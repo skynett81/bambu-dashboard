@@ -54,7 +54,7 @@ ensure_deps() {
   if [ ! -d "$APP_DIR/node_modules/mqtt" ]; then
     echo -e "${BOLD}Installing dependencies...${NC}"
     cd "$APP_DIR"
-    npm install --production
+    npm install --omit=dev
     echo -e "  ${GREEN}Dependencies installed${NC}"
   fi
 }
@@ -133,7 +133,7 @@ run_cli() {
   echo ""
   echo -e "${BOLD}[3/6] Installing dependencies...${NC}"
   cd "$APP_DIR"
-  npm install --production
+  npm install --omit=dev
   echo -e "  ${GREEN}Dependencies installed${NC}"
 
   # 4. Config

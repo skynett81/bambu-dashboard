@@ -1,7 +1,7 @@
 {
   "printers": [
     {
-      "id": "min-printer",
+      "id": "my-printer",
       "name": "P2S Combo",
       "ip": "192.168.1.100",
       "serial": "01S00A000000000",
@@ -21,5 +21,32 @@
     "framerate": 15,
     "bitrate": "1000k"
   },
-  "demo": false
+  "notifications": {
+    "enabled": false,
+    "channels": {
+      "telegram":  { "enabled": false, "botToken": "", "chatId": "" },
+      "discord":   { "enabled": false, "webhookUrl": "" },
+      "email":     { "enabled": false, "host": "", "port": 587, "user": "", "pass": "", "from": "", "to": "" },
+      "webhook":   { "enabled": false, "url": "", "headers": {} },
+      "ntfy":      { "enabled": false, "serverUrl": "https://ntfy.sh", "topic": "", "token": "" },
+      "pushover":  { "enabled": false, "apiToken": "", "userKey": "" }
+    },
+    "events": {
+      "print_started":    { "enabled": true },
+      "print_finished":   { "enabled": true },
+      "print_failed":     { "enabled": true },
+      "print_cancelled":  { "enabled": true },
+      "printer_error":    { "enabled": true },
+      "maintenance_due":  { "enabled": false },
+      "bed_cooled":       { "enabled": false },
+      "update_available": { "enabled": true }
+    },
+    "quietHours": { "enabled": false, "start": "23:00", "end": "07:00" },
+    "bedCooledThreshold": 30
+  },
+  "update": {
+    "autoCheck": true,
+    "checkIntervalHours": 6,
+    "includePrerelease": false
+  }
 }
