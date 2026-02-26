@@ -4,6 +4,8 @@
 
 Created by **SkyNett81** &bull; [MIT License](LICENSE)
 
+![Bambu Dashboard](docs/dashboard.png)
+
 ---
 
 ## Features
