@@ -1,0 +1,12 @@
+services:
+  bambu-dashboard:
+    build: .
+    # network_mode: host is required for LAN access to printers via MQTT
+    network_mode: host
+    restart: unless-stopped
+    volumes:
+      - ./config.json:/app/config.json
+      - ./data:/app/data
+      - ./certs:/app/certs
+    environment:
+      - NODE_ENV=production

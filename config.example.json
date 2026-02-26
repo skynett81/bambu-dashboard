@@ -1,0 +1,25 @@
+{
+  "printers": [
+    {
+      "id": "min-printer",
+      "name": "P2S Combo",
+      "ip": "192.168.1.100",
+      "serial": "01S00A000000000",
+      "accessCode": "your-access-code",
+      "model": "P2S Combo"
+    }
+  ],
+  "server": {
+    "port": 3000,
+    "httpsPort": 3443,
+    "cameraWsPortStart": 9001,
+    "forceHttps": false
+  },
+  "camera": {
+    "enabled": true,
+    "resolution": "640x480",
+    "framerate": 15,
+    "bitrate": "1000k"
+  },
+  "demo": false
+}

@@ -1,0 +1,10 @@
+.git
+node_modules
+data
+certs
+config.json
+*.log
+*.db
+.DS_Store
+.dockerignore
+README.md

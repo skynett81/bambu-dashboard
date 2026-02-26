@@ -1,0 +1,1447 @@
+/* ---- Temperature Gauges ---- */
+.temp-gauges {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  gap: 8px;
+}
+
+.gauge-wrapper {
+  text-align: center;
+  flex: 1;
+}
+
+.gauge-svg {
+  width: 100%;
+  max-width: 120px;
+}
+
+.gauge-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ---- Print Status Panel (prominent) ---- */
+.print-status-panel {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.print-status-left {
+  flex-shrink: 0;
+}
+
+.progress-ring {
+  width: 130px;
+  height: 130px;
+}
+
+.print-status-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.print-status-right {
+  flex-shrink: 0;
+  min-width: 180px;
+  border-left: 1px solid var(--border-color);
+  padding-left: 24px;
+}
+
+.progress-file {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.progress-state {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.progress-eta {
+  font-size: 1.1rem;
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+.progress-countdown {
+  font-size: 1.5rem;
+  color: var(--text-primary);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  line-height: 1.2;
+}
+
+.progress-time {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.progress-layers {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+/* ---- AMS Panel ---- */
+.ams-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+}
+
+.ams-slot {
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px 8px;
+  text-align: center;
+  transition: all var(--transition);
+  background: var(--bg-tertiary);
+}
+
+.ams-slot.ams-active {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 12px rgba(0, 230, 118, 0.15);
+}
+
+.ams-slot.ams-empty {
+  opacity: 0.4;
+  border-style: dashed;
+}
+
+.ams-slot-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.ams-color-ring {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ams-empty-ring {
+  border: 2px dashed var(--border-color);
+  background: transparent !important;
+}
+
+.ams-active-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 6px rgba(255,255,255,0.6);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.ams-type {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.ams-remain-bar {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-primary);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ams-remain-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+
+.ams-remain-text {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+.ams-slot-num {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+/* ---- Controls ---- */
+.controls-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.ctrl-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.ctrl-btn:hover:not(:disabled) {
+  border-color: #484f58;
+  background: #2d333b;
+}
+
+.ctrl-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.ctrl-pause:hover:not(:disabled) { border-color: var(--accent-orange); color: var(--accent-orange); }
+.ctrl-resume:hover:not(:disabled) { border-color: var(--accent-green); color: var(--accent-green); }
+.ctrl-stop:hover:not(:disabled) { border-color: var(--accent-red); color: var(--accent-red); }
+.ctrl-light:hover { border-color: var(--accent-yellow); color: var(--accent-yellow); }
+.ctrl-light-on { border-color: var(--accent-yellow); color: var(--accent-yellow); background: rgba(227, 179, 65, 0.1); }
+
+/* ---- Control Sections ---- */
+.ctrl-section {
+  margin-bottom: 16px;
+}
+
+.ctrl-section:last-child {
+  margin-bottom: 0;
+}
+
+.ctrl-section-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+/* Fan sliders */
+.ctrl-fan-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ctrl-fan-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ctrl-fan-label {
+  width: 80px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.ctrl-slider {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  background: var(--bg-primary);
+  border-radius: 3px;
+  outline: none;
+}
+
+.ctrl-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  cursor: pointer;
+  border: 2px solid var(--bg-secondary);
+  box-shadow: 0 0 4px rgba(0, 230, 118, 0.3);
+}
+
+.ctrl-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  cursor: pointer;
+  border: 2px solid var(--bg-secondary);
+  box-shadow: 0 0 4px rgba(0, 230, 118, 0.3);
+}
+
+.ctrl-fan-value {
+  width: 40px;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Temperature controls */
+.ctrl-temp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ctrl-temp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctrl-temp-label {
+  width: 80px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.ctrl-temp-current {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-orange);
+  min-width: 55px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ctrl-temp-arrow {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.ctrl-temp-input {
+  width: 70px !important;
+  padding: 4px 8px !important;
+  font-size: 0.8rem !important;
+  text-align: center;
+}
+
+/* G-code console */
+.ctrl-gcode {
+  display: flex;
+  gap: 8px;
+}
+
+.ctrl-gcode-input {
+  flex: 1;
+  font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.8rem !important;
+  text-transform: uppercase;
+}
+
+/* ---- Horizontal Bar Charts ---- */
+.chart-bars { display: flex; flex-direction: column; gap: 8px; }
+.chart-bar-row { display: flex; align-items: center; gap: 8px; }
+.chart-bar-label { width: 80px; font-size: 0.8rem; font-weight: 600; color: var(--text-secondary); text-align: right; flex-shrink: 0; }
+.chart-bar-track { flex: 1; height: 10px; background: var(--bg-primary); border-radius: 5px; overflow: hidden; }
+.chart-bar-fill { height: 100%; border-radius: 5px; transition: width 0.4s ease; }
+.chart-bar-value { min-width: 90px; font-size: 0.8rem; color: var(--text-primary); }
+
+/* ---- Heatmap ---- */
+.heatmap-row { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+.heatmap-cell { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 50px; height: 50px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); }
+.heatmap-day { font-size: 0.65rem; font-weight: 600; color: var(--text-primary); }
+.heatmap-count { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+
+/* ---- Maintenance Panel ---- */
+.maintenance-nozzle-card { background: var(--bg-tertiary); border-radius: var(--radius-sm); padding: 16px; border: 1px solid var(--border-color); }
+.nozzle-type { font-size: 1.1rem; font-weight: 700; color: var(--text-primary); }
+.nozzle-stats { font-size: 0.8rem; color: var(--text-secondary); margin: 4px 0; }
+.nozzle-wear-bar { width: 100%; height: 8px; background: var(--bg-primary); border-radius: 4px; overflow: hidden; margin: 8px 0 4px; }
+.nozzle-wear-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+.nozzle-wear-text { font-size: 0.8rem; font-weight: 600; }
+.maintenance-component { padding: 10px 0; border-bottom: 1px solid rgba(48, 54, 61, 0.5); }
+.maintenance-component:last-child { border-bottom: none; }
+.maintenance-component-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.maintenance-component-label { font-size: 0.85rem; font-weight: 600; color: var(--text-primary); }
+.maintenance-bar { width: 100%; height: 6px; background: var(--bg-primary); border-radius: 3px; overflow: hidden; }
+.maintenance-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+
+/* ---- Speed Buttons ---- */
+.speed-buttons {
+  display: flex;
+  gap: 4px;
+}
+
+.speed-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+
+.speed-btn:hover {
+  border-color: #484f58;
+  color: var(--text-primary);
+}
+
+.speed-btn.active {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  background: rgba(0, 230, 118, 0.1);
+}
+
+/* ---- Camera ---- */
+.camera-container {
+  aspect-ratio: 4/3;
+  background: #000;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.camera-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.camera-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.camera-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  padding: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 2;
+}
+
+.camera-container:hover .camera-overlay {
+  opacity: 1;
+}
+
+.camera-fullscreen-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: none;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s ease;
+}
+
+.camera-fullscreen-btn:hover {
+  background: rgba(0, 230, 118, 0.4);
+}
+
+/* ---- Camera Fullscreen Modal ---- */
+.camera-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-modal.active {
+  display: flex;
+}
+
+.camera-modal-content {
+  width: 90vw;
+  max-width: 1200px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+}
+
+.camera-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.camera-modal-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.camera-modal-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.camera-modal-close:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.camera-fullscreen-container {
+  aspect-ratio: 16/9;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.camera-canvas-fullscreen {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* ---- Tables ---- */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.data-table th {
+  text-align: left;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.data-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  color: var(--text-primary);
+}
+
+.data-table tr:hover td {
+  background: rgba(33, 38, 45, 0.5);
+}
+
+/* Status pills */
+.pill {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.pill-completed { background: rgba(0, 230, 118, 0.15); color: var(--accent-green); }
+.pill-failed { background: rgba(248, 81, 73, 0.15); color: var(--accent-red); }
+.pill-cancelled { background: rgba(240, 136, 62, 0.15); color: var(--accent-orange); }
+
+/* ---- Stat Cards ---- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.stat-card {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-detail-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.stat-detail {
+  font-size: 0.85rem;
+}
+
+.stat-detail-label {
+  color: var(--text-secondary);
+  margin-right: 6px;
+}
+
+.stat-detail-value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* ---- Bar Charts ---- */
+.chart-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chart-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chart-bar-label {
+  width: 50px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: right;
+}
+
+.chart-bar-track {
+  flex: 1;
+  height: 14px;
+  background: var(--bg-primary);
+  border-radius: 7px;
+  overflow: hidden;
+}
+
+.chart-bar-fill {
+  height: 100%;
+  border-radius: 7px;
+  transition: width 0.5s ease;
+  min-width: 4px;
+}
+
+.chart-bar-value {
+  font-size: 0.75rem;
+  color: var(--text-primary);
+  min-width: 90px;
+}
+
+/* ---- Week Chart ---- */
+.week-chart {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.week-bar-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 40px;
+}
+
+.week-bar-stack {
+  width: 28px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  border-radius: 4px 4px 0 0;
+  overflow: hidden;
+}
+
+.week-bar-bg {
+  width: 100%;
+  background: var(--bg-tertiary);
+  border-radius: 4px 4px 0 0;
+  position: absolute;
+  bottom: 0;
+}
+
+.week-bar-fg {
+  width: 100%;
+  background: var(--accent-green);
+  border-radius: 4px 4px 0 0;
+  position: absolute;
+  bottom: 0;
+  opacity: 0.8;
+}
+
+.week-bar-label {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.week-bar-count {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-green);
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ---- Filament Cards ---- */
+.filament-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.filament-card {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  border: 1px solid var(--border-color);
+}
+
+.filament-color-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.filament-bar {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-primary);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.filament-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* ---- Error Log ---- */
+.error-item {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+  font-size: 0.85rem;
+}
+
+.error-severity {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.severity-info { background: var(--accent-blue); }
+.severity-warning { background: var(--accent-orange); }
+.severity-error { background: var(--accent-red); }
+
+.error-time {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+}
+
+/* ---- Settings Form ---- */
+.settings-form {
+  max-width: 500px;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.form-input {
+  width: 100%;
+  padding: 8px 12px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.form-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--accent-green);
+  color: #000;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: opacity var(--transition);
+}
+
+.form-btn:hover {
+  opacity: 0.85;
+}
+
+.form-btn-sm {
+  padding: 4px 12px;
+  font-size: 0.75rem;
+}
+
+.form-btn-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.form-btn-danger {
+  background: var(--accent-red);
+}
+
+.form-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ---- Printer Selector ---- */
+.printer-selector {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.printer-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.printer-tab {
+  padding: 6px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+
+.printer-tab:hover {
+  border-color: #484f58;
+  color: var(--text-primary);
+}
+
+.printer-tab.active {
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+  background: rgba(0, 230, 118, 0.08);
+}
+
+.printer-tab-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.2;
+}
+
+.printer-tab-name {
+  font-size: 0.8rem;
+}
+
+.printer-tab-status {
+  font-size: 0.6rem;
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.printer-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+/* ---- Filament Status (in print status panel) ---- */
+.filament-status {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filament-status-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filament-color-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.1);
+}
+
+.filament-status-type {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.filament-status-brand {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.filament-status-name {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filament-remain-section {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.filament-remain-pct {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--accent-green);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.filament-remain-pct.filament-remain-low {
+  color: var(--accent-red);
+}
+
+.filament-remain-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.filament-remain-bar-lg {
+  width: 100%;
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.filament-remain-bar-fill-lg {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.filament-status-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.filament-inactive {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+}
+
+/* ---- Printer Info Grid ---- */
+.info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.info-item {
+  padding: 6px 0;
+}
+
+.info-item.clickable {
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  margin: -6px -8px;
+}
+
+.info-item.clickable:hover {
+  background: var(--bg-tertiary);
+}
+
+.info-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.info-value {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.text-green { color: var(--accent-green); }
+
+/* ---- AMS Enhancements ---- */
+.ams-header-info {
+  font-size: 0.75rem;
+  font-weight: 400;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.ams-brand {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.ams-temp-range {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+/* ---- Settings ---- */
+.printer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.printer-config-card {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+}
+
+.printer-config-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.printer-config-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.settings-section {
+  border-top: 1px solid var(--border-color);
+  padding-top: 16px;
+}
+
+.settings-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+.settings-checkbox input {
+  accent-color: var(--accent-green);
+}
+
+/* ---- Telemetry Charts ---- */
+.telemetry-range-selector {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.telemetry-chart {
+  width: 100%;
+  height: auto;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+/* ---- AMS RFID Badge ---- */
+.ams-rfid-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--accent-green);
+  background: rgba(0, 230, 118, 0.1);
+  border-radius: 8px;
+  padding: 1px 6px;
+  margin-top: 2px;
+}
+
+.ams-rfid-badge svg {
+  width: 8px;
+  height: 8px;
+}
+
+/* ---- AMS Drying Info ---- */
+.ams-dry-info {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.ams-dry-info svg {
+  width: 10px;
+  height: 10px;
+  opacity: 0.6;
+}
+
+/* ---- AMS-Lite Badge ---- */
+.ams-lite-badge {
+  display: inline-block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  background: rgba(88, 166, 255, 0.1);
+  border-radius: 8px;
+  padding: 2px 8px;
+  margin-left: 8px;
+}
+
+/* ---- Component Wear Bars ---- */
+.wear-section {
+  margin-top: 16px;
+}
+
+.wear-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+
+.wear-label {
+  width: 120px;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+
+.wear-bar {
+  flex: 1;
+  height: 8px;
+  background: var(--bg-primary);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.wear-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.wear-value {
+  min-width: 60px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-align: right;
+}
+
+/* ---- XCam Stats ---- */
+.xcam-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.xcam-card {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: center;
+  border: 1px solid var(--border-color);
+}
+
+.xcam-count {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--accent-orange);
+}
+
+.xcam-label {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+/* ---- Firmware History ---- */
+.firmware-history {
+  margin-top: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.firmware-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  color: var(--accent-blue);
+  font-size: 0.7rem;
+}
+
+/* ---- Printer Tag (used in tables) ---- */
+.printer-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: rgba(88, 166, 255, 0.12);
+  color: var(--accent-blue);
+  border: 1px solid rgba(88, 166, 255, 0.25);
+  white-space: nowrap;
+}
+
+/* ---- Panel Printer Selector ---- */
+.panel-printer-select-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.panel-printer-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.panel-printer-select {
+  padding: 5px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  font-size: 0.8rem;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+.panel-printer-select:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+/* ---- Active Filament Per Printer ---- */
+.active-filament-printer {
+  margin-bottom: 16px;
+  padding: 12px;
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.active-filament-printer-name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--accent-blue);
+  margin-bottom: 8px;
+}
+
+.active-filament-trays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.active-filament-tray {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  font-size: 0.75rem;
+}
+
+.active-filament-tray-active {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 6px rgba(0, 230, 118, 0.2);
+}
+
+.active-filament-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.active-filament-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.active-filament-type {
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.active-filament-remain {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+}
+
+.active-filament-slot {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: var(--bg-primary);
+}
+
+/* ---- Filament Per Printer Sections ---- */
+.filament-printer-section {
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.filament-printer-section:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.filament-printer-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.filament-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: all var(--transition);
+}
+
+.filament-card:hover .filament-delete-btn {
+  opacity: 1;
+}
+
+.filament-delete-btn:hover {
+  background: rgba(248, 81, 73, 0.15);
+  color: var(--accent-red);
+}

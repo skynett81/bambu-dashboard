@@ -1,0 +1,185 @@
+/* Tablet */
+@media (max-width: 1024px) {
+  .dashboard {
+    grid-template-columns: 1fr 1fr;
+    padding: var(--gap) 16px;
+  }
+
+  .card-full {
+    grid-column: span 2;
+  }
+
+  .card-wide {
+    grid-column: span 2;
+  }
+
+  #camera-card {
+    grid-column: span 2;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .printer-selector {
+    flex-wrap: wrap;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .print-status-panel {
+    flex-wrap: wrap;
+  }
+
+  .print-status-right {
+    border-left: none;
+    border-top: 1px solid var(--border-color);
+    padding-left: 0;
+    padding-top: 16px;
+    min-width: 100%;
+  }
+}
+
+/* Overlay panel - tablet */
+@media (max-width: 1024px) {
+  .overlay-panel-inner {
+    max-width: 100%;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+  }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .card-full,
+  .card-wide {
+    grid-column: span 1;
+  }
+
+  #camera-card {
+    grid-column: span 1;
+  }
+
+  .header {
+    padding: 12px 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .header-title {
+    font-size: 1rem;
+  }
+
+  .printer-selector {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .printer-tab {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+  }
+
+  .print-status-panel {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+
+  .print-status-right {
+    border-left: none;
+    border-top: 1px solid var(--border-color);
+    padding-left: 0;
+    padding-top: 12px;
+    min-width: 100%;
+  }
+
+  .ams-slots {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-strip {
+    flex-wrap: wrap;
+  }
+
+  .spark-panel {
+    min-width: 100px;
+    flex: 1 1 calc(33% - 1px);
+  }
+
+  .speed-buttons {
+    flex-wrap: wrap;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .controls-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ctrl-fan-label,
+  .ctrl-temp-label {
+    width: 60px;
+    font-size: 0.75rem;
+  }
+
+  .ctrl-temp-row {
+    flex-wrap: wrap;
+  }
+
+  .ctrl-gcode {
+    flex-direction: column;
+  }
+
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-btn {
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .printer-config-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .overlay-panel-body {
+    padding: 16px;
+  }
+
+  .topnav {
+    padding: 0 12px;
+  }
+
+  .topnav-btn {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    gap: 4px;
+  }
+
+  .topnav-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+}

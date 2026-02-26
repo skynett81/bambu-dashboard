@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bambu Dashboard — Setup</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <style>
+    :root {
+      --bg-primary: #0d1117;
+      --bg-secondary: #161b22;
+      --bg-tertiary: #21262d;
+      --border-color: #30363d;
+      --text-primary: #f0f6fc;
+      --text-secondary: #c9d1d9;
+      --text-muted: #8b949e;
+      --accent-green: #00e676;
+      --accent-blue: #58a6ff;
+      --accent-orange: #f0883e;
+      --accent-red: #f85149;
+      --radius: 10px;
+      --radius-sm: 6px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+    }
+    .wizard { width: 100%; max-width: 720px; }
+    .wizard-header { text-align: center; margin-bottom: 32px; }
+    .wizard-header img { width: 48px; height: 48px; margin-bottom: 12px; }
+    .wizard-header h1 { font-size: 1.5rem; font-weight: 600; }
+    .wizard-header p { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+
+    .steps { display: flex; gap: 4px; margin-bottom: 28px; }
+    .step-dot { flex: 1; height: 4px; border-radius: 2px; background: var(--bg-tertiary); transition: background 0.3s; }
+    .step-dot.active { background: var(--accent-blue); }
+    .step-dot.done { background: var(--accent-green); }
+
+    .card { background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 28px; margin-bottom: 16px; }
+    .card-title { font-size: 1.1rem; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .card-title .step-num { background: var(--accent-blue); color: #000; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; }
+
+    .check-list { list-style: none; }
+    .check-item { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
+    .check-item:last-child { border-bottom: none; }
+    .check-icon { font-size: 1.2rem; width: 24px; text-align: center; }
+    .check-icon.ok { color: var(--accent-green); }
+    .check-icon.warn { color: var(--accent-orange); }
+    .check-icon.fail { color: var(--accent-red); }
+    .check-icon.spin { animation: spin 1s linear infinite; color: var(--accent-blue); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .check-label { flex: 1; }
+    .check-label small { color: var(--text-muted); display: block; font-size: 0.8rem; }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label { display: block; font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 4px; font-weight: 500; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    input, select { width: 100%; padding: 10px 12px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+    input:focus, select:focus { border-color: var(--accent-blue); }
+    input::placeholder { color: var(--text-muted); }
+
+    .printer-card { background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 12px; position: relative; }
+    .printer-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .printer-card-header strong { font-size: 0.95rem; }
+    .printer-remove { background: none; border: none; color: var(--accent-red); cursor: pointer; font-size: 1.1rem; padding: 4px; opacity: 0.7; }
+    .printer-remove:hover { opacity: 1; }
+
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border: none; border-radius: var(--radius-sm); font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: background 0.2s, opacity 0.2s; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-primary { background: var(--accent-blue); color: #000; }
+    .btn-primary:hover:not(:disabled) { background: #79b8ff; }
+    .btn-green { background: var(--accent-green); color: #000; }
+    .btn-green:hover:not(:disabled) { background: #33ff99; }
+    .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-secondary); }
+    .btn-outline:hover:not(:disabled) { border-color: var(--text-muted); color: var(--text-primary); }
+    .btn-sm { padding: 6px 12px; font-size: 0.8rem; }
+    .btn-row { display: flex; justify-content: space-between; margin-top: 24px; }
+
+    .checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+    .checkbox-row input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent-blue); }
+
+    .alert { padding: 12px 16px; border-radius: var(--radius-sm); font-size: 0.85rem; margin-bottom: 16px; }
+    .alert-info { background: rgba(88,166,255,0.1); border: 1px solid rgba(88,166,255,0.3); color: var(--accent-blue); }
+    .alert-success { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.3); color: var(--accent-green); }
+    .alert-error { background: rgba(248,81,73,0.1); border: 1px solid rgba(248,81,73,0.3); color: var(--accent-red); }
+    .alert-warn { background: rgba(240,136,62,0.1); border: 1px solid rgba(240,136,62,0.3); color: var(--accent-orange); }
+
+    .finish-screen { text-align: center; padding: 20px 0; }
+    .finish-screen .big-check { font-size: 4rem; color: var(--accent-green); }
+    .finish-screen h2 { font-size: 1.4rem; margin: 16px 0 8px; }
+    .finish-screen p { color: var(--text-muted); }
+    .finish-url { display: inline-block; margin-top: 16px; padding: 12px 24px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: monospace; font-size: 1rem; color: var(--accent-green); }
+
+    .launch-status { margin-top: 16px; text-align: center; }
+    .launch-status .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border-color); border-top-color: var(--accent-blue); border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: middle; margin-right: 8px; }
+
+    .token-badge { display: inline-block; padding: 4px 10px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-family: monospace; font-size: 0.75rem; color: var(--accent-green); margin-top: 4px; }
+
+    select option { background: var(--bg-tertiary); color: var(--text-primary); }
+    .wizard-step { display: none; }
+    .wizard-step.active { display: block; }
+  </style>
+</head>
+<body>
+
+<div class="wizard">
+  <div class="wizard-header">
+    <img src="/assets/favicon.svg" alt="Logo">
+    <h1>Bambu Dashboard Setup</h1>
+    <p>Configure your 3D printer dashboard in a few steps</p>
+    <div class="token-badge" title="Security token — auto-filled from server">&#x1f512; Authenticated</div>
+  </div>
+
+  <div class="steps" id="steps">
+    <div class="step-dot active" data-step="0"></div>
+    <div class="step-dot" data-step="1"></div>
+    <div class="step-dot" data-step="2"></div>
+    <div class="step-dot" data-step="3"></div>
+  </div>
+
+  <!-- Step 1: System Check -->
+  <div class="wizard-step active" id="step-0">
+    <div class="card">
+      <div class="card-title"><span class="step-num">1</span> System Check</div>
+      <ul class="check-list" id="check-list">
+        <li class="check-item">
+          <span class="check-icon spin">&#x21bb;</span>
+          <span class="check-label">Checking system...</span>
+        </li>
+      </ul>
+      <div id="check-alert" style="margin-top:16px;"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="runChecks()" title="Re-check">&#x21bb; Re-check</button>
+      <button class="btn btn-primary" id="btn-next-0" disabled onclick="goStep(1)">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Add Printers -->
+  <div class="wizard-step" id="step-1">
+    <div class="card">
+      <div class="card-title"><span class="step-num">2</span> Printers</div>
+      <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;">
+        Add your Bambu Lab printers. You can find the IP, serial number and LAN access code in your printer's network settings.
+      </p>
+      <div id="printer-list"></div>
+      <button class="btn btn-outline btn-sm" onclick="addPrinterCard()">+ Add Printer</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goStep(0)">&larr; Back</button>
+      <button class="btn btn-primary" onclick="goStep(2)">Next &rarr;</button>
+    </div>
+  </div>
+
+  <!-- Step 3: Server Settings -->
+  <div class="wizard-step" id="step-2">
+    <div class="card">
+      <div class="card-title"><span class="step-num">3</span> Server Settings</div>
+      <div class="form-group">
+        <label class="form-label">Dashboard Language</label>
+        <select id="cfg-language" onchange="onLanguageChange(this.value)">
+          <option value="en">English</option>
+          <option value="nb">Norsk Bokm&#229;l</option>
+          <option value="de">Deutsch</option>
+          <option value="fr">Fran&#231;ais</option>
+          <option value="es">Espa&#241;ol</option>
+          <option value="it">Italiano</option>
+          <option value="ja">&#26085;&#26412;&#35486;</option>
+          <option value="ko">&#54620;&#44397;&#50612;</option>
+          <option value="nl">Nederlands</option>
+          <option value="pl">Polski</option>
+          <option value="pt_BR">Portugu&#234;s (Brasil)</option>
+          <option value="ru">&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;</option>
+          <option value="sv">Svenska</option>
+          <option value="tr">T&#252;rk&#231;e</option>
+          <option value="uk">&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;</option>
+          <option value="zh_CN">&#31616;&#20307;&#20013;&#25991;</option>
+          <option value="cs">&#268;e&#353;tina</option>
+          <option value="hu">Magyar</option>
+        </select>
+      </div>
+      <hr style="border:none; border-top:1px solid var(--border-color); margin:16px 0;">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">HTTP Port</label>
+          <input type="number" id="cfg-port" value="3000" min="1" max="65535">
+        </div>
+        <div class="form-group">
+          <label class="form-label">HTTPS Port</label>
+          <input type="number" id="cfg-https-port" value="3443" min="1" max="65535">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Camera WS Port Start</label>
+          <input type="number" id="cfg-cam-port" value="9001" min="1" max="65535">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Camera Resolution</label>
+          <select id="cfg-cam-res">
+            <option value="640x480">640x480</option>
+            <option value="1280x720">1280x720</option>
+            <option value="1920x1080" selected>1920x1080</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Camera Framerate</label>
+          <select id="cfg-cam-fps">
+            <option value="10">10 fps</option>
+            <option value="15" selected>15 fps</option>
+            <option value="24">24 fps</option>
+            <option value="30">30 fps</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Camera Bitrate</label>
+          <select id="cfg-cam-br">
+            <option value="500k">500 kbps</option>
+            <option value="1000k" selected>1000 kbps</option>
+            <option value="2000k">2000 kbps</option>
+            <option value="4000k">4000 kbps</option>
+          </select>
+        </div>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="cfg-force-https">
+        <label for="cfg-force-https" style="color:var(--text-secondary); font-size:0.85rem;">Force HTTPS redirect (requires SSL certs in /certs)</label>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="cfg-cam-enabled" checked>
+        <label for="cfg-cam-enabled" style="color:var(--text-secondary); font-size:0.85rem;">Enable camera streaming</label>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goStep(1)">&larr; Back</button>
+      <button class="btn btn-primary" id="btn-save" onclick="saveAndFinish()">Save &amp; Finish</button>
+    </div>
+  </div>
+
+  <!-- Step 4: Done -->
+  <div class="wizard-step" id="step-3">
+    <div class="card">
+      <div class="finish-screen">
+        <div class="big-check">&#x2714;</div>
+        <h2>Setup Complete!</h2>
+        <p>Your Bambu Dashboard is configured and ready to go.</p>
+        <div class="finish-url" id="finish-url">http://localhost:3000</div>
+      </div>
+
+      <div style="margin-top:20px;">
+        <div class="checkbox-row">
+          <input type="checkbox" id="cfg-systemd">
+          <label for="cfg-systemd" style="color:var(--text-secondary); font-size:0.85rem;">Create systemd service for auto-start on boot</label>
+        </div>
+      </div>
+
+      <div id="systemd-result" style="margin-top:12px;"></div>
+      <div id="launch-status" class="launch-status" style="display:none;"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goStep(2)">&larr; Back</button>
+      <button class="btn btn-green" id="btn-launch" onclick="launchDashboard()">Launch Dashboard &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Token injected by server ──
+const SETUP_TOKEN = '{{SETUP_TOKEN}}';
+
+const MODELS = [
+  'P2S Combo', 'P2S', 'X1 Carbon', 'X1E', 'P1S', 'P1P',
+  'A1', 'A1 mini', 'H2S', 'H2D', 'H2C'
+];
+
+let currentStep = 0;
+let systemCheck = null;
+let printerCount = 0;
+
+// ── Authenticated fetch helper ──
+function apiFetch(url, opts = {}) {
+  opts.headers = { ...opts.headers, 'Authorization': `Bearer ${SETUP_TOKEN}` };
+  return fetch(url, opts);
+}
+
+// ── Step navigation ──
+function goStep(n) {
+  document.querySelectorAll('.wizard-step').forEach(el => el.classList.remove('active'));
+  document.getElementById(`step-${n}`).classList.add('active');
+  document.querySelectorAll('.step-dot').forEach((dot, i) => {
+    dot.classList.toggle('done', i < n);
+    dot.classList.toggle('active', i === n);
+  });
+  currentStep = n;
+}
+
+// ── System check ──
+async function runChecks() {
+  const list = document.getElementById('check-list');
+  try {
+    const res = await apiFetch('/setup/api/check');
+    if (res.status === 401) {
+      list.innerHTML = `<li class="check-item"><span class="check-icon fail">&#x2718;</span><span class="check-label">Authentication failed<small>Token mismatch — restart the setup wizard</small></span></li>`;
+      return;
+    }
+    systemCheck = await res.json();
+  } catch (e) {
+    list.innerHTML = `<li class="check-item"><span class="check-icon fail">&#x2718;</span><span class="check-label">Could not connect to server<small>${e.message}</small></span></li>`;
+    return;
+  }
+
+  let html = '';
+  const c = systemCheck;
+
+  // ── Critical requirements ──
+  html += `<li class="check-item">
+    <span class="check-icon ${c.node.ok ? 'ok' : 'fail'}">${c.node.ok ? '&#x2714;' : '&#x2718;'}</span>
+    <span class="check-label">Node.js ${c.node.version}
+      <small>${c.node.ok ? 'Version requirement met (v22+)' : 'REQUIRED: Node.js v22 or higher. Please upgrade before continuing.'}</small>
+    </span>
+  </li>`;
+
+  html += `<li class="check-item">
+    <span class="check-icon ${c.writable?.ok ? 'ok' : 'fail'}">${c.writable?.ok ? '&#x2714;' : '&#x2718;'}</span>
+    <span class="check-label">${c.writable?.ok ? 'Data directory writable' : 'Cannot write to data directory'}
+      <small>${c.writable?.ok ? 'Database and config files can be saved' : 'REQUIRED: Check file permissions on the project directory.'}</small>
+    </span>
+  </li>`;
+
+  // ── Important (installable) ──
+  html += `<li class="check-item">
+    <span class="check-icon ${c.dependencies.ok ? 'ok' : 'fail'}">${c.dependencies.ok ? '&#x2714;' : '&#x2718;'}</span>
+    <span class="check-label">${c.dependencies.ok ? 'npm dependencies installed' : 'npm dependencies missing'}
+      <small>${c.dependencies.ok ? 'mqtt, ws packages ready' : 'REQUIRED — click Install to resolve'}</small>
+    </span>
+    ${!c.dependencies.ok ? '<button class="btn btn-sm btn-outline" onclick="installDeps(this)">Install</button>' : ''}
+  </li>`;
+
+  html += `<li class="check-item">
+    <span class="check-icon ${c.ffmpeg.ok ? 'ok' : 'warn'}">${c.ffmpeg.ok ? '&#x2714;' : '&#x26A0;'}</span>
+    <span class="check-label">${c.ffmpeg.ok ? `ffmpeg ${c.ffmpeg.version}` : 'ffmpeg not found'}
+      <small>${c.ffmpeg.ok ? 'Camera streaming available' : 'Optional — needed for camera streaming'}</small>
+    </span>
+    ${!c.ffmpeg.ok ? '<button class="btn btn-sm btn-outline" onclick="installFfmpeg(this)">Install</button>' : ''}
+  </li>`;
+
+  // ── System resources ──
+  if (c.disk) {
+    const diskGB = (c.disk.available_mb / 1024).toFixed(1);
+    html += `<li class="check-item">
+      <span class="check-icon ${c.disk.ok ? 'ok' : 'warn'}">${c.disk.ok ? '&#x2714;' : '&#x26A0;'}</span>
+      <span class="check-label">Disk space: ${diskGB} GB available
+        <small>${c.disk.ok ? 'Sufficient for database and logs' : 'Low disk space — at least 100 MB recommended'}</small>
+      </span>
+    </li>`;
+  }
+
+  if (c.ram) {
+    const ramTotalGB = (c.ram.total_mb / 1024).toFixed(1);
+    const ramAvailGB = (c.ram.available_mb / 1024).toFixed(1);
+    html += `<li class="check-item">
+      <span class="check-icon ${c.ram.ok ? 'ok' : 'warn'}">${c.ram.ok ? '&#x2714;' : '&#x26A0;'}</span>
+      <span class="check-label">RAM: ${ramAvailGB} GB available of ${ramTotalGB} GB
+        <small>${c.ram.ok ? 'Sufficient for dashboard operation' : 'Low memory — at least 128 MB free recommended'}</small>
+      </span>
+    </li>`;
+  }
+
+  // ── Optional / info ──
+  html += `<li class="check-item">
+    <span class="check-icon ${c.config.exists ? 'ok' : 'warn'}">${c.config.exists ? '&#x2714;' : '&#x26A0;'}</span>
+    <span class="check-label">${c.config.exists ? 'config.json exists' : 'config.json not found'}
+      <small>${c.config.exists ? 'Will be updated with your settings' : 'Will be created during setup'}</small>
+    </span>
+  </li>`;
+
+  const sslOk = c.ssl.cert && c.ssl.key;
+  html += `<li class="check-item">
+    <span class="check-icon ${sslOk ? 'ok' : 'warn'}">${sslOk ? '&#x2714;' : '&#x26A0;'}</span>
+    <span class="check-label">${sslOk ? 'SSL certificates found' : 'No SSL certificates'}
+      <small>${sslOk ? 'HTTPS available' : 'Optional: place cert.pem and key.pem in /certs'}</small>
+    </span>
+  </li>`;
+
+  html += `<li class="check-item">
+    <span class="check-icon ok">&#x2139;</span>
+    <span class="check-label">System: ${c.os}<small>IP: ${c.ip}</small></span>
+  </li>`;
+
+  list.innerHTML = html;
+
+  // ── Compatibility gate ──
+  // Critical: node + writable + dependencies must all pass
+  const canProceed = c.compatible && c.dependencies.ok;
+  const btn = document.getElementById('btn-next-0');
+  const alertArea = document.getElementById('check-alert');
+  btn.disabled = !canProceed;
+
+  if (alertArea) {
+    if (!c.compatible) {
+      alertArea.innerHTML = '<div class="alert alert-error">System does not meet minimum requirements. Please resolve the issues marked above before continuing.</div>';
+    } else if (!c.dependencies.ok) {
+      alertArea.innerHTML = '<div class="alert alert-error">Required npm packages are missing. Click <strong>Install</strong> above to install them before continuing.</div>';
+    } else {
+      alertArea.innerHTML = '<div class="alert alert-success">System is compatible. You can proceed with setup.</div>';
+    }
+  }
+}
+
+async function installFfmpeg(btn) {
+  btn.disabled = true; btn.textContent = 'Installing...';
+  try {
+    const res = await apiFetch('/setup/api/install-ffmpeg', { method: 'POST' });
+    const data = await res.json();
+    btn.textContent = data.ok ? 'Installed' : 'Failed';
+    if (data.ok) runChecks();
+  } catch { btn.textContent = 'Error'; }
+}
+
+async function installDeps(btn) {
+  btn.disabled = true; btn.textContent = 'Installing...';
+  try {
+    const res = await apiFetch('/setup/api/install-deps', { method: 'POST' });
+    const data = await res.json();
+    btn.textContent = data.ok ? 'Installed' : 'Failed';
+    if (data.ok) runChecks();
+  } catch { btn.textContent = 'Error'; }
+}
+
+// ── Printers ──
+function addPrinterCard(data = {}) {
+  printerCount++;
+  const n = printerCount;
+  const div = document.createElement('div');
+  div.className = 'printer-card';
+  div.id = `printer-${n}`;
+  div.innerHTML = `
+    <div class="printer-card-header">
+      <strong>Printer ${n}</strong>
+      <button class="printer-remove" onclick="removePrinter(${n})" title="Remove">&times;</button>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input type="text" class="p-name" placeholder="e.g. P2S Living Room" value="${data.name || ''}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Model</label>
+        <select class="p-model">
+          <option value="">Select model...</option>
+          ${MODELS.map(m => `<option value="${m}" ${data.model === m ? 'selected' : ''}>${m}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">IP Address</label>
+      <input type="text" class="p-ip" placeholder="192.168.1.100" value="${data.ip || ''}">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Serial Number</label>
+        <input type="text" class="p-serial" placeholder="01S00A000000000" value="${data.serial || ''}">
+      </div>
+      <div class="form-group">
+        <label class="form-label">LAN Access Code</label>
+        <input type="password" class="p-access" placeholder="From printer menu" value="${data.accessCode || ''}">
+      </div>
+    </div>
+  `;
+  document.getElementById('printer-list').appendChild(div);
+}
+
+function removePrinter(n) {
+  const el = document.getElementById(`printer-${n}`);
+  if (el) el.remove();
+}
+
+function collectPrinters() {
+  const cards = document.querySelectorAll('.printer-card');
+  const printers = [];
+  cards.forEach((card, i) => {
+    const name = card.querySelector('.p-name').value.trim();
+    const model = card.querySelector('.p-model').value;
+    const ip = card.querySelector('.p-ip').value.trim();
+    const serial = card.querySelector('.p-serial').value.trim();
+    const accessCode = card.querySelector('.p-access').value.trim();
+    if (name || ip || serial) {
+      const id = name ? name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : `printer-${i + 1}`;
+      printers.push({ id, name: name || `Printer ${i + 1}`, model, ip, serial, accessCode });
+    }
+  });
+  return printers;
+}
+
+// ── Save config ──
+async function saveAndFinish() {
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  btn.textContent = 'Saving...';
+
+  const data = {
+    printers: collectPrinters(),
+    port: document.getElementById('cfg-port').value,
+    httpsPort: document.getElementById('cfg-https-port').value,
+    cameraWsPortStart: document.getElementById('cfg-cam-port').value,
+    cameraResolution: document.getElementById('cfg-cam-res').value,
+    cameraFramerate: document.getElementById('cfg-cam-fps').value,
+    cameraBitrate: document.getElementById('cfg-cam-br').value,
+    forceHttps: document.getElementById('cfg-force-https').checked,
+    cameraEnabled: document.getElementById('cfg-cam-enabled').checked
+  };
+
+  try {
+    const res = await apiFetch('/setup/api/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    const result = await res.json();
+    if (result.ok) {
+      const port = data.port || 3000;
+      const ip = systemCheck?.ip || 'localhost';
+      document.getElementById('finish-url').textContent = `http://${ip}:${port}`;
+      goStep(3);
+    } else {
+      alert('Save failed: ' + (result.error || 'Unknown error'));
+    }
+  } catch (e) {
+    alert('Save failed: ' + e.message);
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Save & Finish';
+}
+
+// ── Launch dashboard ──
+async function launchDashboard() {
+  const btn = document.getElementById('btn-launch');
+  const statusEl = document.getElementById('launch-status');
+  btn.disabled = true;
+  btn.textContent = 'Starting...';
+
+  // Install systemd if checked
+  if (document.getElementById('cfg-systemd').checked) {
+    const sdRes = document.getElementById('systemd-result');
+    sdRes.innerHTML = '<div class="alert alert-info">Creating systemd service...</div>';
+    try {
+      const res = await apiFetch('/setup/api/systemd', { method: 'POST' });
+      const data = await res.json();
+      sdRes.innerHTML = data.ok
+        ? '<div class="alert alert-success">Systemd service created. Dashboard will auto-start on boot.</div>'
+        : `<div class="alert alert-error">Could not create service: ${data.error}</div>`;
+    } catch (e) {
+      sdRes.innerHTML = `<div class="alert alert-error">Error: ${e.message}</div>`;
+    }
+  }
+
+  // Tell wizard to spawn dashboard and exit
+  statusEl.style.display = 'block';
+  statusEl.innerHTML = '<span class="spinner"></span> Starting dashboard server...';
+
+  const dashPort = document.getElementById('cfg-port').value || 3000;
+  const dashUrl = `http://${window.location.hostname}:${dashPort}`;
+
+  try {
+    const res = await apiFetch('/setup/api/finish', { method: 'POST' });
+    const data = await res.json();
+    if (!data.ok) {
+      statusEl.innerHTML = `<div class="alert alert-warn">Could not auto-start dashboard. Run <code>npm start</code> manually.</div>`;
+      return;
+    }
+  } catch {
+    // Expected — server exits, connection may drop
+  }
+
+  // Poll until dashboard is ready (wizard exits, dashboard takes over the port)
+  statusEl.innerHTML = '<span class="spinner"></span> Waiting for dashboard to be ready...';
+
+  let attempts = 0;
+  const maxAttempts = 20; // 20 * 500ms = 10s max wait
+
+  const poll = setInterval(async () => {
+    attempts++;
+    try {
+      const res = await fetch(dashUrl, { method: 'HEAD', mode: 'no-cors' });
+      // If we get any response (even opaque), the server is up
+      clearInterval(poll);
+      statusEl.innerHTML = '<div class="alert alert-success">Dashboard is ready! Redirecting...</div>';
+      setTimeout(() => { window.location.href = dashUrl; }, 1000);
+    } catch {
+      if (attempts >= maxAttempts) {
+        clearInterval(poll);
+        statusEl.innerHTML = `<div class="alert alert-warn">Dashboard didn't respond in time. <a href="${dashUrl}" style="color:var(--accent-blue);">Try opening manually</a> or run <code>npm start</code>.</div>`;
+        btn.disabled = false;
+        btn.textContent = 'Retry';
+      }
+    }
+  }, 500);
+}
+
+// ── Language selection ──
+// Wizard i18n strings per language (subset for the wizard UI)
+const WIZARD_I18N = {
+  nb: {
+    title: 'Bambu Dashboard Oppsett',
+    subtitle: 'Konfigurer 3D-printer dashboardet ditt i noen få steg',
+    authenticated: 'Autentisert',
+    step1_title: 'Systemsjekk',
+    step2_title: 'Printere',
+    step2_desc: 'Legg til dine Bambu Lab printere. Du finner IP, serienummer og LAN-tilgangskode i printerens nettverksinnstillinger.',
+    step3_title: 'Serverinnstillinger',
+    step4_title: 'Ferdig!',
+    next: 'Neste',
+    back: 'Tilbake',
+    save_finish: 'Lagre og fullfør',
+    launch: 'Start Dashboard',
+    add_printer: '+ Legg til printer',
+    printer: 'Printer',
+    name: 'Navn',
+    model: 'Modell',
+    model_placeholder: 'Velg modell...',
+    ip: 'IP-adresse',
+    serial: 'Serienummer',
+    access_code: 'LAN-tilgangskode',
+    access_code_placeholder: 'Fra printermenyen',
+    language: 'Dashboardspråk',
+    http_port: 'HTTP-port',
+    https_port: 'HTTPS-port',
+    cam_ws_port: 'Kamera WS-port start',
+    cam_res: 'Kameraoppløsning',
+    cam_fps: 'Kamera bilderate',
+    cam_bitrate: 'Kamera bitrate',
+    force_https: 'Tving HTTPS-omdirigering (krever SSL-sertifikater i /certs)',
+    cam_enabled: 'Aktiver kamerastrømming',
+    systemd: 'Opprett systemd-tjeneste for automatisk oppstart',
+    setup_complete: 'Oppsettet er fullført!',
+    setup_complete_desc: 'Bambu Dashboard er konfigurert og klart til bruk.',
+    checking: 'Sjekker system...',
+    recheck: 'Sjekk på nytt',
+    compatible: 'Systemet er kompatibelt. Du kan fortsette oppsettet.',
+    not_compatible: 'Systemet oppfyller ikke minimumskravene. Løs problemene merket ovenfor før du fortsetter.',
+    deps_warning: 'npm-avhengigheter mangler. Installer dem ovenfor før du fortsetter.',
+    name_placeholder: 'F.eks. P2S Stua',
+    remove: 'Fjern'
+  },
+  en: {
+    title: 'Bambu Dashboard Setup',
+    subtitle: 'Configure your 3D printer dashboard in a few steps',
+    authenticated: 'Authenticated',
+    step1_title: 'System Check',
+    step2_title: 'Printers',
+    step2_desc: 'Add your Bambu Lab printers. You can find the IP, serial number and LAN access code in your printer\'s network settings.',
+    step3_title: 'Server Settings',
+    step4_title: 'Setup Complete!',
+    next: 'Next',
+    back: 'Back',
+    save_finish: 'Save & Finish',
+    launch: 'Launch Dashboard',
+    add_printer: '+ Add Printer',
+    printer: 'Printer',
+    name: 'Name',
+    model: 'Model',
+    model_placeholder: 'Select model...',
+    ip: 'IP Address',
+    serial: 'Serial Number',
+    access_code: 'LAN Access Code',
+    access_code_placeholder: 'From printer menu',
+    language: 'Dashboard Language',
+    http_port: 'HTTP Port',
+    https_port: 'HTTPS Port',
+    cam_ws_port: 'Camera WS Port Start',
+    cam_res: 'Camera Resolution',
+    cam_fps: 'Camera Framerate',
+    cam_bitrate: 'Camera Bitrate',
+    force_https: 'Force HTTPS redirect (requires SSL certs in /certs)',
+    cam_enabled: 'Enable camera streaming',
+    systemd: 'Create systemd service for auto-start on boot',
+    setup_complete: 'Setup Complete!',
+    setup_complete_desc: 'Your Bambu Dashboard is configured and ready to go.',
+    checking: 'Checking system...',
+    recheck: 'Re-check',
+    compatible: 'System is compatible. You can proceed with setup.',
+    not_compatible: 'System does not meet minimum requirements. Please resolve the issues marked above before continuing.',
+    deps_warning: 'npm dependencies are missing. Install them above before continuing.',
+    name_placeholder: 'e.g. P2S Living Room',
+    remove: 'Remove'
+  }
+};
+
+let currentLang = 'en';
+
+function wt(key) {
+  return (WIZARD_I18N[currentLang] || WIZARD_I18N['en'])[key]
+    || (WIZARD_I18N['en'])[key]
+    || key;
+}
+
+function onLanguageChange(lang) {
+  currentLang = (lang === 'nb' || lang === 'en') ? lang : 'en';
+  localStorage.setItem('bambu-lang', lang);
+  applyWizardTranslations();
+}
+
+function applyWizardTranslations() {
+  // Header
+  const h1 = document.querySelector('.wizard-header h1');
+  const sub = document.querySelector('.wizard-header p');
+  if (h1) h1.textContent = wt('title');
+  if (sub) sub.textContent = wt('subtitle');
+  document.querySelector('.token-badge').innerHTML = '&#x1f512; ' + wt('authenticated');
+
+  // Step titles
+  document.querySelectorAll('.card-title').forEach(el => {
+    const num = el.querySelector('.step-num');
+    if (!num) return;
+    const n = num.textContent.trim();
+    if (n === '1') el.lastChild.textContent = ' ' + wt('step1_title');
+    if (n === '2') el.lastChild.textContent = ' ' + wt('step2_title');
+    if (n === '3') el.lastChild.textContent = ' ' + wt('step3_title');
+  });
+
+  // Step 2 desc
+  const s2desc = document.querySelector('#step-1 .card > p');
+  if (s2desc) s2desc.textContent = wt('step2_desc');
+
+  // Buttons
+  document.getElementById('btn-next-0').innerHTML = wt('next') + ' &rarr;';
+  document.getElementById('btn-save').innerHTML = wt('save_finish');
+  document.getElementById('btn-launch').innerHTML = wt('launch') + ' &rarr;';
+  document.querySelectorAll('.btn-outline').forEach(btn => {
+    if (btn.innerHTML.includes('larr')) btn.innerHTML = '&larr; ' + wt('back');
+  });
+  const addBtn = document.querySelector('#step-1 .btn-outline.btn-sm');
+  if (addBtn) addBtn.textContent = wt('add_printer');
+
+  // Labels in step 3
+  const labels = document.querySelectorAll('#step-2 .form-label');
+  const labelKeys = ['language', 'http_port', 'https_port', 'cam_ws_port', 'cam_res', 'cam_fps', 'cam_bitrate'];
+  labels.forEach((lbl, i) => { if (labelKeys[i]) lbl.textContent = wt(labelKeys[i]); });
+
+  // Checkboxes in step 3
+  const forceLabel = document.querySelector('label[for="cfg-force-https"]');
+  const camLabel = document.querySelector('label[for="cfg-cam-enabled"]');
+  const sdLabel = document.querySelector('label[for="cfg-systemd"]');
+  if (forceLabel) forceLabel.textContent = wt('force_https');
+  if (camLabel) camLabel.textContent = wt('cam_enabled');
+  if (sdLabel) sdLabel.textContent = wt('systemd');
+
+  // Finish screen
+  const finH2 = document.querySelector('.finish-screen h2');
+  const finP = document.querySelector('.finish-screen p');
+  if (finH2) finH2.textContent = wt('setup_complete');
+  if (finP) finP.textContent = wt('setup_complete_desc');
+
+  // Printer cards (update placeholders)
+  document.querySelectorAll('.printer-card').forEach(card => {
+    const nameInput = card.querySelector('.p-name');
+    const ipInput = card.querySelector('.p-ip');
+    const serialInput = card.querySelector('.p-serial');
+    const accessInput = card.querySelector('.p-access');
+    if (nameInput) nameInput.placeholder = wt('name_placeholder');
+    if (accessInput) accessInput.placeholder = wt('access_code_placeholder');
+
+    const labels = card.querySelectorAll('.form-label');
+    const cardKeys = ['name', 'model', 'ip', 'serial', 'access_code'];
+    labels.forEach((lbl, i) => { if (cardKeys[i]) lbl.textContent = wt(cardKeys[i]); });
+
+    const modelSel = card.querySelector('.p-model option[value=""]');
+    if (modelSel) modelSel.textContent = wt('model_placeholder');
+
+    const removeBtn = card.querySelector('.printer-remove');
+    if (removeBtn) removeBtn.title = wt('remove');
+  });
+}
+
+// ── Init ──
+// Set language dropdown to saved preference
+document.getElementById('cfg-language').value = 'en';
+currentLang = 'en';
+
+addPrinterCard();
+runChecks();
+applyWizardTranslations();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "bambu-dashboard",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Self-hosted dashboard for Bambu Lab 3D printers",
+  "scripts": {
+    "start": "node --experimental-sqlite server/index.js",
+    "dev": "node --experimental-sqlite --watch server/index.js",
+    "demo": "BAMBU_DEMO=true node --experimental-sqlite --watch server/index.js",
+    "setup": "node --experimental-sqlite server/setup-wizard.js"
+  },
+  "dependencies": {
+    "mqtt": "^5.10.0",
+    "ws": "^8.18.0"
+  }
+}
