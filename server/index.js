@@ -11,6 +11,7 @@ import { isAuthEnabled, getSessionToken, validateSession, isPublicPath, initAuth
 import { PrinterManager } from './printer-manager.js';
 import { NotificationManager } from './notifications.js';
 import { Updater } from './updater.js';
+import { sendTelemetryPing } from './telemetry.js';
 
 const IS_DEMO = process.env.BAMBU_DEMO === 'true';
 
@@ -351,6 +352,9 @@ httpServer.listen(PORT, () => {
   console.log(`  ║   Printere: ${printerCount}                              ║`);
   console.log('  ╚══════════════════════════════════════════════╝');
   console.log('');
+
+  // Send anonymous telemetry ping (fire-and-forget)
+  sendTelemetryPing();
 });
 
 if (httpsServer) {

@@ -539,6 +539,19 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, getUpdateHistory(limit));
     }
 
+    // ---- Telemetry stats (proxy to Cloudflare Worker) ----
+    if (method === 'GET' && path === '/api/telemetry/stats') {
+      try {
+        const resp = await fetch('https://telemetry.geektech.no/stats', {
+          signal: AbortSignal.timeout(5000)
+        });
+        const data = await resp.json();
+        return sendJson(res, data);
+      } catch {
+        return sendJson(res, { error: 'Telemetry unavailable' }, 502);
+      }
+    }
+
     // ---- MakerWorld ----
     const mwMatch = path.match(/^\/api\/makerworld\/(\d+)$/);
     if (mwMatch && method === 'GET') {

@@ -29,3 +29,4 @@ Thumbs.db
 
 # Backups created by updater
 data/backups/
+telemetry-worker/
