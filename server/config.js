@@ -47,7 +47,8 @@ const DEFAULTS = {
   update: {
     autoCheck: true,
     checkIntervalHours: 6,
-    includePrerelease: false
+    includePrerelease: false,
+    githubToken: ''
   }
 };
 
@@ -99,6 +100,7 @@ function loadConfig() {
   }
   if (process.env.PORT) config.server.port = parseInt(process.env.PORT);
   if (process.env.SERVER_PORT) config.server.port = parseInt(process.env.SERVER_PORT);
+  if (process.env.GITHUB_TOKEN) config.update.githubToken = process.env.GITHUB_TOKEN;
 
   // Auth env overrides
   if (process.env.BAMBU_AUTH_PASSWORD) {

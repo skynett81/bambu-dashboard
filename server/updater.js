@@ -108,6 +108,10 @@ export class Updater {
       };
       if (this._cache.etag) headers['If-None-Match'] = this._cache.etag;
 
+      // Support private repos via configured GitHub token
+      const token = this._config.githubToken || process.env.GITHUB_TOKEN;
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch(API_URL, { headers });
 
       if (response.status === 304) {
