@@ -264,6 +264,7 @@ const PANEL_TITLES = {
   waste: 'tabs.waste',
   maintenance: 'tabs.maintenance',
   protection: 'protection.title',
+  modelinfo: 'tabs.model_info',
   settings: 'tabs.settings'
 };
 
@@ -277,6 +278,7 @@ const PANEL_LOADERS = {
   waste: () => { if (typeof loadWastePanel === 'function') loadWastePanel(); },
   maintenance: () => { if (typeof loadMaintenancePanel === 'function') loadMaintenancePanel(); },
   protection: () => { if (typeof loadProtectionPanel === 'function') loadProtectionPanel(); },
+  modelinfo: () => { if (typeof loadModelInfoPanel === 'function') loadModelInfoPanel(); },
   settings: () => { if (typeof loadSettingsPanel === 'function') loadSettingsPanel(); }
 };
 

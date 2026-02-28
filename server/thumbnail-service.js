@@ -219,7 +219,97 @@ function parse3mfModel(xmlBuf) {
   if (vertices.length === 0 || triangles.length === 0) return null;
   if (triangles.length / 3 > MAX_TRIANGLES) return null;
 
-  return { vertices, triangles };
+  // Compute bounding box and dimensions
+  let minX = Infinity, minY = Infinity, minZ = Infinity;
+  let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+  for (let i = 0; i < vertices.length; i += 3) {
+    const x = vertices[i], y = vertices[i+1], z = vertices[i+2];
+    if (x < minX) minX = x; if (x > maxX) maxX = x;
+    if (y < minY) minY = y; if (y > maxY) maxY = y;
+    if (z < minZ) minZ = z; if (z > maxZ) maxZ = z;
+  }
+
+  // Compute volume using signed tetrahedron method
+  let volume = 0;
+  for (let i = 0; i < triangles.length; i += 3) {
+    const a = triangles[i] * 3, b = triangles[i+1] * 3, c = triangles[i+2] * 3;
+    const ax = vertices[a], ay = vertices[a+1], az = vertices[a+2];
+    const bx = vertices[b], by = vertices[b+1], bz = vertices[b+2];
+    const cx = vertices[c], cy = vertices[c+1], cz = vertices[c+2];
+    volume += (ax * (by * cz - bz * cy) + bx * (cy * az - cz * ay) + cx * (ay * bz - az * by)) / 6;
+  }
+
+  const meta = {
+    dimensions: {
+      x: +(maxX - minX).toFixed(1),
+      y: +(maxY - minY).toFixed(1),
+      z: +(maxZ - minZ).toFixed(1)
+    },
+    triangleCount: triangles.length / 3,
+    vertexCount: vertices.length / 3,
+    volume: +Math.abs(volume).toFixed(1)  // mm³
+  };
+
+  return { vertices, triangles, meta };
+}
+
+// Extract Bambu Studio slice info from 3MF
+const SLICE_INFO_PATHS = [
+  'Metadata/slice_info.config',
+  'Metadata/project_settings.config',
+  'Metadata/model_settings.config'
+];
+
+function parseSliceInfo(zipBuf) {
+  const info = {};
+
+  // Try slice_info.config (Bambu Studio)
+  for (const path of SLICE_INFO_PATHS) {
+    const buf = extractFromZip(zipBuf, [path]);
+    if (!buf) continue;
+    const xml = buf.toString('utf8');
+
+    // Extract common settings
+    const extract = (key) => {
+      const m = xml.match(new RegExp(`<${key}>([^<]+)</${key}>`, 'i'))
+        || xml.match(new RegExp(`${key}\\s*=\\s*["']?([^"'\\s<>]+)`, 'i'));
+      return m ? m[1].trim() : null;
+    };
+
+    info.layer_height = info.layer_height || extract('layer_height');
+    info.initial_layer_height = info.initial_layer_height || extract('initial_layer_height');
+    info.wall_loops = info.wall_loops || extract('wall_loops');
+    info.infill_density = info.infill_density || extract('sparse_infill_density') || extract('infill_density');
+    info.support_type = info.support_type || extract('support_type');
+    info.filament_type = info.filament_type || extract('filament_type');
+    info.nozzle_diameter = info.nozzle_diameter || extract('nozzle_diameter');
+    info.print_speed = info.print_speed || extract('outer_wall_speed') || extract('default_print_speed');
+
+    // Bambu-specific: estimated weight and time from plate info
+    const weightMatch = xml.match(/weight\s*=\s*["']?([\d.]+)/i);
+    if (weightMatch) info.estimated_weight_g = parseFloat(weightMatch[1]);
+
+    const timeMatch = xml.match(/prediction\s*=\s*["']?(\d+)/i) || xml.match(/time\s*=\s*["']?(\d+)/i);
+    if (timeMatch) info.estimated_time_s = parseInt(timeMatch[1]);
+  }
+
+  // Also try Metadata/plate_X.json for Bambu Studio
+  const plateJson = extractFromZip(zipBuf, ['Metadata/plate_1.json', 'Metadata/plate.json']);
+  if (plateJson) {
+    try {
+      const plate = JSON.parse(plateJson.toString('utf8'));
+      if (plate.weight) info.estimated_weight_g = info.estimated_weight_g || parseFloat(plate.weight);
+      if (plate.prediction) info.estimated_time_s = info.estimated_time_s || parseInt(plate.prediction);
+      if (plate.filament_type) info.filament_type = info.filament_type || plate.filament_type;
+    } catch (_) {}
+  }
+
+  // Filter out null/empty values
+  const result = {};
+  for (const [k, v] of Object.entries(info)) {
+    if (v != null && v !== '' && v !== 'null') result[k] = v;
+  }
+  return Object.keys(result).length ? result : null;
 }
 
 // ---- Demo 3D geometry generators ----
@@ -396,6 +486,15 @@ const DEMO_MODEL_COLORS = {
   'vase_mode.3mf': [0.3, 0.71, 0.67]
 };
 
+const DEMO_SLICE_INFO = {
+  'werewolf_bust.3mf': { layer_height: '0.16', infill_density: '15%', support_type: 'tree', filament_type: 'PLA', estimated_weight_g: 82.5, estimated_time_s: 14400 },
+  'cable_clip_x4.3mf': { layer_height: '0.2', infill_density: '40%', filament_type: 'PETG', estimated_weight_g: 6.2, estimated_time_s: 1200 },
+  'deadpool_grenade.3mf': { layer_height: '0.12', infill_density: '20%', support_type: 'normal', filament_type: 'PLA', estimated_weight_g: 45.8, estimated_time_s: 10800 },
+  'rv_15amp_inlet_mount.3mf': { layer_height: '0.2', infill_density: '35%', filament_type: 'PLA+', estimated_weight_g: 28.3, estimated_time_s: 3600 },
+  'benchy_v2.3mf': { layer_height: '0.2', infill_density: '10%', filament_type: 'PLA', estimated_weight_g: 14.5, estimated_time_s: 2700 },
+  'vase_mode.3mf': { layer_height: '0.2', infill_density: '0%', filament_type: 'Silk PLA', estimated_weight_g: 32.0, estimated_time_s: 5400 }
+};
+
 function generateDemoModel(subtaskName) {
   let model;
   switch (subtaskName) {
@@ -421,6 +520,23 @@ function generateDemoModel(subtaskName) {
       model = generateIcosphere(2, 20);
   }
   model.color = DEMO_MODEL_COLORS[subtaskName] || [0.95, 0.65, 0.25];
+
+  // Compute demo model metadata
+  const verts = model.vertices;
+  let minX = Infinity, minY = Infinity, minZ = Infinity;
+  let maxX = -Infinity, maxY = -Infinity, maxZ = -Infinity;
+  for (let i = 0; i < verts.length; i += 3) {
+    if (verts[i] < minX) minX = verts[i]; if (verts[i] > maxX) maxX = verts[i];
+    if (verts[i+1] < minY) minY = verts[i+1]; if (verts[i+1] > maxY) maxY = verts[i+1];
+    if (verts[i+2] < minZ) minZ = verts[i+2]; if (verts[i+2] > maxZ) maxZ = verts[i+2];
+  }
+  model.meta = {
+    dimensions: { x: +(maxX-minX).toFixed(1), y: +(maxY-minY).toFixed(1), z: +(maxZ-minZ).toFixed(1) },
+    triangleCount: model.triangles.length / 3,
+    vertexCount: verts.length / 3
+  };
+  model.sliceInfo = DEMO_SLICE_INFO[subtaskName] || { layer_height: '0.2', filament_type: 'PLA' };
+
   return model;
 }
 
@@ -520,6 +636,10 @@ export async function getModel(printerId, hub) {
 
   const model = parse3mfModel(modelXml);
   if (!model) return null;
+
+  // Try to extract slice info from the 3MF
+  const sliceInfo = parseSliceInfo(zipBuf);
+  if (sliceInfo) model.sliceInfo = sliceInfo;
 
   _modelCache.set(printerId, { subtask, model });
   return model;

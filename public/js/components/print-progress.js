@@ -10,11 +10,10 @@
   }
 
   const STATE_COLORS = {
-    'IDLE': '#c0c8d2',
     'RUNNING': '#00e676',
     'PAUSE': '#f0883e',
-    'FINISH': '#58a6ff',
-    'FAILED': '#f85149',
+    'FINISH': '#1279ff',
+    'FAILED': '#ff5252',
     'PREPARE': '#e3b341',
     'HEATING': '#e3b341'
   };
@@ -31,15 +30,15 @@
 
     svg.innerHTML = `
       <circle cx="${CX}" cy="${CY}" r="${RADIUS}"
-              fill="none" stroke="#30363d" stroke-width="8"/>
+              fill="none" stroke="${theme.getCSSVar('--bg-tertiary')}" stroke-width="8"/>
       <circle id="progress-circle" cx="${CX}" cy="${CY}" r="${RADIUS}"
               fill="none" stroke="#00e676" stroke-width="8" stroke-linecap="round"
               stroke-dasharray="${CIRCUMFERENCE}" stroke-dashoffset="${CIRCUMFERENCE}"
               transform="rotate(-90 ${CX} ${CY})"
               style="transition: stroke-dashoffset 0.8s ease, stroke 0.3s ease"/>
-      <text x="${CX}" y="${CY - 2}" text-anchor="middle" fill="#f0f6fc"
+      <text x="${CX}" y="${CY - 2}" text-anchor="middle" fill="${theme.getCSSVar('--text-primary')}"
             font-size="26" font-weight="700" id="progress-percent">0%</text>
-      <text x="${CX}" y="${CY + 16}" text-anchor="middle" fill="#e2e8f0"
+      <text x="${CX}" y="${CY + 16}" text-anchor="middle" fill="${theme.getCSSVar('--text-secondary')}"
             font-size="10" id="progress-ring-state">${t('state.idle')}</text>
     `;
 
@@ -106,7 +105,7 @@
 
     const percent = data.mc_percent || 0;
     const state = data.gcode_state || 'IDLE';
-    const color = STATE_COLORS[state] || '#c0c8d2';
+    const color = STATE_COLORS[state] || theme.getCSSVar('--text-muted');
     _lastGcodeState = state;
 
     // Progress ring

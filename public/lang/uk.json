@@ -91,7 +91,10 @@
     "spool_singular": "котушка",
     "spool_plural": "котушки",
     "used_g": "Використано (г)",
-    "drop_here": "Перетягніть котушки сюди"
+    "drop_here": "Перетягніть котушки сюди",
+    "spoolman_title": "Spoolman Spools",
+    "spoolman_not_configured": "Spoolman not configured. Enable in Settings.",
+    "spoolman_empty": "No spools found in Spoolman."
   },
   "controls": {
     "title": "Керування",
@@ -125,7 +128,12 @@
     "extrude": "Екструзія",
     "retract": "Відкат",
     "ai_spaghetti": "ШІ Спагеті",
-    "ai_first_layer": "Перший шар"
+    "ai_first_layer": "Перший шар",
+    "objects_title": "Objects",
+    "skip_object": "Skip",
+    "object_skipped": "Skipped",
+    "no_objects": "No object info available",
+    "skip_confirm": "Skip this object? It cannot be undone."
   },
   "speed": {
     "label": "Швидкість:",
@@ -243,7 +251,9 @@
     "search_placeholder": "Шукати помилки...",
     "no_match": "Немає помилок, що відповідають фільтру.",
     "just_now": "щойно",
-    "unknown_error": "Невідома помилка"
+    "unknown_error": "Невідома помилка",
+    "hms_wiki_link": "View on Bambu Wiki",
+    "hms_unknown": "Unknown HMS code"
   },
   "settings": {
     "printers_title": "Принтери",
@@ -282,7 +292,30 @@
     "demo_confirm": "Видалити всі демо-принтери та пов'язані дані (історія, помилки, філамент, телеметрія)? Цю дію неможливо скасувати.",
     "notif_log_title": "Журнал сповіщень",
     "notif_log_empty": "Сповіщення ще не надсилалися.",
-    "notif_log_failed": "Не вдалося завантажити журнал сповіщень."
+    "notif_log_failed": "Не вдалося завантажити журнал сповіщень.",
+    "tab_appearance": "Appearance",
+    "theme_title": "Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_auto": "Auto (System)",
+    "theme_accent": "Accent Color",
+    "theme_accent_reset": "Reset to default",
+    "theme_radius": "Corner Roundness",
+    "theme_radius_sharp": "Sharp",
+    "theme_radius_round": "Round",
+    "theme_reset": "Reset All",
+    "theme_reset_confirm": "Reset theme to defaults?",
+    "spoolman_title": "Spoolman",
+    "spoolman_description": "Connect to an external Spoolman server to sync filament inventory.",
+    "spoolman_enable": "Enable Spoolman integration",
+    "spoolman_url": "Spoolman URL",
+    "spoolman_url_placeholder": "http://spoolman:7912",
+    "spoolman_test": "Test Connection",
+    "spoolman_test_ok": "Connected!",
+    "spoolman_test_fail": "Connection failed",
+    "obs_title": "OBS Streaming Overlay",
+    "obs_description": "Use this URL as a Browser Source in OBS to show camera + print info.",
+    "obs_params": "Params: ?printer=ID &bg=transparent &compact &hide_idle &no_camera"
   },
   "notify": {
     "print": "Друк",

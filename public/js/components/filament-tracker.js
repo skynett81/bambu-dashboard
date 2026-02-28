@@ -37,7 +37,7 @@
   function barRow(lbl, pct, clr, val) { return `<div class="chart-bar-row"><span class="chart-bar-label">${lbl}</span><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%;background:${clr}"></div></div><span class="chart-bar-value">${val}</span></div>`; }
   function sRow(lbl, val, clr) { return `<div class="stats-detail-item"><span class="stats-detail-item-label">${lbl}</span><span class="stats-detail-item-value"${clr?` style="color:${clr}"`:''}>${val}</span></div>`; }
 
-  const TYPE_COLORS = { 'PLA':'#00e676','PLA+':'#00c853','PETG':'#f0883e','TPU':'#bc8cff','ABS':'#f85149','ASA':'#58a6ff','PA':'#e3b341','PA-CF':'#d2a8ff','PET-CF':'#f778ba','PLA-CF':'#79c0ff','PC':'#8b949e','PLA Silk':'#ffd700','PLA Matte':'#7cb342','PETG-CF':'#ff9800' };
+  const TYPE_COLORS = { 'PLA':'#00e676','PLA+':'#00c853','PETG':'#f0883e','TPU':'#9b4dff','ABS':'#ff5252','ASA':'#1279ff','PA':'#e3b341','PA-CF':'#d2a8ff','PET-CF':'#f778ba','PLA-CF':'#79c0ff','PC':'#8b949e','PLA Silk':'#ffd700','PLA Matte':'#7cb342','PETG-CF':'#ff9800' };
 
   function heroCard(icon, value, label, color) {
     return `<div class="fil-hero-card">
@@ -49,12 +49,13 @@
 
   // ═══ Tab config ═══
   const TAB_CONFIG = {
-    inventory: { label: 'filament.tab_inventory', modules: ['spool-summary', 'active-filament', 'low-stock-alert', 'printer-inventory'] },
+    inventory: { label: 'filament.tab_inventory', modules: ['spool-summary', 'active-filament', 'spoolman-spools', 'low-stock-alert', 'printer-inventory'] },
     stats:     { label: 'filament.tab_stats',     modules: ['type-breakdown', 'brand-breakdown', 'cost-summary', 'stock-health'] }
   };
   const MODULE_SIZE = {
     'spool-summary': 'full', 'active-filament': 'full',
     'low-stock-alert': 'full', 'printer-inventory': 'full',
+    'spoolman-spools': 'full',
     'type-breakdown': 'half', 'brand-breakdown': 'half',
     'cost-summary': 'half', 'stock-health': 'half'
   };
@@ -63,7 +64,7 @@
   const LOCK_KEY = 'filament-layout-locked';
 
   // Clear stale saved orders when module set changes
-  const _MOD_VER = 2;
+  const _MOD_VER = 3;
   if (localStorage.getItem('filament-mod-ver') !== String(_MOD_VER)) {
     for (const tab of Object.keys(TAB_CONFIG)) localStorage.removeItem(STORAGE_PREFIX + tab);
     localStorage.setItem('filament-mod-ver', String(_MOD_VER));
@@ -100,7 +101,7 @@
       }
       const lowColor = lowStockCount > 0 ? '#f0883e' : '#00e676';
       return `<div class="fil-hero-grid">
-        ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', spools.length, t('filament.total_spools'), '#58a6ff')}
+        ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', spools.length, t('filament.total_spools'), '#1279ff')}
         ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>', fmtW(totalRemaining), t('filament.total_remaining'), '#00e676')}
         ${totalValue > 0 ? heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>', `${Math.round(totalValue)} kr`, t('filament.total_value'), '#e3b341') : ''}
         ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', lowStockCount, t('filament.low_stock'), lowColor)}
@@ -126,6 +127,18 @@
         ${t('common.active_filament')}
       </div>`;
       h += buildActiveFilamentContent();
+      return h;
+    },
+
+    'spoolman-spools': () => {
+      // Async load — renders a container and fetches data
+      let h = `<div class="ctrl-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        ${t('filament.spoolman_title')}
+      </div>`;
+      h += `<div id="spoolman-spools-container"><span class="text-muted" style="font-size:0.8rem">Loading...</span></div>`;
+      // Trigger async load
+      setTimeout(() => loadSpoolmanSpools(), 0);
       return h;
     },
 
@@ -565,6 +578,58 @@
       initFilamentDnd();
     } catch (e) {
       panel.innerHTML = `<p class="text-muted">${t('filament.load_failed')}</p>`;
+    }
+  }
+
+  // ═══ Spoolman ═══
+  async function loadSpoolmanSpools() {
+    const container = document.getElementById('spoolman-spools-container');
+    if (!container) return;
+    try {
+      const res = await fetch('/api/spoolman/spools');
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        if (res.status === 400) {
+          container.innerHTML = `<p class="text-muted" style="font-size:0.8rem">${t('filament.spoolman_not_configured')}</p>`;
+          return;
+        }
+        throw new Error(err.error || 'Failed');
+      }
+      const spools = await res.json();
+      if (!spools || spools.length === 0) {
+        container.innerHTML = `<p class="text-muted" style="font-size:0.8rem">${t('filament.spoolman_empty')}</p>`;
+        return;
+      }
+      let html = '<div class="spoolman-grid">';
+      for (const s of spools) {
+        const fil = s.filament || {};
+        const vendor = fil.vendor || {};
+        const color = fil.color_hex ? `#${fil.color_hex.replace('#', '').substring(0, 6)}` : '#888';
+        const remaining = s.remaining_weight != null ? Math.round(s.remaining_weight) : '?';
+        const used = s.used_weight != null ? Math.round(s.used_weight) : 0;
+        const total = remaining !== '?' ? remaining + used : '?';
+        const pct = total !== '?' && total > 0 ? Math.round((remaining / total) * 100) : 0;
+        html += `<div class="spoolman-card">
+          <div class="spoolman-card-top">
+            <span class="filament-color-swatch" style="background:${color}"></span>
+            <div>
+              <strong>${esc(fil.name || fil.material || '--')}</strong>
+              <span class="text-muted" style="font-size:0.75rem"> ${esc(vendor.name || '')}</span>
+            </div>
+          </div>
+          <div class="filament-bar" style="margin:6px 0 4px">
+            <div class="filament-bar-fill" style="width:${pct}%;background:${pct < 20 ? 'var(--accent-orange)' : color}"></div>
+          </div>
+          <div class="spoolman-card-meta">
+            <span>${remaining}g ${t('filament.remaining')}</span>
+            <span>${fil.material || ''}</span>
+          </div>
+        </div>`;
+      }
+      html += '</div>';
+      container.innerHTML = html;
+    } catch (e) {
+      container.innerHTML = `<p class="text-muted" style="font-size:0.8rem">${t('filament.spoolman_not_configured')}</p>`;
     }
   }
 

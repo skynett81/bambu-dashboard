@@ -53,9 +53,9 @@
         <div class="sd-card-visual">
           <div class="sd-card-icon">
             <svg viewBox="0 0 24 30" fill="none">
-              <path d="M4 2h10l6 6v20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="${state.sdcard ? '#58a6ff' : '#30363d'}" opacity="${state.sdcard ? '0.2' : '0.4'}" stroke="${state.sdcard ? '#58a6ff' : '#484f58'}" stroke-width="1.5"/>
-              <path d="M14 2v6h6" fill="none" stroke="${state.sdcard ? '#58a6ff' : '#484f58'}" stroke-width="1.5"/>
-              ${state.sdcard ? '<rect x="7" y="12" width="2" height="6" rx="0.5" fill="#58a6ff" opacity="0.6"/><rect x="11" y="14" width="2" height="4" rx="0.5" fill="#58a6ff" opacity="0.6"/><rect x="15" y="11" width="2" height="7" rx="0.5" fill="#58a6ff" opacity="0.6"/>' : ''}
+              <path d="M4 2h10l6 6v20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z" fill="${state.sdcard ? '#1279ff' : theme.getCSSVar('--bg-tertiary')}" opacity="${state.sdcard ? '0.2' : '0.4'}" stroke="${state.sdcard ? '#1279ff' : theme.getCSSVar('--text-muted')}" stroke-width="1.5"/>
+              <path d="M14 2v6h6" fill="none" stroke="${state.sdcard ? '#1279ff' : theme.getCSSVar('--text-muted')}" stroke-width="1.5"/>
+              ${state.sdcard ? '<rect x="7" y="12" width="2" height="6" rx="0.5" fill="#1279ff" opacity="0.6"/><rect x="11" y="14" width="2" height="4" rx="0.5" fill="#1279ff" opacity="0.6"/><rect x="15" y="11" width="2" height="7" rx="0.5" fill="#1279ff" opacity="0.6"/>' : ''}
             </svg>
           </div>
           <span class="sd-card-status ${state.sdcard ? 'sd-inserted' : 'sd-missing'}">

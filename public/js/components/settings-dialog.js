@@ -10,7 +10,7 @@
 
     // Read sub-slug from hash (e.g. #settings/notifications)
     const hashSub = location.hash.replace('#', '').split('/')[1];
-    if (hashSub && ['printers','general','notifications','system'].includes(hashSub)) _activeTab = hashSub;
+    if (hashSub && ['printers','general','appearance','notifications','system'].includes(hashSub)) _activeTab = hashSub;
 
     try {
       const res = await fetch('/api/printers');
@@ -21,6 +21,7 @@
         <div class="settings-tabs">
           <button class="settings-tab ${_activeTab === 'printers' ? 'active' : ''}" onclick="switchSettingsTab('printers')">${t('settings.tab_printers')}</button>
           <button class="settings-tab ${_activeTab === 'general' ? 'active' : ''}" onclick="switchSettingsTab('general')">${t('settings.tab_general')}</button>
+          <button class="settings-tab ${_activeTab === 'appearance' ? 'active' : ''}" onclick="switchSettingsTab('appearance')">${t('settings.tab_appearance')}</button>
           <button class="settings-tab ${_activeTab === 'notifications' ? 'active' : ''}" onclick="switchSettingsTab('notifications')">${t('settings.tab_notifications')}</button>
           <button class="settings-tab ${_activeTab === 'system' ? 'active' : ''}" onclick="switchSettingsTab('system')">${t('settings.tab_system')}</button>
         </div>`;
@@ -99,7 +100,27 @@
       html += '<div id="auth-settings-section"><div class="settings-card"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div></div>';
 
       html += '</div>'; // end settings-grid
+
+      // Spoolman integration
+      html += '<div id="spoolman-settings-section" class="mt-md"><div class="settings-card"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div></div>';
+
+      // OBS Overlay URL
+      html += `<div class="settings-card mt-md">
+        <div class="card-title">${t('settings.obs_title')}</div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.obs_description')}</p>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="form-input" id="obs-url-display" readonly value="${location.origin}/obs.html" style="flex:1;font-size:0.8rem">
+          <button class="form-btn form-btn-sm" onclick="copyObsUrl()">${t('camera.copy')}</button>
+        </div>
+        <p class="text-muted" style="font-size:0.75rem;margin-top:6px">${t('settings.obs_params')}</p>
+      </div>`;
+
       html += '</div>'; // end tab-general
+
+      // ======== TAB: Appearance ========
+      html += `<div class="settings-tab-content ${_activeTab === 'appearance' ? 'active' : ''}" id="tab-appearance">`;
+      html += buildAppearanceTab();
+      html += '</div>'; // end tab-appearance
 
       // ======== TAB: Notifications ========
       html += `<div class="settings-tab-content ${_activeTab === 'notifications' ? 'active' : ''}" id="tab-notifications">`;
@@ -130,6 +151,7 @@
       if (printerInfoEl && typeof renderPrinterInfoSection === 'function') renderPrinterInfoSection(printerInfoEl);
       checkDemoData();
       loadAuthSettings();
+      loadSpoolmanSettings();
       loadNotifSettings();
       loadNotifLog();
       const updateSection = document.getElementById('update-section');
@@ -721,5 +743,228 @@
       section.innerHTML = `<p class="text-muted" style="font-size:0.8rem">${t('settings.notif_log_failed')}</p>`;
     }
   }
+
+  // ---- OBS URL Copy ----
+  window.copyObsUrl = function() {
+    const input = document.getElementById('obs-url-display');
+    if (!input) return;
+    navigator.clipboard.writeText(input.value).then(() => {
+      const btn = input.nextElementSibling;
+      if (btn) { btn.textContent = t('camera.copied'); setTimeout(() => { btn.textContent = t('camera.copy'); }, 1500); }
+    });
+  };
+
+  // ---- Spoolman Settings ----
+  async function loadSpoolmanSettings() {
+    const section = document.getElementById('spoolman-settings-section');
+    if (!section) return;
+
+    try {
+      const res = await fetch('/api/spoolman/config', { method: 'GET' }).catch(() => null);
+      // Config might not exist yet, use defaults
+      let sc = { enabled: false, url: '' };
+      if (res && res.ok) {
+        // No dedicated GET, we read from general config via spoolman/test
+      }
+    } catch (_) {}
+
+    // We need to infer config — there's no dedicated GET for spoolman config
+    // So we render based on what the test endpoint can tell us
+    let sc = { enabled: false, url: '' };
+    try {
+      // Try fetching spoolman spools to see if it's configured
+      const testRes = await fetch('/api/spoolman/spools');
+      if (testRes.ok) {
+        sc.enabled = true;
+        // We can't easily get the URL back, so leave blank for editing
+      }
+    } catch (_) {}
+
+    let html = `<div class="settings-card">
+      <div class="card-title">${t('settings.spoolman_title')}</div>
+      <p class="text-muted" style="font-size:0.8rem;margin-bottom:10px">${t('settings.spoolman_description')}</p>
+      <label class="settings-checkbox">
+        <input type="checkbox" id="spoolman-enabled" ${sc.enabled ? 'checked' : ''}>
+        <span>${t('settings.spoolman_enable')}</span>
+      </label>
+      <div class="form-group mt-sm">
+        <label class="form-label">${t('settings.spoolman_url')}</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="spoolman-url" value="${sc.url}" placeholder="${t('settings.spoolman_url_placeholder')}" style="flex:1">
+          <button class="form-btn form-btn-sm" id="spoolman-test-btn" onclick="testSpoolman()">${t('settings.spoolman_test')}</button>
+        </div>
+        <span class="text-muted" id="spoolman-test-status" style="font-size:0.75rem;margin-top:4px;display:block"></span>
+      </div>
+      <div class="notif-save-row">
+        <button class="form-btn" onclick="saveSpoolmanSettings()">${t('settings.save')}</button>
+        <span class="notif-save-status" id="spoolman-save-status"></span>
+      </div>
+    </div>`;
+    section.innerHTML = html;
+  }
+
+  window.testSpoolman = async function() {
+    const url = document.getElementById('spoolman-url')?.value?.trim();
+    const status = document.getElementById('spoolman-test-status');
+    const btn = document.getElementById('spoolman-test-btn');
+    if (!url) { if (status) status.textContent = t('settings.spoolman_url_placeholder'); return; }
+    if (btn) btn.disabled = true;
+    if (status) { status.textContent = '...'; status.style.color = ''; }
+    try {
+      const res = await fetch(`/api/spoolman/test?url=${encodeURIComponent(url)}`);
+      const data = await res.json();
+      if (data.ok) {
+        if (status) { status.textContent = `${t('settings.spoolman_test_ok')}${data.version ? ' (v' + data.version + ')' : ''}`; status.style.color = 'var(--accent-green)'; }
+      } else {
+        if (status) { status.textContent = `${t('settings.spoolman_test_fail')}: ${data.error || ''}`; status.style.color = 'var(--accent-red)'; }
+      }
+    } catch {
+      if (status) { status.textContent = t('settings.spoolman_test_fail'); status.style.color = 'var(--accent-red)'; }
+    }
+    if (btn) btn.disabled = false;
+  };
+
+  window.saveSpoolmanSettings = async function() {
+    const status = document.getElementById('spoolman-save-status');
+    const body = {
+      enabled: document.getElementById('spoolman-enabled')?.checked || false,
+      url: document.getElementById('spoolman-url')?.value?.trim() || ''
+    };
+    try {
+      const res = await fetch('/api/spoolman/config', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      const data = await res.json();
+      if (data.ok) {
+        if (status) { status.textContent = t('settings.auth_saved'); status.style.color = 'var(--accent-green)'; }
+      } else {
+        if (status) { status.textContent = t('settings.auth_save_failed'); status.style.color = 'var(--accent-red)'; }
+      }
+    } catch {
+      if (status) { status.textContent = t('settings.auth_save_failed'); status.style.color = 'var(--accent-red)'; }
+    }
+    setTimeout(() => { if (status) { status.textContent = ''; status.style.color = ''; } }, 3000);
+  };
+
+  // ---- Appearance / Theme ----
+
+  const ACCENT_SWATCHES = [
+    { color: '#00AE42', label: 'Green' },
+    { color: '#1279ff', label: 'Blue' },
+    { color: '#7b2ff2', label: 'Purple' },
+    { color: '#f0883e', label: 'Orange' },
+    { color: '#e91e63', label: 'Pink' },
+    { color: '#00bcd4', label: 'Cyan' },
+  ];
+
+  function buildAppearanceTab() {
+    const cfg = window.theme ? window.theme.get() : { preset: 'light', accentColor: null, radius: 12 };
+    const currentAccent = cfg.accentColor || (window.theme ? window.theme.getDefaultAccent() : '#00AE42');
+    const currentRadius = cfg.radius ?? 12;
+
+    let html = '';
+
+    // Theme preset
+    html += `
+      <div class="settings-card">
+        <div class="card-title">${t('settings.theme_title')}</div>
+        <div class="theme-preset-grid">
+          <button class="theme-preset-card ${cfg.preset === 'light' ? 'active' : ''}" onclick="setThemePreset('light')">
+            <div class="theme-preset-preview theme-preview-light">
+              <div class="tpp-sidebar"></div>
+              <div class="tpp-main"><div class="tpp-card"></div><div class="tpp-card"></div></div>
+            </div>
+            <span>${t('settings.theme_light')}</span>
+          </button>
+          <button class="theme-preset-card ${cfg.preset === 'dark' ? 'active' : ''}" onclick="setThemePreset('dark')">
+            <div class="theme-preset-preview theme-preview-dark">
+              <div class="tpp-sidebar"></div>
+              <div class="tpp-main"><div class="tpp-card"></div><div class="tpp-card"></div></div>
+            </div>
+            <span>${t('settings.theme_dark')}</span>
+          </button>
+          <button class="theme-preset-card ${cfg.preset === 'auto' ? 'active' : ''}" onclick="setThemePreset('auto')">
+            <div class="theme-preset-preview theme-preview-auto">
+              <div class="tpp-half-light"></div>
+              <div class="tpp-half-dark"></div>
+            </div>
+            <span>${t('settings.theme_auto')}</span>
+          </button>
+        </div>
+      </div>`;
+
+    // Accent color
+    html += `
+      <div class="settings-card mt-md">
+        <div class="card-title">${t('settings.theme_accent')}</div>
+        <div class="theme-color-row">`;
+    for (const s of ACCENT_SWATCHES) {
+      const isActive = currentAccent.toLowerCase() === s.color.toLowerCase();
+      html += `<button class="theme-color-swatch ${isActive ? 'active' : ''}" style="background:${s.color}" onclick="setThemeAccent('${s.color}')" title="${s.label}"></button>`;
+    }
+    html += `
+          <label class="theme-color-custom" title="${t('settings.theme_accent')}">
+            <input type="color" id="theme-accent-picker" value="${currentAccent}" onchange="setThemeAccent(this.value)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+          </label>
+        </div>
+        ${cfg.accentColor ? `<button class="form-btn form-btn-sm form-btn-secondary mt-sm" onclick="setThemeAccent(null)">${t('settings.theme_accent_reset')}</button>` : ''}
+      </div>`;
+
+    // Border radius
+    html += `
+      <div class="settings-card mt-md">
+        <div class="card-title">${t('settings.theme_radius')}</div>
+        <div class="theme-radius-row">
+          <span class="text-muted" style="font-size:0.8rem">${t('settings.theme_radius_sharp')}</span>
+          <input type="range" class="theme-radius-slider" id="theme-radius-slider" min="0" max="20" step="1" value="${currentRadius}" oninput="setThemeRadius(this.value)">
+          <span class="text-muted" style="font-size:0.8rem">${t('settings.theme_radius_round')}</span>
+          <span class="theme-radius-value" id="theme-radius-value">${currentRadius}px</span>
+        </div>
+      </div>`;
+
+    // Reset
+    html += `
+      <div class="mt-md">
+        <button class="form-btn form-btn-secondary" onclick="resetTheme()">${t('settings.theme_reset')}</button>
+      </div>`;
+
+    return html;
+  }
+
+  window.setThemePreset = function(preset) {
+    if (window.theme) window.theme.set({ preset });
+    // Re-render to update active states
+    if (window._activePanel === 'settings' && _activeTab === 'appearance') {
+      const container = document.getElementById('tab-appearance');
+      if (container) container.innerHTML = buildAppearanceTab();
+    }
+  };
+
+  window.setThemeAccent = function(color) {
+    if (window.theme) window.theme.set({ accentColor: color });
+    if (window._activePanel === 'settings' && _activeTab === 'appearance') {
+      const container = document.getElementById('tab-appearance');
+      if (container) container.innerHTML = buildAppearanceTab();
+    }
+  };
+
+  window.setThemeRadius = function(val) {
+    const r = parseInt(val) || 12;
+    if (window.theme) window.theme.set({ radius: r });
+    const label = document.getElementById('theme-radius-value');
+    if (label) label.textContent = r + 'px';
+  };
+
+  window.resetTheme = function() {
+    if (!confirm(t('settings.theme_reset_confirm'))) return;
+    if (window.theme) window.theme.set({ preset: 'light', accentColor: null, radius: 12 });
+    if (window._activePanel === 'settings' && _activeTab === 'appearance') {
+      const container = document.getElementById('tab-appearance');
+      if (container) container.innerHTML = buildAppearanceTab();
+    }
+  };
 
 })();

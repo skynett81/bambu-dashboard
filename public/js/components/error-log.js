@@ -358,6 +358,9 @@
       for (const e of items) {
         const sev = e.severity || 'info';
         const color = severityColor(sev);
+        const isHms = e.code && e.code.startsWith('HMS_');
+        const hmsAttr = isHms ? e.code.replace('HMS_', '') : null;
+        const wikiUrl = isHms ? `https://wiki.bambulab.com/en/x1/troubleshooting/hmscode/${hmsAttr.replace(/-/g, '_')}` : null;
         html += `<div class="error-card" style="--error-color:${color}">
           <div class="error-card-icon" style="color:${color}">${severityIcon(sev)}</div>
           <div class="error-card-body">
@@ -368,6 +371,10 @@
             <div class="error-card-meta">
               <span class="printer-tag">${esc(printerName(e.printer_id))}</span>
               ${e.code ? `<span class="error-code">${esc(e.code)}</span>` : ''}
+              ${wikiUrl ? `<a href="${wikiUrl}" target="_blank" rel="noopener" class="error-wiki-link" title="${t('errors.hms_wiki_link')}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                ${t('errors.hms_wiki_link')}
+              </a>` : ''}
               <span class="error-card-time">${formatDate(e.timestamp)}</span>
             </div>
           </div>

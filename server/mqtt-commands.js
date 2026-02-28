@@ -39,6 +39,10 @@ export function buildGcodeCommand(gcode) {
   return { print: { sequence_id: nextSeq(), command: 'gcode_line', param: gcode } };
 }
 
+export function buildSkipObjectsCommand(objList) {
+  return { print: { sequence_id: nextSeq(), command: 'skip_objects', obj_list: objList } };
+}
+
 export function buildCommandFromClientMessage(msg) {
   switch (msg.action) {
     case 'pause': return buildPauseCommand();
@@ -47,6 +51,7 @@ export function buildCommandFromClientMessage(msg) {
     case 'speed': return buildSpeedCommand(msg.value);
     case 'light': return buildLightCommand(msg.node || 'chamber_light', msg.mode || 'on');
     case 'gcode': return buildGcodeCommand(msg.gcode);
+    case 'skip_objects': return msg.obj_list ? buildSkipObjectsCommand(msg.obj_list) : null;
     default: return null;
   }
 }

@@ -91,7 +91,10 @@
     "spool_singular": "스풀",
     "spool_plural": "스풀",
     "used_g": "사용량 (g)",
-    "drop_here": "스풀을 여기에 놓으세요"
+    "drop_here": "스풀을 여기에 놓으세요",
+    "spoolman_title": "Spoolman Spools",
+    "spoolman_not_configured": "Spoolman not configured. Enable in Settings.",
+    "spoolman_empty": "No spools found in Spoolman."
   },
   "controls": {
     "title": "제어",
@@ -125,7 +128,12 @@
     "extrude": "압출",
     "retract": "후퇴",
     "ai_spaghetti": "스파게티 AI",
-    "ai_first_layer": "첫 번째 레이어"
+    "ai_first_layer": "첫 번째 레이어",
+    "objects_title": "Objects",
+    "skip_object": "Skip",
+    "object_skipped": "Skipped",
+    "no_objects": "No object info available",
+    "skip_confirm": "Skip this object? It cannot be undone."
   },
   "speed": {
     "label": "속도:",
@@ -244,7 +252,9 @@
     "search_placeholder": "오류 검색...",
     "no_match": "필터에 일치하는 오류가 없습니다.",
     "just_now": "방금",
-    "unknown_error": "알 수 없는 오류"
+    "unknown_error": "알 수 없는 오류",
+    "hms_wiki_link": "View on Bambu Wiki",
+    "hms_unknown": "Unknown HMS code"
   },
   "settings": {
     "printers_title": "프린터",
@@ -283,7 +293,30 @@
     "demo_confirm": "모든 데모 프린터와 관련 데이터(기록, 오류, 필라멘트, 텔레메트리)를 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
     "notif_log_title": "알림 로그",
     "notif_log_empty": "아직 전송된 알림이 없습니다.",
-    "notif_log_failed": "알림 로그를 불러올 수 없습니다."
+    "notif_log_failed": "알림 로그를 불러올 수 없습니다.",
+    "tab_appearance": "Appearance",
+    "theme_title": "Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_auto": "Auto (System)",
+    "theme_accent": "Accent Color",
+    "theme_accent_reset": "Reset to default",
+    "theme_radius": "Corner Roundness",
+    "theme_radius_sharp": "Sharp",
+    "theme_radius_round": "Round",
+    "theme_reset": "Reset All",
+    "theme_reset_confirm": "Reset theme to defaults?",
+    "spoolman_title": "Spoolman",
+    "spoolman_description": "Connect to an external Spoolman server to sync filament inventory.",
+    "spoolman_enable": "Enable Spoolman integration",
+    "spoolman_url": "Spoolman URL",
+    "spoolman_url_placeholder": "http://spoolman:7912",
+    "spoolman_test": "Test Connection",
+    "spoolman_test_ok": "Connected!",
+    "spoolman_test_fail": "Connection failed",
+    "obs_title": "OBS Streaming Overlay",
+    "obs_description": "Use this URL as a Browser Source in OBS to show camera + print info.",
+    "obs_params": "Params: ?printer=ID &bg=transparent &compact &hide_idle &no_camera"
   },
   "notify": {
     "print": "인쇄",

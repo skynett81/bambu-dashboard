@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="/js/theme.js"></script>
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/responsive.css">
@@ -64,6 +65,10 @@
           <span data-i18n-key="protection.title">Print Guard</span>
           <span id="protection-badge" style="display:none;background:var(--accent-red);color:#fff;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:auto;"></span>
         </button>
+        <button class="sidebar-btn" data-panel="modelinfo" onclick="openPanel('modelinfo')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0022 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          <span data-i18n-key="tabs.model_info">Modell Info</span>
+        </button>
         <button class="sidebar-btn" data-panel="settings" onclick="openPanel('settings')">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
           <span data-i18n-key="tabs.settings">Innstillinger</span>
@@ -104,20 +109,17 @@
           <svg class="lock-icon lock-closed" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
           <svg class="lock-icon lock-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>
         </button>
+        <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="theme.toggle()" title="Toggle theme">
+          <svg class="theme-icon theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="theme-icon theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
         <span id="update-badge" class="badge badge-update" style="display:none" onclick="openPanel('settings')" title="Update available">!</span>
         <span id="connection-badge" class="badge badge-disconnected" data-i18n-key="header.connecting">Kobler til...</span>
       </header>
 
       <!-- Grafana-style Live Stats Strip -->
       <section class="stats-strip" id="stats-strip">
-        <div class="strip-speed">
-          <div class="speed-buttons" id="speed-buttons">
-            <button class="speed-btn" data-level="1" onclick="sendCommand('speed', {value:1})" data-i18n-key="speed.silent">Stille</button>
-            <button class="speed-btn active" data-level="2" onclick="sendCommand('speed', {value:2})" data-i18n-key="speed.standard">Standard</button>
-            <button class="speed-btn" data-level="3" onclick="sendCommand('speed', {value:3})" data-i18n-key="speed.sport">Sport</button>
-            <button class="speed-btn" data-level="4" onclick="sendCommand('speed', {value:4})" data-i18n-key="speed.ludicrous">Vanvidd</button>
-          </div>
-        </div>
+        <div class="strip-speed" id="strip-speed"></div>
         <div class="spark-panel" id="spark-nozzle">
           <div class="spark-header">
             <span class="spark-label" data-i18n-key="temperature.nozzle">Dyse</span>
@@ -222,7 +224,6 @@
             <div class="hud-top">
               <span class="hud-file" id="hud-file">--</span>
               <span class="hud-state" id="hud-state"></span>
-              <div class="makerworld-info" id="makerworld-info" style="display:none"></div>
             </div>
             <div class="hud-bottom">
               <div class="hud-ring-wrap">
@@ -245,6 +246,8 @@
             <span id="progress-state"></span>
             <span id="progress-time">--</span>
           </div>
+          <!-- Model metadata bar (dimensions, weight, slice info) -->
+          <div class="model-meta-bar" id="model-meta-bar" style="display:none"></div>
         </div>
 
         <div class="card" id="camera-card">
@@ -269,6 +272,10 @@
             <div class="ams-slot ams-empty"><div class="ams-slot-inner">--</div></div>
           </div>
         </div>
+
+        <!-- MakerWorld info — compact, under 3D preview, beside temperatures -->
+        <!-- Model Info strip (MakerWorld / Printables / Thingiverse) -->
+        <div class="model-info-strip" id="model-info" style="display:none"></div>
 
         <div class="card" id="temp-card">
           <div class="card-title" data-i18n-key="temperature.title">Temperaturer</div>
@@ -386,6 +393,7 @@
   <script src="/js/components/settings-dialog.js"></script>
   <script src="/js/components/update-panel.js"></script>
   <script src="/js/components/model-viewer.js"></script>
+  <script src="/js/components/model-info-panel.js"></script>
   <script src="/js/components/print-preview.js"></script>
   <script src="/js/components/quick-status.js"></script>
   <script src="/js/components/dashboard-dnd.js"></script>

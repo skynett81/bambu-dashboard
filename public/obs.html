@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bambu Dashboard — OBS Overlay</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: transparent;
+      --bg-overlay: rgba(0, 0, 0, 0.65);
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+      --text-muted: #888888;
+      --accent-green: #00AE42;
+      --accent-red: #e53935;
+      --accent-orange: #f0883e;
+      --radius: 10px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+    .obs-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+    .obs-camera {
+      flex: 1;
+      position: relative;
+      background: #000;
+      min-height: 0;
+    }
+    .obs-camera canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+    .obs-camera-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .obs-hud {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      padding: 40px 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .obs-hud-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .obs-filename {
+      font-size: 1rem;
+      font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+    }
+    .obs-state {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .obs-state-running { background: var(--accent-green); color: #fff; }
+    .obs-state-pause { background: var(--accent-orange); color: #fff; }
+    .obs-state-idle { background: rgba(255,255,255,0.15); color: var(--text-secondary); }
+    .obs-state-finish { background: var(--accent-green); color: #fff; }
+    .obs-state-failed { background: var(--accent-red); color: #fff; }
+    .obs-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .obs-progress-fill {
+      height: 100%;
+      background: var(--accent-green);
+      border-radius: 3px;
+      transition: width 1s ease;
+    }
+    .obs-hud-bottom {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+    }
+    .obs-metric {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .obs-metric svg { opacity: 0.6; }
+    .obs-metric-value { color: var(--text-primary); font-weight: 500; }
+    .obs-pct {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--accent-green);
+      min-width: 48px;
+      text-align: right;
+    }
+    /* Compact mode */
+    body.compact .obs-hud { padding: 20px 12px 10px; gap: 5px; }
+    body.compact .obs-filename { font-size: 0.85rem; }
+    body.compact .obs-hud-bottom { font-size: 0.7rem; gap: 10px; }
+    body.compact .obs-pct { font-size: 1rem; }
+    body.compact .obs-progress-bar { height: 4px; }
+    /* No camera mode */
+    body.no-camera .obs-camera { display: none; }
+    body.no-camera .obs-hud {
+      position: relative;
+      background: var(--bg-overlay);
+      padding: 16px;
+    }
+    /* Hidden when idle */
+    .obs-hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="obs-container">
+    <div class="obs-camera" id="obs-camera">
+      <div class="obs-camera-placeholder" id="obs-camera-ph">Waiting for camera...</div>
+    </div>
+    <div class="obs-hud" id="obs-hud">
+      <div class="obs-hud-top">
+        <span class="obs-filename" id="obs-filename">--</span>
+        <span class="obs-state obs-state-idle" id="obs-state">IDLE</span>
+        <span class="obs-pct" id="obs-pct">0%</span>
+      </div>
+      <div class="obs-progress-bar">
+        <div class="obs-progress-fill" id="obs-progress" style="width:0%"></div>
+      </div>
+      <div class="obs-hud-bottom">
+        <span class="obs-metric">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+          <span id="obs-nozzle" class="obs-metric-value">--</span>
+        </span>
+        <span class="obs-metric">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="14" width="20" height="6" rx="1"/></svg>
+          <span id="obs-bed" class="obs-metric-value">--</span>
+        </span>
+        <span class="obs-metric">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+          <span id="obs-layer" class="obs-metric-value">--</span>
+        </span>
+        <span class="obs-metric">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="obs-eta" class="obs-metric-value">--</span>
+        </span>
+        <span class="obs-metric">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span id="obs-speed" class="obs-metric-value">--</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/lib/jsmpeg.min.js"></script>
+  <script>
+  (function() {
+    const params = new URLSearchParams(location.search);
+    const targetPrinter = params.get('printer');
+    const bgMode = params.get('bg');
+    const compact = params.has('compact');
+    const hideIdle = params.has('hide_idle');
+    const noCamera = params.has('no_camera');
+
+    if (bgMode === 'transparent') document.body.style.background = 'transparent';
+    else if (bgMode) document.body.style.background = bgMode;
+    if (compact) document.body.classList.add('compact');
+    if (noCamera) document.body.classList.add('no-camera');
+
+    // Apply saved theme accent
+    try {
+      const cfg = JSON.parse(localStorage.getItem('bambu-theme'));
+      if (cfg?.accentColor) {
+        document.documentElement.style.setProperty('--accent-green', cfg.accentColor);
+      }
+    } catch (_) {}
+
+    const els = {
+      filename: document.getElementById('obs-filename'),
+      state: document.getElementById('obs-state'),
+      pct: document.getElementById('obs-pct'),
+      progress: document.getElementById('obs-progress'),
+      nozzle: document.getElementById('obs-nozzle'),
+      bed: document.getElementById('obs-bed'),
+      layer: document.getElementById('obs-layer'),
+      eta: document.getElementById('obs-eta'),
+      speed: document.getElementById('obs-speed'),
+      hud: document.getElementById('obs-hud'),
+      camera: document.getElementById('obs-camera'),
+      cameraPh: document.getElementById('obs-camera-ph')
+    };
+
+    const SPEED_NAMES = { 1: 'Silent', 2: 'Standard', 3: 'Sport', 4: 'Ludicrous' };
+    const STATE_CLASSES = { RUNNING: 'obs-state-running', PAUSE: 'obs-state-pause', IDLE: 'obs-state-idle', FINISH: 'obs-state-finish', FAILED: 'obs-state-failed' };
+
+    let cameraPlayer = null;
+    let cameraPort = null;
+    let printerMeta = {};
+    let activePrinterId = null;
+
+    function formatTime(minutes) {
+      if (!minutes || minutes <= 0) return '--';
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    }
+
+    function updateHud(data) {
+      if (!data) return;
+      const pd = data.print || data;
+      const state = pd.gcode_state || 'IDLE';
+      const isPrinting = state === 'RUNNING' || state === 'PAUSE';
+
+      if (hideIdle && !isPrinting) {
+        els.hud.classList.add('obs-hidden');
+        return;
+      }
+      els.hud.classList.remove('obs-hidden');
+
+      els.filename.textContent = pd.subtask_name || pd.gcode_file || '--';
+      els.state.textContent = state;
+      els.state.className = 'obs-state ' + (STATE_CLASSES[state] || 'obs-state-idle');
+
+      const pct = pd.mc_percent || 0;
+      els.pct.textContent = pct + '%';
+      els.progress.style.width = pct + '%';
+
+      els.nozzle.textContent = pd.nozzle_temper != null ? Math.round(pd.nozzle_temper) + '°C' : '--';
+      els.bed.textContent = pd.bed_temper != null ? Math.round(pd.bed_temper) + '°C' : '--';
+
+      const layer = pd.layer_num || 0;
+      const totalLayers = pd.total_layer_num || 0;
+      els.layer.textContent = totalLayers > 0 ? `${layer}/${totalLayers}` : '--';
+
+      els.eta.textContent = formatTime(pd.mc_remaining_time);
+      els.speed.textContent = SPEED_NAMES[pd.spd_lvl] || `${pd.spd_mag || 100}%`;
+    }
+
+    function initCamera(port) {
+      if (!port || port === cameraPort) return;
+      cameraPort = port;
+
+      if (noCamera) return;
+      if (typeof JSMpeg === 'undefined') return;
+
+      if (cameraPlayer) {
+        try { cameraPlayer.destroy(); } catch (_) {}
+        cameraPlayer = null;
+      }
+
+      const wsUrl = `ws://${location.hostname}:${port}`;
+      const probe = new WebSocket(wsUrl);
+      const timeout = setTimeout(() => probe.close(), 3000);
+
+      probe.onopen = () => {
+        clearTimeout(timeout);
+        probe.close();
+        els.cameraPh.style.display = 'none';
+        const canvas = document.createElement('canvas');
+        els.camera.appendChild(canvas);
+        cameraPlayer = new JSMpeg.Player(wsUrl, {
+          canvas,
+          autoplay: true,
+          audio: false,
+          loop: false,
+          onSourceCompleted: () => {
+            els.cameraPh.style.display = '';
+            els.cameraPh.textContent = 'Stream ended';
+          }
+        });
+      };
+      probe.onerror = () => clearTimeout(timeout);
+    }
+
+    // WebSocket connection
+    let ws = null;
+    let reconnectDelay = 1000;
+
+    function connect() {
+      const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${protocol}//${location.host}/ws`);
+
+      ws.onopen = () => { reconnectDelay = 1000; };
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+
+          if (msg.type === 'init' && msg.data) {
+            printerMeta = msg.data.printers || {};
+            const states = msg.data.states || {};
+
+            // Find target printer
+            if (targetPrinter) {
+              activePrinterId = targetPrinter;
+            } else {
+              // Use first printer
+              activePrinterId = Object.keys(printerMeta)[0] || null;
+            }
+
+            if (activePrinterId && states[activePrinterId]) {
+              updateHud(states[activePrinterId]);
+              const meta = printerMeta[activePrinterId];
+              if (meta?.cameraPort) initCamera(meta.cameraPort);
+            }
+            return;
+          }
+
+          if (msg.type === 'printer_meta_update' && msg.data) {
+            const printers = msg.data.printers || [];
+            printerMeta = {};
+            for (const p of printers) printerMeta[p.id] = p;
+            const meta = activePrinterId ? printerMeta[activePrinterId] : null;
+            if (meta?.cameraPort) initCamera(meta.cameraPort);
+            return;
+          }
+
+          if (msg.type === 'status' && msg.data) {
+            const id = msg.data.printer_id;
+            if (id === activePrinterId) {
+              updateHud(msg.data);
+              // Init camera if not yet done
+              const meta = printerMeta[activePrinterId];
+              if (meta?.cameraPort && !cameraPort) initCamera(meta.cameraPort);
+            }
+          }
+        } catch (_) {}
+      };
+
+      ws.onclose = () => {
+        setTimeout(connect, reconnectDelay);
+        reconnectDelay = Math.min(reconnectDelay * 2, 10000);
+      };
+
+      ws.onerror = () => ws.close();
+    }
+
+    connect();
+  })();
+  </script>
+</body>
+</html>

@@ -170,6 +170,8 @@ function _runMigrations() {
     { version: 10, up: _mig010_update_history },
     { version: 11, up: _mig011_protection },
     { version: 12, up: _mig012_sensor_guards },
+    { version: 13, up: _mig013_model_links },
+    { version: 14, up: _mig014_model_links_metadata },
   ];
 
   for (const m of migrations) {
@@ -386,6 +388,37 @@ function _mig012_sensor_guards() {
   ];
   for (const [col, type] of cols) {
     try { db.exec(`ALTER TABLE protection_settings ADD COLUMN ${col} ${type}`); } catch (e) { /* exists */ }
+  }
+}
+
+function _mig013_model_links() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS model_links (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      printer_id TEXT,
+      filename TEXT NOT NULL,
+      source TEXT NOT NULL,
+      source_id TEXT NOT NULL,
+      title TEXT,
+      url TEXT,
+      image TEXT,
+      designer TEXT,
+      linked_at TEXT DEFAULT (datetime('now')),
+      UNIQUE(printer_id, filename)
+    );
+    CREATE INDEX IF NOT EXISTS idx_model_links_printer ON model_links(printer_id);
+    CREATE INDEX IF NOT EXISTS idx_model_links_filename ON model_links(filename);
+  `);
+}
+
+function _mig014_model_links_metadata() {
+  const cols = [
+    ['description', 'TEXT'],
+    ['category', 'TEXT'],
+    ['print_settings', 'TEXT']
+  ];
+  for (const [col, type] of cols) {
+    try { db.exec(`ALTER TABLE model_links ADD COLUMN ${col} ${type}`); } catch (e) { /* exists */ }
   }
 }
 
@@ -1133,4 +1166,40 @@ export function getActiveAlerts(printerId) {
     return db.prepare('SELECT * FROM protection_log WHERE printer_id = ? AND resolved = 0 ORDER BY timestamp DESC').all(printerId);
   }
   return db.prepare('SELECT * FROM protection_log WHERE resolved = 0 ORDER BY timestamp DESC').all();
+}
+
+// ---- Model Links ----
+
+export function getModelLink(printerId, filename) {
+  return db.prepare('SELECT * FROM model_links WHERE printer_id = ? AND filename = ?').get(printerId, filename);
+}
+
+export function setModelLink(link) {
+  return db.prepare(`INSERT INTO model_links (printer_id, filename, source, source_id, title, url, image, designer, description, category, print_settings)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(printer_id, filename) DO UPDATE SET
+      source = excluded.source,
+      source_id = excluded.source_id,
+      title = excluded.title,
+      url = excluded.url,
+      image = excluded.image,
+      designer = excluded.designer,
+      description = excluded.description,
+      category = excluded.category,
+      print_settings = excluded.print_settings,
+      linked_at = datetime('now')
+  `).run(
+    link.printer_id, link.filename, link.source, link.source_id,
+    link.title || null, link.url || null, link.image || null, link.designer || null,
+    link.description || null, link.category || null,
+    link.print_settings ? (typeof link.print_settings === 'string' ? link.print_settings : JSON.stringify(link.print_settings)) : null
+  );
+}
+
+export function deleteModelLink(printerId, filename) {
+  return db.prepare('DELETE FROM model_links WHERE printer_id = ? AND filename = ?').run(printerId, filename);
+}
+
+export function getRecentModelLinks(limit = 10) {
+  return db.prepare('SELECT * FROM model_links ORDER BY linked_at DESC LIMIT ?').all(limit);
 }

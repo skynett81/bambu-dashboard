@@ -91,7 +91,10 @@
     "spool_singular": "bobina",
     "spool_plural": "bobine",
     "used_g": "Usato (g)",
-    "drop_here": "Rilascia le bobine qui"
+    "drop_here": "Rilascia le bobine qui",
+    "spoolman_title": "Spoolman Spools",
+    "spoolman_not_configured": "Spoolman not configured. Enable in Settings.",
+    "spoolman_empty": "No spools found in Spoolman."
   },
   "controls": {
     "title": "Controlli",
@@ -125,7 +128,12 @@
     "extrude": "Estrudi",
     "retract": "Ritrai",
     "ai_spaghetti": "IA Spaghetti",
-    "ai_first_layer": "Primo strato"
+    "ai_first_layer": "Primo strato",
+    "objects_title": "Objects",
+    "skip_object": "Skip",
+    "object_skipped": "Skipped",
+    "no_objects": "No object info available",
+    "skip_confirm": "Skip this object? It cannot be undone."
   },
   "speed": {
     "label": "Velocità:",
@@ -244,7 +252,9 @@
     "search_placeholder": "Cerca errori...",
     "no_match": "Nessun errore corrispondente al filtro.",
     "just_now": "adesso",
-    "unknown_error": "Errore sconosciuto"
+    "unknown_error": "Errore sconosciuto",
+    "hms_wiki_link": "View on Bambu Wiki",
+    "hms_unknown": "Unknown HMS code"
   },
   "settings": {
     "printers_title": "Stampanti",
@@ -283,7 +293,30 @@
     "demo_confirm": "Eliminare tutte le stampanti demo e i dati associati (cronologia, errori, filamento, telemetria)? Questa azione non può essere annullata.",
     "notif_log_title": "Registro notifiche",
     "notif_log_empty": "Nessuna notifica inviata finora.",
-    "notif_log_failed": "Impossibile caricare il registro delle notifiche."
+    "notif_log_failed": "Impossibile caricare il registro delle notifiche.",
+    "tab_appearance": "Appearance",
+    "theme_title": "Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_auto": "Auto (System)",
+    "theme_accent": "Accent Color",
+    "theme_accent_reset": "Reset to default",
+    "theme_radius": "Corner Roundness",
+    "theme_radius_sharp": "Sharp",
+    "theme_radius_round": "Round",
+    "theme_reset": "Reset All",
+    "theme_reset_confirm": "Reset theme to defaults?",
+    "spoolman_title": "Spoolman",
+    "spoolman_description": "Connect to an external Spoolman server to sync filament inventory.",
+    "spoolman_enable": "Enable Spoolman integration",
+    "spoolman_url": "Spoolman URL",
+    "spoolman_url_placeholder": "http://spoolman:7912",
+    "spoolman_test": "Test Connection",
+    "spoolman_test_ok": "Connected!",
+    "spoolman_test_fail": "Connection failed",
+    "obs_title": "OBS Streaming Overlay",
+    "obs_description": "Use this URL as a Browser Source in OBS to show camera + print info.",
+    "obs_params": "Params: ?printer=ID &bg=transparent &compact &hide_idle &no_camera"
   },
   "notify": {
     "print": "Stampa",

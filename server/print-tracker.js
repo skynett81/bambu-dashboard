@@ -1,4 +1,29 @@
 import { addHistory, addError, addAmsSnapshot, getActiveNozzleSession, createNozzleSession, retireNozzleSession, updateNozzleSessionCounters, upsertComponentWear, upsertAmsTrayLifetime, updateAmsTrayFilamentUsed } from './database.js';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+let HMS_CODES = {};
+try { HMS_CODES = JSON.parse(readFileSync(join(__dirname, 'hms-codes.json'), 'utf8')); } catch (_) {}
+
+export function lookupHmsCode(attr) {
+  if (!attr) return null;
+  // Try direct lookup (e.g. "0300_8010")
+  const clean = String(attr).replace(/-/g, '_');
+  if (HMS_CODES[clean]) return HMS_CODES[clean];
+  // Try with leading zeros stripped
+  const short = clean.replace(/^0+/, '');
+  for (const [key, val] of Object.entries(HMS_CODES)) {
+    if (key.replace(/^0+/, '') === short) return val;
+  }
+  return null;
+}
+
+export function getHmsWikiUrl(attr) {
+  const code = String(attr).replace(/-/g, '_');
+  return `https://wiki.bambulab.com/en/x1/troubleshooting/hmscode/${code}`;
+}
 
 const ABRASIVE_TYPES = ['PA-CF', 'PA-GF', 'PET-CF', 'PLA-CF', 'PAHT-CF', 'PA6-CF', 'PA6-GF', 'PPA-CF', 'PPA-GF'];
 
@@ -79,15 +104,18 @@ export class PrintTracker {
           if (!this._seenHms) this._seenHms = new Set();
           this._seenHms.add(hms.attr);
           const hmsSeverity = hms.code >= 0x0C000000 ? 'error' : 'warning';
-          const hmsMsg = hms.msg || `HMS advarsel: ${hms.attr}`;
+          const description = lookupHmsCode(hms.attr);
+          const wikiUrl = getHmsWikiUrl(hms.attr);
+          const hmsMsg = description || hms.msg || `HMS: ${hms.attr}`;
           addError({
             printer_id: this.printerId,
             code: `HMS_${hms.attr}`,
             message: hmsMsg,
-            severity: hmsSeverity
+            severity: hmsSeverity,
+            wiki_url: wikiUrl
           });
           if (this.onError) {
-            this.onError({ printerId: this.printerId, code: `HMS_${hms.attr}`, errorMessage: hmsMsg, severity: hmsSeverity });
+            this.onError({ printerId: this.printerId, code: `HMS_${hms.attr}`, errorMessage: hmsMsg, severity: hmsSeverity, wikiUrl });
           }
         }
       }

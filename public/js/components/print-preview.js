@@ -11,9 +11,6 @@
   let _lastColor = null;
 
   // MakerWorld tracking
-  let _currentProjectId = '';
-  let _makerWorldData = null;
-  let _mwFetching = false;
   let _usingMwImage = false;
 
   const STATE_TEXT = {
@@ -22,8 +19,8 @@
   };
 
   const STATE_COLORS = {
-    IDLE: '#c0c8d2', RUNNING: '#00e676', PAUSE: '#f0883e',
-    FINISH: '#58a6ff', FAILED: '#f85149', PREPARE: '#e3b341', HEATING: '#e3b341'
+    IDLE: '#c0c8d8', RUNNING: '#00e676', PAUSE: '#f0883e',
+    FINISH: '#1279ff', FAILED: '#ff5252', PREPARE: '#e3b341', HEATING: '#e3b341'
   };
 
   // Convert RRGGBBAA hex string to [r, g, b] in 0-1 range for WebGL
@@ -89,6 +86,8 @@
       _layerColors = [];
       _lastTrackedLayer = -1;
       _lastColor = null;
+      // Hide model metadata
+      renderModelMeta(null, null);
       return;
     }
 
@@ -169,6 +168,10 @@
             if (revealImg) revealImg.style.clipPath = `inset(${clipTop}% 0 0 0)`;
             if (edge) edge.style.bottom = pct + '%';
             if (mwContainer) mwContainer.style.display = '';
+            // Fetch model metadata in background (for slice info bar)
+            fetch(`/api/model/${printerId}`).then(r => r.ok ? r.json() : null)
+              .then(m => { if (m) renderModelMeta(m.meta, m.sliceInfo); })
+              .catch(() => {});
             // Handle image load failure
             if (bgImg) bgImg.onerror = () => {
               if (mwContainer) mwContainer.style.display = 'none';
@@ -217,9 +220,12 @@
         } else {
           _viewer.setProgress(0);
         }
+        // Show model metadata bar
+        renderModelMeta(model.meta, model.sliceInfo);
       })
       .catch(() => {
         canvas.style.display = 'none';
+        renderModelMeta(null, null);
       })
       .finally(() => {
         _fetching = false;
@@ -296,9 +302,9 @@
     const hudPct = document.getElementById('hud-pct');
     const hudLayers = document.getElementById('progress-layers');
 
-    // Update prepare overlay and MakerWorld info
+    // Update prepare overlay and model info strip
     updatePrepareOverlay(data, state);
-    updateMakerWorldInfo(data, isActive);
+    if (typeof window.updateModelInfo === 'function') window.updateModelInfo(data, isActive);
 
     // File name
     if (hudFile) {
@@ -311,7 +317,7 @@
       const key = STATE_TEXT[state];
       const label = key ? t(`state.${key}`) : state;
       hudState.textContent = label;
-      hudState.style.color = STATE_COLORS[state] || '#c0c8d2';
+      hudState.style.color = STATE_COLORS[state] || '#c0c8d8';
       hudState.style.background = isActive ? 'rgba(0,0,0,0.4)' : '';
     }
 
@@ -332,6 +338,72 @@
     }
   }
 
+  // ---- Model metadata bar ----
+
+  function renderModelMeta(meta, sliceInfo) {
+    const bar = document.getElementById('model-meta-bar');
+    if (!bar) return;
+
+    if (!meta && !sliceInfo) {
+      bar.style.display = 'none';
+      return;
+    }
+
+    const chips = [];
+
+    // Dimensions
+    if (meta?.dimensions) {
+      const d = meta.dimensions;
+      chips.push(`<span class="mm-chip" title="${t('model_meta.dimensions')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0022 16z"/></svg> ${d.x}\u00D7${d.y}\u00D7${d.z} mm</span>`);
+    }
+
+    // Triangle count
+    if (meta?.triangleCount) {
+      const tc = meta.triangleCount >= 1000 ? (meta.triangleCount / 1000).toFixed(1) + 'k' : meta.triangleCount;
+      chips.push(`<span class="mm-chip" title="${t('model_meta.triangles')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 22 20 2 20"/></svg> ${tc}</span>`);
+    }
+
+    // Volume
+    if (meta?.volume) {
+      const vol = meta.volume >= 1000 ? (meta.volume / 1000).toFixed(1) + ' cm\u00B3' : meta.volume + ' mm\u00B3';
+      chips.push(`<span class="mm-chip" title="${t('model_meta.volume')}">${vol}</span>`);
+    }
+
+    // Slice info
+    if (sliceInfo) {
+      if (sliceInfo.layer_height) {
+        chips.push(`<span class="mm-chip" title="${t('model_meta.layer_height')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg> ${sliceInfo.layer_height} mm</span>`);
+      }
+      if (sliceInfo.infill_density) {
+        chips.push(`<span class="mm-chip" title="${t('model_meta.infill')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg> ${sliceInfo.infill_density}${sliceInfo.infill_density.includes('%') ? '' : '%'}</span>`);
+      }
+      if (sliceInfo.filament_type) {
+        chips.push(`<span class="mm-chip mm-chip-accent" title="${t('model_meta.filament')}">${esc(sliceInfo.filament_type)}</span>`);
+      }
+      if (sliceInfo.estimated_weight_g) {
+        chips.push(`<span class="mm-chip" title="${t('model_meta.est_weight')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a4 4 0 00-4 4c0 2 4 4 4 4s4-2 4-4a4 4 0 00-4-4z"/><path d="M5 12h14l-1.5 9h-11z"/></svg> ${sliceInfo.estimated_weight_g}g</span>`);
+      }
+      if (sliceInfo.estimated_time_s) {
+        const mins = Math.round(sliceInfo.estimated_time_s / 60);
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        const timeStr = h > 0 ? `${h}h ${m}m` : `${m}m`;
+        chips.push(`<span class="mm-chip" title="${t('model_meta.est_time')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${timeStr}</span>`);
+      }
+      if (sliceInfo.support_type && sliceInfo.support_type !== 'none') {
+        chips.push(`<span class="mm-chip" title="${t('model_meta.supports')}">SUP: ${esc(sliceInfo.support_type)}</span>`);
+      }
+    }
+
+    if (chips.length === 0) {
+      bar.style.display = 'none';
+      return;
+    }
+
+    bar.style.display = '';
+    bar.innerHTML = chips.join('');
+  }
+
   // ---- Model loading indicator ----
 
   function updateModelLoadingState(loading) {
@@ -348,79 +420,4 @@
     }
   }
 
-  // ---- MakerWorld integration ----
-
-  function updateMakerWorldInfo(data, isActive) {
-    const mwEl = document.getElementById('makerworld-info');
-    if (!mwEl) return;
-
-    if (!isActive) {
-      mwEl.style.display = 'none';
-      _currentProjectId = '';
-      _makerWorldData = null;
-      return;
-    }
-
-    const projectId = data.project_id;
-    if (!projectId || projectId === '0') {
-      mwEl.style.display = 'none';
-      return;
-    }
-
-    // Already fetched for this ID
-    if (projectId === _currentProjectId && _makerWorldData !== null) {
-      return;
-    }
-
-    if (projectId !== _currentProjectId) {
-      _currentProjectId = projectId;
-      _makerWorldData = null;
-
-      if (_mwFetching) return;
-      _mwFetching = true;
-
-      mwEl.style.display = '';
-      mwEl.innerHTML = `<span class="mw-loading">${t('makerworld.loading')}</span>`;
-
-      fetch(`/api/makerworld/${projectId}`)
-        .then(r => r.ok ? r.json() : null)
-        .then(info => {
-          _makerWorldData = info || { fallback: true, url: `https://makerworld.com/en/models/${projectId}` };
-          renderMakerWorldInfo(mwEl, _makerWorldData, projectId);
-        })
-        .catch(() => {
-          _makerWorldData = { fallback: true, url: `https://makerworld.com/en/models/${projectId}` };
-          renderMakerWorldInfo(mwEl, _makerWorldData, projectId);
-        })
-        .finally(() => {
-          _mwFetching = false;
-        });
-    }
-  }
-
-  function renderMakerWorldInfo(el, info, projectId) {
-    if (!info) { el.style.display = 'none'; return; }
-
-    const mwUrl = info.url || `https://makerworld.com/en/models/${projectId}`;
-    const mwIcon = `<svg class="mw-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>`;
-
-    if (info.fallback || !info.title) {
-      el.innerHTML = `${mwIcon}<a class="mw-link" href="${esc(mwUrl)}" target="_blank" rel="noopener">${t('makerworld.view_on_mw')}</a>`;
-    } else {
-      let html = '';
-      if (info.image) {
-        html += `<img class="mw-thumb" src="${esc(info.image)}" alt="" onerror="this.style.display='none'">`;
-      }
-      html += `<div style="min-width:0;flex:1">`;
-      html += `<div class="mw-title">${esc(info.title)}</div>`;
-      const parts = [];
-      if (info.designer) parts.push(`${t('makerworld.by')} ${esc(info.designer)}`);
-      if (info.downloads > 0) parts.push(`${info.downloads} \u2B07`);
-      if (info.likes > 0) parts.push(`${info.likes} \u2764`);
-      if (parts.length) html += `<span class="mw-designer">${parts.join(' \u00B7 ')}</span>`;
-      html += `</div>`;
-      html += `<a class="mw-link" href="${esc(mwUrl)}" target="_blank" rel="noopener">${mwIcon}</a>`;
-      el.innerHTML = html;
-    }
-  }
 })();

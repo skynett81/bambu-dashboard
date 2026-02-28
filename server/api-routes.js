@@ -1,6 +1,7 @@
-import { getHistory, addHistory, getStatistics, getFilament, addFilament, updateFilament, deleteFilament, getErrors, getPrinters, addPrinter, updatePrinter, deletePrinter, addWaste, getWasteStats, getWasteHistory, getMaintenanceStatus, addMaintenanceEvent, getMaintenanceLog, getMaintenanceSchedule, upsertMaintenanceSchedule, getActiveNozzleSession, retireNozzleSession, createNozzleSession, getTelemetry, getComponentWear, getFirmwareHistory, getXcamEvents, getXcamStats, getAmsTrayLifetime, getDemoPrinterIds, purgeDemoData, getNotificationLog, getUpdateHistory } from './database.js';
+import { getHistory, addHistory, getStatistics, getFilament, addFilament, updateFilament, deleteFilament, getErrors, getPrinters, addPrinter, updatePrinter, deletePrinter, addWaste, getWasteStats, getWasteHistory, getMaintenanceStatus, addMaintenanceEvent, getMaintenanceLog, getMaintenanceSchedule, upsertMaintenanceSchedule, getActiveNozzleSession, retireNozzleSession, createNozzleSession, getTelemetry, getComponentWear, getFirmwareHistory, getXcamEvents, getXcamStats, getAmsTrayLifetime, getDemoPrinterIds, purgeDemoData, getNotificationLog, getUpdateHistory, getModelLink, setModelLink, deleteModelLink, getRecentModelLinks } from './database.js';
 import { saveConfig, config } from './config.js';
 import { getThumbnail, getModel } from './thumbnail-service.js';
+import { lookupHmsCode, getHmsWikiUrl } from './print-tracker.js';
 import https from 'node:https';
 import { isAuthEnabled, isMultiUser, validateCredentials, createSession, destroySession, getSessionToken, validateSession, hashPassword } from './auth.js';
 
@@ -609,6 +610,63 @@ export async function handleApiRequest(req, res) {
       return handleMakerWorldFetch(designId, res);
     }
 
+    // ---- Printables ----
+    const printablesMatch = path.match(/^\/api\/printables\/(\d+)$/);
+    if (printablesMatch && method === 'GET') {
+      return handlePrintablesFetch(printablesMatch[1], res);
+    }
+
+    // ---- Thingiverse ----
+    const thingiverseMatch = path.match(/^\/api\/thingiverse\/(\d+)$/);
+    if (thingiverseMatch && method === 'GET') {
+      return handleThingiverseFetch(thingiverseMatch[1], res);
+    }
+
+    // ---- Model Search ----
+    if (method === 'GET' && path === '/api/model-search') {
+      const q = url.searchParams.get('q');
+      const source = url.searchParams.get('source') || 'all';
+      if (!q || q.length < 2) return sendJson(res, { error: 'Query too short' }, 400);
+      return handleModelSearch(q, source, res);
+    }
+
+    // ---- Model Link CRUD ----
+    const mlMatch = path.match(/^\/api\/model-link\/([a-zA-Z0-9_-]+)$/);
+    if (mlMatch) {
+      const printerId = mlMatch[1];
+      const filename = url.searchParams.get('filename');
+
+      if (method === 'GET') {
+        if (!filename) return sendJson(res, { error: 'filename required' }, 400);
+        const link = getModelLink(printerId, filename);
+        if (link && link.print_settings && typeof link.print_settings === 'string') {
+          try { link.print_settings = JSON.parse(link.print_settings); } catch (_) {}
+        }
+        return sendJson(res, link || null);
+      }
+
+      if (method === 'PUT') {
+        return readBody(req, (body) => {
+          if (!body.filename || !body.source || !body.source_id) {
+            return sendJson(res, { error: 'filename, source, source_id required' }, 400);
+          }
+          setModelLink({ printer_id: printerId, ...body });
+          return sendJson(res, { ok: true });
+        });
+      }
+
+      if (method === 'DELETE') {
+        if (!filename) return sendJson(res, { error: 'filename required' }, 400);
+        deleteModelLink(printerId, filename);
+        return sendJson(res, { ok: true });
+      }
+    }
+
+    // ---- Recent Model Links ----
+    if (method === 'GET' && path === '/api/model-links/recent') {
+      return sendJson(res, getRecentModelLinks(20));
+    }
+
     // ---- 3D Model ----
     const modelMatch = path.match(/^\/api\/model\/([a-zA-Z0-9_-]+)$/);
     if (modelMatch && method === 'GET') {
@@ -646,6 +704,75 @@ export async function handleApiRequest(req, res) {
         res.end();
       }
       return;
+    }
+
+    // ---- HMS Codes ----
+    if (method === 'GET' && path === '/api/hms-codes') {
+      try {
+        const { readFileSync } = await import('node:fs');
+        const { fileURLToPath } = await import('node:url');
+        const { dirname, join } = await import('node:path');
+        const __dir = dirname(fileURLToPath(import.meta.url));
+        const codes = JSON.parse(readFileSync(join(__dir, 'hms-codes.json'), 'utf8'));
+        return sendJson(res, codes);
+      } catch { return sendJson(res, {}); }
+    }
+
+    const hmsMatch = path.match(/^\/api\/hms-codes\/([a-zA-Z0-9_-]+)$/);
+    if (hmsMatch && method === 'GET') {
+      const code = hmsMatch[1];
+      const description = lookupHmsCode(code);
+      const wikiUrl = getHmsWikiUrl(code);
+      return sendJson(res, { code, description: description || null, wiki_url: wikiUrl });
+    }
+
+    // ---- Spoolman ----
+    if (method === 'GET' && path === '/api/spoolman/spools') {
+      if (!config.spoolman?.enabled || !config.spoolman?.url) {
+        return sendJson(res, { error: 'Spoolman not configured' }, 400);
+      }
+      try {
+        const resp = await fetch(`${config.spoolman.url}/api/v1/spool`, { signal: AbortSignal.timeout(5000) });
+        const data = await resp.json();
+        return sendJson(res, data);
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+    }
+
+    if (method === 'POST' && path === '/api/spoolman/use') {
+      if (!config.spoolman?.enabled || !config.spoolman?.url) {
+        return sendJson(res, { error: 'Spoolman not configured' }, 400);
+      }
+      return readBody(req, async (body) => {
+        if (!body.id || !body.weight) return sendJson(res, { error: 'id and weight required' }, 400);
+        try {
+          const resp = await fetch(`${config.spoolman.url}/api/v1/spool/${body.id}/use`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ use_weight: body.weight }),
+            signal: AbortSignal.timeout(5000)
+          });
+          const data = await resp.json();
+          return sendJson(res, data);
+        } catch (e) { return sendJson(res, { error: e.message }, 502); }
+      });
+    }
+
+    if (method === 'GET' && path === '/api/spoolman/test') {
+      const testUrl = url.searchParams.get('url') || config.spoolman?.url;
+      if (!testUrl) return sendJson(res, { error: 'URL required' }, 400);
+      try {
+        const resp = await fetch(`${testUrl}/api/v1/info`, { signal: AbortSignal.timeout(5000) });
+        const data = await resp.json();
+        return sendJson(res, { ok: true, version: data.version || null });
+      } catch (e) { return sendJson(res, { ok: false, error: e.message }); }
+    }
+
+    if (method === 'PUT' && path === '/api/spoolman/config') {
+      return readBody(req, (body) => {
+        config.spoolman = { enabled: !!body.enabled, url: (body.url || '').replace(/\/+$/, '') };
+        saveConfig({ spoolman: config.spoolman });
+        return sendJson(res, { ok: true });
+      });
     }
 
     // 404
@@ -703,6 +830,18 @@ async function handleMakerWorldFetch(designId, res) {
     const json = await fetchJson(apiUrl, 5000);
     const creator = json.designCreator || {};
     const instance = (json.instances || [])[0] || {};
+
+    // Extract print settings from instance/profile data
+    const printSettings = {};
+    if (instance.printProfile) {
+      const pp = instance.printProfile;
+      if (pp.resolution) printSettings.resolution = pp.resolution;
+      if (pp.infill) printSettings.infill = pp.infill;
+      if (pp.supports != null) printSettings.supports = pp.supports ? 'Yes' : 'No';
+      if (pp.rafts != null) printSettings.rafts = pp.rafts ? 'Yes' : 'No';
+    }
+    if (json.filamentType) printSettings.filament = json.filamentType;
+
     const data = {
       title: json.titleTranslated || json.title || null,
       image: json.coverUrl || instance.cover || null,
@@ -713,6 +852,8 @@ async function handleMakerWorldFetch(designId, res) {
       likes: json.likeCount || 0,
       downloads: json.downloadCount || 0,
       prints: json.printCount || 0,
+      category: json.categoryName || json.tags?.[0] || null,
+      print_settings: Object.keys(printSettings).length ? printSettings : null,
       fallback: false
     };
     _mwCache.set(designId, { data, ts: Date.now() });
@@ -746,4 +887,262 @@ function fetchJson(url, timeout) {
     req.on('error', reject);
     req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
   });
+}
+
+function fetchHtml(url, timeout) {
+  return new Promise((resolve, reject) => {
+    const req = https.get(url, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BambuDashboard/1.0)', 'Accept': 'text/html' },
+      timeout
+    }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return fetchHtml(res.headers.location, timeout).then(resolve, reject);
+      }
+      if (res.statusCode !== 200) { res.resume(); reject(new Error(`HTTP ${res.statusCode}`)); return; }
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => resolve(data));
+      res.on('error', reject);
+    });
+    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
+  });
+}
+
+// ---- Printables proxy ----
+
+const _printablesCache = new Map();
+
+async function handlePrintablesFetch(id, res) {
+  const cached = _printablesCache.get(id);
+  if (cached && Date.now() - cached.ts < MW_CACHE_TTL) {
+    return sendJson(res, cached.data);
+  }
+
+  const url = `https://www.printables.com/model/${id}`;
+
+  try {
+    // Try scraping OG meta tags and structured data
+    const html = await fetchHtml(url, 8000);
+    const og = (name) => {
+      const m = html.match(new RegExp(`<meta\\s+property=["']og:${name}["']\\s+content=["']([^"']+)["']`, 'i'));
+      return m ? m[1] : null;
+    };
+    const title = og('title') || `Printables #${id}`;
+    const image = og('image') || null;
+    const description = og('description') || '';
+
+    // Try to extract designer from structured data
+    let designer = null;
+    const authorMatch = html.match(/"author"\s*:\s*\{\s*"@type"\s*:\s*"Person"\s*,\s*"name"\s*:\s*"([^"]+)"/);
+    if (authorMatch) designer = authorMatch[1];
+
+    // Try to extract category
+    let category = null;
+    const catMatch = html.match(/"category"\s*:\s*"([^"]+)"/i) || html.match(/class="[^"]*category[^"]*"[^>]*>([^<]+)/i);
+    if (catMatch) category = catMatch[1].trim();
+
+    // Try to extract print settings from structured data or page content
+    const printSettings = {};
+    const settingsPatterns = [
+      [/Printer\s*(?:Brand)?:\s*([^<\n]+)/i, 'printer'],
+      [/Rafts?:\s*(Yes|No|None|yes|no)/i, 'rafts'],
+      [/Supports?:\s*(Yes|No|None|yes|no|Everywhere|Touching)/i, 'supports'],
+      [/Resolution:\s*([\d.]+)/i, 'resolution'],
+      [/Infill:\s*([\d.]+)/i, 'infill'],
+      [/Filament[^:]*:\s*([^<\n]{2,60})/i, 'filament'],
+      [/Layer\s*Height:\s*([\d.]+)/i, 'layer_height'],
+    ];
+    for (const [regex, key] of settingsPatterns) {
+      const m = html.match(regex);
+      if (m) printSettings[key] = m[1].trim();
+    }
+
+    const data = {
+      title,
+      image,
+      description: description.substring(0, 500),
+      url,
+      designer,
+      likes: 0,
+      downloads: 0,
+      category,
+      print_settings: Object.keys(printSettings).length ? printSettings : null,
+      source: 'printables',
+      fallback: false
+    };
+
+    _printablesCache.set(id, { data, ts: Date.now() });
+    sendJson(res, data);
+  } catch {
+    const fallback = { url, source: 'printables', fallback: true };
+    _printablesCache.set(id, { data: fallback, ts: Date.now() });
+    sendJson(res, fallback);
+  }
+}
+
+// ---- Thingiverse proxy ----
+
+const _thingiverseCache = new Map();
+
+async function handleThingiverseFetch(id, res) {
+  const cached = _thingiverseCache.get(id);
+  if (cached && Date.now() - cached.ts < MW_CACHE_TTL) {
+    return sendJson(res, cached.data);
+  }
+
+  const url = `https://www.thingiverse.com/thing:${id}`;
+
+  try {
+    const apiUrl = `https://api.thingiverse.com/things/${id}`;
+    const headers = { 'Accept': 'application/json' };
+    if (process.env.THINGIVERSE_API_KEY) {
+      headers['Authorization'] = `Bearer ${process.env.THINGIVERSE_API_KEY}`;
+    }
+    const json = await fetchJson(apiUrl, 8000);
+
+    // Extract print settings from Thingiverse details
+    const printSettings = {};
+    if (json.details_parts) {
+      for (const part of (Array.isArray(json.details_parts) ? json.details_parts : [])) {
+        if (part.type === 'print_settings' && part.data) {
+          for (const [k, v] of Object.entries(part.data)) {
+            if (v) printSettings[k] = String(v);
+          }
+        }
+      }
+    }
+    // Common Thingiverse fields
+    if (json.print_settings) {
+      const ps = json.print_settings;
+      if (ps.printer_brand) printSettings.printer = ps.printer_brand;
+      if (ps.printer_model) printSettings.printer_model = ps.printer_model;
+      if (ps.rafts) printSettings.rafts = ps.rafts;
+      if (ps.supports) printSettings.supports = ps.supports;
+      if (ps.resolution) printSettings.resolution = ps.resolution;
+      if (ps.infill) printSettings.infill = ps.infill;
+      if (ps.filament_brand) printSettings.filament = `${ps.filament_brand} ${ps.filament_color || ''}`.trim();
+    }
+
+    const data = {
+      title: json.name || `Thingiverse #${id}`,
+      image: json.thumbnail || null,
+      description: (json.description || '').replace(/<[^>]*>/g, '').substring(0, 500),
+      url,
+      designer: json.creator?.name || null,
+      likes: json.like_count || 0,
+      downloads: json.download_count || 0,
+      category: json.category?.name || (json.tags?.[0]?.name) || null,
+      print_settings: Object.keys(printSettings).length ? printSettings : null,
+      source: 'thingiverse',
+      fallback: false
+    };
+    _thingiverseCache.set(id, { data, ts: Date.now() });
+    sendJson(res, data);
+  } catch {
+    // Fallback: scrape OG meta
+    try {
+      const html = await fetchHtml(url, 8000);
+      const og = (name) => {
+        const m = html.match(new RegExp(`<meta\\s+property=["']og:${name}["']\\s+content=["']([^"']+)["']`, 'i'));
+        return m ? m[1] : null;
+      };
+      const data = {
+        title: og('title') || `Thingiverse #${id}`,
+        image: og('image') || null,
+        url,
+        designer: null,
+        likes: 0,
+        downloads: 0,
+        source: 'thingiverse',
+        fallback: true
+      };
+      _thingiverseCache.set(id, { data, ts: Date.now() });
+      sendJson(res, data);
+    } catch {
+      const fallback = { url, source: 'thingiverse', fallback: true };
+      _thingiverseCache.set(id, { data: fallback, ts: Date.now() });
+      sendJson(res, fallback);
+    }
+  }
+}
+
+// ---- Model Search ----
+
+async function handleModelSearch(query, source, res) {
+  const encodedQuery = encodeURIComponent(query);
+  const searches = [];
+
+  if (source === 'all' || source === 'makerworld') {
+    searches.push(searchMakerWorld(encodedQuery).catch(() => []));
+  }
+  if (source === 'all' || source === 'printables') {
+    searches.push(searchPrintables(encodedQuery).catch(() => []));
+  }
+  if (source === 'all' || source === 'thingiverse') {
+    searches.push(searchThingiverse(encodedQuery).catch(() => []));
+  }
+
+  const results = (await Promise.all(searches)).flat();
+  sendJson(res, results);
+}
+
+async function searchMakerWorld(query) {
+  try {
+    const json = await fetchJson(`https://api.bambulab.com/v1/design-service/design/search?keyword=${query}&limit=5`, 8000);
+    const hits = json.hits || json.designs || [];
+    return hits.slice(0, 5).map(d => ({
+      source: 'makerworld',
+      source_id: String(d.id || d.designId),
+      title: d.titleTranslated || d.title || 'Untitled',
+      image: d.coverUrl || d.cover || null,
+      url: `https://makerworld.com/en/models/${d.id || d.designId}`,
+      designer: d.designCreator?.name || null,
+      likes: d.likeCount || 0,
+      downloads: d.downloadCount || 0
+    }));
+  } catch { return []; }
+}
+
+async function searchPrintables(query) {
+  try {
+    const html = await fetchHtml(`https://www.printables.com/search/models?q=${query}`, 8000);
+    const results = [];
+    const regex = /href="\/model\/(\d+)-([^"]+)"/g;
+    let match;
+    while ((match = regex.exec(html)) !== null && results.length < 5) {
+      const id = match[1];
+      const slug = match[2].replace(/-/g, ' ');
+      if (!results.find(r => r.source_id === id)) {
+        results.push({
+          source: 'printables',
+          source_id: id,
+          title: slug.charAt(0).toUpperCase() + slug.slice(1),
+          image: null,
+          url: `https://www.printables.com/model/${id}`,
+          designer: null,
+          likes: 0,
+          downloads: 0
+        });
+      }
+    }
+    return results;
+  } catch { return []; }
+}
+
+async function searchThingiverse(query) {
+  try {
+    const json = await fetchJson(`https://api.thingiverse.com/search/${query}?type=things&per_page=5`, 8000);
+    const hits = json.hits || [];
+    return hits.slice(0, 5).map(d => ({
+      source: 'thingiverse',
+      source_id: String(d.id),
+      title: d.name || 'Untitled',
+      image: d.thumbnail || null,
+      url: `https://www.thingiverse.com/thing:${d.id}`,
+      designer: d.creator?.name || null,
+      likes: d.like_count || 0,
+      downloads: d.download_count || 0
+    }));
+  } catch { return []; }
 }

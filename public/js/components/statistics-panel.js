@@ -8,7 +8,7 @@
   function sRow(lbl, val, clr) { return `<div class="stats-detail-item"><span class="stats-detail-item-label">${lbl}</span><span class="stats-detail-item-value"${clr?` style="color:${clr}"` : ''}>${val}</span></div>`; }
   function barRow(lbl, pct, clr, val) { return `<div class="chart-bar-row"><span class="chart-bar-label">${lbl}</span><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%;background:${clr}"></div></div><span class="chart-bar-value">${val}</span></div>`; }
 
-  const TYPE_COLORS = { 'PLA':'#00e676','PETG':'#f0883e','TPU':'#bc8cff','ABS':'#f85149','ASA':'#58a6ff','PA':'#e3b341','PLA+':'#00c853','PA-CF':'#d2a8ff','PET-CF':'#f778ba','PLA-CF':'#79c0ff','PC':'#8b949e' };
+  const TYPE_COLORS = { 'PLA':'#00e676','PETG':'#f0883e','TPU':'#9b4dff','ABS':'#ff5252','ASA':'#1279ff','PA':'#e3b341','PLA+':'#00c853','PA-CF':'#d2a8ff','PET-CF':'#f778ba','PLA-CF':'#79c0ff','PC':'#8b949e' };
   const SPEED_MAP = { 1:'speed.silent', 2:'speed.standard', 3:'speed.sport', 4:'speed.ludicrous' };
   const DAYS = ['stats.sun','stats.mon','stats.tue','stats.wed','stats.thu','stats.fri','stats.sat'];
 
@@ -150,7 +150,7 @@
       let h = `<div class="card-title">${t('stats.filament_by_type')}</div><div class="chart-bars">`;
       for (const f of s.filament_by_type) {
         const pct = mg > 0 ? (f.grams/mg)*100 : 0;
-        h += barRow(f.type, pct, TYPE_COLORS[f.type]||'#c0c8d2', `${fmtW(f.grams)} (${f.prints})`);
+        h += barRow(f.type, pct, TYPE_COLORS[f.type]||theme.getCSSVar('--text-muted'), `${fmtW(f.grams)} (${f.prints})`);
       }
       h += '</div>';
       return h;
@@ -235,10 +235,10 @@
     'temp-records': (s) => {
       if (!s.temp_stats || (s.temp_stats.peak_nozzle <= 0 && s.temp_stats.peak_bed <= 0)) return '';
       let h = `<div class="card-title">${t('stats.temperature_records')}</div><div class="stats-detail-list">`;
-      h += sRow(t('stats.peak_nozzle'), `${Math.round(s.temp_stats.peak_nozzle)}°C`, '#f85149');
-      h += sRow(t('stats.avg_nozzle'), `${Math.round(s.temp_stats.avg_nozzle)}°C`, '#f85149');
-      h += sRow(t('stats.peak_bed'), `${Math.round(s.temp_stats.peak_bed)}°C`, '#58a6ff');
-      h += sRow(t('stats.avg_bed'), `${Math.round(s.temp_stats.avg_bed)}°C`, '#58a6ff');
+      h += sRow(t('stats.peak_nozzle'), `${Math.round(s.temp_stats.peak_nozzle)}°C`, '#ff5252');
+      h += sRow(t('stats.avg_nozzle'), `${Math.round(s.temp_stats.avg_nozzle)}°C`, '#ff5252');
+      h += sRow(t('stats.peak_bed'), `${Math.round(s.temp_stats.peak_bed)}°C`, '#1279ff');
+      h += sRow(t('stats.avg_bed'), `${Math.round(s.temp_stats.avg_bed)}°C`, '#1279ff');
       h += '</div>';
       return h;
     },

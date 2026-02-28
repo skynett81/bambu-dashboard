@@ -91,7 +91,10 @@
     "spool_singular": "料卷",
     "spool_plural": "料卷",
     "used_g": "已用 (g)",
-    "drop_here": "将料卷拖放到这里"
+    "drop_here": "将料卷拖放到这里",
+    "spoolman_title": "Spoolman Spools",
+    "spoolman_not_configured": "Spoolman not configured. Enable in Settings.",
+    "spoolman_empty": "No spools found in Spoolman."
   },
   "controls": {
     "title": "控制",
@@ -125,7 +128,12 @@
     "extrude": "挤出",
     "retract": "回抽",
     "ai_spaghetti": "意面AI",
-    "ai_first_layer": "首层"
+    "ai_first_layer": "首层",
+    "objects_title": "Objects",
+    "skip_object": "Skip",
+    "object_skipped": "Skipped",
+    "no_objects": "No object info available",
+    "skip_confirm": "Skip this object? It cannot be undone."
   },
   "speed": {
     "label": "速度：",
@@ -243,7 +251,9 @@
     "search_placeholder": "搜索错误...",
     "no_match": "没有匹配筛选条件的错误。",
     "just_now": "刚刚",
-    "unknown_error": "未知错误"
+    "unknown_error": "未知错误",
+    "hms_wiki_link": "View on Bambu Wiki",
+    "hms_unknown": "Unknown HMS code"
   },
   "settings": {
     "printers_title": "打印机",
@@ -282,7 +292,30 @@
     "demo_confirm": "删除所有演示打印机及关联数据（历史、错误、耗材、遥测）？此操作无法撤销。",
     "notif_log_title": "通知日志",
     "notif_log_empty": "尚未发送任何通知。",
-    "notif_log_failed": "无法加载通知日志。"
+    "notif_log_failed": "无法加载通知日志。",
+    "tab_appearance": "Appearance",
+    "theme_title": "Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_auto": "Auto (System)",
+    "theme_accent": "Accent Color",
+    "theme_accent_reset": "Reset to default",
+    "theme_radius": "Corner Roundness",
+    "theme_radius_sharp": "Sharp",
+    "theme_radius_round": "Round",
+    "theme_reset": "Reset All",
+    "theme_reset_confirm": "Reset theme to defaults?",
+    "spoolman_title": "Spoolman",
+    "spoolman_description": "Connect to an external Spoolman server to sync filament inventory.",
+    "spoolman_enable": "Enable Spoolman integration",
+    "spoolman_url": "Spoolman URL",
+    "spoolman_url_placeholder": "http://spoolman:7912",
+    "spoolman_test": "Test Connection",
+    "spoolman_test_ok": "Connected!",
+    "spoolman_test_fail": "Connection failed",
+    "obs_title": "OBS Streaming Overlay",
+    "obs_description": "Use this URL as a Browser Source in OBS to show camera + print info.",
+    "obs_params": "Params: ?printer=ID &bg=transparent &compact &hide_idle &no_camera"
   },
   "notify": {
     "print": "打印",

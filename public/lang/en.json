@@ -119,7 +119,10 @@
     "total_invested": "Total invested",
     "total_used_value": "Used value",
     "most_expensive": "Most expensive type",
-    "avg_remaining": "Avg. remaining"
+    "avg_remaining": "Avg. remaining",
+    "spoolman_title": "Spoolman Spools",
+    "spoolman_not_configured": "Spoolman not configured. Enable in Settings.",
+    "spoolman_empty": "No spools found in Spoolman."
   },
   "controls": {
     "title": "Controls",
@@ -153,7 +156,12 @@
     "extrude": "Extrude",
     "retract": "Retract",
     "ai_spaghetti": "Spaghetti AI",
-    "ai_first_layer": "First Layer"
+    "ai_first_layer": "First Layer",
+    "objects_title": "Objects",
+    "skip_object": "Skip",
+    "object_skipped": "Skipped",
+    "no_objects": "No object info available",
+    "skip_confirm": "Skip this object? It cannot be undone."
   },
   "speed": {
     "label": "Speed:",
@@ -207,6 +215,7 @@
     "errors": "Error Log",
     "waste": "Poop",
     "maintenance": "Maintenance",
+    "model_info": "Model Info",
     "settings": "Settings"
   },
   "history": {
@@ -317,7 +326,9 @@
     "layout_unlocked": "Unlocked",
     "severity_breakdown": "Errors by severity",
     "printer_breakdown": "Errors by printer",
-    "common_errors": "Most common errors"
+    "common_errors": "Most common errors",
+    "hms_wiki_link": "View on Bambu Wiki",
+    "hms_unknown": "Unknown HMS code"
   },
   "settings": {
     "printers_title": "Printers",
@@ -422,7 +433,30 @@
     "demo_confirm": "Delete all demo printers and their associated data (history, errors, filament, telemetry)? This cannot be undone.",
     "notif_log_title": "Notification Log",
     "notif_log_empty": "No notifications sent yet.",
-    "notif_log_failed": "Could not load notification log."
+    "notif_log_failed": "Could not load notification log.",
+    "tab_appearance": "Appearance",
+    "theme_title": "Theme",
+    "theme_light": "Light",
+    "theme_dark": "Dark",
+    "theme_auto": "Auto (System)",
+    "theme_accent": "Accent Color",
+    "theme_accent_reset": "Reset to default",
+    "theme_radius": "Corner Roundness",
+    "theme_radius_sharp": "Sharp",
+    "theme_radius_round": "Round",
+    "theme_reset": "Reset All",
+    "theme_reset_confirm": "Reset theme to defaults?",
+    "spoolman_title": "Spoolman",
+    "spoolman_description": "Connect to an external Spoolman server to sync filament inventory.",
+    "spoolman_enable": "Enable Spoolman integration",
+    "spoolman_url": "Spoolman URL",
+    "spoolman_url_placeholder": "http://spoolman:7912",
+    "spoolman_test": "Test Connection",
+    "spoolman_test_ok": "Connected!",
+    "spoolman_test_fail": "Connection failed",
+    "obs_title": "OBS Streaming Overlay",
+    "obs_description": "Use this URL as a Browser Source in OBS to show camera + print info.",
+    "obs_params": "Params: ?printer=ID &bg=transparent &compact &hide_idle &no_camera"
   },
   "notify": {
     "print": "Print",
@@ -595,6 +629,46 @@
     "loading": "Loading MakerWorld info...",
     "view_on_mw": "View on MakerWorld",
     "by": "by"
+  },
+  "model_info": {
+    "loading": "Loading model info...",
+    "unknown": "Unknown model",
+    "link_model": "Link model",
+    "active_model": "Active Model",
+    "search_models": "Search Models",
+    "search_placeholder": "Search for a model...",
+    "all_sources": "All",
+    "search": "Search",
+    "searching": "Searching...",
+    "no_results": "No results found.",
+    "search_error": "Search failed.",
+    "no_active_model": "No active model.",
+    "recent_links": "Recent Links",
+    "no_recent": "No linked models yet.",
+    "by": "by",
+    "view_on": "View on",
+    "link": "Link",
+    "description": "Description",
+    "print_settings": "Print Settings",
+    "ps_printer": "Printer",
+    "ps_printer_model": "Printer Model",
+    "ps_rafts": "Rafts",
+    "ps_supports": "Supports",
+    "ps_resolution": "Resolution",
+    "ps_infill": "Infill",
+    "ps_filament": "Filament",
+    "ps_layer_height": "Layer Height"
+  },
+  "model_meta": {
+    "dimensions": "Dimensions",
+    "triangles": "Triangles",
+    "volume": "Volume",
+    "layer_height": "Layer Height",
+    "infill": "Infill",
+    "filament": "Filament Type",
+    "est_weight": "Estimated Weight",
+    "est_time": "Estimated Print Time",
+    "supports": "Supports"
   },
   "layout": {
     "locked": "Layout locked",

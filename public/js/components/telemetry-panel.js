@@ -85,12 +85,12 @@
       const wifiStr = wifiVal ? `${wifiVal}dBm` : '--';
 
       return `<div class="tele-hero-grid">
-        ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>', `${nozzle}°C`, t('temperature.nozzle'), nozzleTarget > 0 ? `→ ${nozzleTarget}°C` : '', '#f85149')}
-        ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/></svg>', `${bed}°C`, t('temperature.bed'), bedTarget > 0 ? `→ ${bedTarget}°C` : '', '#58a6ff')}
+        ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>', `${nozzle}°C`, t('temperature.nozzle'), nozzleTarget > 0 ? `→ ${nozzleTarget}°C` : '', '#ff5252')}
+        ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/></svg>', `${bed}°C`, t('temperature.bed'), bedTarget > 0 ? `→ ${bedTarget}°C` : '', '#1279ff')}
         ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>', `${chamber}°C`, t('temperature.chamber'), '', '#e3b341')}
         ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', `${progress}%`, t('telemetry.print_progress'), '', '#00e676')}
         ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', `${spdMag}%`, t('speed.label'), '', '#f0883e')}
-        ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0114 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1"/></svg>', wifiStr, 'WiFi', '', '#bc8cff')}
+        ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0114 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1"/></svg>', wifiStr, 'WiFi', '', '#9b4dff')}
       </div>`;
     },
 
@@ -149,7 +149,7 @@
       };
       h += renderChart(data,
         ['nozzle_temp', 'bed_temp', 'chamber_temp'],
-        { nozzle_temp: '#f85149', bed_temp: '#58a6ff', chamber_temp: '#e3b341' },
+        { nozzle_temp: '#ff5252', bed_temp: '#1279ff', chamber_temp: '#e3b341' },
         { nozzle_temp: t('temperature.nozzle'), bed_temp: t('temperature.bed'), chamber_temp: t('temperature.chamber') },
         null, targets
       );
@@ -166,9 +166,9 @@
           icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"/></svg>' },
         { label: t('fans.aux'), pct: fanPct(pd.big_fan1_speed), color: '#f0883e',
           icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/></svg>' },
-        { label: t('fans.chamber'), pct: fanPct(pd.big_fan2_speed), color: '#58a6ff',
+        { label: t('fans.chamber'), pct: fanPct(pd.big_fan2_speed), color: '#1279ff',
           icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M12 8v8m-4-4h8"/></svg>' },
-        { label: t('telemetry.heatbreak'), pct: fanPct(pd.heatbreak_fan_speed), color: '#bc8cff',
+        { label: t('telemetry.heatbreak'), pct: fanPct(pd.heatbreak_fan_speed), color: '#9b4dff',
           icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>' }
       ];
 
@@ -193,7 +193,7 @@
       if (!data.length) { h += `<p class="text-muted" style="font-size:0.8rem">${t('telemetry.no_data')}</p>`; return h; }
       h += renderChart(data,
         ['fan_cooling', 'fan_aux', 'fan_chamber', 'fan_heatbreak'],
-        { fan_cooling: '#00e676', fan_aux: '#f0883e', fan_chamber: '#58a6ff', fan_heatbreak: '#bc8cff' },
+        { fan_cooling: '#00e676', fan_aux: '#f0883e', fan_chamber: '#1279ff', fan_heatbreak: '#9b4dff' },
         { fan_cooling: t('fans.part'), fan_aux: t('fans.aux'), fan_chamber: t('fans.chamber'), fan_heatbreak: t('telemetry.heatbreak') },
         255
       );
@@ -236,8 +236,8 @@
     for (let i = 0; i <= 4; i++) {
       const y = PAD_T + (plotH / 4) * i;
       const val = Math.round(maxVal - (maxVal / 4) * i);
-      svg += `<line x1="${PAD_L}" y1="${y}" x2="${W - PAD_R}" y2="${y}" stroke="#30363d" stroke-width="1"/>`;
-      svg += `<text x="${PAD_L - 5}" y="${y + 4}" text-anchor="end" fill="#e2e8f0" font-size="10">${val}</text>`;
+      svg += `<line x1="${PAD_L}" y1="${y}" x2="${W - PAD_R}" y2="${y}" stroke="${theme.getCSSVar('--bg-tertiary')}" stroke-width="1"/>`;
+      svg += `<text x="${PAD_L - 5}" y="${y + 4}" text-anchor="end" fill="${theme.getCSSVar('--text-muted')}" font-size="10">${val}</text>`;
     }
 
     if (data.length > 1) {
@@ -246,7 +246,7 @@
         const x = PAD_L + (i / (data.length - 1)) * plotW;
         const time = data[i].time_bucket || '';
         const label = time.includes(' ') ? time.split(' ')[1].substring(0, 5) : time.substring(11, 16);
-        svg += `<text x="${x}" y="${H - 4}" text-anchor="middle" fill="#e2e8f0" font-size="9">${label}</text>`;
+        svg += `<text x="${x}" y="${H - 4}" text-anchor="middle" fill="${theme.getCSSVar('--text-muted')}" font-size="9">${label}</text>`;
       }
     }
 
@@ -284,7 +284,7 @@
       svg += `<polyline points="${points.join(' ')}" fill="none" stroke="${colors[key]}" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>`;
     }
 
-    svg += `<line class="tele-hover-line" x1="0" y1="${PAD_T}" x2="0" y2="${PAD_T + plotH}" stroke="#e2e8f0" stroke-width="1" opacity="0" stroke-dasharray="3,3"/>`;
+    svg += `<line class="tele-hover-line" x1="0" y1="${PAD_T}" x2="0" y2="${PAD_T + plotH}" stroke="#999999" stroke-width="1" opacity="0" stroke-dasharray="3,3"/>`;
     svg += '</svg>';
     svg += `<div class="tele-tooltip" id="${chartId}-tip"></div>`;
     svg += '</div>';

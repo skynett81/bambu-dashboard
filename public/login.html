@@ -10,26 +10,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-primary: #0c1015;
-      --bg-secondary: #131920;
-      --bg-tertiary: #1b222c;
-      --border-color: rgba(255,255,255,0.04);
-      --text-primary: #f0f4f8;
-      --text-secondary: #c0ccda;
-      --text-muted: #8899aa;
-      --accent-green: #00e676;
-      --accent-blue: #5cacff;
-      --accent-red: #ff5252;
-      --radius: 16px;
-      --radius-sm: 10px;
+      --bg-primary: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f0f0f0;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --text-primary: #1a1a1a;
+      --text-secondary: #555555;
+      --text-muted: #999999;
+      --accent-green: #00AE42;
+      --accent-blue: #1279ff;
+      --accent-red: #e53935;
+      --radius: 12px;
+      --radius-sm: 8px;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg-primary);
-      background-image:
-        radial-gradient(ellipse at 30% 20%, rgba(92, 172, 255, 0.04) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 80%, rgba(0, 230, 118, 0.03) 0%, transparent 50%);
       color: var(--text-primary);
       min-height: 100vh;
       display: flex;
@@ -41,25 +38,19 @@
     .login-box {
       width: 100%;
       max-width: 400px;
-      background: rgba(19, 25, 32, 0.85);
-      backdrop-filter: blur(24px);
-      -webkit-backdrop-filter: blur(24px);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
       border-radius: var(--radius);
       padding: 36px 32px;
       text-align: center;
-      box-shadow:
-        0 16px 48px rgba(0, 0, 0, 0.4),
-        0 4px 12px rgba(0, 0, 0, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     }
     .login-logo {
       width: 52px;
       height: 52px;
       margin-bottom: 18px;
-      filter: drop-shadow(0 0 10px rgba(0, 230, 118, 0.3));
     }
-    .login-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; letter-spacing: -0.01em; }
+    .login-title { font-family: 'Inter', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
     .login-sub { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 28px; }
     .form-group { margin-bottom: 18px; text-align: left; }
     .form-label {
@@ -68,35 +59,33 @@
     }
     input {
       width: 100%; padding: 11px 14px;
-      background: var(--bg-primary); border: 1px solid rgba(255,255,255,0.06);
+      background: var(--bg-primary); border: 1px solid var(--border-color);
       border-radius: var(--radius-sm); color: var(--text-primary);
       font-size: 0.9rem; outline: none;
       transition: border-color 0.25s cubic-bezier(0.16,1,0.3,1), box-shadow 0.25s cubic-bezier(0.16,1,0.3,1);
-      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
     }
     input:focus {
-      border-color: var(--accent-blue);
-      box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 0 0 3px rgba(92,172,255,0.1), 0 0 20px rgba(92,172,255,0.06);
+      border-color: var(--accent-green);
+      box-shadow: 0 0 0 3px rgba(0, 174, 66, 0.1);
     }
     input::placeholder { color: var(--text-muted); }
     .btn-login {
       width: 100%; padding: 12px; margin-top: 10px;
-      background: linear-gradient(135deg, var(--accent-green), #00c864); color: #000;
+      background: var(--accent-green); color: #fff;
       border: none; border-radius: var(--radius-sm);
       font-size: 0.95rem; font-weight: 600; cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0,230,118,0.2);
       transition: all 0.25s cubic-bezier(0.16,1,0.3,1);
     }
     .btn-login:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 24px rgba(0,230,118,0.3);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 174, 66, 0.2);
       filter: brightness(1.05);
     }
     .btn-login:active { transform: translateY(0); }
     .btn-login:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
     .error-msg {
       display: none; margin-top: 14px; padding: 10px 14px;
-      background: rgba(255,82,82,0.08); border: 1px solid rgba(255,82,82,0.2);
+      background: rgba(229,57,53,0.06); border: 1px solid rgba(229,57,53,0.15);
       border-radius: var(--radius-sm); color: var(--accent-red);
       font-size: 0.85rem;
     }
@@ -106,6 +95,29 @@
   </style>
 </head>
 <body>
+  <script>
+    // Apply saved theme to standalone page
+    (function(){try{
+      var cfg=JSON.parse(localStorage.getItem('bambu-theme'));
+      if(!cfg)return;
+      var s=document.documentElement.style;
+      var preset=cfg.preset;
+      if(preset==='auto')preset=(window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches)?'dark':'light';
+      if(preset==='dark'){
+        var d={
+          '--bg-primary':'#121218','--bg-secondary':'#1a1a24','--bg-tertiary':'#222230',
+          '--border-color':'rgba(255,255,255,0.08)','--text-primary':'#e8e8ec',
+          '--text-secondary':'#a0a0b0','--text-muted':'#6b6b7a',
+          '--accent-green':'#00AE42','--accent-red':'#e53935',
+          '--surface-glass':'rgba(26,26,36,0.95)'
+        };
+        for(var k in d)s.setProperty(k,d[k]);
+        document.documentElement.setAttribute('data-theme','dark');
+      }
+      if(cfg.accentColor){s.setProperty('--accent-green',cfg.accentColor);}
+      if(typeof cfg.radius==='number'){s.setProperty('--radius',cfg.radius+'px');s.setProperty('--radius-sm',Math.max(cfg.radius-4,2)+'px');}
+    }catch(e){}})();
+  </script>
   <div class="login-box">
     <img src="/assets/favicon.svg" alt="Logo" class="login-logo">
     <h1 class="login-title">Bambu Dashboard</h1>

@@ -72,24 +72,24 @@
     {
       id: 'spark-nozzle',
       key: 'nozzle_temp',
-      color: '#f85149',
+      color: '#ff5252',
       extract: d => d.nozzle_temper ?? d.nozzle_temp,
       format: (v, d) => {
         const tgt = d.nozzle_target_temper ?? d.nozzle_target;
         return tgt > 0 ? `${Math.round(v)}/${tgt}°` : `${Math.round(v)}°`;
       },
-      valColor: v => v > 180 ? '#f85149' : v > 80 ? '#f0883e' : v > 40 ? '#00e676' : ''
+      valColor: v => v > 180 ? '#ff5252' : v > 80 ? '#f0883e' : v > 40 ? '#00e676' : ''
     },
     {
       id: 'spark-bed',
       key: 'bed_temp',
-      color: '#58a6ff',
+      color: '#1279ff',
       extract: d => d.bed_temper ?? d.bed_temp,
       format: (v, d) => {
         const tgt = d.bed_target_temper ?? d.bed_target;
         return tgt > 0 ? `${Math.round(v)}/${tgt}°` : `${Math.round(v)}°`;
       },
-      valColor: v => v > 80 ? '#f0883e' : v > 35 ? '#58a6ff' : ''
+      valColor: v => v > 80 ? '#f0883e' : v > 35 ? '#1279ff' : ''
     },
     {
       id: 'spark-chamber',
@@ -110,10 +110,10 @@
     {
       id: 'spark-speed',
       key: 'speed_mag',
-      color: '#bc8cff',
+      color: '#9b4dff',
       extract: d => d.spd_mag,
       format: v => `${Math.round(v)}%`,
-      valColor: () => '#bc8cff'
+      valColor: () => '#9b4dff'
     },
     {
       id: 'spark-layer',

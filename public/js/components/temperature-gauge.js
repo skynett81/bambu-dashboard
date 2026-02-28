@@ -34,10 +34,10 @@
   }
 
   function tempColor(ratio) {
-    if (ratio < 0.3) return '#58a6ff';
+    if (ratio < 0.3) return '#1279ff';
     if (ratio < 0.6) return '#00e676';
     if (ratio < 0.85) return '#f0883e';
-    return '#f85149';
+    return '#ff5252';
   }
 
   function initGauge(id) {
@@ -46,12 +46,12 @@
 
     svg.innerHTML = `
       <path class="gauge-bg" d="${describeArc(CX, CY, RADIUS, ARC_START, ARC_END)}"
-            fill="none" stroke="#30363d" stroke-width="8" stroke-linecap="round"/>
+            fill="none" stroke="${theme.getCSSVar('--bg-tertiary')}" stroke-width="8" stroke-linecap="round"/>
       <path class="gauge-fill" id="${id}-fill" d="${describeArc(CX, CY, RADIUS, ARC_START, ARC_START)}"
             fill="none" stroke="#00e676" stroke-width="8" stroke-linecap="round"/>
-      <text x="${CX}" y="${CY - 4}" text-anchor="middle" fill="#f0f6fc"
+      <text x="${CX}" y="${CY - 4}" text-anchor="middle" fill="${theme.getCSSVar('--text-primary')}"
             font-size="18" font-weight="600" id="${id}-value">--</text>
-      <text x="${CX}" y="${CY + 14}" text-anchor="middle" fill="#e2e8f0"
+      <text x="${CX}" y="${CY + 14}" text-anchor="middle" fill="${theme.getCSSVar('--text-secondary')}"
             font-size="10" id="${id}-target"></text>
     `;
   }

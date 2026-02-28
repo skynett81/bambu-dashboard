@@ -89,7 +89,7 @@
           slot.className = `ams-slot ${isActive ? 'ams-active' : ''}`;
           slot.innerHTML = `
             <div class="ams-slot-inner">
-              <div class="ams-color-ring" style="background:${color};${light ? 'border:2px solid #30363d;' : ''}">
+              <div class="ams-color-ring" style="background:${color};${light ? `border:2px solid ${theme.getCSSVar('--text-muted')};` : ''}">
                 ${isActive ? '<div class="ams-active-dot"></div>' : ''}
               </div>
               <div class="ams-type">${tray.tray_type}</div>

@@ -119,7 +119,10 @@
     "total_invested": "Total investert",
     "total_used_value": "Brukt verdi",
     "most_expensive": "Dyreste type",
-    "avg_remaining": "Snitt gjenstående"
+    "avg_remaining": "Snitt gjenstående",
+    "spoolman_title": "Spoolman-spoler",
+    "spoolman_not_configured": "Spoolman er ikke konfigurert. Aktiver i Innstillinger.",
+    "spoolman_empty": "Ingen spoler funnet i Spoolman."
   },
   "controls": {
     "title": "Kontroller",
@@ -153,7 +156,12 @@
     "extrude": "Ekstruder",
     "retract": "Trekk tilbake",
     "ai_spaghetti": "Spaghetti-AI",
-    "ai_first_layer": "Første lag"
+    "ai_first_layer": "Første lag",
+    "objects_title": "Objekter",
+    "skip_object": "Hopp over",
+    "object_skipped": "Hoppet over",
+    "no_objects": "Ingen objekt-info tilgjengelig",
+    "skip_confirm": "Hopp over dette objektet? Kan ikke angres."
   },
   "speed": {
     "label": "Hastighet:",
@@ -207,6 +215,7 @@
     "errors": "Feillogg",
     "waste": "Poop",
     "maintenance": "Vedlikehold",
+    "model_info": "Modell Info",
     "settings": "Innstillinger"
   },
   "history": {
@@ -317,7 +326,9 @@
     "layout_unlocked": "Ulåst",
     "severity_breakdown": "Feil per alvorlighetsgrad",
     "printer_breakdown": "Feil per printer",
-    "common_errors": "Vanligste feil"
+    "common_errors": "Vanligste feil",
+    "hms_wiki_link": "Se pa Bambu Wiki",
+    "hms_unknown": "Ukjent HMS-kode"
   },
   "settings": {
     "printers_title": "Printere",
@@ -422,7 +433,30 @@
     "demo_confirm": "Slette alle demo-printere og tilhørende data (historikk, feil, filament, telemetri)? Dette kan ikke angres.",
     "notif_log_title": "Varslingslogg",
     "notif_log_empty": "Ingen varslinger sendt enda.",
-    "notif_log_failed": "Kunne ikke laste varslingslogg."
+    "notif_log_failed": "Kunne ikke laste varslingslogg.",
+    "tab_appearance": "Utseende",
+    "theme_title": "Tema",
+    "theme_light": "Lyst",
+    "theme_dark": "Mørkt",
+    "theme_auto": "Auto (System)",
+    "theme_accent": "Aksentfarge",
+    "theme_accent_reset": "Tilbakestill til standard",
+    "theme_radius": "Hjørneavrunding",
+    "theme_radius_sharp": "Skarpt",
+    "theme_radius_round": "Rundt",
+    "theme_reset": "Tilbakestill alt",
+    "theme_reset_confirm": "Tilbakestill tema til standard?",
+    "spoolman_title": "Spoolman",
+    "spoolman_description": "Koble til en ekstern Spoolman-server for a synkronisere filamentlager.",
+    "spoolman_enable": "Aktiver Spoolman-integrasjon",
+    "spoolman_url": "Spoolman URL",
+    "spoolman_url_placeholder": "http://spoolman:7912",
+    "spoolman_test": "Test tilkobling",
+    "spoolman_test_ok": "Tilkoblet!",
+    "spoolman_test_fail": "Tilkobling feilet",
+    "obs_title": "OBS Streaming Overlay",
+    "obs_description": "Bruk denne URLen som Browser Source i OBS for a vise kamera + print-info.",
+    "obs_params": "Params: ?printer=ID &bg=transparent &compact &hide_idle &no_camera"
   },
   "notify": {
     "print": "Utskrift",
@@ -595,6 +629,46 @@
     "loading": "Henter MakerWorld-info...",
     "view_on_mw": "Se på MakerWorld",
     "by": "av"
+  },
+  "model_info": {
+    "loading": "Henter modellinfo...",
+    "unknown": "Ukjent modell",
+    "link_model": "Koble modell",
+    "active_model": "Aktiv Modell",
+    "search_models": "Søk Modeller",
+    "search_placeholder": "Søk etter en modell...",
+    "all_sources": "Alle",
+    "search": "Søk",
+    "searching": "Søker...",
+    "no_results": "Ingen resultater funnet.",
+    "search_error": "Søk feilet.",
+    "no_active_model": "Ingen aktiv modell.",
+    "recent_links": "Nylige Koblinger",
+    "no_recent": "Ingen koblede modeller enda.",
+    "by": "av",
+    "view_on": "Se på",
+    "link": "Koble",
+    "description": "Beskrivelse",
+    "print_settings": "Utskriftsinnstillinger",
+    "ps_printer": "Printer",
+    "ps_printer_model": "Printermodell",
+    "ps_rafts": "Rafts",
+    "ps_supports": "Supports",
+    "ps_resolution": "Oppløsning",
+    "ps_infill": "Infill",
+    "ps_filament": "Filament",
+    "ps_layer_height": "Laghøyde"
+  },
+  "model_meta": {
+    "dimensions": "Dimensjoner",
+    "triangles": "Trekanter",
+    "volume": "Volum",
+    "layer_height": "Laghøyde",
+    "infill": "Infill",
+    "filament": "Filamenttype",
+    "est_weight": "Estimert vekt",
+    "est_time": "Estimert printtid",
+    "supports": "Supports"
   },
   "layout": {
     "locked": "Layout låst",

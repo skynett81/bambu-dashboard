@@ -40,6 +40,10 @@ const DEFAULTS = {
     quietHours: { enabled: false, start: '23:00', end: '07:00' },
     bedCooledThreshold: 30
   },
+  spoolman: {
+    enabled: false,
+    url: ''
+  },
   update: {
     autoCheck: true,
     checkIntervalHours: 6,

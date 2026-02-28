@@ -35,29 +35,58 @@
       <div class="controls-grid" id="ctrl-print-grid">${printControlButtons(state, isPrinting)}</div>
     </div>`;
 
+    // ===== CARD: Objects (only during print) =====
+    if (isPrinting && data.obj_list && data.obj_list.length > 0) {
+      html += `<div class="ctrl-card ctrl-area-objects">
+        <div class="ctrl-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          ${t('controls.objects_title')}
+          <span class="ctrl-card-badge">${data.obj_list.length} ${t('controls.objects_title').toLowerCase()}</span>
+        </div>
+        <div class="ctrl-objects-list" id="ctrl-objects-list">`;
+      for (const obj of data.obj_list) {
+        const isSkipped = obj.skipped || false;
+        const name = obj.name || `Object ${obj.obj_id ?? '?'}`;
+        html += `<div class="ctrl-object-row ${isSkipped ? 'ctrl-object-skipped' : ''}">
+          <span class="ctrl-object-name">${esc(name)}</span>
+          ${isSkipped
+            ? `<span class="ctrl-object-status">${t('controls.object_skipped')}</span>`
+            : `<button class="form-btn form-btn-sm ctrl-object-skip-btn" onclick="skipObject(${obj.obj_id})">${t('controls.skip_object')}</button>`
+          }
+        </div>`;
+      }
+      html += `</div></div>`;
+    }
+
     // ===== CARD: Speed Profile =====
     const spdLvl = data.spd_lvl || 2;
     const spdMag = data.spd_mag || 100;
+    const printerName = meta?.name || '';
     html += `<div class="ctrl-card ctrl-area-speed">
       <div class="ctrl-card-title">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         ${t('controls.speed_profile')}
-        <span class="ctrl-card-badge" id="ctrl-speed-label">${t(speedLevelKey(spdLvl))} · ${spdMag}%</span>
+        ${printerName ? `<span class="ctrl-card-printer-tag" id="ctrl-speed-printer">${esc(printerName)}</span>` : ''}
+      </div>
+      <div class="ctrl-speed-slider-row">
+        <input type="range" class="ctrl-slider ctrl-speed-range" id="ctrl-speed-slider" min="50" max="166" value="${spdMag}"
+               oninput="updateSpeedPreview(this.value)" onchange="applySpeedFromSlider(this.value)">
+        <span class="ctrl-speed-value" id="ctrl-speed-value">${spdMag}%</span>
       </div>
       <div class="ctrl-speed-grid">
-        <button class="ctrl-speed-btn ${spdLvl === 1 ? 'active' : ''}" data-speed="1" onclick="sendCommand('speed',{value:1})">
+        <button class="ctrl-speed-btn ${spdLvl === 1 ? 'active' : ''}" data-speed="1" onclick="applySpeedPreset(1)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 18h4l3-8 3 8h4l5-16"/></svg>
           ${t('speed.silent')}
         </button>
-        <button class="ctrl-speed-btn ${spdLvl === 2 ? 'active' : ''}" data-speed="2" onclick="sendCommand('speed',{value:2})">
+        <button class="ctrl-speed-btn ${spdLvl === 2 ? 'active' : ''}" data-speed="2" onclick="applySpeedPreset(2)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           ${t('speed.standard')}
         </button>
-        <button class="ctrl-speed-btn ${spdLvl === 3 ? 'active' : ''}" data-speed="3" onclick="sendCommand('speed',{value:3})">
+        <button class="ctrl-speed-btn ${spdLvl === 3 ? 'active' : ''}" data-speed="3" onclick="applySpeedPreset(3)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           ${t('speed.sport')}
         </button>
-        <button class="ctrl-speed-btn ${spdLvl === 4 ? 'active' : ''}" data-speed="4" onclick="sendCommand('speed',{value:4})">
+        <button class="ctrl-speed-btn ${spdLvl === 4 ? 'active' : ''}" data-speed="4" onclick="applySpeedPreset(4)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           ${t('speed.ludicrous')}
         </button>
@@ -259,12 +288,19 @@
 
     const spdLvl = data.spd_lvl || 2;
     const spdMag = data.spd_mag || 100;
-    const spdLabel = container.querySelector('#ctrl-speed-label');
-    if (spdLabel) spdLabel.textContent = `${t(speedLevelKey(spdLvl))} · ${spdMag}%`;
+    const spdSlider = container.querySelector('#ctrl-speed-slider');
+    const spdValue = container.querySelector('#ctrl-speed-value');
+    if (spdSlider && !spdSlider.matches(':active')) spdSlider.value = spdMag;
+    if (spdValue) spdValue.textContent = `${spdMag}%`;
     container.querySelectorAll('.ctrl-speed-btn').forEach(btn => {
       const lvl = parseInt(btn.dataset.speed);
       btn.classList.toggle('active', lvl === spdLvl);
     });
+    const printerTag = container.querySelector('#ctrl-speed-printer');
+    if (printerTag) {
+      const meta = window.printerState.getActivePrinterMeta();
+      if (meta?.name) printerTag.textContent = meta.name;
+    }
 
     updateTempCurrent(container, 'nozzle', data.nozzle_temper);
     updateTempCurrent(container, 'nozzle2', data.nozzle_temper_2);
@@ -391,5 +427,39 @@
   window.toggleLight = function() {
     const newMode = lightState === 'on' ? 'off' : 'on';
     sendCommand('light', { mode: newMode, node: 'chamber_light' });
+  };
+
+  window.skipObject = function(objId) {
+    if (!confirm(t('controls.skip_confirm'))) return;
+    sendCommand('skip_objects', { obj_list: [objId] });
+  };
+
+  // Speed slider helpers
+  const SPEED_PRESET_MAP = { 1: 50, 2: 100, 3: 124, 4: 166 };
+
+  window.updateSpeedPreview = function(val) {
+    const el = document.getElementById('ctrl-speed-value');
+    if (el) el.textContent = `${val}%`;
+  };
+
+  window.applySpeedFromSlider = function(val) {
+    const pct = parseInt(val);
+    // Map slider value to nearest preset level
+    let bestLvl = 2;
+    let bestDist = Infinity;
+    for (const [lvl, target] of Object.entries(SPEED_PRESET_MAP)) {
+      const dist = Math.abs(pct - target);
+      if (dist < bestDist) { bestDist = dist; bestLvl = parseInt(lvl); }
+    }
+    sendCommand('speed', { value: bestLvl });
+  };
+
+  window.applySpeedPreset = function(level) {
+    sendCommand('speed', { value: level });
+    const slider = document.getElementById('ctrl-speed-slider');
+    const val = SPEED_PRESET_MAP[level] || 100;
+    if (slider) slider.value = val;
+    const el = document.getElementById('ctrl-speed-value');
+    if (el) el.textContent = `${val}%`;
   };
 })();
