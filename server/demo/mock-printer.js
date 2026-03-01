@@ -30,8 +30,11 @@ export class MockPrinter {
     this.fileIndex = 0;
     this.totalLayers = 200;
     this.onUpdate = null;
+    this.onXcamEvent = null;
     this.interval = null;
     this.seqId = 0;
+    this._tickCount = 0;
+    this._baseWifiSignal = -35 - Math.floor(Math.random() * 20); // -35 to -55
   }
 
   start() {
@@ -61,6 +64,10 @@ export class MockPrinter {
         }
         break;
       case 'stop':
+        if (this.phase === 'PRINTING' || this.phase === 'HEATING') {
+          this.state.gcode_state = 'IDLE';
+          this._emit(); // Emit before reset so PrintTracker records the cancelled print
+        }
         this._transitionTo('IDLE');
         break;
       case 'speed':
@@ -80,6 +87,8 @@ export class MockPrinter {
   }
 
   _tick() {
+    this._tickCount++;
+
     if (this.paused) {
       this._emit();
       return;
@@ -88,6 +97,9 @@ export class MockPrinter {
     const elapsed = Date.now() - this.phaseStart;
     const duration = PHASES[this.phase].duration;
     const progress = Math.min(elapsed / duration, 1);
+
+    // Update WiFi signal with slight variation
+    this.state.wifi_signal = `${this._baseWifiSignal + Math.floor(this._fluctuate(3))}dBm`;
 
     switch (this.phase) {
       case 'IDLE':
@@ -201,9 +213,22 @@ export class MockPrinter {
     }
 
     // Simulate filament consumption
-    const activeTray = this.amsData.ams[0].tray.find(t => t.id === this.amsData.tray_now);
+    const activeTray = this.amsData.ams[0].tray.find(t => t && t.id === this.amsData.tray_now);
     if (activeTray && activeTray.remain > 5) {
       activeTray.remain = Math.max(5, activeTray.remain - 0.01);
+    }
+
+    // Occasional XCam events (~1% chance per tick during mid-print)
+    if (this.onXcamEvent && progress > 0.1 && progress < 0.9 && Math.random() < 0.01) {
+      const events = ['spaghetti', 'first_layer_inspection'];
+      this.onXcamEvent(events[Math.floor(Math.random() * events.length)]);
+    }
+
+    // Occasional HMS event (~0.3% chance per tick)
+    if (progress > 0.2 && progress < 0.8 && Math.random() < 0.003) {
+      this.state.hms = [{ attr: '0300_0100_0001_0001', code: 0x03000100, msg: 'AMS filament has run out' }];
+    } else {
+      delete this.state.hms;
     }
   }
 

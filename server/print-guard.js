@@ -107,11 +107,12 @@ export class PrintGuardService {
     const amsUnits = state.ams?.ams;
     if (!Array.isArray(amsUnits)) return;
 
-    const activeTray = state.tray_now;
+    const activeTray = state.ams?.tray_now;
 
     for (const unit of amsUnits) {
       if (!Array.isArray(unit.tray)) continue;
       for (const tray of unit.tray) {
+        if (!tray) continue;
         // Only alert for the active tray or any tray with filament that's critically low
         const remain = tray.remain;
         if (remain == null || remain < 0) continue;

@@ -257,15 +257,18 @@ if (IS_DEMO) {
     }
   }
 
-  // Seed demo history if empty
-  const { addHistory, addFilament, addError } = await import('./database.js');
+  // Seed demo history if empty — distribute across all printers
+  const { addHistory, addFilament, addError, addFirmwareEntry, addXcamEvent } = await import('./database.js');
   const { getHistory } = await import('./database.js');
+  const printerIds = MOCK_PRINTERS.map(p => p.id);
   if (getHistory(1, 0, 'demo-p2s').length === 0 && MOCK_HISTORY) {
-    for (const h of MOCK_HISTORY) {
+    for (let i = 0; i < MOCK_HISTORY.length; i++) {
+      const h = MOCK_HISTORY[i];
+      const pid = printerIds[i % printerIds.length];
       const started = new Date(Date.now() - (h.days_ago || 1) * 86400000).toISOString();
       const finished = new Date(new Date(started).getTime() + (h.duration_seconds || 0) * 1000).toISOString();
       addHistory({
-        printer_id: 'demo-p2s', started_at: started, finished_at: finished,
+        printer_id: pid, started_at: started, finished_at: finished,
         filename: h.filename, status: h.status, duration_seconds: h.duration_seconds,
         filament_used_g: h.filament_used_g, filament_type: h.filament_type,
         filament_color: h.filament_color, layer_count: h.layer_count,
@@ -276,7 +279,7 @@ if (IS_DEMO) {
         color_changes: h.color_changes, waste_g: h.waste_g
       });
     }
-    console.log(`[demo] Seeded ${MOCK_HISTORY.length} history records`);
+    console.log(`[demo] Seeded ${MOCK_HISTORY.length} history records across ${printerIds.length} printers`);
   }
 
   // Seed filament inventory
@@ -288,18 +291,45 @@ if (IS_DEMO) {
     console.log(`[demo] Seeded ${MOCK_FILAMENT.length} filament records`);
   }
 
-  // Seed errors
+  // Seed errors — distribute across printers
   const { getErrors } = await import('./database.js');
   if (getErrors(1, 'demo-p2s').length === 0 && MOCK_ERRORS) {
-    for (const e of MOCK_ERRORS) {
+    for (let i = 0; i < MOCK_ERRORS.length; i++) {
+      const e = MOCK_ERRORS[i];
+      const pid = printerIds[i % printerIds.length];
       addError({
-        printer_id: 'demo-p2s',
+        printer_id: pid,
         code: e.code, message: e.message, severity: e.severity,
         timestamp: new Date(Date.now() - (e.days_ago || 1) * 86400000).toISOString()
       });
     }
-    console.log(`[demo] Seeded ${MOCK_ERRORS.length} error records`);
+    console.log(`[demo] Seeded ${MOCK_ERRORS.length} error records across ${printerIds.length} printers`);
   }
+
+  // Seed firmware entries for demo printers
+  const FIRMWARE_MODULES = {
+    'demo-p2s': [
+      { module: 'ota', sw_ver: '01.09.01.00', hw_ver: 'AP04' },
+      { module: 'mc', sw_ver: '09.01.30.00', hw_ver: '' },
+      { module: 'ams', sw_ver: '00.00.06.53', hw_ver: '' }
+    ],
+    'demo-x1c': [
+      { module: 'ota', sw_ver: '01.10.01.00', hw_ver: 'AP05' },
+      { module: 'mc', sw_ver: '09.02.10.00', hw_ver: '' },
+      { module: 'ams', sw_ver: '00.00.06.55', hw_ver: '' }
+    ],
+    'demo-h2d': [
+      { module: 'ota', sw_ver: '01.08.00.00', hw_ver: 'AP06' },
+      { module: 'mc', sw_ver: '09.00.20.00', hw_ver: '' },
+      { module: 'ams', sw_ver: '00.00.06.50', hw_ver: '' }
+    ]
+  };
+  for (const p of MOCK_PRINTERS) {
+    for (const mod of FIRMWARE_MODULES[p.id] || []) {
+      addFirmwareEntry({ printer_id: p.id, module: mod.module, sw_ver: mod.sw_ver, hw_ver: mod.hw_ver, sn: `${p.id}-${mod.module}` });
+    }
+  }
+  console.log('[demo] Seeded firmware entries');
 
   // Seed protection settings for demo printers
   const { getProtectionSettings, upsertProtectionSettings, addProtectionLog } = await import('./database.js');
@@ -323,23 +353,52 @@ if (IS_DEMO) {
     'demo-h2d': MOCK_AMS_H2D
   };
 
-  // Start mock printers with telemetry sampling
+  // Start mock printers with telemetry sampling and print tracking
   const { TelemetrySampler } = await import('./telemetry-sampler.js');
+  const { PrintTracker } = await import('./print-tracker.js');
 
   for (const p of MOCK_PRINTERS) {
     const mock = new MockPrinter(p.id, AMS_MAP[p.id]);
-    const sampler = new TelemetrySampler(p.id, { printInterval: 10000, idleInterval: 30000, batchSize: 5 });
+    const sampler = new TelemetrySampler(p.id, { printInterval: 15000, idleInterval: 120000, batchSize: 5 });
+    const tracker = new PrintTracker(p.id);
     setMetaAll(p.id, { name: p.name, model: p.model || '', cameraPort: 0 });
+
+    tracker.onPrintStart = (data) => {
+      notifier.notify('print_started', { ...data, printerName: p.name });
+    };
+    tracker.onPrintEnd = (data) => {
+      const eventMap = { completed: 'print_finished', failed: 'print_failed', cancelled: 'print_cancelled' };
+      notifier.notify(eventMap[data.status] || 'print_finished', { ...data, printerName: p.name });
+    };
+    tracker.onError = (data) => {
+      notifier.notify('printer_error', { ...data, printerName: p.name });
+    };
+
+    // XCam event handler for demo printers
+    mock.onXcamEvent = (status) => {
+      const eventMap = { 'spaghetti': 'spaghetti_detected', 'first_layer_inspection': 'first_layer_issue' };
+      for (const [key, eventType] of Object.entries(eventMap)) {
+        if (status.includes(key)) {
+          addXcamEvent({ printer_id: p.id, event_type: eventType });
+          const printId = tracker.currentPrint?.id || null;
+          if (manager.guard) manager.guard.handleEvent(p.id, eventType, printId);
+          break;
+        }
+      }
+    };
 
     mock.onUpdate = (state) => {
       broadcastAll('status', { printer_id: p.id, ...state });
       const printData = state.print || state;
+      tracker.update(printData);
       sampler.update(printData);
       notifier.updateBedMonitor(p.id, p.name, printData);
+      if (manager.guard) manager.guard.processSensorData(p.id, printData);
     };
 
     mock.start();
     mock._sampler = sampler;
+    mock._tracker = tracker;
     demoMockPrinters.push(mock);
   }
 
@@ -368,6 +427,7 @@ setOnDemoPurge((printerIds) => {
     if (idx !== -1) {
       demoMockPrinters[idx].stop();
       if (demoMockPrinters[idx]._sampler) demoMockPrinters[idx]._sampler.stop();
+      if (demoMockPrinters[idx]._tracker) demoMockPrinters[idx]._tracker.stop?.();
       demoMockPrinters.splice(idx, 1);
     }
     hub.removePrinterMeta(id);
@@ -405,7 +465,7 @@ process.on('SIGTERM', shutdown);
 
 // Start servers
 httpServer.listen(PORT, () => {
-  const printerCount = manager.getPrinterIds().length;
+  const printerCount = manager.getPrinterIds().length + (IS_DEMO ? demoMockPrinters.length : 0);
   console.log('');
   console.log('  ╔══════════════════════════════════════════════╗');
   console.log(`  ║   Bambu Dashboard v${updater.currentVersion.padEnd(26)}║`);

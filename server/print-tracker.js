@@ -316,6 +316,7 @@ export class PrintTracker {
     try {
       for (const unit of data.ams.ams) {
         for (const tray of (unit.tray || [])) {
+          if (!tray) continue;
           if (tray.tray_type) {
             addAmsSnapshot({
               printer_id: this.printerId,
@@ -362,7 +363,7 @@ export class PrintTracker {
 
     const activeTray = data.ams.tray_now;
     for (const unit of data.ams.ams) {
-      const tray = (unit.tray || []).find(t => String(t.id) === String(activeTray));
+      const tray = (unit.tray || []).find(t => t && String(t.id) === String(activeTray));
       if (tray) {
         result.type = tray.tray_type || null;
         result.color = tray.tray_color || null;
@@ -380,6 +381,7 @@ export class PrintTracker {
 
     for (const unit of data.ams.ams) {
       for (const tray of (unit.tray || [])) {
+        if (!tray) continue;
         if (tray.remain >= 0) {
           remaining[`${unit.id}_${tray.id}`] = tray.remain;
         }

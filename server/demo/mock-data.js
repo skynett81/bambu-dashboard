@@ -117,7 +117,12 @@ export const MOCK_AMS_X1C = {
           nozzle_temp_max: '230',
           nozzle_temp_min: '200',
           remain: 85,
-          tag_uid: '0000000000000005'
+          tag_uid: '0000000000000005',
+          tray_uuid: 'x1c-uuid-0001',
+          tray_weight: '1000',
+          drying_temp: 55,
+          drying_time: 8,
+          k: 0.02
         },
         {
           id: '1',
@@ -130,7 +135,12 @@ export const MOCK_AMS_X1C = {
           nozzle_temp_max: '270',
           nozzle_temp_min: '240',
           remain: 100,
-          tag_uid: '0000000000000006'
+          tag_uid: '0000000000000006',
+          tray_uuid: 'x1c-uuid-0002',
+          tray_weight: '1000',
+          drying_temp: 80,
+          drying_time: 12,
+          k: 0.04
         },
         {
           id: '2',
@@ -143,7 +153,12 @@ export const MOCK_AMS_X1C = {
           nozzle_temp_max: '230',
           nozzle_temp_min: '190',
           remain: 55,
-          tag_uid: '0000000000000007'
+          tag_uid: '0000000000000007',
+          tray_uuid: 'x1c-uuid-0003',
+          tray_weight: '1000',
+          drying_temp: 55,
+          drying_time: 8,
+          k: 0.02
         },
         {
           id: '3',
@@ -156,7 +171,12 @@ export const MOCK_AMS_X1C = {
           nozzle_temp_max: '270',
           nozzle_temp_min: '240',
           remain: 70,
-          tag_uid: '0000000000000008'
+          tag_uid: '0000000000000008',
+          tray_uuid: 'x1c-uuid-0004',
+          tray_weight: '1000',
+          drying_temp: 65,
+          drying_time: 6,
+          k: 0.04
         }
       ]
     }
