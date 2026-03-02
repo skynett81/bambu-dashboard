@@ -128,19 +128,19 @@
     'history-filters': (data) => {
       const s = getStats(data);
       return `<div class="history-filters">
-        <button class="history-filter-btn ${_activeFilter === 'all' ? 'active' : ''}" data-filter="all" onclick="filterHistory('all', this)">
+        <button class="history-filter-btn ${_activeFilter === 'all' ? 'active' : ''}" data-filter="all" data-ripple onclick="filterHistory('all', this)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
           ${t('stats.total')} <span class="history-filter-count">${data.length}</span>
         </button>
-        <button class="history-filter-btn history-filter-completed ${_activeFilter === 'completed' ? 'active' : ''}" data-filter="completed" onclick="filterHistory('completed', this)">
+        <button class="history-filter-btn history-filter-completed ${_activeFilter === 'completed' ? 'active' : ''}" data-filter="completed" data-ripple onclick="filterHistory('completed', this)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
           ${t('history.completed')} <span class="history-filter-count">${s.completed}</span>
         </button>
-        <button class="history-filter-btn history-filter-failed ${_activeFilter === 'failed' ? 'active' : ''}" data-filter="failed" onclick="filterHistory('failed', this)">
+        <button class="history-filter-btn history-filter-failed ${_activeFilter === 'failed' ? 'active' : ''}" data-filter="failed" data-ripple onclick="filterHistory('failed', this)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           ${t('history.failed')} <span class="history-filter-count">${s.failed}</span>
         </button>
-        <button class="history-filter-btn history-filter-cancelled ${_activeFilter === 'cancelled' ? 'active' : ''}" data-filter="cancelled" onclick="filterHistory('cancelled', this)">
+        <button class="history-filter-btn history-filter-cancelled ${_activeFilter === 'cancelled' ? 'active' : ''}" data-filter="cancelled" data-ripple onclick="filterHistory('cancelled', this)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
           ${t('history.cancelled')} <span class="history-filter-count">${s.cancelled}</span>
         </button>
@@ -195,13 +195,13 @@
         if (row.notes) h += `<div class="history-detail-row"><span class="history-detail-label">${t('maintenance.notes')}</span><span>${esc(row.notes)}</span></div>`;
         h += `<div class="history-cost-row" id="cost-row-${row.id}" style="display:none"></div>`;
         h += '</div></div>';
-        h += `<button class="history-card-toggle" onclick="toggleHistoryDetail(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>`;
+        h += `<button class="history-card-toggle" data-ripple data-tooltip="${t('history.expand_details') || 'Details'}" onclick="toggleHistoryDetail(this)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>`;
         h += '</div>'; // close .history-card-content
         h += '</div>'; // close .history-card
       }
       h += '</div>';
       const exportUrl = _activePrinter === 'all' ? '/api/history/export' : `/api/history/export?printer_id=${_activePrinter}`;
-      h += `<div class="history-export"><a href="${exportUrl}" class="form-btn form-btn-sm form-btn-secondary" download>
+      h += `<div class="history-export"><a href="${exportUrl}" class="form-btn form-btn-sm form-btn-secondary" data-ripple download>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         ${t('stats.download_csv')}</a></div>`;
       return h;
@@ -280,6 +280,10 @@
       const isActive = p.id === `history-tab-${tabId}`;
       p.classList.toggle('active', isActive);
       p.style.display = isActive ? 'grid' : 'none';
+      if (isActive) {
+        p.classList.add('ix-tab-panel');
+        p.addEventListener('animationend', () => p.classList.remove('ix-tab-panel'), { once: true });
+      }
     });
     const slug = tabId === 'history' ? 'history' : `history/${tabId}`;
     if (location.hash !== '#' + slug) history.replaceState(null, '', '#' + slug);
@@ -382,7 +386,8 @@
       // Tab panels
       for (const [tabId, cfg] of Object.entries(TAB_CONFIG)) {
         const order = getOrder(tabId);
-        html += `<div class="tab-panel history-tab-panel stats-tab-panel ${tabId === _activeTab ? 'active' : ''}" id="history-tab-${tabId}" style="display:${tabId === _activeTab ? 'grid' : 'none'}">`;
+        html += `<div class="tab-panel history-tab-panel stats-tab-panel stagger-in ${tabId === _activeTab ? 'active' : ''}" id="history-tab-${tabId}" style="display:${tabId === _activeTab ? 'grid' : 'none'}">`;
+        let _si = 0;
         for (const modId of order) {
           const builder = BUILDERS[modId];
           if (!builder) continue;
@@ -391,7 +396,7 @@
           const draggable = _locked ? '' : 'draggable="true"';
           const unlocked = _locked ? '' : ' stats-module-unlocked';
           const span = (MODULE_SIZE[modId] || 'full') === 'full' ? 'grid-column:1/-1;' : '';
-          html += `<div class="stats-module${unlocked}" data-module-id="${modId}" ${draggable} style="${span}">`;
+          html += `<div class="stats-module${unlocked}" data-module-id="${modId}" ${draggable} style="${span}--i:${_si++};">`;
           if (!_locked) html += '<div class="stats-module-handle" title="Drag to reorder">&#x2630;</div>';
           html += content;
           html += '</div>';

@@ -132,7 +132,7 @@
             <div style="font-size:0.8rem;font-weight:600">${esc(printerName(a.printer_id))} — ${evLabel}</div>
             <div style="font-size:0.7rem;color:var(--text-muted)">${actLabel} · ${fmtTime(a.timestamp)}${a.notes ? ` · ${esc(a.notes)}` : ''}</div>
           </div>
-          <button class="form-btn form-btn-sm form-btn-secondary" onclick="resolveProtectionAlert(${a.id})">${t('protection.resolve')}</button>
+          <button class="form-btn form-btn-sm form-btn-secondary" data-ripple data-tooltip="${t('protection.resolve')}" onclick="resolveProtectionAlert(${a.id})">${t('protection.resolve')}</button>
         </div>`;
       }
       h += '</div>';
@@ -250,7 +250,7 @@
         const resolvedCls = entry.resolved ? ' protection-log-card-resolved' : '';
         const actionPill = entry.action_taken === 'pause' ? 'pill-warning' : entry.action_taken === 'stop' ? 'pill-failed' : 'pill-info';
 
-        h += `<div class="protection-log-card${resolvedCls}">
+        h += `<div class="protection-log-card protect-card${resolvedCls}">
           <div class="protection-log-card-accent" style="background:${accentColor}"></div>
           <div class="protection-log-card-body">
             <div class="protection-log-card-header">
@@ -266,7 +266,7 @@
             <div class="protection-log-card-footer">
               ${entry.resolved
                 ? `<span class="pill pill-completed" style="font-size:0.65rem">${t('protection.resolved_label') || 'Resolved'}</span>`
-                : `<button class="form-btn form-btn-sm" onclick="resolveProtectionAlert(${entry.id})">${t('protection.resolve')}</button>`}
+                : `<button class="form-btn form-btn-sm" data-ripple onclick="resolveProtectionAlert(${entry.id})">${t('protection.resolve')}</button>`}
             </div>
           </div>
         </div>`;
@@ -320,11 +320,11 @@
     let html = `<div class="stats-toolbar">
       <div class="tabs" style="border-bottom:none;margin-bottom:0">`;
     for (const [id, cfg] of Object.entries(TAB_CONFIG)) {
-      html += `<button class="tab-btn${id === _activeTab ? ' active' : ''}" onclick="switchProtectionTab('${id}')">${t(cfg.label)}</button>`;
+      html += `<button class="tab-btn${id === _activeTab ? ' active' : ''}" data-ripple onclick="switchProtectionTab('${id}')">${t(cfg.label)}</button>`;
     }
     html += `</div>
       <div class="stats-toolbar-actions">
-        <button class="form-btn form-btn-sm form-btn-secondary" onclick="toggleProtectionLock()" title="${_locked ? t('protection.layout_locked') : t('protection.layout_unlocked')}">
+        <button class="form-btn form-btn-sm form-btn-secondary" data-ripple onclick="toggleProtectionLock()" title="${_locked ? t('protection.layout_locked') : t('protection.layout_unlocked')}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${_locked ? '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>' : '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/>'}</svg>
           ${_locked ? t('protection.layout_locked') : t('protection.layout_unlocked')}
         </button>

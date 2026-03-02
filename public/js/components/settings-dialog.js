@@ -60,14 +60,14 @@
                 <div class="text-muted" style="font-size:0.75rem">${p.model || ''} ${p.ip && p.serial && p.accessCode ? '| ' + p.ip + ' | ' + t('settings.auto_connect') : '| ' + t('settings.add_details')}</div>
               </div>
               <div class="printer-config-actions">
-                <button class="form-btn form-btn-sm" onclick="editPrinter('${p.id}')">${t('settings.edit')}</button>
-                <button class="form-btn form-btn-sm form-btn-danger" onclick="removePrinter('${p.id}')">${t('settings.delete')}</button>
+                <button class="form-btn form-btn-sm" data-ripple data-tooltip="${t('settings.edit')}" onclick="editPrinter('${p.id}')">${t('settings.edit')}</button>
+                <button class="form-btn form-btn-sm form-btn-danger" data-ripple data-tooltip="${t('settings.delete')}" onclick="removePrinter('${p.id}')">${t('settings.delete')}</button>
               </div>
             </div>
           </div>`;
       }
       html += '</div>';
-      html += `<button class="form-btn mt-md" onclick="showAddPrinterForm()">${t('settings.add_printer')}</button>`;
+      html += `<button class="form-btn mt-md" data-ripple onclick="showAddPrinterForm()">${t('settings.add_printer')}</button>`;
       html += `<div id="printer-form-area"></div>`;
       html += '</div>'; // end tab-printers
 
@@ -117,7 +117,7 @@
         <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.obs_description')}</p>
         <div style="display:flex;gap:8px;align-items:center">
           <input class="form-input" id="obs-url-display" readonly value="${location.origin}/obs.html" style="flex:1;font-size:0.8rem">
-          <button class="form-btn form-btn-sm" onclick="copyObsUrl()">${t('camera.copy')}</button>
+          <button class="form-btn form-btn-sm" data-ripple onclick="copyObsUrl()">${t('camera.copy')}</button>
         </div>
         <p class="text-muted" style="font-size:0.75rem;margin-top:6px">${t('settings.obs_params')}</p>
       </div>`;
@@ -142,7 +142,7 @@
           <div class="card-title">${t('settings.webhooks_title')}</div>
           <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.webhooks_desc')}</p>
           <div id="webhooks-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div>
-          <button class="form-btn form-btn-primary mt-sm" onclick="showWebhookEditor()">${t('settings.webhook_add')}</button>
+          <button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showWebhookEditor()">${t('settings.webhook_add')}</button>
         </div>`;
       html += '</div>'; // end tab-notifications
 
@@ -167,22 +167,22 @@
           <div class="card-title">${t('settings.users_title')}</div>
           <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.users_desc')}</p>
           <div id="users-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div>
-          <button class="form-btn form-btn-primary mt-sm" onclick="showUserEditor()">${t('settings.user_add')}</button>
+          <button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showUserEditor()">${t('settings.user_add')}</button>
         </div>`;
       html += `
         <div class="settings-card">
           <div class="card-title">${t('settings.api_keys_title')}</div>
           <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.api_keys_desc')}</p>
           <div id="api-keys-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div>
-          <button class="form-btn form-btn-primary mt-sm" onclick="showApiKeyEditor()">${t('settings.api_key_add')}</button>
+          <button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showApiKeyEditor()">${t('settings.api_key_add')}</button>
         </div>`;
       html += `
         <div class="settings-card">
           <div class="card-title">${t('settings.push_title')}</div>
           <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.push_desc')}</p>
           <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-            <button class="form-btn form-btn-primary" onclick="subscribePush()">${t('settings.push_enable')}</button>
-            <button class="form-btn" onclick="unsubscribePush()">${t('settings.push_disable')}</button>
+            <button class="form-btn form-btn-primary" data-ripple onclick="subscribePush()">${t('settings.push_enable')}</button>
+            <button class="form-btn" data-ripple onclick="unsubscribePush()">${t('settings.push_disable')}</button>
           </div>
         </div>`;
       html += '</div>';
@@ -195,7 +195,7 @@
           <div class="card-title">${t('settings.printer_groups_title')}</div>
           <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.printer_groups_desc')}</p>
           <div id="printer-groups-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div>
-          <button class="form-btn form-btn-primary mt-sm" onclick="showPrinterGroupEditor()">${t('settings.printer_groups_add')}</button>
+          <button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showPrinterGroupEditor()">${t('settings.printer_groups_add')}</button>
         </div>`;
       html += `
         <div class="settings-card">
@@ -263,7 +263,7 @@
           <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.ecom_desc')}</p>
           <div id="ecom-license-area"><div class="text-muted" style="font-size:0.8rem">${t('settings.ecom_license_checking')}</div></div>
           <div id="ecom-section" style="display:none"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div>
-          <button class="form-btn form-btn-primary mt-sm" id="ecom-add-btn" style="display:none" onclick="showEcomEditor()">${t('settings.ecom_add')}</button>
+          <button class="form-btn form-btn-primary mt-sm" id="ecom-add-btn" style="display:none" data-ripple onclick="showEcomEditor()">${t('settings.ecom_add')}</button>
         </div>`;
       html += '</div>';
 
@@ -275,20 +275,20 @@
           <div class="card-title">${t('settings.custom_fields_title')}</div>
           <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.custom_fields_desc')}</p>
           <div id="custom-fields-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div>
-          <button class="form-btn form-btn-primary mt-sm" onclick="showCustomFieldEditor()">${t('settings.custom_fields_add')}</button>
+          <button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showCustomFieldEditor()">${t('settings.custom_fields_add')}</button>
         </div>`;
       html += `
         <div class="settings-card">
           <div class="card-title">${t('settings.brand_defaults_title')}</div>
           <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.brand_defaults_desc')}</p>
           <div id="brand-defaults-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div>
-          <button class="form-btn form-btn-primary mt-sm" onclick="showBrandDefaultEditor()">${t('settings.brand_defaults_add')}</button>
+          <button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showBrandDefaultEditor()">${t('settings.brand_defaults_add')}</button>
         </div>`;
       html += `
         <div class="settings-card" style="cursor:pointer" onclick="openPanel('learning')">
           <div class="card-title">${t('settings.courses_title')}</div>
           <p class="text-muted" style="font-size:0.85rem">${t('settings.courses_desc')}</p>
-          <button class="form-btn form-btn-sm mt-sm" onclick="openPanel('learning')">${t('learning.go_to')} \u2192</button>
+          <button class="form-btn form-btn-sm mt-sm" data-ripple onclick="openPanel('learning')">${t('learning.go_to')} \u2192</button>
         </div>`;
       html += '</div>';
 
@@ -328,7 +328,12 @@
       el.classList.toggle('active', el.textContent.trim() === document.querySelector(`.settings-tab[onclick*="'${tab}'"]`)?.textContent.trim());
     });
     document.querySelectorAll('.settings-tab-content').forEach(el => {
-      el.classList.toggle('active', el.id === 'tab-' + tab);
+      const isTarget = el.id === 'tab-' + tab;
+      el.classList.toggle('active', isTarget);
+      if (isTarget) {
+        el.classList.add('ix-tab-panel');
+        el.addEventListener('animationend', () => el.classList.remove('ix-tab-panel'), { once: true });
+      }
     });
     // Re-match tab buttons
     document.querySelectorAll('.settings-tab').forEach(el => {
@@ -370,8 +375,8 @@
           <input class="form-input" id="pf-access" value="" placeholder="${t('settings.access_code_hint')}">
         </div>
         <div class="form-actions">
-          <button class="form-btn" onclick="savePrinterForm('${printer?.id || ''}')">${t('settings.save')}</button>
-          <button class="form-btn form-btn-secondary" onclick="cancelPrinterForm()">${t('settings.cancel')}</button>
+          <button class="form-btn" data-ripple onclick="savePrinterForm('${printer?.id || ''}')">${t('settings.save')}</button>
+          <button class="form-btn form-btn-secondary" data-ripple onclick="cancelPrinterForm()">${t('settings.cancel')}</button>
         </div>
         <p class="text-muted mt-sm" style="font-size:0.75rem">${t('settings.auto_connect_hint')}</p>
       </div>`;
@@ -399,7 +404,7 @@
     const ip = document.getElementById('pf-ip')?.value.trim();
     const serial = document.getElementById('pf-serial')?.value.trim();
 
-    if (!name) { alert(t('settings.name_required')); return; }
+    if (!name) { showToast(t('settings.name_required'), 'warning'); return; }
 
     const accessCode = document.getElementById('pf-access')?.value.trim();
     const body = { name, model, ip, serial, accessCode };
@@ -421,7 +426,7 @@
       }
       loadSettings();
     } catch (e) {
-      alert(t('settings.save_failed'));
+      showToast(t('settings.save_failed'), 'error');
     }
   };
 
@@ -431,11 +436,12 @@
   };
 
   window.removePrinter = async function(id) {
-    if (!confirm(t('settings.confirm_delete'))) return;
-    try {
-      await fetch(`/api/printers/${id}`, { method: 'DELETE' });
-      loadSettings();
-    } catch (e) { /* ignore */ }
+    return confirmAction(t('settings.confirm_delete'), async () => {
+      try {
+        await fetch(`/api/printers/${id}`, { method: 'DELETE' });
+        loadSettings();
+      } catch (e) { /* ignore */ }
+    }, { danger: true });
   };
 
   window.changeLanguage = function(locale) {
@@ -466,28 +472,29 @@
             <div class="text-muted" style="font-size:0.8rem; margin-bottom:8px;">
               ${t('settings.demo_description', { count: data.printerIds.length })}
             </div>
-            <button class="form-btn form-btn-danger" onclick="deleteDemoData()">${t('settings.demo_delete')}</button>
+            <button class="form-btn form-btn-danger" data-ripple data-tooltip="${t('settings.demo_delete')}" onclick="deleteDemoData()">${t('settings.demo_delete')}</button>
           </div>`;
       }
     } catch { /* no demo data endpoint or error */ }
   }
 
   window.deleteDemoData = async function() {
-    if (!confirm(t('settings.demo_confirm'))) return;
-    try {
-      const res = await fetch('/api/demo', { method: 'DELETE' });
-      const data = await res.json();
-      if (data.deleted > 0) {
-        if (data.printerIds && window.printerState) {
-          for (const id of data.printerIds) {
-            window.printerState.removePrinter(id);
+    return confirmAction(t('settings.demo_confirm'), async () => {
+      try {
+        const res = await fetch('/api/demo', { method: 'DELETE' });
+        const data = await res.json();
+        if (data.deleted > 0) {
+          if (data.printerIds && window.printerState) {
+            for (const id of data.printerIds) {
+              window.printerState.removePrinter(id);
+            }
+            if (typeof updatePrinterSelector === 'function') updatePrinterSelector();
+            if (typeof updateConnectionBadge === 'function') updateConnectionBadge();
           }
-          if (typeof updatePrinterSelector === 'function') updatePrinterSelector();
-          if (typeof updateConnectionBadge === 'function') updateConnectionBadge();
+          loadSettings();
         }
-        loadSettings();
-      }
-    } catch { /* ignore */ }
+      } catch { /* ignore */ }
+    }, { danger: true });
   };
 
   // ---- Authentication Settings ----
@@ -521,14 +528,14 @@
 
           <div class="card-title mt-md" style="font-size:0.7rem">${t('settings.auth_users_title')}</div>
           <div id="auth-users-list"></div>
-          <button class="form-btn form-btn-sm mt-sm" onclick="addAuthUser()">${t('settings.auth_add_user')}</button>
+          <button class="form-btn form-btn-sm mt-sm" data-ripple onclick="addAuthUser()">${t('settings.auth_add_user')}</button>
 
           <div class="form-group mt-md">
             <label class="form-label">${t('settings.auth_session')}</label>
             <input class="form-input" type="number" id="auth-session-hours" value="${ac.sessionDurationHours || 24}" min="1" max="720" style="max-width:120px">
           </div>
           <div class="notif-save-row">
-            <button class="form-btn" id="auth-save-btn" onclick="saveAuthSettings()">${t('settings.auth_save')}</button>
+            <button class="form-btn" id="auth-save-btn" data-ripple onclick="saveAuthSettings()">${t('settings.auth_save')}</button>
             <span class="notif-save-status" id="auth-save-status"></span>
           </div>`;
       }
@@ -561,7 +568,7 @@
           <input class="form-input auth-user-input" type="password" value="${u.password || ''}"
                  placeholder="${u.password === '***' ? t('settings.auth_password_unchanged') : t('settings.auth_password_ph')}"
                  data-idx="${i}" data-field="password" onchange="updateAuthUser(this)">
-          <button class="form-btn form-btn-sm form-btn-danger" onclick="removeAuthUser(${i})" title="${t('settings.delete')}">✕</button>
+          <button class="form-btn form-btn-sm form-btn-danger" data-ripple data-tooltip="${t('settings.delete')}" onclick="removeAuthUser(${i})" title="${t('settings.delete')}">✕</button>
         </div>`;
     }
     html += '</div>';
@@ -590,7 +597,7 @@
   window.saveAuthSettings = async function() {
     const btn = document.getElementById('auth-save-btn');
     const status = document.getElementById('auth-save-status');
-    if (btn) btn.disabled = true;
+    if (btn) { btn.disabled = true; btn.classList.add('btn-loading'); }
     if (status) { status.textContent = t('settings.auth_saving'); status.style.color = ''; }
 
     const body = {
@@ -619,7 +626,7 @@
       if (status) { status.textContent = t('settings.auth_save_failed'); status.style.color = 'var(--accent-red)'; }
     }
 
-    if (btn) btn.disabled = false;
+    if (btn) { btn.disabled = false; btn.classList.remove('btn-loading'); }
     setTimeout(() => { if (status) { status.textContent = ''; status.style.color = ''; } }, 3000);
   };
 
@@ -755,7 +762,7 @@
       </div>
 
       <div class="notif-save-row">
-        <button class="form-btn" id="notif-save-btn" onclick="saveNotifSettings()">${t('settings.notif_save')}</button>
+        <button class="form-btn" id="notif-save-btn" data-ripple onclick="saveNotifSettings()">${t('settings.notif_save')}</button>
         <span class="notif-save-status" id="notif-save-status"></span>
       </div>
     </div>`;
@@ -821,7 +828,7 @@
   window.saveNotifSettings = async function() {
     const btn = document.getElementById('notif-save-btn');
     const status = document.getElementById('notif-save-status');
-    if (btn) btn.disabled = true;
+    if (btn) { btn.disabled = true; btn.classList.add('btn-loading'); }
     if (status) status.textContent = t('settings.notif_saving');
 
     const allEvents = ['print_started','print_finished','print_failed','print_cancelled','printer_error','maintenance_due','bed_cooled','drying_due','filament_low_stock','queue_item_started','queue_item_completed','queue_item_failed','queue_completed'];
@@ -868,7 +875,7 @@
       if (status) { status.textContent = t('settings.notif_save_failed'); status.style.color = 'var(--accent-red)'; }
     }
 
-    if (btn) btn.disabled = false;
+    if (btn) { btn.disabled = false; btn.classList.remove('btn-loading'); }
     setTimeout(() => { if (status) { status.textContent = ''; status.style.color = ''; } }, 3000);
   };
 
@@ -982,7 +989,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
           </label>
         </div>
-        ${cfg.accentColor ? `<button class="form-btn form-btn-sm form-btn-secondary mt-sm" onclick="setThemeAccent(null)">${t('settings.theme_accent_reset')}</button>` : ''}
+        ${cfg.accentColor ? `<button class="form-btn form-btn-sm form-btn-secondary mt-sm" data-ripple onclick="setThemeAccent(null)">${t('settings.theme_accent_reset')}</button>` : ''}
       </div>`;
 
     // Border radius
@@ -1000,7 +1007,7 @@
     // Reset
     html += `
       <div class="mt-md">
-        <button class="form-btn form-btn-secondary" onclick="resetTheme()">${t('settings.theme_reset')}</button>
+        <button class="form-btn form-btn-secondary" data-ripple onclick="resetTheme()">${t('settings.theme_reset')}</button>
       </div>`;
 
     return html;
@@ -1031,12 +1038,13 @@
   };
 
   window.resetTheme = function() {
-    if (!confirm(t('settings.theme_reset_confirm'))) return;
-    if (window.theme) window.theme.set({ preset: 'light', accentColor: null, radius: 12 });
-    if (window._activePanel === 'settings' && _activeTab === 'appearance') {
-      const container = document.getElementById('tab-appearance');
-      if (container) container.innerHTML = buildAppearanceTab();
-    }
+    return confirmAction(t('settings.theme_reset_confirm'), () => {
+      if (window.theme) window.theme.set({ preset: 'light', accentColor: null, radius: 12 });
+      if (window._activePanel === 'settings' && _activeTab === 'appearance') {
+        const container = document.getElementById('tab-appearance');
+        if (container) container.innerHTML = buildAppearanceTab();
+      }
+    }, {});
   };
 
   // ---- Webhook Management ----
@@ -1062,10 +1070,10 @@
           <div class="text-muted" style="font-size:0.8rem;word-break:break-all">${wh.url}</div>
           <div class="text-muted" style="font-size:0.75rem">${t('settings.webhook_template')}: ${wh.template} | ${t('settings.webhook_events')}: ${events.length === 0 ? t('common.all') : events.join(', ')}</div>
           <div class="wh-item-actions mt-xs">
-            <button class="form-btn form-btn-sm" onclick="testWebhook(${wh.id})">${t('settings.webhook_test')}</button>
-            <button class="form-btn form-btn-sm" onclick="showWebhookEditor(${wh.id})">${t('settings.webhook_edit')}</button>
-            <button class="form-btn form-btn-sm" onclick="showWebhookDeliveries(${wh.id})">${t('settings.webhook_deliveries')}</button>
-            <button class="form-btn form-btn-sm form-btn-danger" onclick="deleteWebhookItem(${wh.id})">${t('settings.webhook_delete')}</button>
+            <button class="form-btn form-btn-sm" data-ripple data-tooltip="${t('settings.webhook_test')}" onclick="testWebhook(${wh.id})">${t('settings.webhook_test')}</button>
+            <button class="form-btn form-btn-sm" data-ripple data-tooltip="${t('settings.webhook_edit')}" onclick="showWebhookEditor(${wh.id})">${t('settings.webhook_edit')}</button>
+            <button class="form-btn form-btn-sm" data-ripple data-tooltip="${t('settings.webhook_deliveries')}" onclick="showWebhookDeliveries(${wh.id})">${t('settings.webhook_deliveries')}</button>
+            <button class="form-btn form-btn-sm form-btn-danger" data-ripple data-tooltip="${t('settings.webhook_delete')}" onclick="deleteWebhookItem(${wh.id})">${t('settings.webhook_delete')}</button>
           </div>
         </div>`;
       }
@@ -1115,8 +1123,8 @@
           <input type="checkbox" id="wh-active" ${wh.active ? 'checked' : ''}>
         </div>
         <div class="modal-footer">
-          <button class="form-btn form-btn-secondary" onclick="document.getElementById('webhook-editor-modal').remove()">${t('common.cancel')}</button>
-          <button class="form-btn form-btn-primary" onclick="saveWebhook(${id || 'null'})">${t('common.save')}</button>
+          <button class="form-btn form-btn-secondary" data-ripple onclick="document.getElementById('webhook-editor-modal').remove()">${t('common.cancel')}</button>
+          <button class="form-btn form-btn-primary" data-ripple onclick="saveWebhook(${id || 'null'})">${t('common.save')}</button>
         </div>
       </div>
     </div>`;
@@ -1131,7 +1139,7 @@
     const active = document.getElementById('wh-active').checked ? 1 : 0;
     const events = [...document.querySelectorAll('.wh-events-grid input:checked')].map(i => i.value);
 
-    if (!name || !url) return alert(t('settings.webhook_name_url_required'));
+    if (!name || !url) { showToast(t('settings.webhook_name_url_required'), 'warning'); return; }
 
     const body = { name, url, secret, template, active, events };
     const endpoint = id ? `/api/webhooks/${id}` : '/api/webhooks';
@@ -1141,23 +1149,28 @@
       await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       document.getElementById('webhook-editor-modal')?.remove();
       loadWebhooks();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.testWebhook = async function(id) {
     try {
       const res = await fetch(`/api/webhooks/${id}/test`, { method: 'POST' });
       const data = await res.json();
-      alert(data.ok ? t('settings.webhook_test_sent') : 'Error: ' + (data.error || 'Unknown'));
-    } catch (e) { alert('Error: ' + e.message); }
+      if (data.ok) {
+        showToast(t('settings.webhook_test_sent'), 'success');
+      } else {
+        showToast(data.error || 'Unknown', 'error');
+      }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.deleteWebhookItem = async function(id) {
-    if (!confirm(t('settings.webhook_delete_confirm'))) return;
-    try {
-      await fetch(`/api/webhooks/${id}`, { method: 'DELETE' });
-      loadWebhooks();
-    } catch (e) { alert('Error: ' + e.message); }
+    return confirmAction(t('settings.webhook_delete_confirm'), async () => {
+      try {
+        await fetch(`/api/webhooks/${id}`, { method: 'DELETE' });
+        loadWebhooks();
+      } catch (e) { showToast(e.message, 'error'); }
+    }, { danger: true });
   };
 
   window.showWebhookDeliveries = async function(id) {
@@ -1185,7 +1198,7 @@
 
       html += '</div></div></div>';
       document.body.insertAdjacentHTML('beforeend', html);
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   // ---- Users Management ----
@@ -1213,8 +1226,8 @@
           </div>
           <div class="text-muted" style="font-size:0.75rem">${t('settings.user_last_login')}: ${u.last_login || t('common.never')}</div>
           <div class="wh-item-actions mt-xs">
-            <button class="form-btn form-btn-sm" onclick="showUserEditor(${u.id})">${t('settings.user_edit')}</button>
-            <button class="form-btn form-btn-sm form-btn-danger" onclick="deleteUserItem(${u.id})">${t('settings.user_delete')}</button>
+            <button class="form-btn form-btn-sm" data-ripple data-tooltip="${t('settings.user_edit')}" onclick="showUserEditor(${u.id})">${t('settings.user_edit')}</button>
+            <button class="form-btn form-btn-sm form-btn-danger" data-ripple data-tooltip="${t('settings.user_delete')}" onclick="deleteUserItem(${u.id})">${t('settings.user_delete')}</button>
           </div>
         </div>`;
       }
@@ -1253,8 +1266,8 @@
           <input class="form-input" type="password" id="user-password" placeholder="${id ? '••••••••' : ''}">
         </div>
         <div class="modal-footer">
-          <button class="form-btn form-btn-secondary" onclick="document.getElementById('user-editor-modal').remove()">${t('common.cancel')}</button>
-          <button class="form-btn form-btn-primary" onclick="saveUser(${id || 'null'})">${t('common.save')}</button>
+          <button class="form-btn form-btn-secondary" data-ripple onclick="document.getElementById('user-editor-modal').remove()">${t('common.cancel')}</button>
+          <button class="form-btn form-btn-primary" data-ripple onclick="saveUser(${id || 'null'})">${t('common.save')}</button>
         </div>
       </div>
     </div>`;
@@ -1267,8 +1280,8 @@
     const role_id = parseInt(document.getElementById('user-role').value) || null;
     const password = document.getElementById('user-password').value;
 
-    if (!username) return alert(t('settings.username_required'));
-    if (!id && !password) return alert(t('settings.password_required_new'));
+    if (!username) { showToast(t('settings.username_required'), 'warning'); return; }
+    if (!id && !password) { showToast(t('settings.password_required_new'), 'warning'); return; }
 
     const body = { username, display_name, role_id };
     if (password) body.password = password;
@@ -1281,15 +1294,16 @@
       });
       document.getElementById('user-editor-modal')?.remove();
       loadUsers();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.deleteUserItem = async function(id) {
-    if (!confirm(t('settings.user_delete_confirm'))) return;
-    try {
-      await fetch(`/api/users/${id}`, { method: 'DELETE' });
-      loadUsers();
-    } catch (e) { alert('Error: ' + e.message); }
+    return confirmAction(t('settings.user_delete_confirm'), async () => {
+      try {
+        await fetch(`/api/users/${id}`, { method: 'DELETE' });
+        loadUsers();
+      } catch (e) { showToast(e.message, 'error'); }
+    }, { danger: true });
   };
 
   // ---- API Key Management ----
@@ -1318,7 +1332,7 @@
             ${k.expires_at ? ` | ${t('common.expires')}: ${k.expires_at}` : ''}
           </div>
           <div class="wh-item-actions mt-xs">
-            <button class="form-btn form-btn-sm form-btn-danger" onclick="deleteApiKeyItem(${k.id})">${t('settings.api_key_delete')}</button>
+            <button class="form-btn form-btn-sm form-btn-danger" data-ripple data-tooltip="${t('settings.api_key_delete')}" onclick="deleteApiKeyItem(${k.id})">${t('settings.api_key_delete')}</button>
           </div>
         </div>`;
       }
@@ -1346,8 +1360,8 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="form-btn form-btn-secondary" onclick="document.getElementById('api-key-editor-modal').remove()">${t('common.cancel')}</button>
-          <button class="form-btn form-btn-primary" id="apikey-create-btn" onclick="createApiKey()">${t('settings.api_key_generate')}</button>
+          <button class="form-btn form-btn-secondary" data-ripple onclick="document.getElementById('api-key-editor-modal').remove()">${t('common.cancel')}</button>
+          <button class="form-btn form-btn-primary" data-ripple id="apikey-create-btn" onclick="createApiKey()">${t('settings.api_key_generate')}</button>
         </div>
       </div>
     </div>`;
@@ -1356,7 +1370,7 @@
 
   window.createApiKey = async function() {
     const name = document.getElementById('apikey-name').value.trim();
-    if (!name) return alert(t('settings.name_required'));
+    if (!name) { showToast(t('settings.name_required'), 'warning'); return; }
     const expires = document.getElementById('apikey-expires').value;
 
     try {
@@ -1372,15 +1386,16 @@
         document.getElementById('apikey-create-btn').style.display = 'none';
         loadApiKeys();
       }
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.deleteApiKeyItem = async function(id) {
-    if (!confirm(t('settings.api_key_delete_confirm'))) return;
-    try {
-      await fetch(`/api/keys/${id}`, { method: 'DELETE' });
-      loadApiKeys();
-    } catch (e) { alert('Error: ' + e.message); }
+    return confirmAction(t('settings.api_key_delete_confirm'), async () => {
+      try {
+        await fetch(`/api/keys/${id}`, { method: 'DELETE' });
+        loadApiKeys();
+      } catch (e) { showToast(e.message, 'error'); }
+    }, { danger: true });
   };
 
   // ---- E-Commerce License + Management ----
@@ -1404,7 +1419,7 @@
             <span><strong>${t('settings.ecom_license_holder')}:</strong> ${_esc(lic.holder || '-')}</span>
             <span><strong>${t('settings.ecom_license_expires')}:</strong> ${lic.expires_at ? new Date(lic.expires_at).toLocaleDateString() : '-'}</span>
             <span><strong>${t('settings.ecom_fees_month')}:</strong> ${feeStr} (${lic.orders_this_month || 0} ${t('settings.ecom_fees_orders')})</span>
-            <button class="form-btn form-btn-sm form-btn-danger" onclick="deactivateEcomLicense()" style="margin-left:auto">${t('settings.ecom_deactivate')}</button>
+            <button class="form-btn form-btn-sm form-btn-danger" data-ripple data-tooltip="${t('settings.ecom_deactivate')}" onclick="deactivateEcomLicense()" style="margin-left:auto">${t('settings.ecom_deactivate')}</button>
           </div>`;
         if (ecomSection) ecomSection.style.display = '';
         if (addBtn) addBtn.style.display = '';
@@ -1427,7 +1442,7 @@
               <input class="form-input" id="ecom-license-email" placeholder="${t('settings.ecom_license_email_ph') || 'din@epost.no'}">
             </div>
             <div style="display:flex;gap:0.5rem;align-items:center">
-              <button class="form-btn form-btn-primary" onclick="activateEcomLicense()">${t('settings.ecom_activate')}</button>
+              <button class="form-btn form-btn-primary" data-ripple onclick="activateEcomLicense()">${t('settings.ecom_activate')}</button>
               <a href="https://geektech.no/registrer" target="_blank" rel="noopener" style="font-size:0.85rem">${t('settings.ecom_create_account')}</a>
             </div>
           </div>`;
@@ -1440,7 +1455,7 @@
   window.activateEcomLicense = async function() {
     const key = document.getElementById('ecom-license-key')?.value?.trim();
     const email = document.getElementById('ecom-license-email')?.value?.trim();
-    if (!key) return alert(t('settings.ecom_license_invalid'));
+    if (!key) { showToast(t('settings.ecom_license_invalid'), 'warning'); return; }
     try {
       const res = await fetch('/api/ecommerce/license/activate', {
         method: 'POST',
@@ -1449,21 +1464,22 @@
       });
       const data = await res.json();
       if (data.valid) {
-        alert(t('settings.ecom_license_activated'));
+        showToast(t('settings.ecom_license_activated'), 'success');
       } else {
-        alert(data.error || t('settings.ecom_license_invalid'));
+        showToast(data.error || t('settings.ecom_license_invalid'), 'error');
       }
       loadEcomLicenseStatus();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.deactivateEcomLicense = async function() {
-    if (!confirm(t('settings.ecom_deactivate') + '?')) return;
-    try {
-      await fetch('/api/ecommerce/license/deactivate', { method: 'POST' });
-      alert(t('settings.ecom_license_deactivated'));
-      loadEcomLicenseStatus();
-    } catch (e) { alert('Error: ' + e.message); }
+    return confirmAction(t('settings.ecom_deactivate') + '?', async () => {
+      try {
+        await fetch('/api/ecommerce/license/deactivate', { method: 'POST' });
+        showToast(t('settings.ecom_license_deactivated'), 'success');
+        loadEcomLicenseStatus();
+      } catch (e) { showToast(e.message, 'error'); }
+    }, { danger: true });
   };
 
   async function loadEcomConfigs() {
@@ -1482,8 +1498,8 @@
             ${c.auto_queue ? '<span class="wh-badge" style="background:rgba(0,180,255,0.15);color:#00b4ff">' + t('settings.auto_queue') + '</span>' : ''}
           </div>
           <div style="display:flex;gap:0.3rem">
-            <button class="form-btn form-btn-sm" onclick="showEcomEditor(${c.id})">${t('settings.webhook_edit')}</button>
-            <button class="form-btn form-btn-sm form-btn-danger" onclick="deleteEcomConfig(${c.id})">${t('settings.webhook_delete')}</button>
+            <button class="form-btn form-btn-sm" data-ripple data-tooltip="${t('settings.webhook_edit')}" onclick="showEcomEditor(${c.id})">${t('settings.webhook_edit')}</button>
+            <button class="form-btn form-btn-sm form-btn-danger" data-ripple data-tooltip="${t('settings.webhook_delete')}" onclick="deleteEcomConfig(${c.id})">${t('settings.webhook_delete')}</button>
           </div>
         </div>`).join('');
     } catch (e) { el.innerHTML = `<span class="text-muted">Error: ${e.message}</span>`; }
@@ -1536,8 +1552,8 @@
           </label>
         </div>
         <div class="modal-footer">
-          <button class="form-btn form-btn-secondary" onclick="document.getElementById('ecom-editor-modal').remove()">${t('common.cancel')}</button>
-          <button class="form-btn form-btn-primary" onclick="saveEcomConfig(${id || 'null'})">${t('common.save')}</button>
+          <button class="form-btn form-btn-secondary" data-ripple onclick="document.getElementById('ecom-editor-modal').remove()">${t('common.cancel')}</button>
+          <button class="form-btn form-btn-primary" data-ripple onclick="saveEcomConfig(${id || 'null'})">${t('common.save')}</button>
         </div>
       </div>
     </div>`;
@@ -1556,7 +1572,7 @@
       sku_to_file_mapping: skuMap,
       active: document.getElementById('ecom-active').checked
     };
-    if (!data.name) return alert(t('settings.name_required'));
+    if (!data.name) { showToast(t('settings.name_required'), 'warning'); return; }
     try {
       await fetch(id ? `/api/ecommerce/configs/${id}` : '/api/ecommerce/configs', {
         method: id ? 'PUT' : 'POST',
@@ -1565,15 +1581,16 @@
       });
       document.getElementById('ecom-editor-modal')?.remove();
       loadEcomConfigs();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.deleteEcomConfig = async function(id) {
-    if (!confirm(t('settings.ecom_delete_confirm'))) return;
-    try {
-      await fetch(`/api/ecommerce/configs/${id}`, { method: 'DELETE' });
-      loadEcomConfigs();
-    } catch (e) { alert('Error: ' + e.message); }
+    return confirmAction(t('settings.ecom_delete_confirm'), async () => {
+      try {
+        await fetch(`/api/ecommerce/configs/${id}`, { method: 'DELETE' });
+        loadEcomConfigs();
+      } catch (e) { showToast(e.message, 'error'); }
+    }, { danger: true });
   };
 
   // ---- Timelapse Settings ----
@@ -1601,8 +1618,8 @@
             ${r.file_size_bytes ? '<span class="text-muted" style="margin-left:0.3rem">' + (r.file_size_bytes / 1024 / 1024).toFixed(1) + 'MB</span>' : ''}
           </div>
           <div style="display:flex;gap:0.3rem">
-            ${r.status === 'complete' ? `<a class="form-btn form-btn-sm" href="/api/timelapse/${r.id}/video" target="_blank">${t('common.view')}</a>` : ''}
-            <button class="form-btn form-btn-sm form-btn-danger" onclick="deleteTimelapse(${r.id})">${t('common.delete')}</button>
+            ${r.status === 'complete' ? `<a class="form-btn form-btn-sm" data-ripple data-tooltip="${t('common.view')}" href="/api/timelapse/${r.id}/video" target="_blank">${t('common.view')}</a>` : ''}
+            <button class="form-btn form-btn-sm form-btn-danger" data-ripple data-tooltip="${t('common.delete')}" onclick="deleteTimelapse(${r.id})">${t('common.delete')}</button>
           </div>
         </div>`).join('');
     } catch {}
@@ -1615,15 +1632,16 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ value: enabled ? '1' : '0' })
       });
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.deleteTimelapse = async function(id) {
-    if (!confirm(t('settings.timelapse_delete_confirm'))) return;
-    try {
-      await fetch(`/api/timelapse/${id}`, { method: 'DELETE' });
-      loadTimelapseSettings();
-    } catch (e) { alert('Error: ' + e.message); }
+    return confirmAction(t('settings.timelapse_delete_confirm'), async () => {
+      try {
+        await fetch(`/api/timelapse/${id}`, { method: 'DELETE' });
+        loadTimelapseSettings();
+      } catch (e) { showToast(e.message, 'error'); }
+    }, { danger: true });
   };
 
   // ---- Hub/Kiosk Settings ----
@@ -1686,7 +1704,7 @@
         section.innerHTML = '<div class="text-muted" style="font-size:0.8rem">' + t('settings.no_printer_groups') + '</div>';
         return;
       }
-      section.innerHTML = groups.map(g => `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0;border-bottom:1px solid var(--border)"><span style="font-size:0.85rem">${_esc(g.name)} ${g.color ? '<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:' + _esc(g.color) + '"></span>' : ''} <span class="text-muted">(${(g.members || []).length} printers, stagger: ${g.stagger_delay_s}s)</span></span><button class="form-btn form-btn-sm" onclick="deletePrinterGroupSetting(${g.id})" style="font-size:0.75rem">${t('common.delete')}</button></div>`).join('');
+      section.innerHTML = groups.map(g => `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0;border-bottom:1px solid var(--border)"><span style="font-size:0.85rem">${_esc(g.name)} ${g.color ? '<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:' + _esc(g.color) + '"></span>' : ''} <span class="text-muted">(${(g.members || []).length} printers, stagger: ${g.stagger_delay_s}s)</span></span><button class="form-btn form-btn-sm" data-ripple data-tooltip="${t('common.delete')}" onclick="deletePrinterGroupSetting(${g.id})" style="font-size:0.75rem">${t('common.delete')}</button></div>`).join('');
     } catch {}
   }
 
@@ -1724,8 +1742,8 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="form-btn form-btn-secondary" onclick="document.getElementById('pg-editor-modal').remove()">${t('common.cancel')}</button>
-          <button class="form-btn form-btn-primary" onclick="savePrinterGroup()">${t('common.save')}</button>
+          <button class="form-btn form-btn-secondary" data-ripple onclick="document.getElementById('pg-editor-modal').remove()">${t('common.cancel')}</button>
+          <button class="form-btn form-btn-primary" data-ripple onclick="savePrinterGroup()">${t('common.save')}</button>
         </div>
       </div>
     </div>`;
@@ -1734,7 +1752,7 @@
 
   window.savePrinterGroup = async function() {
     const name = document.getElementById('pg-name')?.value.trim();
-    if (!name) return alert(t('settings.pg_name_required'));
+    if (!name) { showToast(t('settings.pg_name_required'), 'warning'); return; }
     const body = {
       name,
       description: document.getElementById('pg-desc')?.value.trim() || null,
@@ -1750,13 +1768,14 @@
       });
       document.getElementById('pg-editor-modal')?.remove();
       loadPrinterGroupsSettings();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.deletePrinterGroupSetting = async function(id) {
-    if (!confirm(t('settings.pg_delete_confirm'))) return;
-    await fetch(`/api/printer-groups/${id}`, { method: 'DELETE' });
-    loadPrinterGroupsSettings();
+    return confirmAction(t('settings.pg_delete_confirm'), async () => {
+      await fetch(`/api/printer-groups/${id}`, { method: 'DELETE' });
+      loadPrinterGroupsSettings();
+    }, { danger: true });
   };
 
   // ---- Custom Fields Settings ----
@@ -1770,7 +1789,7 @@
         section.innerHTML = '<div class="text-muted" style="font-size:0.8rem">' + t('settings.no_custom_fields') + '</div>';
         return;
       }
-      section.innerHTML = fields.map(f => `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0;border-bottom:1px solid var(--border)"><span style="font-size:0.85rem">${_esc(f.field_label)} <span class="text-muted">(${_esc(f.entity_type)} / ${_esc(f.field_type)})</span></span><button class="form-btn form-btn-sm" onclick="deleteCustomFieldSetting(${f.id})" style="font-size:0.75rem">${t('common.delete')}</button></div>`).join('');
+      section.innerHTML = fields.map(f => `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0;border-bottom:1px solid var(--border)"><span style="font-size:0.85rem">${_esc(f.field_label)} <span class="text-muted">(${_esc(f.entity_type)} / ${_esc(f.field_type)})</span></span><button class="form-btn form-btn-sm" data-ripple data-tooltip="${t('common.delete')}" onclick="deleteCustomFieldSetting(${f.id})" style="font-size:0.75rem">${t('common.delete')}</button></div>`).join('');
     } catch {}
   }
 
@@ -1810,8 +1829,8 @@
           </label>
         </div>
         <div class="modal-footer">
-          <button class="form-btn form-btn-secondary" onclick="document.getElementById('cf-editor-modal').remove()">${t('common.cancel')}</button>
-          <button class="form-btn form-btn-primary" onclick="saveCustomField()">${t('common.save')}</button>
+          <button class="form-btn form-btn-secondary" data-ripple onclick="document.getElementById('cf-editor-modal').remove()">${t('common.cancel')}</button>
+          <button class="form-btn form-btn-primary" data-ripple onclick="saveCustomField()">${t('common.save')}</button>
         </div>
       </div>
     </div>`;
@@ -1821,7 +1840,7 @@
   window.saveCustomField = async function() {
     const field_name = document.getElementById('cf-name')?.value.trim();
     const field_label = document.getElementById('cf-label')?.value.trim();
-    if (!field_name || !field_label) return alert(t('settings.cf_name_required'));
+    if (!field_name || !field_label) { showToast(t('settings.cf_name_required'), 'warning'); return; }
     const body = {
       entity_type: document.getElementById('cf-entity')?.value || 'spool',
       field_name,
@@ -1838,13 +1857,14 @@
       });
       document.getElementById('cf-editor-modal')?.remove();
       loadCustomFieldsSettings();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.deleteCustomFieldSetting = async function(id) {
-    if (!confirm(t('settings.cf_delete_confirm'))) return;
-    await fetch(`/api/custom-fields/${id}`, { method: 'DELETE' });
-    loadCustomFieldsSettings();
+    return confirmAction(t('settings.cf_delete_confirm'), async () => {
+      await fetch(`/api/custom-fields/${id}`, { method: 'DELETE' });
+      loadCustomFieldsSettings();
+    }, { danger: true });
   };
 
   // ---- Brand Defaults Settings ----
@@ -1858,7 +1878,7 @@
         section.innerHTML = '<div class="text-muted" style="font-size:0.8rem">' + t('settings.no_brand_defaults') + '</div>';
         return;
       }
-      section.innerHTML = defaults.map(d => `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0;border-bottom:1px solid var(--border)"><span style="font-size:0.85rem">${_esc(d.manufacturer)} ${d.material ? '(' + _esc(d.material) + ')' : ''} <span class="text-muted">${d.default_extruder_temp ? d.default_extruder_temp + '°C' : ''}</span></span><button class="form-btn form-btn-sm" onclick="deleteBrandDefaultSetting(${d.id})" style="font-size:0.75rem">${t('common.delete')}</button></div>`).join('');
+      section.innerHTML = defaults.map(d => `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.25rem 0;border-bottom:1px solid var(--border)"><span style="font-size:0.85rem">${_esc(d.manufacturer)} ${d.material ? '(' + _esc(d.material) + ')' : ''} <span class="text-muted">${d.default_extruder_temp ? d.default_extruder_temp + '°C' : ''}</span></span><button class="form-btn form-btn-sm" data-ripple data-tooltip="${t('common.delete')}" onclick="deleteBrandDefaultSetting(${d.id})" style="font-size:0.75rem">${t('common.delete')}</button></div>`).join('');
     } catch {}
   }
 
@@ -1898,8 +1918,8 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button class="form-btn form-btn-secondary" onclick="document.getElementById('bd-editor-modal').remove()">${t('common.cancel')}</button>
-          <button class="form-btn form-btn-primary" onclick="saveBrandDefault()">${t('common.save')}</button>
+          <button class="form-btn form-btn-secondary" data-ripple onclick="document.getElementById('bd-editor-modal').remove()">${t('common.cancel')}</button>
+          <button class="form-btn form-btn-primary" data-ripple onclick="saveBrandDefault()">${t('common.save')}</button>
         </div>
       </div>
     </div>`;
@@ -1908,7 +1928,7 @@
 
   window.saveBrandDefault = async function() {
     const manufacturer = document.getElementById('bd-manufacturer')?.value.trim();
-    if (!manufacturer) return alert(t('settings.bd_manufacturer_required'));
+    if (!manufacturer) { showToast(t('settings.bd_manufacturer_required'), 'warning'); return; }
     const body = {
       manufacturer,
       material: document.getElementById('bd-material')?.value.trim() || null,
@@ -1925,13 +1945,14 @@
       });
       document.getElementById('bd-editor-modal')?.remove();
       loadBrandDefaultsSettings();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.deleteBrandDefaultSetting = async function(id) {
-    if (!confirm(t('settings.bd_delete_confirm'))) return;
-    await fetch(`/api/brand-defaults/${id}`, { method: 'DELETE' });
-    loadBrandDefaultsSettings();
+    return confirmAction(t('settings.bd_delete_confirm'), async () => {
+      await fetch(`/api/brand-defaults/${id}`, { method: 'DELETE' });
+      loadBrandDefaultsSettings();
+    }, { danger: true });
   };
 
 })();

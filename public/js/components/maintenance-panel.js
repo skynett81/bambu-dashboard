@@ -97,7 +97,7 @@
       } else {
         h += `<p class="text-muted">${t('maintenance.no_nozzle_data')}</p>`;
       }
-      h += `<button class="form-btn form-btn-sm mt-sm" onclick="toggleNozzleChangeForm()">${t('maintenance.log_nozzle_change')}</button>
+      h += `<button class="form-btn form-btn-sm mt-sm" data-ripple onclick="toggleNozzleChangeForm()">${t('maintenance.log_nozzle_change')}</button>
         <div id="nozzle-change-form" style="display:none" class="settings-form mt-sm">
           <div class="form-group" style="margin-bottom:8px">
             <label class="form-label">${t('maintenance.nozzle_type')}</label>
@@ -115,7 +115,7 @@
               <option value="0.8">0.8mm</option>
             </select>
           </div>
-          <button class="form-btn" onclick="submitNozzleChange()">${t('maintenance.save')}</button>
+          <button class="form-btn" data-ripple onclick="submitNozzleChange()">${t('maintenance.save')}</button>
         </div>`;
       return h;
     },
@@ -185,7 +185,7 @@
     },
 
     'log-form': () => {
-      return `<button class="form-btn" onclick="toggleMaintenanceForm()">${t('maintenance.log_event')}</button>
+      return `<button class="form-btn" data-ripple onclick="toggleMaintenanceForm()">${t('maintenance.log_event')}</button>
         <div id="maint-form-area" style="display:none" class="settings-form mt-sm">
           <div class="flex gap-sm" style="flex-wrap:wrap;align-items:flex-end">
             <div class="form-group" style="flex:1;min-width:120px;margin-bottom:0">
@@ -204,7 +204,7 @@
               <label class="form-label">${t('maintenance.notes')}</label>
               <input class="form-input" id="maint-notes" placeholder="${t('waste.notes_placeholder')}">
             </div>
-            <button class="form-btn" onclick="submitMaintenance()">${t('maintenance.save')}</button>
+            <button class="form-btn" data-ripple onclick="submitMaintenance()">${t('maintenance.save')}</button>
           </div>
         </div>`;
     },
@@ -313,15 +313,15 @@
         ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>'
         : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>';
       html += `<div class="stats-toolbar">
-        <button class="form-btn" onclick="showGlobalNozzleChange()" style="display:flex;align-items:center;gap:4px">
+        <button class="form-btn" data-ripple data-tooltip="${t('maintenance.log_nozzle_change')}" onclick="showGlobalNozzleChange()" style="display:flex;align-items:center;gap:4px">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
           <span>${t('maintenance.log_nozzle_change')}</span>
         </button>
-        <button class="form-btn" onclick="showGlobalMaintEvent()" style="display:flex;align-items:center;gap:4px">
+        <button class="form-btn" data-ripple data-tooltip="${t('maintenance.log_event')}" onclick="showGlobalMaintEvent()" style="display:flex;align-items:center;gap:4px">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>${t('maintenance.log_event')}</span>
         </button>
-        <button class="speed-btn ${_locked ? '' : 'active'}" onclick="toggleMaintLock()" title="${_locked ? t('maintenance.layout_locked') : t('maintenance.layout_unlocked')}">
+        <button class="speed-btn ${_locked ? '' : 'active'}" data-ripple onclick="toggleMaintLock()" title="${_locked ? t('maintenance.layout_locked') : t('maintenance.layout_unlocked')}">
           ${lockIcon} <span>${_locked ? t('maintenance.layout_locked') : t('maintenance.layout_unlocked')}</span>
         </button>
       </div>`;
@@ -332,14 +332,15 @@
       // Tab bar
       html += '<div class="tabs">';
       for (const [id, cfg] of Object.entries(TAB_CONFIG)) {
-        html += `<button class="tab-btn maint-tab-btn ${id === _activeTab ? 'active' : ''}" data-tab="${id}" onclick="switchMaintTab('${id}')">${t(cfg.label)}</button>`;
+        html += `<button class="tab-btn maint-tab-btn ${id === _activeTab ? 'active' : ''}" data-tab="${id}" data-ripple onclick="switchMaintTab('${id}')">${t(cfg.label)}</button>`;
       }
       html += '</div>';
 
       // Tab panels
       for (const [tabId, cfg] of Object.entries(TAB_CONFIG)) {
         const order = getOrder(tabId);
-        html += `<div class="tab-panel maint-tab-panel stats-tab-panel ${tabId === _activeTab ? 'active' : ''}" id="maint-tab-${tabId}" style="display:${tabId === _activeTab ? 'grid' : 'none'}">`;
+        html += `<div class="tab-panel maint-tab-panel stats-tab-panel stagger-in ix-tab-panel ${tabId === _activeTab ? 'active' : ''}" id="maint-tab-${tabId}" style="display:${tabId === _activeTab ? 'grid' : 'none'}">`;
+        let _si = 0;
         for (const modId of order) {
           const builder = BUILDERS[modId];
           if (!builder) continue;
@@ -348,7 +349,7 @@
           const draggable = _locked ? '' : 'draggable="true"';
           const unlocked = _locked ? '' : ' stats-module-unlocked';
           const isFull = (MODULE_SIZE[modId] || 'full') === 'full';
-          html += `<div class="stats-module${unlocked}${isFull ? ' stats-module-full' : ''}" data-module-id="${modId}" ${draggable}>`;
+          html += `<div class="stats-module${unlocked}${isFull ? ' stats-module-full' : ''}" data-module-id="${modId}" ${draggable} style="--i:${_si++}">`;
           if (!_locked) html += '<div class="stats-module-handle" title="Drag to reorder">&#x2630;</div>';
           html += content;
           html += '</div>';
@@ -392,8 +393,8 @@
               <option value="0.8">0.8mm</option>
             </select>
           </div>
-          <button class="form-btn" onclick="submitGlobalNozzleChange()">${t('maintenance.save')}</button>
-          <button class="form-btn form-btn-sm" style="background:transparent;color:var(--text-muted)" onclick="hideGlobalMaintForm()">${t('settings.cancel')}</button>
+          <button class="form-btn" data-ripple onclick="submitGlobalNozzleChange()">${t('maintenance.save')}</button>
+          <button class="form-btn form-btn-sm" data-ripple style="background:transparent;color:var(--text-muted)" onclick="hideGlobalMaintForm()">${t('settings.cancel')}</button>
         </div>
       </div>
     </div>`;
@@ -423,8 +424,8 @@
             <label class="form-label">${t('maintenance.notes')}</label>
             <input class="form-input" id="global-maint-notes" placeholder="${t('waste.notes_placeholder')}">
           </div>
-          <button class="form-btn" onclick="submitGlobalMaintEvent()">${t('maintenance.save')}</button>
-          <button class="form-btn form-btn-sm" style="background:transparent;color:var(--text-muted)" onclick="hideGlobalMaintForm()">${t('settings.cancel')}</button>
+          <button class="form-btn" data-ripple onclick="submitGlobalMaintEvent()">${t('maintenance.save')}</button>
+          <button class="form-btn form-btn-sm" data-ripple style="background:transparent;color:var(--text-muted)" onclick="hideGlobalMaintForm()">${t('settings.cancel')}</button>
         </div>
       </div>
     </div>`;

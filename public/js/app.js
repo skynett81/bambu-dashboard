@@ -267,6 +267,7 @@ const PANEL_TITLES = {
   protection: 'protection.title',
   modelinfo: 'tabs.model_info',
   learning: 'tabs.learning',
+  knowledge: 'nav.knowledge',
   settings: 'tabs.settings'
 };
 
@@ -283,6 +284,7 @@ const PANEL_LOADERS = {
   protection: () => { if (typeof loadProtectionPanel === 'function') loadProtectionPanel(); },
   modelinfo: () => { if (typeof loadModelInfoPanel === 'function') loadModelInfoPanel(); },
   learning: () => { if (typeof loadLearningPanel === 'function') loadLearningPanel(); },
+  knowledge: () => { if (typeof loadKnowledgePanel === 'function') loadKnowledgePanel(); },
   settings: () => { if (typeof loadSettingsPanel === 'function') loadSettingsPanel(); }
 };
 
@@ -304,18 +306,59 @@ window.openPanel = function(name, skipHash) {
   // Update URL hash
   if (!skipHash) history.replaceState(null, '', '#' + name);
 
-  // Highlight sidebar button
+  // Highlight sidebar button and expand its section
   document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
   document.querySelector(`.sidebar-btn[data-panel="${name}"]`)?.classList.add('active');
+  _expandSectionForPanel(name);
 
   // Hide dashboard + stats strip, show panel
-  dashboardGrid.style.display = 'none';
-  if (statsStrip) statsStrip.style.display = 'none';
-  panelContent.style.display = 'flex';
+  dashboardGrid.classList.add('view-hidden');
+  if (statsStrip) statsStrip.classList.add('view-hidden');
+  panelContent.classList.add('panel-active');
 
-  // Clear and load content
+  // Show skeleton while content loads — tailored per panel type
   const body = document.getElementById('overlay-panel-body');
-  if (body) body.innerHTML = '';
+  if (body) {
+    const gridPanels = ['controls', 'filament', 'stats', 'maintenance', 'learning', 'knowledge'];
+    const tablePanels = ['history', 'errors', 'queue', 'waste'];
+    let skel;
+    if (gridPanels.includes(name)) {
+      // Tab bar + card grid skeleton
+      skel = '<div style="padding:8px 0">' +
+        '<div style="display:flex;gap:8px;margin-bottom:16px">' +
+        '<div class="skeleton" style="height:32px;width:80px;border-radius:6px"></div>' +
+        '<div class="skeleton" style="height:32px;width:80px;border-radius:6px"></div>' +
+        '<div class="skeleton" style="height:32px;width:80px;border-radius:6px"></div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px">' +
+        '<div class="skeleton skeleton-block" style="height:140px"></div>' +
+        '<div class="skeleton skeleton-block" style="height:140px"></div>' +
+        '<div class="skeleton skeleton-block" style="height:140px"></div>' +
+        '<div class="skeleton skeleton-block" style="height:140px"></div>' +
+        '</div></div>';
+    } else if (tablePanels.includes(name)) {
+      // Filter bar + list rows skeleton
+      skel = '<div style="padding:8px 0">' +
+        '<div style="display:flex;gap:8px;margin-bottom:16px">' +
+        '<div class="skeleton" style="height:32px;width:120px;border-radius:6px"></div>' +
+        '<div class="skeleton" style="height:32px;flex:1;border-radius:6px"></div>' +
+        '</div>' +
+        '<div class="skeleton skeleton-block" style="height:48px;margin-bottom:6px"></div>' +
+        '<div class="skeleton skeleton-block" style="height:48px;margin-bottom:6px"></div>' +
+        '<div class="skeleton skeleton-block" style="height:48px;margin-bottom:6px"></div>' +
+        '<div class="skeleton skeleton-block" style="height:48px;margin-bottom:6px"></div>' +
+        '<div class="skeleton skeleton-block" style="height:48px"></div>' +
+        '</div>';
+    } else {
+      // Generic skeleton
+      skel = '<div style="padding:8px 0">' +
+        '<div class="skeleton skeleton-block" style="height:40px;margin-bottom:12px"></div>' +
+        '<div class="skeleton skeleton-block" style="height:180px;margin-bottom:12px"></div>' +
+        '<div class="skeleton skeleton-text" style="width:45%"></div>' +
+        '</div>';
+    }
+    body.innerHTML = skel;
+  }
 
   if (PANEL_LOADERS[name]) PANEL_LOADERS[name]();
 };
@@ -328,9 +371,9 @@ window.showDashboard = function(skipHash) {
 
   closeSidebarIfMobile();
 
-  dashboardGrid.style.display = '';
-  if (statsStrip) statsStrip.style.display = '';
-  panelContent.style.display = 'none';
+  dashboardGrid.classList.remove('view-hidden');
+  if (statsStrip) statsStrip.classList.remove('view-hidden');
+  panelContent.classList.remove('panel-active');
   window._activePanel = null;
 
   // Update URL hash
@@ -355,6 +398,63 @@ window.refreshAllComponents = function() {
   window.reloadActiveTab();
 };
 
+// ---- Sidebar Collapse ----
+
+const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed';
+const SIDEBAR_SECTIONS_KEY = 'sidebar-sections';
+
+window.toggleSidebarCollapse = function() {
+  const sidebar = document.getElementById('sidebar');
+  if (!sidebar || window.innerWidth <= 768) return;
+  const isCollapsed = sidebar.classList.toggle('collapsed');
+  try { localStorage.setItem(SIDEBAR_COLLAPSED_KEY, isCollapsed ? '1' : '0'); } catch (_) {}
+};
+
+// ---- Sidebar Sections (collapsible groups) ----
+
+window.toggleSidebarSection = function(name) {
+  const section = document.querySelector(`.sidebar-section[data-section="${name}"]`);
+  if (!section) return;
+  section.classList.toggle('collapsed');
+  _saveSidebarSections();
+};
+
+function _saveSidebarSections() {
+  try {
+    const state = {};
+    document.querySelectorAll('.sidebar-section').forEach(s => {
+      state[s.dataset.section] = s.classList.contains('collapsed') ? 0 : 1;
+    });
+    localStorage.setItem(SIDEBAR_SECTIONS_KEY, JSON.stringify(state));
+  } catch (_) {}
+}
+
+function _restoreSidebarSections() {
+  try {
+    const raw = localStorage.getItem(SIDEBAR_SECTIONS_KEY);
+    if (!raw) return;
+    const state = JSON.parse(raw);
+    for (const [name, open] of Object.entries(state)) {
+      const section = document.querySelector(`.sidebar-section[data-section="${name}"]`);
+      if (section) {
+        if (open) section.classList.remove('collapsed');
+        else section.classList.add('collapsed');
+      }
+    }
+  } catch (_) {}
+}
+
+// Auto-expand section when its child panel becomes active
+function _expandSectionForPanel(panelName) {
+  const btn = document.querySelector(`.sidebar-btn[data-panel="${panelName}"]`);
+  if (!btn) return;
+  const section = btn.closest('.sidebar-section');
+  if (section && section.classList.contains('collapsed')) {
+    section.classList.remove('collapsed');
+    _saveSidebarSections();
+  }
+}
+
 // ---- Hash-based routing ----
 
 function navigateFromHash() {
@@ -375,6 +475,14 @@ window.addEventListener('hashchange', navigateFromHash);
 document.addEventListener('DOMContentLoaded', async () => {
   await window.i18n.init();
   connect();
+
+  // Restore sidebar collapse state
+  if (window.innerWidth > 768 && localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1') {
+    document.getElementById('sidebar')?.classList.add('collapsed');
+  }
+
+  // Restore sidebar section collapse state
+  _restoreSidebarSections();
 
   // Fetch version for sidebar
   fetch('/api/update/status').then(r => r.json()).then(d => {

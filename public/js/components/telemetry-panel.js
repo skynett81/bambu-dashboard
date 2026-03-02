@@ -448,19 +448,19 @@
       html += buildPrinterSelector('changeTelePrinter', _selectedTelePrinter, false);
       html += '<div class="tele-range-group">';
       for (const key of Object.keys(RANGE_MAP)) {
-        html += `<button class="tele-range-btn ${key === currentRange ? 'active' : ''}" onclick="setTelemetryRange('${key}')">${key}</button>`;
+        html += `<button class="tele-range-btn ${key === currentRange ? 'active' : ''}" data-ripple onclick="setTelemetryRange('${key}')">${key}</button>`;
       }
       html += '</div>';
       const lockIcon = _locked
         ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>'
         : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>';
-      html += `<button class="tele-lock-btn ${_locked ? '' : 'active'}" onclick="toggleTeleLock()" title="${_locked ? t('telemetry.layout_locked') : t('telemetry.layout_unlocked')}">${lockIcon}</button>`;
+      html += `<button class="tele-lock-btn ${_locked ? '' : 'active'}" data-ripple onclick="toggleTeleLock()" title="${_locked ? t('telemetry.layout_locked') : t('telemetry.layout_unlocked')}">${lockIcon}</button>`;
       html += '</div>';
 
       // ── Tab bar ──
       html += '<div class="tabs">';
       for (const [id, cfg] of Object.entries(TAB_CONFIG)) {
-        html += `<button class="tab-btn tele-tab-btn ${id === _activeTab ? 'active' : ''}" data-tab="${id}" onclick="switchTeleTab('${id}')">${t(cfg.label)}</button>`;
+        html += `<button class="tab-btn tele-tab-btn ${id === _activeTab ? 'active' : ''}" data-tab="${id}" data-ripple onclick="switchTeleTab('${id}')">${t(cfg.label)}</button>`;
       }
       html += '</div>';
 

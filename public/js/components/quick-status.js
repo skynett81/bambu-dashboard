@@ -142,7 +142,8 @@
       guardColor = 'var(--accent-green)';
     }
 
-    container.innerHTML = `<div class="qs-grid">
+    const isFirstRender = !container._lastHtml;
+    container.innerHTML = `<div class="qs-grid${isFirstRender ? ' stagger-in' : ''}">
       ${item('wifi', t('quick_status.wifi'), wifiSig, wifiCol)}
       ${item('nozzle', t('quick_status.nozzle'), nozzleStr, '')}
       ${item('sd', t('quick_status.sd_card'), sdStr, sdColor)}
@@ -151,6 +152,11 @@
       ${item('error', t('quick_status.error'), errStr, errColor, 'qs-error-value')}
       ${item('guard', t('protection.title'), guardStr, guardColor, 'qs-guard-value')}
     </div>`;
+    // Apply stagger delay indices for entrance animation
+    if (isFirstRender) {
+      const items = container.querySelectorAll('.qs-item');
+      items.forEach((el, i) => el.style.setProperty('--i', i));
+    }
     container._lastHtml = true;
   };
 })();

@@ -17,7 +17,7 @@
       setTimeout(() => location.reload(), 5000);
     } else if (data.stage === 'failed') {
       hideUpdateOverlay();
-      alert(t('update.failed') + ': ' + (data.error || ''));
+      showToast(t('update.failed') + ': ' + (data.error || ''), 'error');
     } else if (data.stage) {
       const stageKey = 'update.stage_' + data.stage;
       showUpdateOverlay(t(stageKey));
@@ -152,22 +152,22 @@
     }
   };
 
-  window.applyUpdate = async function() {
-    if (!confirm(t('update.confirm'))) return;
-
-    showUpdateOverlay(t('update.stage_downloading'));
-    try {
-      const res = await fetch('/api/update/apply', { method: 'POST' });
-      const data = await res.json();
-      if (data.error) {
+  window.applyUpdate = function() {
+    return confirmAction(t('update.confirm'), async () => {
+      showUpdateOverlay(t('update.stage_downloading'));
+      try {
+        const res = await fetch('/api/update/apply', { method: 'POST' });
+        const data = await res.json();
+        if (data.error) {
+          hideUpdateOverlay();
+          showToast(data.error, 'error');
+        }
+        // If successful, we'll get WS update_status messages
+      } catch (e) {
         hideUpdateOverlay();
-        alert(data.error);
+        showToast(t('update.failed') + ': ' + e.message, 'error');
       }
-      // If successful, we'll get WS update_status messages
-    } catch (e) {
-      hideUpdateOverlay();
-      alert(t('update.failed') + ': ' + e.message);
-    }
+    }, {});
   };
 
   function escapeHtml(text) {

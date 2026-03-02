@@ -103,17 +103,17 @@
     'error-filters': (errors) => {
       const c = getCounts(errors);
       let h = `<div class="error-sidebar-filters">
-        <button class="error-filter-btn ${_activeSeverity === 'all' ? 'active' : ''}" onclick="filterErrorSeverity('all')">${t('errors.all')}</button>
-        <button class="error-filter-btn ${_activeSeverity === 'critical' ? 'active' : ''}" onclick="filterErrorSeverity('critical')" style="--filter-color:var(--accent-red)">${t('errors.critical')} (${c.fatal + c.critical})</button>
-        <button class="error-filter-btn ${_activeSeverity === 'error' ? 'active' : ''}" onclick="filterErrorSeverity('error')" style="--filter-color:var(--accent-orange)">${t('errors.errors')} (${c.error})</button>
-        <button class="error-filter-btn ${_activeSeverity === 'warning' ? 'active' : ''}" onclick="filterErrorSeverity('warning')" style="--filter-color:var(--accent-yellow, #e3b341)">${t('errors.warnings')} (${c.warning})</button>
+        <button class="error-filter-btn ${_activeSeverity === 'all' ? 'active' : ''}" data-ripple onclick="filterErrorSeverity('all')">${t('errors.all')}</button>
+        <button class="error-filter-btn ${_activeSeverity === 'critical' ? 'active' : ''}" data-ripple onclick="filterErrorSeverity('critical')" style="--filter-color:var(--accent-red)">${t('errors.critical')} (${c.fatal + c.critical})</button>
+        <button class="error-filter-btn ${_activeSeverity === 'error' ? 'active' : ''}" data-ripple onclick="filterErrorSeverity('error')" style="--filter-color:var(--accent-orange)">${t('errors.errors')} (${c.error})</button>
+        <button class="error-filter-btn ${_activeSeverity === 'warning' ? 'active' : ''}" data-ripple onclick="filterErrorSeverity('warning')" style="--filter-color:var(--accent-yellow, #e3b341)">${t('errors.warnings')} (${c.warning})</button>
       </div>
       <div style="margin-top:8px">
         <input type="text" class="form-input" style="width:100%" placeholder="${t('errors.search_placeholder')}" value="${_searchTerm}" oninput="searchErrors(this.value)">
       </div>
       <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-        <button class="error-filter-btn ${!_showAcknowledged ? 'active' : ''}" style="--filter-color:var(--accent-blue)" onclick="toggleErrorAcknowledged(false)">${t('errors.show_active')}</button>
-        <button class="error-filter-btn ${_showAcknowledged ? 'active' : ''}" style="--filter-color:var(--accent-green)" onclick="toggleErrorAcknowledged(true)">${t('errors.show_all')}</button>
+        <button class="error-filter-btn ${!_showAcknowledged ? 'active' : ''}" data-ripple style="--filter-color:var(--accent-blue)" onclick="toggleErrorAcknowledged(false)">${t('errors.show_active')}</button>
+        <button class="error-filter-btn ${_showAcknowledged ? 'active' : ''}" data-ripple style="--filter-color:var(--accent-green)" onclick="toggleErrorAcknowledged(true)">${t('errors.show_all')}</button>
       </div>`;
       return h;
     },
@@ -202,6 +202,10 @@
       const isActive = p.id === `error-tab-${tabId}`;
       p.classList.toggle('active', isActive);
       p.style.display = isActive ? 'grid' : 'none';
+      if (isActive) {
+        p.classList.add('ix-tab-panel');
+        p.addEventListener('animationend', () => p.classList.remove('ix-tab-panel'), { once: true });
+      }
     });
     const slug = tabId === 'log' ? 'errors' : `errors/${tabId}`;
     if (location.hash !== '#' + slug) history.replaceState(null, '', '#' + slug);
@@ -298,7 +302,8 @@
       // Tab panels
       for (const [tabId, cfg] of Object.entries(TAB_CONFIG)) {
         const order = getOrder(tabId);
-        html += `<div class="tab-panel error-tab-panel stats-tab-panel ${tabId === _activeTab ? 'active' : ''}" id="error-tab-${tabId}" style="display:${tabId === _activeTab ? 'grid' : 'none'}">`;
+        html += `<div class="tab-panel error-tab-panel stats-tab-panel stagger-in ${tabId === _activeTab ? 'active' : ''}" id="error-tab-${tabId}" style="display:${tabId === _activeTab ? 'grid' : 'none'}">`;
+        let _si = 0;
         for (const modId of order) {
           const builder = BUILDERS[modId];
           if (!builder) continue;
@@ -307,7 +312,7 @@
           const draggable = _locked ? '' : 'draggable="true"';
           const unlocked = _locked ? '' : ' stats-module-unlocked';
           const isFull = (MODULE_SIZE[modId] || 'full') === 'full';
-          html += `<div class="stats-module${unlocked}${isFull ? ' stats-module-full' : ''}" data-module-id="${modId}" ${draggable}>`;
+          html += `<div class="stats-module${unlocked}${isFull ? ' stats-module-full' : ''}" data-module-id="${modId}" ${draggable} style="--i:${_si++}">`;
           if (!_locked) html += '<div class="stats-module-handle" title="Drag to reorder">&#x2630;</div>';
           html += content;
           html += '</div>';
@@ -410,11 +415,11 @@
           <div class="error-card-actions">
             ${acked
               ? `<span class="pill pill-success" style="font-size:0.65rem">${t('errors.acknowledged')}</span>`
-              : `<button class="error-action-btn error-action-ack" onclick="acknowledgeError(${e.id})" title="${t('errors.acknowledge')}">
+              : `<button class="error-action-btn error-action-ack" data-ripple data-tooltip="${t('errors.acknowledge')}" onclick="acknowledgeError(${e.id})" title="${t('errors.acknowledge')}">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
                 </button>`
             }
-            <button class="error-action-btn error-action-del" onclick="deleteErrorEntry(${e.id})" title="${t('errors.delete')}">
+            <button class="error-action-btn error-action-del" data-ripple data-tooltip="${t('errors.delete')}" onclick="deleteErrorEntry(${e.id})" title="${t('errors.delete')}">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
             </button>
           </div>

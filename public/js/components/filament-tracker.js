@@ -259,9 +259,9 @@
       // Pagination controls
       if (totalPages > 1) {
         h += `<div class="inv-pagination">
-          <button class="form-btn form-btn-sm" onclick="window._invPage(-1)" ${_currentPage === 0 ? 'disabled' : ''}>&laquo; ${t('filament.prev')}</button>
+          <button class="form-btn form-btn-sm" data-ripple onclick="window._invPage(-1)" ${_currentPage === 0 ? 'disabled' : ''}>&laquo; ${t('filament.prev')}</button>
           <span class="inv-page-info">${_currentPage + 1} / ${totalPages} (${totalFiltered} ${t('filament.total_spools').toLowerCase()})</span>
-          <button class="form-btn form-btn-sm" onclick="window._invPage(1)" ${_currentPage >= totalPages - 1 ? 'disabled' : ''}>${t('filament.next')} &raquo;</button>
+          <button class="form-btn form-btn-sm" data-ripple onclick="window._invPage(1)" ${_currentPage >= totalPages - 1 ? 'disabled' : ''}>${t('filament.next')} &raquo;</button>
         </div>`;
       }
       return h;
@@ -285,8 +285,8 @@
             <td>${v.website ? `<a href="${esc(v.website)}" target="_blank" class="text-muted">${esc(v.website)}</a>` : '--'}</td>
             <td>${v.empty_spool_weight_g ? v.empty_spool_weight_g + 'g' : '--'}</td>
             <td style="text-align:right">
-              <button class="filament-edit-btn" onclick="editVendor(${v.id})" title="${t('settings.edit')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-              <button class="filament-delete-btn" onclick="deleteVendorItem(${v.id})" title="${t('settings.delete')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              <button class="filament-edit-btn" onclick="editVendor(${v.id})" title="${t('settings.edit')}" data-tooltip="${t('settings.edit')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="filament-delete-btn" onclick="deleteVendorItem(${v.id})" title="${t('settings.delete')}" data-tooltip="${t('settings.delete')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </td>
           </tr>`;
         }
@@ -294,7 +294,7 @@
       }
 
       h += `<div id="vendor-form-container"></div>`;
-      h += `<button class="form-btn form-btn-sm" style="margin-top:8px" onclick="showAddVendorForm()">+ ${t('filament.vendor_add')}</button>`;
+      h += `<button class="form-btn form-btn-sm" data-ripple style="margin-top:8px" onclick="showAddVendorForm()">+ ${t('filament.vendor_add')}</button>`;
       return h;
     },
 
@@ -310,7 +310,7 @@
         h += '<div class="filament-grid">';
         for (const p of _profiles) {
           const color = hexToRgb(p.color_hex);
-          h += `<div class="filament-card inv-profile-card">
+          h += `<div class="filament-card inv-spool-card inv-profile-card">
             <div class="fil-spool-top">
               <div class="fil-spool-identity">
                 <span class="filament-color-swatch" style="background:${color}"></span>
@@ -320,8 +320,8 @@
                 </div>
               </div>
               <div class="fil-spool-actions">
-                <button class="filament-edit-btn" onclick="editProfile(${p.id})" title="${t('settings.edit')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-                <button class="filament-delete-btn" onclick="deleteProfileItem(${p.id})" title="${t('settings.delete')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+                <button class="filament-edit-btn" onclick="editProfile(${p.id})" title="${t('settings.edit')}" data-tooltip="${t('settings.edit')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+                <button class="filament-delete-btn" onclick="deleteProfileItem(${p.id})" title="${t('settings.delete')}" data-tooltip="${t('settings.delete')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
               </div>
             </div>
             <div class="fil-spool-meta">${esc(p.material)}${p.color_name ? ' · ' + esc(p.color_name) : ''} · ${p.spool_weight_g}g</div>
@@ -339,7 +339,7 @@
       }
 
       h += `<div id="profile-form-container"></div>`;
-      h += `<button class="form-btn form-btn-sm" style="margin-top:8px" onclick="showAddProfileForm()">+ ${t('filament.profile_add')}</button>`;
+      h += `<button class="form-btn form-btn-sm" data-ripple style="margin-top:8px" onclick="showAddProfileForm()">+ ${t('filament.profile_add')}</button>`;
       return h;
     },
 
@@ -357,8 +357,8 @@
           h += `<div class="inv-location-item">
             <span>${esc(l.name)}${l.description ? ` <span class="text-muted">(${esc(l.description)})</span>` : ''}</span>
             <div>
-              <button class="filament-edit-btn" onclick="editLocationItem(${l.id})" title="${t('settings.edit')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
-              <button class="filament-delete-btn" onclick="deleteLocationItem(${l.id})"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              <button class="filament-edit-btn" onclick="editLocationItem(${l.id})" title="${t('settings.edit')}" data-tooltip="${t('settings.edit')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
+              <button class="filament-delete-btn" onclick="deleteLocationItem(${l.id})" data-tooltip="${t('settings.delete')}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
             </div>
           </div>`;
         }
@@ -366,7 +366,7 @@
       }
 
       h += `<div id="location-form-container"></div>`;
-      h += `<button class="form-btn form-btn-sm" style="margin-top:8px" onclick="showAddLocationForm()">+ ${t('filament.location_add')}</button>`;
+      h += `<button class="form-btn form-btn-sm" data-ripple style="margin-top:8px" onclick="showAddLocationForm()">+ ${t('filament.location_add')}</button>`;
       return h;
     },
 
@@ -584,7 +584,7 @@
           <div class="fil-drying-timer" id="drying-timer-${ds.id}">${remainH}h ${String(remainM).padStart(2, '0')}m</div>
           <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
             <div class="filament-bar" style="width:80px;height:6px"><div class="filament-bar-fill" style="width:${pct}%;background:var(--accent-orange,#f0883e)"></div></div>
-            <button class="form-btn form-btn-sm" onclick="completeDryingItem(${ds.id})">${t('filament.drying_complete')}</button>
+            <button class="form-btn form-btn-sm" data-ripple onclick="completeDryingItem(${ds.id})">${t('filament.drying_complete')}</button>
           </div>
         </div>`;
       }
@@ -609,7 +609,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
           ${t('filament.drying_presets')}
         </span>
-        <button class="form-btn form-btn-sm" onclick="showAddDryingPresetForm()">${t('filament.drying_preset_add')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="showAddDryingPresetForm()">${t('filament.drying_preset_add')}</button>
       </div>`;
       h += `<div id="drying-presets-form" style="display:none"></div>`;
       if (!_dryingPresets || _dryingPresets.length === 0) {
@@ -630,10 +630,10 @@
           <td>${p.duration_minutes} min (${(p.duration_minutes / 60).toFixed(1)}h)</td>
           <td>${p.max_days_without_drying} d</td>
           <td style="text-align:right">
-            <button class="filament-edit-btn" style="opacity:1" onclick="editDryingPreset('${esc(p.material)}')" title="${t('settings.edit')}">
+            <button class="filament-edit-btn" style="opacity:1" onclick="editDryingPreset('${esc(p.material)}')" title="${t('settings.edit')}" data-tooltip="${t('settings.edit')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
-            <button class="filament-delete-btn" style="opacity:1" onclick="deleteDryingPresetItem('${esc(p.material)}')" title="${t('settings.delete')}">
+            <button class="filament-delete-btn" style="opacity:1" onclick="deleteDryingPresetItem('${esc(p.material)}')" title="${t('settings.delete')}" data-tooltip="${t('settings.delete')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </td>
@@ -662,7 +662,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="8" cy="8" r="2"/><circle cx="16" cy="8" r="2"/><circle cx="8" cy="16" r="2"/><circle cx="16" cy="16" r="2"/></svg>
           ${t('filament.color_card')}
         </span>
-        <button class="form-btn form-btn-sm" onclick="exportColorCard()">${t('filament.color_card_export')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="exportColorCard()">${t('filament.color_card_export')}</button>
       </div>`;
       h += `<div id="color-card-container"><span class="text-muted" style="font-size:0.8rem">Loading...</span></div>`;
       setTimeout(() => _loadColorCard(), 0);
@@ -675,7 +675,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8.32a7.43 7.43 0 010 7.36"/><path d="M9.46 6.21a11.76 11.76 0 010 11.58"/><path d="M12.91 4.1a16.09 16.09 0 010 15.8"/><path d="M16.37 2a20.42 20.42 0 010 20"/></svg>
           ${t('filament.nfc_manager')}
         </span>
-        <button class="form-btn form-btn-sm" onclick="startNfcScan()">${t('filament.nfc_scan')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="startNfcScan()">${t('filament.nfc_scan')}</button>
       </div>`;
       h += `<div id="nfc-container"><span class="text-muted" style="font-size:0.8rem">Loading...</span></div>`;
       setTimeout(() => _loadNfcMappings(), 0);
@@ -766,7 +766,7 @@
     ].filter(Boolean).join(' ');
 
     return `
-      <div class="filament-card ${lowClass} ${archivedClass}" data-spool-id="${s.id}">
+      <div class="filament-card inv-spool-card ${lowClass} ${archivedClass}" data-spool-id="${s.id}">
         <div class="fil-spool-top">
           <div class="fil-spool-identity">
             <input type="checkbox" class="fil-bulk-check" onclick="toggleSpoolSelect(${s.id}, this)" ${_selectedSpools.has(s.id) ? 'checked' : ''} title="${t('filament.bulk_select')}">
@@ -774,32 +774,32 @@
             <strong>${esc(cleanName)}</strong>
           </div>
           <div class="fil-spool-actions">
-            ${s.archived ? `<button class="filament-edit-btn" onclick="unarchiveSpoolItem(${s.id})" title="${t('filament.unarchive')}">↩</button>` : ''}
-            <button class="filament-edit-btn" onclick="showSwatchLabel(${s.id})" title="${t('filament.swatch_label')}">
+            ${s.archived ? `<button class="filament-edit-btn" onclick="unarchiveSpoolItem(${s.id})" title="${t('filament.unarchive')}" data-tooltip="${t('filament.unarchive')}">↩</button>` : ''}
+            <button class="filament-edit-btn" onclick="showSwatchLabel(${s.id})" title="${t('filament.swatch_label')}" data-tooltip="${t('filament.swatch_label')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><circle cx="12" cy="12" r="4"/></svg>
             </button>
-            <button class="filament-edit-btn" onclick="showSpoolTimeline(${s.id})" title="${t('filament.spool_timeline')}">
+            <button class="filament-edit-btn" onclick="showSpoolTimeline(${s.id})" title="${t('filament.spool_timeline')}" data-tooltip="${t('filament.spool_timeline')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
             </button>
-            <button class="filament-edit-btn" onclick="showSpoolLabel(${s.id})" title="${t('filament.qr_label')}">
+            <button class="filament-edit-btn" onclick="showSpoolLabel(${s.id})" title="${t('filament.qr_label')}" data-tooltip="${t('filament.qr_label')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="3" height="3"/></svg>
             </button>
-            <button class="filament-edit-btn" onclick="duplicateSpoolItem(${s.id})" title="${t('filament.duplicate')}">
+            <button class="filament-edit-btn" onclick="duplicateSpoolItem(${s.id})" title="${t('filament.duplicate')}" data-tooltip="${t('filament.duplicate')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
             </button>
-            <button class="filament-edit-btn" onclick="showMeasureDialog(${s.id})" title="${t('filament.measure_weight')}">
+            <button class="filament-edit-btn" onclick="showMeasureDialog(${s.id})" title="${t('filament.measure_weight')}" data-tooltip="${t('filament.measure_weight')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4"/></svg>
             </button>
-            <button class="filament-edit-btn" onclick="showStartDryingDialog(${s.id})" title="${t('filament.start_drying')}">
+            <button class="filament-edit-btn" onclick="showStartDryingDialog(${s.id})" title="${t('filament.start_drying')}" data-tooltip="${t('filament.start_drying')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
             </button>
-            <button class="filament-edit-btn" onclick="showEditSpoolForm(${s.id})" title="${t('settings.edit')}">
+            <button class="filament-edit-btn" onclick="showEditSpoolForm(${s.id})" title="${t('settings.edit')}" data-tooltip="${t('settings.edit')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             </button>
-            ${!s.archived ? `<button class="filament-edit-btn" onclick="archiveSpoolItem(${s.id})" title="${t('filament.archive')}">
+            ${!s.archived ? `<button class="filament-edit-btn" onclick="archiveSpoolItem(${s.id})" title="${t('filament.archive')}" data-tooltip="${t('filament.archive')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
             </button>` : ''}
-            <button class="filament-delete-btn" onclick="deleteSpoolItem(${s.id})" title="${t('settings.delete')}">
+            <button class="filament-delete-btn" onclick="deleteSpoolItem(${s.id})" title="${t('settings.delete')}" data-tooltip="${t('settings.delete')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
@@ -897,6 +897,10 @@
       const isActive = p.id === `filament-tab-${tabId}`;
       p.classList.toggle('active', isActive);
       p.style.display = isActive ? 'grid' : 'none';
+      if (isActive) {
+        p.classList.add('ix-tab-panel');
+        p.addEventListener('animationend', () => p.classList.remove('ix-tab-panel'), { once: true });
+      }
     });
     const slug = tabId === 'inventory' ? 'filament' : `filament/${tabId}`;
     if (location.hash !== '#' + slug) history.replaceState(null, '', '#' + slug);
@@ -976,16 +980,16 @@
         ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>'
         : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>';
       html += `<div class="tele-top-bar">
-        <button class="form-btn" onclick="showAddSpoolForm()" style="display:flex;align-items:center;gap:4px">
+        <button class="form-btn" data-ripple onclick="showAddSpoolForm()" style="display:flex;align-items:center;gap:4px">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>${t('filament.add_spool')}</span>
         </button>
-        <button class="form-btn form-btn-sm" onclick="showSpoolmanDbBrowser()" style="display:flex;align-items:center;gap:4px" title="${t('filament.browse_spoolmandb')}">
+        <button class="form-btn form-btn-sm" data-ripple onclick="showSpoolmanDbBrowser()" style="display:flex;align-items:center;gap:4px" title="${t('filament.browse_spoolmandb')}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
           <span>SpoolmanDB</span>
         </button>
         <div class="inv-export-dropdown">
-          <button class="form-btn form-btn-sm" onclick="this.nextElementSibling.classList.toggle('show')" style="display:flex;align-items:center;gap:4px">
+          <button class="form-btn form-btn-sm" data-ripple onclick="this.nextElementSibling.classList.toggle('show')" style="display:flex;align-items:center;gap:4px">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             <span>${t('filament.export')}</span>
           </button>
@@ -998,11 +1002,11 @@
             <button onclick="showImportDialog()">${t('filament.import')}</button>
           </div>
         </div>
-        <button class="form-btn form-btn-sm" onclick="openQrScanner()" style="display:flex;align-items:center;gap:4px" title="${t('filament.scan_qr')}">
+        <button class="form-btn form-btn-sm" data-ripple onclick="openQrScanner()" style="display:flex;align-items:center;gap:4px" title="${t('filament.scan_qr')}">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><path d="M14 14h3v3h-3z"/><path d="M20 14v7h-7"/></svg>
         </button>
         <div style="flex:1"></div>
-        <button class="form-btn form-btn-sm" onclick="showInventorySettings()" title="${t('filament.settings')}" style="display:flex;align-items:center;gap:4px">
+        <button class="form-btn form-btn-sm" data-ripple onclick="showInventorySettings()" title="${t('filament.settings')}" style="display:flex;align-items:center;gap:4px">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         </button>
         <button class="tele-lock-btn ${_locked ? '' : 'active'}" onclick="toggleFilamentLock()" title="${_locked ? t('filament.layout_locked') : t('filament.layout_unlocked')}">${lockIcon}</button>
@@ -1239,11 +1243,11 @@
           <div id="sp-${id}-extra-fields-section">
             <div style="font-size:0.8rem;margin:4px 0">${t('filament.extra_fields')}</div>
             <div id="sp-${id}-extra-fields">${_renderExtraFieldInputs(`sp-${id}`, spool?.extra_fields)}</div>
-            <button class="form-btn form-btn-sm" style="font-size:0.7rem" onclick="window._addExtraField('sp-${id}')" type="button">+ ${t('filament.add_field')}</button>
+            <button class="form-btn form-btn-sm" data-ripple style="font-size:0.7rem" onclick="window._addExtraField('sp-${id}')" type="button">+ ${t('filament.add_field')}</button>
           </div>
           <div class="flex gap-sm">
-            <button class="form-btn" onclick="${isEdit ? `saveSpool(${spool.id})` : 'saveNewSpool()'}">${t('filament.save')}</button>
-            <button class="form-btn form-btn-sm" style="background:transparent;color:var(--text-muted)" onclick="${isEdit ? `hideSpoolEdit(${spool.id})` : 'hideGlobalSpoolForm()'}">${t('settings.cancel')}</button>
+            <button class="form-btn" data-ripple onclick="${isEdit ? `saveSpool(${spool.id})` : 'saveNewSpool()'}">${t('filament.save')}</button>
+            <button class="form-btn form-btn-sm" data-ripple style="background:transparent;color:var(--text-muted)" onclick="${isEdit ? `hideSpoolEdit(${spool.id})` : 'hideGlobalSpoolForm()'}">${t('settings.cancel')}</button>
           </div>
         </div>
       </div>`;
@@ -1261,7 +1265,7 @@
 
   window.saveNewSpool = async function() {
     const profileId = parseInt(document.getElementById('sp-profile-new')?.value);
-    if (!profileId) return alert(t('filament.add_spool_select_profile'));
+    if (!profileId) { showToast(t('filament.add_spool_select_profile'), 'warning'); return; }
     const data = {
       filament_profile_id: profileId,
       initial_weight_g: parseFloat(document.getElementById('sp-initial-new').value) || 1000,
@@ -1312,10 +1316,11 @@
     if (c) { c.style.display = 'none'; c.innerHTML = ''; }
   };
 
-  window.deleteSpoolItem = async function(id) {
-    if (!confirm(t('filament.delete_spool_confirm'))) return;
-    await fetch(`/api/inventory/spools/${id}`, { method: 'DELETE' });
-    loadFilament();
+  window.deleteSpoolItem = function(id) {
+    return confirmAction(t('filament.delete_spool_confirm'), async () => {
+      await fetch(`/api/inventory/spools/${id}`, { method: 'DELETE' });
+      loadFilament();
+    }, { danger: true });
   };
 
   window.archiveSpoolItem = async function(id) {
@@ -1341,9 +1346,9 @@
       <div id="va-extra-fields-section">
         <div style="font-size:0.8rem;margin:4px 0">${t('filament.extra_fields')}</div>
         <div id="va-extra-fields"></div>
-        <button class="form-btn form-btn-sm" style="font-size:0.7rem" onclick="window._addExtraField('va')" type="button">+ ${t('filament.add_field')}</button>
+        <button class="form-btn form-btn-sm" data-ripple style="font-size:0.7rem" onclick="window._addExtraField('va')" type="button">+ ${t('filament.add_field')}</button>
       </div>
-      <div class="flex gap-sm"><button class="form-btn" onclick="saveNewVendor()">${t('filament.save')}</button><button class="form-btn form-btn-sm" style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('vendor-form-container').innerHTML=''">${t('settings.cancel')}</button></div>
+      <div class="flex gap-sm"><button class="form-btn" data-ripple onclick="saveNewVendor()">${t('filament.save')}</button><button class="form-btn form-btn-sm" data-ripple style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('vendor-form-container').innerHTML=''">${t('settings.cancel')}</button></div>
     </div>`;
   };
 
@@ -1361,9 +1366,9 @@
       <div id="ve-extra-fields-section">
         <div style="font-size:0.8rem;margin:4px 0">${t('filament.extra_fields')}</div>
         <div id="ve-extra-fields">${_renderExtraFieldInputs('ve', v.extra_fields)}</div>
-        <button class="form-btn form-btn-sm" style="font-size:0.7rem" onclick="window._addExtraField('ve')" type="button">+ ${t('filament.add_field')}</button>
+        <button class="form-btn form-btn-sm" data-ripple style="font-size:0.7rem" onclick="window._addExtraField('ve')" type="button">+ ${t('filament.add_field')}</button>
       </div>
-      <div class="flex gap-sm"><button class="form-btn" onclick="saveVendorEdit(${id})">${t('filament.save')}</button><button class="form-btn form-btn-sm" style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('vendor-form-container').innerHTML=''">${t('settings.cancel')}</button></div>
+      <div class="flex gap-sm"><button class="form-btn" data-ripple onclick="saveVendorEdit(${id})">${t('filament.save')}</button><button class="form-btn form-btn-sm" data-ripple style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('vendor-form-container').innerHTML=''">${t('settings.cancel')}</button></div>
     </div>`;
   };
 
@@ -1389,10 +1394,11 @@
     loadFilament();
   };
 
-  window.deleteVendorItem = async function(id) {
-    if (!confirm(t('filament.vendor_delete_confirm'))) return;
-    await fetch(`/api/inventory/vendors/${id}`, { method: 'DELETE' });
-    loadFilament();
+  window.deleteVendorItem = function(id) {
+    return confirmAction(t('filament.vendor_delete_confirm'), async () => {
+      await fetch(`/api/inventory/vendors/${id}`, { method: 'DELETE' });
+      loadFilament();
+    }, { danger: true });
   };
 
   // ═══ Profile CRUD ═══
@@ -1576,11 +1582,11 @@
       <div id="${pfx}-extra-fields-section">
         <div style="font-size:0.8rem;margin:4px 0">${t('filament.extra_fields')}</div>
         <div id="${pfx}-extra-fields">${_renderExtraFieldInputs(pfx, profile?.extra_fields)}</div>
-        <button class="form-btn form-btn-sm" style="font-size:0.7rem" onclick="window._addExtraField('${pfx}')" type="button">+ ${t('filament.add_field')}</button>
+        <button class="form-btn form-btn-sm" data-ripple style="font-size:0.7rem" onclick="window._addExtraField('${pfx}')" type="button">+ ${t('filament.add_field')}</button>
       </div>
       <div class="flex gap-sm">
-        <button class="form-btn" onclick="${isEdit ? `saveProfileEdit(${profile.id})` : 'saveNewProfile()'}">${t('filament.save')}</button>
-        <button class="form-btn form-btn-sm" style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('profile-form-container').innerHTML=''">${t('settings.cancel')}</button>
+        <button class="form-btn" data-ripple onclick="${isEdit ? `saveProfileEdit(${profile.id})` : 'saveNewProfile()'}">${t('filament.save')}</button>
+        <button class="form-btn form-btn-sm" data-ripple style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('profile-form-container').innerHTML=''">${t('settings.cancel')}</button>
       </div>
     </div>`;
   }
@@ -1642,22 +1648,23 @@
 
   window.saveNewProfile = async function() {
     const data = collectProfileData('pa');
-    if (!data.name || !data.material) return alert(t('filament.type_required'));
+    if (!data.name || !data.material) { showToast(t('filament.type_required'), 'warning'); return; }
     await fetch('/api/inventory/filaments', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     loadFilament();
   };
 
   window.saveProfileEdit = async function(id) {
     const data = collectProfileData('pe');
-    if (!data.name || !data.material) return alert(t('filament.type_required'));
+    if (!data.name || !data.material) { showToast(t('filament.type_required'), 'warning'); return; }
     await fetch(`/api/inventory/filaments/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
     loadFilament();
   };
 
-  window.deleteProfileItem = async function(id) {
-    if (!confirm(t('filament.profile_delete_confirm'))) return;
-    await fetch(`/api/inventory/filaments/${id}`, { method: 'DELETE' });
-    loadFilament();
+  window.deleteProfileItem = function(id) {
+    return confirmAction(t('filament.profile_delete_confirm'), async () => {
+      await fetch(`/api/inventory/filaments/${id}`, { method: 'DELETE' });
+      loadFilament();
+    }, { danger: true });
   };
 
   // ═══ Location CRUD ═══
@@ -1668,7 +1675,7 @@
       <div class="flex gap-sm">
         <div class="form-group" style="flex:1"><label class="form-label">${t('filament.location_name')}</label><input class="form-input" id="loc-name"></div>
       </div>
-      <div class="flex gap-sm"><button class="form-btn" onclick="saveNewLocation()">${t('filament.save')}</button><button class="form-btn form-btn-sm" style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('location-form-container').innerHTML=''">${t('settings.cancel')}</button></div>
+      <div class="flex gap-sm"><button class="form-btn" data-ripple onclick="saveNewLocation()">${t('filament.save')}</button><button class="form-btn form-btn-sm" data-ripple style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('location-form-container').innerHTML=''">${t('settings.cancel')}</button></div>
     </div>`;
   };
 
@@ -1694,7 +1701,7 @@
         <div class="form-group" style="flex:1"><label class="form-label">${t('filament.location_name')}</label><input class="form-input" id="loc-edit-name" value="${esc(l.name)}"></div>
         <div class="form-group" style="flex:1"><label class="form-label">${t('filament.location_description')}</label><input class="form-input" id="loc-edit-desc" value="${esc(l.description || '')}"></div>
       </div>
-      <div class="flex gap-sm"><button class="form-btn" onclick="saveLocationEdit(${id})">${t('filament.save')}</button><button class="form-btn form-btn-sm" style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('location-form-container').innerHTML=''">${t('settings.cancel')}</button></div>
+      <div class="flex gap-sm"><button class="form-btn" data-ripple onclick="saveLocationEdit(${id})">${t('filament.save')}</button><button class="form-btn form-btn-sm" data-ripple style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('location-form-container').innerHTML=''">${t('settings.cancel')}</button></div>
     </div>`;
   };
 
@@ -1710,7 +1717,7 @@
   window.duplicateSpoolItem = async function(id) {
     const res = await fetch(`/api/inventory/spools/${id}/duplicate`, { method: 'POST' });
     if (res.ok) loadFilament();
-    else alert(t('filament.duplicate_failed'));
+    else showToast(t('filament.duplicate_failed'), 'error');
   };
 
   // ═══ Measure Weight ═══
@@ -1726,8 +1733,8 @@
           <label class="form-label">${t('filament.gross_weight')}</label>
           <input class="form-input" id="measure-weight-${id}" type="number" placeholder="${t('filament.gross_weight_placeholder')}">
         </div>
-        <button class="form-btn form-btn-sm" onclick="submitMeasure(${id})">${t('filament.measure')}</button>
-        <button class="form-btn form-btn-sm" style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('spool-edit-${id}').style.display='none'">${t('settings.cancel')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="submitMeasure(${id})">${t('filament.measure')}</button>
+        <button class="form-btn form-btn-sm" data-ripple style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('spool-edit-${id}').style.display='none'">${t('settings.cancel')}</button>
       </div>
     </div>`;
   };
@@ -1740,7 +1747,7 @@
       body: JSON.stringify({ gross_weight_g: grossWeight })
     });
     if (res.ok) loadFilament();
-    else { const err = await res.json().catch(() => ({})); alert(err.error || t('filament.measure_failed')); }
+    else { const err = await res.json().catch(() => ({})); showToast(err.error || t('filament.measure_failed'), 'error'); }
   };
 
   // ═══ QR Label ═══
@@ -1792,7 +1799,7 @@
         </div>
       </div>
       <div class="inv-modal-footer">
-        <button class="form-btn" onclick="printQrLabel()">${t('filament.print_label')}</button>
+        <button class="form-btn" data-ripple onclick="printQrLabel()">${t('filament.print_label')}</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
@@ -1886,7 +1893,7 @@
           if (spool) {
             showEditSpoolForm(spoolId);
           } else {
-            alert(t('filament.spool_not_found'));
+            showToast(t('filament.spool_not_found'), 'warning');
           }
           return;
         }
@@ -2017,7 +2024,7 @@
         h += `<div class="inv-spoolmandb-fil">
           <span class="filament-color-swatch" style="background:${color};width:10px;height:10px"></span>
           <span>${esc(f.name || '')} · ${esc(f.material || '')}</span>
-          <button class="form-btn form-btn-sm" onclick='importSpoolmanDbFilament(${JSON.stringify(f).replace(/'/g,"&#39;")})'>${t('filament.import')}</button>
+          <button class="form-btn form-btn-sm" data-ripple onclick='importSpoolmanDbFilament(${JSON.stringify(f).replace(/'/g,"&#39;")})'>${t('filament.import')}</button>
         </div>`;
       }
       filDiv.innerHTML = h || `<span class="text-muted" style="font-size:0.8rem">${t('filament.no_results')}</span>`;
@@ -2037,7 +2044,7 @@
       loadFilament();
     } else {
       const err = await res.json().catch(() => ({}));
-      alert(err.error || t('filament.import_failed'));
+      showToast(err.error || t('filament.import_failed'), 'error');
     }
   };
 
@@ -2084,7 +2091,7 @@
         <div id="import-status"></div>
       </div>
       <div class="inv-modal-footer">
-        <button class="form-btn" onclick="executeImport()">${t('filament.import')}</button>
+        <button class="form-btn" data-ripple onclick="executeImport()">${t('filament.import')}</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
@@ -2190,7 +2197,7 @@
         </div>
       </div>
       <div class="inv-modal-footer">
-        <button class="form-btn" onclick="saveInventorySettings()">${t('filament.save')}</button>
+        <button class="form-btn" data-ripple onclick="saveInventorySettings()">${t('filament.save')}</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
@@ -2291,7 +2298,7 @@
           <td>${s.duration_minutes} min</td>
           <td>${s.humidity_before != null ? s.humidity_before + '%' : '-'}</td>
           <td>${s.humidity_after != null ? s.humidity_after + '%' : '-'}</td>
-          <td><button class="filament-delete-btn" style="opacity:1" onclick="deleteDryingItem(${s.id})">
+          <td><button class="filament-delete-btn" style="opacity:1" onclick="deleteDryingItem(${s.id})" data-tooltip="${t('settings.delete')}">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button></td>
         </tr>`;
@@ -2433,8 +2440,8 @@
           </label>
         </div>
         <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="form-btn" onclick="submitStartDrying(${spoolId})">${t('filament.start_drying')}</button>
-          <button class="form-btn form-btn-sm" onclick="document.getElementById('inv-global-form').style.display='none'">${t('common.cancel')}</button>
+          <button class="form-btn" data-ripple onclick="submitStartDrying(${spoolId})">${t('filament.start_drying')}</button>
+          <button class="form-btn form-btn-sm" data-ripple onclick="document.getElementById('inv-global-form').style.display='none'">${t('common.cancel')}</button>
         </div>
       </div>`;
     formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -2456,7 +2463,7 @@
       if (!res.ok) throw new Error('Failed');
       document.getElementById('inv-global-form').style.display = 'none';
       loadFilament();
-    } catch (e) { alert('Failed to start drying: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.completeDryingItem = async function(sessionId) {
@@ -2469,15 +2476,16 @@
       });
       if (!res.ok) throw new Error('Failed');
       loadFilament();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
-  window.deleteDryingItem = async function(sessionId) {
-    if (!confirm(t('common.delete_confirm'))) return;
-    try {
-      await fetch(`/api/inventory/drying/sessions/${sessionId}`, { method: 'DELETE' });
-      loadFilament();
-    } catch (e) { alert('Error: ' + e.message); }
+  window.deleteDryingItem = function(sessionId) {
+    return confirmAction(t('common.delete_confirm'), async () => {
+      try {
+        await fetch(`/api/inventory/drying/sessions/${sessionId}`, { method: 'DELETE' });
+        loadFilament();
+      } catch (e) { showToast(e.message, 'error'); }
+    }, { danger: true });
   };
 
   window.showAddDryingPresetForm = function() {
@@ -2500,8 +2508,8 @@
         </label>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="form-btn" onclick="submitDryingPreset()">${t('common.save')}</button>
-        <button class="form-btn form-btn-sm" onclick="document.getElementById('drying-presets-form').style.display='none'">${t('common.cancel')}</button>
+        <button class="form-btn" data-ripple onclick="submitDryingPreset()">${t('common.save')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="document.getElementById('drying-presets-form').style.display='none'">${t('common.cancel')}</button>
       </div>`;
   };
 
@@ -2527,8 +2535,8 @@
         </label>
       </div>
       <div style="display:flex;gap:8px">
-        <button class="form-btn" onclick="submitDryingPreset()">${t('common.save')}</button>
-        <button class="form-btn form-btn-sm" onclick="document.getElementById('drying-presets-form').style.display='none'">${t('common.cancel')}</button>
+        <button class="form-btn" data-ripple onclick="submitDryingPreset()">${t('common.save')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="document.getElementById('drying-presets-form').style.display='none'">${t('common.cancel')}</button>
       </div>`;
   };
 
@@ -2547,15 +2555,16 @@
       if (!res.ok) throw new Error('Failed');
       document.getElementById('drying-presets-form').style.display = 'none';
       loadFilament();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
-  window.deleteDryingPresetItem = async function(material) {
-    if (!confirm(t('filament.drying_preset_delete'))) return;
-    try {
-      await fetch(`/api/inventory/drying/presets/${encodeURIComponent(material)}`, { method: 'DELETE' });
-      loadFilament();
-    } catch (e) { alert('Error: ' + e.message); }
+  window.deleteDryingPresetItem = function(material) {
+    return confirmAction(t('filament.drying_preset_delete'), async () => {
+      try {
+        await fetch(`/api/inventory/drying/presets/${encodeURIComponent(material)}`, { method: 'DELETE' });
+        loadFilament();
+      } catch (e) { showToast(e.message, 'error'); }
+    }, { danger: true });
   };
 
   // ═══ Checked-out spools ═══
@@ -2575,7 +2584,7 @@
             <strong>${esc(s.profile_name || s.material || '--')}</strong>
             <span class="text-muted" style="font-size:0.75rem">${s.checked_out_by ? t('filament.checked_out_by') + ': ' + esc(s.checked_out_by) : ''} ${s.checked_out_from ? '· ' + esc(s.checked_out_from) : ''}</span>
           </div>
-          <button class="form-btn form-btn-sm" onclick="checkinSpoolItem(${s.id})">${t('filament.checkin')}</button>
+          <button class="form-btn form-btn-sm" data-ripple onclick="checkinSpoolItem(${s.id})">${t('filament.checkin')}</button>
         </div>`;
       }
       h += '</div>';
@@ -2592,7 +2601,7 @@
         body: JSON.stringify({ actor: actor || undefined })
       });
       loadFilament();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.checkinSpoolItem = async function(id) {
@@ -2602,7 +2611,7 @@
         body: JSON.stringify({})
       });
       loadFilament();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   // ═══ Color Card ═══
@@ -2670,7 +2679,7 @@
             <strong>${esc(m.spool_name || t('filament.nfc_unlinked'))}</strong>
             <span class="text-muted" style="font-size:0.75rem">UID: ${esc(m.tag_uid)} · ${esc(m.standard || 'openspool')}</span>
           </div>
-          <button class="filament-delete-btn" style="opacity:1" onclick="unlinkNfcItem('${esc(m.tag_uid)}')" title="${t('settings.delete')}">
+          <button class="filament-delete-btn" style="opacity:1" onclick="unlinkNfcItem('${esc(m.tag_uid)}')" title="${t('settings.delete')}" data-tooltip="${t('settings.delete')}">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
         </div>`;
@@ -2682,7 +2691,7 @@
 
   window.startNfcScan = async function() {
     if (!('NDEFReader' in window)) {
-      alert(t('filament.nfc_not_supported'));
+      showToast(t('filament.nfc_not_supported'), 'warning');
       return;
     }
     try {
@@ -2722,13 +2731,13 @@
             resultEl.innerHTML = `<div style="margin-top:12px;padding:12px;background:var(--bg-secondary);border-radius:8px">
               <p>${t('filament.nfc_tag_unknown')}</p>
               <span class="text-muted">UID: ${esc(uid)}</span><br>
-              <button class="form-btn form-btn-sm" style="margin-top:8px" onclick="linkNfcToSpool('${esc(uid)}')">${t('filament.nfc_link')}</button>
+              <button class="form-btn form-btn-sm" data-ripple style="margin-top:8px" onclick="linkNfcToSpool('${esc(uid)}')">${t('filament.nfc_link')}</button>
             </div>`;
           }
         } catch { resultEl.innerHTML = '<span class="text-muted">Error</span>'; }
       };
     } catch (e) {
-      alert(t('filament.nfc_error') + ': ' + e.message);
+      showToast(t('filament.nfc_error') + ': ' + e.message, 'error');
     }
   };
 
@@ -2741,15 +2750,16 @@
         body: JSON.stringify({ tag_uid: uid, spool_id: parseInt(spoolId) })
       });
       loadFilament();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
-  window.unlinkNfcItem = async function(uid) {
-    if (!confirm(t('filament.nfc_unlink_confirm'))) return;
-    try {
-      await fetch(`/api/nfc/link/${encodeURIComponent(uid)}`, { method: 'DELETE' });
-      loadFilament();
-    } catch (e) { alert('Error: ' + e.message); }
+  window.unlinkNfcItem = function(uid) {
+    return confirmAction(t('filament.nfc_unlink_confirm'), async () => {
+      try {
+        await fetch(`/api/nfc/link/${encodeURIComponent(uid)}`, { method: 'DELETE' });
+        loadFilament();
+      } catch (e) { showToast(e.message, 'error'); }
+    }, { danger: true });
   };
 
   // ═══ Spool Timeline ═══
@@ -2823,7 +2833,7 @@
         <div style="padding:12px;max-height:400px;overflow-y:auto">${h}</div>
       </div>`;
       document.body.appendChild(overlay);
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   // ═══ Bulk Operations ═══
@@ -2854,11 +2864,11 @@
     }
     bar.innerHTML = `<span>${_selectedSpools.size} ${t('filament.bulk_selected')}</span>
       <div class="fil-bulk-actions">
-        <button class="form-btn form-btn-sm" onclick="bulkAction('mark_dried')">${t('filament.start_drying')}</button>
-        <button class="form-btn form-btn-sm" onclick="bulkAction('relocate')">${t('filament.bulk_relocate')}</button>
-        <button class="form-btn form-btn-sm" onclick="bulkAction('archive')">${t('filament.archive')}</button>
-        <button class="form-btn form-btn-sm" style="color:var(--accent-red)" onclick="bulkAction('delete')">${t('settings.delete')}</button>
-        <button class="form-btn form-btn-sm" onclick="clearBulkSelection()">${t('common.cancel')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="bulkAction('mark_dried')">${t('filament.start_drying')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="bulkAction('relocate')">${t('filament.bulk_relocate')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="bulkAction('archive')">${t('filament.archive')}</button>
+        <button class="form-btn form-btn-sm" data-ripple style="color:var(--accent-red)" onclick="bulkAction('delete')">${t('settings.delete')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="clearBulkSelection()">${t('common.cancel')}</button>
       </div>`;
   }
 
@@ -2872,23 +2882,32 @@
     const ids = Array.from(_selectedSpools);
     if (ids.length === 0) return;
     let body = { action, spool_ids: ids };
-    if (action === 'delete' && !confirm(t('filament.bulk_delete_confirm', { count: ids.length }))) return;
-    if (action === 'archive' && !confirm(t('filament.bulk_archive_confirm', { count: ids.length }))) return;
-    if (action === 'relocate') {
-      const loc = prompt(t('filament.bulk_relocate_prompt'));
-      if (!loc) return;
-      body.location = loc;
+
+    const _doBulk = async (b) => {
+      if (b.action === 'relocate') {
+        const loc = prompt(t('filament.bulk_relocate_prompt'));
+        if (!loc) return;
+        b.location = loc;
+      }
+      try {
+        const res = await fetch('/api/inventory/spools/bulk', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(b)
+        });
+        if (!res.ok) throw new Error('Failed');
+        _selectedSpools.clear();
+        _updateBulkBar();
+        loadFilament();
+      } catch (e) { showToast(e.message, 'error'); }
+    };
+
+    if (action === 'delete') {
+      return confirmAction(t('filament.bulk_delete_confirm', { count: ids.length }), () => _doBulk(body), { danger: true });
     }
-    try {
-      const res = await fetch('/api/inventory/spools/bulk', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-      if (!res.ok) throw new Error('Failed');
-      _selectedSpools.clear();
-      _updateBulkBar();
-      loadFilament();
-    } catch (e) { alert('Error: ' + e.message); }
+    if (action === 'archive') {
+      return confirmAction(t('filament.bulk_archive_confirm', { count: ids.length }), () => _doBulk(body), {});
+    }
+    await _doBulk(body);
   };
 
   // ═══ Swatch Labels (enhanced) ═══
@@ -2926,7 +2945,7 @@
         </div>
       </div>
       <div class="inv-modal-footer">
-        <button class="form-btn" onclick="printSwatchLabel()">${t('filament.print_label')}</button>
+        <button class="form-btn" data-ripple onclick="printSwatchLabel()">${t('filament.print_label')}</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
@@ -3096,7 +3115,7 @@
         </div>
       </div>`;
       document.body.insertAdjacentHTML('beforeend', html);
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   // ═══ Legacy compat: old /api/filament still works for backward compat ═══

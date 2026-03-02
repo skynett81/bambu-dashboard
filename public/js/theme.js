@@ -96,6 +96,9 @@
     const vars = PRESETS[resolved];
     const root = document.documentElement;
 
+    // Enable smooth theme transition
+    document.documentElement.classList.add('theme-transitioning');
+
     // Apply preset vars
     for (const [key, val] of Object.entries(vars)) {
       root.style.setProperty(key, val);
@@ -127,6 +130,12 @@
 
     // Update toggle button icon if present
     updateToggleButton(resolved);
+
+    // Remove transition class after animation completes
+    clearTimeout(window._themeTransTimeout);
+    window._themeTransTimeout = setTimeout(() => {
+      document.documentElement.classList.remove('theme-transitioning');
+    }, 400);
   }
 
   function updateToggleButton(resolved) {

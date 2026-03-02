@@ -58,8 +58,8 @@
         <div class="stat-card"><div class="stat-value">${total}</div><div class="stat-label">${t('queue.total_queues')}</div></div>
       </div>
       <div style="margin-top:12px;display:flex;gap:8px">
-        <button class="btn btn-primary" onclick="window._queueShowCreate()">${t('queue.create')}</button>
-        <button class="btn btn-ghost" onclick="window._queueForceDispatch()">${t('queue.dispatch_now')}</button>
+        <button class="btn btn-primary" data-ripple onclick="window._queueShowCreate()">${t('queue.create')}</button>
+        <button class="btn btn-ghost" data-ripple onclick="window._queueForceDispatch()">${t('queue.dispatch_now')}</button>
       </div>`;
     },
 
@@ -84,9 +84,9 @@
             ${q.target_printer_id ? `<span>${printerName(q.target_printer_id)}</span>` : ''}
           </div>
           <div style="margin-top:8px;display:flex;gap:6px">
-            ${q.status === 'active' ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();window._queuePause(${q.id})">${t('queue.pause_queue')}</button>` :
-              q.status === 'paused' ? `<button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();window._queueResume(${q.id})">${t('queue.resume_queue')}</button>` : ''}
-            <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();window._queueAddItem(${q.id})">${t('queue.add_item')}</button>
+            ${q.status === 'active' ? `<button class="btn btn-ghost btn-sm" data-ripple data-tooltip="${t('queue.pause_queue')}" onclick="event.stopPropagation();window._queuePause(${q.id})">${t('queue.pause_queue')}</button>` :
+              q.status === 'paused' ? `<button class="btn btn-ghost btn-sm" data-ripple data-tooltip="${t('queue.resume_queue')}" onclick="event.stopPropagation();window._queueResume(${q.id})">${t('queue.resume_queue')}</button>` : ''}
+            <button class="btn btn-ghost btn-sm" data-ripple onclick="event.stopPropagation();window._queueAddItem(${q.id})">${t('queue.add_item')}</button>
           </div>
         </div>`;
       }).join('');
@@ -128,7 +128,7 @@
       container.innerHTML = `<div class="queue-items-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <strong>${queue.name} — ${t('queue.items_count', { count: items.length })}</strong>
       </div>` + items.map(item => `
-        <div class="queue-item" data-item-id="${item.id}" draggable="true" style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--card-bg)">
+        <div class="queue-item q-item" data-item-id="${item.id}" draggable="true" style="display:flex;align-items:center;gap:12px;padding:10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;background:var(--card-bg)">
           <span class="queue-item-drag" style="cursor:grab;color:var(--text-muted)">⠿</span>
           <div style="flex:1;min-width:0">
             <div style="font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${item.filename}</div>
@@ -140,7 +140,7 @@
           </div>
           ${statusBadge(item.status)}
           <div style="display:flex;gap:4px">
-            ${item.status === 'pending' ? `<button class="btn btn-ghost btn-sm" onclick="window._queueSkipItem(${item.id})" title="${t('queue.skip')}">&times;</button>` : ''}
+            ${item.status === 'pending' ? `<button class="btn btn-ghost btn-sm" data-ripple data-tooltip="${t('queue.skip')}" onclick="window._queueSkipItem(${item.id})" title="${t('queue.skip')}">&times;</button>` : ''}
           </div>
         </div>`).join('');
 
@@ -222,8 +222,8 @@
       </div>
       <div class="form-group"><label>${t('queue.bed_clear_gcode')}</label><textarea id="qc-gcode" class="form-input" rows="3" placeholder="G28\nG1 Z50"></textarea></div>
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-        <button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove()">${t('common.cancel')}</button>
-        <button class="btn btn-primary" onclick="window._queueDoCreate()">${t('queue.create')}</button>
+        <button class="btn btn-ghost" data-ripple onclick="this.closest('.modal-overlay').remove()">${t('common.cancel')}</button>
+        <button class="btn btn-primary" data-ripple onclick="window._queueDoCreate()">${t('queue.create')}</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
@@ -263,8 +263,8 @@
       <div class="form-group"><label>${t('queue.required_material')}</label><input type="text" id="qi-material" class="form-input" placeholder="PLA" /></div>
       <div class="form-group"><label>${t('queue.notes')}</label><input type="text" id="qi-notes" class="form-input" /></div>
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-        <button class="btn btn-ghost" onclick="this.closest('.modal-overlay').remove()">${t('common.cancel')}</button>
-        <button class="btn btn-primary" onclick="window._queueDoAddItem(${queueId})">${t('queue.add_item')}</button>
+        <button class="btn btn-ghost" data-ripple onclick="this.closest('.modal-overlay').remove()">${t('common.cancel')}</button>
+        <button class="btn btn-primary" data-ripple onclick="window._queueDoAddItem(${queueId})">${t('queue.add_item')}</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
@@ -319,7 +319,7 @@
     if (!panel) return;
 
     const tabBar = Object.entries(TAB_CONFIG).map(([id, cfg]) =>
-      `<button class="tab-btn${id === _activeTab ? ' active' : ''}" data-tab="${id}">${t(cfg.label)}</button>`
+      `<button class="tab-btn${id === _activeTab ? ' active' : ''}" data-tab="${id}" data-ripple>${t(cfg.label)}</button>`
     ).join('');
 
     let html = `<div class="tab-bar" id="queue-tab-bar">${tabBar}</div>`;
@@ -327,7 +327,7 @@
       const display = tabId === _activeTab ? '' : 'display:none';
       const order = getOrder(tabId);
       const mods = order.filter(m => cfg.modules.includes(m));
-      html += `<div class="tab-content module-grid" id="queue-tab-${tabId}" style="${display}">`;
+      html += `<div class="tab-content module-grid ix-tab-panel" id="queue-tab-${tabId}" style="${display}">`;
       for (const modId of mods) {
         const size = MODULE_SIZE[modId] || 'full';
         const content = BUILDERS[modId] ? BUILDERS[modId]() : '';

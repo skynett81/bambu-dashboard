@@ -23,6 +23,8 @@
   let _countdownInterval = null;
   let _lastGcodeState = 'IDLE';
   let _lastServerMins = -1;
+  let _lastPercent = 0;
+  let _completionFired = false;
 
   function initProgressRing() {
     const svg = document.getElementById('progress-ring');
@@ -106,6 +108,7 @@
     const percent = data.mc_percent || 0;
     const state = data.gcode_state || 'IDLE';
     const color = STATE_COLORS[state] || theme.getCSSVar('--text-muted');
+    const prevState = _lastGcodeState;
     _lastGcodeState = state;
 
     // Progress ring
@@ -113,8 +116,36 @@
     circle.setAttribute('stroke-dashoffset', offset);
     circle.setAttribute('stroke', color);
 
-    // Percent text
-    percentText.textContent = `${percent}%`;
+    // Animate percent number smoothly
+    const ring = document.getElementById('progress-ring');
+    if (percent !== _lastPercent && typeof animateNumber === 'function') {
+      animateNumber(percentText, _lastPercent, percent, 800, v => `${Math.round(v)}%`);
+    } else {
+      percentText.textContent = `${percent}%`;
+    }
+
+    // Completion celebration — glow burst on ring
+    if (state === 'FINISH' && prevState !== 'FINISH' && !_completionFired) {
+      _completionFired = true;
+      if (ring) {
+        ring.classList.remove('ring-complete');
+        void ring.offsetWidth;
+        ring.classList.add('ring-complete');
+      }
+      if (typeof showToast === 'function') {
+        showToast(t('progress.print_complete'), 'success', 5000);
+      }
+    }
+    if (state !== 'FINISH') _completionFired = false;
+
+    // Error shake on FAILED
+    if (state === 'FAILED' && prevState !== 'FAILED' && ring) {
+      ring.style.animation = 'none';
+      void ring.offsetWidth;
+      ring.style.animation = 'badgeDisconnect 0.5s ease';
+    }
+
+    _lastPercent = percent;
 
     // Ring state label
     ringState.textContent = stateLabel(state);

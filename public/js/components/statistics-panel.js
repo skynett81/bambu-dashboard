@@ -313,6 +313,10 @@
       const isActive = p.id === `stats-tab-${tabId}`;
       p.classList.toggle('active', isActive);
       p.style.display = isActive ? 'grid' : 'none';
+      if (isActive) {
+        p.classList.add('ix-tab-panel');
+        p.addEventListener('animationend', () => p.classList.remove('ix-tab-panel'), { once: true });
+      }
     });
     const slug = tabId === 'overview' ? 'stats' : `stats/${tabId}`;
     if (location.hash !== '#' + slug) history.replaceState(null, '', '#' + slug);
@@ -385,7 +389,7 @@
         <button class="speed-btn ${_locked ? '' : 'active'}" onclick="toggleStatsLock()" title="${_locked ? t('stats.layout_locked') : t('stats.layout_unlocked')}">
           ${lockIcon} <span>${_locked ? t('stats.layout_locked') : t('stats.layout_unlocked')}</span>
         </button>
-        <button class="form-btn form-btn-sm" onclick="exportCsv()">${t('stats.download_csv')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="exportCsv()">${t('stats.download_csv')}</button>
       </div>`;
 
       // Tab bar
@@ -399,7 +403,8 @@
       for (const [tabId, cfg] of Object.entries(TAB_CONFIG)) {
         const order = getOrder(tabId);
         const isActive = tabId === _activeTab;
-        html += `<div class="tab-panel stats-tab-panel ${isActive ? 'active' : ''}" id="stats-tab-${tabId}" style="display:${isActive ? 'grid' : 'none'}">`;
+        html += `<div class="tab-panel stats-tab-panel stagger-in ${isActive ? 'active' : ''}" id="stats-tab-${tabId}" style="display:${isActive ? 'grid' : 'none'}">`;
+        let _si = 0;
         for (const modId of order) {
           const builder = BUILDERS[modId];
           if (!builder) continue;
@@ -409,7 +414,7 @@
           const unlocked = _locked ? '' : ' stats-module-unlocked';
           const size = MODULE_SIZE[modId] || 'half';
           const span = size === 'full' ? ' stats-module-full' : '';
-          html += `<div class="stats-module${unlocked}${span}" data-module-id="${modId}" ${draggable}>`;
+          html += `<div class="stats-module${unlocked}${span}" data-module-id="${modId}" ${draggable} style="--i:${_si++}">`;
           if (!_locked) html += '<div class="stats-module-handle" title="Drag to reorder">&#x2630;</div>';
           html += content;
           html += '</div>';

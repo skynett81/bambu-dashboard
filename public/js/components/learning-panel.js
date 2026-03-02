@@ -110,7 +110,7 @@
     for (const [id, cfg] of Object.entries(CATEGORIES)) {
       const active = id === _activeCategory ? ' lc-tab-active' : '';
       const count = id === 'all' ? _courses.length : _courses.filter(c => c.category === id).length;
-      html += '<button class="lc-tab-btn' + active + '" onclick="lcSwitchCategory(\'' + id + '\')" style="--tab-color:' + cfg.color + '">' + t(cfg.label) + ' <span class="lc-tab-count">' + count + '</span></button>';
+      html += '<button class="lc-tab-btn' + active + '" data-ripple onclick="lcSwitchCategory(\'' + id + '\')" style="--tab-color:' + cfg.color + '">' + t(cfg.label) + ' <span class="lc-tab-count">' + count + '</span></button>';
     }
     html += '</div>';
 
@@ -118,10 +118,10 @@
     if (filtered.length === 0) {
       html += '<div class="text-muted" style="text-align:center;padding:2rem">' + t('learning.no_results') + '</div>';
     } else {
-      html += '<div class="lc-course-grid">';
-      for (const course of filtered) {
-        html += _renderCard(course);
-      }
+      html += '<div class="lc-course-grid stagger-in">';
+      filtered.forEach((course, i) => {
+        html += _renderCard(course, i);
+      });
       html += '</div>';
     }
 
@@ -146,14 +146,14 @@
     '</div>';
   }
 
-  function _renderCard(course) {
+  function _renderCard(course, idx) {
     const steps = _getSteps(course);
     const done = _getCompletedSteps(course);
     const pct = _getProgress(course);
     const isComplete = pct === 100;
     const cat = CATEGORIES[course.category] || CATEGORIES.all;
 
-    return '<div class="lc-course-card' + (isComplete ? ' lc-complete' : '') + '" onclick="lcToggleCourse(' + course.id + ')">' +
+    return '<div class="lc-course-card' + (isComplete ? ' lc-complete' : '') + '" onclick="lcToggleCourse(' + course.id + ')" style="--i:' + (idx || 0) + '">' +
       '<div class="lc-card-header">' +
         '<span class="lc-cat-badge" style="background:' + cat.color + '20;color:' + cat.color + '">' + t(cat.label) + '</span>' +
         (isComplete ? '<span class="lc-done-badge">\u2705</span>' : '') +
@@ -205,7 +205,7 @@
       const step = steps[i];
       const checked = done.includes(i);
       const actionBtn = step.action
-        ? '<button class="form-btn form-btn-sm lc-goto-btn" onclick="event.stopPropagation();lcGoTo(\'' + _esc(step.action) + '\')">' + t('learning.go_to') + ' \u2192</button>'
+        ? '<button class="form-btn form-btn-sm lc-goto-btn" data-ripple onclick="event.stopPropagation();lcGoTo(\'' + _esc(step.action) + '\')">' + t('learning.go_to') + ' \u2192</button>'
         : '';
 
       html += '<div class="lc-step' + (checked ? ' lc-step-done' : '') + '">';
@@ -221,8 +221,8 @@
 
     // Actions
     html += '<div class="lc-detail-actions">';
-    html += '<button class="form-btn form-btn-sm" onclick="lcMarkAll(' + course.id + ')">' + t('learning.mark_all_complete') + '</button>';
-    html += '<button class="form-btn form-btn-sm form-btn-danger" onclick="lcResetProgress(' + course.id + ')">' + t('learning.reset_progress') + '</button>';
+    html += '<button class="form-btn form-btn-sm" data-ripple onclick="lcMarkAll(' + course.id + ')">' + t('learning.mark_all_complete') + '</button>';
+    html += '<button class="form-btn form-btn-sm form-btn-danger" data-ripple onclick="lcResetProgress(' + course.id + ')">' + t('learning.reset_progress') + '</button>';
     html += '</div>';
 
     html += '</div></div>';

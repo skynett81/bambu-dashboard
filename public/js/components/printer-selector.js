@@ -57,16 +57,16 @@
 
   function getStatusDot(printerState) {
     const gcodeState = printerState.gcode_state || 'IDLE';
-    let color;
+    let color, dotClass = '';
     switch(gcodeState) {
-      case 'RUNNING': color = 'var(--accent-green)'; break;
+      case 'RUNNING': color = 'var(--accent-green)'; dotClass = 'dot-running'; break;
       case 'PAUSE': color = 'var(--accent-orange)'; break;
-      case 'FAILED': color = 'var(--accent-red)'; break;
-      case 'PREPARE': case 'HEATING': color = 'var(--accent-blue)'; break;
-      case 'FINISH': color = 'var(--accent-green)'; break;
+      case 'FAILED': color = 'var(--accent-red)'; dotClass = 'dot-error'; break;
+      case 'PREPARE': case 'HEATING': color = 'var(--accent-blue)'; dotClass = 'dot-running'; break;
+      case 'FINISH': color = 'var(--accent-green)'; dotClass = 'dot-idle'; break;
       default: color = 'var(--text-muted)';
     }
-    return `<span class="printer-status-dot" style="background:${color}"></span>`;
+    return `<span class="printer-status-dot ${dotClass}" style="background:${color}"></span>`;
   }
 
   window.selectPrinter = function(id) {
@@ -89,8 +89,14 @@
     if (typeof updatePrinterInfo === 'function') updatePrinterInfo(printData);
     if (typeof updateStatusBar === 'function') updateStatusBar(printData);
 
-    // Update selector appearance
+    // Update selector appearance with selection pop
     window.updatePrinterSelector();
+    // Add selection pop animation to newly active tab
+    const activeTab = document.querySelector(`.printer-tab[data-printer-id="${id}"]`);
+    if (activeTab) {
+      activeTab.classList.add('printer-selected');
+      activeTab.addEventListener('animationend', () => activeTab.classList.remove('printer-selected'), { once: true });
+    }
 
     // Update camera to new printer's port
     if (typeof switchCamera === 'function') {

@@ -51,7 +51,7 @@
           <span class="ctrl-object-name">${esc(name)}</span>
           ${isSkipped
             ? `<span class="ctrl-object-status">${t('controls.object_skipped')}</span>`
-            : `<button class="form-btn form-btn-sm ctrl-object-skip-btn" onclick="skipObject(${obj.obj_id})">${t('controls.skip_object')}</button>`
+            : `<button class="form-btn form-btn-sm ctrl-object-skip-btn" data-ripple onclick="skipObject(${obj.obj_id})">${t('controls.skip_object')}</button>`
           }
         </div>`;
       }
@@ -74,19 +74,19 @@
         <span class="ctrl-speed-value" id="ctrl-speed-value">${spdMag}%</span>
       </div>
       <div class="ctrl-speed-grid">
-        <button class="ctrl-speed-btn ${spdLvl === 1 ? 'active' : ''}" data-speed="1" onclick="applySpeedPreset(1)">
+        <button class="ctrl-speed-btn ${spdLvl === 1 ? 'active' : ''}" data-speed="1" data-ripple onclick="applySpeedPreset(1)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 18h4l3-8 3 8h4l5-16"/></svg>
           ${t('speed.silent')}
         </button>
-        <button class="ctrl-speed-btn ${spdLvl === 2 ? 'active' : ''}" data-speed="2" onclick="applySpeedPreset(2)">
+        <button class="ctrl-speed-btn ${spdLvl === 2 ? 'active' : ''}" data-speed="2" data-ripple onclick="applySpeedPreset(2)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           ${t('speed.standard')}
         </button>
-        <button class="ctrl-speed-btn ${spdLvl === 3 ? 'active' : ''}" data-speed="3" onclick="applySpeedPreset(3)">
+        <button class="ctrl-speed-btn ${spdLvl === 3 ? 'active' : ''}" data-speed="3" data-ripple onclick="applySpeedPreset(3)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           ${t('speed.sport')}
         </button>
-        <button class="ctrl-speed-btn ${spdLvl === 4 ? 'active' : ''}" data-speed="4" onclick="applySpeedPreset(4)">
+        <button class="ctrl-speed-btn ${spdLvl === 4 ? 'active' : ''}" data-speed="4" data-ripple onclick="applySpeedPreset(4)">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           ${t('speed.ludicrous')}
         </button>
@@ -127,12 +127,12 @@
     html += `</div>
       <div class="ctrl-presets">
         <span class="ctrl-preset-label">${t('controls.presets')}</span>
-        <button class="ctrl-preset-btn" onclick="applyTempPreset(220, 60)" title="PLA">PLA</button>
-        <button class="ctrl-preset-btn" onclick="applyTempPreset(250, 80)" title="PETG">PETG</button>
-        <button class="ctrl-preset-btn" onclick="applyTempPreset(260, 100)" title="ABS">ABS</button>
-        <button class="ctrl-preset-btn" onclick="applyTempPreset(270, 100)" title="ASA">ASA</button>
-        <button class="ctrl-preset-btn" onclick="applyTempPreset(230, 60)" title="TPU">TPU</button>
-        <button class="ctrl-preset-btn ctrl-preset-off" onclick="applyTempPreset(0, 0)" title="${t('controls.cooldown')}">
+        <button class="ctrl-preset-btn" data-ripple onclick="applyTempPreset(220, 60)" title="PLA">PLA</button>
+        <button class="ctrl-preset-btn" data-ripple onclick="applyTempPreset(250, 80)" title="PETG">PETG</button>
+        <button class="ctrl-preset-btn" data-ripple onclick="applyTempPreset(260, 100)" title="ABS">ABS</button>
+        <button class="ctrl-preset-btn" data-ripple onclick="applyTempPreset(270, 100)" title="ASA">ASA</button>
+        <button class="ctrl-preset-btn" data-ripple onclick="applyTempPreset(230, 60)" title="TPU">TPU</button>
+        <button class="ctrl-preset-btn ctrl-preset-off" data-ripple onclick="applyTempPreset(0, 0)" title="${t('controls.cooldown')}">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           ${t('controls.cooldown')}
         </button>
@@ -172,29 +172,29 @@
         <div class="ctrl-motion-grid">
           <div class="ctrl-motion-xy">
             <div></div>
-            <button class="ctrl-motion-btn" onclick="sendGcode('G91\\nG0 Y10 F3000\\nG90')" title="Y+10">
+            <button class="ctrl-motion-btn" data-ripple onclick="sendGcode('G91\\nG0 Y10 F3000\\nG90')" title="Y+10">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
             </button>
             <div></div>
-            <button class="ctrl-motion-btn" onclick="sendGcode('G91\\nG0 X-10 F3000\\nG90')" title="X-10">
+            <button class="ctrl-motion-btn" data-ripple onclick="sendGcode('G91\\nG0 X-10 F3000\\nG90')" title="X-10">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
-            <button class="ctrl-motion-btn ctrl-motion-home" onclick="sendGcode('G28')">
+            <button class="ctrl-motion-btn ctrl-motion-home" data-ripple onclick="sendGcode('G28')">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
             </button>
-            <button class="ctrl-motion-btn" onclick="sendGcode('G91\\nG0 X10 F3000\\nG90')" title="X+10">
+            <button class="ctrl-motion-btn" data-ripple onclick="sendGcode('G91\\nG0 X10 F3000\\nG90')" title="X+10">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
             <div></div>
-            <button class="ctrl-motion-btn" onclick="sendGcode('G91\\nG0 Y-10 F3000\\nG90')" title="Y-10">
+            <button class="ctrl-motion-btn" data-ripple onclick="sendGcode('G91\\nG0 Y-10 F3000\\nG90')" title="Y-10">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </button>
             <div></div>
           </div>
           <div class="ctrl-motion-z">
-            <button class="ctrl-motion-btn" onclick="sendGcode('G91\\nG0 Z5 F600\\nG90')" title="Z+5">Z+</button>
+            <button class="ctrl-motion-btn" data-ripple onclick="sendGcode('G91\\nG0 Z5 F600\\nG90')" title="Z+5">Z+</button>
             <span class="ctrl-motion-z-label">Z</span>
-            <button class="ctrl-motion-btn" onclick="sendGcode('G91\\nG0 Z-5 F600\\nG90')" title="Z-5">Z-</button>
+            <button class="ctrl-motion-btn" data-ripple onclick="sendGcode('G91\\nG0 Z-5 F600\\nG90')" title="Z-5">Z-</button>
           </div>
         </div>
         <div class="ctrl-divider"></div>
@@ -203,11 +203,11 @@
           ${t('controls.extruder')}
         </div>
         <div class="ctrl-extrude-row">
-          <button class="ctrl-btn" onclick="sendGcode('G91\\nG0 E10 F300\\nG90')">
+          <button class="ctrl-btn" data-ripple onclick="sendGcode('G91\\nG0 E10 F300\\nG90')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             ${t('controls.extrude')} 10mm
           </button>
-          <button class="ctrl-btn" onclick="sendGcode('G91\\nG0 E-10 F300\\nG90')">
+          <button class="ctrl-btn" data-ripple onclick="sendGcode('G91\\nG0 E-10 F300\\nG90')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="18 15 12 9 6 15"/></svg>
             ${t('controls.retract')} 10mm
           </button>
@@ -224,7 +224,7 @@
       <div class="ctrl-tools-grid">`;
 
     if (caps.light) {
-      html += `<button class="ctrl-tool-btn ${lightState === 'on' ? 'ctrl-tool-active' : ''}" id="ctrl-light-btn" onclick="toggleLight()">
+      html += `<button class="ctrl-tool-btn ${lightState === 'on' ? 'ctrl-tool-active' : ''}" id="ctrl-light-btn" data-ripple data-tooltip="${t('controls.light')}" onclick="toggleLight()">
         <div class="ctrl-tool-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 1 4 12.7V17a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-2.3A7 7 0 0 1 12 2z"/><line x1="10" y1="22" x2="14" y2="22"/></svg>
         </div>
@@ -232,7 +232,7 @@
       </button>`;
     }
 
-    html += `<button class="ctrl-tool-btn" onclick="sendGcode('G29')">
+    html += `<button class="ctrl-tool-btn" data-ripple data-tooltip="${t('controls.calibration')}" onclick="sendGcode('G29')">
       <div class="ctrl-tool-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20"/><path d="M5 20V8l7-5 7 5v12"/><rect x="9" y="12" width="6" height="8"/></svg>
       </div>
@@ -242,13 +242,13 @@
     if (caps.ai) {
       const spaghetti = data.xcam?.spaghetti_detector;
       const firstLayer = data.xcam?.first_layer_inspector;
-      html += `<button class="ctrl-tool-btn ${spaghetti ? 'ctrl-tool-active' : ''}" id="ctrl-ai-spaghetti" disabled title="${t('controls.ai_spaghetti')}">
+      html += `<button class="ctrl-tool-btn ${spaghetti ? 'ctrl-tool-active' : ''}" id="ctrl-ai-spaghetti" disabled data-tooltip="${t('controls.ai_spaghetti')}" title="${t('controls.ai_spaghetti')}">
         <div class="ctrl-tool-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
         </div>
         <span class="ctrl-tool-label">${t('controls.ai_spaghetti')}</span>
       </button>`;
-      html += `<button class="ctrl-tool-btn ${firstLayer ? 'ctrl-tool-active' : ''}" id="ctrl-ai-firstlayer" disabled title="${t('controls.ai_first_layer')}">
+      html += `<button class="ctrl-tool-btn ${firstLayer ? 'ctrl-tool-active' : ''}" id="ctrl-ai-firstlayer" disabled data-tooltip="${t('controls.ai_first_layer')}" title="${t('controls.ai_first_layer')}">
         <div class="ctrl-tool-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
         </div>
@@ -266,7 +266,7 @@
       </div>
       <div class="ctrl-gcode">
         <input class="form-input ctrl-gcode-input" id="gcode-input" placeholder="${t('controls.gcode_placeholder')}" onkeydown="if(event.key==='Enter')sendGcodeInput()">
-        <button class="form-btn form-btn-sm" onclick="sendGcodeInput()">${t('controls.gcode_send')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="sendGcodeInput()">${t('controls.gcode_send')}</button>
       </div>
     </div>`;
 
@@ -277,7 +277,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
           ${t('controls.macros_title')}
         </span>
-        <button class="form-btn form-btn-sm" onclick="showMacroEditor()">${t('controls.macro_add')}</button>
+        <button class="form-btn form-btn-sm" data-ripple onclick="showMacroEditor()">${t('controls.macro_add')}</button>
       </div>
       <div id="ctrl-macros-list"><span class="text-muted" style="font-size:0.8rem">Loading...</span></div>
     </div>`;
@@ -290,7 +290,7 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
             ${t('controls.sd_files')}
           </span>
-          <button class="form-btn form-btn-sm" onclick="loadPrinterFiles('${esc(meta.id)}')">${t('controls.refresh')}</button>
+          <button class="form-btn form-btn-sm" data-ripple onclick="loadPrinterFiles('${esc(meta.id)}')">${t('controls.refresh')}</button>
         </div>
         <div id="ctrl-files-list"><span class="text-muted" style="font-size:0.8rem">${t('controls.sd_click_refresh')}</span></div>
       </div>`;
@@ -361,17 +361,17 @@
   function printControlButtons(state, isPrinting) {
     let html = '';
     if (state === 'RUNNING') {
-      html += `<button class="ctrl-btn ctrl-pause" onclick="sendCommand('pause')">
+      html += `<button class="ctrl-btn ctrl-pause" data-ripple onclick="sendCommand('pause')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         ${t('controls.pause')}
       </button>`;
     } else if (state === 'PAUSE') {
-      html += `<button class="ctrl-btn ctrl-resume" onclick="sendCommand('resume')">
+      html += `<button class="ctrl-btn ctrl-resume" data-ripple onclick="sendCommand('resume')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
         ${t('controls.resume')}
       </button>`;
     }
-    html += `<button class="ctrl-btn ctrl-stop" ${!isPrinting ? 'disabled' : ''} onclick="confirmStop()">
+    html += `<button class="ctrl-btn ctrl-stop" data-ripple ${!isPrinting ? 'disabled' : ''} onclick="confirmStop()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
       ${t('controls.stop')}
     </button>`;
@@ -426,7 +426,7 @@
       <span class="ctrl-temp-current" id="temp-current-${id}">${current}°C</span>
       <span class="ctrl-temp-arrow">\u2192</span>
       <input type="number" class="form-input ctrl-temp-input" id="temp-input-${id}" value="${target}" min="0" max="${max}" step="5">
-      <button class="form-btn form-btn-sm" onclick="setTemp('${gcode}', document.getElementById('temp-input-${id}').value)">${t('controls.set')}</button>
+      <button class="form-btn form-btn-sm" data-ripple onclick="setTemp('${gcode}', document.getElementById('temp-input-${id}').value)">${t('controls.set')}</button>
     </div>`;
   }
 
@@ -458,7 +458,9 @@
   };
 
   window.confirmStop = function() {
-    if (confirm(t('controls.confirm_stop'))) sendCommand('stop');
+    return confirmAction(t('controls.confirm_stop'), () => {
+      sendCommand('stop');
+    }, { danger: true });
   };
 
   window.toggleLight = function() {
@@ -467,8 +469,9 @@
   };
 
   window.skipObject = function(objId) {
-    if (!confirm(t('controls.skip_confirm'))) return;
-    sendCommand('skip_objects', { obj_list: [objId] });
+    return confirmAction(t('controls.skip_confirm'), () => {
+      sendCommand('skip_objects', { obj_list: [objId] });
+    }, { danger: true });
   };
 
   // Speed slider helpers
@@ -520,7 +523,7 @@
         h += '<div class="ctrl-macro-grid">';
         for (const m of items) {
           h += `<div class="ctrl-macro-btn-wrap">
-            <button class="form-btn form-btn-sm ctrl-macro-btn" onclick="runMacro(${m.id})" title="${esc(m.description || m.name)}">
+            <button class="form-btn form-btn-sm ctrl-macro-btn" data-ripple onclick="runMacro(${m.id})" title="${esc(m.description || m.name)}">
               ${esc(m.name)}
             </button>
             <button class="filament-edit-btn" style="opacity:0.6" onclick="showMacroEditor(${m.id})" title="${t('settings.edit')}">
@@ -539,7 +542,7 @@
 
   window.runMacro = async function(id) {
     const meta = window.printerState?.getActivePrinterMeta();
-    if (!meta?.id) { alert(t('controls.no_printer')); return; }
+    if (!meta?.id) { showToast(t('controls.no_printer'), 'warning'); return; }
     try {
       const res = await fetch(`/api/macros/${id}/run`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -547,7 +550,7 @@
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed');
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
   window.showMacroEditor = async function(id) {
@@ -600,7 +603,7 @@
       gcode: document.getElementById('macro-gcode')?.value?.trim(),
       category: document.getElementById('macro-category')?.value || 'manual'
     };
-    if (!body.name || !body.gcode) { alert('Name and G-Code required'); return; }
+    if (!body.name || !body.gcode) { showToast('Name and G-Code required', 'warning'); return; }
     try {
       const res = await fetch(id ? `/api/macros/${id}` : '/api/macros', {
         method: id ? 'PUT' : 'POST',
@@ -610,16 +613,17 @@
       if (!res.ok) throw new Error('Failed');
       document.querySelector('.inv-modal-overlay')?.remove();
       loadMacros();
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
-  window.deleteMacroItem = async function(id) {
-    if (!confirm(t('controls.macro_delete_confirm'))) return;
-    try {
-      await fetch(`/api/macros/${id}`, { method: 'DELETE' });
-      document.querySelector('.inv-modal-overlay')?.remove();
-      loadMacros();
-    } catch (e) { alert('Error: ' + e.message); }
+  window.deleteMacroItem = function(id) {
+    return confirmAction(t('controls.macro_delete_confirm'), async () => {
+      try {
+        await fetch(`/api/macros/${id}`, { method: 'DELETE' });
+        document.querySelector('.inv-modal-overlay')?.remove();
+        loadMacros();
+      } catch (e) { showToast(e.message, 'error'); }
+    }, { danger: true });
   };
 
   // ═══ SD Card File Browser ═══
@@ -642,8 +646,8 @@
             <span class="text-muted" style="font-size:0.7rem">${sizeKb}</span>
           </div>
           <div class="ctrl-file-actions">
-            <button class="form-btn form-btn-sm" onclick="printFile('${esc(printerId)}', '${esc(f.path)}')">${t('controls.print')}</button>
-            <button class="form-btn form-btn-sm" onclick="addFileToQueue('${esc(f.path)}')">${t('controls.add_to_queue')}</button>
+            <button class="form-btn form-btn-sm" data-ripple onclick="printFile('${esc(printerId)}', '${esc(f.path)}')">${t('controls.print')}</button>
+            <button class="form-btn form-btn-sm" data-ripple onclick="addFileToQueue('${esc(f.path)}')">${t('controls.add_to_queue')}</button>
             <button class="filament-delete-btn" style="opacity:0.7" onclick="deleteFile('${esc(printerId)}', '${esc(f.path)}')" title="${t('settings.delete')}">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -655,14 +659,15 @@
     } catch (e) { el.innerHTML = `<span class="text-muted">Error: ${esc(e.message)}</span>`; }
   };
 
-  window.printFile = async function(printerId, filePath) {
-    if (!confirm(t('controls.print_confirm'))) return;
-    try {
-      await fetch(`/api/printers/${encodeURIComponent(printerId)}/files/print`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ filename: filePath })
-      });
-    } catch (e) { alert('Error: ' + e.message); }
+  window.printFile = function(printerId, filePath) {
+    return confirmAction(t('controls.print_confirm'), async () => {
+      try {
+        await fetch(`/api/printers/${encodeURIComponent(printerId)}/files/print`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: filePath })
+        });
+      } catch (e) { showToast(e.message, 'error'); }
+    }, {});
   };
 
   window.addFileToQueue = async function(filePath) {
@@ -670,20 +675,21 @@
     try {
       const qRes = await fetch('/api/queue');
       const queues = await qRes.json();
-      if (!queues.length) { alert(t('controls.no_queues')); return; }
+      if (!queues.length) { showToast(t('controls.no_queues'), 'warning'); return; }
       const queueId = queues[0].id;
       await fetch(`/api/queue/${queueId}/items`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ filename })
       });
-    } catch (e) { alert('Error: ' + e.message); }
+    } catch (e) { showToast(e.message, 'error'); }
   };
 
-  window.deleteFile = async function(printerId, filePath) {
-    if (!confirm(t('controls.delete_file_confirm'))) return;
-    try {
-      await fetch(`/api/printers/${encodeURIComponent(printerId)}/files/${encodeURIComponent(filePath)}`, { method: 'DELETE' });
-      loadPrinterFiles(printerId);
-    } catch (e) { alert('Error: ' + e.message); }
+  window.deleteFile = function(printerId, filePath) {
+    return confirmAction(t('controls.delete_file_confirm'), async () => {
+      try {
+        await fetch(`/api/printers/${encodeURIComponent(printerId)}/files/${encodeURIComponent(filePath)}`, { method: 'DELETE' });
+        loadPrinterFiles(printerId);
+      } catch (e) { showToast(e.message, 'error'); }
+    }, { danger: true });
   };
 })();

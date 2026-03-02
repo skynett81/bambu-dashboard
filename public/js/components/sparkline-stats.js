@@ -145,11 +145,17 @@
         const c = p.valColor(raw);
         if (c) valEl.style.color = c;
 
-        // Flash on change
+        // Flash on change with direction indicator
         if (old !== txt && old !== '--') {
-          valEl.classList.remove('spark-flash');
+          valEl.classList.remove('spark-flash', 'ix-value-up', 'ix-value-down');
           void valEl.offsetWidth;
           valEl.classList.add('spark-flash');
+          // Direction animation — compare numeric values
+          const oldNum = parseFloat(old);
+          const newNum = parseFloat(txt);
+          if (!isNaN(oldNum) && !isNaN(newNum) && oldNum !== newNum) {
+            valEl.classList.add(newNum > oldNum ? 'ix-value-up' : 'ix-value-down');
+          }
         }
       }
 

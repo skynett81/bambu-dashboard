@@ -70,6 +70,12 @@
     fillEl.setAttribute('stroke', color);
     valueEl.textContent = `${Math.round(current * 10) / 10}°`;
 
+    // Add danger class for high temperatures (ratio > 0.85)
+    const wrapper = fillEl.closest('.gauge-wrapper') || document.getElementById(id)?.closest('.gauge-wrapper');
+    if (wrapper) {
+      wrapper.classList.toggle('gauge-danger', ratio > 0.85);
+    }
+
     if (target && target > 0) {
       targetEl.textContent = t('temperature.target', { temp: Math.round(target) + '°' });
     } else {

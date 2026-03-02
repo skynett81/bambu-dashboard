@@ -140,7 +140,7 @@
     html += `<option value="makerworld">MakerWorld</option>`;
     html += `<option value="thingiverse">Thingiverse</option>`;
     html += `</select>`;
-    html += `<button id="mi-search-btn" class="mi-btn">${t('model_info.search')}</button>`;
+    html += `<button id="mi-search-btn" class="mi-btn" data-ripple>${t('model_info.search')}</button>`;
     html += `</div>`;
     html += `<div id="mi-search-results" class="mi-search-results"></div>`;
     html += `</div>`;
@@ -150,7 +150,7 @@
     html += `<h3 class="mi-section-title">${t('model_info.link_by_url')}</h3>`;
     html += `<div class="mi-search-bar">`;
     html += `<input type="text" id="mi-url-input" class="mi-input" placeholder="${t('model_info.url_placeholder')}">`;
-    html += `<button id="mi-url-btn" class="mi-btn">${t('model_info.link')}</button>`;
+    html += `<button id="mi-url-btn" class="mi-btn" data-ripple>${t('model_info.link')}</button>`;
     html += `</div>`;
     html += `<div id="mi-url-status"></div>`;
     html += `</div>`;
@@ -260,9 +260,13 @@
 
     results.innerHTML = `<div class="mi-loading">${t('model_info.searching')}</div>`;
 
+    const searchBtn = document.getElementById('mi-search-btn');
+    if (searchBtn) { searchBtn.disabled = true; searchBtn.dataset.loading = 'true'; }
+
     fetch(`/api/model-search?q=${encodeURIComponent(q)}&source=${source.value}`)
       .then(r => r.ok ? r.json() : [])
       .then(items => {
+        if (searchBtn) { searchBtn.disabled = false; delete searchBtn.dataset.loading; }
         if (!items.length) {
           results.innerHTML = `<div class="mi-empty">${t('model_info.no_results')}</div>`;
           return;
@@ -275,6 +279,7 @@
         });
       })
       .catch(() => {
+        if (searchBtn) { searchBtn.disabled = false; delete searchBtn.dataset.loading; }
         results.innerHTML = `<div class="mi-empty">${t('model_info.search_error')}</div>`;
       });
   }
@@ -309,7 +314,7 @@
     const printerId = window.printerState?.getActivePrinterId() || '';
     const filename = _currentFilename;
     if (printerId && filename) {
-      html += `<button class="mi-action-btn mi-action-link mi-result-link-btn" `
+      html += `<button class="mi-action-btn mi-action-link mi-result-link-btn" data-ripple `
         + `data-source="${esc(item.source)}" `
         + `data-source_id="${esc(item.source_id)}" `
         + `data-title="${esc(item.title)}" `

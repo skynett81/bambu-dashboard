@@ -197,11 +197,11 @@
         ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>'
         : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>';
       html += `<div class="stats-toolbar">
-        <button class="form-btn" onclick="showGlobalWasteForm()" style="display:flex;align-items:center;gap:4px">
+        <button class="form-btn" data-ripple onclick="showGlobalWasteForm()" style="display:flex;align-items:center;gap:4px">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>${t('waste.add_manual')}</span>
         </button>
-        <button class="speed-btn ${_locked ? '' : 'active'}" onclick="toggleWasteLock()" title="${_locked ? t('waste.layout_locked') : t('waste.layout_unlocked')}">
+        <button class="speed-btn ${_locked ? '' : 'active'}" data-ripple onclick="toggleWasteLock()" title="${_locked ? t('waste.layout_locked') : t('waste.layout_unlocked')}">
           ${lockIcon} <span>${_locked ? t('waste.layout_locked') : t('waste.layout_unlocked')}</span>
         </button>
       </div>`;
@@ -212,14 +212,14 @@
       // Tab bar
       html += '<div class="tabs">';
       for (const [id, cfg] of Object.entries(TAB_CONFIG)) {
-        html += `<button class="tab-btn waste-tab-btn ${id === _activeTab ? 'active' : ''}" data-tab="${id}" onclick="switchWasteTab('${id}')">${t(cfg.label)}</button>`;
+        html += `<button class="tab-btn waste-tab-btn ${id === _activeTab ? 'active' : ''}" data-tab="${id}" data-ripple onclick="switchWasteTab('${id}')">${t(cfg.label)}</button>`;
       }
       html += '</div>';
 
       // Tab panels
       for (const [tabId, cfg] of Object.entries(TAB_CONFIG)) {
         const order = getOrder(tabId);
-        html += `<div class="tab-panel waste-tab-panel stats-tab-panel ${tabId === _activeTab ? 'active' : ''}" id="waste-tab-${tabId}" style="display:${tabId === _activeTab ? 'grid' : 'none'}">`;
+        html += `<div class="tab-panel waste-tab-panel stats-tab-panel ix-tab-panel ${tabId === _activeTab ? 'active' : ''}" id="waste-tab-${tabId}" style="display:${tabId === _activeTab ? 'grid' : 'none'}">`;
         for (const modId of order) {
           const builder = BUILDERS[modId];
           if (!builder) continue;
@@ -265,8 +265,8 @@
             <label class="form-label">${t('waste.notes')}</label>
             <input class="form-input" id="global-waste-notes" placeholder="${t('waste.notes_placeholder')}">
           </div>
-          <button class="form-btn" onclick="submitGlobalWaste()">${t('waste.save')}</button>
-          <button class="form-btn form-btn-sm" style="background:transparent;color:var(--text-muted)" onclick="hideGlobalWasteForm()">${t('settings.cancel')}</button>
+          <button class="form-btn" data-ripple onclick="submitGlobalWaste()">${t('waste.save')}</button>
+          <button class="form-btn form-btn-sm" data-ripple style="background:transparent;color:var(--text-muted)" onclick="hideGlobalWasteForm()">${t('settings.cancel')}</button>
         </div>
       </div>
     </div>`;
