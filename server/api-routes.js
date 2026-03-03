@@ -1,4 +1,4 @@
-import { getHistory, addHistory, getStatistics, getFilament, addFilament, updateFilament, deleteFilament, getErrors, acknowledgeError, deleteError, acknowledgeAllErrors, getPrinters, addPrinter, updatePrinter, deletePrinter, addWaste, getWasteStats, getWasteHistory, getMaintenanceStatus, addMaintenanceEvent, getMaintenanceLog, getMaintenanceSchedule, upsertMaintenanceSchedule, getActiveNozzleSession, retireNozzleSession, createNozzleSession, getTelemetry, getComponentWear, getFirmwareHistory, getXcamEvents, getXcamStats, getAmsTrayLifetime, getDemoPrinterIds, purgeDemoData, getNotificationLog, getUpdateHistory, getModelLink, setModelLink, deleteModelLink, getRecentModelLinks, getVendors, addVendor, updateVendor, deleteVendor, getFilamentProfiles, getFilamentProfile, addFilamentProfile, updateFilamentProfile, deleteFilamentProfile, getSpools, getSpool, addSpool, updateSpool, deleteSpool, archiveSpool, useSpoolWeight, assignSpoolToSlot, getSpoolUsageLog, getLocations, addLocation, updateLocation, deleteLocation, getInventoryStats, searchSpools, duplicateSpool, measureSpoolWeight, getAllSpoolsForExport, getAllFilamentProfilesForExport, getAllVendorsForExport, findSimilarColors, getDistinctMaterials, getDistinctLotNumbers, getDistinctArticleNumbers, getInventorySetting, setInventorySetting, getAllInventorySettings, importSpools, importFilamentProfiles, importVendors, getFieldSchemas, addFieldSchema, deleteFieldSchema, lengthToWeight, getDryingSessions, getActiveDryingSessions, startDryingSession, completeDryingSession, deleteDryingSession, getDryingPresets, getDryingPreset, upsertDryingPreset, deleteDryingPreset, getSpoolsDryingStatus, getUsagePredictions, estimatePrintCost, createQueue, getQueues, getQueue, updateQueue, deleteQueue, addQueueItem, getQueueItem, updateQueueItem, deleteQueueItem, reorderQueueItems, getActiveQueueItems, addQueueLog, getQueueLog, getNextPendingItem, getTags, createTag, deleteTag, assignTag, unassignTag, getEntityTags, getNfcMappings, lookupNfcTag, linkNfcTag, unlinkNfcTag, updateNfcScan, checkoutSpool, checkinSpool, getCheckedOutSpools, getCheckoutLog, addSpoolEvent, getSpoolTimeline, getRecentSpoolEvents, bulkDeleteSpools, bulkArchiveSpools, bulkRelocateSpools, bulkMarkDried, toggleSpoolFavorite, batchAddSpools, createSharedPalette, getSharedPalette, deleteSharedPalette, getSharedPaletteSpools, getMacros, getMacro, addMacro, updateMacro, deleteMacro, getWebhookConfigs, getWebhookConfig, addWebhookConfig, updateWebhookConfig, deleteWebhookConfig, getActiveWebhooks, addWebhookDelivery, updateWebhookDelivery, getWebhookDeliveries, savePrintCost, getPrintCost, getCostReport, getCostSummary, estimatePrintCostAdvanced, getMaterials, getMaterial, getMaterialByName, updateMaterial, addMaterial, getHardwareItems, getHardwareItem, addHardwareItem, updateHardwareItem, deleteHardwareItem, assignHardware, unassignHardware, getHardwareForPrinter, getHardwareAssignments, getRoles, getRole, addRole, updateRole, deleteRole, getUsers, getUser, addUser, updateUser, deleteUser, getApiKeys, addApiKey, deleteApiKey, deactivateApiKey, getEcommerceConfigs, getEcommerceConfig, addEcommerceConfig, updateEcommerceConfig, deleteEcommerceConfig, getEcommerceOrders, getEcommerceOrder, addEcommerceOrder, updateEcommerceOrder, getTimelapseRecordings, getTimelapseRecording, deleteTimelapseRecording, getPushSubscriptions, addPushSubscription, deletePushSubscription, getCommunityFilaments, getCommunityFilament, searchCommunityByColor, getCommunityManufacturers, getCommunityMaterials, addCommunityFilament, updateCommunityFilament, deleteCommunityFilament, getBrandDefaults, getBrandDefault, upsertBrandDefault, deleteBrandDefault, getCustomFieldDefs, getCustomFieldDef, addCustomFieldDef, updateCustomFieldDef, deleteCustomFieldDef, getCustomFieldValues, setCustomFieldValue, deleteCustomFieldValues, getPrinterGroups, getPrinterGroup, addPrinterGroup, updatePrinterGroup, deletePrinterGroup, addPrinterToGroup, removePrinterFromGroup, getGroupMembers, getPrinterGroupsForPrinter, getProjects, getProject, addProject, updateProject, deleteProject, getProjectPrints, addProjectPrint, updateProjectPrint, deleteProjectPrint, getExportTemplates, getExportTemplate, addExportTemplate, deleteExportTemplate, getUserQuota, upsertUserQuota, addUserTransaction, getUserTransactions, getFailureDetections, getFailureDetection, addFailureDetection, acknowledgeFailureDetection, deleteFailureDetection, getPriceHistory, addPriceEntry, getLowestPrice, getPriceStats, getBuildPlates, getBuildPlate, addBuildPlate, updateBuildPlate, deleteBuildPlate, incrementBuildPlatePrintCount, getDryerModels, getDryerModel, addDryerModel, updateDryerModel, deleteDryerModel, getStorageConditions, getLatestStorageCondition, addStorageCondition, deleteStorageCondition, getCourses, getCourse, addCourse, updateCourse, deleteCourse, getCourseProgress, upsertCourseProgress, getUserCourseProgress, getAllCoursesWithProgress, searchSpoolsByColor, generateSpoolName, getEcomFees, getEcomFeesSummary, getEcomFeesTotal, getKbPrinters, getKbPrinter, addKbPrinter, updateKbPrinter, deleteKbPrinter, getKbAccessories, getKbAccessory, addKbAccessory, updateKbAccessory, deleteKbAccessory, getKbFilaments, getKbFilament, addKbFilament, updateKbFilament, deleteKbFilament, getKbProfiles, getKbProfile, addKbProfile, updateKbProfile, deleteKbProfile, searchKb, getKbStats, getKbTags, addKbTag, deleteKbTag, seedKbData } from './database.js';
+import { getHistory, addHistory, getStatistics, getFilament, addFilament, updateFilament, deleteFilament, getErrors, acknowledgeError, deleteError, acknowledgeAllErrors, getPrinters, addPrinter, updatePrinter, deletePrinter, addWaste, getWasteStats, getWasteHistory, getMaintenanceStatus, addMaintenanceEvent, getMaintenanceLog, getMaintenanceSchedule, upsertMaintenanceSchedule, getActiveNozzleSession, retireNozzleSession, createNozzleSession, getTelemetry, getComponentWear, getFirmwareHistory, getXcamEvents, getXcamStats, getAmsTrayLifetime, getDemoPrinterIds, purgeDemoData, getNotificationLog, getUpdateHistory, getModelLink, setModelLink, deleteModelLink, getRecentModelLinks, getVendors, addVendor, updateVendor, deleteVendor, getFilamentProfiles, getFilamentProfile, addFilamentProfile, updateFilamentProfile, deleteFilamentProfile, getSpools, getSpool, addSpool, updateSpool, deleteSpool, archiveSpool, useSpoolWeight, assignSpoolToSlot, getSpoolUsageLog, getLocations, addLocation, updateLocation, deleteLocation, getInventoryStats, searchSpools, duplicateSpool, measureSpoolWeight, getAllSpoolsForExport, getAllFilamentProfilesForExport, getAllVendorsForExport, findSimilarColors, getDistinctMaterials, getDistinctLotNumbers, getDistinctArticleNumbers, getInventorySetting, setInventorySetting, getAllInventorySettings, importSpools, importFilamentProfiles, importVendors, getFieldSchemas, addFieldSchema, deleteFieldSchema, lengthToWeight, getDryingSessions, getActiveDryingSessions, startDryingSession, completeDryingSession, deleteDryingSession, getDryingPresets, getDryingPreset, upsertDryingPreset, deleteDryingPreset, getSpoolsDryingStatus, getUsagePredictions, getRestockSuggestions, estimatePrintCost, createQueue, getQueues, getQueue, updateQueue, deleteQueue, addQueueItem, getQueueItem, updateQueueItem, deleteQueueItem, reorderQueueItems, getActiveQueueItems, addQueueLog, getQueueLog, getNextPendingItem, getTags, createTag, updateTag, deleteTag, assignTag, unassignTag, getEntityTags, getEntitiesByTag, getNfcMappings, lookupNfcTag, linkNfcTag, unlinkNfcTag, updateNfcScan, checkoutSpool, checkinSpool, getCheckedOutSpools, getCheckoutLog, addSpoolEvent, getSpoolTimeline, getRecentSpoolEvents, bulkDeleteSpools, bulkArchiveSpools, bulkRelocateSpools, bulkMarkDried, bulkEditSpools, bulkAssignTag, bulkUnassignTag, bulkDeleteProfiles, bulkEditProfiles, bulkDeleteVendors, bulkStartDrying, getSpoolsForExportByIds, toggleSpoolFavorite, batchAddSpools, createSharedPalette, getSharedPalette, deleteSharedPalette, getSharedPaletteSpools, getMacros, getMacro, addMacro, updateMacro, deleteMacro, getWebhookConfigs, getWebhookConfig, addWebhookConfig, updateWebhookConfig, deleteWebhookConfig, getActiveWebhooks, addWebhookDelivery, updateWebhookDelivery, getWebhookDeliveries, savePrintCost, getPrintCost, getCostReport, getCostSummary, estimatePrintCostAdvanced, getMaterials, getMaterial, getMaterialByName, updateMaterial, addMaterial, getHardwareItems, getHardwareItem, addHardwareItem, updateHardwareItem, deleteHardwareItem, assignHardware, unassignHardware, getHardwareForPrinter, getHardwareAssignments, getRoles, getRole, addRole, updateRole, deleteRole, getUsers, getUser, addUser, updateUser, deleteUser, getApiKeys, addApiKey, deleteApiKey, deactivateApiKey, getEcommerceConfigs, getEcommerceConfig, addEcommerceConfig, updateEcommerceConfig, deleteEcommerceConfig, getEcommerceOrders, getEcommerceOrder, addEcommerceOrder, updateEcommerceOrder, getTimelapseRecordings, getTimelapseRecording, deleteTimelapseRecording, getPushSubscriptions, addPushSubscription, deletePushSubscription, getCommunityFilaments, getCommunityFilament, searchCommunityByColor, getCommunityManufacturers, getCommunityMaterials, addCommunityFilament, updateCommunityFilament, deleteCommunityFilament, getCommunityFilamentStats, upsertCommunityFilament, clearCommunityFilaments, getCommunityFilamentCategories, getBrandDefaults, getBrandDefault, upsertBrandDefault, deleteBrandDefault, getCustomFieldDefs, getCustomFieldDef, addCustomFieldDef, updateCustomFieldDef, deleteCustomFieldDef, getCustomFieldValues, setCustomFieldValue, deleteCustomFieldValues, getPrinterGroups, getPrinterGroup, addPrinterGroup, updatePrinterGroup, deletePrinterGroup, addPrinterToGroup, removePrinterFromGroup, getGroupMembers, getPrinterGroupsForPrinter, getProjects, getProject, addProject, updateProject, deleteProject, getProjectPrints, addProjectPrint, updateProjectPrint, deleteProjectPrint, getExportTemplates, getExportTemplate, addExportTemplate, deleteExportTemplate, getUserQuota, upsertUserQuota, addUserTransaction, getUserTransactions, getFailureDetections, getFailureDetection, addFailureDetection, acknowledgeFailureDetection, deleteFailureDetection, getPriceHistory, addPriceEntry, getLowestPrice, getPriceStats, getPriceAlerts, getPriceAlert, addPriceAlert, updatePriceAlert, deletePriceAlert, checkPriceAlerts, triggerPriceAlert, getBuildPlates, getBuildPlate, addBuildPlate, updateBuildPlate, deleteBuildPlate, incrementBuildPlatePrintCount, getDryerModels, getDryerModel, addDryerModel, updateDryerModel, deleteDryerModel, getStorageConditions, getLatestStorageCondition, addStorageCondition, deleteStorageCondition, getCourses, getCourse, addCourse, updateCourse, deleteCourse, getCourseProgress, upsertCourseProgress, getUserCourseProgress, getAllCoursesWithProgress, searchSpoolsByColor, generateSpoolName, getEcomFees, getEcomFeesSummary, getEcomFeesTotal, getKbPrinters, getKbPrinter, addKbPrinter, updateKbPrinter, deleteKbPrinter, getKbAccessories, getKbAccessory, addKbAccessory, updateKbAccessory, deleteKbAccessory, getKbFilaments, getKbFilament, addKbFilament, updateKbFilament, deleteKbFilament, getKbProfiles, getKbProfile, addKbProfile, updateKbProfile, deleteKbProfile, searchKb, getKbStats, getKbTags, addKbTag, deleteKbTag, seedKbData } from './database.js';
 import { createBackup, listBackups } from './backup.js';
 import { saveConfig, config } from './config.js';
 import { getThumbnail, getModel } from './thumbnail-service.js';
@@ -8,9 +8,13 @@ import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
 import { readFileSync, existsSync, statSync, createReadStream } from 'node:fs';
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isAuthEnabled, isMultiUser, validateCredentials, createSession, destroySession, getSessionToken, validateSession, hashPassword, validateApiKey, generateApiKey, hasPermission, validateCredentialsDB, getSessionUser } from './auth.js';
-import { getSlicerStatus, saveUploadedFile, sliceFile, uploadToPrinter, cleanupJob, getJobFilePath } from './slicer-service.js';
+import { isAuthEnabled, isMultiUser, validateCredentials, createSession, destroySession, getSessionToken, validateSession, hashPassword, validateApiKey, generateApiKey, hasPermission, validateCredentialsDB, getSessionUser, requirePermission } from './auth.js';
+import { getSlicerStatus, getSlicerProfiles, saveUploadedFile, sliceFile, uploadToPrinter, cleanupJob, getJobFilePath } from './slicer-service.js';
 import { getSlicerJobs as dbGetSlicerJobs, getSlicerJob as dbGetSlicerJob, deleteSlicerJob as dbDeleteSlicerJob } from './database.js';
+import { readFileSync as _readPkg } from 'node:fs';
+
+// API version from package.json
+const _pkgVersion = (() => { try { return JSON.parse(_readPkg(join(dirname(fileURLToPath(import.meta.url)), '..', 'package.json'), 'utf-8')).version; } catch { return '0.0.0'; } })();
 
 // ---- Login rate limiter ----
 const LOGIN_MAX_ATTEMPTS = 5;
@@ -35,6 +39,37 @@ setInterval(() => {
     if (now - entry.firstAttempt > LOGIN_WINDOW_MS) _loginAttempts.delete(ip);
   }
 }, 5 * 60 * 1000);
+
+// ---- General API rate limiter ----
+const API_RATE_MAX = 200;           // max requests per window
+const API_RATE_WINDOW_MS = 60_000;  // 1 minute window
+const _apiRates = new Map();        // ip -> { count, windowStart }
+
+function checkApiRate(ip) {
+  const now = Date.now();
+  const entry = _apiRates.get(ip);
+  if (!entry || now - entry.windowStart > API_RATE_WINDOW_MS) {
+    _apiRates.set(ip, { count: 1, windowStart: now });
+    return true;
+  }
+  entry.count++;
+  return entry.count <= API_RATE_MAX;
+}
+
+function getApiRateHeaders(ip) {
+  const entry = _apiRates.get(ip);
+  if (!entry) return { 'X-RateLimit-Limit': API_RATE_MAX, 'X-RateLimit-Remaining': API_RATE_MAX };
+  const remaining = Math.max(0, API_RATE_MAX - entry.count);
+  const reset = Math.ceil((entry.windowStart + API_RATE_WINDOW_MS - Date.now()) / 1000);
+  return { 'X-RateLimit-Limit': API_RATE_MAX, 'X-RateLimit-Remaining': remaining, 'X-RateLimit-Reset': Math.max(0, reset) };
+}
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, entry] of _apiRates) {
+    if (now - entry.windowStart > API_RATE_WINDOW_MS) _apiRates.delete(ip);
+  }
+}, 60_000);
 
 let _broadcastFn = null;
 let _onPrinterRemoved = null;
@@ -65,6 +100,75 @@ function _loadSpoolmanDb() {
     _spoolmanDbCache.manufacturers = [];
   }
   return _spoolmanDbCache;
+}
+
+// ---- Permission enforcement ----
+
+// Map route patterns to required permissions for write operations
+// GET routes require 'view' (all roles have this). Write routes are gated by category.
+function getRoutePermission(method, path) {
+  if (method === 'GET') return 'view';
+
+  // Admin-only routes
+  if (path.startsWith('/api/users') || path.startsWith('/api/roles') || path.startsWith('/api/keys')) return 'admin';
+  if (path === '/api/auth/config' || path.startsWith('/api/auth/totp')) return 'admin';
+  if (path === '/api/community-filaments/seed' || path === '/api/kb/seed') return 'admin';
+  if (path === '/api/update/apply') return 'admin';
+  if (path === '/api/demo') return 'admin';
+  if (path === '/api/hub/settings') return 'admin';
+
+  // Print routes
+  if (path.match(/^\/api\/printers\/[^/]+\/files\/print$/)) return 'print';
+  if (path === '/api/printer-groups/staggered-start') return 'print';
+  if (path.startsWith('/api/slicer/')) return 'print';
+
+  // Queue routes
+  if (path.startsWith('/api/queue')) return 'queue';
+
+  // Control routes (printer management, maintenance, protection)
+  if (path === '/api/printers' && method === 'POST') return 'admin';
+  if (path.match(/^\/api\/printers\/[^/]+$/) && (method === 'PUT' || method === 'DELETE')) return 'controls';
+  if (path.startsWith('/api/maintenance') || path.startsWith('/api/protection')) return 'controls';
+  if (path === '/api/waste') return 'controls';
+  if (path.match(/^\/api\/printers\/[^/]+\/files/)) return 'controls';
+
+  // Filament/inventory routes
+  if (path.startsWith('/api/filament') || path.startsWith('/api/inventory')) return 'filament';
+  if (path.startsWith('/api/community-filaments')) return 'filament';
+  if (path.startsWith('/api/brand-defaults') || path.startsWith('/api/custom-fields')) return 'filament';
+  if (path.startsWith('/api/price-history') || path.startsWith('/api/price-alerts') || path.startsWith('/api/build-plates')) return 'filament';
+  if (path.startsWith('/api/dryer-models') || path.startsWith('/api/storage-conditions')) return 'filament';
+  if (path.startsWith('/api/tags') || path.startsWith('/api/nfc')) return 'filament';
+  if (path.startsWith('/api/palette')) return 'filament';
+  if (path.startsWith('/api/spoolman')) return 'filament';
+
+  // Macro routes
+  if (path.startsWith('/api/macros')) return 'macros';
+
+  // Config routes (notifications, webhooks, hardware, materials, groups, ecommerce)
+  if (path.startsWith('/api/notifications') || path.startsWith('/api/webhooks')) return 'admin';
+  if (path.startsWith('/api/hardware') || path.startsWith('/api/materials')) return 'admin';
+  if (path.startsWith('/api/printer-groups')) return 'admin';
+  if (path.startsWith('/api/ecommerce')) return 'admin';
+  if (path.startsWith('/api/export')) return 'admin';
+  if (path.startsWith('/api/courses') || path.startsWith('/api/kb')) return 'admin';
+  if (path === '/api/backup') return 'admin';
+  if (path.startsWith('/api/timelapse') && method === 'DELETE') return 'admin';
+  if (path.startsWith('/api/model-link')) return 'controls';
+
+  // Push subscriptions — allow for all authenticated users
+  if (path.startsWith('/api/push')) return 'view';
+
+  // Default: require view for GET, admin for everything else
+  return method === 'GET' ? 'view' : 'admin';
+}
+
+function requirePerm(req, res, permission) {
+  if (!requirePermission(req, permission)) {
+    sendJson(res, { error: 'Forbidden', required: permission }, 403);
+    return false;
+  }
+  return true;
 }
 
 export function setGuard(guard) {
@@ -131,7 +235,19 @@ export async function handleAuthApiRequest(req, res) {
       const token = getSessionToken(req);
       const authenticated = enabled ? validateSession(token) : true;
       const requiresUsername = isMultiUser() || !!(config.auth?.username);
-      return sendJson(res, { enabled, authenticated, requiresUsername });
+      let user = null;
+      if (authenticated && token) {
+        const session = getSessionUser(token);
+        if (session) {
+          user = {
+            username: session.username,
+            displayName: session.displayName || session.username,
+            roleName: session.roleName || 'admin',
+            permissions: session.permissions || ['*']
+          };
+        }
+      }
+      return sendJson(res, { enabled, authenticated, requiresUsername, user });
     }
 
     // POST /api/auth/login
@@ -145,10 +261,22 @@ export async function handleAuthApiRequest(req, res) {
       }
       return readBody(req, (body) => {
         const { password, username } = body;
+        // Try DB-backed auth first (returns user object with role/permissions)
+        const dbUser = validateCredentialsDB(username, password);
+        if (dbUser) {
+          const token = createSession(dbUser);
+          const maxAge = (config.auth?.sessionDurationHours || 24) * 3600;
+          res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Set-Cookie': `bambu_session=${token}; Path=/; HttpOnly; SameSite=Strict; Max-Age=${maxAge}`
+          });
+          return res.end(JSON.stringify({ ok: true }));
+        }
+        // Fall back to config-based auth (legacy single-user, gets full admin permissions)
         if (!validateCredentials(password, username)) {
           return sendJson(res, { error: 'Invalid credentials' }, 401);
         }
-        const token = createSession(username);
+        const token = createSession({ username: username || 'admin', permissions: ['*'] });
         const maxAge = (config.auth?.sessionDurationHours || 24) * 3600;
         res.writeHead(200, {
           'Content-Type': 'application/json',
@@ -188,7 +316,30 @@ export async function handleApiRequest(req, res) {
   const path = url.pathname;
   const method = req.method;
 
+  // General API rate limiting
+  const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  if (!checkApiRate(clientIp)) {
+    const headers = getApiRateHeaders(clientIp);
+    res.writeHead(429, { 'Content-Type': 'application/json', ...headers });
+    res.end(JSON.stringify({ error: 'Too many requests', retry_after: headers['X-RateLimit-Reset'] }));
+    return;
+  }
+  // Attach rate limit headers to response
+  const rateHeaders = getApiRateHeaders(clientIp);
+  for (const [k, v] of Object.entries(rateHeaders)) res.setHeader(k, v);
+
+  // Centralized permission check for all API routes
+  if (isAuthEnabled()) {
+    const perm = getRoutePermission(method, path);
+    if (!requirePerm(req, res, perm)) return;
+  }
+
   try {
+    // ---- API Documentation ----
+    if (method === 'GET' && path === '/api/docs') {
+      return sendJson(res, _getApiDocs());
+    }
+
     // ---- Printers ----
     if (method === 'GET' && path === '/api/printers') {
       const printers = getPrinters().map(p => ({
@@ -872,6 +1023,7 @@ export async function handleApiRequest(req, res) {
       if (url.searchParams.get('vendor_id')) filters.vendor_id = parseInt(url.searchParams.get('vendor_id'));
       if (url.searchParams.get('location')) filters.location = url.searchParams.get('location');
       if (url.searchParams.get('printer_id')) filters.printer_id = url.searchParams.get('printer_id');
+      if (url.searchParams.get('tag_id')) filters.tag_id = parseInt(url.searchParams.get('tag_id'));
       if (url.searchParams.get('limit')) filters.limit = parseInt(url.searchParams.get('limit'));
       if (url.searchParams.get('offset')) filters.offset = parseInt(url.searchParams.get('offset'));
       const result = getSpools(filters);
@@ -1300,6 +1452,11 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, getUsagePredictions());
     }
 
+    if (method === 'GET' && path === '/api/inventory/restock') {
+      const days = parseInt(url.searchParams.get('days') || '30');
+      return sendJson(res, getRestockSuggestions(days));
+    }
+
     // ---- Inventory: Cost Estimate ----
     if (method === 'GET' && path === '/api/inventory/cost-estimate') {
       const filamentG = parseFloat(url.searchParams.get('filament_g') || '0');
@@ -1580,9 +1737,21 @@ export async function handleApiRequest(req, res) {
       });
     }
 
-    const tagDeleteMatch = path.match(/^\/api\/tags\/(\d+)$/);
-    if (tagDeleteMatch && method === 'DELETE') {
-      deleteTag(parseInt(tagDeleteMatch[1]));
+    const tagIdMatch = path.match(/^\/api\/tags\/(\d+)$/);
+    if (tagIdMatch && method === 'PUT') {
+      return readBody(req, (body) => {
+        if (!body.name) return sendJson(res, { error: 'Name required' }, 400);
+        try {
+          updateTag(parseInt(tagIdMatch[1]), body.name, body.category, body.color);
+          return sendJson(res, { ok: true });
+        } catch (e) {
+          return sendJson(res, { error: 'Tag name already exists' }, 409);
+        }
+      });
+    }
+
+    if (tagIdMatch && method === 'DELETE') {
+      deleteTag(parseInt(tagIdMatch[1]));
       return sendJson(res, { ok: true });
     }
 
@@ -1627,6 +1796,27 @@ export async function handleApiRequest(req, res) {
           const id = linkNfcTag(body.tag_uid, body.spool_id, body.standard, body.data ? JSON.stringify(body.data) : null);
           return sendJson(res, { ok: true, id });
         } catch (e) { return sendJson(res, { error: e.message }, 500); }
+      });
+    }
+
+    // Auto-AMS: scan NFC tag and auto-assign spool to AMS slot
+    if (method === 'POST' && path === '/api/nfc/scan') {
+      return readBody(req, (body) => {
+        if (!body.tag_uid) return sendJson(res, { error: 'tag_uid required' }, 400);
+        const mapping = lookupNfcTag(body.tag_uid);
+        if (!mapping) return sendJson(res, { error: 'Unknown NFC tag', tag_uid: body.tag_uid }, 404);
+        updateNfcScan(body.tag_uid);
+        const result = { spool_id: mapping.spool_id, spool_name: mapping.spool_name, material: mapping.material, color_hex: mapping.color_hex, vendor_name: mapping.vendor_name };
+        // Auto-assign to AMS slot if printer_id and slot info provided
+        if (body.printer_id && body.ams_unit != null && body.ams_tray != null) {
+          assignSpoolToSlot(mapping.spool_id, body.printer_id, body.ams_unit, body.ams_tray);
+          result.assigned = true;
+          result.printer_id = body.printer_id;
+          result.ams_unit = body.ams_unit;
+          result.ams_tray = body.ams_tray;
+          if (_broadcastFn) _broadcastFn('spool_assigned', { spool_id: mapping.spool_id, printer_id: body.printer_id, ams_unit: body.ams_unit, ams_tray: body.ams_tray });
+        }
+        return sendJson(res, result);
       });
     }
 
@@ -1686,9 +1876,95 @@ export async function handleApiRequest(req, res) {
             bulkRelocateSpools(ids, body.location);
             break;
           case 'mark_dried': bulkMarkDried(ids); break;
+          case 'edit':
+            if (!body.fields || typeof body.fields !== 'object') return sendJson(res, { error: 'fields object required' }, 400);
+            bulkEditSpools(ids, body.fields);
+            break;
+          case 'tag': {
+            if (!body.tag_id) return sendJson(res, { error: 'tag_id required' }, 400);
+            const tagAction = body.tag_action || 'assign';
+            if (tagAction === 'unassign') bulkUnassignTag(body.tag_id, 'spool', ids);
+            else bulkAssignTag(body.tag_id, 'spool', ids);
+            break;
+          }
+          case 'start_drying': {
+            const sessionIds = bulkStartDrying(ids, {
+              temperature: body.temperature, duration_minutes: body.duration_minutes,
+              method: body.method, notes: body.notes
+            });
+            return sendJson(res, { ok: true, count: ids.length, session_ids: sessionIds });
+          }
+          case 'export': {
+            const spools = getSpoolsForExportByIds(ids);
+            const format = body.format || 'json';
+            if (format === 'csv') {
+              if (spools.length === 0) return sendJson(res, { error: 'No spools found' }, 404);
+              const keys = Object.keys(spools[0]);
+              const csv = [keys.join(','), ...spools.map(s => keys.map(k => {
+                const v = s[k]; return v == null ? '' : typeof v === 'string' && (v.includes(',') || v.includes('"')) ? `"${v.replace(/"/g, '""')}"` : v;
+              }).join(','))].join('\n');
+              res.writeHead(200, { 'Content-Type': 'text/csv', 'Content-Disposition': 'attachment; filename="spools-export.csv"' });
+              return res.end(csv);
+            }
+            return sendJson(res, spools);
+          }
           default: return sendJson(res, { error: 'Unknown action: ' + body.action }, 400);
         }
+        _broadcastInventory('bulk_update', { entity: 'spool', action: body.action, count: ids.length });
         return sendJson(res, { ok: true, count: ids.length });
+      });
+    }
+
+    // Bulk profile operations
+    if (method === 'POST' && path === '/api/inventory/profiles/bulk') {
+      return readBody(req, (body) => {
+        if (!body.action || !Array.isArray(body.profile_ids) || body.profile_ids.length === 0) {
+          return sendJson(res, { error: 'action and profile_ids[] required' }, 400);
+        }
+        const ids = body.profile_ids.map(Number);
+        switch (body.action) {
+          case 'delete': bulkDeleteProfiles(ids); break;
+          case 'edit':
+            if (!body.fields || typeof body.fields !== 'object') return sendJson(res, { error: 'fields object required' }, 400);
+            bulkEditProfiles(ids, body.fields);
+            break;
+          default: return sendJson(res, { error: 'Unknown action: ' + body.action }, 400);
+        }
+        _broadcastInventory('bulk_update', { entity: 'profile', action: body.action, count: ids.length });
+        return sendJson(res, { ok: true, count: ids.length });
+      });
+    }
+
+    // Bulk vendor operations
+    if (method === 'POST' && path === '/api/inventory/vendors/bulk') {
+      return readBody(req, (body) => {
+        if (!body.action || !Array.isArray(body.vendor_ids) || body.vendor_ids.length === 0) {
+          return sendJson(res, { error: 'action and vendor_ids[] required' }, 400);
+        }
+        const ids = body.vendor_ids.map(Number);
+        switch (body.action) {
+          case 'delete':
+            try { bulkDeleteVendors(ids); } catch (e) { return sendJson(res, { error: e.message }, 409); }
+            break;
+          default: return sendJson(res, { error: 'Unknown action: ' + body.action }, 400);
+        }
+        _broadcastInventory('bulk_update', { entity: 'vendor', action: body.action, count: ids.length });
+        return sendJson(res, { ok: true, count: ids.length });
+      });
+    }
+
+    // Bulk tag assignment
+    if (method === 'POST' && path === '/api/tags/bulk-assign') {
+      return readBody(req, (body) => {
+        if (!body.tag_id || !body.entity_type || !Array.isArray(body.entity_ids) || body.entity_ids.length === 0) {
+          return sendJson(res, { error: 'tag_id, entity_type, and entity_ids[] required' }, 400);
+        }
+        const ids = body.entity_ids.map(Number);
+        const action = body.action || 'assign';
+        const count = action === 'unassign'
+          ? bulkUnassignTag(body.tag_id, body.entity_type, ids)
+          : bulkAssignTag(body.tag_id, body.entity_type, ids);
+        return sendJson(res, { ok: true, count });
       });
     }
 
@@ -1814,6 +2090,10 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, getSlicerStatus());
     }
 
+    if (method === 'GET' && path === '/api/slicer/profiles') {
+      return sendJson(res, getSlicerProfiles());
+    }
+
     if (method === 'GET' && path === '/api/slicer/jobs') {
       const limit = parseInt(url.searchParams.get('limit')) || 50;
       return sendJson(res, dbGetSlicerJobs(limit));
@@ -1838,6 +2118,8 @@ export async function handleApiRequest(req, res) {
       const filename = url.searchParams.get('filename');
       const printerId = url.searchParams.get('printer_id') || null;
       const autoQueue = url.searchParams.get('auto_queue') === '1';
+      const quality = url.searchParams.get('quality') || null;
+      const profile = url.searchParams.get('profile') || null;
       if (!filename) return sendJson(res, { error: 'filename query param required' }, 400);
       return readBinaryBody(req, (buffer) => {
         try {
@@ -1845,7 +2127,7 @@ export async function handleApiRequest(req, res) {
           sendJson(res, result, 201);
           // Auto-slice if needed
           if (result.needsSlicing) {
-            sliceFile(result.jobId).catch(e => console.error('[slicer] Slice failed:', e.message));
+            sliceFile(result.jobId, { quality, profile }).catch(e => console.error('[slicer] Slice failed:', e.message));
           }
         } catch (e) { sendJson(res, { error: e.message }, 500); }
       });
@@ -1854,11 +2136,13 @@ export async function handleApiRequest(req, res) {
     // Trigger slicing for a pending job
     const sliceMatch = path.match(/^\/api\/slicer\/jobs\/(\d+)\/slice$/);
     if (sliceMatch && method === 'POST') {
-      const id = parseInt(sliceMatch[1]);
-      try {
-        const result = await sliceFile(id);
-        return sendJson(res, result);
-      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+      return readBody(req, async (body) => {
+        const id = parseInt(sliceMatch[1]);
+        try {
+          const result = await sliceFile(id, { quality: body.quality, profile: body.profile, layerHeight: body.layer_height });
+          return sendJson(res, result);
+        } catch (e) { return sendJson(res, { error: e.message }, 500); }
+      });
     }
 
     // Upload sliced file to printer via FTPS
@@ -2467,10 +2751,26 @@ export async function handleApiRequest(req, res) {
       const filters = {};
       if (url.searchParams.get('manufacturer')) filters.manufacturer = url.searchParams.get('manufacturer');
       if (url.searchParams.get('material')) filters.material = url.searchParams.get('material');
+      if (url.searchParams.get('material_type')) filters.material_type = url.searchParams.get('material_type');
+      if (url.searchParams.get('category')) filters.category = url.searchParams.get('category');
       if (url.searchParams.get('search')) filters.search = url.searchParams.get('search');
+      if (url.searchParams.get('has_k_value')) filters.has_k_value = true;
+      if (url.searchParams.get('has_td')) filters.has_td = true;
+      if (url.searchParams.get('temp_min')) filters.temp_min = parseInt(url.searchParams.get('temp_min'));
+      if (url.searchParams.get('temp_max')) filters.temp_max = parseInt(url.searchParams.get('temp_max'));
+      if (url.searchParams.get('sort')) filters.sort = url.searchParams.get('sort');
+      if (url.searchParams.get('sort_dir')) filters.sort_dir = url.searchParams.get('sort_dir');
       if (url.searchParams.get('limit')) filters.limit = parseInt(url.searchParams.get('limit'));
       if (url.searchParams.get('offset')) filters.offset = parseInt(url.searchParams.get('offset'));
       return sendJson(res, getCommunityFilaments(filters));
+    }
+
+    if (method === 'GET' && path === '/api/community-filaments/stats') {
+      return sendJson(res, getCommunityFilamentStats());
+    }
+
+    if (method === 'GET' && path === '/api/community-filaments/categories') {
+      return sendJson(res, getCommunityFilamentCategories());
     }
 
     if (method === 'GET' && path === '/api/community-filaments/manufacturers') {
@@ -2486,6 +2786,55 @@ export async function handleApiRequest(req, res) {
       const tolerance = parseInt(url.searchParams.get('tolerance') || '30');
       if (!hex || hex.length < 6) return sendJson(res, { error: 'hex parameter required (6 chars)' }, 400);
       return sendJson(res, searchCommunityByColor(hex, tolerance));
+    }
+
+    if (method === 'POST' && path === '/api/community-filaments/import-to-inventory') {
+      return readBody(req, (body) => {
+        const cf = getCommunityFilament(body.id);
+        if (!cf) return sendJson(res, { error: 'Not found' }, 404);
+        let vendorId = null;
+        if (cf.manufacturer) {
+          const existing = getVendors().find(v => v.name.toLowerCase() === cf.manufacturer.toLowerCase());
+          vendorId = existing ? existing.id : addVendor({ name: cf.manufacturer }).id;
+        }
+        const profile = addFilamentProfile({
+          vendor_id: vendorId,
+          name: cf.name || `${cf.manufacturer} ${cf.material}`,
+          material: cf.material,
+          color_name: cf.color_name,
+          color_hex: cf.color_hex,
+          density: cf.density || 1.24,
+          diameter: cf.diameter || 1.75,
+          spool_weight_g: cf.weight || 1000,
+          nozzle_temp_min: cf.extruder_temp ? cf.extruder_temp - 10 : null,
+          nozzle_temp_max: cf.extruder_temp,
+          bed_temp_min: cf.bed_temp ? cf.bed_temp - 10 : null,
+          bed_temp_max: cf.bed_temp,
+          pressure_advance_k: cf.pressure_advance_k,
+          max_volumetric_speed: cf.max_volumetric_speed,
+          retraction_distance: cf.retraction_distance,
+          retraction_speed: cf.retraction_speed,
+          cooling_fan_speed: cf.fan_speed_max,
+          transmission_distance: cf.td_value,
+          price: cf.price
+        });
+        if (body.create_spool) {
+          addSpool({ filament_profile_id: profile.id, initial_weight_g: cf.weight || 1000, remaining_weight_g: cf.weight || 1000, cost: cf.price });
+        }
+        sendJson(res, { ok: true, profile_id: profile.id, vendor_id: vendorId }, 201);
+      });
+    }
+
+    if (method === 'POST' && path === '/api/community-filaments/seed') {
+      return readBody(req, async (body) => {
+        try {
+          const { seedFilamentDatabase } = await import('./seed-filament-db.js');
+          const result = await seedFilamentDatabase();
+          sendJson(res, result);
+        } catch (e) {
+          sendJson(res, { error: e.message }, 500);
+        }
+      });
     }
 
     const cfMatch = path.match(/^\/api\/community-filaments\/(\d+)$/);
@@ -2837,7 +3186,19 @@ export async function handleApiRequest(req, res) {
         if (!body.filament_profile_id || !body.price) return sendJson(res, { error: 'filament_profile_id and price required' }, 400);
         try {
           const id = addPriceEntry(body);
-          sendJson(res, { ok: true, id }, 201);
+          // Check for triggered price alerts
+          const triggered = checkPriceAlerts();
+          for (const alert of triggered) {
+            triggerPriceAlert(alert.id);
+            if (_notifier) {
+              _notifier.notify('filament_low_stock', {
+                title: `Price drop: ${alert.profile_name}`,
+                message: `${alert.profile_name} (${alert.material}) dropped to ${alert.latest_price} ${alert.currency || ''} — target was ${alert.target_price}`,
+                printerName: 'Price Alert'
+              });
+            }
+          }
+          sendJson(res, { ok: true, id, alerts_triggered: triggered.length }, 201);
         } catch (e) { sendJson(res, { error: e.message }, 400); }
       });
     }
@@ -2845,6 +3206,32 @@ export async function handleApiRequest(req, res) {
     const phStatsMatch = path.match(/^\/api\/price-history\/(\d+)\/stats$/);
     if (phStatsMatch && method === 'GET') {
       return sendJson(res, getPriceStats(parseInt(phStatsMatch[1])) || {});
+    }
+
+    // ---- Price Alerts ----
+    if (method === 'GET' && path === '/api/price-alerts') {
+      return sendJson(res, getPriceAlerts());
+    }
+
+    if (method === 'POST' && path === '/api/price-alerts') {
+      return readBody(req, (body) => {
+        if (!body.filament_profile_id || !body.target_price) return sendJson(res, { error: 'filament_profile_id and target_price required' }, 400);
+        const id = addPriceAlert(body);
+        return sendJson(res, { ok: true, id }, 201);
+      });
+    }
+
+    const paMatch = path.match(/^\/api\/price-alerts\/(\d+)$/);
+    if (paMatch && method === 'PUT') {
+      return readBody(req, (body) => {
+        updatePriceAlert(parseInt(paMatch[1]), body);
+        return sendJson(res, { ok: true });
+      });
+    }
+
+    if (paMatch && method === 'DELETE') {
+      deletePriceAlert(parseInt(paMatch[1]));
+      return sendJson(res, { ok: true });
     }
 
     // ---- Hex Color Search ----
@@ -3227,8 +3614,264 @@ export async function handleApiRequest(req, res) {
   }
 }
 
+function _getApiDocs() {
+  return {
+    openapi: '3.0.3',
+    info: {
+      title: 'Bambu Dashboard API',
+      version: _pkgVersion,
+      description: 'REST API for Bambu Dashboard — a self-hosted 3D printer management system.'
+    },
+    servers: [{ url: '/api', description: 'Relative API base' }],
+    security: [{ session: [] }, { apiKey: [] }],
+    components: {
+      securitySchemes: {
+        session: { type: 'apiKey', in: 'cookie', name: 'session' },
+        apiKey: { type: 'apiKey', in: 'header', name: 'X-API-Key' }
+      }
+    },
+    tags: [
+      { name: 'Auth', description: 'Authentication & sessions' },
+      { name: 'Printers', description: 'Printer management & control' },
+      { name: 'History', description: 'Print history & statistics' },
+      { name: 'Inventory', description: 'Spool inventory management' },
+      { name: 'Filament', description: 'Legacy filament CRUD' },
+      { name: 'Profiles', description: 'Filament profiles & vendors' },
+      { name: 'Tags', description: 'Tagging system for spools' },
+      { name: 'Drying', description: 'Drying sessions & presets' },
+      { name: 'Queue', description: 'Print queue management' },
+      { name: 'Maintenance', description: 'Printer maintenance tracking' },
+      { name: 'Notifications', description: 'Notification configuration' },
+      { name: 'Webhooks', description: 'Webhook management & delivery' },
+      { name: 'Users', description: 'User & role management (admin)' },
+      { name: 'Hardware', description: 'Hardware inventory' },
+      { name: 'Materials', description: 'Material database' },
+      { name: 'Ecommerce', description: 'E-commerce integration' },
+      { name: 'Slicer', description: 'Cloud slicer service' },
+      { name: 'NFC', description: 'NFC tag mapping' },
+      { name: 'Community', description: 'Community filament database' },
+      { name: 'Timelapse', description: 'Timelapse recordings' },
+      { name: 'System', description: 'Settings, backup, update' }
+    ],
+    endpoints: [
+      // Auth
+      { method: 'GET', path: '/api/auth/status', tag: 'Auth', summary: 'Get auth status', permission: null },
+      { method: 'POST', path: '/api/auth/login', tag: 'Auth', summary: 'Login with credentials', permission: null },
+      { method: 'POST', path: '/api/auth/logout', tag: 'Auth', summary: 'Logout / destroy session', permission: null },
+      { method: 'GET', path: '/api/auth/config', tag: 'Auth', summary: 'Get auth configuration', permission: 'admin' },
+      { method: 'PUT', path: '/api/auth/config', tag: 'Auth', summary: 'Update auth configuration', permission: 'admin' },
+      // Printers
+      { method: 'GET', path: '/api/printers', tag: 'Printers', summary: 'List all printers', permission: 'view' },
+      { method: 'POST', path: '/api/printers', tag: 'Printers', summary: 'Add a printer', permission: 'admin' },
+      { method: 'GET', path: '/api/printers/:id', tag: 'Printers', summary: 'Get printer details', permission: 'view' },
+      { method: 'PUT', path: '/api/printers/:id', tag: 'Printers', summary: 'Update printer', permission: 'controls' },
+      { method: 'DELETE', path: '/api/printers/:id', tag: 'Printers', summary: 'Delete printer', permission: 'controls' },
+      { method: 'GET', path: '/api/printers/:id/files', tag: 'Printers', summary: 'List files on printer SD', permission: 'view' },
+      { method: 'POST', path: '/api/printers/:id/files/print', tag: 'Printers', summary: 'Start printing a file', permission: 'print' },
+      { method: 'GET', path: '/api/printers/:id/camera', tag: 'Printers', summary: 'Get camera snapshot', permission: 'view' },
+      // History & Stats
+      { method: 'GET', path: '/api/history', tag: 'History', summary: 'Get print history (paginated)', permission: 'view' },
+      { method: 'GET', path: '/api/history/export', tag: 'History', summary: 'Export history as CSV', permission: 'view' },
+      { method: 'GET', path: '/api/statistics', tag: 'History', summary: 'Get print statistics', permission: 'view' },
+      { method: 'GET', path: '/api/telemetry', tag: 'History', summary: 'Get telemetry data', permission: 'view' },
+      { method: 'GET', path: '/api/wear', tag: 'History', summary: 'Get component wear data', permission: 'view' },
+      { method: 'GET', path: '/api/errors', tag: 'History', summary: 'Get printer errors', permission: 'view' },
+      // Inventory (Spools)
+      { method: 'GET', path: '/api/inventory/spools', tag: 'Inventory', summary: 'List spools (filterable)', permission: 'view' },
+      { method: 'POST', path: '/api/inventory/spools', tag: 'Inventory', summary: 'Create a spool', permission: 'filament' },
+      { method: 'GET', path: '/api/inventory/spools/:id', tag: 'Inventory', summary: 'Get spool details', permission: 'view' },
+      { method: 'PUT', path: '/api/inventory/spools/:id', tag: 'Inventory', summary: 'Update spool', permission: 'filament' },
+      { method: 'DELETE', path: '/api/inventory/spools/:id', tag: 'Inventory', summary: 'Delete spool', permission: 'filament' },
+      { method: 'POST', path: '/api/inventory/spools/:id/archive', tag: 'Inventory', summary: 'Archive a spool', permission: 'filament' },
+      { method: 'POST', path: '/api/inventory/spools/:id/use', tag: 'Inventory', summary: 'Record spool weight usage', permission: 'filament' },
+      { method: 'POST', path: '/api/inventory/spools/:id/duplicate', tag: 'Inventory', summary: 'Duplicate a spool', permission: 'filament' },
+      { method: 'POST', path: '/api/inventory/spools/:id/measure', tag: 'Inventory', summary: 'Measure spool weight', permission: 'filament' },
+      { method: 'POST', path: '/api/inventory/spools/:id/favorite', tag: 'Inventory', summary: 'Toggle spool favorite', permission: 'filament' },
+      { method: 'GET', path: '/api/inventory/spools/:id/timeline', tag: 'Inventory', summary: 'Get spool event timeline', permission: 'view' },
+      { method: 'GET', path: '/api/inventory/stats', tag: 'Inventory', summary: 'Get inventory statistics', permission: 'view' },
+      { method: 'GET', path: '/api/inventory/search', tag: 'Inventory', summary: 'Search spools', permission: 'view' },
+      { method: 'GET', path: '/api/inventory/export', tag: 'Inventory', summary: 'Export all spools', permission: 'view' },
+      { method: 'POST', path: '/api/inventory/import', tag: 'Inventory', summary: 'Import spools from JSON/CSV', permission: 'filament' },
+      { method: 'POST', path: '/api/inventory/spools/bulk', tag: 'Inventory', summary: 'Bulk spool operations', permission: 'filament' },
+      { method: 'POST', path: '/api/inventory/spools/batch', tag: 'Inventory', summary: 'Batch add spools', permission: 'filament' },
+      // Locations
+      { method: 'GET', path: '/api/inventory/locations', tag: 'Inventory', summary: 'List storage locations', permission: 'view' },
+      { method: 'POST', path: '/api/inventory/locations', tag: 'Inventory', summary: 'Create location', permission: 'filament' },
+      { method: 'PUT', path: '/api/inventory/locations/:id', tag: 'Inventory', summary: 'Update location', permission: 'filament' },
+      { method: 'DELETE', path: '/api/inventory/locations/:id', tag: 'Inventory', summary: 'Delete location', permission: 'filament' },
+      // Settings
+      { method: 'GET', path: '/api/inventory/settings', tag: 'System', summary: 'Get all inventory settings', permission: 'view' },
+      { method: 'GET', path: '/api/inventory/settings/:key', tag: 'System', summary: 'Get a single setting', permission: 'view' },
+      { method: 'PUT', path: '/api/inventory/settings/:key', tag: 'System', summary: 'Update a setting', permission: 'filament' },
+      // Profiles & Vendors
+      { method: 'GET', path: '/api/filament-profiles', tag: 'Profiles', summary: 'List filament profiles', permission: 'view' },
+      { method: 'POST', path: '/api/filament-profiles', tag: 'Profiles', summary: 'Create filament profile', permission: 'filament' },
+      { method: 'GET', path: '/api/filament-profiles/:id', tag: 'Profiles', summary: 'Get profile details', permission: 'view' },
+      { method: 'PUT', path: '/api/filament-profiles/:id', tag: 'Profiles', summary: 'Update profile', permission: 'filament' },
+      { method: 'DELETE', path: '/api/filament-profiles/:id', tag: 'Profiles', summary: 'Delete profile', permission: 'filament' },
+      { method: 'POST', path: '/api/filament-profiles/bulk', tag: 'Profiles', summary: 'Bulk profile operations', permission: 'filament' },
+      { method: 'GET', path: '/api/vendors', tag: 'Profiles', summary: 'List vendors', permission: 'view' },
+      { method: 'POST', path: '/api/vendors', tag: 'Profiles', summary: 'Create vendor', permission: 'filament' },
+      { method: 'PUT', path: '/api/vendors/:id', tag: 'Profiles', summary: 'Update vendor', permission: 'filament' },
+      { method: 'DELETE', path: '/api/vendors/:id', tag: 'Profiles', summary: 'Delete vendor', permission: 'filament' },
+      { method: 'POST', path: '/api/vendors/bulk', tag: 'Profiles', summary: 'Bulk vendor operations', permission: 'filament' },
+      // Tags
+      { method: 'GET', path: '/api/tags', tag: 'Tags', summary: 'List all tags', permission: 'view' },
+      { method: 'POST', path: '/api/tags', tag: 'Tags', summary: 'Create tag', permission: 'filament' },
+      { method: 'PUT', path: '/api/tags/:id', tag: 'Tags', summary: 'Update tag', permission: 'filament' },
+      { method: 'DELETE', path: '/api/tags/:id', tag: 'Tags', summary: 'Delete tag', permission: 'filament' },
+      { method: 'POST', path: '/api/tags/assign', tag: 'Tags', summary: 'Assign tag to entity', permission: 'filament' },
+      { method: 'POST', path: '/api/tags/unassign', tag: 'Tags', summary: 'Remove tag from entity', permission: 'filament' },
+      { method: 'POST', path: '/api/tags/bulk-assign', tag: 'Tags', summary: 'Bulk assign tags', permission: 'filament' },
+      // Drying
+      { method: 'GET', path: '/api/inventory/drying', tag: 'Drying', summary: 'Get drying sessions', permission: 'view' },
+      { method: 'GET', path: '/api/inventory/drying/active', tag: 'Drying', summary: 'Get active drying sessions', permission: 'view' },
+      { method: 'POST', path: '/api/inventory/drying', tag: 'Drying', summary: 'Start drying session', permission: 'filament' },
+      { method: 'POST', path: '/api/inventory/drying/:id/complete', tag: 'Drying', summary: 'Complete drying session', permission: 'filament' },
+      { method: 'DELETE', path: '/api/inventory/drying/:id', tag: 'Drying', summary: 'Delete drying session', permission: 'filament' },
+      { method: 'GET', path: '/api/inventory/drying/presets', tag: 'Drying', summary: 'List drying presets', permission: 'view' },
+      { method: 'POST', path: '/api/inventory/drying/presets', tag: 'Drying', summary: 'Create/update drying preset', permission: 'filament' },
+      { method: 'DELETE', path: '/api/inventory/drying/presets/:id', tag: 'Drying', summary: 'Delete drying preset', permission: 'filament' },
+      // Queue
+      { method: 'GET', path: '/api/queues', tag: 'Queue', summary: 'List print queues', permission: 'view' },
+      { method: 'POST', path: '/api/queues', tag: 'Queue', summary: 'Create print queue', permission: 'queue' },
+      { method: 'GET', path: '/api/queues/:id', tag: 'Queue', summary: 'Get queue details', permission: 'view' },
+      { method: 'PUT', path: '/api/queues/:id', tag: 'Queue', summary: 'Update queue', permission: 'queue' },
+      { method: 'DELETE', path: '/api/queues/:id', tag: 'Queue', summary: 'Delete queue', permission: 'queue' },
+      { method: 'POST', path: '/api/queues/:id/items', tag: 'Queue', summary: 'Add item to queue', permission: 'queue' },
+      { method: 'PUT', path: '/api/queues/:queueId/items/:id', tag: 'Queue', summary: 'Update queue item', permission: 'queue' },
+      { method: 'DELETE', path: '/api/queues/:queueId/items/:id', tag: 'Queue', summary: 'Remove queue item', permission: 'queue' },
+      { method: 'POST', path: '/api/queues/:id/reorder', tag: 'Queue', summary: 'Reorder queue items', permission: 'queue' },
+      // Maintenance
+      { method: 'GET', path: '/api/maintenance/status', tag: 'Maintenance', summary: 'Get maintenance status', permission: 'view' },
+      { method: 'GET', path: '/api/maintenance/log', tag: 'Maintenance', summary: 'Get maintenance log', permission: 'view' },
+      { method: 'POST', path: '/api/maintenance/log', tag: 'Maintenance', summary: 'Add maintenance event', permission: 'controls' },
+      { method: 'GET', path: '/api/maintenance/schedule', tag: 'Maintenance', summary: 'Get maintenance schedule', permission: 'view' },
+      { method: 'PUT', path: '/api/maintenance/schedule', tag: 'Maintenance', summary: 'Update maintenance schedule', permission: 'controls' },
+      // Notifications
+      { method: 'GET', path: '/api/notifications/config', tag: 'Notifications', summary: 'Get notification config', permission: 'admin' },
+      { method: 'PUT', path: '/api/notifications/config', tag: 'Notifications', summary: 'Update notification config', permission: 'admin' },
+      { method: 'POST', path: '/api/notifications/test', tag: 'Notifications', summary: 'Send test notification', permission: 'admin' },
+      { method: 'GET', path: '/api/notifications/log', tag: 'Notifications', summary: 'Get notification log', permission: 'view' },
+      // Webhooks
+      { method: 'GET', path: '/api/webhooks', tag: 'Webhooks', summary: 'List webhook configs', permission: 'admin' },
+      { method: 'POST', path: '/api/webhooks', tag: 'Webhooks', summary: 'Create webhook config', permission: 'admin' },
+      { method: 'PUT', path: '/api/webhooks/:id', tag: 'Webhooks', summary: 'Update webhook config', permission: 'admin' },
+      { method: 'DELETE', path: '/api/webhooks/:id', tag: 'Webhooks', summary: 'Delete webhook config', permission: 'admin' },
+      // Users & Roles
+      { method: 'GET', path: '/api/users', tag: 'Users', summary: 'List users', permission: 'admin' },
+      { method: 'POST', path: '/api/users', tag: 'Users', summary: 'Create user', permission: 'admin' },
+      { method: 'PUT', path: '/api/users/:id', tag: 'Users', summary: 'Update user', permission: 'admin' },
+      { method: 'DELETE', path: '/api/users/:id', tag: 'Users', summary: 'Delete user', permission: 'admin' },
+      { method: 'GET', path: '/api/roles', tag: 'Users', summary: 'List roles', permission: 'admin' },
+      { method: 'POST', path: '/api/roles', tag: 'Users', summary: 'Create role', permission: 'admin' },
+      { method: 'PUT', path: '/api/roles/:id', tag: 'Users', summary: 'Update role', permission: 'admin' },
+      { method: 'DELETE', path: '/api/roles/:id', tag: 'Users', summary: 'Delete role', permission: 'admin' },
+      { method: 'GET', path: '/api/keys', tag: 'Users', summary: 'List API keys', permission: 'admin' },
+      { method: 'POST', path: '/api/keys', tag: 'Users', summary: 'Create API key', permission: 'admin' },
+      { method: 'DELETE', path: '/api/keys/:id', tag: 'Users', summary: 'Delete API key', permission: 'admin' },
+      // Hardware
+      { method: 'GET', path: '/api/hardware', tag: 'Hardware', summary: 'List hardware items', permission: 'view' },
+      { method: 'POST', path: '/api/hardware', tag: 'Hardware', summary: 'Add hardware item', permission: 'admin' },
+      { method: 'PUT', path: '/api/hardware/:id', tag: 'Hardware', summary: 'Update hardware item', permission: 'admin' },
+      { method: 'DELETE', path: '/api/hardware/:id', tag: 'Hardware', summary: 'Delete hardware item', permission: 'admin' },
+      // Materials
+      { method: 'GET', path: '/api/materials', tag: 'Materials', summary: 'List materials', permission: 'view' },
+      { method: 'POST', path: '/api/materials', tag: 'Materials', summary: 'Add material', permission: 'admin' },
+      { method: 'PUT', path: '/api/materials/:id', tag: 'Materials', summary: 'Update material', permission: 'admin' },
+      // NFC
+      { method: 'GET', path: '/api/nfc/mappings', tag: 'NFC', summary: 'List NFC tag mappings', permission: 'view' },
+      { method: 'POST', path: '/api/nfc/link', tag: 'NFC', summary: 'Link NFC tag to spool', permission: 'filament' },
+      { method: 'POST', path: '/api/nfc/unlink', tag: 'NFC', summary: 'Unlink NFC tag', permission: 'filament' },
+      { method: 'GET', path: '/api/nfc/lookup/:uid', tag: 'NFC', summary: 'Lookup spool by NFC UID', permission: 'view' },
+      { method: 'POST', path: '/api/nfc/scan', tag: 'NFC', summary: 'Scan NFC tag + auto-assign to AMS slot', permission: 'filament' },
+      // Community
+      { method: 'GET', path: '/api/community-filaments', tag: 'Community', summary: 'List community filaments', permission: 'view' },
+      { method: 'GET', path: '/api/community-filaments/search', tag: 'Community', summary: 'Search community by color', permission: 'view' },
+      { method: 'POST', path: '/api/community-filaments/seed', tag: 'Community', summary: 'Seed community database', permission: 'admin' },
+      // Ecommerce
+      { method: 'GET', path: '/api/ecommerce/configs', tag: 'Ecommerce', summary: 'List e-commerce configs', permission: 'admin' },
+      { method: 'POST', path: '/api/ecommerce/configs', tag: 'Ecommerce', summary: 'Create e-commerce config', permission: 'admin' },
+      { method: 'GET', path: '/api/ecommerce/orders', tag: 'Ecommerce', summary: 'List orders', permission: 'view' },
+      // Slicer
+      { method: 'GET', path: '/api/slicer/status', tag: 'Slicer', summary: 'Get slicer status + quality presets', permission: 'view' },
+      { method: 'GET', path: '/api/slicer/profiles', tag: 'Slicer', summary: 'List detected slicer profiles', permission: 'view' },
+      { method: 'POST', path: '/api/slicer/upload', tag: 'Slicer', summary: 'Upload file for slicing (query: quality, profile)', permission: 'print' },
+      { method: 'POST', path: '/api/slicer/jobs/:id/slice', tag: 'Slicer', summary: 'Slice job (body: quality, profile, layer_height)', permission: 'print' },
+      { method: 'GET', path: '/api/slicer/jobs', tag: 'Slicer', summary: 'List slicer jobs', permission: 'view' },
+      // Timelapse
+      { method: 'GET', path: '/api/timelapse', tag: 'Timelapse', summary: 'List timelapse recordings', permission: 'view' },
+      { method: 'GET', path: '/api/timelapse/:id', tag: 'Timelapse', summary: 'Get timelapse recording', permission: 'view' },
+      { method: 'DELETE', path: '/api/timelapse/:id', tag: 'Timelapse', summary: 'Delete timelapse recording', permission: 'admin' },
+      // System
+      { method: 'GET', path: '/api/update/status', tag: 'System', summary: 'Get update status', permission: 'view' },
+      { method: 'POST', path: '/api/update/check', tag: 'System', summary: 'Check for updates', permission: 'admin' },
+      { method: 'POST', path: '/api/update/apply', tag: 'System', summary: 'Apply update', permission: 'admin' },
+      { method: 'POST', path: '/api/backup', tag: 'System', summary: 'Create backup', permission: 'admin' },
+      { method: 'GET', path: '/api/backup/list', tag: 'System', summary: 'List backups', permission: 'admin' },
+      { method: 'GET', path: '/api/docs', tag: 'System', summary: 'This API documentation', permission: 'view' },
+      // Filament (legacy)
+      { method: 'GET', path: '/api/filament', tag: 'Filament', summary: 'List filament records', permission: 'view' },
+      { method: 'POST', path: '/api/filament', tag: 'Filament', summary: 'Add filament record', permission: 'filament' },
+      { method: 'PUT', path: '/api/filament/:id', tag: 'Filament', summary: 'Update filament record', permission: 'filament' },
+      { method: 'DELETE', path: '/api/filament/:id', tag: 'Filament', summary: 'Delete filament record', permission: 'filament' },
+      // Waste
+      { method: 'GET', path: '/api/waste/stats', tag: 'History', summary: 'Get waste statistics', permission: 'view' },
+      { method: 'GET', path: '/api/waste/history', tag: 'History', summary: 'Get waste history', permission: 'view' },
+      { method: 'POST', path: '/api/waste', tag: 'History', summary: 'Record waste entry', permission: 'controls' },
+      // Printer Groups
+      { method: 'GET', path: '/api/printer-groups', tag: 'Printers', summary: 'List printer groups', permission: 'view' },
+      { method: 'POST', path: '/api/printer-groups', tag: 'Printers', summary: 'Create printer group', permission: 'admin' },
+      { method: 'PUT', path: '/api/printer-groups/:id', tag: 'Printers', summary: 'Update printer group', permission: 'admin' },
+      { method: 'DELETE', path: '/api/printer-groups/:id', tag: 'Printers', summary: 'Delete printer group', permission: 'admin' },
+      // Cost
+      { method: 'POST', path: '/api/inventory/cost/estimate', tag: 'Inventory', summary: 'Estimate print cost', permission: 'view' },
+      { method: 'GET', path: '/api/inventory/cost/report', tag: 'Inventory', summary: 'Get cost report', permission: 'view' },
+      { method: 'GET', path: '/api/inventory/restock', tag: 'Inventory', summary: 'Get restock suggestions (query: days=30)', permission: 'view' },
+      { method: 'GET', path: '/api/inventory/predictions', tag: 'Inventory', summary: 'Get usage predictions', permission: 'view' },
+      // Protection
+      { method: 'GET', path: '/api/protection/settings', tag: 'Printers', summary: 'Get protection settings', permission: 'view' },
+      { method: 'PUT', path: '/api/protection/settings', tag: 'Printers', summary: 'Update protection settings', permission: 'controls' },
+      // Macros
+      { method: 'GET', path: '/api/macros', tag: 'System', summary: 'List macros', permission: 'view' },
+      { method: 'POST', path: '/api/macros', tag: 'System', summary: 'Create macro', permission: 'macros' },
+      { method: 'PUT', path: '/api/macros/:id', tag: 'System', summary: 'Update macro', permission: 'macros' },
+      { method: 'DELETE', path: '/api/macros/:id', tag: 'System', summary: 'Delete macro', permission: 'macros' },
+      // Custom Fields
+      { method: 'GET', path: '/api/custom-fields', tag: 'System', summary: 'List custom field definitions', permission: 'view' },
+      { method: 'POST', path: '/api/custom-fields', tag: 'System', summary: 'Create custom field', permission: 'filament' },
+      { method: 'PUT', path: '/api/custom-fields/:id', tag: 'System', summary: 'Update custom field', permission: 'filament' },
+      { method: 'DELETE', path: '/api/custom-fields/:id', tag: 'System', summary: 'Delete custom field', permission: 'filament' },
+      // Shared Palette
+      { method: 'POST', path: '/api/palette/share', tag: 'Inventory', summary: 'Create shared palette link', permission: 'filament' },
+      { method: 'GET', path: '/api/palette/:token', tag: 'Inventory', summary: 'Get shared palette', permission: 'view' },
+      // Build Plates
+      { method: 'GET', path: '/api/build-plates', tag: 'Hardware', summary: 'List build plates', permission: 'view' },
+      { method: 'POST', path: '/api/build-plates', tag: 'Hardware', summary: 'Add build plate', permission: 'filament' },
+      { method: 'PUT', path: '/api/build-plates/:id', tag: 'Hardware', summary: 'Update build plate', permission: 'filament' },
+      { method: 'DELETE', path: '/api/build-plates/:id', tag: 'Hardware', summary: 'Delete build plate', permission: 'filament' },
+      // Dryer Models
+      { method: 'GET', path: '/api/dryer-models', tag: 'Hardware', summary: 'List dryer models', permission: 'view' },
+      { method: 'POST', path: '/api/dryer-models', tag: 'Hardware', summary: 'Add dryer model', permission: 'filament' },
+      { method: 'PUT', path: '/api/dryer-models/:id', tag: 'Hardware', summary: 'Update dryer model', permission: 'filament' },
+      { method: 'DELETE', path: '/api/dryer-models/:id', tag: 'Hardware', summary: 'Delete dryer model', permission: 'filament' },
+      // Price History
+      { method: 'GET', path: '/api/price-history', tag: 'Inventory', summary: 'Get price history', permission: 'view' },
+      { method: 'POST', path: '/api/price-history', tag: 'Inventory', summary: 'Add price entry (triggers alerts)', permission: 'filament' },
+      { method: 'GET', path: '/api/price-alerts', tag: 'Inventory', summary: 'List price alerts', permission: 'view' },
+      { method: 'POST', path: '/api/price-alerts', tag: 'Inventory', summary: 'Create price alert', permission: 'filament' },
+      { method: 'PUT', path: '/api/price-alerts/:id', tag: 'Inventory', summary: 'Update price alert', permission: 'filament' },
+      { method: 'DELETE', path: '/api/price-alerts/:id', tag: 'Inventory', summary: 'Delete price alert', permission: 'filament' },
+      // Failure Detection
+      { method: 'GET', path: '/api/failure-detections', tag: 'Printers', summary: 'List AI failure detections', permission: 'view' },
+      { method: 'POST', path: '/api/failure-detections/:id/acknowledge', tag: 'Printers', summary: 'Acknowledge failure detection', permission: 'controls' },
+    ],
+    rateLimit: { requests: API_RATE_MAX, window: `${API_RATE_WINDOW_MS / 1000}s`, headers: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'] }
+  };
+}
+
 function sendJson(res, data, status = 200) {
-  res.writeHead(status, { 'Content-Type': 'application/json' });
+  res.writeHead(status, { 'Content-Type': 'application/json', 'X-API-Version': _pkgVersion });
   res.end(JSON.stringify(data));
 }
 
