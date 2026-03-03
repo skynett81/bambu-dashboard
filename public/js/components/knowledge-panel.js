@@ -28,6 +28,8 @@
   let _data = { printers: [], accessories: [], filaments: [], profiles: [] };
   let _stats = { printers: 0, accessories: 0, filaments: 0, profiles: 0 };
 
+  // Use global formatFromUSD() and currencyCode() from i18n.js
+
   function _esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
   function _stars(n) { return '<span class="kb-stars">' + '★'.repeat(Math.min(n || 0, 5)) + '☆'.repeat(5 - Math.min(n || 0, 5)) + '</span>'; }
@@ -269,7 +271,7 @@
       <div class="kb-card-desc">${_esc(p.build_volume)} &middot; ${p.max_speed || '--'}mm/s</div>
       <div class="kb-card-footer">
         ${_badges(p.supported_filaments, 'kb-compat-badge')}
-        ${p.price_usd ? `<span class="kb-card-price">$${p.price_usd}</span>` : ''}
+        ${p.price_usd ? `<span class="kb-card-price">${formatFromUSD(p.price_usd)}</span>` : ''}
       </div>
     </div>`;
   }
@@ -283,7 +285,7 @@
       <div class="kb-card-desc">${_esc(a.description)}</div>
       <div class="kb-card-footer">
         ${_badges(a.compatible_printers, 'kb-compat-badge')}
-        ${a.price_usd ? `<span class="kb-card-price">$${a.price_usd}</span>` : ''}
+        ${a.price_usd ? `<span class="kb-card-price">${formatFromUSD(a.price_usd)}</span>` : ''}
       </div>
     </div>`;
   }
@@ -401,7 +403,7 @@
     html += _specRow(t('kb.build_volume'), p.build_volume);
     html += _specRow(t('kb.max_speed'), p.max_speed ? p.max_speed + ' mm/s' : null);
     html += _specRow(t('kb.nozzle_rec'), p.nozzle_type);
-    html += _specRow(t('kb.price'), p.price_usd ? '$' + p.price_usd : null);
+    html += _specRow(t('kb.price'), p.price_usd ? formatFromUSD(p.price_usd) : null);
     html += _specRow('Weight', p.weight_kg ? p.weight_kg + ' kg' : null);
     html += '</table></div>';
 
@@ -440,7 +442,7 @@
     let html = '<table class="kb-specs-table">';
     html += _specRow(t('kb.category'), t('kb.filter_' + a.category) || a.category);
     html += _specRow(t('kb.brand'), a.brand);
-    html += _specRow(t('kb.price'), a.price_usd ? '$' + a.price_usd : null);
+    html += _specRow(t('kb.price'), a.price_usd ? formatFromUSD(a.price_usd) : null);
     html += '</table>';
 
     if (a.description) html += '<div class="kb-detail-section"><div class="kb-detail-section-title">' + t('kb.description') + '</div><div style="font-size:0.8rem;color:var(--text-secondary);line-height:1.5">' + _esc(a.description) + '</div></div>';
@@ -565,7 +567,7 @@
       + _field('Full Name *', 'full_name', p.full_name, 'text', true)
       + _field(t('kb.build_volume'), 'build_volume', p.build_volume)
       + _field(t('kb.max_speed') + ' (mm/s)', 'max_speed', p.max_speed, 'number')
-      + _field(t('kb.price') + ' (USD)', 'price_usd', p.price_usd, 'number')
+      + _field(t('kb.price') + ` (${currencyCode()})`, 'price_usd', p.price_usd, 'number')
       + _field('Release Year', 'release_year', p.release_year, 'number')
       + _field(t('kb.supported_filaments') + ' (comma-sep)', 'supported_filaments', _parseJson(p.supported_filaments).join(', '))
       + _field(t('kb.pros') + ' (comma-sep)', 'pros', _parseJson(p.pros).join(', '))
@@ -577,7 +579,7 @@
     return _field('Name *', 'name', a.name, 'text', true)
       + _selectField(t('kb.category'), 'category', a.category || 'other', ACC_FILTERS.filter(f => f !== 'all').map(f => [f, t('kb.filter_' + f)]))
       + _field(t('kb.brand'), 'brand', a.brand)
-      + _field(t('kb.price') + ' (USD)', 'price_usd', a.price_usd, 'number')
+      + _field(t('kb.price') + ` (${currencyCode()})`, 'price_usd', a.price_usd, 'number')
       + _field(t('kb.compatible') + ' (comma-sep)', 'compatible_printers', _parseJson(a.compatible_printers).join(', '))
       + _field(t('kb.description'), 'description', a.description, 'textarea')
       + _field(t('kb.tips'), 'tips', a.tips, 'textarea');

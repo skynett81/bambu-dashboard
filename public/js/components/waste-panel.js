@@ -55,7 +55,7 @@
       return `<div class="stat-grid">
         <div class="stat-card"><div class="stat-value">${s.total_color_changes}</div><div class="stat-label">${t('waste.total_count')}</div></div>
         <div class="stat-card"><div class="stat-value" style="color:var(--accent-orange)">${formatWeight(s.total_waste_g)}</div><div class="stat-label">${t('waste.total_weight')}</div></div>
-        <div class="stat-card"><div class="stat-value" style="color:var(--accent-red)">${s.total_cost} kr</div><div class="stat-label">${t('waste.total_cost')}</div></div>
+        <div class="stat-card"><div class="stat-value" style="color:var(--accent-red)">${formatCurrency(s.total_cost, 0)}</div><div class="stat-label">${t('waste.total_cost')}</div></div>
       </div>`;
     },
 

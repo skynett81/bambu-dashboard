@@ -7551,9 +7551,13 @@ input[type="range"]::-webkit-slider-thumb:active {
 }
 
 .kb-prop-label {
-  min-width: 80px;
+  width: 110px;
+  flex-shrink: 0;
   color: var(--text-secondary);
   font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .kb-prop-bar-wrap {

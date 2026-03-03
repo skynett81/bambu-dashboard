@@ -157,7 +157,7 @@
       return `<div class="fil-hero-grid">
         ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', active.length, t('filament.total_spools'), '#1279ff')}
         ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>', fmtW(totalRemaining), t('filament.total_remaining'), '#00e676')}
-        ${totalValue > 0 ? heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>', `${Math.round(totalValue)} kr`, t('filament.total_value'), '#e3b341') : ''}
+        ${totalValue > 0 ? heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>', formatCurrency(totalValue, 0), t('filament.total_value'), '#e3b341') : ''}
         ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', lowStockCount, t('filament.low_stock'), lowColor)}
       </div>`;
     },
@@ -325,7 +325,7 @@
               </div>
             </div>
             <div class="fil-spool-meta">${esc(p.material)}${p.color_name ? ' · ' + esc(p.color_name) : ''} · ${p.spool_weight_g}g</div>
-            <div class="fil-spool-meta text-muted" style="font-size:0.7rem">${p.nozzle_temp_min || p.nozzle_temp_max ? `🌡 ${p.nozzle_temp_min || '?'}–${p.nozzle_temp_max || '?'}°C` : ''} ${p.bed_temp_min || p.bed_temp_max ? `🛏 ${p.bed_temp_min || '?'}–${p.bed_temp_max || '?'}°C` : ''}${p.price ? ` · ${p.price} ${t('stats.currency')}` : ''}</div>
+            <div class="fil-spool-meta text-muted" style="font-size:0.7rem">${p.nozzle_temp_min || p.nozzle_temp_max ? `🌡 ${p.nozzle_temp_min || '?'}–${p.nozzle_temp_max || '?'}°C` : ''} ${p.bed_temp_min || p.bed_temp_max ? `🛏 ${p.bed_temp_min || '?'}–${p.bed_temp_max || '?'}°C` : ''}${p.price ? ` · ${formatCurrency(p.price)}` : ''}</div>
             ${p.finish || p.translucent || p.glow ? `<div class="fil-profile-badges">${p.finish ? `<span class="fil-badge">${t('filament.finish_' + p.finish)}</span>` : ''}${p.translucent ? `<span class="fil-badge">${t('filament.translucent')}</span>` : ''}${p.glow ? `<span class="fil-badge fil-badge-glow">${t('filament.glow')}</span>` : ''}</div>` : ''}
             ${p.pressure_advance_k || p.max_volumetric_speed || p.retraction_distance || p.cooling_fan_speed ? `<div class="fil-spool-meta text-muted" style="font-size:0.65rem;margin-top:2px">${[
               p.pressure_advance_k ? 'PA:' + p.pressure_advance_k : '',
@@ -448,7 +448,7 @@
       </div><div class="chart-bars">`;
       for (const [br, d] of sorted) {
         const avgKg = d.total_weight > 0 && d.total_cost > 0 ? Math.round(d.total_cost / (d.total_weight / 1000)) : null;
-        const extra = avgKg ? ` · ${avgKg} kr/kg` : '';
+        const extra = avgKg ? ` · ${formatCurrency(avgKg, 0)}/kg` : '';
         h += barRow(esc(br), (d.count / mx) * 100, 'var(--accent-purple)', `${d.count}${extra}`);
       }
       h += '</div>';
@@ -477,10 +477,10 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         ${t('filament.cost_summary')}
       </div><div class="stats-detail-list">`;
-      h += sRow(t('filament.total_invested'), `${Math.round(invested)} kr`);
-      h += sRow(t('filament.total_used_value'), `${Math.round(usedValue)} kr`, 'var(--accent-orange)');
-      h += sRow(t('filament.avg_cost_kg'), `${avgKg} kr/kg`);
-      if (expensive) h += sRow(t('filament.most_expensive'), `${esc(expensive[0])} (${Math.round(expensive[1])} kr)`);
+      h += sRow(t('filament.total_invested'), formatCurrency(invested, 0));
+      h += sRow(t('filament.total_used_value'), formatCurrency(usedValue, 0), 'var(--accent-orange)');
+      h += sRow(t('filament.avg_cost_kg'), `${formatCurrency(avgKg, 0)}/kg`);
+      if (expensive) h += sRow(t('filament.most_expensive'), `${esc(expensive[0])} (${formatCurrency(expensive[1], 0)})`);
       h += '</div>';
       return h;
     },
@@ -814,7 +814,7 @@
         <div class="fil-spool-info">${infoParts.join(' · ')}${dryIcon}${compatIcon}</div>
         <div class="fil-spool-footer">
           <span>${footerLeft}</span>
-          <span>${s.cost ? s.cost + ' kr' : ''}</span>
+          <span>${s.cost ? formatCurrency(s.cost) : ''}</span>
         </div>
         ${s.extra_fields ? renderExtraFields(s.extra_fields) : ''}
         <div id="spool-edit-${s.id}" style="display:none"></div>
@@ -2163,7 +2163,7 @@
         </div>
         <div class="form-group">
           <label class="form-label">${t('filament.currency')}</label>
-          <input class="form-input" id="set-currency" value="${settings.currency || 'kr'}" placeholder="kr">
+          <input class="form-input" id="set-currency" value="${settings.currency || currencySymbol()}" placeholder="${currencySymbol()}">
         </div>
         <div class="form-group">
           <label class="form-label">${t('filament.low_stock_threshold')}</label>
@@ -2388,17 +2388,16 @@
           rows.push({ name: r.filename, cost: cost.total_cost });
         } catch {}
       }
-      const currency = _spools[0]?.cost ? 'kr' : 'kr';
       let h = `<div class="fil-health-legend" style="gap:12px;margin-bottom:8px">
-        <span><strong>${t('filament.filament_cost')}:</strong> ${totalFilament.toFixed(2)} kr</span>
-        <span><strong>${t('filament.electricity_cost')}:</strong> ${totalElectricity.toFixed(2)} kr</span>
-        <span><strong>${t('filament.depreciation_cost')}:</strong> ${totalDepreciation.toFixed(2)} kr</span>
-        <span style="font-weight:700"><strong>${t('filament.total_cost')}:</strong> ${totalCost.toFixed(2)} kr</span>
+        <span><strong>${t('filament.filament_cost')}:</strong> ${formatCurrency(totalFilament)}</span>
+        <span><strong>${t('filament.electricity_cost')}:</strong> ${formatCurrency(totalElectricity)}</span>
+        <span><strong>${t('filament.depreciation_cost')}:</strong> ${formatCurrency(totalDepreciation)}</span>
+        <span style="font-weight:700"><strong>${t('filament.total_cost')}:</strong> ${formatCurrency(totalCost)}</span>
       </div>`;
       const mats = Object.entries(byMaterial).sort((a, b) => b[1].cost - a[1].cost);
       if (mats.length > 0) {
         h += `<div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:4px">`;
-        h += mats.map(([m, d]) => `${m}: ${d.cost.toFixed(2)} kr (${d.count})`).join(' · ');
+        h += mats.map(([m, d]) => `${m}: ${formatCurrency(d.cost)} (${d.count})`).join(' · ');
         h += '</div>';
       }
       container.innerHTML = h;

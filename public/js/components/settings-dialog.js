@@ -1412,7 +1412,7 @@
       if (lic.active) {
         // Active license — show info + enable ecom configs
         if (badge) { badge.classList.add('active'); badge.textContent = t('settings.ecom_premium') + ' \u2713'; }
-        const feeStr = (lic.fees_this_month || 0).toLocaleString(undefined, { minimumFractionDigits: 2 }) + ' ' + (lic.currency || 'NOK');
+        const feeStr = formatCurrency(lic.fees_this_month || 0);
         licArea.innerHTML = `
           <div class="ecom-license-info" style="display:flex;flex-wrap:wrap;gap:0.5rem 1.5rem;font-size:0.85rem;margin-bottom:0.5rem;padding:0.6rem;background:var(--bg-secondary);border-radius:var(--radius);border:1px solid rgba(0,174,66,0.3)">
             <span><strong>${t('settings.ecom_license_key')}:</strong> ${_esc(lic.license_key || '')}</span>

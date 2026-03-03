@@ -429,7 +429,7 @@
         const res = await fetch(`/api/inventory/cost-estimate?filament_g=${fg}&duration_s=${ds}`);
         const cost = await res.json();
         const valEl = cell.querySelector('.hc-cost-value');
-        if (valEl && cost.total_cost > 0) valEl.textContent = cost.total_cost.toFixed(2) + ' kr';
+        if (valEl && cost.total_cost > 0) valEl.textContent = formatCurrency(cost.total_cost);
       } catch {}
     }
   }
@@ -459,12 +459,12 @@
         fetch(`/api/cost/${printId}`).then(r => r.ok ? r.json() : null).then(cost => {
           if (cost && cost.total_cost > 0) {
             costRow.style.display = '';
-            costRow.innerHTML = `<div class="history-detail-row"><span class="history-detail-label">${t('history.print_cost')}</span><span>${cost.total_cost.toFixed(2)} ${cost.currency || 'NOK'}</span></div>` +
-              (cost.filament_cost > 0 ? `<div class="history-detail-row text-muted" style="font-size:0.8rem"><span class="history-detail-label" style="padding-left:1rem">${t('history.cost_filament')}</span><span>${cost.filament_cost.toFixed(2)}</span></div>` : '') +
-              (cost.electricity_cost > 0 ? `<div class="history-detail-row text-muted" style="font-size:0.8rem"><span class="history-detail-label" style="padding-left:1rem">${t('history.cost_electricity')}</span><span>${cost.electricity_cost.toFixed(2)}</span></div>` : '') +
-              (cost.depreciation_cost > 0 ? `<div class="history-detail-row text-muted" style="font-size:0.8rem"><span class="history-detail-label" style="padding-left:1rem">${t('history.cost_depreciation')}</span><span>${cost.depreciation_cost.toFixed(2)}</span></div>` : '') +
-              (cost.labor_cost > 0 ? `<div class="history-detail-row text-muted" style="font-size:0.8rem"><span class="history-detail-label" style="padding-left:1rem">${t('history.cost_labor')}</span><span>${cost.labor_cost.toFixed(2)}</span></div>` : '') +
-              (cost.markup_amount > 0 ? `<div class="history-detail-row text-muted" style="font-size:0.8rem"><span class="history-detail-label" style="padding-left:1rem">${t('history.cost_markup')}</span><span>${cost.markup_amount.toFixed(2)}</span></div>` : '');
+            costRow.innerHTML = `<div class="history-detail-row"><span class="history-detail-label">${t('history.print_cost')}</span><span>${formatCurrency(cost.total_cost)}</span></div>` +
+              (cost.filament_cost > 0 ? `<div class="history-detail-row text-muted" style="font-size:0.8rem"><span class="history-detail-label" style="padding-left:1rem">${t('history.cost_filament')}</span><span>${formatCurrency(cost.filament_cost)}</span></div>` : '') +
+              (cost.electricity_cost > 0 ? `<div class="history-detail-row text-muted" style="font-size:0.8rem"><span class="history-detail-label" style="padding-left:1rem">${t('history.cost_electricity')}</span><span>${formatCurrency(cost.electricity_cost)}</span></div>` : '') +
+              (cost.depreciation_cost > 0 ? `<div class="history-detail-row text-muted" style="font-size:0.8rem"><span class="history-detail-label" style="padding-left:1rem">${t('history.cost_depreciation')}</span><span>${formatCurrency(cost.depreciation_cost)}</span></div>` : '') +
+              (cost.labor_cost > 0 ? `<div class="history-detail-row text-muted" style="font-size:0.8rem"><span class="history-detail-label" style="padding-left:1rem">${t('history.cost_labor')}</span><span>${formatCurrency(cost.labor_cost)}</span></div>` : '') +
+              (cost.markup_amount > 0 ? `<div class="history-detail-row text-muted" style="font-size:0.8rem"><span class="history-detail-label" style="padding-left:1rem">${t('history.cost_markup')}</span><span>${formatCurrency(cost.markup_amount)}</span></div>` : '');
           }
         }).catch(() => {});
       }
