@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync, readFileSync, unlinkSync, statSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync, readFileSync, unlinkSync, statSync, readdirSync } from 'node:fs';
 import { join, extname, basename } from 'node:path';
 import { execFile } from 'node:child_process';
 import { DATA_DIR } from './config.js';
@@ -41,6 +41,37 @@ export function detectSlicer() {
   return false;
 }
 
+// Quality presets: layer height + speed modifiers for slicer CLI
+const QUALITY_PRESETS = {
+  draft:    { label: 'Draft (0.28mm)',    layerHeight: 0.28, infill: 15, speed: 'fast' },
+  fast:     { label: 'Fast (0.20mm)',     layerHeight: 0.20, infill: 15, speed: 'fast' },
+  normal:   { label: 'Normal (0.16mm)',   layerHeight: 0.16, infill: 20, speed: 'normal' },
+  detailed: { label: 'Detailed (0.12mm)', layerHeight: 0.12, infill: 20, speed: 'normal' },
+  fine:     { label: 'Fine (0.08mm)',     layerHeight: 0.08, infill: 25, speed: 'slow' },
+};
+
+// Detect available slicer profiles from standard install locations
+const PROFILE_DIRS = [
+  '/usr/share/OrcaSlicer/resources/profiles',
+  '/opt/OrcaSlicer/resources/profiles',
+  join(process.env.HOME || '', '.config/OrcaSlicer/user'),
+  join(process.env.HOME || '', '.config/PrusaSlicer/print'),
+];
+
+export function getSlicerProfiles() {
+  const profiles = [];
+  for (const dir of PROFILE_DIRS) {
+    try {
+      if (!existsSync(dir)) continue;
+      const files = readdirSync(dir).filter(f => f.endsWith('.json') || f.endsWith('.ini'));
+      for (const f of files) {
+        profiles.push({ name: f.replace(/\.(json|ini)$/, ''), path: join(dir, f), source: dir });
+      }
+    } catch {}
+  }
+  return profiles;
+}
+
 export function getSlicerStatus() {
   const slicer = detectSlicer();
   return {
@@ -49,7 +80,9 @@ export function getSlicerStatus() {
     path: slicer ? slicer.path : null,
     uploadDir: UPLOAD_DIR,
     supportedFormats: ['.stl', '.3mf', '.obj', '.step'],
-    printFormats: ['.3mf', '.gcode', '.gcode.3mf']
+    printFormats: ['.3mf', '.gcode', '.gcode.3mf'],
+    qualityPresets: Object.entries(QUALITY_PRESETS).map(([k, v]) => ({ id: k, ...v })),
+    profiles: getSlicerProfiles().length
   };
 }
 
@@ -78,7 +111,7 @@ export function saveUploadedFile(filename, buffer, printerId, autoQueue) {
 }
 
 // Slice an STL file using detected slicer CLI
-export function sliceFile(jobId) {
+export function sliceFile(jobId, options = {}) {
   return new Promise((resolve, reject) => {
     const slicer = detectSlicer();
     if (!slicer) {
@@ -101,7 +134,26 @@ export function sliceFile(jobId) {
     updateSlicerJob(jobId, { status: 'slicing', slicer_used: slicer.name });
 
     // Build CLI args (works for both OrcaSlicer and PrusaSlicer)
-    const args = ['--slice', '--export-3mf', outputPath, inputPath];
+    const args = ['--slice', '--export-3mf', outputPath];
+
+    // Apply quality preset overrides
+    const preset = options.quality ? QUALITY_PRESETS[options.quality] : null;
+    if (preset) {
+      args.push('--layer-height', String(preset.layerHeight));
+      args.push('--fill-density', String(preset.infill) + '%');
+    }
+
+    // Apply custom profile if provided
+    if (options.profile) {
+      const profiles = getSlicerProfiles();
+      const match = profiles.find(p => p.name === options.profile);
+      if (match) args.push('--load', match.path);
+    }
+
+    // Custom layer height override
+    if (options.layerHeight) args.push('--layer-height', String(options.layerHeight));
+
+    args.push(inputPath);
 
     execFile(slicer.path, args, { timeout: 300000 }, (err, stdout, stderr) => {
       if (err) {
