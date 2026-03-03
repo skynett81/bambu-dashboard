@@ -20,7 +20,7 @@ if [ "${1:-}" = "--help" ] || [ "${1:-}" = "-h" ]; then
   echo "  - systemd service (bambu-dashboard)"
   echo "  - Docker container (if running)"
   echo "  - node_modules/"
-  echo "  - data/ (database, logs)"
+  echo "  - data/ (database, logs, uploads)"
   echo "  - config.json (printer credentials)"
   echo "  - certs/ (SSL certificates)"
   echo ""
@@ -59,9 +59,9 @@ if command -v docker &>/dev/null; then
 fi
 
 # 3. Stop running server process (if started manually)
-SERVER_PIDS=$(lsof -ti:3000 2>/dev/null || true)
+SERVER_PIDS=$(lsof -ti:3000 -ti:3443 2>/dev/null || true)
 if [ -n "$SERVER_PIDS" ]; then
-  echo -e "${BOLD}Stopping running server (port 3000)...${NC}"
+  echo -e "${BOLD}Stopping running server (port 3000/3443)...${NC}"
   echo "$SERVER_PIDS" | xargs -r kill 2>/dev/null || true
   echo -e "  ${GREEN}Server stopped${NC}"
   echo ""
@@ -79,7 +79,7 @@ fi
 
 # 5. Remove data
 if [ -d "$APP_DIR/data" ]; then
-  read -p "Remove database and data? [y/N] " -n 1 -r
+  read -p "Remove database, data, and uploads? [y/N] " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     rm -rf "$APP_DIR/data"

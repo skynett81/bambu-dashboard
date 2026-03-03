@@ -12,6 +12,7 @@ Step-by-step guide for installing Bambu Dashboard on your system.
 | **npm** | Included with Node.js | Package manager |
 | **ffmpeg** | Any recent version | Optional — only needed for camera livestream |
 | **git** | Any recent version | For cloning and auto-updates |
+| **openssl** | Any recent version | Optional — for auto-SSL certificate generation (usually pre-installed) |
 
 ### Check if you have Node.js 22+
 
@@ -261,6 +262,11 @@ Go to **Settings** > **Notifications** in the dashboard to configure:
 - Webhook
 - ntfy
 - Pushover
+- SMS (Twilio or generic HTTP gateway)
+
+### Cloud Slicer (optional)
+
+If you have **OrcaSlicer** or **PrusaSlicer** installed, the dashboard can auto-detect the CLI and slice uploaded files locally. To use a custom slicer path, set the `SLICER_PATH` environment variable.
 
 ### Run as systemd service (Linux)
 

@@ -8,148 +8,16 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 
 ---
 
-## Features
+## Highlights
 
-### Real-time Monitoring
-- **Live sparkline stats** — Grafana-style rolling graphs for nozzle, bed, chamber temps, fan speed, print speed, and layer progress
-- **Temperature gauges** — animated SVG ring gauges for nozzle, bed, and chamber
-- **Print progress** — percentage ring, countdown timer, ETA, elapsed time, layer info
-- **3D print preview** — live 3D model viewer with layer-by-layer animation and filament color tracking
-- **3D fullscreen** — click to open full-size 3D view with real-time layer progress
-- **MakerWorld integration** — auto-detects MakerWorld prints and shows model image with visual print progress reveal
-- **AMS visualization** — filament colors, remaining %, humidity, temperature (multi-AMS support)
-- **Camera livestream** — RTSPS via ffmpeg + jsmpeg, click-to-fullscreen with direct stream URL
-
-### Multi-printer Support
-- Manage multiple printers from a single dashboard
-- Instant printer switching with per-printer data across all panels
-- Supports P1, P2, X1, A1, and H2D series
-
-### Controls
-- Pause / resume / stop with confirmation dialogs
-- Light toggle, speed profiles (Silent / Standard / Sport / Ludicrous)
-- Fan control (part, aux, chamber), temperature presets
-- Home / calibration commands, G-code console
-
-### Print Guard
-- **Automatic print protection** using printer xcam sensors
-- Spaghetti detection, first layer issues, foreign objects, nozzle clumps
-- Configurable actions per event: notify, pause, stop, or ignore
-- Per-printer settings with cooldown and auto-resume options
-- Active alert dashboard with resolve functionality
-- Full protection event log
-
-### Data & Analytics
-- **Print history** — full log with status, duration, filament, layers (CSV export)
-- **Statistics** — success rates, filament usage by type/brand, prints per week, monthly trends
-- **Telemetry** — hero cards for live values, fan dashboard, time-series charts for temperatures/fans/speed
-- **Error log** — all printer errors with severity, timestamps, and search
-- **Filament inventory** — hero card summary, AMS tray display with progress bars, spool management with drag-and-drop between printers, stock health visualization
-- **Waste tracking** — automatic and manual waste logging with cost estimates
-- **Maintenance** — component wear tracking, nozzle history, maintenance scheduling
-
-### Notifications
-6 channels supported: **Telegram**, **Discord**, **Email (SMTP)**, **Webhook**, **ntfy**, **Pushover**
-
-Events: print started, finished, failed, cancelled, printer error, maintenance due, bed cooled, update available, protection alert. Quiet hours supported.
-
-### Infrastructure
-- **Authentication** — optional password protection with session management
-- **17 languages** — English, Norwegian, German, French, Spanish, Italian, Japanese, Korean, Dutch, Polish, Portuguese (BR), Swedish, Turkish, Ukrainian, Chinese (Simplified), Czech, Hungarian
-- **HTTPS by default** — auto-generated self-signed SSL certificates, forced HTTPS redirect, HSTS headers
-- **Content Security Policy** — CSP headers to prevent XSS and code injection
-- **Browser notifications** — real-time alerts for print events
-- **Responsive design** — desktop, tablet, mobile
-- **Modern UI** — glassmorphism effects, smooth transitions, Inter font
-- **Auto-update** — checks GitHub Releases, one-click update with automatic backup, toast notification banner
-- **Spoolman integration** — optional connection to Spoolman for filament inventory sync
-- **Demo mode** — 3 mock printers for testing without hardware
-- **Setup wizard** — web-based first-time configuration
-- **Zero framework frontend** — pure HTML/CSS/JS, no build step
-- **Layout lock** — drag-and-drop module ordering in all panels, lock/unlock layout
-- **Pterodactyl / wisp.gg** — ready-made egg file for game panel hosting
-
----
-
-## Changelog
-
-### v1.1.5 — Security + UI Improvements (2026-03-01)
-
-**Security**
-- Auto-generated self-signed SSL certificates (no manual setup needed)
-- HTTPS forced by default with HTTP→HTTPS redirect
-- HSTS (Strict-Transport-Security) header
-- Content Security Policy (CSP) header
-- Config file restricted to owner-only permissions (0600)
-- SMTP TLS verification enabled by default
-
-**UI**
-- Sidebar printer status indicators (online/offline/printing)
-- AMS panel visual redesign with improved filament display
-- 3D viewport restructured — HUD info moved below canvas
-- Improved card grid sizing for 3D view, camera, and AMS panels
-- Anatomical bust model for demo mode 3D preview
-- Update notification toast banner when new version available
-
-**Other**
-- Spoolman integration support
-- Database migrations v12-v20
-- 117 API endpoints (up from 40+)
-
-### v1.1.1 — Visual Redesign + Print Guard (2026-02-28)
-
-**Visual Redesign**
-- Complete UI overhaul — softer border-radius (14px), glassmorphism effects, subtle shadows, smooth cubic-bezier transitions
-- Inter font across the entire dashboard
-- Redesigned all 8 panels: Controls, History, Statistics, Telemetry, Filament, Error Log, Waste, and Maintenance
-- Hero card grids with live stats on Telemetry and Filament panels
-- Card title headers with SVG icons across all modules
-- Improved responsive breakpoints for mobile/tablet
-
-**Print Guard**
-- New automatic print protection system using printer xcam sensors
-- Detects spaghetti, first layer issues, foreign objects, and nozzle clumps
-- Configurable actions per event type: notify, pause, stop, or ignore
-- Per-printer settings with cooldown and auto-resume options
-- Active alert dashboard with resolve functionality
-- Full protection event log with filtering
-
-**Camera & 3D Fullscreen**
-- Click camera stream to open fullscreen modal
-- Stream URL display with copy-to-clipboard in fullscreen
-- Click 3D preview / MakerWorld image to open fullscreen
-- Real-time layer progress in fullscreen (both 3D model and MakerWorld reveal)
-- MakerWorld fullscreen mirrors the progress card view exactly
-
-**Authentication**
-- Optional password protection with session management
-- Username + password or simple password mode
-- Environment variable support for Docker/Pterodactyl deployments
-
-**Other**
-- 6 new notification channels: Telegram, Discord, Email, Webhook, ntfy, Pushover
-- Protection alert notification type added to all channels
-- Database migrations v9-v11 (protection settings, protection log)
-- Settings dialog improvements: notification test, auth config
-- Pterodactyl/wisp.gg egg file included
-
-### v1.1.0 — 3D Preview, MakerWorld, Notifications (2025)
-
-- 3D print preview with live layer animation
-- MakerWorld integration with model image progress reveal
-- Multi-channel notification system
-- Auto-update from GitHub Releases
-- Dashboard layout with drag-and-drop module ordering
-- AMS visualization with multi-AMS support
-
-### v1.0.0 — Initial Release (2025)
-
-- Real-time printer monitoring via MQTT
-- Temperature gauges and sparkline stats
-- Camera livestream via ffmpeg + jsmpeg
-- Print history and statistics
-- Multi-printer support
-- 17 language translations
+- **Real-time monitoring** — live temperature gauges, sparkline graphs, print progress, 3D model preview
+- **Multi-printer** — manage all your printers from one dashboard with instant switching
+- **Print Guard** — automatic protection using xcam + 5 sensor monitors (temp, filament, fan, stall, errors)
+- **Print Queue** — multi-printer dispatch with load balancing and pre-print filament checks
+- **Filament Inventory** — favorites, color filters, bulk add, HueForge TD, CSV import, Spoolman sync
+- **Cloud Slicer** — upload files, auto-slice with OrcaSlicer/PrusaSlicer, FTPS to printer
+- **7 notification channels** — Telegram, Discord, Email, Webhook, ntfy, Pushover, SMS
+- **Zero frameworks** — pure HTML/CSS/JS frontend, Node.js 22 backend with 3 npm packages
 
 ---
 
@@ -161,29 +29,19 @@ Events: print started, finished, failed, cancelled, printer error, maintenance d
 | **npm** | Included with Node.js | Yes | Package manager |
 | **ffmpeg** | Any recent version | No | Only needed for camera livestream |
 | **git** | Any recent version | No | For cloning, auto-updates, and version control |
+| **openssl** | Any recent version | No | For auto-SSL certificate generation (usually pre-installed) |
 
-### Supported Printers
+## Supported Printers
 
 All Bambu Lab printers with LAN mode enabled:
+
 - **P1 Series** — P1S, P1P
 - **P2 Series** — P2S Combo
 - **X1 Series** — X1 Carbon, X1E
 - **A1 Series** — A1, A1 Mini
 - **H2D Series** — H2D
 
-### Network Requirements
-
-| Port | Protocol | Direction | Purpose |
-|------|----------|-----------|---------|
-| 3000 | HTTP + WS | Inbound | Dashboard (redirects to HTTPS) |
-| 3443 | HTTPS + WSS | Inbound | Secure dashboard (default) |
-| 9001+ | WS | Inbound | Camera streams (one per printer) |
-| 8883 | MQTTS | Outbound | MQTT connection to printer |
-| 322 | RTSPS | Outbound | Camera feed from printer |
-
-The server and printers must be on the **same local network** (LAN). Each printer requires its **LAN access code** to be enabled.
-
-### Supported Platforms
+## Supported Platforms
 
 | Platform | Support |
 |----------|---------|
@@ -284,12 +142,6 @@ Edit `config.json` (created from `config.example.json`):
     "httpsPort": 3443,
     "cameraWsPortStart": 9001,
     "forceHttps": true
-  },
-  "camera": {
-    "enabled": true,
-    "resolution": "640x480",
-    "framerate": 15,
-    "bitrate": "1000k"
   }
 }
 ```
@@ -309,50 +161,21 @@ Edit `config.json` (created from `config.example.json`):
 
 Add more entries to the `printers` array. Each printer gets its own MQTT connection and camera stream (on consecutive ports starting from `cameraWsPortStart`).
 
-```json
-{
-  "printers": [
-    { "id": "printer-1", "name": "P1S", "ip": "192.168.1.100", "serial": "...", "accessCode": "...", "model": "P1S" },
-    { "id": "printer-2", "name": "X1C", "ip": "192.168.1.101", "serial": "...", "accessCode": "...", "model": "X1 Carbon" }
-  ]
-}
-```
-
 ---
 
-## HTTPS Setup
+## HTTPS
 
 HTTPS is enabled by default. On first start, the server auto-generates a self-signed SSL certificate if none exists. HTTPS runs on port 3443, and HTTP traffic on port 3000 is automatically redirected.
 
-To use your own certificate, place files in the `certs/` directory:
+To use your own certificate, place files in `certs/cert.pem` and `certs/key.pem`.
 
-```
-certs/
-  cert.pem
-  key.pem
-```
-
-The server includes HSTS and CSP security headers. To disable forced HTTPS redirect, set `"forceHttps": false` in config.json.
+The server includes HSTS and CSP security headers. To disable forced HTTPS, set `"forceHttps": false` in config.json.
 
 ---
 
 ## Authentication
 
-Authentication is **disabled by default**. Enable it to protect the dashboard when exposed publicly.
-
-### Simple Password (Default)
-
-Add to `config.json`:
-```json
-{
-  "auth": {
-    "enabled": true,
-    "password": "your-password"
-  }
-}
-```
-
-### Username + Password
+Authentication is **disabled by default**. Enable it to protect the dashboard:
 
 ```json
 {
@@ -365,284 +188,69 @@ Add to `config.json`:
 }
 ```
 
-### Environment Variables
-
-For Docker or Pterodactyl deployments, use environment variables instead of config:
-
+Or use environment variables (for Docker/Pterodactyl):
 ```bash
-BAMBU_AUTH_PASSWORD=your-password npm start
-# Or with username:
 BAMBU_AUTH_PASSWORD=your-password BAMBU_AUTH_USERNAME=admin npm start
 ```
 
-When `BAMBU_AUTH_PASSWORD` is set, authentication is automatically enabled regardless of `config.json`.
-
-Sessions last 24 hours by default (configurable via `sessionDurationHours`).
-
 ---
 
-## Pterodactyl / wisp.gg
+## Notifications
 
-A ready-made egg file is included for Pterodactyl Panel, Pelican, and wisp.gg:
+Configure in **Settings > Notifications** in the dashboard:
 
-1. In your panel, go to **Nests** > **Import Egg**
-2. Upload `egg-bambu-dashboard.json` from the project root
-3. Create a server using the egg
-4. Configure the **Server Port**, **Auth Password**, and other variables
+| Channel | Configuration |
+|---------|--------------|
+| Telegram | Bot token + chat ID |
+| Discord | Webhook URL |
+| Email | SMTP host, port, credentials |
+| Webhook | Custom URL with headers |
+| ntfy | Server URL + topic |
+| Pushover | API token + user key |
+| SMS | Twilio or generic HTTP gateway |
 
-The egg installs Node.js 22, ffmpeg, and clones the repository automatically. Reinstalling the server from the panel runs `git pull` to update to the latest release.
-
----
-
-## Commands
-
-| Command | Description |
-|---------|-------------|
-| `npm start` | Start the server |
-| `npm run dev` | Start with auto-reload (development) |
-| `npm run demo` | Start with 3 mock printers |
-| `npm run setup` | Run the setup wizard |
-| `./install.sh` | Interactive installer (web wizard) |
-| `./install.sh --cli` | Terminal-based installer with systemd option |
-| `./start.sh` | Start the server (same as `npm start`) |
-| `./start.sh --demo` | Start in demo mode |
-| `./uninstall.sh` | Remove service, data, config (interactive) |
-
----
-
-## Architecture
-
-```
-Browser <--WebSocket--> Node.js <--MQTTS:8883--> Printer
-Browser <--WS:9001+--> ffmpeg  <--RTSPS:322---> Camera
-```
-
-### Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Frontend | Vanilla HTML/CSS/JS — 28 component modules, no build step, no frameworks |
-| Backend | Node.js 22 with 3 npm packages: `mqtt`, `ws`, `basic-ftp` |
-| Database | SQLite (built into Node.js 22 via `--experimental-sqlite`) |
-| Camera | ffmpeg transcodes RTSPS to MPEG1, jsmpeg renders in browser |
-| Real-time | WebSocket hub broadcasts printer state to all connected clients |
-| Protocol | MQTT over TLS (port 8883) using the printer's LAN access code |
-
-### Ports
-
-| Port | Protocol | Direction | Description |
-|------|----------|-----------|-------------|
-| 3000 | HTTP + WS | Inbound | Dashboard (redirects to HTTPS) |
-| 3443 | HTTPS + WSS | Inbound | Secure dashboard (default) |
-| 9001+ | WS | Inbound | Camera streams (one per printer) |
-| 8883 | MQTTS | Outbound | Connection to printer |
-| 322 | RTSPS | Outbound | Camera feed from printer |
-
-### Server Modules (19)
-
-| Module | Purpose |
-|--------|---------|
-| `index.js` | HTTP/HTTPS servers, auto-SSL, CSP/HSTS headers, static files, demo mode |
-| `config.js` | Configuration loading, defaults, and migrations |
-| `database.js` | SQLite schema, migrations (v1-v20), CRUD |
-| `api-routes.js` | REST API (117 endpoints) |
-| `auth.js` | Authentication and session management |
-| `backup.js` | Backup and restore functionality |
-| `printer-manager.js` | Printer lifecycle, MQTT connection management |
-| `mqtt-client.js` | MQTT connectivity to Bambu printers |
-| `mqtt-commands.js` | MQTT command serialization (pause, resume, stop, etc.) |
-| `websocket-hub.js` | WebSocket broadcast to all browser clients |
-| `camera-stream.js` | ffmpeg process management for camera streams |
-| `print-tracker.js` | Print job tracking, state transitions, history logging |
-| `print-guard.js` | Print protection via xcam sensors |
-| `telemetry.js` | Telemetry data processing |
-| `telemetry-sampler.js` | Time-series data sampling |
-| `thumbnail-service.js` | Print thumbnail fetching via FTPS from printer SD |
-| `notifications.js` | 6-channel notification system |
-| `updater.js` | GitHub Releases auto-update with backup |
-| `setup-wizard.js` | Web-based first-time setup |
-
-### Frontend Components (28)
-
-| Component | Purpose |
-|-----------|---------|
-| `print-preview.js` | 3D model viewer + MakerWorld image reveal |
-| `model-viewer.js` | WebGL 3D renderer with layer animation |
-| `model-info-panel.js` | 3D model metadata display |
-| `temperature-gauge.js` | Animated SVG ring gauges |
-| `sparkline-stats.js` | Grafana-style stat panels with rolling graphs |
-| `ams-panel.js` | AMS filament visualization |
-| `camera-view.js` | jsmpeg video player with fullscreen + stream URL |
-| `controls-panel.js` | Printer controls UI |
-| `history-table.js` | Print history with search and filters |
-| `statistics-panel.js` | Charts and aggregated stats |
-| `telemetry-panel.js` | Live values, fan dashboard, time-series charts |
-| `filament-tracker.js` | Filament inventory with hero cards and AMS display |
-| `waste-panel.js` | Waste tracking and statistics |
-| `maintenance-panel.js` | Maintenance scheduling and wear tracking |
-| `protection-panel.js` | Print Guard status, settings, and log |
-| `settings-dialog.js` | Printer config, notifications, preferences |
-| `dashboard-dnd.js` | Drag-and-drop card layout with lock toggle |
-| `notifications.js` | Browser notification system |
-| `printer-selector.js` | Multi-printer switcher |
-| `error-log.js` | Error log viewer |
-| `update-panel.js` | Auto-update UI with toast notifications |
-| `active-filament.js` | Active filament display on dashboard |
-| `fan-display.js` | Fan speed visualization |
-| `print-progress.js` | Print progress tracking |
-| `printer-info.js` | Printer info display |
-| `speed-control.js` | Speed profile control |
-| `quick-status.js` | Quick status card |
-| `panel-utils.js` | Shared panel utilities |
-
----
-
-## Systemd Service
-
-The `--cli` installer can create a systemd service automatically. To set it up manually:
-
-```bash
-sudo tee /etc/systemd/system/bambu-dashboard.service > /dev/null <<EOF
-[Unit]
-Description=Bambu Dashboard
-After=network.target
-
-[Service]
-Type=simple
-User=$USER
-WorkingDirectory=$(pwd)
-ExecStart=$(which node) --experimental-sqlite server/index.js
-Restart=on-failure
-RestartSec=5
-Environment=NODE_ENV=production
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-sudo systemctl daemon-reload
-sudo systemctl enable --now bambu-dashboard
-```
-
-Manage with:
-```bash
-sudo systemctl status bambu-dashboard
-sudo systemctl restart bambu-dashboard
-sudo journalctl -u bambu-dashboard -f
-```
+14 events available including print status, errors, maintenance, queue, and filament alerts. Quiet hours supported.
 
 ---
 
 ## Updating
 
-The dashboard checks for updates automatically (every 6 hours by default). When a new version is available, a toast notification banner appears at the top of the page, and a badge appears in the sidebar.
+The dashboard checks for updates automatically (every 6 hours). When a new version is available, a toast notification appears.
 
-**From the dashboard:** Click "View details" on the toast or navigate to Settings > System. Click "Update Now" — the server backs up current files, downloads the new version, and restarts automatically.
+**From the dashboard:** Click "View details" on the toast or go to Settings > System > Update Now.
 
-**Manual update (git):**
+**Manual (git):**
 ```bash
-git pull
-npm install
+git pull && npm install
 # Restart the server
 ```
 
-**Docker update:**
+**Docker:**
 ```bash
-docker compose pull
-docker compose up -d
+docker compose pull && docker compose up -d
 ```
-
----
-
-## Language Support
-
-17 languages available. Change via Settings > Language. Preference is saved per browser.
-
-English, Norwegian (Bokmal), German, French, Spanish, Italian, Japanese, Korean, Dutch, Polish, Portuguese (Brazil), Swedish, Turkish, Ukrainian, Chinese (Simplified), Czech, Hungarian.
 
 ---
 
 ## Troubleshooting
 
-### Printer not connecting
-- Verify the printer IP is reachable: `ping 192.168.1.100`
-- Verify the LAN access code matches (regenerating it on the printer will change it)
-- Ensure MQTT port 8883 is not blocked by your firewall
-- The printer must be on the same LAN as the server
-
-### Camera not working
-- Requires `ffmpeg` installed on the server
-- Verify the printer has camera streaming enabled
-- Check that camera WebSocket port (default 9001) is not blocked
-
-### Node.js version
-- Node.js 22+ is required. Check with: `node -v`
-- The `--experimental-sqlite` flag is required for the built-in SQLite module
-
-### Demo mode
-- Run `npm run demo` or `BAMBU_DEMO=true npm start`
-- Demo data can be removed from Settings > Demo section
-
-### Docker: printer not found
-- `network_mode: host` is required in `docker-compose.yml` (default)
-- Bridge mode will not work because the server needs direct LAN access
+| Problem | Solution |
+|---------|----------|
+| Printer not connecting | Verify IP (`ping`), access code, port 8883 open, same LAN |
+| Camera not working | Install `ffmpeg`, verify camera enabled on printer |
+| "experimental-sqlite" error | Update to Node.js 22+: `node -v` |
+| Docker: printer not found | Ensure `network_mode: host` in docker-compose.yml |
+| Port already in use | Change `server.port` in config.json or set `SERVER_PORT` env var |
+| Dashboard blank after update | Clear browser cache (Ctrl+Shift+R) |
 
 ---
 
-## Project Structure
+## More Documentation
 
-```
-bambu-dashboard/
-├── server/                    # Backend (19 modules)
-│   ├── index.js               # Entry point (auto-SSL, CSP, HSTS)
-│   ├── config.js              # Configuration
-│   ├── database.js            # SQLite database (20 migrations)
-│   ├── api-routes.js          # REST API (117 endpoints)
-│   ├── auth.js                # Authentication
-│   ├── backup.js              # Backup and restore
-│   ├── printer-manager.js     # Printer management
-│   ├── mqtt-client.js         # MQTT connection
-│   ├── mqtt-commands.js       # Command serialization
-│   ├── websocket-hub.js       # WebSocket hub
-│   ├── camera-stream.js       # Camera streaming
-│   ├── print-tracker.js       # Print job tracking
-│   ├── print-guard.js         # Print protection (xcam)
-│   ├── telemetry.js           # Telemetry processing
-│   ├── telemetry-sampler.js   # Telemetry sampling
-│   ├── thumbnail-service.js   # Thumbnail fetching
-│   ├── notifications.js       # Notification system
-│   ├── updater.js             # Auto-update
-│   ├── setup-wizard.js        # Setup wizard
-│   └── demo/                  # Demo mode
-│       ├── mock-printer.js    # Simulated printers
-│       └── mock-data.js       # Seed data
-├── public/                    # Frontend (served as static files)
-│   ├── index.html             # Main page
-│   ├── login.html             # Login page
-│   ├── setup.html             # Setup wizard page
-│   ├── css/
-│   │   ├── main.css           # Core styles
-│   │   ├── components.css     # Component styles
-│   │   └── responsive.css     # Responsive breakpoints
-│   ├── js/
-│   │   ├── app.js             # Main app logic
-│   │   ├── state.js           # State management
-│   │   ├── i18n.js            # Internationalization
-│   │   ├── components/        # 28 UI components
-│   │   ├── utils/             # Shared utilities
-│   │   └── lib/               # Third-party (jsmpeg)
-│   ├── lang/                  # 17 language files
-│   └── assets/                # Icons and fonts
-├── config.example.json        # Configuration template
-├── egg-bambu-dashboard.json   # Pterodactyl egg
-├── package.json
-├── Dockerfile
-├── docker-compose.yml
-├── install.sh                 # Interactive installer
-├── uninstall.sh               # Uninstaller
-├── start.sh                   # Start script
-└── LICENSE
-```
+- **[Features](docs/features.md)** — complete feature list
+- **[Architecture](docs/architecture.md)** — stack, modules, components, project structure, systemd, Pterodactyl
+- **[Changelog](docs/changelog.md)** — version history from v1.0.0 to v1.1.6
+- **[Installation Guide](INSTALL.md)** — detailed step-by-step install instructions
 
 ---
 

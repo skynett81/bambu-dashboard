@@ -45,6 +45,13 @@ ensure_node() {
     sudo apt-get install -y nodejs
     echo -e "  ${GREEN}Node.js $(node -v) installed${NC}"
   fi
+
+  # Check openssl (used for auto-SSL certificate generation)
+  if command -v openssl &>/dev/null; then
+    echo -e "  ${GREEN}openssl found${NC}"
+  else
+    echo -e "  ${YELLOW}openssl not found (needed for auto-SSL certificates)${NC}"
+  fi
 }
 
 # ────────────────────────────────────────
@@ -64,6 +71,7 @@ ensure_deps() {
 # ────────────────────────────────────────
 ensure_dirs() {
   mkdir -p "$APP_DIR/data"
+  mkdir -p "$APP_DIR/data/uploads"
   mkdir -p "$APP_DIR/certs"
   [ -f "$APP_DIR/start.sh" ] && chmod +x "$APP_DIR/start.sh"
 }

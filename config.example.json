@@ -39,7 +39,8 @@
       "email":     { "enabled": false, "host": "", "port": 587, "user": "", "pass": "", "from": "", "to": "" },
       "webhook":   { "enabled": false, "url": "", "headers": {} },
       "ntfy":      { "enabled": false, "serverUrl": "https://ntfy.sh", "topic": "", "token": "" },
-      "pushover":  { "enabled": false, "apiToken": "", "userKey": "" }
+      "pushover":  { "enabled": false, "apiToken": "", "userKey": "" },
+      "sms":       { "enabled": false, "provider": "twilio", "accountSid": "", "authToken": "", "fromNumber": "", "toNumber": "", "gatewayUrl": "", "gatewayHeaders": "", "extraParams": "" }
     },
     "events": {
       "print_started":    { "enabled": true },
@@ -48,8 +49,14 @@
       "print_cancelled":  { "enabled": true },
       "printer_error":    { "enabled": true },
       "maintenance_due":  { "enabled": false },
-      "bed_cooled":       { "enabled": false },
-      "update_available": { "enabled": true }
+      "bed_cooled":         { "enabled": false },
+      "update_available":   { "enabled": true },
+      "drying_due":         { "enabled": false },
+      "filament_low_stock": { "enabled": false },
+      "queue_item_started":   { "enabled": false },
+      "queue_item_completed": { "enabled": false },
+      "queue_item_failed":    { "enabled": true },
+      "queue_completed":      { "enabled": true }
     },
     "quietHours": { "enabled": false, "start": "23:00", "end": "07:00" },
     "bedCooledThreshold": 30

@@ -7,7 +7,7 @@
   "exported_at": "2026-03-01T00:00:00+00:00",
   "name": "Bambu Dashboard",
   "author": "skynett81@github.com",
-  "description": "Self-hosted dashboard for monitoring and controlling Bambu Lab 3D printers. Provides real-time status, camera feeds, print history, filament tracking, and notifications via MQTT.",
+  "description": "Self-hosted dashboard for monitoring and controlling Bambu Lab 3D printers. Real-time status, camera feeds, print history, print queue with load balancing, filament inventory, cloud slicer integration, and 7 notification channels (Telegram, Discord, Email, Webhook, ntfy, Pushover, SMS) via MQTT.",
   "features": null,
   "docker_images": {
     "Node.js 22": "ghcr.io/parkervcp/yolks:nodejs_22"
@@ -22,7 +22,7 @@
   },
   "scripts": {
     "installation": {
-      "script": "#!/bin/bash\napt-get update -qq\napt-get install -y --no-install-recommends git ffmpeg ca-certificates openssl\n\ncd /mnt/server\n\nif [ -d .git ]; then\n  git pull\nelse\n  git clone https://github.com/skynett81/bambu-dashboard.git .\nfi\n\nnpm install --omit=dev\n\nmkdir -p data certs\n\necho \"Installation complete\"",
+      "script": "#!/bin/bash\napt-get update -qq\napt-get install -y --no-install-recommends git ffmpeg ca-certificates openssl\n\ncd /mnt/server\n\nif [ -d .git ]; then\n  git pull\nelse\n  git clone https://github.com/skynett81/bambu-dashboard.git .\nfi\n\nnpm install --omit=dev\n\nmkdir -p data data/uploads certs\n\necho \"Installation complete\"",
       "container": "ghcr.io/parkervcp/installers:debian",
       "entrypoint": "bash"
     }
@@ -102,6 +102,16 @@
       "name": "Spoolman URL",
       "description": "URL of your Spoolman instance for filament inventory sync. Leave empty to disable.",
       "env_variable": "SPOOLMAN_URL",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:256",
+      "field_type": "text"
+    },
+    {
+      "name": "GitHub Token",
+      "description": "GitHub personal access token for auto-update checks. Only needed for private repositories or to avoid rate limits.",
+      "env_variable": "GITHUB_TOKEN",
       "default_value": "",
       "user_viewable": true,
       "user_editable": true,
