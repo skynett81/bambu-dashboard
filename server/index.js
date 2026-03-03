@@ -10,7 +10,7 @@ import { initDatabase, getPrinters, addPrinter as dbAddPrinter, getSpoolsDryingS
 import { startNightlyBackup } from './backup.js';
 import { handleApiRequest, handleAuthApiRequest, setApiBroadcast, setOnPrinterRemoved, setOnPrinterAdded, setOnPrinterUpdated, setOnDemoPurge, setNotifier, setUpdater, setHub, setGuard, setQueueManager, setTimelapseService, setEcomLicense, dispatchWebhooksForEvent } from './api-routes.js';
 import { EcomLicenseManager } from './ecom-license.js';
-import { isAuthEnabled, getSessionToken, validateSession, isPublicPath, initAuth, shutdownAuth, validateApiKey } from './auth.js';
+import { isAuthEnabled, getSessionToken, validateSession, isPublicPath, initAuth, shutdownAuth, validateApiKey, getSessionUser } from './auth.js';
 import { PrinterManager } from './printer-manager.js';
 import { NotificationManager } from './notifications.js';
 import { Updater } from './updater.js';
@@ -103,8 +103,38 @@ function applySecurityHeaders(res) {
   applyHttpsHeaders(res);
 }
 
+function handleCors(req, res) {
+  const origin = req.headers.origin;
+  if (!origin) return false;
+
+  // Allow configured origins or * for API key-authenticated requests
+  const allowedOrigins = config.server.corsOrigins || [];
+  if (allowedOrigins.length === 0) return false; // CORS disabled by default
+
+  const allowed = allowedOrigins.includes('*') || allowedOrigins.includes(origin);
+  if (!allowed) return false;
+
+  res.setHeader('Access-Control-Allow-Origin', allowedOrigins.includes('*') ? '*' : origin);
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-API-Key');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  res.setHeader('Vary', 'Origin');
+
+  // Handle preflight
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204);
+    res.end();
+    return true;
+  }
+  return false;
+}
+
 function handleRequest(req, res) {
   applySecurityHeaders(res);
+
+  // CORS handling for API routes
+  if (req.url.startsWith('/api/') && handleCors(req, res)) return;
+
   const pathname = req.url.split('?')[0];
 
   // Public auth API routes (login, logout, status) - always accessible
@@ -116,7 +146,8 @@ function handleRequest(req, res) {
   if (isAuthEnabled() && !isPublicPath(pathname)) {
     const token = getSessionToken(req);
     const apiKey = pathname.startsWith('/api/') ? validateApiKey(req) : null;
-    if (!validateSession(token) && !apiKey) {
+    const sessionValid = validateSession(token);
+    if (!sessionValid && !apiKey) {
       if (pathname.startsWith('/api/')) {
         res.writeHead(401, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Unauthorized' }));
@@ -125,6 +156,17 @@ function handleRequest(req, res) {
       res.writeHead(302, { Location: '/login.html' });
       res.end();
       return;
+    }
+    // Inject user data onto request for permission checking
+    if (sessionValid) {
+      req._user = getSessionUser(token);
+    } else if (apiKey) {
+      req._user = {
+        username: apiKey.name,
+        userId: apiKey.user_id || null,
+        permissions: typeof apiKey.permissions === 'string' ? JSON.parse(apiKey.permissions) : (apiKey.permissions || ['*']),
+        _fromApiKey: true
+      };
     }
   }
 
