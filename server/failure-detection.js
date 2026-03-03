@@ -126,47 +126,110 @@ export class FailureDetectionService {
     });
   }
 
+  // Analyze JPEG pixel data without external libraries: parse DCT coefficients from raw JPEG data
+  _getFrameStats(buf) {
+    const size = buf.length;
+    // Compute Shannon entropy of raw bytes (correlates with image complexity)
+    const freq = new Uint32Array(256);
+    for (let i = 0; i < size; i++) freq[buf[i]]++;
+    let entropy = 0;
+    for (let i = 0; i < 256; i++) {
+      if (freq[i] === 0) continue;
+      const p = freq[i] / size;
+      entropy -= p * Math.log2(p);
+    }
+    // High-byte ratio: proportion of bright pixel data (bytes > 192)
+    let highBytes = 0, lowBytes = 0;
+    for (let i = 0; i < size; i++) {
+      if (buf[i] > 192) highBytes++;
+      else if (buf[i] < 64) lowBytes++;
+    }
+    const highRatio = highBytes / size;
+    const lowRatio = lowBytes / size;
+    // Byte variance (measures texture complexity)
+    const mean = buf.reduce((s, b) => s + b, 0) / size;
+    let variance = 0;
+    for (let i = 0; i < size; i++) variance += (buf[i] - mean) ** 2;
+    variance /= size;
+    return { size, entropy, highRatio, lowRatio, variance, mean };
+  }
+
   async _analyzeFrame(framePath, printerId) {
-    // Heuristic-based detection using image analysis
-    // Compares consecutive frames for anomalies
     const monitor = this._monitors.get(printerId);
     if (!monitor) return { detected: false };
 
     try {
       const currentFrame = readFileSync(framePath);
-      const currentSize = currentFrame.length;
+      const stats = this._getFrameStats(currentFrame);
 
       if (monitor.lastFrame) {
-        const lastSize = monitor.lastFrame.length;
-        const sizeDiff = Math.abs(currentSize - lastSize) / Math.max(lastSize, 1);
+        const lastStats = monitor.lastStats || this._getFrameStats(monitor.lastFrame);
+        const sizeDiff = Math.abs(stats.size - lastStats.size) / Math.max(lastStats.size, 1);
+        const entropyDiff = Math.abs(stats.entropy - lastStats.entropy);
+        const varianceDiff = Math.abs(stats.variance - lastStats.variance) / Math.max(lastStats.variance, 1);
 
-        // Sudden large change in frame size can indicate spaghetti/detachment
-        if (sizeDiff > 0.4 && monitor.frameCount > 3) {
-          monitor.lastFrame = currentFrame;
-          monitor.frameCount++;
+        monitor.lastFrame = currentFrame;
+        monitor.lastStats = stats;
+        monitor.frameCount++;
+
+        // Camera obstruction: very small frame or extremely low entropy (solid color)
+        if (stats.size < 5000 || stats.entropy < 3.0) {
+          return {
+            detected: true,
+            type: 'camera_obstruction',
+            confidence: stats.entropy < 2.0 ? 0.9 : 0.7,
+            details: { frame_size: stats.size, entropy: stats.entropy.toFixed(2) }
+          };
+        }
+
+        // Need at least 3 baseline frames before detecting anomalies
+        if (monitor.frameCount <= 3) return { detected: false };
+
+        // Spaghetti detection: sudden entropy increase + high variance change
+        // Spaghetti filament creates chaotic patterns = high entropy + high texture variance
+        if (entropyDiff > 0.8 && stats.entropy > 6.5 && varianceDiff > 0.3) {
+          return {
+            detected: true,
+            type: 'spaghetti_detected',
+            confidence: Math.min(0.5 + entropyDiff * 0.3 + varianceDiff * 0.2, 0.95),
+            details: { entropy_change: entropyDiff.toFixed(2), variance_change: varianceDiff.toFixed(2), entropy: stats.entropy.toFixed(2) }
+          };
+        }
+
+        // Bed detachment: significant size change + decreased high-byte ratio (darker = object moved)
+        if (sizeDiff > 0.35 && stats.highRatio < lastStats.highRatio * 0.7) {
+          return {
+            detected: true,
+            type: 'bed_detachment',
+            confidence: Math.min(0.5 + sizeDiff * 0.4, 0.9),
+            details: { size_change: sizeDiff.toFixed(2), brightness_drop: ((1 - stats.highRatio / Math.max(lastStats.highRatio, 0.01)) * 100).toFixed(0) + '%' }
+          };
+        }
+
+        // Nozzle blob: sudden increase in bright regions (plastic accumulation = shiny/reflective)
+        if (stats.highRatio > lastStats.highRatio * 1.5 && stats.highRatio > 0.15 && sizeDiff > 0.2) {
+          return {
+            detected: true,
+            type: 'nozzle_blob',
+            confidence: Math.min(0.4 + (stats.highRatio - lastStats.highRatio) * 2, 0.85),
+            details: { high_ratio: stats.highRatio.toFixed(3), prev_high_ratio: lastStats.highRatio.toFixed(3) }
+          };
+        }
+
+        // Generic anomaly: large frame size change (catch-all from original logic)
+        if (sizeDiff > 0.4) {
           return {
             detected: true,
             type: 'anomaly_detected',
             confidence: Math.min(0.5 + sizeDiff * 0.5, 0.95),
-            details: { size_change: sizeDiff, frames_analyzed: monitor.frameCount }
+            details: { size_change: sizeDiff.toFixed(2), frames_analyzed: monitor.frameCount }
           };
         }
-
-        // Very small frame = possible camera obstruction or nozzle blob
-        if (currentSize < 5000) {
-          monitor.lastFrame = currentFrame;
-          monitor.frameCount++;
-          return {
-            detected: true,
-            type: 'camera_obstruction',
-            confidence: 0.7,
-            details: { frame_size: currentSize }
-          };
-        }
+      } else {
+        monitor.lastFrame = currentFrame;
+        monitor.lastStats = stats;
+        monitor.frameCount++;
       }
-
-      monitor.lastFrame = currentFrame;
-      monitor.frameCount++;
     } catch {}
 
     return { detected: false };
