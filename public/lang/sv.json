@@ -85,6 +85,7 @@
     "remaining": "kvar",
     "estimated_usage": "Est. usage",
     "print_using": "Using",
+    "est_remaining": "Est. remaining",
     "slot": "Plats {{num}}",
     "add_spool": "+ Lägg till spole",
     "add_spool_title": "Lägg till ny spole",

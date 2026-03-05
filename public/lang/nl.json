@@ -85,6 +85,7 @@
     "remaining": "resterend",
     "estimated_usage": "Est. usage",
     "print_using": "Using",
+    "est_remaining": "Est. remaining",
     "slot": "Slot {{num}}",
     "add_spool": "+ Spoel toevoegen",
     "add_spool_title": "Nieuwe spoel toevoegen",

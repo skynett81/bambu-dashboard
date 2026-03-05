@@ -85,6 +85,7 @@
     "remaining": "剩余",
     "estimated_usage": "Est. usage",
     "print_using": "Using",
+    "est_remaining": "Est. remaining",
     "slot": "槽位 {{num}}",
     "add_spool": "+ 添加料卷",
     "add_spool_title": "添加新料卷",

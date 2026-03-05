@@ -89,6 +89,7 @@
     "remaining": "remaining",
     "estimated_usage": "Est. usage",
     "print_using": "Using",
+    "est_remaining": "Est. remaining",
     "slot": "Slot {{num}}",
     "add_spool": "+ Add spool",
     "add_spool_title": "Add new spool",

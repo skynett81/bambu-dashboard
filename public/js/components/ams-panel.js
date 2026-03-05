@@ -99,25 +99,39 @@
           const printerId = meta?.id || window.printerState?.getActivePrinterId?.() || null;
           const linkedSpool = _getLinkedSpool(printerId, unitIdx, i);
 
-          let remain, remainParts;
+          let remain, remainParts, remainG = null, totalG = null;
           if (linkedSpool && linkedSpool.initial_weight_g > 0) {
             // Use inventory data for accurate weight tracking
-            const pct = Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100);
+            remainG = linkedSpool.remaining_weight_g;
+            totalG = linkedSpool.initial_weight_g;
+            const pct = Math.round((remainG / totalG) * 100);
             remain = pct;
-            remainParts = [`${pct}%`, `${Math.round(linkedSpool.remaining_weight_g)}g / ${linkedSpool.initial_weight_g}g`];
+            remainParts = [`${pct}%`, `${Math.round(remainG)}g / ${totalG}g`];
           } else {
             // Fallback to MQTT/AMS data
             remain = tray.remain >= 0 ? Math.round(tray.remain) : '?';
             remainParts = [`${remain}%`];
-            if (tray.tray_weight) remainParts.push(`${tray.tray_weight}g`);
+            if (tray.tray_weight) {
+              totalG = parseFloat(tray.tray_weight);
+              remainG = totalG * (remain / 100);
+              remainParts.push(`${tray.tray_weight}g`);
+            }
           }
 
-          // Show estimated usage on active tray during printing
+          // Adjust remaining to account for estimated print consumption
           const est = window._printEstimates;
           const gcodeState = data.gcode_state || 'IDLE';
           const isPrinting = gcodeState === 'RUNNING' || gcodeState === 'PAUSE';
           let usageInfo = '';
-          if (isActive && isPrinting && est && est.weight_g > 0) {
+          let estRemain = remain;
+          if (isActive && isPrinting && est && est.weight_g > 0 && remainG !== null && totalG > 0) {
+            const pctDone = data.mc_percent || 0;
+            const remainingPrintG = est.weight_g * (1 - pctDone / 100);
+            const estRemainG = Math.max(0, remainG - remainingPrintG);
+            estRemain = Math.round((estRemainG / totalG) * 100);
+            const consumedG = Math.round(est.weight_g * pctDone / 100);
+            usageInfo = `<div class="ams-row ams-row-usage"><span class="ams-usage-text">${t('filament.print_using')}: ${consumedG}g / ${Math.round(est.weight_g)}g &middot; ${t('filament.est_remaining')}: ~${Math.round(estRemainG)}g</span></div>`;
+          } else if (isActive && isPrinting && est && est.weight_g > 0) {
             const pctDone = data.mc_percent || 0;
             const consumedG = Math.round(est.weight_g * pctDone / 100);
             usageInfo = `<div class="ams-row ams-row-usage"><span class="ams-usage-text">${t('filament.print_using')}: ${consumedG}g / ${Math.round(est.weight_g)}g</span></div>`;
@@ -149,8 +163,8 @@
                 ${rfidBadge}
               </div>
               <div class="ams-row ams-row-bar">
-                <div class="ams-remain-bar"><div class="ams-remain-fill" style="width:${remain}%;background:${color}"></div></div>
-                <span class="ams-remain-text">${remainParts.join(' \u00b7 ')}</span>
+                <div class="ams-remain-bar"><div class="ams-remain-fill" style="width:${isActive && isPrinting && estRemain !== remain ? estRemain : remain}%;background:${color}"></div>${isActive && isPrinting && estRemain !== remain ? `<div class="ams-remain-usage" style="width:${remain - estRemain}%;left:${estRemain}%;background:${color};opacity:0.3"></div>` : ''}</div>
+                <span class="ams-remain-text">${isActive && isPrinting && estRemain !== remain ? `~${estRemain}%` : remainParts.join(' \u00b7 ')}</span>
               </div>
               ${detailParts.length ? `<div class="ams-row ams-row-details">${detailParts.join(' \u00b7 ')}</div>` : ''}
               ${usageInfo}

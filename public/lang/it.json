@@ -85,6 +85,7 @@
     "remaining": "rimanente",
     "estimated_usage": "Est. usage",
     "print_using": "Using",
+    "est_remaining": "Est. remaining",
     "slot": "Slot {{num}}",
     "add_spool": "+ Aggiungi bobina",
     "add_spool_title": "Aggiungi nuova bobina",

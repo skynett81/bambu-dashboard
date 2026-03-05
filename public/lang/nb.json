@@ -89,6 +89,7 @@
     "remaining": "gjenstår",
     "estimated_usage": "Est. forbruk",
     "print_using": "Bruker",
+    "est_remaining": "Est. gjenstår",
     "slot": "Spor {{num}}",
     "add_spool": "+ Legg til spole",
     "add_spool_title": "Legg til ny spole",

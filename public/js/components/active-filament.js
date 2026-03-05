@@ -32,6 +32,8 @@
     const tempMax = tray.nozzle_temp_max || '?';
     const isLight = isLightHex(tray.tray_color);
     const slotNum = parseInt(activeTrayIdx) + 1;
+    const totalG = tray.tray_weight ? parseFloat(tray.tray_weight) : null;
+    const remainG = totalG ? totalG * (remain / 100) : null;
 
     // Estimate filament consumption during active print
     const est = window._printEstimates;
@@ -40,19 +42,26 @@
     const pct = data.mc_percent || 0;
 
     let usageHtml = '';
+    let displayRemain = remain;
+    let displayRemainG = remainG;
     if (isPrinting && est && est.weight_g > 0) {
       const consumedG = Math.round(est.weight_g * pct / 100);
-      const remainingG = Math.round(est.weight_g - consumedG);
+      const remainingPrintG = est.weight_g - consumedG;
+      if (remainG !== null && totalG > 0) {
+        displayRemainG = Math.max(0, remainG - remainingPrintG);
+        displayRemain = Math.round((displayRemainG / totalG) * 100);
+      }
       usageHtml = `
         <div class="filament-usage-estimate">
-          <span>${t('filament.estimated_usage')}: ${consumedG}g / ${Math.round(est.weight_g)}g</span>
+          <span>${t('filament.print_using')}: ${consumedG}g / ${Math.round(est.weight_g)}g</span>
           <div class="filament-usage-bar"><div class="filament-usage-bar-fill" style="width:${pct}%;background:${color}"></div></div>
         </div>`;
     }
 
     // Color for the bar - low remaining = warn
-    const barColor = remain < 15 ? 'var(--accent-red)' : color;
-    const remainClass = remain < 15 ? 'filament-remain-low' : '';
+    const barColor = displayRemain < 15 ? 'var(--accent-red)' : color;
+    const remainClass = displayRemain < 15 ? 'filament-remain-low' : '';
+    const showEstimate = isPrinting && displayRemain !== remain;
 
     container.innerHTML = `
       <div class="filament-status">
@@ -64,11 +73,11 @@
           </div>
         </div>
         <div class="filament-remain-section">
-          <div class="filament-remain-pct ${remainClass}">${remain}%</div>
-          <div class="filament-remain-label">${t('filament.remaining')}</div>
+          <div class="filament-remain-pct ${remainClass}">~${displayRemain}%</div>
+          <div class="filament-remain-label">${showEstimate ? t('filament.est_remaining') : t('filament.remaining')}${displayRemainG !== null ? ` · ~${Math.round(displayRemainG)}g` : ''}</div>
         </div>
         <div class="filament-remain-bar-lg">
-          <div class="filament-remain-bar-fill-lg" style="width:${remain}%;background:${barColor}"></div>
+          <div class="filament-remain-bar-fill-lg" style="width:${displayRemain}%;background:${barColor}"></div>${showEstimate ? `<div class="filament-remain-bar-usage" style="width:${remain - displayRemain}%;left:${displayRemain}%;background:${barColor};opacity:0.3"></div>` : ''}
         </div>
         ${usageHtml}
         <div class="filament-status-meta">

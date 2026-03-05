@@ -85,6 +85,7 @@
     "remaining": "restante",
     "estimated_usage": "Est. usage",
     "print_using": "Using",
+    "est_remaining": "Est. remaining",
     "slot": "Ranura {{num}}",
     "add_spool": "+ Añadir bobina",
     "add_spool_title": "Añadir nueva bobina",

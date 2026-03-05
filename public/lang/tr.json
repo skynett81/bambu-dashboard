@@ -85,6 +85,7 @@
     "remaining": "kalan",
     "estimated_usage": "Est. usage",
     "print_using": "Using",
+    "est_remaining": "Est. remaining",
     "slot": "Slot {{num}}",
     "add_spool": "+ Makara ekle",
     "add_spool_title": "Yeni makara ekle",

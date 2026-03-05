@@ -85,6 +85,7 @@
     "remaining": "残り",
     "estimated_usage": "Est. usage",
     "print_using": "Using",
+    "est_remaining": "Est. remaining",
     "slot": "スロット {{num}}",
     "add_spool": "+ スプール追加",
     "add_spool_title": "新しいスプールを追加",

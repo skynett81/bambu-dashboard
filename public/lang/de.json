@@ -85,6 +85,7 @@
     "remaining": "übrig",
     "estimated_usage": "Est. usage",
     "print_using": "Using",
+    "est_remaining": "Est. remaining",
     "slot": "Platz {{num}}",
     "add_spool": "+ Spule hinzufügen",
     "add_spool_title": "Neue Spule anlegen",

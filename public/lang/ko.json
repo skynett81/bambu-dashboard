@@ -85,6 +85,7 @@
     "remaining": "남음",
     "estimated_usage": "Est. usage",
     "print_using": "Using",
+    "est_remaining": "Est. remaining",
     "slot": "슬롯 {{num}}",
     "add_spool": "+ 스풀 추가",
     "add_spool_title": "새 스풀 추가",

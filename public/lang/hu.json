@@ -81,6 +81,7 @@
     "remaining": "maradt",
     "estimated_usage": "Est. usage",
     "print_using": "Using",
+    "est_remaining": "Est. remaining",
     "slot": "Hely {{num}}",
     "add_spool": "+ Tekercs hozzáadása",
     "add_spool_title": "Új tekercs hozzáadása",
