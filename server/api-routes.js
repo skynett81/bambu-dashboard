@@ -4886,6 +4886,29 @@ async function handleMakerWorldFetch(designId, res) {
     _mwCache.set(designId, { data, ts: Date.now() });
     sendJson(res, data);
   } catch {
+    // Fallback: try Bambu Cloud task API (project_id matches task id)
+    if (_bambuCloud?.isAuthenticated()) {
+      try {
+        const tasks = await _bambuCloud.getTaskHistory();
+        const task = tasks.find(t => String(t.id) === String(designId));
+        if (task?.cover) {
+          const data = {
+            title: task.designTitle || task.title || null,
+            image: task.cover,
+            description: task.title || '',
+            url: mwUrl,
+            designer: null,
+            designerAvatar: null,
+            likes: 0, downloads: 0, prints: 0,
+            category: null,
+            print_settings: null,
+            fallback: false
+          };
+          _mwCache.set(designId, { data, ts: Date.now() });
+          return sendJson(res, data);
+        }
+      } catch {}
+    }
     const fallback = { url: mwUrl, fallback: true };
     _mwCache.set(designId, { data: fallback, ts: Date.now() });
     sendJson(res, fallback);

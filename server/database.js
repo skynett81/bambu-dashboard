@@ -3378,7 +3378,7 @@ export function createNozzleSession(printerId, nozzleType, nozzleDiameter) {
 }
 
 export function retireNozzleSession(sessionId) {
-  return db.prepare('UPDATE nozzle_sessions SET retired_at = datetime("now") WHERE id = ?').run(sessionId);
+  return db.prepare(`UPDATE nozzle_sessions SET retired_at = datetime('now') WHERE id = ?`).run(sessionId);
 }
 
 export function updateNozzleSessionCounters(sessionId, hours, filamentG, abrasiveG) {
