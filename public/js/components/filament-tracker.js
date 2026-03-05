@@ -223,6 +223,8 @@
   let _currentPage = 0;
   let _pageSize = 50;
   let _searchDebounce = null;
+  let _lowStockPct = 20;
+  let _lowStockGrams = 0;
 
   // ═══ Persistence ═══
   function getOrder(tabId) {
@@ -236,6 +238,53 @@
     localStorage.setItem(STORAGE_PREFIX + tabId, JSON.stringify(ids));
   }
 
+  // ═══ Cascade filter options ═══
+  function _applyFiltersExcept(spools, excludeDim) {
+    return spools.filter(s => {
+      if (!_showArchived && s.archived) return false;
+      if (_filterFavorites && !s.is_favorite) return false;
+      if (excludeDim !== 'material' && _filterMaterial && s.material !== _filterMaterial) return false;
+      if (excludeDim !== 'category' && _filterCategory && !Object.entries(FILAMENT_TYPES).some(([cat, types]) => cat === _filterCategory && types.includes(s.material))) return false;
+      if (excludeDim !== 'vendor' && _filterVendor && s.vendor_name !== _filterVendor) return false;
+      if (excludeDim !== 'location' && _filterLocation && s.location !== _filterLocation) return false;
+      if (excludeDim !== 'color' && _filterColorFamily && _classifyColor(s.color_hex) !== _filterColorFamily) return false;
+      if (excludeDim !== 'tag' && _filterTag && !(s.tags && s.tags.some(tg => String(tg.id) === _filterTag))) return false;
+      if (_searchQuery) {
+        const q = _searchQuery.toLowerCase();
+        const fields = [s.profile_name, s.material, s.vendor_name, s.color_name, s.lot_number, s.location, s.comment, s.article_number, s.short_id].filter(Boolean);
+        if (!fields.some(f => f.toLowerCase().includes(q))) return false;
+      }
+      return true;
+    });
+  }
+
+  function _computeCascadeOptions(spools) {
+    const matPool = _applyFiltersExcept(spools, 'material');
+    const catPool = _applyFiltersExcept(spools, 'category');
+    const venPool = _applyFiltersExcept(spools, 'vendor');
+    const locPool = _applyFiltersExcept(spools, 'location');
+    const tagPool = _applyFiltersExcept(spools, 'tag');
+    const matCounts = {};
+    for (const s of matPool) { if (s.material) matCounts[s.material] = (matCounts[s.material] || 0) + 1; }
+    const venCounts = {};
+    for (const s of venPool) { if (s.vendor_name) venCounts[s.vendor_name] = (venCounts[s.vendor_name] || 0) + 1; }
+    const locCounts = {};
+    for (const s of locPool) { if (s.location) locCounts[s.location] = (locCounts[s.location] || 0) + 1; }
+    const catCounts = {};
+    for (const s of catPool) {
+      for (const [cat, types] of Object.entries(FILAMENT_TYPES)) {
+        if (types.includes(s.material)) { catCounts[cat] = (catCounts[cat] || 0) + 1; break; }
+      }
+    }
+    const tagCounts = {};
+    for (const s of tagPool) { if (s.tags) for (const tg of s.tags) tagCounts[tg.id] = (tagCounts[tg.id] || 0) + 1; }
+    return { matCounts, venCounts, locCounts, catCounts, tagCounts };
+  }
+
+  function _hasActiveFilters() {
+    return !!(_filterMaterial || _filterVendor || _filterLocation || _filterCategory || _filterTag || _filterColorFamily || _filterFavorites || _searchQuery);
+  }
+
   // ═══ Module builders ═══
   const BUILDERS = {
     'spool-summary': (spools) => {
@@ -245,7 +294,7 @@
         totalRemaining += s.remaining_weight_g || 0;
         if (s.cost) totalValue += s.cost;
         const pct = s.initial_weight_g > 0 ? (s.remaining_weight_g / s.initial_weight_g) * 100 : 0;
-        if (pct < 20 && pct > 0) lowStockCount++;
+        if ((pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams)) lowStockCount++;
       }
       const lowColor = lowStockCount > 0 ? '#f0883e' : '#00e676';
       return `<div class="fil-hero-grid">
@@ -260,7 +309,7 @@
       const low = spools.filter(s => {
         if (s.archived) return false;
         const pct = s.initial_weight_g > 0 ? (s.remaining_weight_g / s.initial_weight_g) * 100 : 100;
-        return pct < 20 && pct > 0;
+        return (pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams);
       });
       if (low.length === 0) return '';
       return `<div class="filament-low-stock-alert">
@@ -285,6 +334,9 @@
         ${t('filament.spool_title')}
       </div>`;
 
+      // Cascade filter options — each dropdown only shows options matching OTHER active filters
+      const _co = _computeCascadeOptions(spools);
+
       h += `<div class="inv-filter-bar">
         <label class="bulk-select-all" title="${t('filament.bulk_select_all')}">
           <input type="checkbox" id="bulk-select-all-cb" onchange="window._bulkSelectAll(this.checked)">
@@ -296,23 +348,23 @@
         </button>
         <select class="form-input form-input-sm" onchange="window._invFilterMaterial(this.value)">
           <option value="">${t('filament.filter_all')} ${t('filament.filter_material')}</option>
-          ${[...new Set(spools.map(s => s.material).filter(Boolean))].sort().map(m => `<option value="${m}" ${m === _filterMaterial ? 'selected' : ''}>${m}</option>`).join('')}
+          ${Object.entries(_co.matCounts).sort(([a],[b]) => a.localeCompare(b)).map(([m, n]) => `<option value="${m}" ${m === _filterMaterial ? 'selected' : ''}>${m} (${n})</option>`).join('')}
         </select>
         <select class="form-input form-input-sm" onchange="window._invFilterCategory(this.value)">
           <option value="">${t('filament.filter_all')} ${t('filament.filter_category')}</option>
-          ${Object.keys(FILAMENT_TYPES).map(c => `<option value="${c}" ${c === _filterCategory ? 'selected' : ''}>${c}</option>`).join('')}
+          ${Object.keys(FILAMENT_TYPES).filter(c => _co.catCounts[c]).map(c => `<option value="${c}" ${c === _filterCategory ? 'selected' : ''}>${c} (${_co.catCounts[c]})</option>`).join('')}
         </select>
         <select class="form-input form-input-sm" onchange="window._invFilterVendor(this.value)">
           <option value="">${t('filament.filter_all')} ${t('filament.filter_vendor')}</option>
-          ${[...new Set(spools.map(s => s.vendor_name).filter(Boolean))].sort().map(v => `<option value="${v}" ${v === _filterVendor ? 'selected' : ''}>${v}</option>`).join('')}
+          ${Object.entries(_co.venCounts).sort(([a],[b]) => a.localeCompare(b)).map(([v, n]) => `<option value="${v}" ${v === _filterVendor ? 'selected' : ''}>${v} (${n})</option>`).join('')}
         </select>
         <select class="form-input form-input-sm" onchange="window._invFilterLocation(this.value)">
           <option value="">${t('filament.filter_all')} ${t('filament.filter_location')}</option>
-          ${[...new Set(spools.map(s => s.location).filter(Boolean))].sort().map(l => `<option value="${l}" ${l === _filterLocation ? 'selected' : ''}>${l}</option>`).join('')}
+          ${Object.entries(_co.locCounts).sort(([a],[b]) => a.localeCompare(b)).map(([l, n]) => `<option value="${l}" ${l === _filterLocation ? 'selected' : ''}>${l} (${n})</option>`).join('')}
         </select>
         ${_tags.length ? `<select class="form-input form-input-sm" onchange="window._invFilterTag(this.value)">
           <option value="">${t('filament.all_tags')}</option>
-          ${_tags.map(tg => `<option value="${tg.id}" ${String(tg.id) === _filterTag ? 'selected' : ''}>${esc(tg.name)}</option>`).join('')}
+          ${_tags.filter(tg => _co.tagCounts[tg.id]).map(tg => `<option value="${tg.id}" ${String(tg.id) === _filterTag ? 'selected' : ''}>${esc(tg.name)} (${_co.tagCounts[tg.id]})</option>`).join('')}
         </select>` : ''}
         <select class="form-input form-input-sm" onchange="window._invSort(this.value)">
           <option value="recent" ${_sortBy === 'recent' ? 'selected' : ''}>${t('filament.sort_recent')}</option>
@@ -321,6 +373,10 @@
           <option value="remaining_desc" ${_sortBy === 'remaining_desc' ? 'selected' : ''}>${t('filament.sort_remaining_desc')}</option>
           <option value="fifo" ${_sortBy === 'fifo' ? 'selected' : ''}>${t('filament.sort_fifo')}</option>
         </select>
+        ${_hasActiveFilters() ? `<button class="inv-filter-chip" onclick="window._invResetFilters()" title="${t('filament.reset_filters')}" style="color:var(--accent-red)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          ${t('filament.reset_filters')}
+        </button>` : ''}
         <label class="inv-archive-toggle">
           <input type="checkbox" ${_showArchived ? 'checked' : ''} onchange="window._invToggleArchived(this.checked)">
           <span>${t('filament.show_archived')}</span>
@@ -340,6 +396,19 @@
           </button>
         </div>
       </div>`;
+      // Active filter chips
+      if (_hasActiveFilters()) {
+        h += `<div class="inv-active-filters">`;
+        if (_searchQuery) h += `<span class="inv-active-chip" onclick="window._invSearch('')">${t('filament.search_placeholder')}: "${esc(_searchQuery)}" &times;</span>`;
+        if (_filterMaterial) h += `<span class="inv-active-chip" onclick="window._invFilterMaterial('')">${_filterMaterial} &times;</span>`;
+        if (_filterCategory) h += `<span class="inv-active-chip" onclick="window._invFilterCategory('')">${_filterCategory} &times;</span>`;
+        if (_filterVendor) h += `<span class="inv-active-chip" onclick="window._invFilterVendor('')">${_filterVendor} &times;</span>`;
+        if (_filterLocation) h += `<span class="inv-active-chip" onclick="window._invFilterLocation('')">${_filterLocation} &times;</span>`;
+        if (_filterColorFamily) h += `<span class="inv-active-chip" onclick="window._invFilterColor('')">${_filterColorFamily} &times;</span>`;
+        if (_filterTag) { const tg = _tags.find(t2 => String(t2.id) === _filterTag); h += `<span class="inv-active-chip" onclick="window._invFilterTag('')">${tg ? esc(tg.name) : _filterTag} &times;</span>`; }
+        if (_filterFavorites) h += `<span class="inv-active-chip" onclick="window._invToggleFavorites()">${t('filament.favorites_only')} &times;</span>`;
+        h += `</div>`;
+      }
       // Color family filter chips
       const colorFamilies = [...new Set(spools.map(s => _classifyColor(s.color_hex)).filter(c => c !== 'transparent'))];
       if (colorFamilies.length > 1) {
@@ -712,7 +781,7 @@
       }
       h += '</div>';
       h += `<select class="form-input form-input-sm" onchange="window._dbSetSort(this.value)" style="max-width:160px">`;
-      for (const [val, label] of [['manufacturer','Brand'],['name','Name'],['material','Material'],['extruder_temp','Temp'],['pressure_advance_k','K-Value'],['td_value','TD Value'],['price','Price']]) {
+      for (const [val, label] of [['manufacturer','Brand'],['name','Name'],['material','Material'],['extruder_temp','Temp'],['pressure_advance_k','K-Value'],['td_value','TD Value'],['price','Price'],['rating',t('filament.community_sort_rating')],['newest',t('filament.community_sort_newest')]]) {
         h += `<option value="${val}"${_dbSort===val?' selected':''}>${label}</option>`;
       }
       h += '</select>';
@@ -775,7 +844,7 @@
   function renderSpoolCard(s) {
     const pct = s.initial_weight_g > 0 ? Math.round((s.remaining_weight_g / s.initial_weight_g) * 100) : 0;
     const color = hexToRgb(s.color_hex);
-    const isLow = pct < 20 && pct > 0;
+    const isLow = (pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams);
     const isEmpty = pct === 0 && s.used_weight_g > 0;
     const lowClass = isEmpty ? 'filament-card-empty' : isLow ? 'filament-card-low' : '';
     const archivedClass = s.archived ? 'filament-card-archived' : '';
@@ -798,6 +867,12 @@
     if (s.location) infoParts.push('📍' + esc(s.location));
     if (s.storage_method) infoParts.push(s.storage_method === 'dry_box' ? '📦' : s.storage_method === 'vacuum_bag' ? '🫙' : '🌬');
     if (s.transmission_distance) infoParts.push('TD:' + s.transmission_distance);
+    if (s.last_used_at) {
+      const daysAgo = Math.floor((Date.now() - new Date(s.last_used_at).getTime()) / 86400000);
+      if (daysAgo < 1) infoParts.push(t('filament.used_today'));
+      else if (daysAgo < 60) infoParts.push(t('filament.days_ago', { n: daysAgo }));
+      else infoParts.push(t('filament.months_ago', { n: Math.floor(daysAgo / 30) }));
+    }
     if (s.archived) infoParts.push('📦');
     const footerLeft = [
       s.printer_id ? '🖨 ' + esc(printerName(s.printer_id)) : '',
@@ -917,7 +992,7 @@
         <span class="filament-color-swatch" style="background:${color};width:14px;height:14px;border-radius:50%;flex-shrink:0"></span>
         <span class="inv-list-name">${favIcon} <strong>${esc(name)}</strong> <span class="text-muted">${esc(s.vendor_name || '')}</span></span>
         <span class="inv-list-material">${s.material || '--'}</span>
-        <div class="inv-list-bar"><div class="filament-bar" style="width:80px;height:6px"><div class="filament-bar-fill" style="width:${pct}%;background:${pct < 20 ? 'var(--accent-orange)' : color}"></div></div></div>
+        <div class="inv-list-bar"><div class="filament-bar" style="width:80px;height:6px"><div class="filament-bar-fill" style="width:${pct}%;background:${(pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams) ? 'var(--accent-orange)' : color}"></div></div></div>
         <span class="inv-list-weight">${Math.round(s.remaining_weight_g)}g / ${Math.round(s.initial_weight_g)}g</span>
         <span class="inv-list-loc text-muted">${s.location || ''}</span>
         <span class="inv-list-cost">${s.cost ? formatCurrency(s.cost) : ''}</span>
@@ -949,7 +1024,7 @@
         <td>${s.material || '--'}</td>
         <td>${esc(s.vendor_name || '--')}</td>
         <td>${Math.round(s.remaining_weight_g)}g / ${Math.round(s.initial_weight_g)}g</td>
-        <td style="color:${pct < 20 ? 'var(--accent-orange)' : 'inherit'}">${pct}%</td>
+        <td style="color:${(pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams) ? 'var(--accent-orange)' : 'inherit'}">${pct}%</td>
         <td>${esc(s.location || '--')}</td>
         <td>${s.cost ? formatCurrency(s.cost) : '--'}</td>
         <td>${s.printer_id ? esc(printerName(s.printer_id)) : '--'}</td>
@@ -1106,7 +1181,7 @@
 
     try {
       // Fetch all data in parallel
-      const [spoolsRes, vendorsRes, profilesRes, locationsRes, dryingActiveRes, dryingPresetsRes, dryingStatusRes, tagsRes, alertsRes] = await Promise.all([
+      const [spoolsRes, vendorsRes, profilesRes, locationsRes, dryingActiveRes, dryingPresetsRes, dryingStatusRes, tagsRes, alertsRes, settingsRes] = await Promise.all([
         fetch('/api/inventory/spools'),
         fetch('/api/inventory/vendors'),
         fetch('/api/inventory/filaments'),
@@ -1115,7 +1190,8 @@
         fetch('/api/inventory/drying/presets'),
         fetch('/api/inventory/drying/status'),
         fetch('/api/tags'),
-        fetch('/api/inventory/location-alerts')
+        fetch('/api/inventory/location-alerts'),
+        fetch('/api/inventory/settings')
       ]);
       _spools = await spoolsRes.json();
       _vendors = await vendorsRes.json();
@@ -1127,6 +1203,11 @@
       _tags = await tagsRes.json();
       let _locationAlerts = [];
       try { _locationAlerts = await alertsRes.json(); } catch {}
+      try {
+        const _invSettings = await settingsRes.json();
+        _lowStockPct = parseInt(_invSettings.low_stock_threshold) || 20;
+        _lowStockGrams = parseInt(_invSettings.near_empty_grams) || 0;
+      } catch {}
       // Clear old drying timers
       for (const tid of Object.values(_dryingTimers)) clearInterval(tid);
       _dryingTimers = {};
@@ -1359,6 +1440,7 @@
   window._invFilterColor = function(v) { _filterColorFamily = v; _currentPage = 0; loadFilament(); };
   window._invFilterTag = function(v) { _filterTag = v; _currentPage = 0; loadFilament(); };
   window._invFilterCategory = function(v) { _filterCategory = v; _currentPage = 0; loadFilament(); };
+  window._invResetFilters = function() { _filterMaterial = ''; _filterVendor = ''; _filterLocation = ''; _filterCategory = ''; _filterTag = ''; _filterColorFamily = ''; _filterFavorites = false; _searchQuery = ''; _currentPage = 0; loadFilament(); };
   window._invViewMode = function(mode) { _viewMode = mode; localStorage.setItem('inv-view-mode', mode); loadFilament(); };
 
   function _updateFilterHash() {
@@ -2328,6 +2410,13 @@
     const container = document.getElementById(`spool-edit-${id}`);
     if (!container) return;
     container.style.display = '';
+    const tare = spool.spool_weight ?? spool.vendor_empty_spool_weight_g ?? 250;
+    const totalG = spool.initial_weight_g || 1000;
+    const quickPcts = [0, 25, 50, 75, 100];
+    const quickBtns = quickPcts.map(p => {
+      const gross = Math.round(totalG * p / 100 + tare);
+      return `<button class="measure-quick-btn" onclick="document.getElementById('measure-weight-${id}').value=${gross};document.getElementById('measure-weight-${id}').dispatchEvent(new Event('input'))">${p}% <span class="measure-quick-g">${gross}g</span></button>`;
+    }).join('');
     container.innerHTML = `<div class="settings-form" style="margin:6px 0;padding:6px;border-top:1px solid var(--border-color)">
       <div class="flex gap-sm" style="align-items:flex-end">
         <div class="form-group" style="width:120px">
@@ -2337,6 +2426,7 @@
         <button class="form-btn form-btn-sm" data-ripple onclick="submitMeasure(${id})">${t('filament.measure')}</button>
         <button class="form-btn form-btn-sm" data-ripple style="background:transparent;color:var(--text-muted)" onclick="document.getElementById('spool-edit-${id}').style.display='none'">${t('settings.cancel')}</button>
       </div>
+      <div class="measure-quick-btns">${quickBtns}</div>
     </div>`;
   };
 
@@ -3056,6 +3146,26 @@
           <span class="text-muted" style="font-size:0.7rem">%</span>
         </div>
         <div class="form-group">
+          <label class="form-label">${t('filament.near_empty_grams')}</label>
+          <input class="form-input" id="set-near-empty-g" type="number" value="${settings.near_empty_grams || 0}" placeholder="0" min="0">
+          <span class="text-muted" style="font-size:0.7rem">${t('filament.near_empty_grams_hint')}</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">${t('filament.filament_check_mode')}</label>
+          <select class="form-input" id="set-filament-check-mode">
+            <option value="warn" ${(settings.filament_check_mode || 'warn') === 'warn' ? 'selected' : ''}>${t('filament.filament_check_warn')}</option>
+            <option value="block" ${settings.filament_check_mode === 'block' ? 'selected' : ''}>${t('filament.filament_check_block')}</option>
+          </select>
+          <span class="text-muted" style="font-size:0.7rem">${t('filament.filament_check_hint')}</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" style="display:flex;align-items:center;gap:8px">
+            <input type="checkbox" id="set-exclude-labor-cancelled" ${settings.exclude_labor_cancelled === '1' ? 'checked' : ''}>
+            ${t('filament.exclude_labor_cancelled')}
+          </label>
+          <span class="text-muted" style="font-size:0.7rem">${t('filament.exclude_labor_cancelled_hint')}</span>
+        </div>
+        <div class="form-group">
           <label class="form-label">${t('filament.page_size')}</label>
           <select class="form-input" id="set-page-size">
             ${[25, 50, 100].map(n => `<option value="${n}" ${(_pageSize === n || (!_pageSize && n === 50)) ? 'selected' : ''}>${n}</option>`).join('')}
@@ -3102,6 +3212,9 @@
       ['default_weight', document.getElementById('set-default-weight')?.value],
       ['currency', document.getElementById('set-currency')?.value],
       ['low_stock_threshold', document.getElementById('set-low-threshold')?.value],
+      ['near_empty_grams', document.getElementById('set-near-empty-g')?.value],
+      ['filament_check_mode', document.getElementById('set-filament-check-mode')?.value],
+      ['exclude_labor_cancelled', document.getElementById('set-exclude-labor-cancelled')?.checked ? '1' : '0'],
       ['page_size', document.getElementById('set-page-size')?.value],
       ['auto_trash_days', document.getElementById('set-auto-trash')?.value],
       ['electricity_rate_kwh', document.getElementById('set-electricity-rate')?.value],
@@ -5380,12 +5493,19 @@
       if (f.category) badges.push(`<span class="fil-badge" style="background:var(--bg-tertiary);font-size:0.65rem">${f.category}</span>`);
       if (f.pressure_advance_k != null) badges.push(`<span class="fil-badge" style="background:#2d1f4e;color:#c4b5fd;font-size:0.65rem">K=${f.pressure_advance_k}</span>`);
       if (f.td_value && f.td_value > 0) badges.push(`<span class="fil-badge" style="background:#3d2e00;color:#e3b341;font-size:0.65rem">TD=${f.td_value}</span>`);
+      // Slicer settings badges
+      if (f.flow_ratio && f.flow_ratio !== 1) badges.push(`<span class="fil-badge" style="background:#1a3a2a;color:#6ee7b7;font-size:0.65rem">${t('filament.flow_ratio')} ${f.flow_ratio}</span>`);
+      if (f.max_volumetric_speed) badges.push(`<span class="fil-badge" style="background:#1a2a3a;color:#93c5fd;font-size:0.65rem">${f.max_volumetric_speed} mm³/s</span>`);
+      if (f.retraction_distance) badges.push(`<span class="fil-badge" style="background:#3a2a1a;color:#fcd34d;font-size:0.65rem">${t('filament.retraction')} ${f.retraction_distance}mm</span>`);
+      // Rating
+      const ratingAvg = f.rating_count > 0 ? (f.rating_sum / f.rating_count).toFixed(1) : null;
+      const stars = ratingAvg ? '★'.repeat(Math.round(ratingAvg)) + '☆'.repeat(5 - Math.round(ratingAvg)) : '';
       const inCompare = _dbCompare.includes(f.id);
 
       h += `<div class="db-filament-card" onclick="window._dbShowDetail(${f.id})">
         <div class="db-card-color" style="background:${color}"></div>
         <div class="db-card-body">
-          <div class="db-card-brand">${esc(f.manufacturer || '')}</div>
+          <div class="db-card-brand">${esc(f.manufacturer || '')}${ratingAvg ? ` <span style="color:#fbbf24;font-size:0.7rem">${stars} (${ratingAvg})</span>` : ''}</div>
           <div class="db-card-name">${esc(f.name || f.material)}</div>
           <div class="db-card-material">${esc(f.material || '')}${f.material_type ? ' <span class="text-muted">' + esc(f.material_type) + '</span>' : ''}</div>
           <div class="db-card-temps">${f.extruder_temp ? f.extruder_temp + '°C' : '--'} / ${f.bed_temp ? f.bed_temp + '°C' : '--'}</div>

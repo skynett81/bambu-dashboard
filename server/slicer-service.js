@@ -3,6 +3,7 @@ import { join, extname, basename } from 'node:path';
 import { execFile } from 'node:child_process';
 import { DATA_DIR } from './config.js';
 import { addSlicerJob, updateSlicerJob, getSlicerJob } from './database.js';
+import { parse3mf, parseGcode } from './file-parser.js';
 
 const UPLOAD_DIR = join(DATA_DIR, 'uploads');
 if (!existsSync(UPLOAD_DIR)) mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -98,16 +99,27 @@ export function saveUploadedFile(filename, buffer, printerId, autoQueue) {
   const needsSlicing = ['.stl', '.obj', '.step'].includes(ext);
   const status = needsSlicing ? 'pending_slice' : 'ready';
 
+  // Auto-parse 3mf/gcode for weight and time estimates
+  let parsed = null;
+  if (!needsSlicing) {
+    try {
+      if (ext === '.3mf') parsed = parse3mf(buffer);
+      else if (ext === '.gcode' || ext === '.g') parsed = parseGcode(buffer);
+    } catch (e) { console.warn(`[slicer] Auto-parse failed for ${filename}:`, e.message); }
+  }
+
   const jobId = addSlicerJob({
     printer_id: printerId || null,
     original_filename: filename,
     stored_filename: storedName,
     status,
     file_size: buffer.length,
-    auto_queue: autoQueue || false
+    auto_queue: autoQueue || false,
+    estimated_filament_g: parsed?.total_weight_g || null,
+    estimated_time_s: parsed?.estimated_time_min ? Math.round(parsed.estimated_time_min * 60) : null
   });
 
-  return { jobId, storedName, storedPath, needsSlicing, status };
+  return { jobId, storedName, storedPath, needsSlicing, status, parsed };
 }
 
 // Slice an STL file using detected slicer CLI

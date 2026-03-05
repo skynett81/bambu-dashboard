@@ -216,10 +216,12 @@ export class QueueManager {
       }
     }
 
-    // Pre-print filament check — warn if spool has insufficient filament
+    // Pre-print filament check — warn or block if spool has insufficient filament
     if (item.estimated_filament_g && item.estimated_filament_g > 0) {
+      const filamentCheckMode = getInventorySetting('filament_check_mode') || 'warn';
       const printer = this._pm.printers.get(printerId);
       const ams = printer?.tracker?.previousState?.ams?.ams;
+      let insufficientFilament = false;
       if (Array.isArray(ams)) {
         for (const unit of ams) {
           if (!Array.isArray(unit?.tray)) continue;
@@ -231,9 +233,16 @@ export class QueueManager {
               addQueueLog(queue.id, item.id, printerId, 'filament_warning', msg);
               this._notifyEvent('queue_filament_warning', { printerId, filename: item.filename, message: msg });
               console.log(`[queue] ${msg}`);
+              insufficientFilament = true;
             }
           }
         }
+      }
+      if (insufficientFilament && filamentCheckMode === 'block') {
+        addQueueLog(queue.id, item.id, printerId, 'filament_blocked', 'Dispatch blocked: insufficient filament');
+        this._broadcast('queue_update', { action: 'filament_blocked', queueId: queue.id, itemId: item.id, printerId });
+        console.log(`[queue] Dispatch blocked for "${item.filename}" — insufficient filament`);
+        return;
       }
     }
 

@@ -1,4 +1,4 @@
-import { addHistory, getHistory, addError, addAmsSnapshot, getActiveNozzleSession, createNozzleSession, retireNozzleSession, updateNozzleSessionCounters, upsertComponentWear, upsertAmsTrayLifetime, updateAmsTrayFilamentUsed, getSpoolBySlot, useSpoolWeight, savePrintCost, estimatePrintCostAdvanced, lookupNfcTag, linkNfcTag, assignSpoolToSlot } from './database.js';
+import { addHistory, getHistory, addError, addAmsSnapshot, getActiveNozzleSession, createNozzleSession, retireNozzleSession, updateNozzleSessionCounters, upsertComponentWear, upsertAmsTrayLifetime, updateAmsTrayFilamentUsed, getSpoolBySlot, useSpoolWeight, savePrintCost, estimatePrintCostAdvanced, lookupNfcTag, linkNfcTag, assignSpoolToSlot, syncAmsToSpool } from './database.js';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -81,6 +81,24 @@ export class PrintTracker {
       }
       if (printData.bed_temper > this.currentPrint.maxTemp_bed) {
         this.currentPrint.maxTemp_bed = printData.bed_temper;
+      }
+    }
+
+    // Live AMS weight sync (throttled: max once per 60s per tray)
+    if (printData.ams?.ams) {
+      if (!this._amsSyncTs) this._amsSyncTs = {};
+      const now = Date.now();
+      for (const unit of printData.ams.ams) {
+        for (const tray of (unit.tray || [])) {
+          if (tray.remain == null || tray.remain < 0) continue;
+          const key = `${unit.id}_${tray.id}`;
+          if (this._amsSyncTs[key] && now - this._amsSyncTs[key] < 60000) continue;
+          const result = syncAmsToSpool(this.printerId, parseInt(unit.id) || 0, parseInt(tray.id) || 0, tray.remain);
+          if (result) {
+            this._amsSyncTs[key] = now;
+            if (this.onBroadcast) this.onBroadcast('spool_weight_synced', { spoolId: result.spoolId, weight: result.newWeight, source: 'ams_live' });
+          }
+        }
       }
     }
 
@@ -263,7 +281,7 @@ export class PrintTracker {
       }
 
       // Auto-save print cost
-      this._savePrintCost(printHistoryId, filamentUsedG, duration, data);
+      this._savePrintCost(printHistoryId, filamentUsedG, duration, data, status);
 
       // Update component wear
       this._updateComponentWear(duration, data);
@@ -599,7 +617,7 @@ export class PrintTracker {
     }
   }
 
-  _savePrintCost(printHistoryId, filamentUsedG, durationSeconds, data) {
+  _savePrintCost(printHistoryId, filamentUsedG, durationSeconds, data, printStatus) {
     try {
       // Find the spool used for cost-per-gram calculation
       let spoolId = null;
@@ -613,7 +631,7 @@ export class PrintTracker {
           }
         }
       }
-      const costs = estimatePrintCostAdvanced(filamentUsedG || 0, durationSeconds || 0, spoolId);
+      const costs = estimatePrintCostAdvanced(filamentUsedG || 0, durationSeconds || 0, spoolId, this.printerId, printStatus);
       if (costs.total_cost > 0) {
         savePrintCost(printHistoryId, costs);
       }

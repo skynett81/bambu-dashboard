@@ -294,7 +294,8 @@ notifier.setPrinterListProvider(() =>
 notifier.setDryingStatusProvider(() => getSpoolsDryingStatus());
 notifier.setLowStockProvider(() => {
   const threshold = parseInt(getInventorySetting('low_stock_threshold') || '20');
-  return getLowStockSpools(threshold);
+  const thresholdG = parseInt(getInventorySetting('near_empty_grams') || '0');
+  return getLowStockSpools(threshold, thresholdG);
 });
 notifier.setWebhookDispatcher(dispatchWebhooksForEvent);
 manager.setNotificationHandler(notifier);
@@ -612,6 +613,9 @@ if (IS_DEMO) {
     };
     tracker.onNfcAutoLinked = (data) => {
       broadcastAll('nfc_auto_linked', { ...data, printerName: p.name });
+    };
+    tracker.onBroadcast = (type, data) => {
+      broadcastAll(type, { ...data, printerId: p.id, printerName: p.name });
     };
 
     // XCam event handler for demo printers

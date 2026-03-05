@@ -17,7 +17,8 @@
     overview:  { label: 'stats.tab_overview',  modules: ['hero-stats','overview','weekly-trends','monthly-trends'] },
     filament:  { label: 'stats.tab_filament',  modules: ['filament-by-type','success-by-filament','success-by-speed','filament-by-brand','top-files'] },
     activity:  { label: 'stats.tab_activity',  modules: ['day-heatmap','hour-heatmap','avg-time-by-day'] },
-    hardware:  { label: 'stats.tab_hardware',  modules: ['temp-records','nozzle-usage','ams-stats','xcam-stats'] }
+    hardware:  { label: 'stats.tab_hardware',  modules: ['temp-records','nozzle-usage','ams-stats','xcam-stats'] },
+    cost:      { label: 'stats.tab_cost',      modules: ['cost-hero','cost-breakdown','cost-trends','cost-by-printer','cost-by-material'] }
   };
 
   const MODULE_SIZE = {
@@ -29,7 +30,9 @@
     'top-files': 'full',
     'day-heatmap': 'half', 'hour-heatmap': 'full', 'avg-time-by-day': 'half',
     'temp-records': 'half', 'nozzle-usage': 'half',
-    'ams-stats': 'half', 'xcam-stats': 'half'
+    'ams-stats': 'half', 'xcam-stats': 'half',
+    'cost-hero': 'full', 'cost-breakdown': 'half', 'cost-trends': 'half',
+    'cost-by-printer': 'half', 'cost-by-material': 'half'
   };
 
   const STORAGE_PREFIX = 'stats-module-order-';
@@ -40,6 +43,9 @@
   let _locked = localStorage.getItem(LOCK_KEY) !== '0';
   let _data = null;
   let _xcam = null;
+  let _costData = null;
+  let _dateFrom = null;
+  let _dateTo = null;
   let _draggedMod = null;
 
   // ═══ Module builders ═══
@@ -280,6 +286,95 @@
           <div class="xcam-card"><div class="xcam-count">${xcam.foreign_object||0}</div><div class="xcam-label">${t('stats.xcam_foreign')}</div></div>
           <div class="xcam-card"><div class="xcam-count">${xcam.nozzle_clump||0}</div><div class="xcam-label">${t('stats.xcam_clump')}</div></div>
         </div>`;
+    },
+
+    // ═══ Cost tab modules ═══
+    'cost-hero': (s, x, cost) => {
+      if (!cost || !cost.summary) return '';
+      const c = cost.summary;
+      const cur = c.currency || 'NOK';
+      return `<div class="stats-hero-grid">
+        <div class="stats-hero-card">
+          <div class="stats-hero-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M8 9h8M8 15h6"/></svg></div>
+          <div class="stats-hero-value">${c.grand_total.toFixed(2)} ${cur}</div>
+          <div class="stats-hero-label">${t('stats.cost_total')}</div>
+        </div>
+        <div class="stats-hero-card">
+          <div class="stats-hero-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
+          <div class="stats-hero-value">${c.avg_per_print.toFixed(2)} ${cur}</div>
+          <div class="stats-hero-label">${t('stats.cost_avg')}</div>
+        </div>
+        <div class="stats-hero-card">
+          <div class="stats-hero-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+          <div class="stats-hero-value">${c.cost_per_hour.toFixed(2)} ${cur}</div>
+          <div class="stats-hero-label">${t('stats.cost_per_hour')}</div>
+        </div>
+        <div class="stats-hero-card">
+          <div class="stats-hero-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2 12 4 8 2 3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47"/><path d="M12 22V10"/></svg></div>
+          <div class="stats-hero-value">${c.cost_per_kg.toFixed(2)} ${cur}</div>
+          <div class="stats-hero-label">${t('stats.cost_per_kg')}</div>
+        </div>
+      </div>`;
+    },
+
+    'cost-breakdown': (s, x, cost) => {
+      if (!cost || !cost.breakdown) return '';
+      const b = cost.breakdown;
+      const total = b.filament + b.electricity + b.depreciation + b.labor + b.markup;
+      if (total <= 0) return '';
+      const cur = cost.summary?.currency || 'NOK';
+      const items = [
+        { label: t('stats.filament_cost_label'), val: b.filament, clr: 'var(--accent-green)' },
+        { label: t('stats.electricity_cost_label'), val: b.electricity, clr: 'var(--accent-orange)' },
+        { label: t('stats.depreciation_cost_label'), val: b.depreciation, clr: 'var(--accent-blue)' },
+        { label: t('stats.labor_cost_label'), val: b.labor, clr: 'var(--accent-purple, #9b4dff)' },
+        { label: t('stats.markup_cost_label'), val: b.markup, clr: 'var(--accent-red)' }
+      ].filter(i => i.val > 0);
+      let html = `<div class="stats-card"><div class="stats-card-title">${t('stats.cost_breakdown')}</div>`;
+      for (const i of items) {
+        const pct = Math.round((i.val / total) * 100);
+        html += barRow(i.label, pct, i.clr, `${i.val.toFixed(2)} ${cur} (${pct}%)`);
+      }
+      html += '</div>';
+      return html;
+    },
+
+    'cost-trends': (s, x, cost) => {
+      if (!cost || !cost.by_month || !cost.by_month.length) return '';
+      const cur = cost.summary?.currency || 'NOK';
+      const maxCost = Math.max(...cost.by_month.map(m => m.total_cost), 1);
+      let html = `<div class="stats-card"><div class="stats-card-title">${t('stats.cost_trends')}</div><div class="chart-bars">`;
+      for (const m of cost.by_month) {
+        const pct = Math.round((m.total_cost / maxCost) * 100);
+        const lbl = m.month.substring(2); // "25-01" etc
+        html += `<div class="chart-col"><div class="chart-stack" style="height:${pct}%" title="${m.total_cost.toFixed(2)} ${cur} (${m.prints} prints)"><div class="chart-seg" style="height:100%;background:var(--accent-color)"></div></div><span class="chart-x-label">${lbl}</span></div>`;
+      }
+      html += '</div></div>';
+      return html;
+    },
+
+    'cost-by-printer': (s, x, cost) => {
+      if (!cost || !cost.by_printer || !cost.by_printer.length) return '';
+      const cur = cost.summary?.currency || 'NOK';
+      const printers = window._printerNames || {};
+      let html = `<div class="stats-card"><div class="stats-card-title">${t('stats.cost_by_printer')}</div><table class="stats-table"><thead><tr><th>${t('stats.printer')}</th><th>${t('stats.prints')}</th><th>${t('stats.cost_total')}</th><th>${t('stats.cost_avg')}</th></tr></thead><tbody>`;
+      for (const p of cost.by_printer) {
+        const name = printers[p.printer_id] || p.printer_id || '--';
+        html += `<tr><td>${name}</td><td>${p.prints}</td><td>${p.total_cost.toFixed(2)} ${cur}</td><td>${p.avg_cost.toFixed(2)} ${cur}</td></tr>`;
+      }
+      html += '</tbody></table></div>';
+      return html;
+    },
+
+    'cost-by-material': (s, x, cost) => {
+      if (!cost || !cost.by_material || !cost.by_material.length) return '';
+      const cur = cost.summary?.currency || 'NOK';
+      let html = `<div class="stats-card"><div class="stats-card-title">${t('stats.cost_by_material')}</div><table class="stats-table"><thead><tr><th>${t('stats.material')}</th><th>${t('stats.prints')}</th><th>${t('stats.cost_total')}</th><th>${t('filament.weight')}</th><th>${t('stats.cost_per_kg')}</th></tr></thead><tbody>`;
+      for (const m of cost.by_material) {
+        html += `<tr><td>${m.material}</td><td>${m.prints}</td><td>${m.total_cost.toFixed(2)} ${cur}</td><td>${fmtW(m.total_grams)}</td><td>${m.cost_per_kg.toFixed(2)} ${cur}</td></tr>`;
+      }
+      html += '</tbody></table></div>';
+      return html;
     }
   };
 
@@ -368,13 +463,19 @@
     }
 
     try {
-      const params = _printer ? `?printer_id=${_printer}` : '';
-      const [statsRes, xcamRes] = await Promise.all([
+      const qp = new URLSearchParams();
+      if (_printer) qp.set('printer_id', _printer);
+      if (_dateFrom) qp.set('from', _dateFrom);
+      if (_dateTo) qp.set('to', _dateTo);
+      const params = qp.toString() ? '?' + qp.toString() : '';
+      const [statsRes, xcamRes, costRes] = await Promise.all([
         fetch(`/api/statistics${params}`),
-        fetch(`/api/xcam/stats${params}`).catch(() => null)
+        fetch(`/api/xcam/stats${params}`).catch(() => null),
+        fetch(`/api/statistics/costs${params}`).catch(() => null)
       ]);
       _data = await statsRes.json();
       try { _xcam = xcamRes ? await xcamRes.json() : null; } catch (_) { _xcam = null; }
+      try { _costData = costRes ? await costRes.json() : null; } catch (_) { _costData = null; }
 
       let html = '<div class="stats-layout">';
 
@@ -386,6 +487,12 @@
         ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>'
         : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 019.9-1"/></svg>';
       html += `<div class="stats-toolbar">
+        <div class="stats-date-range">
+          <input type="date" class="form-control form-control-sm" value="${_dateFrom || ''}" onchange="statsSetDateFrom(this.value)" title="${t('stats.date_from')}">
+          <span class="stats-date-sep">—</span>
+          <input type="date" class="form-control form-control-sm" value="${_dateTo || ''}" onchange="statsSetDateTo(this.value)" title="${t('stats.date_to')}">
+          <button class="form-btn form-btn-sm" data-ripple onclick="statsResetDates()">${t('stats.all_time')}</button>
+        </div>
         <button class="speed-btn ${_locked ? '' : 'active'}" onclick="toggleStatsLock()" title="${_locked ? t('stats.layout_locked') : t('stats.layout_unlocked')}">
           ${lockIcon} <span>${_locked ? t('stats.layout_locked') : t('stats.layout_unlocked')}</span>
         </button>
@@ -408,7 +515,7 @@
         for (const modId of order) {
           const builder = BUILDERS[modId];
           if (!builder) continue;
-          const content = builder(_data, _xcam);
+          const content = builder(_data, _xcam, _costData);
           if (!content) continue;
           const draggable = _locked ? '' : 'draggable="true"';
           const unlocked = _locked ? '' : ' stats-module-unlocked';
@@ -447,4 +554,17 @@
   window.exportCsv = function() {
     window.open(`/api/history/export${_printer ? '?printer_id='+_printer : ''}`);
   };
+  window.statsSetDateFrom = function(v) { _dateFrom = v || null; loadStatistics(); };
+  window.statsSetDateTo = function(v) { _dateTo = v || null; loadStatistics(); };
+  window.statsResetDates = function() { _dateFrom = null; _dateTo = null; loadStatistics(); };
+
+  // Cache printer names for cost-by-printer table
+  (async () => {
+    try {
+      const r = await fetch('/api/printers');
+      const printers = await r.json();
+      window._printerNames = {};
+      for (const p of printers) { window._printerNames[p.id] = p.name; }
+    } catch {}
+  })();
 })();

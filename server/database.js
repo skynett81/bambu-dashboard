@@ -233,6 +233,8 @@ function _runMigrations() {
     { version: 68, up: _mig068_material_modifiers },
     { version: 69, up: _mig069_compatibility_matrix },
     { version: 70, up: _mig070_competitive_features },
+    { version: 71, up: _mig071_printer_cost_settings },
+    { version: 72, up: _mig072_location_fk },
   ];
 
   for (const m of migrations) {
@@ -3080,6 +3082,19 @@ function _mig070_competitive_features() {
   if (!existing3) db.prepare("INSERT INTO inventory_settings (key, value) VALUES ('recent_profiles', '[]')").run();
 }
 
+function _mig071_printer_cost_settings() {
+  const cols = ['electricity_rate_kwh REAL', 'printer_wattage REAL', 'machine_cost REAL', 'machine_lifetime_hours REAL'];
+  for (const col of cols) {
+    try { db.exec(`ALTER TABLE printers ADD COLUMN ${col}`); } catch { /* exists */ }
+  }
+}
+
+function _mig072_location_fk() {
+  try { db.exec('ALTER TABLE spools ADD COLUMN location_id INTEGER REFERENCES locations(id) ON DELETE SET NULL'); } catch { /* exists */ }
+  db.exec('CREATE INDEX IF NOT EXISTS idx_spools_location_id ON spools(location_id)');
+  db.exec(`UPDATE spools SET location_id = (SELECT id FROM locations WHERE name = spools.location) WHERE location IS NOT NULL AND location_id IS NULL`);
+}
+
 function _generateShortId() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No I/O/0/1 to avoid confusion
   for (let attempt = 0; attempt < 100; attempt++) {
@@ -3114,7 +3129,11 @@ export function getPrinters() {
     serial: r.serial,
     accessCode: r.access_code,
     model: r.model,
-    added_at: r.added_at
+    added_at: r.added_at,
+    electricity_rate_kwh: r.electricity_rate_kwh,
+    printer_wattage: r.printer_wattage,
+    machine_cost: r.machine_cost,
+    machine_lifetime_hours: r.machine_lifetime_hours
   }));
 }
 
@@ -3125,8 +3144,10 @@ export function addPrinter(p) {
 }
 
 export function updatePrinter(id, p) {
-  return db.prepare('UPDATE printers SET name=?, ip=?, serial=?, access_code=?, model=? WHERE id=?').run(
-    p.name, p.ip || null, p.serial || null, p.accessCode || null, p.model || null, id
+  return db.prepare(`UPDATE printers SET name=?, ip=?, serial=?, access_code=?, model=?,
+    electricity_rate_kwh=?, printer_wattage=?, machine_cost=?, machine_lifetime_hours=? WHERE id=?`).run(
+    p.name, p.ip || null, p.serial || null, p.accessCode || null, p.model || null,
+    p.electricity_rate_kwh ?? null, p.printer_wattage ?? null, p.machine_cost ?? null, p.machine_lifetime_hours ?? null, id
   );
 }
 
@@ -3165,28 +3186,36 @@ export function addHistory(record) {
 
 // ---- Statistics ----
 
-export function getStatistics(printerId = null) {
-  const where = printerId ? ' WHERE printer_id = ?' : '';
-  const params = printerId ? [printerId] : [];
+export function getStatistics(printerId = null, startDate = null, endDate = null) {
+  // Build dynamic WHERE clause for printer + date range
+  const clauses = [];
+  const params = [];
+  if (printerId) { clauses.push('printer_id = ?'); params.push(printerId); }
+  if (startDate) { clauses.push('started_at >= ?'); params.push(startDate); }
+  if (endDate) { clauses.push('started_at <= ?'); params.push(endDate); }
+  const where = clauses.length ? ' WHERE ' + clauses.join(' AND ') : '';
+  const and = where ? ' AND ' : ' WHERE ';
 
   const total = db.prepare(`SELECT COUNT(*) as count FROM print_history${where}`).get(...params);
-  const completed = db.prepare(`SELECT COUNT(*) as count FROM print_history${where}${where ? ' AND' : ' WHERE'} status = 'completed'`).get(...params);
-  const failed = db.prepare(`SELECT COUNT(*) as count FROM print_history${where}${where ? ' AND' : ' WHERE'} status = 'failed'`).get(...params);
-  const cancelled = db.prepare(`SELECT COUNT(*) as count FROM print_history${where}${where ? ' AND' : ' WHERE'} status = 'cancelled'`).get(...params);
+  const completed = db.prepare(`SELECT COUNT(*) as count FROM print_history${where}${and}status = 'completed'`).get(...params);
+  const failed = db.prepare(`SELECT COUNT(*) as count FROM print_history${where}${and}status = 'failed'`).get(...params);
+  const cancelled = db.prepare(`SELECT COUNT(*) as count FROM print_history${where}${and}status = 'cancelled'`).get(...params);
   const totalTime = db.prepare(`SELECT COALESCE(SUM(duration_seconds), 0) as seconds FROM print_history${where}`).get(...params);
   const totalFilament = db.prepare(`SELECT COALESCE(SUM(filament_used_g), 0) as grams FROM print_history${where}`).get(...params);
-  const avgDuration = db.prepare(`SELECT COALESCE(AVG(duration_seconds), 0) as avg FROM print_history${where}${where ? ' AND' : ' WHERE'} status = 'completed'`).get(...params);
-  const longestPrint = db.prepare(`SELECT filename, duration_seconds FROM print_history${where}${where ? ' AND' : ' WHERE'} status = 'completed' ORDER BY duration_seconds DESC LIMIT 1`).get(...params);
-  const mostUsedFilament = db.prepare(`SELECT filament_type, COUNT(*) as count FROM print_history${where}${where ? ' AND' : ' WHERE'} filament_type IS NOT NULL GROUP BY filament_type ORDER BY count DESC LIMIT 1`).get(...params);
+  const avgDuration = db.prepare(`SELECT COALESCE(AVG(duration_seconds), 0) as avg FROM print_history${where}${and}status = 'completed'`).get(...params);
+  const longestPrint = db.prepare(`SELECT filename, duration_seconds FROM print_history${where}${and}status = 'completed' ORDER BY duration_seconds DESC LIMIT 1`).get(...params);
+  const mostUsedFilament = db.prepare(`SELECT filament_type, COUNT(*) as count FROM print_history${where}${and}filament_type IS NOT NULL GROUP BY filament_type ORDER BY count DESC LIMIT 1`).get(...params);
 
-  const filamentByType = db.prepare(`SELECT filament_type as type, COALESCE(SUM(filament_used_g), 0) as grams, COUNT(*) as prints FROM print_history${where}${where ? ' AND' : ' WHERE'} filament_type IS NOT NULL GROUP BY filament_type ORDER BY grams DESC`).all(...params);
+  const filamentByType = db.prepare(`SELECT filament_type as type, COALESCE(SUM(filament_used_g), 0) as grams, COUNT(*) as prints FROM print_history${where}${and}filament_type IS NOT NULL GROUP BY filament_type ORDER BY grams DESC`).all(...params);
 
+  // Weekly trends: respect date range if given, else last 56 days
+  const weekWhere = startDate ? where : (where ? where + ' AND' : ' WHERE') + " started_at >= datetime('now', '-56 days')";
   const printsPerWeek = db.prepare(`
     SELECT strftime('%Y-W%W', started_at) as week,
            COUNT(*) as total,
            SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
            SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed
-    FROM print_history${where}${where ? ' AND' : ' WHERE'} started_at >= datetime('now', '-56 days')
+    FROM print_history${weekWhere}
     GROUP BY week ORDER BY week
   `).all(...params);
 
@@ -3195,26 +3224,26 @@ export function getStatistics(printerId = null) {
   const totalCost = { cost: (legacyCost.cost || 0) + (spoolCost.cost || 0) };
 
   // Success rate by filament type
-  const and = where ? ' AND' : ' WHERE';
-  const successByFilament = db.prepare(`SELECT filament_type as type, COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM print_history${where}${and} filament_type IS NOT NULL GROUP BY filament_type ORDER BY total DESC`).all(...params);
+  const successByFilament = db.prepare(`SELECT filament_type as type, COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM print_history${where}${and}filament_type IS NOT NULL GROUP BY filament_type ORDER BY total DESC`).all(...params);
 
   // Success rate by speed level
-  const successBySpeed = db.prepare(`SELECT speed_level as level, COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM print_history${where}${and} speed_level IS NOT NULL GROUP BY speed_level ORDER BY level`).all(...params);
+  const successBySpeed = db.prepare(`SELECT speed_level as level, COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM print_history${where}${and}speed_level IS NOT NULL GROUP BY speed_level ORDER BY level`).all(...params);
 
   // Filament by brand
-  const filamentByBrand = db.prepare(`SELECT filament_brand as brand, filament_type as type, COALESCE(SUM(filament_used_g), 0) as grams, COUNT(*) as prints FROM print_history${where}${and} filament_brand IS NOT NULL GROUP BY filament_brand, filament_type ORDER BY grams DESC`).all(...params);
+  const filamentByBrand = db.prepare(`SELECT filament_brand as brand, filament_type as type, COALESCE(SUM(filament_used_g), 0) as grams, COUNT(*) as prints FROM print_history${where}${and}filament_brand IS NOT NULL GROUP BY filament_brand, filament_type ORDER BY grams DESC`).all(...params);
 
   // Temperature records
-  const tempStats = db.prepare(`SELECT COALESCE(MAX(max_nozzle_temp), 0) as peak_nozzle, COALESCE(AVG(max_nozzle_temp), 0) as avg_nozzle, COALESCE(MAX(max_bed_temp), 0) as peak_bed, COALESCE(AVG(max_bed_temp), 0) as avg_bed FROM print_history${where}${and} status = 'completed' AND max_nozzle_temp > 0`).get(...params);
+  const tempStats = db.prepare(`SELECT COALESCE(MAX(max_nozzle_temp), 0) as peak_nozzle, COALESCE(AVG(max_nozzle_temp), 0) as avg_nozzle, COALESCE(MAX(max_bed_temp), 0) as peak_bed, COALESCE(AVG(max_bed_temp), 0) as avg_bed FROM print_history${where}${and}status = 'completed' AND max_nozzle_temp > 0`).get(...params);
 
   // Top 5 files
-  const topFiles = db.prepare(`SELECT filename, COUNT(*) as count, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM print_history${where}${and} filename IS NOT NULL GROUP BY filename ORDER BY count DESC LIMIT 5`).all(...params);
+  const topFiles = db.prepare(`SELECT filename, COUNT(*) as count, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM print_history${where}${and}filename IS NOT NULL GROUP BY filename ORDER BY count DESC LIMIT 5`).all(...params);
 
-  // Monthly trends (last 6 months)
-  const monthlyTrends = db.prepare(`SELECT strftime('%Y-%m', started_at) as month, COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed, COALESCE(SUM(duration_seconds), 0) as total_seconds, COALESCE(SUM(filament_used_g), 0) as total_filament_g FROM print_history${where}${and} started_at >= datetime('now', '-180 days') GROUP BY month ORDER BY month`).all(...params);
+  // Monthly trends: respect date range if given, else last 180 days
+  const monthWhere = startDate ? where : (where ? where + ' AND' : ' WHERE') + " started_at >= datetime('now', '-180 days')";
+  const monthlyTrends = db.prepare(`SELECT strftime('%Y-%m', started_at) as month, COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed, COALESCE(SUM(duration_seconds), 0) as total_seconds, COALESCE(SUM(filament_used_g), 0) as total_filament_g FROM print_history${monthWhere} GROUP BY month ORDER BY month`).all(...params);
 
   // Total layers
-  const totalLayers = db.prepare(`SELECT COALESCE(SUM(layer_count), 0) as total FROM print_history${where}${and} status = 'completed'`).get(...params);
+  const totalLayers = db.prepare(`SELECT COALESCE(SUM(layer_count), 0) as total FROM print_history${where}${and}status = 'completed'`).get(...params);
 
   // Prints by day of week (0=Sunday)
   const printsByDayOfWeek = db.prepare(`SELECT CAST(strftime('%w', started_at) AS INTEGER) as dow, COUNT(*) as count FROM print_history${where} GROUP BY dow ORDER BY dow`).all(...params);
@@ -3222,14 +3251,16 @@ export function getStatistics(printerId = null) {
   // Prints by hour of day
   const printsByHour = db.prepare(`SELECT CAST(strftime('%H', started_at) AS INTEGER) as hour, COUNT(*) as count FROM print_history${where} GROUP BY hour ORDER BY hour`).all(...params);
 
-  // AMS stats from snapshots
-  const amsFilamentByBrand = db.prepare(`SELECT tray_brand as brand, tray_type as type, COUNT(*) as snapshots FROM ams_snapshots${where}${where ? ' AND' : ' WHERE'} tray_brand IS NOT NULL GROUP BY tray_brand, tray_type ORDER BY snapshots DESC LIMIT 10`).all(...params);
-  const amsAvgHumidity = db.prepare(`SELECT ams_unit, ROUND(AVG(CAST(humidity AS REAL)), 1) as avg_humidity, COUNT(*) as readings FROM ams_snapshots${where}${where ? ' AND' : ' WHERE'} humidity IS NOT NULL GROUP BY ams_unit ORDER BY ams_unit`).all(...params);
+  // AMS stats from snapshots — use printer filter only (no date range for ams_snapshots)
+  const amsWhere = printerId ? ' WHERE printer_id = ?' : '';
+  const amsParams = printerId ? [printerId] : [];
+  const amsFilamentByBrand = db.prepare(`SELECT tray_brand as brand, tray_type as type, COUNT(*) as snapshots FROM ams_snapshots${amsWhere}${amsWhere ? ' AND' : ' WHERE'} tray_brand IS NOT NULL GROUP BY tray_brand, tray_type ORDER BY snapshots DESC LIMIT 10`).all(...amsParams);
+  const amsAvgHumidity = db.prepare(`SELECT ams_unit, ROUND(AVG(CAST(humidity AS REAL)), 1) as avg_humidity, COUNT(*) as readings FROM ams_snapshots${amsWhere}${amsWhere ? ' AND' : ' WHERE'} humidity IS NOT NULL GROUP BY ams_unit ORDER BY ams_unit`).all(...amsParams);
 
   // Extra stats: waste, color changes, avg filament per print, nozzle breakdown, streaks
   const wasteStats = db.prepare(`SELECT COALESCE(SUM(waste_g), 0) as total_waste, COALESCE(SUM(color_changes), 0) as total_color_changes FROM print_history${where}`).get(...params);
-  const avgFilamentPerPrint = db.prepare(`SELECT COALESCE(AVG(filament_used_g), 0) as avg FROM print_history${where}${and} status = 'completed' AND filament_used_g > 0`).get(...params);
-  const nozzleBreakdown = db.prepare(`SELECT nozzle_type as type, nozzle_diameter as diameter, COUNT(*) as prints, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM print_history${where}${and} nozzle_type IS NOT NULL GROUP BY nozzle_type, nozzle_diameter ORDER BY prints DESC`).all(...params);
+  const avgFilamentPerPrint = db.prepare(`SELECT COALESCE(AVG(filament_used_g), 0) as avg FROM print_history${where}${and}status = 'completed' AND filament_used_g > 0`).get(...params);
+  const nozzleBreakdown = db.prepare(`SELECT nozzle_type as type, nozzle_diameter as diameter, COUNT(*) as prints, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM print_history${where}${and}nozzle_type IS NOT NULL GROUP BY nozzle_type, nozzle_diameter ORDER BY prints DESC`).all(...params);
 
   // Streak: consecutive completed prints (current)
   const recentPrints = db.prepare(`SELECT status FROM print_history${where} ORDER BY started_at DESC LIMIT 50`).all(...params);
@@ -3247,7 +3278,7 @@ export function getStatistics(printerId = null) {
   }
 
   // Avg print time per day-of-week
-  const avgDurationByDay = db.prepare(`SELECT CAST(strftime('%w', started_at) AS INTEGER) as dow, ROUND(AVG(duration_seconds) / 60) as avg_minutes FROM print_history${where}${and} status = 'completed' GROUP BY dow ORDER BY dow`).all(...params);
+  const avgDurationByDay = db.prepare(`SELECT CAST(strftime('%w', started_at) AS INTEGER) as dow, ROUND(AVG(duration_seconds) / 60) as avg_minutes FROM print_history${where}${and}status = 'completed' GROUP BY dow ORDER BY dow`).all(...params);
 
   // First and last print dates
   const firstPrint = db.prepare(`SELECT started_at FROM print_history${where} ORDER BY started_at ASC LIMIT 1`).get(...params);
@@ -4136,8 +4167,8 @@ export function getRecentProfiles(limit = 5) {
 
 export function getLocationAlerts() {
   const locations = db.prepare(`SELECT l.*,
-    (SELECT COUNT(*) FROM spools s WHERE s.location = l.name AND s.archived = 0) as spool_count,
-    (SELECT COALESCE(SUM(s.remaining_weight_g), 0) / 1000.0 FROM spools s WHERE s.location = l.name AND s.archived = 0) as total_weight_kg
+    (SELECT COUNT(*) FROM spools s WHERE (s.location_id = l.id OR s.location = l.name) AND s.archived = 0) as spool_count,
+    (SELECT COALESCE(SUM(s.remaining_weight_g), 0) / 1000.0 FROM spools s WHERE (s.location_id = l.id OR s.location = l.name) AND s.archived = 0) as total_weight_kg
     FROM locations l
     WHERE l.min_spools IS NOT NULL OR l.max_spools IS NOT NULL OR l.min_weight_kg IS NOT NULL OR l.max_weight_kg IS NOT NULL`).all();
   const alerts = [];
@@ -4180,6 +4211,18 @@ export function assignSpoolToSlot(spoolId, printerId, amsUnit, amsTray) {
 export function getSpoolBySlot(printerId, amsUnit, amsTray) {
   return db.prepare(SPOOL_SELECT + ' WHERE s.printer_id = ? AND s.ams_unit = ? AND s.ams_tray = ? AND s.archived = 0')
     .get(printerId, amsUnit, amsTray) || null;
+}
+
+export function syncAmsToSpool(printerId, amsUnit, trayId, remainPct) {
+  const spool = db.prepare('SELECT id, initial_weight_g, remaining_weight_g FROM spools WHERE printer_id = ? AND ams_unit = ? AND ams_tray = ? AND archived = 0')
+    .get(printerId, amsUnit, trayId);
+  if (!spool || !spool.initial_weight_g) return null;
+  const newWeight = Math.round((remainPct / 100) * spool.initial_weight_g * 10) / 10;
+  const diff = Math.abs(newWeight - (spool.remaining_weight_g || 0));
+  if (diff < 5) return null; // Ignore noise < 5g
+  db.prepare('UPDATE spools SET remaining_weight_g = ?, used_weight_g = MAX(0, initial_weight_g - ?), last_used_at = datetime(\'now\') WHERE id = ?')
+    .run(newWeight, newWeight, spool.id);
+  return { spoolId: spool.id, newWeight, diff };
 }
 
 export function toggleSpoolFavorite(id) {
@@ -4300,12 +4343,17 @@ export function getFifoSpool(material, colorHex = null, profileId = null) {
 // ---- Slicer Jobs ----
 
 export function addSlicerJob(data) {
-  const result = db.prepare(`INSERT INTO slicer_jobs (printer_id, original_filename, stored_filename, status, slicer_used, file_size, auto_queue)
-    VALUES (?, ?, ?, ?, ?, ?, ?)`).run(
+  const result = db.prepare(`INSERT INTO slicer_jobs (printer_id, original_filename, stored_filename, status, slicer_used, file_size, auto_queue, estimated_filament_g, estimated_time_s)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
     data.printer_id || null, data.original_filename, data.stored_filename || null,
-    data.status || 'uploading', data.slicer_used || null, data.file_size || 0, data.auto_queue ? 1 : 0
+    data.status || 'uploading', data.slicer_used || null, data.file_size || 0, data.auto_queue ? 1 : 0,
+    data.estimated_filament_g || null, data.estimated_time_s || null
   );
   return Number(result.lastInsertRowid);
+}
+
+export function getSlicerJobByFilename(filename) {
+  return db.prepare('SELECT * FROM slicer_jobs WHERE original_filename = ? ORDER BY created_at DESC LIMIT 1').get(filename) || null;
 }
 
 export function updateSlicerJob(id, data) {
@@ -4377,10 +4425,17 @@ export function updateLocation(id, data) {
   if (data.name !== oldName) {
     db.prepare('UPDATE spools SET location = ? WHERE location = ?').run(data.name, oldName);
   }
+  // Keep location_id in sync
+  db.prepare('UPDATE spools SET location = ? WHERE location_id = ?').run(data.name, id);
   return { id, old_name: oldName, new_name: data.name };
 }
 
 export function deleteLocation(id) {
+  const loc = db.prepare('SELECT parent_id FROM locations WHERE id = ?').get(id);
+  // Reparent children to this location's parent
+  db.prepare('UPDATE locations SET parent_id = ? WHERE parent_id = ?').run(loc?.parent_id || null, id);
+  // Nullify spool references
+  db.prepare('UPDATE spools SET location_id = NULL, location = NULL WHERE location_id = ?').run(id);
   db.prepare('DELETE FROM locations WHERE id=?').run(id);
 }
 
@@ -4767,7 +4822,7 @@ export function getUsagePredictions() {
   return { by_material: byMaterial, per_spool: perSpool };
 }
 
-export function getLowStockSpools(thresholdPct = 20) {
+export function getLowStockSpools(thresholdPct = 20, thresholdGrams = 0) {
   return db.prepare(`SELECT s.id, s.remaining_weight_g, s.initial_weight_g,
     ROUND((s.remaining_weight_g * 100.0 / s.initial_weight_g), 1) AS remaining_pct,
     fp.name AS profile_name, fp.material, v.name AS vendor_name
@@ -4775,8 +4830,8 @@ export function getLowStockSpools(thresholdPct = 20) {
     LEFT JOIN filament_profiles fp ON s.filament_profile_id = fp.id
     LEFT JOIN vendors v ON fp.vendor_id = v.id
     WHERE s.archived = 0 AND s.initial_weight_g > 0
-    AND (s.remaining_weight_g * 100.0 / s.initial_weight_g) < ?
-    ORDER BY remaining_pct ASC`).all(thresholdPct);
+    AND ((s.remaining_weight_g * 100.0 / s.initial_weight_g) < ? OR (? > 0 AND s.remaining_weight_g < ?))
+    ORDER BY remaining_pct ASC`).all(thresholdPct, thresholdGrams, thresholdGrams);
 }
 
 export function getRestockSuggestions(daysAhead = 30) {
@@ -4848,11 +4903,25 @@ export function getRestockSuggestions(daysAhead = 30) {
   }).filter(s => s.urgency !== 'low');
 }
 
-export function estimatePrintCost(filamentUsedG, durationSeconds, spoolId = null) {
-  const electricityRate = parseFloat(getInventorySetting('electricity_rate_kwh') || '0');
-  const printerWattage = parseFloat(getInventorySetting('printer_wattage') || '0');
-  const machineCost = parseFloat(getInventorySetting('machine_cost') || '0');
-  const machineLifetimeH = parseFloat(getInventorySetting('machine_lifetime_hours') || '0');
+export function getPrinterCostSettings(printerId = null) {
+  let ps = null;
+  if (printerId) {
+    ps = db.prepare('SELECT electricity_rate_kwh, printer_wattage, machine_cost, machine_lifetime_hours FROM printers WHERE id = ?').get(printerId);
+  }
+  return {
+    electricity_rate_kwh: parseFloat(ps?.electricity_rate_kwh || getInventorySetting('electricity_rate_kwh') || '0'),
+    printer_wattage: parseFloat(ps?.printer_wattage || getInventorySetting('printer_wattage') || '0'),
+    machine_cost: parseFloat(ps?.machine_cost || getInventorySetting('machine_cost') || '0'),
+    machine_lifetime_hours: parseFloat(ps?.machine_lifetime_hours || getInventorySetting('machine_lifetime_hours') || '0'),
+  };
+}
+
+export function estimatePrintCost(filamentUsedG, durationSeconds, spoolId = null, printerId = null) {
+  const cs = getPrinterCostSettings(printerId);
+  const electricityRate = cs.electricity_rate_kwh;
+  const printerWattage = cs.printer_wattage;
+  const machineCost = cs.machine_cost;
+  const machineLifetimeH = cs.machine_lifetime_hours;
 
   let filamentCostPerG = 0;
   if (spoolId) {
@@ -5391,15 +5460,89 @@ export function getCostSummary(from, to) {
   return db.prepare(query).get(...params);
 }
 
-export function estimatePrintCostAdvanced(filamentUsedG, durationSeconds, spoolId = null) {
-  const electricityRate = parseFloat(getInventorySetting('electricity_rate_kwh') || '0');
-  const printerWattage = parseFloat(getInventorySetting('printer_wattage') || '0');
-  const machineCost = parseFloat(getInventorySetting('machine_cost') || '0');
-  const machineLifetimeH = parseFloat(getInventorySetting('machine_lifetime_hours') || '0');
+export function getCostStatistics(printerId = null, startDate = null, endDate = null) {
+  const clauses = ['1=1'];
+  const params = [];
+  if (printerId) { clauses.push('ph.printer_id = ?'); params.push(printerId); }
+  if (startDate) { clauses.push('ph.started_at >= ?'); params.push(startDate); }
+  if (endDate) { clauses.push('ph.started_at <= ?'); params.push(endDate); }
+  const w = clauses.join(' AND ');
+
+  // Summary totals
+  const summary = db.prepare(`SELECT COUNT(*) as print_count,
+    COALESCE(SUM(pc.filament_cost), 0) as total_filament,
+    COALESCE(SUM(pc.electricity_cost), 0) as total_electricity,
+    COALESCE(SUM(pc.depreciation_cost), 0) as total_depreciation,
+    COALESCE(SUM(pc.labor_cost), 0) as total_labor,
+    COALESCE(SUM(pc.markup_amount), 0) as total_markup,
+    COALESCE(SUM(pc.total_cost), 0) as grand_total,
+    COALESCE(AVG(pc.total_cost), 0) as avg_per_print,
+    COALESCE(SUM(ph.duration_seconds), 0) as total_seconds,
+    COALESCE(SUM(ph.filament_used_g), 0) as total_filament_g
+    FROM print_costs pc JOIN print_history ph ON pc.print_history_id = ph.id WHERE ${w}`).get(...params);
+
+  // Monthly breakdown
+  const byMonth = db.prepare(`SELECT strftime('%Y-%m', ph.started_at) as month,
+    COUNT(*) as prints, COALESCE(SUM(pc.total_cost), 0) as total_cost,
+    COALESCE(SUM(pc.filament_cost), 0) as filament_cost,
+    COALESCE(SUM(pc.electricity_cost), 0) as electricity_cost,
+    COALESCE(SUM(pc.depreciation_cost), 0) as depreciation_cost
+    FROM print_costs pc JOIN print_history ph ON pc.print_history_id = ph.id WHERE ${w}
+    GROUP BY month ORDER BY month`).all(...params);
+
+  // By printer
+  const byPrinter = db.prepare(`SELECT ph.printer_id, COUNT(*) as prints,
+    COALESCE(SUM(pc.total_cost), 0) as total_cost,
+    COALESCE(AVG(pc.total_cost), 0) as avg_cost
+    FROM print_costs pc JOIN print_history ph ON pc.print_history_id = ph.id WHERE ${w}
+    GROUP BY ph.printer_id ORDER BY total_cost DESC`).all(...params);
+
+  // By material type
+  const byMaterial = db.prepare(`SELECT ph.filament_type as material, COUNT(*) as prints,
+    COALESCE(SUM(pc.total_cost), 0) as total_cost,
+    COALESCE(SUM(ph.filament_used_g), 0) as total_grams
+    FROM print_costs pc JOIN print_history ph ON pc.print_history_id = ph.id WHERE ${w} AND ph.filament_type IS NOT NULL
+    GROUP BY ph.filament_type ORDER BY total_cost DESC`).all(...params);
+
+  const currency = getInventorySetting('cost_currency') || 'NOK';
+  const totalH = summary.total_seconds / 3600;
+
+  return {
+    summary: {
+      print_count: summary.print_count,
+      grand_total: Math.round(summary.grand_total * 100) / 100,
+      avg_per_print: Math.round(summary.avg_per_print * 100) / 100,
+      cost_per_hour: totalH > 0 ? Math.round((summary.grand_total / totalH) * 100) / 100 : 0,
+      cost_per_kg: summary.total_filament_g > 0 ? Math.round((summary.grand_total / (summary.total_filament_g / 1000)) * 100) / 100 : 0,
+      currency
+    },
+    breakdown: {
+      filament: Math.round(summary.total_filament * 100) / 100,
+      electricity: Math.round(summary.total_electricity * 100) / 100,
+      depreciation: Math.round(summary.total_depreciation * 100) / 100,
+      labor: Math.round(summary.total_labor * 100) / 100,
+      markup: Math.round(summary.total_markup * 100) / 100
+    },
+    by_month: byMonth.map(r => ({ month: r.month, prints: r.prints, total_cost: Math.round(r.total_cost * 100) / 100, filament_cost: Math.round(r.filament_cost * 100) / 100, electricity_cost: Math.round(r.electricity_cost * 100) / 100, depreciation_cost: Math.round(r.depreciation_cost * 100) / 100 })),
+    by_printer: byPrinter.map(r => ({ printer_id: r.printer_id, prints: r.prints, total_cost: Math.round(r.total_cost * 100) / 100, avg_cost: Math.round(r.avg_cost * 100) / 100 })),
+    by_material: byMaterial.map(r => ({ material: r.material, prints: r.prints, total_cost: Math.round(r.total_cost * 100) / 100, total_grams: Math.round(r.total_grams), cost_per_kg: r.total_grams > 0 ? Math.round((r.total_cost / (r.total_grams / 1000)) * 100) / 100 : 0 }))
+  };
+}
+
+export function estimatePrintCostAdvanced(filamentUsedG, durationSeconds, spoolId = null, printerId = null, printStatus = null) {
+  const cs = getPrinterCostSettings(printerId);
+  const electricityRate = cs.electricity_rate_kwh;
+  const printerWattage = cs.printer_wattage;
+  const machineCost = cs.machine_cost;
+  const machineLifetimeH = cs.machine_lifetime_hours;
   const laborRate = parseFloat(getInventorySetting('labor_rate_hour') || '0');
   const setupMinutes = parseFloat(getInventorySetting('labor_setup_minutes') || '0');
   const markupPct = parseFloat(getInventorySetting('markup_pct') || '0');
   const currency = getInventorySetting('cost_currency') || 'NOK';
+
+  // Exclude labor & markup for cancelled/failed prints if setting is enabled
+  const excludeLabor = printStatus && printStatus !== 'completed'
+    && getInventorySetting('exclude_labor_cancelled') === '1';
 
   let filamentCostPerG = 0;
   if (spoolId) {
@@ -5419,9 +5562,9 @@ export function estimatePrintCostAdvanced(filamentUsedG, durationSeconds, spoolI
   const durationH = durationSeconds / 3600;
   const electricityCost = Math.round(durationH * (printerWattage / 1000) * electricityRate * 100) / 100;
   const depreciationCost = machineLifetimeH > 0 ? Math.round(durationH * (machineCost / machineLifetimeH) * 100) / 100 : 0;
-  const laborCost = Math.round((durationH * laborRate + (setupMinutes / 60) * laborRate) * 100) / 100;
+  const laborCost = excludeLabor ? 0 : Math.round((durationH * laborRate + (setupMinutes / 60) * laborRate) * 100) / 100;
   const subtotal = filamentCost + electricityCost + depreciationCost + laborCost;
-  const markupAmount = markupPct > 0 ? Math.round(subtotal * (markupPct / 100) * 100) / 100 : 0;
+  const markupAmount = excludeLabor ? 0 : (markupPct > 0 ? Math.round(subtotal * (markupPct / 100) * 100) / 100 : 0);
   const totalCost = Math.round((subtotal + markupAmount) * 100) / 100;
 
   return { filament_cost: filamentCost, electricity_cost: electricityCost, depreciation_cost: depreciationCost, labor_cost: laborCost, markup_amount: markupAmount, total_cost: totalCost, currency };
@@ -5756,9 +5899,12 @@ export function getCommunityFilaments(filters = {}) {
   if (filters.temp_max) { where += ' AND extruder_temp <= ?'; params.push(filters.temp_max); }
   if (filters.search) { where += ' AND (name LIKE ? OR manufacturer LIKE ? OR color_name LIKE ? OR material LIKE ?)'; params.push(`%${filters.search}%`, `%${filters.search}%`, `%${filters.search}%`, `%${filters.search}%`); }
 
-  const allowedSort = ['manufacturer', 'name', 'material', 'extruder_temp', 'pressure_advance_k', 'td_value', 'price', 'category'];
-  const sort = allowedSort.includes(filters.sort) ? filters.sort : 'manufacturer';
-  const dir = filters.sort_dir === 'DESC' ? 'DESC' : 'ASC';
+  const allowedSort = ['manufacturer', 'name', 'material', 'extruder_temp', 'pressure_advance_k', 'td_value', 'price', 'category', 'rating_avg', 'created_at'];
+  let sort = allowedSort.includes(filters.sort) ? filters.sort : 'manufacturer';
+  let dir = filters.sort_dir === 'DESC' ? 'DESC' : 'ASC';
+  // Convenience sort aliases
+  if (filters.sort === 'rating') { sort = 'rating_count'; dir = 'DESC'; where += ' AND rating_count > 0'; }
+  if (filters.sort === 'newest') { sort = 'created_at'; dir = 'DESC'; }
   const order = `ORDER BY ${sort} ${dir}, manufacturer ASC, name ASC`;
 
   if (filters.limit) {

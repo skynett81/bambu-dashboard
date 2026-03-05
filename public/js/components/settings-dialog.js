@@ -408,6 +408,28 @@
           <label class="form-label">${t('settings.access_code')}</label>
           <input class="form-input" id="pf-access" value="" placeholder="${t('settings.access_code_hint')}">
         </div>
+        <details style="margin-top:8px;border-top:1px solid var(--border-color);padding-top:8px">
+          <summary style="cursor:pointer;font-size:0.8rem;font-weight:600">${t('settings.per_printer_cost_title')}</summary>
+          <p class="text-muted" style="font-size:0.7rem;margin:4px 0">${t('settings.per_printer_cost_hint')}</p>
+          <div class="flex gap-sm" style="flex-wrap:wrap">
+            <div class="form-group" style="width:110px">
+              <label class="form-label">${t('settings.printer_wattage')}</label>
+              <input class="form-input" id="pf-wattage" type="number" value="${printer?.printer_wattage || ''}" placeholder="--">
+            </div>
+            <div class="form-group" style="width:110px">
+              <label class="form-label">${t('settings.printer_electricity_rate')}</label>
+              <input class="form-input" id="pf-elec-rate" type="number" step="0.01" value="${printer?.electricity_rate_kwh || ''}" placeholder="--">
+            </div>
+            <div class="form-group" style="width:110px">
+              <label class="form-label">${t('settings.printer_machine_cost')}</label>
+              <input class="form-input" id="pf-machine-cost" type="number" step="0.01" value="${printer?.machine_cost || ''}" placeholder="--">
+            </div>
+            <div class="form-group" style="width:110px">
+              <label class="form-label">${t('settings.printer_machine_lifetime')}</label>
+              <input class="form-input" id="pf-machine-lifetime" type="number" value="${printer?.machine_lifetime_hours || ''}" placeholder="--">
+            </div>
+          </div>
+        </details>
         <div class="form-actions">
           <button class="form-btn" data-ripple onclick="savePrinterForm('${printer?.id || ''}')">${t('settings.save')}</button>
           <button class="form-btn form-btn-secondary" data-ripple onclick="testPrinterConnection()">${t('settings.test_connection')}</button>
@@ -443,7 +465,16 @@
     if (!name) { showToast(t('settings.name_required'), 'warning'); return; }
 
     const accessCode = document.getElementById('pf-access')?.value.trim();
-    const body = { name, model, ip, serial, accessCode };
+    const wattage = document.getElementById('pf-wattage')?.value;
+    const elecRate = document.getElementById('pf-elec-rate')?.value;
+    const machCost = document.getElementById('pf-machine-cost')?.value;
+    const machLife = document.getElementById('pf-machine-lifetime')?.value;
+    const body = { name, model, ip, serial, accessCode,
+      printer_wattage: wattage ? parseFloat(wattage) : null,
+      electricity_rate_kwh: elecRate ? parseFloat(elecRate) : null,
+      machine_cost: machCost ? parseFloat(machCost) : null,
+      machine_lifetime_hours: machLife ? parseFloat(machLife) : null
+    };
 
     try {
       if (existingId) {

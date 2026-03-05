@@ -39,6 +39,9 @@ export class PrinterManager {
     tracker.onNfcAutoLinked = (data) => {
       if (this.broadcast) this.broadcast('nfc_auto_linked', { ...data, printerName });
     };
+    tracker.onBroadcast = (type, data) => {
+      if (this.broadcast) this.broadcast(type, { ...data, printerId, printerName });
+    };
   }
 
   async init() {
