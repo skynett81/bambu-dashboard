@@ -52,6 +52,8 @@
     "fullscreen": "Megnyitás teljes képernyőn",
     "stream_ended": "Közvetítés véget ért",
     "connect_failed": "Nem sikerült csatlakozni a kamerához",
+    "rtsp_disabled": "Camera streaming is not yet available for this printer model",
+    "rtsp_disabled_hint": "Enable \"LAN Only Liveview\" in printer settings. If already enabled, a firmware update may be required.",
     "stream_url": "Stream URL:",
     "copy": "Copy",
     "copied": "Copied!"
@@ -77,6 +79,8 @@
     "no_data": "Nincs filament adat",
     "none_active": "Nincs aktív filament",
     "remaining": "maradt",
+    "estimated_usage": "Est. usage",
+    "print_using": "Using",
     "slot": "Hely {{num}}",
     "add_spool": "+ Tekercs hozzáadása",
     "add_spool_title": "Új tekercs hozzáadása",

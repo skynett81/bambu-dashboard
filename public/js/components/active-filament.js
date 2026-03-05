@@ -33,6 +33,23 @@
     const isLight = isLightHex(tray.tray_color);
     const slotNum = parseInt(activeTrayIdx) + 1;
 
+    // Estimate filament consumption during active print
+    const est = window._printEstimates;
+    const gcodeState = data.gcode_state || 'IDLE';
+    const isPrinting = gcodeState === 'RUNNING' || gcodeState === 'PAUSE';
+    const pct = data.mc_percent || 0;
+
+    let usageHtml = '';
+    if (isPrinting && est && est.weight_g > 0) {
+      const consumedG = Math.round(est.weight_g * pct / 100);
+      const remainingG = Math.round(est.weight_g - consumedG);
+      usageHtml = `
+        <div class="filament-usage-estimate">
+          <span>${t('filament.estimated_usage')}: ${consumedG}g / ${Math.round(est.weight_g)}g</span>
+          <div class="filament-usage-bar"><div class="filament-usage-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+        </div>`;
+    }
+
     // Color for the bar - low remaining = warn
     const barColor = remain < 15 ? 'var(--accent-red)' : color;
     const remainClass = remain < 15 ? 'filament-remain-low' : '';
@@ -53,6 +70,7 @@
         <div class="filament-remain-bar-lg">
           <div class="filament-remain-bar-fill-lg" style="width:${remain}%;background:${barColor}"></div>
         </div>
+        ${usageHtml}
         <div class="filament-status-meta">
           ${t('filament.slot', { num: slotNum })} &middot; ${tempMin}-${tempMax}°C
         </div>

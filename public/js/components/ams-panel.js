@@ -112,6 +112,17 @@
             if (tray.tray_weight) remainParts.push(`${tray.tray_weight}g`);
           }
 
+          // Show estimated usage on active tray during printing
+          const est = window._printEstimates;
+          const gcodeState = data.gcode_state || 'IDLE';
+          const isPrinting = gcodeState === 'RUNNING' || gcodeState === 'PAUSE';
+          let usageInfo = '';
+          if (isActive && isPrinting && est && est.weight_g > 0) {
+            const pctDone = data.mc_percent || 0;
+            const consumedG = Math.round(est.weight_g * pctDone / 100);
+            usageInfo = `<div class="ams-row ams-row-usage"><span class="ams-usage-text">${t('filament.print_using')}: ${consumedG}g / ${Math.round(est.weight_g)}g</span></div>`;
+          }
+
           // RFID detection
           const hasRfid = !!(tray.tag_uid || tray.tray_uuid);
           const rfidBadge = hasRfid ? `<span class="ams-rfid-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12C2 6.5 6.5 2 12 2a10 10 0 0 1 8 4"/><path d="M5 12a7 7 0 0 1 7-7 7 7 0 0 1 5.7 3"/><circle cx="12" cy="12" r="2"/></svg>RFID</span>` : '';
@@ -142,6 +153,7 @@
                 <span class="ams-remain-text">${remainParts.join(' \u00b7 ')}</span>
               </div>
               ${detailParts.length ? `<div class="ams-row ams-row-details">${detailParts.join(' \u00b7 ')}</div>` : ''}
+              ${usageInfo}
               <div class="ams-row ams-row-bottom">
                 ${dryInfo || '<span></span>'}
                 <span class="ams-slot-num">${slotLabel}</span>

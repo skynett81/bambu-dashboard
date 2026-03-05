@@ -6,7 +6,7 @@ import { lookupHmsCode, getHmsWikiUrl } from './print-tracker.js';
 import { parse3mf, parseGcode } from './file-parser.js';
 import https from 'node:https';
 import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
-import { readFileSync, existsSync, statSync, createReadStream } from 'node:fs';
+import { readFileSync, existsSync, statSync, createReadStream, writeFileSync, mkdirSync } from 'node:fs';
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { isAuthEnabled, isMultiUser, validateCredentials, createSession, destroySession, getSessionToken, validateSession, hashPassword, validateApiKey, generateApiKey, hasPermission, validateCredentialsDB, getSessionUser, requirePermission } from './auth.js';
@@ -1033,6 +1033,17 @@ export async function handleApiRequest(req, res) {
       } catch {
         return sendJson(res, { error: 'Telemetry unavailable' }, 502);
       }
+    }
+
+    // ---- Cloud image proxy (locally cached thumbnails) ----
+    const cloudImgMatch = path.match(/^\/api\/cloud-image\/(\d+)$/);
+    if (cloudImgMatch && method === 'GET') {
+      const imgPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'thumbnails', `${cloudImgMatch[1]}.png`);
+      if (existsSync(imgPath)) {
+        res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' });
+        return createReadStream(imgPath).pipe(res);
+      }
+      return sendJson(res, { error: 'Not found' }, 404);
     }
 
     // ---- MakerWorld ----
@@ -4892,9 +4903,11 @@ async function handleMakerWorldFetch(designId, res) {
         const tasks = await _bambuCloud.getTaskHistory();
         const task = tasks.find(t => String(t.id) === String(designId));
         if (task?.cover) {
+          // Download image locally so we don't depend on expiring S3 signed URLs
+          const localImage = await _cacheCloudImage(designId, task.cover);
           const data = {
             title: task.designTitle || task.title || null,
-            image: task.cover,
+            image: localImage || task.cover,
             description: task.title || '',
             url: mwUrl,
             designer: null,
@@ -4902,7 +4915,10 @@ async function handleMakerWorldFetch(designId, res) {
             likes: 0, downloads: 0, prints: 0,
             category: null,
             print_settings: null,
-            fallback: false
+            fallback: false,
+            estimated_weight_g: task.weight || null,
+            estimated_time_s: task.costTime || null,
+            filament_type: task.amsDetailMapping?.[0]?.filamentType || null
           };
           _mwCache.set(designId, { data, ts: Date.now() });
           return sendJson(res, data);
@@ -4936,6 +4952,27 @@ function fetchJson(url, timeout) {
     });
     req.on('error', reject);
     req.on('timeout', () => { req.destroy(); reject(new Error('Timeout')); });
+  });
+}
+
+function _cacheCloudImage(designId, url) {
+  const thumbDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'thumbnails');
+  const filePath = join(thumbDir, `${designId}.png`);
+  if (existsSync(filePath)) return Promise.resolve(`/api/cloud-image/${designId}`);
+  return new Promise((resolve) => {
+    try { mkdirSync(thumbDir, { recursive: true }); } catch {}
+    const req = https.get(url, { timeout: 10000 }, (res) => {
+      if (res.statusCode !== 200) { res.resume(); return resolve(null); }
+      const chunks = [];
+      res.on('data', c => chunks.push(c));
+      res.on('end', () => {
+        try { writeFileSync(filePath, Buffer.concat(chunks)); resolve(`/api/cloud-image/${designId}`); }
+        catch { resolve(null); }
+      });
+      res.on('error', () => resolve(null));
+    });
+    req.on('error', () => resolve(null));
+    req.on('timeout', () => { req.destroy(); resolve(null); });
   });
 }
 

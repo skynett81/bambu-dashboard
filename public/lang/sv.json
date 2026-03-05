@@ -56,6 +56,8 @@
     "fullscreen": "Öppna i helskärm",
     "stream_ended": "Strömmen avslutad",
     "connect_failed": "Kunde inte ansluta till kameran",
+    "rtsp_disabled": "Camera streaming is not yet available for this printer model",
+    "rtsp_disabled_hint": "Enable \"LAN Only Liveview\" in printer settings. If already enabled, a firmware update may be required.",
     "stream_url": "Stream URL:",
     "copy": "Copy",
     "copied": "Copied!"
@@ -81,6 +83,8 @@
     "no_data": "Ingen filamentdata",
     "none_active": "Inget filament aktivt",
     "remaining": "kvar",
+    "estimated_usage": "Est. usage",
+    "print_using": "Using",
     "slot": "Plats {{num}}",
     "add_spool": "+ Lägg till spole",
     "add_spool_title": "Lägg till ny spole",

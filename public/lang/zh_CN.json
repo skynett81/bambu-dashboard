@@ -56,6 +56,8 @@
     "fullscreen": "全屏查看",
     "stream_ended": "直播已结束",
     "connect_failed": "无法连接到摄像头",
+    "rtsp_disabled": "Camera streaming is not yet available for this printer model",
+    "rtsp_disabled_hint": "Enable \"LAN Only Liveview\" in printer settings. If already enabled, a firmware update may be required.",
     "stream_url": "Stream URL:",
     "copy": "Copy",
     "copied": "Copied!"
@@ -81,6 +83,8 @@
     "no_data": "无耗材数据",
     "none_active": "无活跃耗材",
     "remaining": "剩余",
+    "estimated_usage": "Est. usage",
+    "print_using": "Using",
     "slot": "槽位 {{num}}",
     "add_spool": "+ 添加料卷",
     "add_spool_title": "添加新料卷",

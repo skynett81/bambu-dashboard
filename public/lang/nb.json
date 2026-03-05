@@ -56,6 +56,8 @@
     "fullscreen": "Åpne i fullskjerm",
     "stream_ended": "Stream avsluttet",
     "connect_failed": "Kunne ikke koble til kamera",
+    "rtsp_disabled": "Kamerastrømming er ikke tilgjengelig for denne printermodellen ennå",
+    "rtsp_disabled_hint": "Aktiver \"LAN Only Liveview\" i printerinnstillinger. Hvis allerede aktivert, kan en fastvareoppdatering være nødvendig.",
     "stream_url": "Stream URL:",
     "copy": "Kopier",
     "copied": "Kopiert!"
@@ -85,6 +87,8 @@
     "no_data": "Ingen filamentdata",
     "none_active": "Inget filament aktivt",
     "remaining": "gjenstår",
+    "estimated_usage": "Est. forbruk",
+    "print_using": "Bruker",
     "slot": "Spor {{num}}",
     "add_spool": "+ Legg til spole",
     "add_spool_title": "Legg til ny spole",

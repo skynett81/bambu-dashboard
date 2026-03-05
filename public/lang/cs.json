@@ -52,6 +52,8 @@
     "fullscreen": "Otevřít na celou obrazovku",
     "stream_ended": "Přenos ukončen",
     "connect_failed": "Nepodařilo se připojit ke kameře",
+    "rtsp_disabled": "Camera streaming is not yet available for this printer model",
+    "rtsp_disabled_hint": "Enable \"LAN Only Liveview\" in printer settings. If already enabled, a firmware update may be required.",
     "stream_url": "Stream URL:",
     "copy": "Copy",
     "copied": "Copied!"
@@ -77,6 +79,8 @@
     "no_data": "Žádná data o filamentu",
     "none_active": "Žádný aktivní filament",
     "remaining": "zbývá",
+    "estimated_usage": "Est. usage",
+    "print_using": "Using",
     "slot": "Slot {{num}}",
     "add_spool": "+ Přidat cívku",
     "add_spool_title": "Přidat novou cívku",

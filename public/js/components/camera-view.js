@@ -14,6 +14,18 @@
     const container = document.getElementById('camera-container');
     if (!container) return;
 
+    // Check if RTSP is disabled on this printer (e.g. P2S)
+    const printerId = window.printerState?.getActivePrinterId();
+    const ps = printerId ? window.printerState?._printers?.[printerId] : null;
+    const pd = ps?.print || ps;
+    if (pd?.ipcam?.rtsp_url === 'disable') {
+      if (player) { try { player.destroy(); } catch(e) {} player = null; }
+      currentPort = null;
+      streamActive = false;
+      showRtspDisabled(container);
+      return;
+    }
+
     // No camera port configured — show placeholder, don't connect
     if (!port) {
       if (player) {
@@ -124,6 +136,20 @@
           <path d="M17 10l4-2v8l-4-2z"/>
         </svg>
         <span>${t('camera.not_available')}</span>
+      </div>`;
+    container.style.cursor = 'default';
+  }
+
+  function showRtspDisabled(container) {
+    container.innerHTML = `
+      <div class="camera-placeholder">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="2" y="6" width="15" height="12" rx="2"/>
+          <path d="M17 10l4-2v8l-4-2z"/>
+          <line x1="1" y1="1" x2="23" y2="23" stroke-width="2"/>
+        </svg>
+        <span>${t('camera.rtsp_disabled')}</span>
+        <span class="camera-hint">${t('camera.rtsp_disabled_hint')}</span>
       </div>`;
     container.style.cursor = 'default';
   }

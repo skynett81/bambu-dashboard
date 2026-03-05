@@ -56,6 +56,8 @@
     "fullscreen": "Відкрити на весь екран",
     "stream_ended": "Трансляцію завершено",
     "connect_failed": "Не вдалося підключитися до камери",
+    "rtsp_disabled": "Camera streaming is not yet available for this printer model",
+    "rtsp_disabled_hint": "Enable \"LAN Only Liveview\" in printer settings. If already enabled, a firmware update may be required.",
     "stream_url": "Stream URL:",
     "copy": "Copy",
     "copied": "Copied!"
@@ -81,6 +83,8 @@
     "no_data": "Немає даних про філамент",
     "none_active": "Немає активного філаменту",
     "remaining": "залишилось",
+    "estimated_usage": "Est. usage",
+    "print_using": "Using",
     "slot": "Слот {{num}}",
     "add_spool": "+ Додати котушку",
     "add_spool_title": "Додати нову котушку",

@@ -56,6 +56,8 @@
     "fullscreen": "Abrir em tela cheia",
     "stream_ended": "Transmissão encerrada",
     "connect_failed": "Não foi possível conectar à câmera",
+    "rtsp_disabled": "Camera streaming is not yet available for this printer model",
+    "rtsp_disabled_hint": "Enable \"LAN Only Liveview\" in printer settings. If already enabled, a firmware update may be required.",
     "stream_url": "Stream URL:",
     "copy": "Copy",
     "copied": "Copied!"
@@ -81,6 +83,8 @@
     "no_data": "Sem dados de filamento",
     "none_active": "Nenhum filamento ativo",
     "remaining": "restante",
+    "estimated_usage": "Est. usage",
+    "print_using": "Using",
     "slot": "Slot {{num}}",
     "add_spool": "+ Adicionar bobina",
     "add_spool_title": "Adicionar nova bobina",

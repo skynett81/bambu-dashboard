@@ -86,6 +86,8 @@
       _layerColors = [];
       _lastTrackedLayer = -1;
       _lastColor = null;
+      // Clear print estimates
+      window._printEstimates = null;
       // Hide model metadata
       renderModelMeta(null, null);
       return;
@@ -154,6 +156,15 @@
       fetch(`/api/makerworld/${projectId}`)
         .then(r => r.ok ? r.json() : null)
         .then(info => {
+          // Store print estimates globally for AMS/filament panels
+          if (info && (info.estimated_weight_g || info.estimated_time_s)) {
+            window._printEstimates = {
+              weight_g: info.estimated_weight_g || 0,
+              time_s: info.estimated_time_s || 0,
+              filament_type: info.filament_type || null,
+              title: info.title || null
+            };
+          }
           if (info && info.image && !info.fallback) {
             _usingMwImage = true;
             canvas.style.display = 'none';
@@ -168,10 +179,18 @@
             if (revealImg) revealImg.style.clipPath = `inset(${clipTop}% 0 0 0)`;
             if (edge) edge.style.bottom = pct + '%';
             if (mwContainer) mwContainer.style.display = '';
-            // Fetch model metadata in background (for slice info bar)
-            fetch(`/api/model/${printerId}`).then(r => r.ok ? r.json() : null)
-              .then(m => { if (m) renderModelMeta(m.meta, m.sliceInfo); })
-              .catch(() => {});
+            // Use cloud task data for metadata bar, fallback to model API
+            if (info.estimated_weight_g || info.estimated_time_s) {
+              renderModelMeta(null, {
+                filament_type: info.filament_type || null,
+                estimated_weight_g: info.estimated_weight_g || null,
+                estimated_time_s: info.estimated_time_s || null
+              });
+            } else {
+              fetch(`/api/model/${printerId}`).then(r => r.ok ? r.json() : null)
+                .then(m => { if (m) renderModelMeta(m.meta, m.sliceInfo); })
+                .catch(() => {});
+            }
             // Handle image load failure
             if (bgImg) bgImg.onerror = () => {
               if (mwContainer) mwContainer.style.display = 'none';
