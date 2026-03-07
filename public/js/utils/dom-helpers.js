@@ -45,3 +45,6 @@ export function esc(str) {
   if (str == null) return '';
   return String(str).replace(/[&<>"']/g, c => ESC_MAP[c]);
 }
+
+// Expose globally for non-module scripts
+window.esc = esc;

@@ -1,4 +1,6 @@
 {
+    "0500_0600": "The front housing of the toolhead is open or not installed properly. Please check and reinstall it.",
+    "0C00_0300": "The AMS filament has run out. Please load a new spool.",
     "1201_8007": "Failed to extrude the filament. The extruder may be clogged or the filament may be stuck; please refer to HMS. After troubleshooting, click 'Retry' button.",
     "1202_8007": "Failed to extrude the filament. The extruder may be clogged or the filament may be stuck; please refer to HMS. After troubleshooting, click 'Retry' button.",
     "1203_8007": "Failed to extrude the filament. The extruder may be clogged or the filament may be stuck; please refer to HMS. After troubleshooting, click 'Retry' button.",

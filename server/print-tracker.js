@@ -1,4 +1,4 @@
-import { addHistory, getHistory, addError, addAmsSnapshot, getActiveNozzleSession, createNozzleSession, retireNozzleSession, updateNozzleSessionCounters, upsertComponentWear, upsertAmsTrayLifetime, updateAmsTrayFilamentUsed, getSpoolBySlot, useSpoolWeight, savePrintCost, estimatePrintCostAdvanced, lookupNfcTag, linkNfcTag, assignSpoolToSlot, syncAmsToSpool, getActiveLayerPauses, markLayerTriggered, deactivateLayerPauses } from './database.js';
+import { addHistory, getHistory, addError, getErrors, addAmsSnapshot, getActiveNozzleSession, createNozzleSession, retireNozzleSession, updateNozzleSessionCounters, upsertComponentWear, upsertAmsTrayLifetime, updateAmsTrayFilamentUsed, getSpoolBySlot, useSpoolWeight, savePrintCost, estimatePrintCostAdvanced, lookupNfcTag, linkNfcTag, assignSpoolToSlot, syncAmsToSpool, getActiveLayerPauses, markLayerTriggered, deactivateLayerPauses } from './database.js';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -7,13 +7,38 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 let HMS_CODES = {};
 try { HMS_CODES = JSON.parse(readFileSync(join(__dirname, 'hms-codes.json'), 'utf8')); } catch (_) {}
 
+export function hmsAttrToHex(attr) {
+  if (!attr) return null;
+  const s = String(attr);
+  // Already in XXXX_XXXX format
+  if (/^[0-9a-fA-F]{4}[_-][0-9a-fA-F]{4}$/.test(s)) return s.replace('-', '_').toUpperCase();
+  // Decimal number — convert to hex XXXX_XXXX
+  const num = parseInt(s, 10);
+  if (!isNaN(num)) {
+    const hex = num.toString(16).toUpperCase().padStart(8, '0');
+    return hex.slice(0, 4) + '_' + hex.slice(4);
+  }
+  // Hex string without separator
+  if (/^[0-9a-fA-F]{6,8}$/.test(s)) {
+    const padded = s.toUpperCase().padStart(8, '0');
+    return padded.slice(0, 4) + '_' + padded.slice(4);
+  }
+  return s;
+}
+
 export function lookupHmsCode(attr) {
   if (!attr) return null;
-  // Try direct lookup (e.g. "0300_8010")
-  const clean = String(attr).replace(/-/g, '_');
-  if (HMS_CODES[clean]) return HMS_CODES[clean];
-  // Try with leading zeros stripped
-  const short = clean.replace(/^0+/, '');
+  const hexKey = hmsAttrToHex(attr);
+  if (!hexKey) return null;
+  // Direct lookup
+  if (HMS_CODES[hexKey]) return HMS_CODES[hexKey];
+  // Try lowercase
+  const lower = hexKey.toLowerCase();
+  for (const [key, val] of Object.entries(HMS_CODES)) {
+    if (key.toLowerCase() === lower) return val;
+  }
+  // Try without leading zeros
+  const short = hexKey.replace(/^0+/, '');
   for (const [key, val] of Object.entries(HMS_CODES)) {
     if (key.replace(/^0+/, '') === short) return val;
   }
@@ -21,8 +46,9 @@ export function lookupHmsCode(attr) {
 }
 
 export function getHmsWikiUrl(attr) {
-  const parts = String(attr).replace(/[_-]/g, '+');
-  return `https://www.google.com/search?q=Bambu+Lab+HMS+${parts}`;
+  const hexCode = hmsAttrToHex(attr) || String(attr);
+  const parts = hexCode.replace(/[_-]/g, '+');
+  return `https://wiki.bambulab.com/en/x1/troubleshooting/hmscode/${hexCode.replace('_', '_').toLowerCase()}`;
 }
 
 const ABRASIVE_TYPES = ['PA-CF', 'PA-GF', 'PET-CF', 'PLA-CF', 'PAHT-CF', 'PA6-CF', 'PA6-GF', 'PPA-CF', 'PPA-GF'];
@@ -51,6 +77,24 @@ export class PrintTracker {
 
     // NFC auto-detection cache: tag_uid -> { spool_id, ams_unit, tray_id }
     this._nfcProcessed = new Map();
+
+    // Seed HMS dedup from recent errors so we don't re-log on restart
+    this._hmsLastLogged = new Map();
+    try {
+      const HMS_DEDUP_MS = 30 * 60 * 1000;
+      const recentErrors = getErrors(100, this.printerId);
+      const now = Date.now();
+      for (const err of recentErrors) {
+        if (err.code?.startsWith('HMS_')) {
+          const ts = new Date(err.timestamp).getTime();
+          if (now - ts < HMS_DEDUP_MS) {
+            const dedupKey = `${this.printerId}_${err.code.slice(4)}`;
+            const existing = this._hmsLastLogged.get(dedupKey) || 0;
+            if (ts > existing) this._hmsLastLogged.set(dedupKey, ts);
+          }
+        }
+      }
+    } catch (_) {}
   }
 
   update(printData) {
@@ -141,26 +185,30 @@ export class PrintTracker {
       }
     }
 
-    // Log HMS errors
+    // Log HMS errors (with time-based dedup — max once per 30 min per code per printer)
     if (printData.hms && Array.isArray(printData.hms)) {
+      if (!this._hmsLastLogged) this._hmsLastLogged = new Map();
+      const HMS_DEDUP_MS = 30 * 60 * 1000; // 30 minutes
+      const now = Date.now();
       for (const hms of printData.hms) {
-        if (!this._seenHms?.has(hms.attr)) {
-          if (!this._seenHms) this._seenHms = new Set();
-          this._seenHms.add(hms.attr);
-          const hmsSeverity = hms.code >= 0x0C000000 ? 'error' : 'warning';
-          const description = lookupHmsCode(hms.attr);
-          const wikiUrl = getHmsWikiUrl(hms.attr);
-          const hmsMsg = description || hms.msg || `HMS: ${hms.attr}`;
-          addError({
-            printer_id: this.printerId,
-            code: `HMS_${hms.attr}`,
-            message: hmsMsg,
-            severity: hmsSeverity,
-            context: errorContext
-          });
-          if (this.onError) {
-            this.onError({ printerId: this.printerId, code: `HMS_${hms.attr}`, errorMessage: hmsMsg, severity: hmsSeverity, wikiUrl });
-          }
+        const hexAttr = hmsAttrToHex(hms.attr) || String(hms.attr);
+        const dedupKey = `${this.printerId}_${hexAttr}`;
+        const lastLogged = this._hmsLastLogged.get(dedupKey) || 0;
+        if (now - lastLogged < HMS_DEDUP_MS) continue;
+        this._hmsLastLogged.set(dedupKey, now);
+        const hmsSeverity = hms.code >= 0x0C000000 ? 'error' : 'warning';
+        const description = lookupHmsCode(hms.attr);
+        const wikiUrl = getHmsWikiUrl(hms.attr);
+        const hmsMsg = description || hms.msg || `HMS: ${hexAttr}`;
+        addError({
+          printer_id: this.printerId,
+          code: `HMS_${hexAttr}`,
+          message: hmsMsg,
+          severity: hmsSeverity,
+          context: { ...errorContext, wiki_url: wikiUrl }
+        });
+        if (this.onError) {
+          this.onError({ printerId: this.printerId, code: `HMS_${hexAttr}`, errorMessage: hmsMsg, severity: hmsSeverity, wikiUrl });
         }
       }
     }

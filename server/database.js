@@ -3507,6 +3507,22 @@ export function acknowledgeAllErrors(printerId = null) {
   return db.prepare('UPDATE error_log SET acknowledged = 1 WHERE acknowledged = 0').run();
 }
 
+export function deduplicateHmsErrors() {
+  const dupes = db.prepare(`
+    DELETE FROM error_log WHERE id IN (
+      SELECT e.id FROM error_log e
+      INNER JOIN (
+        SELECT code, printer_id, MIN(id) as keep_id
+        FROM error_log
+        WHERE code LIKE 'HMS_%'
+        GROUP BY code, printer_id
+      ) k ON e.code = k.code AND e.printer_id IS k.printer_id AND e.id != k.keep_id
+      WHERE e.code LIKE 'HMS_%'
+    )
+  `).run();
+  return dupes.changes;
+}
+
 // ---- Waste Tracking ----
 
 export function addWaste(w) {

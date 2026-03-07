@@ -2,6 +2,9 @@
 (function() {
 
   // ═══ Helpers ═══
+  const _ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  function esc(s) { if (s == null) return ''; return String(s).replace(/[&<>"']/g, c => _ESC_MAP[c]); }
+
   function printerName(id) {
     return window.printerState?._printerMeta?.[id]?.name || id || '--';
   }
@@ -355,7 +358,8 @@
       // Render error list
       renderFilteredErrors();
     } catch (e) {
-      panel.innerHTML = `<p class="text-muted">${t('errors.load_failed')}</p>`;
+      console.error('[error-log] loadErrors failed:', e);
+      panel.innerHTML = `<p class="text-muted">${t('errors.load_failed')}</p><pre style="color:var(--accent-red);font-size:0.7rem;margin-top:8px">${e?.message || e}</pre>`;
     }
   }
 
@@ -413,10 +417,11 @@
         const sev = e.severity || 'info';
         const color = severityColor(sev);
         const isHms = e.code && e.code.startsWith('HMS_');
-        // Build search URL: split code parts into space-separated words for better Google results
-        const codeUrl = e.code ? `https://www.google.com/search?q=Bambu+Lab+${isHms ? 'HMS+' : 'error+'}${e.code.replace(/^HMS_/, '').replace(/[_-]/g, '+')}`  : null;
-        const acked = e.acknowledged;
         const ctx = parseContext(e);
+        const codeUrl = ctx?.wiki_url
+          ? ctx.wiki_url
+          : e.code ? `https://www.google.com/search?q=Bambu+Lab+${isHms ? 'HMS+' : 'error+'}${e.code.replace(/^HMS_/, '').replace(/[_-]/g, '+')}` : null;
+        const acked = e.acknowledged;
         const occurrences = e.code ? countOccurrences(_allErrors, e.code) : 0;
 
         // Build context details section
