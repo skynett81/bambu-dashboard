@@ -202,7 +202,7 @@
   class ModelViewer {
     constructor(canvas) {
       this.canvas = canvas;
-      const gl = canvas.getContext('webgl', { antialias: true, alpha: false });
+      const gl = canvas.getContext('webgl', { antialias: true, alpha: true, premultipliedAlpha: false });
       if (!gl) { console.warn('[model-viewer] No WebGL'); return; }
       this.gl = gl;
 
@@ -266,8 +266,10 @@
       gl.bufferData(gl.ARRAY_BUFFER, fineVerts, gl.STATIC_DRAW);
 
       gl.enable(gl.DEPTH_TEST);
-      // Bambu Studio style dark grey background
-      gl.clearColor(0.14, 0.15, 0.16, 1);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+      // Transparent background — CSS grid pattern shows through
+      gl.clearColor(0, 0, 0, 0);
 
       this._setupControls();
       this._render = this._render.bind(this);

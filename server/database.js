@@ -3706,7 +3706,7 @@ export function getWasteStats(printerId = null) {
   const manualWaste = db.prepare(`SELECT COALESCE(SUM(waste_g), 0) as total, COUNT(*) as count FROM filament_waste${where}`).get(...params);
 
   // From print_history (auto-tracked)
-  const autoWaste = db.prepare(`SELECT COALESCE(SUM(waste_g), 0) as total, COALESCE(SUM(color_changes), 0) as changes, COUNT(CASE WHEN color_changes > 0 THEN 1 END) as prints_with_changes FROM print_history${where}`).get(...params);
+  const autoWaste = db.prepare(`SELECT COALESCE(SUM(waste_g), 0) as total, COALESCE(SUM(color_changes), 0) as changes, COUNT(CASE WHEN color_changes > 0 THEN 1 END) as prints_with_changes, COUNT(CASE WHEN waste_g > 0 THEN 1 END) as prints_with_waste FROM print_history${where}`).get(...params);
 
   // Total prints for average
   const totalPrints = db.prepare(`SELECT COUNT(*) as count FROM print_history${where}`).get(...params);
@@ -3738,6 +3738,16 @@ export function getWasteStats(printerId = null) {
   // Waste by material (from print_history only)
   const wasteByMaterial = db.prepare(`SELECT filament_type as type, ROUND(SUM(waste_g), 1) as total FROM print_history${where}${and} waste_g > 0 AND filament_type IS NOT NULL GROUP BY filament_type ORDER BY total DESC`).all(...params);
 
+  // Waste by filament (color + type + brand)
+  const wasteByFilament = db.prepare(`
+    SELECT filament_type as type, filament_color as color, filament_brand as brand,
+           ROUND(SUM(waste_g), 1) as waste, ROUND(SUM(filament_used_g), 1) as used,
+           COUNT(*) as prints
+    FROM print_history${where}${and} waste_g > 0 AND filament_color IS NOT NULL
+    GROUP BY filament_color, filament_type
+    ORDER BY waste DESC
+  `).all(...params);
+
   // Waste by printer (combined)
   const wasteByPrinter = db.prepare(`
     SELECT printer_id, ROUND(SUM(waste), 1) as total FROM (
@@ -3750,9 +3760,37 @@ export function getWasteStats(printerId = null) {
   // Total filament used (for efficiency ratio)
   const totalFilament = db.prepare(`SELECT COALESCE(SUM(filament_used_g), 0) as total FROM print_history${where}`).get(...params);
 
-  // Recent events (combined from both tables)
-  const recentAuto = db.prepare(`SELECT printer_id, started_at as timestamp, filename as notes, color_changes, waste_g, 'auto' as reason FROM print_history${where}${and} waste_g > 0 ORDER BY started_at DESC LIMIT 20`).all(...params);
-  const recentManual = db.prepare(`SELECT id, printer_id, timestamp, notes, 0 as color_changes, waste_g, reason FROM filament_waste${where} ORDER BY timestamp DESC LIMIT 20`).all(...params);
+  // Waste breakdown by source (purge vs color change vs failed)
+  const wasteBreakdown = db.prepare(`
+    SELECT
+      ROUND(SUM(CASE WHEN status IN ('failed','cancelled') THEN filament_used_g ELSE 0 END), 1) as failed_g,
+      ROUND(SUM(CASE WHEN color_changes > 0 THEN color_changes * 5.0 ELSE 0 END), 1) as color_change_g,
+      COUNT(*) as total_prints,
+      COUNT(CASE WHEN status IN ('failed','cancelled') THEN 1 END) as failed_prints
+    FROM print_history${where}
+  `).get(...params);
+  const purgeG = Math.round((totalPrints.count * 1.0) * 10) / 10; // 1g per print startup
+
+  // Daily waste (last 30 days)
+  const wastePerDay = db.prepare(`
+    SELECT day, SUM(waste) as total FROM (
+      SELECT date(started_at) as day, waste_g as waste FROM print_history${where}${and} started_at >= datetime('now', '-30 days') AND waste_g > 0
+      UNION ALL
+      SELECT date(timestamp) as day, waste_g as waste FROM filament_waste${where}${and} timestamp >= datetime('now', '-30 days')
+    ) GROUP BY day ORDER BY day
+  `).all(...params, ...params);
+
+  // Top wasteful prints (highest waste ratio)
+  const topWasteful = db.prepare(`
+    SELECT filename, waste_g, filament_used_g, color_changes, status, filament_color, filament_type,
+           CASE WHEN filament_used_g > 0 THEN ROUND(waste_g * 100.0 / filament_used_g, 1) ELSE 0 END as waste_pct
+    FROM print_history${where}${and} waste_g > 0 AND filament_used_g > 0
+    ORDER BY waste_pct DESC LIMIT 5
+  `).all(...params);
+
+  // Recent events with filament color
+  const recentAuto = db.prepare(`SELECT printer_id, started_at as timestamp, filename as notes, color_changes, waste_g, status, filament_color, filament_type, filament_brand, filament_used_g, duration_seconds, 'auto' as reason FROM print_history${where}${and} waste_g > 0 ORDER BY started_at DESC LIMIT 20`).all(...params);
+  const recentManual = db.prepare(`SELECT id, printer_id, timestamp, notes, 0 as color_changes, waste_g, null as status, null as filament_color, null as filament_type, null as filament_brand, null as filament_used_g, null as duration_seconds, reason FROM filament_waste${where} ORDER BY timestamp DESC LIMIT 20`).all(...params);
 
   const recent = [...recentAuto, ...recentManual]
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
@@ -3767,14 +3805,46 @@ export function getWasteStats(printerId = null) {
     total_cost: Math.round(totalWasteG * avgPerG * 10) / 10,
     avg_per_print: totalPrints.count > 0 ? Math.round((totalWasteG / totalPrints.count) * 10) / 10 : 0,
     total_filament_used_g: Math.round(totalFilament.total * 10) / 10,
+    total_prints: totalPrints.count,
     manual_entries: manualWaste.count,
     prints_with_changes: autoWaste.prints_with_changes,
+    prints_with_waste: autoWaste.prints_with_waste + manualWaste.count,
+    waste_breakdown: {
+      purge_g: purgeG,
+      color_change_g: wasteBreakdown.color_change_g || 0,
+      failed_g: wasteBreakdown.failed_g || 0,
+      manual_g: manualWaste.total,
+      failed_prints: wasteBreakdown.failed_prints || 0
+    },
+    cost_per_g: Math.round(avgPerG * 100) / 100,
+    waste_per_day: wastePerDay,
     waste_per_week: wastePerWeek,
     waste_per_month: wastePerMonth,
     waste_by_material: wasteByMaterial,
+    waste_by_filament: wasteByFilament,
     waste_by_printer: wasteByPrinter,
+    waste_top_prints: topWasteful,
     recent
   };
+}
+
+export function backfillWaste(startupPurgeG = 1.0, wastePerChangeG = 5) {
+  // Add startup purge to all prints that have waste_g = 0 or only color-change waste
+  const prints = db.prepare("SELECT id, status, waste_g, color_changes, filament_used_g FROM print_history").all();
+  let updated = 0;
+  for (const p of prints) {
+    const colorWaste = (p.color_changes || 0) * wastePerChangeG;
+    let newWaste = startupPurgeG + colorWaste;
+    if (p.status === 'failed' || p.status === 'cancelled') {
+      newWaste += (p.filament_used_g || 0);
+    }
+    newWaste = Math.round(newWaste * 10) / 10;
+    if (newWaste !== p.waste_g) {
+      db.prepare("UPDATE print_history SET waste_g = ? WHERE id = ?").run(newWaste, p.id);
+      updated++;
+    }
+  }
+  return updated;
 }
 
 // ---- Telemetry ----

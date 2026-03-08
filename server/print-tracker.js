@@ -308,7 +308,14 @@ export class PrintTracker {
       }
     }
 
-    const wasteG = Math.round(this.colorChanges * this.wastePerChangeG * 10) / 10;
+    // Waste = startup purge (~1g) + color change waste + failed print filament
+    const STARTUP_PURGE_G = 1.0;
+    let wasteG = STARTUP_PURGE_G + (this.colorChanges * this.wastePerChangeG);
+    if (status === 'failed' || status === 'cancelled') {
+      // All filament used in a failed/cancelled print is waste
+      wasteG += filamentUsedG;
+    }
+    wasteG = Math.round(wasteG * 10) / 10;
 
     const record = {
       printer_id: this.printerId,

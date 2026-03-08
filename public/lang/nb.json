@@ -1479,7 +1479,19 @@
     "delete_confirm": "Slette denne oppføringen?",
     "download_csv": "Last ned CSV",
     "no_material_data": "Ingen materialdata ennå.",
-    "no_printer_data": "Ingen printerdata ennå."
+    "no_printer_data": "Ingen printerdata ennå.",
+    "by_filament": "Per filament",
+    "breakdown": "Waste-fordeling",
+    "trend": "Waste-trend",
+    "this_week": "Denne uken",
+    "last_week": "Forrige uke",
+    "top_wasteful": "Mest waste-intensive prints",
+    "waste_ratio": "Waste-andel",
+    "cumulative": "Kumulativ waste",
+    "prints_label": "prints",
+    "savings_tip": "Sparetips",
+    "startup_purge": "Oppstartspurge",
+    "no_trend_data": "For lite data for trendvisning."
   },
   "telemetry": {
     "no_printer": "Velg en printer for telemetridata.",

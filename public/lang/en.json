@@ -1479,7 +1479,19 @@
     "delete_confirm": "Delete this waste entry?",
     "download_csv": "Download CSV",
     "no_material_data": "No material data yet.",
-    "no_printer_data": "No printer data yet."
+    "no_printer_data": "No printer data yet.",
+    "by_filament": "Per filament",
+    "breakdown": "Waste breakdown",
+    "trend": "Waste trend",
+    "this_week": "This week",
+    "last_week": "Last week",
+    "top_wasteful": "Most wasteful prints",
+    "waste_ratio": "Waste ratio",
+    "cumulative": "Cumulative waste",
+    "prints_label": "prints",
+    "savings_tip": "Savings tip",
+    "startup_purge": "Startup purge",
+    "no_trend_data": "Not enough data for trend display."
   },
   "telemetry": {
     "no_printer": "Select a printer to view telemetry.",

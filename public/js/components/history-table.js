@@ -68,17 +68,42 @@
     </svg>`;
   }
 
+  // Mini donut SVG
+  function miniDonut(segments, size = 64, thickness = 8) {
+    const r = (size - thickness) / 2;
+    const cx = size / 2;
+    const total = segments.reduce((s, seg) => s + seg.value, 0);
+    if (total === 0) return `<svg width="${size}" height="${size}"><circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="var(--border-color)" stroke-width="${thickness}"/></svg>`;
+    let cumAngle = -90;
+    let paths = '';
+    for (const seg of segments) {
+      if (seg.value <= 0) continue;
+      const angle = (seg.value / total) * 360;
+      const startRad = (cumAngle * Math.PI) / 180;
+      const endRad = ((cumAngle + angle) * Math.PI) / 180;
+      const x1 = cx + r * Math.cos(startRad);
+      const y1 = cx + r * Math.sin(startRad);
+      const x2 = cx + r * Math.cos(endRad);
+      const y2 = cx + r * Math.sin(endRad);
+      const large = angle > 180 ? 1 : 0;
+      paths += `<path d="M${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2}" fill="none" stroke="${seg.color}" stroke-width="${thickness}" stroke-linecap="round"/>`;
+      cumAngle += angle;
+    }
+    return `<svg width="${size}" height="${size}">${paths}</svg>`;
+  }
+
   // ═══ Tab config ═══
   const TAB_CONFIG = {
     history: { label: 'history.tab_history', modules: ['history-summary', 'history-filters', 'history-list'] },
-    stats:   { label: 'history.tab_stats',   modules: ['status-breakdown', 'duration-stats', 'temperature-stats', 'filament-breakdown', 'nozzle-stats', 'top-models', 'printer-breakdown', 'print-timeline'] }
+    stats:   { label: 'history.tab_stats',   modules: ['stats-hero', 'stats-status-activity', 'stats-duration-temp', 'filament-breakdown', 'stats-nozzle-models', 'print-timeline'] }
   };
   const MODULE_SIZE = {
     'history-summary': 'full', 'history-filters': 'full', 'history-list': 'full',
-    'status-breakdown': 'third', 'printer-breakdown': 'third',
-    'filament-breakdown': 'full', 'duration-stats': 'third',
-    'nozzle-stats': 'third', 'temperature-stats': 'third',
-    'print-timeline': 'full', 'top-models': 'third'
+    'stats-hero': 'full',
+    'stats-status-activity': 'half', 'stats-duration-temp': 'half',
+    'filament-breakdown': 'full',
+    'stats-nozzle-models': 'full',
+    'print-timeline': 'full'
   };
 
   const STORAGE_PREFIX = 'history-module-order-';
@@ -115,8 +140,16 @@
 
   // ═══ Persistence ═══
   function getOrder(tabId) {
-    try { const o = JSON.parse(localStorage.getItem(STORAGE_PREFIX + tabId)); if (Array.isArray(o)) return o; } catch (_) {}
-    return TAB_CONFIG[tabId]?.modules || [];
+    const defaults = TAB_CONFIG[tabId]?.modules || [];
+    try {
+      const o = JSON.parse(localStorage.getItem(STORAGE_PREFIX + tabId));
+      if (Array.isArray(o)) {
+        const valid = o.filter(id => defaults.includes(id));
+        if (valid.length >= defaults.length - 1) return valid;
+        localStorage.removeItem(STORAGE_PREFIX + tabId);
+      }
+    } catch (_) {}
+    return defaults;
   }
   function saveOrder(tabId) {
     const cont = document.getElementById(`history-tab-${tabId}`);
@@ -232,39 +265,221 @@
       return h;
     },
 
-    'status-breakdown': (data) => {
+    // ═══ STATS TAB ═══
+
+    // Hero summary cards with icons and ring gauge
+    'stats-hero': (data) => {
       if (!data.length) return '';
       const s = getStats(data);
-      const entries = [
-        [t('history.completed'), s.completed, 'var(--accent-green)'],
-        [t('history.failed'), s.failed, 'var(--accent-red)'],
-        [t('history.cancelled'), s.cancelled, 'var(--accent-orange)']
-      ].filter(e => e[1] > 0);
-      const mx = Math.max(...entries.map(e => e[1]), 1);
-      let h = `<div class="card-title">${t('history.status_breakdown')}</div><div class="chart-bars">`;
-      for (const [lbl, cnt, clr] of entries) h += barRow(lbl, (cnt / mx) * 100, clr, cnt);
-      h += '</div>';
-      return h;
+      const rateColor = s.successRate >= 90 ? 'var(--accent-green)' : s.successRate >= 70 ? 'var(--accent-orange)' : 'var(--accent-red)';
+      const ratePct = Math.min(s.successRate, 100);
+      const avgFilament = data.length > 0 ? Math.round(s.totalFilament / data.length) : 0;
+      const wasteTotal = data.reduce((sum, r) => sum + (r.waste_g || 0), 0);
+
+      return `<div class="waste-hero-grid" style="grid-template-columns:repeat(auto-fit, minmax(110px, 1fr))">
+        <div class="waste-hero-card waste-hero-card--blue">
+          <div class="waste-hero-top">
+            <div class="waste-hero-icon" style="background:rgba(59,130,246,0.15);color:var(--accent-blue)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="8" rx="1"/><rect x="2" y="14" width="20" height="8" rx="1"/></svg>
+            </div>
+          </div>
+          <div class="waste-hero-value">${data.length}</div>
+          <div class="waste-hero-label">${t('stats.total_prints')}</div>
+        </div>
+        <div class="waste-hero-card waste-hero-card--green">
+          <div class="waste-hero-top">
+            <div class="waste-hero-icon" style="background:rgba(63,185,80,0.15);color:var(--accent-green)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+          </div>
+          <div style="position:relative;display:inline-flex;align-items:center;justify-content:center;margin:2px 0">
+            <svg width="44" height="44" viewBox="0 0 44 44">
+              <circle cx="22" cy="22" r="18" fill="none" stroke="var(--border-color)" stroke-width="4"/>
+              <circle cx="22" cy="22" r="18" fill="none" stroke="${rateColor}" stroke-width="4"
+                stroke-dasharray="${ratePct * 1.131} ${113.1 - ratePct * 1.131}"
+                stroke-dashoffset="28.3" stroke-linecap="round"/>
+            </svg>
+            <span style="position:absolute;font-size:0.6rem;font-weight:800;color:${rateColor}">${s.successRate}%</span>
+          </div>
+          <div class="waste-hero-label">${t('stats.success_rate')}</div>
+        </div>
+        <div class="waste-hero-card waste-hero-card--cyan">
+          <div class="waste-hero-top">
+            <div class="waste-hero-icon" style="background:rgba(6,182,212,0.15);color:var(--accent-cyan)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+          </div>
+          <div class="waste-hero-value">${formatDuration(s.totalTime)}</div>
+          <div class="waste-hero-label">${t('stats.total_time')}</div>
+        </div>
+        <div class="waste-hero-card waste-hero-card--orange">
+          <div class="waste-hero-top">
+            <div class="waste-hero-icon" style="background:rgba(249,115,22,0.15);color:var(--accent-orange)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+          </div>
+          <div class="waste-hero-value">${fmtW(s.totalFilament)}</div>
+          <div class="waste-hero-label">${t('stats.filament_used')}</div>
+        </div>
+        <div class="waste-hero-card waste-hero-card--red">
+          <div class="waste-hero-top">
+            <div class="waste-hero-icon" style="background:rgba(248,81,73,0.15);color:var(--accent-red)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+          </div>
+          <div class="waste-hero-value">${s.totalLayers.toLocaleString()}</div>
+          <div class="waste-hero-label">${t('stats.total_layers')}</div>
+        </div>
+      </div>`;
     },
 
-    'printer-breakdown': (data) => {
+    // Combined: Status donut + printer breakdown + activity
+    'stats-status-activity': (data) => {
       if (!data.length) return '';
+      const s = getStats(data);
+
+      // Status donut
+      const segments = [
+        { value: s.completed, color: 'var(--accent-green)', label: t('history.completed') },
+        { value: s.failed, color: 'var(--accent-red)', label: t('history.failed') },
+        { value: s.cancelled, color: 'var(--accent-orange)', label: t('history.cancelled') }
+      ].filter(seg => seg.value > 0);
+
+      let h = `<div class="card-title">${t('history.status_breakdown')}</div>`;
+      h += `<div style="display:flex;align-items:center;gap:12px">`;
+      h += `<div style="position:relative;flex-shrink:0;display:flex;align-items:center;justify-content:center">`;
+      h += miniDonut(segments, 70, 8);
+      h += `<div class="waste-donut-center" style="width:70px;height:70px">
+        <span class="waste-donut-center-value" style="font-size:0.85rem">${data.length}</span>
+        <span class="waste-donut-center-label">prints</span>
+      </div>`;
+      h += `</div>`;
+      h += `<div style="flex:1;display:flex;flex-direction:column;gap:3px">`;
+      for (const seg of segments) {
+        const pct = ((seg.value / data.length) * 100).toFixed(0);
+        h += `<div style="display:flex;align-items:center;gap:5px;font-size:0.72rem">
+          <span style="width:8px;height:8px;border-radius:2px;background:${seg.color};flex-shrink:0"></span>
+          <span style="flex:1">${seg.label}</span>
+          <span style="font-weight:700">${seg.value}</span>
+          <span class="text-muted" style="font-size:0.6rem">${pct}%</span>
+        </div>`;
+      }
+      h += `</div></div>`;
+
+      // Printer breakdown (compact)
       const byPrinter = {};
       for (const r of data) {
         const pid = r.printer_id || 'unknown';
         byPrinter[pid] = (byPrinter[pid] || 0) + 1;
       }
-      const sorted = Object.entries(byPrinter).sort((a, b) => b[1] - a[1]);
-      const mx = sorted[0]?.[1] || 1;
-      let h = `<div class="card-title">${t('history.printer_breakdown')}</div><div class="chart-bars">`;
-      for (const [pid, cnt] of sorted) h += barRow(esc(printerName(pid)), (cnt / mx) * 100, 'var(--accent-purple)', cnt);
-      h += '</div>';
+      const sortedPrinters = Object.entries(byPrinter).sort((a, b) => b[1] - a[1]);
+      if (sortedPrinters.length > 0) {
+        const mxP = sortedPrinters[0][1];
+        h += `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border-color)">`;
+        h += `<div class="waste-compact-heading">${t('history.printer_breakdown')}</div>`;
+        for (const [pid, cnt] of sortedPrinters) {
+          h += barRow(esc(printerName(pid)), (cnt / mxP) * 100, 'var(--accent-purple)', cnt);
+        }
+        h += `</div>`;
+      }
+
+      // Waste + color changes
+      const wasteTotal = data.reduce((sum, r) => sum + (r.waste_g || 0), 0);
+      const colorChanges = data.reduce((sum, r) => sum + (r.color_changes || 0), 0);
+      if (wasteTotal > 0 || colorChanges > 0) {
+        h += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border-color)">`;
+        h += `<div class="stats-detail-list">`;
+        if (wasteTotal > 0) h += sRow(t('stats.total_waste'), fmtW(wasteTotal), 'var(--accent-orange)');
+        if (colorChanges > 0) h += sRow(t('stats.color_changes'), colorChanges);
+        h += `</div></div>`;
+      }
+
+      return h;
+    },
+
+    // Combined: Duration stats + Temperature stats
+    'stats-duration-temp': (data) => {
+      if (!data.length) return '';
+      const s = getStats(data);
+
+      // Duration
+      const durations = data.filter(r => r.duration_seconds > 0).map(r => r.duration_seconds);
+      const avgDuration = durations.length > 0 ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0;
+      const longest = durations.length > 0 ? Math.max(...durations) : 0;
+      const longestRow = data.find(r => r.duration_seconds === longest);
+      const avgFilament = data.length > 0 ? Math.round(s.totalFilament / data.length) : 0;
+
+      let h = `<div class="card-title">${t('history.duration_stats')}</div>`;
+      h += `<div class="stats-detail-list">`;
+      h += sRow(t('stats.avg_duration'), formatDuration(avgDuration));
+      h += sRow(t('stats.longest_print'), `${formatDuration(longest)}${longestRow ? ' — ' + esc((longestRow.filename || '').replace(/\.(3mf|gcode)$/i, '').substring(0, 20)) : ''}`);
+      h += sRow(t('stats.avg_filament'), `${avgFilament}g`);
+      h += sRow(t('stats.total_time'), formatDuration(s.totalTime));
+      h += `</div>`;
+
+      // Temperature stats
+      const nozzleTemps = data.filter(r => r.max_nozzle_temp > 100).map(r => r.max_nozzle_temp);
+      const bedTemps = data.filter(r => r.max_bed_temp > 0).map(r => r.max_bed_temp);
+      if (nozzleTemps.length || bedTemps.length) {
+        h += `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border-color)">`;
+        h += `<div class="waste-compact-heading">Temperaturer</div>`;
+        h += `<div class="stats-detail-list">`;
+        if (nozzleTemps.length) {
+          const avg = Math.round(nozzleTemps.reduce((a, b) => a + b, 0) / nozzleTemps.length);
+          const max = Math.max(...nozzleTemps);
+          h += sRow('Dyse snitt / maks', `${avg}°C / ${max}°C`);
+        }
+        if (bedTemps.length) {
+          const avg = Math.round(bedTemps.reduce((a, b) => a + b, 0) / bedTemps.length);
+          const max = Math.max(...bedTemps);
+          h += sRow('Bed snitt / maks', `${avg}°C / ${max}°C`);
+        }
+        h += `</div></div>`;
+      }
+
+      // Nozzle + speed (compact)
+      const byNozzle = {};
+      let totalLayers = 0;
+      for (const r of data) {
+        const key = r.nozzle_type && r.nozzle_diameter
+          ? `${r.nozzle_type} ${r.nozzle_diameter}mm`
+          : r.nozzle_diameter ? `${r.nozzle_diameter}mm` : null;
+        if (key) {
+          if (!byNozzle[key]) byNozzle[key] = { count: 0, time: 0 };
+          byNozzle[key].count++;
+          byNozzle[key].time += r.duration_seconds || 0;
+        }
+        totalLayers += r.layer_count || 0;
+      }
+      const sortedNozzles = Object.entries(byNozzle).sort((a, b) => b[1].count - a[1].count);
+      if (sortedNozzles.length) {
+        h += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border-color)">`;
+        h += `<div class="waste-compact-heading">Dyse & hastighet</div>`;
+        const mxN = sortedNozzles[0][1].count;
+        for (const [nz, d] of sortedNozzles) {
+          h += barRow(esc(nz), (d.count / mxN) * 100, 'var(--accent-orange)', `${d.count}× · ${formatDuration(d.time)}`);
+        }
+        h += `<div class="stats-detail-list" style="margin-top:6px">`;
+        h += sRow(t('stats.total_layers'), totalLayers.toLocaleString());
+        const speedLevels = data.filter(r => r.speed_level != null);
+        if (speedLevels.length > 0) {
+          const speedNames = { 1: 'Stille', 2: 'Standard', 3: 'Sport', 4: 'Ludicrous' };
+          const bySp = {};
+          for (const r of speedLevels) {
+            const name = speedNames[r.speed_level] || `Nivå ${r.speed_level}`;
+            bySp[name] = (bySp[name] || 0) + 1;
+          }
+          const topSpeed = Object.entries(bySp).sort((a, b) => b[1] - a[1]);
+          h += sRow('Mest brukte', topSpeed[0] ? `${topSpeed[0][0]} (${topSpeed[0][1]}×)` : '--');
+        }
+        h += `</div></div>`;
+      }
+
       return h;
     },
 
     'filament-breakdown': (data) => {
       if (!data.length) return '';
-      // Group by type + color for full breakdown
       const byType = {};
       const byColor = {};
       const byBrand = {};
@@ -276,14 +491,10 @@
         byType[tp].count++;
         byType[tp].weight += r.filament_used_g || 0;
         if (color) byType[tp].colors.add(color.substring(0, 6));
-
-        // By color
         const colorKey = color ? color.substring(0, 6) : 'none';
         if (!byColor[colorKey]) byColor[colorKey] = { count: 0, weight: 0, type: tp };
         byColor[colorKey].count++;
         byColor[colorKey].weight += r.filament_used_g || 0;
-
-        // By brand
         if (!byBrand[brand]) byBrand[brand] = { count: 0, weight: 0 };
         byBrand[brand].count++;
         byBrand[brand].weight += r.filament_used_g || 0;
@@ -330,101 +541,39 @@
         }
         h += '</div></div>';
       }
-
       h += '</div>';
       return h;
     },
 
-    'duration-stats': (data) => {
+    // Combined: Top models + nozzle side by side in one full-width module
+    'stats-nozzle-models': (data) => {
       if (!data.length) return '';
-      const s = getStats(data);
-      const durations = data.filter(r => r.duration_seconds > 0).map(r => r.duration_seconds);
-      const avgDuration = durations.length > 0 ? Math.round(durations.reduce((a, b) => a + b, 0) / durations.length) : 0;
-      const longest = durations.length > 0 ? Math.max(...durations) : 0;
-      const longestRow = data.find(r => r.duration_seconds === longest);
-      const avgFilament = data.length > 0 ? Math.round(s.totalFilament / data.length) : 0;
-      let h = `<div class="card-title">${t('history.duration_stats')}</div><div class="stats-detail-list">`;
-      h += sRow(t('stats.avg_duration'), formatDuration(avgDuration));
-      h += sRow(t('stats.longest_print'), `${formatDuration(longest)}${longestRow ? ' — ' + esc((longestRow.filename || '').replace(/\.(3mf|gcode)$/i, '')) : ''}`);
-      h += sRow(t('stats.avg_filament'), `${avgFilament}g`);
-      h += sRow(t('stats.total_time'), formatDuration(s.totalTime));
-      h += '</div>';
-      return h;
-    },
 
-    'nozzle-stats': (data) => {
-      if (!data.length) return '';
-      const byNozzle = {};
-      let totalLayers = 0;
+      // Top models
+      const byModel = {};
       for (const r of data) {
-        const key = r.nozzle_type && r.nozzle_diameter
-          ? `${r.nozzle_type} ${r.nozzle_diameter}mm`
-          : r.nozzle_diameter ? `${r.nozzle_diameter}mm` : null;
-        if (key) {
-          if (!byNozzle[key]) byNozzle[key] = { count: 0, time: 0, layers: 0 };
-          byNozzle[key].count++;
-          byNozzle[key].time += r.duration_seconds || 0;
-          byNozzle[key].layers += r.layer_count || 0;
-        }
-        totalLayers += r.layer_count || 0;
+        const name = (r.filename || 'Ukjent').replace(/\.(3mf|gcode)$/i, '');
+        if (!byModel[name]) byModel[name] = { count: 0, time: 0, success: 0, fail: 0 };
+        byModel[name].count++;
+        byModel[name].time += r.duration_seconds || 0;
+        if (r.status === 'completed') byModel[name].success++;
+        if (r.status === 'failed') byModel[name].fail++;
       }
-      const sorted = Object.entries(byNozzle).sort((a, b) => b[1].count - a[1].count);
+      const sorted = Object.entries(byModel).sort((a, b) => b[1].count - a[1].count).slice(0, 8);
       if (!sorted.length) return '';
-      const mx = sorted[0][1].count;
-      let h = `<div class="card-title">Dysestatistikk</div><div class="chart-bars">`;
-      for (const [nz, d] of sorted) {
-        h += barRow(esc(nz), (d.count / mx) * 100, 'var(--accent-orange, #f0883e)', `${d.count}× · ${formatDuration(d.time)}`);
-      }
-      h += '</div>';
-      h += `<div class="stats-detail-list" style="margin-top:10px">`;
-      h += sRow('Totalt lag printet', totalLayers.toLocaleString());
-      const speedLevels = data.filter(r => r.speed_level != null);
-      if (speedLevels.length > 0) {
-        const speedNames = { 1: 'Stille', 2: 'Standard', 3: 'Sport', 4: 'Ludicrous' };
-        const bySp = {};
-        for (const r of speedLevels) {
-          const name = speedNames[r.speed_level] || `Nivå ${r.speed_level}`;
-          bySp[name] = (bySp[name] || 0) + 1;
-        }
-        const topSpeed = Object.entries(bySp).sort((a, b) => b[1] - a[1]);
-        h += sRow('Mest brukte hastighet', topSpeed[0] ? `${topSpeed[0][0]} (${topSpeed[0][1]}×)` : '--');
-      }
-      h += '</div>';
-      return h;
-    },
+      const mx = sorted[0]?.[1].count || 1;
 
-    'temperature-stats': (data) => {
-      if (!data.length) return '';
-      const nozzleTemps = data.filter(r => r.max_nozzle_temp > 100).map(r => r.max_nozzle_temp);
-      const bedTemps = data.filter(r => r.max_bed_temp > 0).map(r => r.max_bed_temp);
-      if (!nozzleTemps.length && !bedTemps.length) return '';
-
-      let h = `<div class="card-title">Temperaturstatistikk</div><div class="stats-detail-list">`;
-      if (nozzleTemps.length) {
-        const avg = Math.round(nozzleTemps.reduce((a, b) => a + b, 0) / nozzleTemps.length);
-        const max = Math.max(...nozzleTemps);
-        const min = Math.min(...nozzleTemps);
-        h += sRow('Dyse gjennomsnitt', `${avg}°C`);
-        h += sRow('Dyse maks', `${max}°C`);
-        h += sRow('Dyse min', `${min}°C`);
+      let h = `<div class="card-title">Mest printede modeller</div><div class="chart-bars">`;
+      for (const [name, d] of sorted) {
+        const failTag = d.fail > 0 ? ` <span style="color:var(--accent-red);font-size:0.65rem">(${d.fail} feilet)</span>` : '';
+        h += barRow(esc(name.length > 35 ? name.substring(0, 33) + '…' : name), (d.count / mx) * 100, 'var(--accent-green)', `${d.count}×${failTag}`);
       }
-      if (bedTemps.length) {
-        const avg = Math.round(bedTemps.reduce((a, b) => a + b, 0) / bedTemps.length);
-        const max = Math.max(...bedTemps);
-        h += sRow('Bed gjennomsnitt', `${avg}°C`);
-        h += sRow('Bed maks', `${max}°C`);
-      }
-      const wasteTotal = data.reduce((s, r) => s + (r.waste_g || 0), 0);
-      if (wasteTotal > 0) h += sRow('Total filamentsvinn', fmtW(wasteTotal));
-      const colorChanges = data.reduce((s, r) => s + (r.color_changes || 0), 0);
-      if (colorChanges > 0) h += sRow('Fargebytter totalt', colorChanges);
       h += '</div>';
       return h;
     },
 
     'print-timeline': (data) => {
       if (!data.length) return '';
-      // Group prints by day
       const byDay = {};
       for (const r of data) {
         if (!r.started_at) continue;
@@ -442,7 +591,7 @@
       h += `<div class="timeline-chart">`;
       for (const [day, d] of days) {
         const pct = (d.count / maxCount) * 100;
-        const dateLabel = day.substring(5); // MM-DD
+        const dateLabel = day.substring(5);
         const successRate = d.count > 0 ? Math.round(d.success / d.count * 100) : 0;
         const color = successRate === 100 ? 'var(--accent-green)' : successRate >= 50 ? 'var(--accent-orange, #f0883e)' : 'var(--accent-red)';
         h += `<div class="timeline-bar" title="${day}: ${d.count} prints, ${formatDuration(d.time)}">
@@ -453,46 +602,40 @@
       }
       h += '</div>';
 
-      // Activity summary
+      // Activity + hourly heatmap
       const totalDays = days.length;
       const first = days[0][0];
       const last = days[days.length - 1][0];
       const span = Math.max(1, Math.round((new Date(last) - new Date(first)) / 86400000));
       const activePct = Math.round(totalDays / span * 100);
-      h += `<div class="stats-detail-list" style="margin-top:10px">`;
-      h += sRow('Aktive printdager', `${totalDays} av ${span} dager (${activePct}%)`);
-      h += sRow('Prints per dag (snitt)', (data.length / totalDays).toFixed(1));
       const byHour = Array(24).fill(0);
       for (const r of data) {
         if (!r.started_at) continue;
-        const h24 = new Date(r.started_at).getHours();
-        byHour[h24]++;
+        byHour[new Date(r.started_at).getHours()]++;
       }
       const peakHour = byHour.indexOf(Math.max(...byHour));
-      h += sRow('Mest aktive time', `${String(peakHour).padStart(2,'0')}:00 – ${String(peakHour+1).padStart(2,'0')}:00 (${byHour[peakHour]} prints)`);
-      h += '</div>';
-      return h;
-    },
+      const maxHour = Math.max(...byHour, 1);
 
-    'top-models': (data) => {
-      if (!data.length) return '';
-      const byModel = {};
-      for (const r of data) {
-        const name = (r.filename || 'Ukjent').replace(/\.(3mf|gcode)$/i, '');
-        if (!byModel[name]) byModel[name] = { count: 0, time: 0, success: 0, fail: 0 };
-        byModel[name].count++;
-        byModel[name].time += r.duration_seconds || 0;
-        if (r.status === 'completed') byModel[name].success++;
-        if (r.status === 'failed') byModel[name].fail++;
+      h += `<div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">`;
+      // Left: activity stats
+      h += `<div style="flex:1;min-width:180px"><div class="stats-detail-list">`;
+      h += sRow('Aktive printdager', `${totalDays} av ${span} dager (${activePct}%)`);
+      h += sRow('Prints per dag (snitt)', (data.length / totalDays).toFixed(1));
+      h += sRow('Mest aktive time', `${String(peakHour).padStart(2,'0')}:00 – ${String(peakHour+1).padStart(2,'0')}:00 (${byHour[peakHour]} prints)`);
+      h += `</div></div>`;
+      // Right: hourly mini heatmap
+      h += `<div style="flex:1;min-width:200px">`;
+      h += `<div class="waste-compact-heading">Aktivitet per time</div>`;
+      h += `<div style="display:flex;gap:2px;align-items:flex-end;height:36px">`;
+      for (let i = 0; i < 24; i++) {
+        const v = byHour[i];
+        const ht = maxHour > 0 ? Math.max((v / maxHour) * 100, v > 0 ? 8 : 2) : 2;
+        const bg = v > 0 ? `rgba(63, 185, 80, ${Math.max(0.3, v / maxHour)})` : 'var(--bg-tertiary)';
+        h += `<div title="${String(i).padStart(2,'0')}:00 — ${v} prints" style="flex:1;height:${ht}%;background:${bg};border-radius:2px 2px 0 0"></div>`;
       }
-      const sorted = Object.entries(byModel).sort((a, b) => b[1].count - a[1].count).slice(0, 10);
-      const mx = sorted[0]?.[1].count || 1;
-      let h = `<div class="card-title">Mest printede modeller</div><div class="chart-bars">`;
-      for (const [name, d] of sorted) {
-        const failTag = d.fail > 0 ? ` <span style="color:var(--accent-red);font-size:0.7rem">(${d.fail} feilet)</span>` : '';
-        h += barRow(esc(name.length > 30 ? name.substring(0, 28) + '…' : name), (d.count / mx) * 100, 'var(--accent-green)', `${d.count}×${failTag}`);
-      }
-      h += '</div>';
+      h += `</div>`;
+      h += `<div style="display:flex;justify-content:space-between;font-size:0.5rem;color:var(--text-muted);margin-top:2px"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>`;
+      h += `</div></div>`;
       return h;
     }
   };
@@ -518,7 +661,6 @@
     const nozzleText = [row.nozzle_type, row.nozzle_diameter ? row.nozzle_diameter + 'mm' : ''].filter(Boolean).join(' ') || '--';
     const plateLabel = cloud?.plateName || (cloud?.plateIndex ? `Plate ${cloud.plateIndex}` : '');
 
-    // Build filament chip with color swatch
     let filChip = '';
     if (row.filament_type) {
       const fColor = filColorHex || '#888';
@@ -536,7 +678,6 @@
     overlay.className = 'ph-detail-overlay';
     overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
-    // Build temperature info
     const tempInfo = [];
     if (row.max_nozzle_temp > 0) tempInfo.push(`Dyse: ${row.max_nozzle_temp}°C`);
     if (row.max_bed_temp > 0) tempInfo.push(`Bed: ${row.max_bed_temp}°C`);
@@ -641,7 +782,6 @@
 
     document.body.appendChild(overlay);
 
-    // Load cost estimate
     const costField = overlay.querySelector('.ph-detail-cost-field');
     if (costField) {
       const fg = parseFloat(costField.dataset.filamentG) || 0;
@@ -771,9 +911,16 @@
       // Tab panels
       for (const [tabId, cfg] of Object.entries(TAB_CONFIG)) {
         const order = getOrder(tabId);
+        // Merge new modules
+        const allModules = cfg.modules;
+        const mergedOrder = [...order];
+        for (const mod of allModules) {
+          if (!mergedOrder.includes(mod)) mergedOrder.push(mod);
+        }
+
         html += `<div class="tab-panel history-tab-panel stats-tab-panel stagger-in ${tabId === _activeTab ? 'active' : ''}" id="history-tab-${tabId}" style="display:${tabId === _activeTab ? 'grid' : 'none'}">`;
         let _si = 0;
-        for (const modId of order) {
+        for (const modId of mergedOrder) {
           const builder = BUILDERS[modId];
           if (!builder) continue;
           const content = builder(filteredData);
@@ -781,8 +928,8 @@
           const draggable = _locked ? '' : 'draggable="true"';
           const unlocked = _locked ? '' : ' stats-module-unlocked';
           const size = MODULE_SIZE[modId] || 'full';
-          const span = size === 'full' ? 'grid-column:1/-1;' : size === 'half' ? 'grid-column:span 2;' : '';
-          html += `<div class="stats-module${unlocked}" data-module-id="${modId}" ${draggable} style="${span}--i:${_si++};">`;
+          const isFull = size === 'full';
+          html += `<div class="stats-module${unlocked}${isFull ? ' stats-module-full' : ''}" data-module-id="${modId}" ${draggable} style="--i:${_si++};">`;
           if (!_locked) html += '<div class="stats-module-handle" title="Drag to reorder">&#x2630;</div>';
           html += content;
           html += '</div>';
