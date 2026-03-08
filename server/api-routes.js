@@ -1,10 +1,11 @@
-import { getHistory, getHistoryById, addHistory, getStatistics, getFilament, addFilament, updateFilament, deleteFilament, getErrors, acknowledgeError, deleteError, acknowledgeAllErrors, getPrinters, addPrinter, updatePrinter, deletePrinter, addWaste, deleteWaste, getWasteStats, getWasteHistory, getMaintenanceStatus, addMaintenanceEvent, getMaintenanceLog, getMaintenanceSchedule, upsertMaintenanceSchedule, getActiveNozzleSession, retireNozzleSession, createNozzleSession, getTelemetry, getComponentWear, getFirmwareHistory, getXcamEvents, getXcamStats, getAmsTrayLifetime, getDemoPrinterIds, purgeDemoData, getNotificationLog, getUpdateHistory, getModelLink, setModelLink, deleteModelLink, getRecentModelLinks, getVendors, addVendor, updateVendor, deleteVendor, getFilamentProfiles, getFilamentProfile, addFilamentProfile, updateFilamentProfile, deleteFilamentProfile, getSpools, getSpool, addSpool, updateSpool, deleteSpool, archiveSpool, useSpoolWeight, assignSpoolToSlot, getSpoolUsageLog, getLocations, addLocation, updateLocation, deleteLocation, getInventoryStats, searchSpools, duplicateSpool, measureSpoolWeight, getAllSpoolsForExport, getAllFilamentProfilesForExport, getAllVendorsForExport, findSimilarColors, getDistinctMaterials, getDistinctLotNumbers, getDistinctArticleNumbers, getInventorySetting, setInventorySetting, getAllInventorySettings, importSpools, importFilamentProfiles, importVendors, getFieldSchemas, addFieldSchema, deleteFieldSchema, lengthToWeight, getDryingSessions, getActiveDryingSessions, startDryingSession, completeDryingSession, deleteDryingSession, getDryingPresets, getDryingPreset, upsertDryingPreset, deleteDryingPreset, getSpoolsDryingStatus, getUsagePredictions, getRestockSuggestions, estimatePrintCost, createQueue, getQueues, getQueue, updateQueue, deleteQueue, addQueueItem, getQueueItem, updateQueueItem, deleteQueueItem, reorderQueueItems, getActiveQueueItems, addQueueLog, getQueueLog, getNextPendingItem, getTags, createTag, updateTag, deleteTag, assignTag, unassignTag, getEntityTags, getEntitiesByTag, getNfcMappings, lookupNfcTag, linkNfcTag, unlinkNfcTag, updateNfcScan, checkoutSpool, checkinSpool, getCheckedOutSpools, getCheckoutLog, addSpoolEvent, getSpoolTimeline, getSpoolPrintStats, estimateFilamentFromHistory, backfillFilamentUsage, syncSpoolWeightsFromLog, getRecentSpoolEvents, bulkDeleteSpools, bulkArchiveSpools, bulkRelocateSpools, bulkMarkDried, bulkEditSpools, bulkAssignTag, bulkUnassignTag, bulkDeleteProfiles, bulkEditProfiles, bulkDeleteVendors, bulkStartDrying, getSpoolsForExportByIds, toggleSpoolFavorite, batchAddSpools, createSharedPalette, getSharedPalette, deleteSharedPalette, getSharedPaletteSpools, getMacros, getMacro, addMacro, updateMacro, deleteMacro, getWebhookConfigs, getWebhookConfig, addWebhookConfig, updateWebhookConfig, deleteWebhookConfig, getActiveWebhooks, addWebhookDelivery, updateWebhookDelivery, getWebhookDeliveries, savePrintCost, getPrintCost, getCostReport, getCostSummary, getCostStatistics, estimatePrintCostAdvanced, getMaterials, getMaterial, getMaterialByName, updateMaterial, addMaterial, getHardwareItems, getHardwareItem, addHardwareItem, updateHardwareItem, deleteHardwareItem, assignHardware, unassignHardware, getHardwareForPrinter, getHardwareAssignments, getRoles, getRole, addRole, updateRole, deleteRole, getUsers, getUser, addUser, updateUser, deleteUser, getApiKeys, addApiKey, deleteApiKey, deactivateApiKey, getEcommerceConfigs, getEcommerceConfig, addEcommerceConfig, updateEcommerceConfig, deleteEcommerceConfig, getEcommerceOrders, getEcommerceOrder, addEcommerceOrder, updateEcommerceOrder, getTimelapseRecordings, getTimelapseRecording, deleteTimelapseRecording, getPushSubscriptions, addPushSubscription, deletePushSubscription, getCommunityFilaments, getCommunityFilament, searchCommunityByColor, getCommunityManufacturers, getCommunityMaterials, addCommunityFilament, updateCommunityFilament, deleteCommunityFilament, getCommunityFilamentStats, getOwnedCommunityIds, upsertCommunityFilament, clearCommunityFilaments, getCommunityFilamentCategories, getBrandDefaults, getBrandDefault, upsertBrandDefault, deleteBrandDefault, getCustomFieldDefs, getCustomFieldDef, addCustomFieldDef, updateCustomFieldDef, deleteCustomFieldDef, getCustomFieldValues, setCustomFieldValue, deleteCustomFieldValues, getPrinterGroups, getPrinterGroup, addPrinterGroup, updatePrinterGroup, deletePrinterGroup, addPrinterToGroup, removePrinterFromGroup, getGroupMembers, getPrinterGroupsForPrinter, getProjects, getProject, addProject, updateProject, deleteProject, getProjectPrints, addProjectPrint, updateProjectPrint, deleteProjectPrint, getExportTemplates, getExportTemplate, addExportTemplate, deleteExportTemplate, getUserQuota, upsertUserQuota, addUserTransaction, getUserTransactions, getFailureDetections, getFailureDetection, addFailureDetection, acknowledgeFailureDetection, deleteFailureDetection, getPriceHistory, addPriceEntry, getLowestPrice, getPriceStats, getPriceAlerts, getPriceAlert, addPriceAlert, updatePriceAlert, deletePriceAlert, checkPriceAlerts, triggerPriceAlert, getBuildPlates, getBuildPlate, addBuildPlate, updateBuildPlate, deleteBuildPlate, incrementBuildPlatePrintCount, getDryerModels, getDryerModel, addDryerModel, updateDryerModel, deleteDryerModel, getStorageConditions, getLatestStorageCondition, addStorageCondition, deleteStorageCondition, getCourses, getCourse, addCourse, updateCourse, deleteCourse, getCourseProgress, upsertCourseProgress, getUserCourseProgress, getAllCoursesWithProgress, searchSpoolsByColor, generateSpoolName, getEcomFees, getEcomFeesSummary, getEcomFeesTotal, getKbPrinters, getKbPrinter, addKbPrinter, updateKbPrinter, deleteKbPrinter, getKbAccessories, getKbAccessory, addKbAccessory, updateKbAccessory, deleteKbAccessory, getKbFilaments, getKbFilament, addKbFilament, updateKbFilament, deleteKbFilament, getKbProfiles, getKbProfile, addKbProfile, updateKbProfile, deleteKbProfile, searchKb, getKbStats, getKbTags, addKbTag, deleteKbTag, seedKbData, addBedMesh, getBedMeshHistory, getLatestBedMesh, deleteBedMesh, createFilamentChange, updateFilamentChange, getActiveFilamentChange, getFilamentChangeHistory, shareFilamentProfile, rateCommunityFilament, getCommunityFilamentRatings, submitTdVote, getTdVotes, importCommunityToInventory, mergeSpools, getFifoSpool, getCompatibilityMatrix, addCompatibilityRule, updateCompatibilityRule, deleteCompatibilityRule, getTemperatureGuide, matchPrinterForFilament, autoTrashEmptySpools, getRecentProfiles, getLocationAlerts, getSpoolBySlot, addLayerPause, getLayerPauses, getActiveLayerPauses, deleteLayerPause, deactivateLayerPauses, refillSpool, recalculateAllCosts, getHardwareStats, deduplicateHmsErrors, backfillWaste } from './database.js';
+import { getHistory, getHistoryById, addHistory, getStatistics, getFilament, addFilament, updateFilament, deleteFilament, getErrors, acknowledgeError, deleteError, acknowledgeAllErrors, getPrinters, addPrinter, updatePrinter, deletePrinter, addWaste, deleteWaste, getWasteStats, getWasteHistory, getMaintenanceStatus, addMaintenanceEvent, getMaintenanceLog, getMaintenanceSchedule, upsertMaintenanceSchedule, getActiveNozzleSession, retireNozzleSession, createNozzleSession, getTelemetry, getComponentWear, getFirmwareHistory, getXcamEvents, getXcamStats, getAmsTrayLifetime, getDemoPrinterIds, purgeDemoData, getNotificationLog, getUpdateHistory, getModelLink, setModelLink, deleteModelLink, getRecentModelLinks, getVendors, addVendor, updateVendor, deleteVendor, getFilamentProfiles, getFilamentProfile, addFilamentProfile, updateFilamentProfile, deleteFilamentProfile, getSpools, getSpool, addSpool, updateSpool, deleteSpool, archiveSpool, useSpoolWeight, assignSpoolToSlot, getSpoolUsageLog, getLocations, addLocation, updateLocation, deleteLocation, getInventoryStats, searchSpools, duplicateSpool, measureSpoolWeight, getAllSpoolsForExport, getAllFilamentProfilesForExport, getAllVendorsForExport, findSimilarColors, getDistinctMaterials, getDistinctLotNumbers, getDistinctArticleNumbers, getInventorySetting, setInventorySetting, getAllInventorySettings, importSpools, importFilamentProfiles, importVendors, getFieldSchemas, addFieldSchema, deleteFieldSchema, lengthToWeight, getDryingSessions, getActiveDryingSessions, startDryingSession, completeDryingSession, deleteDryingSession, getDryingPresets, getDryingPreset, upsertDryingPreset, deleteDryingPreset, getSpoolsDryingStatus, getUsagePredictions, getRestockSuggestions, estimatePrintCost, createQueue, getQueues, getQueue, updateQueue, deleteQueue, addQueueItem, getQueueItem, updateQueueItem, deleteQueueItem, reorderQueueItems, getActiveQueueItems, addQueueLog, getQueueLog, getNextPendingItem, getTags, createTag, updateTag, deleteTag, assignTag, unassignTag, getEntityTags, getEntitiesByTag, getNfcMappings, lookupNfcTag, linkNfcTag, unlinkNfcTag, updateNfcScan, checkoutSpool, checkinSpool, getCheckedOutSpools, getCheckoutLog, addSpoolEvent, getSpoolTimeline, getSpoolPrintStats, estimateFilamentFromHistory, backfillFilamentUsage, syncSpoolWeightsFromLog, getRecentSpoolEvents, bulkDeleteSpools, bulkArchiveSpools, bulkRelocateSpools, bulkMarkDried, bulkEditSpools, bulkAssignTag, bulkUnassignTag, bulkDeleteProfiles, bulkEditProfiles, bulkDeleteVendors, bulkStartDrying, getSpoolsForExportByIds, toggleSpoolFavorite, batchAddSpools, createSharedPalette, getSharedPalette, deleteSharedPalette, getSharedPaletteSpools, getMacros, getMacro, addMacro, updateMacro, deleteMacro, getWebhookConfigs, getWebhookConfig, addWebhookConfig, updateWebhookConfig, deleteWebhookConfig, getActiveWebhooks, addWebhookDelivery, updateWebhookDelivery, getWebhookDeliveries, savePrintCost, getPrintCost, getCostReport, getCostSummary, getCostStatistics, estimatePrintCostAdvanced, getMaterials, getMaterial, getMaterialByName, updateMaterial, addMaterial, getHardwareItems, getHardwareItem, addHardwareItem, updateHardwareItem, deleteHardwareItem, assignHardware, unassignHardware, getHardwareForPrinter, getHardwareAssignments, getRoles, getRole, addRole, updateRole, deleteRole, getUsers, getUser, addUser, updateUser, deleteUser, getApiKeys, addApiKey, deleteApiKey, deactivateApiKey, getEcommerceConfigs, getEcommerceConfig, addEcommerceConfig, updateEcommerceConfig, deleteEcommerceConfig, getEcommerceOrders, getEcommerceOrder, addEcommerceOrder, updateEcommerceOrder, getTimelapseRecordings, getTimelapseRecording, deleteTimelapseRecording, getPushSubscriptions, addPushSubscription, deletePushSubscription, getCommunityFilaments, getCommunityFilament, searchCommunityByColor, getCommunityManufacturers, getCommunityMaterials, addCommunityFilament, updateCommunityFilament, deleteCommunityFilament, getCommunityFilamentStats, getOwnedCommunityIds, upsertCommunityFilament, clearCommunityFilaments, getCommunityFilamentCategories, getBrandDefaults, getBrandDefault, upsertBrandDefault, deleteBrandDefault, getCustomFieldDefs, getCustomFieldDef, addCustomFieldDef, updateCustomFieldDef, deleteCustomFieldDef, getCustomFieldValues, setCustomFieldValue, deleteCustomFieldValues, getPrinterGroups, getPrinterGroup, addPrinterGroup, updatePrinterGroup, deletePrinterGroup, addPrinterToGroup, removePrinterFromGroup, getGroupMembers, getPrinterGroupsForPrinter, getProjects, getProject, addProject, updateProject, deleteProject, getProjectPrints, addProjectPrint, updateProjectPrint, deleteProjectPrint, getExportTemplates, getExportTemplate, addExportTemplate, deleteExportTemplate, getUserQuota, upsertUserQuota, addUserTransaction, getUserTransactions, getFailureDetections, getFailureDetection, addFailureDetection, acknowledgeFailureDetection, deleteFailureDetection, getPriceHistory, addPriceEntry, getLowestPrice, getPriceStats, getPriceAlerts, getPriceAlert, addPriceAlert, updatePriceAlert, deletePriceAlert, checkPriceAlerts, triggerPriceAlert, getBuildPlates, getBuildPlate, addBuildPlate, updateBuildPlate, deleteBuildPlate, incrementBuildPlatePrintCount, getDryerModels, getDryerModel, addDryerModel, updateDryerModel, deleteDryerModel, getStorageConditions, getLatestStorageCondition, addStorageCondition, deleteStorageCondition, getCourses, getCourse, addCourse, updateCourse, deleteCourse, getCourseProgress, upsertCourseProgress, getUserCourseProgress, getAllCoursesWithProgress, searchSpoolsByColor, generateSpoolName, getEcomFees, getEcomFeesSummary, getEcomFeesTotal, getKbPrinters, getKbPrinter, addKbPrinter, updateKbPrinter, deleteKbPrinter, getKbAccessories, getKbAccessory, addKbAccessory, updateKbAccessory, deleteKbAccessory, getKbFilaments, getKbFilament, addKbFilament, updateKbFilament, deleteKbFilament, getKbProfiles, getKbProfile, addKbProfile, updateKbProfile, deleteKbProfile, searchKb, getKbStats, getKbTags, addKbTag, deleteKbTag, seedKbData, addBedMesh, getBedMeshHistory, getLatestBedMesh, deleteBedMesh, createFilamentChange, updateFilamentChange, getActiveFilamentChange, getFilamentChangeHistory, shareFilamentProfile, rateCommunityFilament, getCommunityFilamentRatings, submitTdVote, getTdVotes, importCommunityToInventory, mergeSpools, getFifoSpool, getCompatibilityMatrix, addCompatibilityRule, updateCompatibilityRule, deleteCompatibilityRule, getTemperatureGuide, matchPrinterForFilament, autoTrashEmptySpools, getRecentProfiles, getLocationAlerts, getSpoolBySlot, addLayerPause, getLayerPauses, getActiveLayerPauses, deleteLayerPause, deactivateLayerPauses, refillSpool, recalculateAllCosts, getHardwareStats, deduplicateHmsErrors, backfillWaste, getDailyActivity, getActivityStreaks } from './database.js';
 import { createBackup, listBackups, restoreBackup, uploadBackup } from './backup.js';
-import { saveConfig, config } from './config.js';
+import { saveConfig, config, DATA_DIR } from './config.js';
 import { getThumbnail, getModel } from './thumbnail-service.js';
 import { lookupHmsCode, getHmsWikiUrl } from './print-tracker.js';
 import { parse3mf, parseGcode } from './file-parser.js';
 import https from 'node:https';
+import { inflateRawSync } from 'node:zlib';
 import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
 import { readFileSync, existsSync, statSync, createReadStream, writeFileSync, mkdirSync, unlinkSync } from 'node:fs';
 import { join, dirname, extname } from 'node:path';
@@ -13,6 +14,13 @@ import { isAuthEnabled, isMultiUser, validateCredentials, createSession, destroy
 import { getSlicerStatus, getSlicerProfiles, saveUploadedFile, sliceFile, uploadToPrinter, cleanupJob, getJobFilePath } from './slicer-service.js';
 import { buildPauseCommand, buildResumeCommand, buildGcodeMultiLine, buildFilamentUnloadSequence, buildFilamentLoadSequence, buildAmsTrayChangeCommand } from './mqtt-commands.js';
 import { getSlicerJobs as dbGetSlicerJobs, getSlicerJob as dbGetSlicerJob, deleteSlicerJob as dbDeleteSlicerJob, getSlicerJobByFilename } from './database.js';
+import * as _energy from './energy-service.js';
+import * as _power from './power-monitor.js';
+import { getMilestones, getMilestoneFile, getArchivedMilestones, getArchivedMilestoneFile } from './milestone-service.js';
+import { generateReport, sendReportEmail, restartReportService } from './report-service.js';
+import { restartHaDiscovery, getHaDiscoveryStatus } from './ha-discovery.js';
+import { getRemoteNodeStates, restartRemoteNodes, testRemoteNode } from './remote-nodes.js';
+import { getRemoteNodes, getRemoteNode, addRemoteNode, updateRemoteNode, deleteRemoteNode, getScheduledPrints, getScheduledPrint, addScheduledPrint, updateScheduledPrint, deleteScheduledPrint, getFileLibrary, getFileLibraryItem, addFileLibraryItem, updateFileLibraryItem, deleteFileLibraryItem, getFileLibraryCategories, incrementFileLibraryPrintCount, getWidgetLayouts, getActiveWidgetLayout, saveWidgetLayout, setActiveWidgetLayout, deleteWidgetLayout, getTimeTracking, addTimeTracking, getTimeTrackingStats } from './database.js';
 import { readFileSync as _readPkg } from 'node:fs';
 
 // API version from package.json
@@ -163,6 +171,9 @@ function getRoutePermission(method, path) {
   if (path.startsWith('/api/courses') || path.startsWith('/api/kb')) return 'admin';
   if (path.startsWith('/api/backup')) return 'admin';
   if (path.startsWith('/api/timelapse') && method === 'DELETE') return 'admin';
+  if (path.startsWith('/api/remote-nodes') || path.startsWith('/api/ha-discovery')) return 'admin';
+  if (path.startsWith('/api/scheduler') && (method === 'POST' || method === 'PUT' || method === 'DELETE')) return 'controls';
+  if (path.startsWith('/api/library') && (method === 'POST' || method === 'PUT' || method === 'DELETE')) return 'controls';
   if (path.startsWith('/api/model-link')) return 'controls';
 
   // Push subscriptions — allow for all authenticated users
@@ -365,6 +376,13 @@ export async function handleApiRequest(req, res) {
   // Attach rate limit headers to response
   const rateHeaders = getApiRateHeaders(clientIp);
   for (const [k, v] of Object.entries(rateHeaders)) res.setHeader(k, v);
+
+  // Public status endpoint — always accessible, no auth required
+  if (method === 'GET' && path === '/api/status/public') {
+    const enabled = getInventorySetting('public_status_enabled');
+    if (enabled !== '1' && enabled !== 'true') return sendJson(res, { error: 'Public status page is disabled' }, 403);
+    return sendJson(res, _getPublicStatus());
+  }
 
   // Centralized permission check for all API routes
   if (isAuthEnabled()) {
@@ -610,7 +628,8 @@ export async function handleApiRequest(req, res) {
       const limit = parseInt(url.searchParams.get('limit')) || 50;
       const offset = parseInt(url.searchParams.get('offset')) || 0;
       const printerId = url.searchParams.get('printer_id') || null;
-      return sendJson(res, getHistory(limit, offset, printerId));
+      const status = url.searchParams.get('status') || null;
+      return sendJson(res, getHistory(limit, offset, printerId, status));
     }
 
     // ---- CSV Export ----
@@ -2979,6 +2998,364 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ---- Energy / Electricity Prices ----
+    if (method === 'GET' && path === '/api/energy/prices') {
+      return sendJson(res, _energy.getCachedPrices());
+    }
+    if (method === 'GET' && path === '/api/energy/current') {
+      return sendJson(res, _energy.getCurrentPrice() || { error: 'No price data' });
+    }
+    if (method === 'GET' && path === '/api/energy/today') {
+      return sendJson(res, _energy.getTodayStats() || { error: 'No price data' });
+    }
+    if (method === 'POST' && path === '/api/energy/refresh') {
+      const result = await _energy.fetchPrices();
+      return sendJson(res, result);
+    }
+    if (method === 'GET' && path === '/api/energy/cheapest') {
+      const u = new URL(req.url, 'http://localhost');
+      const minutes = parseInt(u.searchParams.get('duration') || '60');
+      return sendJson(res, _energy.findCheapestWindow(minutes) || { error: 'No price data' });
+    }
+    if (method === 'POST' && path === '/api/energy/spot-cost') {
+      return readBody(req, (body) => {
+        const result = _energy.calculateSpotCost(body.started_at, body.duration_seconds, body.wattage || 200);
+        return sendJson(res, result || { error: 'Could not calculate' });
+      });
+    }
+
+    // ---- Reports ----
+    if (method === 'GET' && path === '/api/reports/generate') {
+      const u = new URL(req.url, 'http://localhost');
+      const period = u.searchParams.get('period') || 'week';
+      const report = generateReport(period);
+      return sendJson(res, { summary: report.summary, period: report.period, from: report.from, to: report.to });
+    }
+    if (method === 'GET' && path === '/api/reports/preview') {
+      const u = new URL(req.url, 'http://localhost');
+      const period = u.searchParams.get('period') || 'week';
+      const report = generateReport(period);
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(report.html);
+    }
+    if (method === 'POST' && path === '/api/reports/send') {
+      return readBody(req, async (body) => {
+        const period = body.period || 'week';
+        const report = generateReport(period);
+        const result = await sendReportEmail(report);
+        return sendJson(res, result);
+      });
+    }
+    if (method === 'POST' && path === '/api/reports/restart') {
+      restartReportService();
+      return sendJson(res, { ok: true });
+    }
+
+    // ---- Remote Nodes ----
+    if (method === 'GET' && path === '/api/remote-nodes') {
+      return sendJson(res, getRemoteNodeStates());
+    }
+    if (method === 'POST' && path === '/api/remote-nodes') {
+      return readBody(req, (body) => {
+        if (!body.name || !body.base_url) return sendJson(res, { error: 'name and base_url required' }, 400);
+        const id = addRemoteNode(body);
+        restartRemoteNodes();
+        return sendJson(res, { ok: true, id }, 201);
+      });
+    }
+    const remoteNodeMatch = path.match(/^\/api\/remote-nodes\/(\d+)$/);
+    if (remoteNodeMatch && method === 'GET') {
+      const node = getRemoteNode(parseInt(remoteNodeMatch[1]));
+      if (!node) return sendJson(res, { error: 'Node not found' }, 404);
+      return sendJson(res, { ...node, api_key: node.api_key ? '***' : null });
+    }
+    if (remoteNodeMatch && method === 'PUT') {
+      return readBody(req, (body) => {
+        updateRemoteNode(parseInt(remoteNodeMatch[1]), body);
+        restartRemoteNodes();
+        return sendJson(res, { ok: true });
+      });
+    }
+    if (remoteNodeMatch && method === 'DELETE') {
+      deleteRemoteNode(parseInt(remoteNodeMatch[1]));
+      restartRemoteNodes();
+      return sendJson(res, { ok: true });
+    }
+    if (method === 'POST' && path === '/api/remote-nodes/test') {
+      return readBody(req, async (body) => {
+        if (!body.base_url) return sendJson(res, { error: 'base_url required' }, 400);
+        try {
+          const result = await testRemoteNode(body.base_url, body.api_key);
+          return sendJson(res, result);
+        } catch (e) {
+          return sendJson(res, { ok: false, error: e.message });
+        }
+      });
+    }
+
+    // ---- Home Assistant MQTT Discovery ----
+    if (method === 'GET' && path === '/api/ha-discovery/status') {
+      return sendJson(res, getHaDiscoveryStatus());
+    }
+    if (method === 'POST' && path === '/api/ha-discovery/restart') {
+      restartHaDiscovery();
+      return sendJson(res, { ok: true });
+    }
+
+    // ---- Print Scheduler ----
+    if (method === 'GET' && path === '/api/scheduler') {
+      const u = new URL(req.url, 'http://localhost');
+      const from = u.searchParams.get('from') || undefined;
+      const to = u.searchParams.get('to') || undefined;
+      return sendJson(res, getScheduledPrints(from, to));
+    }
+    if (method === 'POST' && path === '/api/scheduler') {
+      return readBody(req, (body) => {
+        if (!body.title || !body.filename || !body.scheduled_at) return sendJson(res, { error: 'title, filename, scheduled_at required' }, 400);
+        const id = addScheduledPrint(body);
+        return sendJson(res, { id }, 201);
+      });
+    }
+    const schedulerMatch = path.match(/^\/api\/scheduler\/(\d+)$/);
+    if (method === 'GET' && schedulerMatch) {
+      const sp = getScheduledPrint(parseInt(schedulerMatch[1]));
+      if (!sp) return sendJson(res, { error: 'Not found' }, 404);
+      return sendJson(res, sp);
+    }
+    if (method === 'PUT' && schedulerMatch) {
+      return readBody(req, (body) => {
+        updateScheduledPrint(parseInt(schedulerMatch[1]), body);
+        return sendJson(res, { ok: true });
+      });
+    }
+    if (method === 'DELETE' && schedulerMatch) {
+      deleteScheduledPrint(parseInt(schedulerMatch[1]));
+      return sendJson(res, { ok: true });
+    }
+
+    // ---- File Library ----
+    if (method === 'GET' && path === '/api/library') {
+      const u = new URL(req.url, 'http://localhost');
+      return sendJson(res, getFileLibrary({
+        category: u.searchParams.get('category') || undefined,
+        file_type: u.searchParams.get('type') || undefined,
+        search: u.searchParams.get('q') || undefined,
+        limit: parseInt(u.searchParams.get('limit')) || 50,
+        offset: parseInt(u.searchParams.get('offset')) || 0
+      }));
+    }
+    if (method === 'GET' && path === '/api/library/categories') {
+      return sendJson(res, getFileLibraryCategories());
+    }
+    if (method === 'POST' && path === '/api/library/upload') {
+      const u = new URL(req.url, 'http://localhost');
+      const origName = u.searchParams.get('filename');
+      if (!origName) return sendJson(res, { error: 'filename param required' }, 400);
+      const ext = origName.split('.').pop().toLowerCase();
+      const allowed = ['stl', '3mf', 'obj', 'step', 'gcode'];
+      if (!allowed.includes(ext)) return sendJson(res, { error: 'Unsupported file type' }, 400);
+      return readBinaryBody(req, (buffer) => {
+        const ts = Date.now();
+        const safeName = origName.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const storedName = `lib_${ts}_${safeName}`;
+        const libDir = join(DATA_DIR, 'library');
+        try { mkdirSync(libDir, { recursive: true }); } catch {}
+        const filePath = join(libDir, storedName);
+        writeFileSync(filePath, buffer);
+        // Try thumbnail extraction for 3mf
+        let thumbPath = null;
+        if (ext === '3mf') {
+          try {
+            const thumbNames = ['Metadata/plate_1.png', 'Metadata/top_1.png', 'Metadata/plate_2.png', 'Metadata/thumbnail.png'];
+            const thumbBuf = _extractZipFile(buffer, thumbNames);
+            if (thumbBuf) {
+              const thumbName = `thumb_${ts}.png`;
+              writeFileSync(join(libDir, thumbName), thumbBuf);
+              thumbPath = thumbName;
+            }
+          } catch {}
+        }
+        // Parse estimates
+        let est = {};
+        try {
+          if (ext === '3mf') est = parse3mf(buffer) || {};
+          else if (ext === 'gcode') est = parseGcode(buffer.toString('utf-8', 0, Math.min(buffer.length, 200000))) || {};
+        } catch {}
+        const id = addFileLibraryItem({
+          filename: storedName,
+          original_name: origName,
+          file_type: ext,
+          file_size: buffer.length,
+          category: u.searchParams.get('category') || 'uncategorized',
+          tags: u.searchParams.get('tags') || null,
+          estimated_time_s: est.estimated_time || null,
+          estimated_filament_g: est.filament_used_g || null,
+          filament_type: est.filament_type || null,
+          thumbnail_path: thumbPath
+        });
+        return sendJson(res, { id, filename: storedName }, 201);
+      });
+    }
+    const libMatch = path.match(/^\/api\/library\/(\d+)$/);
+    if (method === 'GET' && libMatch) {
+      const item = getFileLibraryItem(parseInt(libMatch[1]));
+      if (!item) return sendJson(res, { error: 'Not found' }, 404);
+      return sendJson(res, item);
+    }
+    if (method === 'PUT' && libMatch) {
+      return readBody(req, (body) => {
+        updateFileLibraryItem(parseInt(libMatch[1]), body);
+        return sendJson(res, { ok: true });
+      });
+    }
+    if (method === 'DELETE' && libMatch) {
+      const item = getFileLibraryItem(parseInt(libMatch[1]));
+      if (item) {
+        try { unlinkSync(join(DATA_DIR, 'library', item.filename)); } catch {}
+        if (item.thumbnail_path) try { unlinkSync(join(DATA_DIR, 'library', item.thumbnail_path)); } catch {}
+      }
+      deleteFileLibraryItem(parseInt(libMatch[1]));
+      return sendJson(res, { ok: true });
+    }
+    if (method === 'GET' && path.match(/^\/api\/library\/(\d+)\/thumbnail$/)) {
+      const id = parseInt(path.match(/^\/api\/library\/(\d+)\/thumbnail$/)[1]);
+      const item = getFileLibraryItem(id);
+      if (!item || !item.thumbnail_path) return sendJson(res, { error: 'No thumbnail' }, 404);
+      const thumbFile = join(DATA_DIR, 'library', item.thumbnail_path);
+      if (!existsSync(thumbFile)) return sendJson(res, { error: 'Not found' }, 404);
+      res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' });
+      createReadStream(thumbFile).pipe(res);
+      return;
+    }
+    if (method === 'GET' && path.match(/^\/api\/library\/(\d+)\/download$/)) {
+      const id = parseInt(path.match(/^\/api\/library\/(\d+)\/download$/)[1]);
+      const item = getFileLibraryItem(id);
+      if (!item) return sendJson(res, { error: 'Not found' }, 404);
+      const filePath = join(DATA_DIR, 'library', item.filename);
+      if (!existsSync(filePath)) return sendJson(res, { error: 'File not found' }, 404);
+      res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': `attachment; filename="${item.original_name}"` });
+      createReadStream(filePath).pipe(res);
+      return;
+    }
+
+    // ---- Activity Heatmap ----
+    if (method === 'GET' && path === '/api/activity/daily') {
+      const u = new URL(req.url, 'http://localhost');
+      const days = parseInt(u.searchParams.get('days') || '365');
+      return sendJson(res, getDailyActivity(days));
+    }
+    if (method === 'GET' && path === '/api/activity/streaks') {
+      return sendJson(res, getActivityStreaks());
+    }
+
+    // ---- Widget Layouts ----
+    if (method === 'GET' && path === '/api/widgets') {
+      return sendJson(res, getWidgetLayouts());
+    }
+    if (method === 'GET' && path === '/api/widgets/active') {
+      return sendJson(res, getActiveWidgetLayout() || { layout: '[]' });
+    }
+    if (method === 'POST' && path === '/api/widgets') {
+      const body = await readBody(req);
+      const id = saveWidgetLayout(body.name || 'default', body.layout || []);
+      if (body.active) setActiveWidgetLayout(id);
+      return sendJson(res, { ok: true, id });
+    }
+    if (method === 'PUT' && path.match(/^\/api\/widgets\/(\d+)\/activate$/)) {
+      const id = parseInt(path.match(/^\/api\/widgets\/(\d+)\/activate$/)[1]);
+      setActiveWidgetLayout(id);
+      return sendJson(res, { ok: true });
+    }
+    if (method === 'DELETE' && path.match(/^\/api\/widgets\/(\d+)$/)) {
+      const id = parseInt(path.match(/^\/api\/widgets\/(\d+)$/)[1]);
+      deleteWidgetLayout(id);
+      return sendJson(res, { ok: true });
+    }
+
+    // ---- Print Time Tracking ----
+    if (method === 'GET' && path === '/api/time-tracking') {
+      const u = new URL(req.url, 'http://localhost');
+      const opts = {};
+      if (u.searchParams.get('filament_type')) opts.filament_type = u.searchParams.get('filament_type');
+      if (u.searchParams.get('from')) opts.from = u.searchParams.get('from');
+      if (u.searchParams.get('to')) opts.to = u.searchParams.get('to');
+      if (u.searchParams.get('limit')) opts.limit = parseInt(u.searchParams.get('limit'));
+      return sendJson(res, getTimeTracking(opts));
+    }
+    if (method === 'GET' && path === '/api/time-tracking/stats') {
+      return sendJson(res, getTimeTrackingStats());
+    }
+    if (method === 'POST' && path === '/api/time-tracking') {
+      const body = await readBody(req);
+      const id = addTimeTracking(body);
+      return sendJson(res, { ok: true, id });
+    }
+
+    // ---- Milestone Screenshots ----
+    if (method === 'GET' && path.startsWith('/api/milestones/archive/')) {
+      const parts = path.split('/');
+      // /api/milestones/archive/{historyId}/{filename}
+      if (parts.length === 6) {
+        const historyId = parts[4];
+        const filename = parts[5];
+        const filepath = getArchivedMilestoneFile(historyId, filename);
+        if (filepath) {
+          res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=86400' });
+          return createReadStream(filepath).pipe(res);
+        }
+        return sendJson(res, { error: 'Not found' }, 404);
+      }
+      // /api/milestones/archive/{historyId}
+      if (parts.length === 5) {
+        const historyId = parts[4];
+        return sendJson(res, getArchivedMilestones(historyId));
+      }
+    }
+    if (method === 'GET' && path.startsWith('/api/milestones/')) {
+      const parts = path.split('/');
+      // /api/milestones/{printerId}/{filename}
+      if (parts.length === 5) {
+        const printerId = parts[3];
+        const filename = parts[4];
+        const filepath = getMilestoneFile(printerId, filename);
+        if (filepath) {
+          res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'no-cache' });
+          return createReadStream(filepath).pipe(res);
+        }
+        return sendJson(res, { error: 'Not found' }, 404);
+      }
+      // /api/milestones/{printerId}
+      if (parts.length === 4) {
+        const printerId = parts[3];
+        return sendJson(res, getMilestones(printerId));
+      }
+    }
+
+    // ---- Power Monitor (Shelly/Tasmota) ----
+    if (method === 'GET' && path === '/api/power/current') {
+      return sendJson(res, _power.getLatestPower() || { watts: null });
+    }
+    if (method === 'GET' && path === '/api/power/session') {
+      return sendJson(res, _power.getLiveSession() || { error: 'No active session' });
+    }
+    if (method === 'GET' && path.startsWith('/api/power/print/')) {
+      const printId = parseInt(path.split('/').pop());
+      return sendJson(res, _power.getPrintPower(printId) || { error: 'No data' });
+    }
+    if (method === 'GET' && path === '/api/power/history') {
+      const u = new URL(req.url, 'http://localhost');
+      const limit = parseInt(u.searchParams.get('limit') || '20');
+      return sendJson(res, _power.getPowerHistory(limit));
+    }
+    if (method === 'POST' && path === '/api/power/poll') {
+      const result = await _power.pollNow();
+      return sendJson(res, result || { error: 'Poll failed' });
+    }
+    if (method === 'POST' && path === '/api/power/restart') {
+      _power.restartMonitor();
+      return sendJson(res, { ok: true });
+    }
+
     // ---- Material Reference ----
     if (method === 'GET' && path === '/api/materials') {
       return sendJson(res, getMaterials());
@@ -4792,6 +5169,65 @@ export async function handleApiRequest(req, res) {
   }
 }
 
+function _extractZipFile(zipBuf, targetPaths) {
+  // Find EOCD
+  let eocdOff = -1;
+  for (let i = zipBuf.length - 22; i >= Math.max(0, zipBuf.length - 65557); i--) {
+    if (zipBuf.readUInt32LE(i) === 0x06054b50) { eocdOff = i; break; }
+  }
+  if (eocdOff < 0) return null;
+  const cdOffset = zipBuf.readUInt32LE(eocdOff + 16);
+  const entryCount = zipBuf.readUInt16LE(eocdOff + 10);
+  let pos = cdOffset;
+  for (let i = 0; i < entryCount; i++) {
+    if (pos + 46 > zipBuf.length || zipBuf.readUInt32LE(pos) !== 0x02014b50) break;
+    const compression = zipBuf.readUInt16LE(pos + 10);
+    const compressedSize = zipBuf.readUInt32LE(pos + 20);
+    const fnLen = zipBuf.readUInt16LE(pos + 28);
+    const extraLen = zipBuf.readUInt16LE(pos + 30);
+    const commentLen = zipBuf.readUInt16LE(pos + 32);
+    const localOffset = zipBuf.readUInt32LE(pos + 42);
+    const filename = zipBuf.subarray(pos + 46, pos + 46 + fnLen).toString('utf8');
+    if (targetPaths.some(tp => filename === tp || filename.toLowerCase() === tp.toLowerCase())) {
+      if (localOffset + 30 > zipBuf.length || zipBuf.readUInt32LE(localOffset) !== 0x04034b50) return null;
+      const lfhFnLen = zipBuf.readUInt16LE(localOffset + 26);
+      const lfhExtraLen = zipBuf.readUInt16LE(localOffset + 28);
+      const dataStart = localOffset + 30 + lfhFnLen + lfhExtraLen;
+      if (dataStart + compressedSize > zipBuf.length) return null;
+      const data = zipBuf.subarray(dataStart, dataStart + compressedSize);
+      if (compression === 0) return data;
+      if (compression === 8) { try { return inflateRawSync(data); } catch { return null; } }
+      return null;
+    }
+    pos += 46 + fnLen + extraLen + commentLen;
+  }
+  return null;
+}
+
+function _getPublicStatus() {
+  const printers = getPrinters();
+  const result = [];
+  for (const p of printers) {
+    const state = _hub?.printerStates?.[p.id] || {};
+    const gcodeState = state.gcode_state || 'OFFLINE';
+    const isPrinting = ['RUNNING', 'PREPARE', 'PAUSE'].includes(gcodeState);
+    result.push({
+      id: p.id,
+      name: p.name,
+      model: p.model || null,
+      status: gcodeState,
+      progress: isPrinting ? (parseInt(state.mc_percent) || 0) : null,
+      remaining_minutes: isPrinting ? (parseInt(state.mc_remaining_time) || 0) : null,
+      current_file: isPrinting ? (state.subtask_name || null) : null,
+      layer: isPrinting ? (parseInt(state.layer_num) || 0) : null,
+      total_layers: isPrinting ? (parseInt(state.total_layer_num) || 0) : null,
+      nozzle_temp: state.nozzle_temper ?? null,
+      bed_temp: state.bed_temper ?? null
+    });
+  }
+  return { printers: result, timestamp: new Date().toISOString() };
+}
+
 function _getApiDocs() {
   return {
     openapi: '3.0.3',
@@ -4829,9 +5265,12 @@ function _getApiDocs() {
       { name: 'NFC', description: 'NFC tag mapping' },
       { name: 'Community', description: 'Community filament database' },
       { name: 'Timelapse', description: 'Timelapse recordings' },
+      { name: 'Status', description: 'Public status page' },
       { name: 'System', description: 'Settings, backup, update' }
     ],
     endpoints: [
+      // Public Status
+      { method: 'GET', path: '/api/status/public', tag: 'Status', summary: 'Get public printer status (no auth required, must be enabled)', permission: null },
       // Auth
       { method: 'GET', path: '/api/auth/status', tag: 'Auth', summary: 'Get auth status', permission: null },
       { method: 'POST', path: '/api/auth/login', tag: 'Auth', summary: 'Login with credentials', permission: null },
@@ -5723,6 +6162,19 @@ export function dispatchWebhooksForEvent(eventType, title, message, data) {
       } else if (wh.template === 'slack') {
         payload = JSON.stringify({
           text: `*${title}*\n${message}`
+        });
+      } else if (wh.template === 'homey') {
+        // Flat structure optimized for Homey Flow tags
+        payload = JSON.stringify({
+          event: eventType,
+          title,
+          message,
+          printer_name: data?.printerName || '',
+          printer_id: data?.printerId || '',
+          file_name: data?.filename || '',
+          progress: data?.progress ?? 0,
+          status: data?.status || eventType,
+          timestamp: new Date().toISOString()
         });
       } else {
         payload = JSON.stringify({

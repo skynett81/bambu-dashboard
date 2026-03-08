@@ -331,6 +331,21 @@ body {
   box-shadow: inset 2px 0 0 var(--accent-green), 0 0 8px rgba(0, 174, 66, 0.06);
 }
 
+/* Sidebar sub-group labels */
+.sidebar-sub-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: color-mix(in srgb, var(--section-color, var(--text-muted)) 60%, var(--text-muted));
+  padding: 8px 10px 3px;
+  user-select: none;
+  opacity: 0.7;
+}
+.sidebar-sub-label:first-child {
+  padding-top: 4px;
+}
+
 /* Sidebar status */
 .sidebar-status {
   padding: 10px 14px;

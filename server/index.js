@@ -19,8 +19,14 @@ import { Updater } from './updater.js';
 import { sendTelemetryPing } from './telemetry.js';
 import { QueueManager } from './queue-manager.js';
 import { TimelapseService } from './timelapse-service.js';
+import { initEnergyService } from './energy-service.js';
+import { initPowerMonitor, onPrintStart, onPrintEnd } from './power-monitor.js';
+import { captureMilestone, archivePrintMilestones } from './milestone-service.js';
+import { initReportService } from './report-service.js';
 import { FailureDetectionService } from './failure-detection.js';
 import { buildPauseCommand } from './mqtt-commands.js';
+import { initHaDiscovery, onPrinterStateUpdate, shutdownHaDiscovery } from './ha-discovery.js';
+import { initRemoteNodes, shutdownRemoteNodes } from './remote-nodes.js';
 
 const IS_DEMO = process.env.BAMBU_DEMO === 'true';
 
@@ -258,6 +264,10 @@ if (httpsServer) {
 function broadcastAll(type, data) {
   hub.broadcast(type, data);
   if (hubHttps) hubHttps.broadcast(type, data);
+  // Forward printer state to HA MQTT discovery
+  if (type === 'status' && data.printer_id) {
+    onPrinterStateUpdate(data.printer_id, data);
+  }
 }
 
 function setMetaAll(printerId, meta) {
@@ -330,6 +340,21 @@ setQueueManager(queueManager);
 const timelapseService = new TimelapseService();
 timelapseService.init();
 setTimelapseService(timelapseService);
+
+// Energy Service (Tibber / Nordpool)
+initEnergyService();
+
+// Power Monitor (Shelly / Tasmota smart plugs)
+initPowerMonitor();
+
+// Report Service (weekly/monthly)
+initReportService();
+
+// Home Assistant MQTT Discovery
+initHaDiscovery(hub);
+
+// Remote Node Linking
+initRemoteNodes(hub, broadcastAll);
 
 // E-Commerce License Manager
 const ecomLicense = new EcomLicenseManager();
@@ -467,7 +492,7 @@ for (const [id, entry] of manager.printers) {
     const origOnPrintEnd = entry.tracker.onPrintEnd;
     const origOnPrintStart = entry.tracker.onPrintStart;
 
-    // Timelapse + AI detection start on print start
+    // Timelapse + AI detection + power monitor start on print start
     entry.tracker.onPrintStart = (data) => {
       if (origOnPrintStart) origOnPrintStart(data);
       const printer = getPrinters().find(p => p.id === id);
@@ -479,6 +504,8 @@ for (const [id, entry] of manager.printers) {
         // Start AI failure detection monitoring
         failureDetector.startMonitoring(id, printer.ip, printer.accessCode);
       }
+      // Start power monitoring for this print
+      onPrintStart(id);
     };
 
     entry.tracker.onPrintEnd = (data) => {
@@ -490,6 +517,24 @@ for (const [id, entry] of manager.printers) {
       }
       // Stop AI failure detection
       failureDetector.stopMonitoring(id);
+      // Stop power monitoring — associate with print history ID
+      onPrintEnd(data.printHistoryId || id);
+      // Archive milestone screenshots to print history
+      if (data.printHistoryId) archivePrintMilestones(id, data.printHistoryId);
+    };
+
+    // Milestone screenshot capture (25/50/75/100%)
+    entry.tracker.onMilestone = (data) => {
+      const printer = getPrinters().find(p => p.id === id);
+      if (printer && printer.ip && printer.accessCode) {
+        const enabled = getInventorySetting('milestones_enabled');
+        if (enabled === '1' || enabled === 'true' || enabled === null || enabled === undefined) {
+          captureMilestone(id, printer.ip, printer.accessCode, data.milestone, {
+            layer: data.layer,
+            totalLayers: data.totalLayers
+          }).catch(() => {});
+        }
+      }
     };
 
     // Layer pause — pause printer when target layer is reached
@@ -725,6 +770,8 @@ function shutdown() {
   notifier.shutdown();
   manager.shutdown();
   discovery.shutdown();
+  shutdownHaDiscovery();
+  shutdownRemoteNodes();
   process.exit(0);
 }
 process.on('SIGINT', shutdown);

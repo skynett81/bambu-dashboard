@@ -242,6 +242,18 @@
           remain = tray.remain >= 0 ? Math.round(tray.remain) : null;
         }
 
+        // Adjust for in-progress filament consumption (match active-filament.js)
+        if (isActive && isPrinting && est && est.weight_g > 0 && remain !== null) {
+          const pct = data.mc_percent || 0;
+          const totalG = linkedSpool ? linkedSpool.initial_weight_g : (tray.tray_weight ? parseFloat(tray.tray_weight) : null);
+          const remainG = linkedSpool ? linkedSpool.remaining_weight_g : (totalG ? totalG * (remain / 100) : null);
+          if (remainG !== null && totalG > 0) {
+            const consumedG = Math.round(est.weight_g * pct / 100);
+            const remainingPrintG = est.weight_g - consumedG;
+            remain = Math.max(0, Math.round(((remainG - remainingPrintG) / totalG) * 100));
+          }
+        }
+
         const hasRfid = !!(tray.tag_uid || tray.tray_uuid);
 
         const fillPct = remain !== null ? Math.max(0, Math.min(100, remain)) : 100;
@@ -290,6 +302,18 @@
           remain = vtTray.remain >= 0 ? Math.round(vtTray.remain) : null;
         }
 
+        // Adjust for in-progress filament consumption (match active-filament.js)
+        if (isExtActive && isPrinting && est && est.weight_g > 0 && remain !== null) {
+          const pct = data.mc_percent || 0;
+          const totalG = linkedSpool ? linkedSpool.initial_weight_g : (vtTray.tray_weight ? parseFloat(vtTray.tray_weight) : null);
+          const remainG = linkedSpool ? linkedSpool.remaining_weight_g : (totalG ? totalG * (remain / 100) : null);
+          if (remainG !== null && totalG > 0) {
+            const consumedG = Math.round(est.weight_g * pct / 100);
+            const remainingPrintG = est.weight_g - consumedG;
+            remain = Math.max(0, Math.round(((remainG - remainingPrintG) / totalG) * 100));
+          }
+        }
+
         extSection.innerHTML = `
           <div class="ams-ext-label">Ext</div>
           <div class="ams-ext-row">
@@ -331,12 +355,12 @@
         const pid = window.printerState?.getActivePrinterId?.();
         if (!pid) return;
         try {
-          await fetch(`/api/printers/${pid}/filament-change`, {
+          await fetch(`/api/printers/${pid}/change-filament`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ step: 'start' })
           });
-          await fetch(`/api/printers/${pid}/filament-change`, {
+          await fetch(`/api/printers/${pid}/change-filament`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ step: 'unload' })
@@ -350,7 +374,7 @@
         const pid = window.printerState?.getActivePrinterId?.();
         if (!pid) return;
         try {
-          await fetch(`/api/printers/${pid}/filament-change`, {
+          await fetch(`/api/printers/${pid}/change-filament`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ step: 'load' })

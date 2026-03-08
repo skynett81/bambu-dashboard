@@ -161,6 +161,7 @@ const PUBLIC_PATHS = new Set([
 export function isPublicPath(pathname) {
   if (PUBLIC_PATHS.has(pathname)) return true;
   if (pathname.startsWith('/api/auth/')) return true;
+  if (pathname === '/status.html' || pathname === '/api/status/public') return true;
   return false;
 }
 

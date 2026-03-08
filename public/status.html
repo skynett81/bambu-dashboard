@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bambu Dashboard — Status</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-primary: #f5f5f5;
+      --bg-secondary: #ffffff;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --text-primary: #1a1a1a;
+      --text-secondary: #555555;
+      --text-muted: #999999;
+      --accent-green: #00AE42;
+      --accent-blue: #1279ff;
+      --accent-orange: #f59e0b;
+      --accent-red: #e53935;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .status-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .status-header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .status-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .status-header .subtitle {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .status-summary {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .summary-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+    }
+    .summary-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .dot-idle { background: var(--accent-green); }
+    .dot-printing { background: var(--accent-blue); animation: pulse 2s infinite; }
+    .dot-offline { background: var(--text-muted); }
+    .dot-error { background: var(--accent-red); }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .printer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .printer-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: box-shadow 0.2s;
+    }
+    .printer-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+    .printer-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .printer-name {
+      font-weight: 600;
+      font-size: 1rem;
+    }
+    .printer-model {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .badge-idle { background: rgba(0,174,66,0.1); color: var(--accent-green); }
+    .badge-printing { background: rgba(18,121,255,0.1); color: var(--accent-blue); }
+    .badge-pause { background: rgba(245,158,11,0.1); color: var(--accent-orange); }
+    .badge-finish { background: rgba(0,174,66,0.1); color: var(--accent-green); }
+    .badge-offline { background: rgba(153,153,153,0.1); color: var(--text-muted); }
+    .badge-error { background: rgba(229,57,53,0.1); color: var(--accent-red); }
+    .badge-prepare { background: rgba(18,121,255,0.1); color: var(--accent-blue); }
+    .progress-section { margin-top: 12px; }
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(0,0,0,0.06);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent-blue);
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    .progress-details {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+    .progress-pct {
+      font-weight: 600;
+      color: var(--accent-blue);
+    }
+    .print-info {
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+    }
+    .print-info .file-name {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .temp-row {
+      display: flex;
+      gap: 16px;
+      margin-top: 10px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .temp-row span { display: flex; align-items: center; gap: 4px; }
+    .disabled-msg {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 1.1rem;
+    }
+    .auto-refresh { text-align: center; margin-top: 20px; color: var(--text-muted); font-size: 0.75rem; }
+    @media (max-width: 600px) {
+      body { padding: 12px; }
+      .printer-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="status-container">
+    <div class="status-header">
+      <h1>Printer Status</h1>
+      <div class="subtitle" id="timestamp"></div>
+    </div>
+    <div class="status-summary" id="summary"></div>
+    <div class="printer-grid" id="grid"></div>
+    <div class="auto-refresh" id="refresh-note"></div>
+    <div class="disabled-msg" id="disabled-msg" style="display:none">
+      Public status page is disabled.
+    </div>
+  </div>
+
+  <script>
+    const STATUS_MAP = {
+      'IDLE': { label: 'Idle', badge: 'badge-idle', dot: 'dot-idle' },
+      'RUNNING': { label: 'Printing', badge: 'badge-printing', dot: 'dot-printing' },
+      'PREPARE': { label: 'Preparing', badge: 'badge-prepare', dot: 'dot-printing' },
+      'PAUSE': { label: 'Paused', badge: 'badge-pause', dot: 'dot-printing' },
+      'FINISH': { label: 'Finished', badge: 'badge-finish', dot: 'dot-idle' },
+      'OFFLINE': { label: 'Offline', badge: 'badge-offline', dot: 'dot-offline' },
+      'FAILED': { label: 'Error', badge: 'badge-error', dot: 'dot-error' }
+    };
+
+    function getStatusInfo(s) {
+      return STATUS_MAP[s] || { label: s || 'Unknown', badge: 'badge-offline', dot: 'dot-offline' };
+    }
+
+    function fmtTime(mins) {
+      if (!mins) return '--';
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return h > 0 ? `${h}h ${m}m` : `${m}m`;
+    }
+
+    function renderCard(p) {
+      const info = getStatusInfo(p.status);
+      const isPrinting = ['RUNNING', 'PREPARE', 'PAUSE'].includes(p.status);
+      let html = `<div class="printer-card">
+        <div class="printer-card-header">
+          <div>
+            <div class="printer-name">${esc(p.name)}</div>
+            ${p.model ? `<div class="printer-model">${esc(p.model)}</div>` : ''}
+          </div>
+          <span class="status-badge ${info.badge}">${info.label}</span>
+        </div>`;
+
+      if (isPrinting && p.progress != null) {
+        html += `<div class="progress-section">
+          <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${p.progress}%"></div></div>
+          <div class="progress-details">
+            <span class="progress-pct">${p.progress}%</span>
+            <span>${fmtTime(p.remaining_minutes)} remaining</span>
+          </div>
+        </div>`;
+        if (p.current_file) {
+          html += `<div class="print-info">
+            <span class="file-name" title="${esc(p.current_file)}">${esc(p.current_file.replace(/\.3mf$|\.gcode\.3mf$/i, ''))}</span>
+            ${p.layer && p.total_layers ? `<span>Layer ${p.layer} / ${p.total_layers}</span>` : ''}
+          </div>`;
+        }
+      }
+
+      if (p.nozzle_temp != null || p.bed_temp != null) {
+        html += `<div class="temp-row">`;
+        if (p.nozzle_temp != null) html += `<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>${Math.round(p.nozzle_temp)}&deg;C</span>`;
+        if (p.bed_temp != null) html += `<span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/></svg>${Math.round(p.bed_temp)}&deg;C</span>`;
+        html += `</div>`;
+      }
+
+      html += `</div>`;
+      return html;
+    }
+
+    function esc(s) {
+      const d = document.createElement('div');
+      d.textContent = s || '';
+      return d.innerHTML;
+    }
+
+    function renderSummary(printers) {
+      const counts = { printing: 0, idle: 0, offline: 0, error: 0 };
+      for (const p of printers) {
+        if (['RUNNING', 'PREPARE', 'PAUSE'].includes(p.status)) counts.printing++;
+        else if (p.status === 'IDLE' || p.status === 'FINISH') counts.idle++;
+        else if (p.status === 'FAILED') counts.error++;
+        else counts.offline++;
+      }
+      let html = '';
+      if (counts.printing > 0) html += `<div class="summary-badge"><span class="summary-dot dot-printing"></span>${counts.printing} printing</div>`;
+      if (counts.idle > 0) html += `<div class="summary-badge"><span class="summary-dot dot-idle"></span>${counts.idle} idle</div>`;
+      if (counts.offline > 0) html += `<div class="summary-badge"><span class="summary-dot dot-offline"></span>${counts.offline} offline</div>`;
+      if (counts.error > 0) html += `<div class="summary-badge"><span class="summary-dot dot-error"></span>${counts.error} error</div>`;
+      return html;
+    }
+
+    async function refresh() {
+      try {
+        const res = await fetch('/api/status/public');
+        if (res.status === 403) {
+          document.getElementById('grid').innerHTML = '';
+          document.getElementById('summary').innerHTML = '';
+          document.getElementById('disabled-msg').style.display = '';
+          document.getElementById('refresh-note').textContent = '';
+          return;
+        }
+        const data = await res.json();
+        document.getElementById('disabled-msg').style.display = 'none';
+        document.getElementById('timestamp').textContent = 'Updated ' + new Date(data.timestamp).toLocaleTimeString();
+        document.getElementById('summary').innerHTML = renderSummary(data.printers);
+        document.getElementById('grid').innerHTML = data.printers.map(renderCard).join('');
+        document.getElementById('refresh-note').textContent = 'Auto-refreshes every 10 seconds';
+      } catch (e) {
+        console.error('Status fetch failed:', e);
+      }
+    }
+
+    refresh();
+    setInterval(refresh, 10000);
+  </script>
+</body>
+</html>

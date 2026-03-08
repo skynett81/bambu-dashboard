@@ -1,4 +1,4 @@
-import { addHistory, getHistory, addError, getErrors, addAmsSnapshot, getActiveNozzleSession, createNozzleSession, retireNozzleSession, updateNozzleSessionCounters, upsertComponentWear, upsertAmsTrayLifetime, updateAmsTrayFilamentUsed, getSpoolBySlot, useSpoolWeight, savePrintCost, estimatePrintCostAdvanced, lookupNfcTag, linkNfcTag, assignSpoolToSlot, syncAmsToSpool, getActiveLayerPauses, markLayerTriggered, deactivateLayerPauses } from './database.js';
+import { addHistory, getHistory, addError, getErrors, addAmsSnapshot, getActiveNozzleSession, createNozzleSession, retireNozzleSession, updateNozzleSessionCounters, upsertComponentWear, upsertAmsTrayLifetime, updateAmsTrayFilamentUsed, getSpoolBySlot, useSpoolWeight, savePrintCost, estimatePrintCostAdvanced, lookupNfcTag, linkNfcTag, assignSpoolToSlot, syncAmsToSpool, getActiveLayerPauses, markLayerTriggered, deactivateLayerPauses, addTimeTracking } from './database.js';
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
@@ -72,8 +72,10 @@ export class PrintTracker {
     // Notification callbacks
     this.onPrintStart = null;
     this.onPrintEnd = null;
+    this.onMilestone = null;
     this.onError = null;
     this.onNfcAutoLinked = null;
+    this._milestonesTriggered = new Set();
 
     // NFC auto-detection cache: tag_uid -> { spool_id, ams_unit, tray_id }
     this._nfcProcessed = new Map();
@@ -126,6 +128,24 @@ export class PrintTracker {
       }
       if (printData.chamber_temper > (this.currentPrint.maxTemp_chamber || 0)) {
         this.currentPrint.maxTemp_chamber = printData.chamber_temper;
+      }
+    }
+
+    // Milestone detection (25%, 50%, 75%, 100%)
+    if (this.currentPrint && this.onMilestone && printData.mc_percent != null) {
+      const pct = parseInt(printData.mc_percent) || 0;
+      for (const milestone of [25, 50, 75, 100]) {
+        if (pct >= milestone && !this._milestonesTriggered.has(milestone)) {
+          this._milestonesTriggered.add(milestone);
+          this.onMilestone({
+            printerId: this.printerId,
+            filename: this.currentPrint.filename,
+            milestone,
+            layer: printData.layer_num || 0,
+            totalLayers: printData.total_layer_num || 0,
+            progress: pct
+          });
+        }
       }
     }
 
@@ -272,10 +292,14 @@ export class PrintTracker {
 
     this._hmsLogged = new Set(); // Reset HMS dedup for new print
     this._lastPrintError = null; // Reset print_error dedup for new print
+    this._milestonesTriggered = new Set(); // Reset milestones for new print
     this.amsSnapshot = this._getAmsRemaining(data);
     this.colorChanges = 0;
     this.lastTrayId = data.ams?.tray_now != null ? String(data.ams.tray_now) : null;
     const filamentInfo = this._getActiveFilament(data);
+
+    // Capture estimated time from MQTT (mc_remaining_time is in minutes at print start)
+    const estimatedSeconds = parseInt(data.mc_remaining_time) > 0 ? parseInt(data.mc_remaining_time) * 60 : null;
 
     this.currentPrint = {
       started_at: new Date().toISOString(),
@@ -295,7 +319,8 @@ export class PrintTracker {
       bed_target: data.bed_target_temper || 0,
       nozzle_target: data.nozzle_target_temper || 0,
       ams_units_used: data.ams?.ams?.length || 0,
-      tray_id: data.ams?.tray_now != null ? String(data.ams.tray_now) : null
+      tray_id: data.ams?.tray_now != null ? String(data.ams.tray_now) : null,
+      estimated_seconds: estimatedSeconds
     };
 
     // Check for nozzle change
@@ -385,12 +410,31 @@ export class PrintTracker {
       if (this.onPrintEnd) {
         this.onPrintEnd({
           printerId: this.printerId,
+          printHistoryId,
           filename: record.filename,
           status,
           duration,
           filamentUsed: record.filament_used_g,
           error: data.print_error_msg || null
         });
+      }
+
+      // Save time tracking data (estimated vs actual)
+      if (status === 'completed' && this.currentPrint.estimated_seconds && duration > 0) {
+        try {
+          const est = this.currentPrint.estimated_seconds;
+          const accuracy = Math.round((100 - Math.abs(est - duration) * 100 / est) * 10) / 10;
+          addTimeTracking({
+            print_history_id: printHistoryId,
+            printer_id: this.printerId,
+            filename: record.filename,
+            estimated_s: est,
+            actual_s: duration,
+            accuracy_pct: accuracy,
+            filament_type: record.filament_type,
+            finished_at: record.finished_at
+          });
+        } catch (_) {}
       }
 
       // Auto-save print cost

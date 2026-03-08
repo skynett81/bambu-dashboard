@@ -25,12 +25,14 @@
       const dot = getStatusDot(ps);
       const mini = getMiniStatus(ps);
 
+      const remoteLabel = meta.remote ? `<span style="font-size:0.6rem;opacity:0.6;margin-left:2px">${esc(meta.remoteNodeName || 'Remote')}</span>` : '';
+
       return `<button class="printer-tab ${isActive ? 'active' : ''}"
                       data-printer-id="${id}"
                       onclick="selectPrinter('${id}')">
                 ${dot}
                 <span class="printer-tab-info">
-                  <span class="printer-tab-name">${esc(meta.name || id)}</span>
+                  <span class="printer-tab-name">${esc(meta.name || id)}${remoteLabel}</span>
                   ${mini}
                 </span>
               </button>`;

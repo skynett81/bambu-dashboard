@@ -840,6 +840,8 @@
             </div>
           </div>
           <div class="ph-detail-divider"></div>
+          <div id="ph-milestone-album-${row.id}" class="ph-milestone-album"></div>
+          <div class="ph-detail-divider"></div>
           <div class="ph-detail-footer-fields">
             <div class="ph-detail-field ph-detail-field-wide">
               <span class="ph-detail-label">${t('history.filename')}</span>
@@ -870,6 +872,25 @@
             }
           }).catch(() => {});
       }
+    }
+
+    // Load milestone album
+    const albumEl = overlay.querySelector(`#ph-milestone-album-${id}`);
+    if (albumEl) {
+      fetch(`/api/milestones/archive/${id}`).then(r => r.json()).then(milestones => {
+        if (!milestones.length) { albumEl.style.display = 'none'; return; }
+        let ah = `<div class="ph-detail-label" style="margin-bottom:8px">${t('history.milestone_album')}</div>`;
+        ah += `<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">`;
+        for (const m of milestones) {
+          ah += `<div style="position:relative;border-radius:6px;overflow:hidden;cursor:pointer" onclick="window.open('${m.url}','_blank')">`;
+          ah += `<img src="${m.url}" alt="${m.milestone}%" style="width:100%;aspect-ratio:16/9;object-fit:cover;display:block">`;
+          ah += `<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.7));padding:2px 6px;text-align:center">`;
+          ah += `<span style="color:#fff;font-size:0.7rem;font-weight:700">${m.milestone}%</span>`;
+          ah += `</div></div>`;
+        }
+        ah += `</div>`;
+        albumEl.innerHTML = ah;
+      }).catch(() => { albumEl.style.display = 'none'; });
     }
   }
 

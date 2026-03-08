@@ -240,6 +240,13 @@ function _runMigrations() {
     { version: 74, up: _mig074_round5_features },
     { version: 75, up: _mig075_chamber_temp },
     { version: 76, up: _mig076_error_context },
+    { version: 77, up: _mig077_energy_service },
+    { version: 78, up: _mig078_power_readings },
+    { version: 79, up: _mig079_remote_nodes },
+    { version: 80, up: _mig080_scheduled_prints },
+    { version: 81, up: _mig081_file_library },
+    { version: 82, up: _mig082_widget_layouts },
+    { version: 83, up: _mig083_time_tracking },
   ];
 
   for (const m of migrations) {
@@ -3141,6 +3148,92 @@ function _mig076_error_context() {
   try { db.exec('ALTER TABLE error_log ADD COLUMN context TEXT'); } catch { /* exists */ }
 }
 
+function _mig077_energy_service() {
+  db.exec(`CREATE TABLE IF NOT EXISTS energy_prices (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    starts_at TEXT NOT NULL,
+    price REAL NOT NULL,
+    currency TEXT DEFAULT 'NOK',
+    zone TEXT,
+    provider TEXT,
+    level TEXT,
+    fetched_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(starts_at, zone)
+  )`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_energy_starts ON energy_prices(starts_at)`);
+}
+
+function _mig078_power_readings() {
+  db.exec(`CREATE TABLE IF NOT EXISTS power_readings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    print_id INTEGER,
+    started_at TEXT,
+    ended_at TEXT,
+    total_wh REAL DEFAULT 0,
+    avg_watts REAL DEFAULT 0,
+    peak_watts REAL DEFAULT 0,
+    duration_seconds INTEGER DEFAULT 0,
+    reading_count INTEGER DEFAULT 0,
+    FOREIGN KEY (print_id) REFERENCES print_history(id)
+  )`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_power_print ON power_readings(print_id)`);
+}
+
+function _mig081_file_library() {
+  db.exec(`CREATE TABLE IF NOT EXISTS file_library (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    file_type TEXT NOT NULL,
+    file_size INTEGER,
+    category TEXT DEFAULT 'uncategorized',
+    tags TEXT,
+    notes TEXT,
+    estimated_time_s INTEGER,
+    estimated_filament_g REAL,
+    filament_type TEXT,
+    print_count INTEGER DEFAULT 0,
+    last_printed TEXT,
+    thumbnail_path TEXT,
+    added_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_fl_category ON file_library(category)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_fl_type ON file_library(file_type)`);
+}
+
+function _mig080_scheduled_prints() {
+  db.exec(`CREATE TABLE IF NOT EXISTS scheduled_prints (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    filename TEXT NOT NULL,
+    printer_id TEXT,
+    scheduled_at TEXT NOT NULL,
+    repeat_rule TEXT,
+    repeat_end TEXT,
+    color TEXT DEFAULT '#1279ff',
+    notes TEXT,
+    status TEXT DEFAULT 'pending',
+    queue_id INTEGER,
+    last_run TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_sp_scheduled_at ON scheduled_prints(scheduled_at)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_sp_status ON scheduled_prints(status)`);
+}
+
+function _mig079_remote_nodes() {
+  db.exec(`CREATE TABLE IF NOT EXISTS remote_nodes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    base_url TEXT NOT NULL,
+    api_key TEXT,
+    enabled INTEGER DEFAULT 1,
+    last_seen TEXT,
+    last_error TEXT,
+    added_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+}
+
 function _generateShortId() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // No I/O/0/1 to avoid confusion
   for (let attempt = 0; attempt < 100; attempt++) {
@@ -3203,11 +3296,14 @@ export function deletePrinter(id) {
 
 // ---- History ----
 
-export function getHistory(limit = 50, offset = 0, printerId = null) {
-  if (printerId) {
-    return db.prepare('SELECT * FROM print_history WHERE printer_id = ? ORDER BY started_at DESC LIMIT ? OFFSET ?').all(printerId, limit, offset);
-  }
-  return db.prepare('SELECT * FROM print_history ORDER BY started_at DESC LIMIT ? OFFSET ?').all(limit, offset);
+export function getHistory(limit = 50, offset = 0, printerId = null, status = null) {
+  const conditions = [];
+  const params = [];
+  if (printerId) { conditions.push('printer_id = ?'); params.push(printerId); }
+  if (status) { conditions.push('status = ?'); params.push(status); }
+  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  params.push(limit, offset);
+  return db.prepare(`SELECT * FROM print_history ${where} ORDER BY started_at DESC LIMIT ? OFFSET ?`).all(...params);
 }
 
 export function getHistoryById(id) {
@@ -3845,6 +3941,92 @@ export function backfillWaste(startupPurgeG = 1.0, wastePerChangeG = 5) {
     }
   }
   return updated;
+}
+
+// ---- Activity Heatmap ----
+
+export function getDailyActivity(days = 365) {
+  return db.prepare(`
+    SELECT date(started_at) as day,
+      COUNT(*) as prints,
+      SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+      SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) as failed,
+      SUM(CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END) as cancelled,
+      ROUND(SUM(duration_seconds) / 3600.0, 1) as hours,
+      ROUND(SUM(filament_used_g), 1) as filament_g
+    FROM print_history
+    WHERE started_at >= date('now', '-' || ? || ' days')
+    GROUP BY date(started_at)
+    ORDER BY day ASC
+  `).all(days);
+}
+
+export function getActivityStreaks() {
+  const rows = db.prepare(`
+    SELECT DISTINCT date(started_at) as day
+    FROM print_history
+    WHERE started_at >= date('now', '-365 days')
+    ORDER BY day ASC
+  `).all();
+  return rows.map(r => r.day);
+}
+
+// ---- Power Readings ----
+
+export function getPowerReading(printId) {
+  return db.prepare('SELECT * FROM power_readings WHERE print_id = ?').get(printId) || null;
+}
+
+export function getPowerReadings(limit = 20) {
+  return db.prepare('SELECT * FROM power_readings ORDER BY started_at DESC LIMIT ?').all(limit);
+}
+
+export function upsertPowerReading(printId, startedAt, endedAt, totalWh, avgWatts, peakWatts, durationSeconds, readingCount) {
+  const existing = db.prepare('SELECT id, total_wh, peak_watts, duration_seconds, reading_count FROM power_readings WHERE print_id = ?').get(printId);
+  if (existing) {
+    const newWh = existing.total_wh + totalWh;
+    const newPeak = Math.max(existing.peak_watts || 0, peakWatts);
+    const newCount = existing.reading_count + readingCount;
+    const newDur = (existing.duration_seconds || 0) + durationSeconds;
+    const newAvg = newDur > 0 ? Math.round((newWh / (newDur / 3600)) || 0) : 0;
+    db.prepare('UPDATE power_readings SET total_wh = ?, avg_watts = ?, peak_watts = ?, ended_at = ?, duration_seconds = ?, reading_count = ? WHERE id = ?')
+      .run(newWh, newAvg, newPeak, endedAt, newDur, newCount, existing.id);
+  } else {
+    db.prepare('INSERT INTO power_readings (print_id, started_at, ended_at, total_wh, avg_watts, peak_watts, duration_seconds, reading_count) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+      .run(printId, startedAt, endedAt, totalWh, avgWatts, peakWatts, durationSeconds, readingCount);
+  }
+}
+
+// ---- Remote Nodes ----
+
+export function getRemoteNodes() {
+  return db.prepare('SELECT * FROM remote_nodes ORDER BY name').all();
+}
+
+export function getRemoteNode(id) {
+  return db.prepare('SELECT * FROM remote_nodes WHERE id = ?').get(id);
+}
+
+export function addRemoteNode(node) {
+  const result = db.prepare('INSERT INTO remote_nodes (name, base_url, api_key, enabled) VALUES (?, ?, ?, ?)').run(
+    node.name, node.base_url, node.api_key || null, node.enabled !== false ? 1 : 0
+  );
+  return result.lastInsertRowid;
+}
+
+export function updateRemoteNode(id, node) {
+  const fields = [];
+  const values = [];
+  for (const key of ['name', 'base_url', 'api_key', 'enabled', 'last_seen', 'last_error']) {
+    if (node[key] !== undefined) { fields.push(`${key} = ?`); values.push(key === 'enabled' ? (node[key] ? 1 : 0) : node[key]); }
+  }
+  if (fields.length === 0) return;
+  values.push(id);
+  db.prepare(`UPDATE remote_nodes SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+}
+
+export function deleteRemoteNode(id) {
+  db.prepare('DELETE FROM remote_nodes WHERE id = ?').run(id);
 }
 
 // ---- Telemetry ----
@@ -7352,4 +7534,183 @@ export function importCommunityToInventory(communityId, vendorId) {
     cf.max_volumetric_speed, cf.flow_ratio, cf.retraction_distance, cf.retraction_speed
   );
   return Number(r.lastInsertRowid);
+}
+
+// ── Scheduled Prints ──
+export function getScheduledPrints(from, to) {
+  let sql = 'SELECT * FROM scheduled_prints WHERE 1=1';
+  const params = [];
+  if (from) { sql += ' AND scheduled_at >= ?'; params.push(from); }
+  if (to) { sql += ' AND scheduled_at <= ?'; params.push(to); }
+  sql += ' ORDER BY scheduled_at ASC';
+  return db.prepare(sql).all(...params);
+}
+export function getScheduledPrint(id) {
+  return db.prepare('SELECT * FROM scheduled_prints WHERE id = ?').get(id);
+}
+export function addScheduledPrint(sp) {
+  const r = db.prepare(`INSERT INTO scheduled_prints (title, filename, printer_id, scheduled_at, repeat_rule, repeat_end, color, notes, status, queue_id)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    sp.title, sp.filename, sp.printer_id || null, sp.scheduled_at,
+    sp.repeat_rule || null, sp.repeat_end || null, sp.color || '#1279ff',
+    sp.notes || null, sp.status || 'pending', sp.queue_id || null
+  );
+  return Number(r.lastInsertRowid);
+}
+export function updateScheduledPrint(id, sp) {
+  const fields = [];
+  const vals = [];
+  for (const key of ['title', 'filename', 'printer_id', 'scheduled_at', 'repeat_rule', 'repeat_end', 'color', 'notes', 'status', 'queue_id', 'last_run']) {
+    if (sp[key] !== undefined) { fields.push(`${key} = ?`); vals.push(sp[key]); }
+  }
+  if (!fields.length) return;
+  vals.push(id);
+  db.prepare(`UPDATE scheduled_prints SET ${fields.join(', ')} WHERE id = ?`).run(...vals);
+}
+export function deleteScheduledPrint(id) {
+  db.prepare('DELETE FROM scheduled_prints WHERE id = ?').run(id);
+}
+
+// ── File Library ──
+export function getFileLibrary(opts = {}) {
+  let sql = 'SELECT * FROM file_library WHERE 1=1';
+  const params = [];
+  if (opts.category) { sql += ' AND category = ?'; params.push(opts.category); }
+  if (opts.file_type) { sql += ' AND file_type = ?'; params.push(opts.file_type); }
+  if (opts.search) { sql += ' AND (original_name LIKE ? OR tags LIKE ? OR notes LIKE ?)'; const s = `%${opts.search}%`; params.push(s, s, s); }
+  sql += ' ORDER BY added_at DESC';
+  if (opts.limit) { sql += ' LIMIT ?'; params.push(opts.limit); }
+  if (opts.offset) { sql += ' OFFSET ?'; params.push(opts.offset); }
+  return db.prepare(sql).all(...params);
+}
+export function getFileLibraryItem(id) {
+  return db.prepare('SELECT * FROM file_library WHERE id = ?').get(id);
+}
+export function addFileLibraryItem(item) {
+  const r = db.prepare(`INSERT INTO file_library (filename, original_name, file_type, file_size, category, tags, notes, estimated_time_s, estimated_filament_g, filament_type, thumbnail_path)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    item.filename, item.original_name, item.file_type, item.file_size || 0,
+    item.category || 'uncategorized', item.tags || null, item.notes || null,
+    item.estimated_time_s || null, item.estimated_filament_g || null,
+    item.filament_type || null, item.thumbnail_path || null
+  );
+  return Number(r.lastInsertRowid);
+}
+export function updateFileLibraryItem(id, item) {
+  const fields = [];
+  const vals = [];
+  for (const key of ['original_name', 'category', 'tags', 'notes', 'estimated_time_s', 'estimated_filament_g', 'filament_type', 'print_count', 'last_printed', 'thumbnail_path']) {
+    if (item[key] !== undefined) { fields.push(`${key} = ?`); vals.push(item[key]); }
+  }
+  if (!fields.length) return;
+  vals.push(id);
+  db.prepare(`UPDATE file_library SET ${fields.join(', ')} WHERE id = ?`).run(...vals);
+}
+export function deleteFileLibraryItem(id) {
+  db.prepare('DELETE FROM file_library WHERE id = ?').run(id);
+}
+export function getFileLibraryCategories() {
+  return db.prepare('SELECT category, COUNT(*) as count FROM file_library GROUP BY category ORDER BY count DESC').all();
+}
+export function incrementFileLibraryPrintCount(id) {
+  db.prepare('UPDATE file_library SET print_count = print_count + 1, last_printed = datetime(\'now\') WHERE id = ?').run(id);
+}
+
+// ── Migration v82: Widget Layouts ──
+function _mig082_widget_layouts() {
+  db.exec(`CREATE TABLE IF NOT EXISTS widget_layouts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL DEFAULT 'default',
+    layout TEXT NOT NULL,
+    is_active INTEGER DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+}
+
+// ── Migration v83: Print Time Tracking ──
+function _mig083_time_tracking() {
+  db.exec(`CREATE TABLE IF NOT EXISTS print_time_tracking (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    print_history_id INTEGER,
+    printer_id TEXT,
+    filename TEXT,
+    estimated_s INTEGER,
+    actual_s INTEGER,
+    accuracy_pct REAL,
+    filament_type TEXT,
+    finished_at TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  )`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_ptt_printer ON print_time_tracking(printer_id)`);
+  // Backfill from print_history + slicer_jobs
+  try {
+    db.exec(`INSERT INTO print_time_tracking (print_history_id, printer_id, filename, estimated_s, actual_s, accuracy_pct, filament_type, finished_at)
+      SELECT ph.id, ph.printer_id, ph.filename, sj.estimated_time_s, ph.duration_seconds,
+        CASE WHEN sj.estimated_time_s > 0 AND ph.duration_seconds > 0
+          THEN ROUND(100.0 - ABS(sj.estimated_time_s - ph.duration_seconds) * 100.0 / sj.estimated_time_s, 1)
+          ELSE NULL END,
+        ph.filament_type, ph.finished_at
+      FROM print_history ph
+      JOIN slicer_jobs sj ON sj.original_filename = ph.filename
+      WHERE ph.status = 'completed' AND ph.duration_seconds > 0 AND sj.estimated_time_s > 0
+    `);
+  } catch {}
+}
+
+// ── Widget Layout CRUD ──
+export function getWidgetLayouts() {
+  return db.prepare('SELECT * FROM widget_layouts ORDER BY is_active DESC, updated_at DESC').all();
+}
+export function getActiveWidgetLayout() {
+  return db.prepare('SELECT * FROM widget_layouts WHERE is_active = 1 LIMIT 1').get() || null;
+}
+export function saveWidgetLayout(name, layout) {
+  const existing = db.prepare('SELECT id FROM widget_layouts WHERE name = ?').get(name);
+  if (existing) {
+    db.prepare('UPDATE widget_layouts SET layout = ?, updated_at = datetime(\'now\') WHERE id = ?').run(JSON.stringify(layout), existing.id);
+    return existing.id;
+  }
+  const r = db.prepare('INSERT INTO widget_layouts (name, layout, is_active) VALUES (?, ?, 0)').run(name, JSON.stringify(layout));
+  return Number(r.lastInsertRowid);
+}
+export function setActiveWidgetLayout(id) {
+  db.prepare('UPDATE widget_layouts SET is_active = 0').run();
+  db.prepare('UPDATE widget_layouts SET is_active = 1 WHERE id = ?').run(id);
+}
+export function deleteWidgetLayout(id) {
+  db.prepare('DELETE FROM widget_layouts WHERE id = ?').run(id);
+}
+
+// ── Print Time Tracking CRUD ──
+export function getTimeTracking(opts = {}) {
+  let sql = 'SELECT * FROM print_time_tracking WHERE accuracy_pct IS NOT NULL';
+  const params = [];
+  if (opts.filament_type) { sql += ' AND filament_type = ?'; params.push(opts.filament_type); }
+  if (opts.from) { sql += ' AND finished_at >= ?'; params.push(opts.from); }
+  if (opts.to) { sql += ' AND finished_at <= ?'; params.push(opts.to); }
+  sql += ' ORDER BY finished_at DESC';
+  if (opts.limit) { sql += ' LIMIT ?'; params.push(opts.limit); }
+  return db.prepare(sql).all(...params);
+}
+export function addTimeTracking(data) {
+  const accuracy = data.estimated_s > 0 && data.actual_s > 0
+    ? Math.round((100 - Math.abs(data.estimated_s - data.actual_s) * 100 / data.estimated_s) * 10) / 10
+    : null;
+  const r = db.prepare(`INSERT INTO print_time_tracking (print_history_id, printer_id, filename, estimated_s, actual_s, accuracy_pct, filament_type, finished_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    data.print_history_id || null, data.printer_id || null, data.filename || null,
+    data.estimated_s || null, data.actual_s || null, accuracy,
+    data.filament_type || null, data.finished_at || new Date().toISOString()
+  );
+  return Number(r.lastInsertRowid);
+}
+export function getTimeTrackingStats() {
+  const row = db.prepare(`SELECT
+    COUNT(*) as total,
+    ROUND(AVG(accuracy_pct), 1) as avg_accuracy,
+    MAX(accuracy_pct) as best,
+    MIN(accuracy_pct) as worst
+  FROM print_time_tracking WHERE accuracy_pct IS NOT NULL`).get();
+  return row || { total: 0, avg_accuracy: 0, best: 0, worst: 0 };
 }

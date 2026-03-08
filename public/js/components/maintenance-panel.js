@@ -514,13 +514,17 @@
   window.updateSchedule = async function(input) {
     const printerId = _selectedMaintPrinter || window.printerState.getActivePrinterId();
     const component = input.dataset.comp;
-    const intervalHours = parseFloat(input.value);
-    if (!printerId || !component || !intervalHours) return;
-    await fetch('/api/maintenance/schedule', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ printer_id: printerId, component, interval_hours: intervalHours })
-    });
+    const intervalHours = parseInt(input.value, 10);
+    if (!printerId || !component || isNaN(intervalHours) || intervalHours < 1) return;
+    try {
+      await fetch('/api/maintenance/schedule', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ printer_id: printerId, component, interval_hours: intervalHours })
+      });
+      if (typeof showToast === 'function') showToast(t('maintenance.schedule_saved') || 'Saved', 'success');
+      loadMaintenance();
+    } catch (_) {}
   };
 
 })();
