@@ -3,6 +3,7 @@
   let _inventorySpools = null;
   let _inventoryLoaded = false;
   let _selectedUnit = 0;
+  const _lowAlerted = {};  // track which trays have shown low filament toasts
 
   async function _loadInventorySpools() {
     try {
@@ -215,6 +216,7 @@
     const gcodeState = data.gcode_state || 'IDLE';
     const isPrinting = gcodeState === 'RUNNING' || gcodeState === 'PAUSE';
     const est = window._printEstimates;
+    const _warnings = [];  // collect low filament warnings for banner
 
     for (let i = 0; i < trays.length; i++) {
       const tray = trays[i];
@@ -236,10 +238,14 @@
         const linkedSpool = _getLinkedSpool(printerId, _selectedUnit, i);
 
         let remain;
-        if (linkedSpool && linkedSpool.initial_weight_g > 0) {
+        if (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g > 0) {
+          remain = Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100);
+        } else if (tray.remain >= 0) {
+          remain = Math.round(tray.remain);
+        } else if (linkedSpool && linkedSpool.initial_weight_g > 0) {
           remain = Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100);
         } else {
-          remain = tray.remain >= 0 ? Math.round(tray.remain) : null;
+          remain = null;
         }
 
         // Adjust for in-progress filament consumption (match active-filament.js)
@@ -256,15 +262,45 @@
 
         const hasRfid = !!(tray.tag_uid || tray.tray_uuid);
 
-        const fillPct = remain !== null ? Math.max(0, Math.min(100, remain)) : 100;
+        const fillPct = remain !== null ? Math.max(8, Math.min(100, remain)) : 100;
 
-        card.className = `ams-card${isActive ? ' ams-card-active' : ''}`;
+        // Low filament warning levels
+        const isCritical = remain !== null && remain <= 5;
+        const isLow = remain !== null && remain <= 10;
+        if (isLow) _warnings.push({ slot: `A${i + 1}`, pct: remain });
+        let warnClass = '';
+        if (isCritical) warnClass = ' ams-card-critical';
+        else if (isLow) warnClass = ' ams-card-low';
+
+        // Toast notification for low filament (once per tray per threshold)
+        const alertKey = `${printerId}_${_selectedUnit}_${i}`;
+        if (isCritical && !_lowAlerted[alertKey + '_crit']) {
+          _lowAlerted[alertKey + '_crit'] = true;
+          if (typeof showToast === 'function') showToast(t('ams.critical_filament', { slot: `A${i + 1}`, pct: remain }) || `A${i + 1}: ${remain}% filament — bytt snart!`, 'error', 8000);
+        } else if (isLow && !isCritical && !_lowAlerted[alertKey + '_low']) {
+          _lowAlerted[alertKey + '_low'] = true;
+          if (typeof showToast === 'function') showToast(t('ams.low_filament', { slot: `A${i + 1}`, pct: remain }) || `A${i + 1}: ${remain}% filament igjen`, 'warning', 6000);
+        }
+        // Reset alerts when filament is replenished
+        if (remain !== null && remain > 10) {
+          delete _lowAlerted[alertKey + '_low'];
+          delete _lowAlerted[alertKey + '_crit'];
+        }
+
+        const warnIcon = isCritical
+          ? `<div class="ams-card-warn ams-card-warn-critical"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>`
+          : isLow
+            ? `<div class="ams-card-warn ams-card-warn-low"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>`
+            : '';
+
+        card.className = `ams-card${isActive ? ' ams-card-active' : ''}${warnClass}`;
         card.style.setProperty('--card-color', rgb);
         card.style.setProperty('--card-color-alpha', hexToRgba(color, 0.15));
         card.innerHTML = `
           <div class="ams-card-inner" style="color:${textColor};${light ? 'border:1px solid rgba(0,0,0,0.15);' : ''}">
             <div class="ams-card-fill" style="height:${fillPct}%;background:${rgb}"></div>
             ${isActive ? '<div class="ams-card-active-border"></div>' : ''}
+            ${warnIcon}
             <span class="ams-card-type">${tray.tray_type}</span>
             ${remain !== null ? `<span class="ams-card-remain" style="color:${textColor}">${remain}%</span>` : ''}
             ${hasRfid ? `<div class="ams-card-rfid" style="color:${textColor}"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12z" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="3"/></svg></div>` : ''}
@@ -272,6 +308,24 @@
       }
 
       container.appendChild(card);
+    }
+
+    // --- Low filament warning banner ---
+    const bannerEl = document.getElementById('ams-low-banner');
+    if (bannerEl) {
+      if (_warnings.length > 0) {
+        const hasCritical = _warnings.some(w => w.pct <= 5);
+        const warnSvg = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+        const lines = _warnings.map(w => {
+          const label = w.pct <= 5 ? t('ams.critical_filament', w) : t('ams.low_filament', w);
+          return `<span>${label}</span>`;
+        }).join('');
+        bannerEl.className = 'ams-low-banner' + (hasCritical ? ' ams-low-banner-critical' : ' ams-low-banner-warn');
+        bannerEl.innerHTML = `<div class="ams-low-banner-icon">${warnSvg}</div><div class="ams-low-banner-text">${lines}</div>`;
+        bannerEl.style.display = '';
+      } else {
+        bannerEl.style.display = 'none';
+      }
     }
 
     // --- External spool ---
@@ -296,10 +350,14 @@
 
         const linkedSpool = _getLinkedSpool(printerId, 255, 0);
         let remain;
-        if (linkedSpool && linkedSpool.initial_weight_g > 0) {
+        if (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g > 0) {
+          remain = Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100);
+        } else if (vtTray.remain >= 0) {
+          remain = Math.round(vtTray.remain);
+        } else if (linkedSpool && linkedSpool.initial_weight_g > 0) {
           remain = Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100);
         } else {
-          remain = vtTray.remain >= 0 ? Math.round(vtTray.remain) : null;
+          remain = null;
         }
 
         // Adjust for in-progress filament consumption (match active-filament.js)

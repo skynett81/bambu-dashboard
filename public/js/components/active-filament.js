@@ -57,14 +57,22 @@
     const linkedSpool = window.getLinkedSpool?.(printerId, amsUnitIdx, isExternal ? 0 : amsTrayIdx);
 
     let remain, totalG, remainG;
-    if (linkedSpool && linkedSpool.initial_weight_g > 0) {
+    if (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g > 0) {
+      totalG = linkedSpool.initial_weight_g;
+      remainG = linkedSpool.remaining_weight_g;
+      remain = Math.round((remainG / totalG) * 100);
+    } else if (tray.remain >= 0) {
+      remain = Math.round(tray.remain);
+      totalG = tray.tray_weight ? parseFloat(tray.tray_weight) : null;
+      remainG = totalG ? totalG * (remain / 100) : null;
+    } else if (linkedSpool && linkedSpool.initial_weight_g > 0) {
       totalG = linkedSpool.initial_weight_g;
       remainG = linkedSpool.remaining_weight_g;
       remain = Math.round((remainG / totalG) * 100);
     } else {
-      remain = tray.remain >= 0 ? Math.round(tray.remain) : 0;
+      remain = 0;
       totalG = tray.tray_weight ? parseFloat(tray.tray_weight) : null;
-      remainG = totalG ? totalG * (remain / 100) : null;
+      remainG = null;
     }
 
     // Estimate filament consumption during active print

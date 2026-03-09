@@ -4554,6 +4554,13 @@ export function addSpool(s) {
 }
 
 export function updateSpool(id, s) {
+  // Merge with existing spool data so partial updates work
+  const existing = getSpool(id);
+  if (existing) {
+    for (const key of Object.keys(existing)) {
+      if (!(key in s)) s[key] = existing[key];
+    }
+  }
   db.prepare(`UPDATE spools SET filament_profile_id=?, remaining_weight_g=?, used_weight_g=?,
     initial_weight_g=?, cost=?, lot_number=?, purchase_date=?, location=?,
     printer_id=?, ams_unit=?, ams_tray=?, archived=?, comment=?, extra_fields=?, spool_weight=?,
@@ -6067,11 +6074,11 @@ export function getPendingDeliveries() {
 // ---- Print Costs (Advanced) ----
 
 export function recalculateAllCosts() {
-  const rows = db.prepare(`SELECT id, printer_id, duration_seconds, filament_used_g, status FROM print_history WHERE duration_seconds > 0`).all();
+  const rows = db.prepare(`SELECT id, printer_id, duration_seconds, filament_used_g, waste_g, status FROM print_history`).all();
   let updated = 0;
   for (const row of rows) {
     try {
-      const costs = estimatePrintCostAdvanced(row.filament_used_g || 0, row.duration_seconds || 0, null, row.printer_id, row.status);
+      const costs = estimatePrintCostAdvanced(row.filament_used_g || 0, row.duration_seconds || 0, null, row.printer_id, row.status, row.waste_g || 0);
       if (costs.total_cost > 0) {
         db.prepare(`INSERT OR REPLACE INTO print_costs (print_history_id, filament_cost, electricity_cost, depreciation_cost, labor_cost, markup_amount, total_cost, currency)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(
@@ -6191,7 +6198,7 @@ export function getCostStatistics(printerId = null, startDate = null, endDate = 
   };
 }
 
-export function estimatePrintCostAdvanced(filamentUsedG, durationSeconds, spoolId = null, printerId = null, printStatus = null) {
+export function estimatePrintCostAdvanced(filamentUsedG, durationSeconds, spoolId = null, printerId = null, printStatus = null, wasteG = 0) {
   const cs = getPrinterCostSettings(printerId);
   const electricityRate = cs.electricity_rate_kwh;
   const printerWattage = cs.printer_wattage;
@@ -6219,8 +6226,19 @@ export function estimatePrintCostAdvanced(filamentUsedG, durationSeconds, spoolI
       }
     }
   }
+  // Fallback: average cost per gram from all spools
+  if (filamentCostPerG <= 0) {
+    const spoolAvg = db.prepare("SELECT AVG(cost / initial_weight_g) as avg FROM spools WHERE initial_weight_g > 0 AND cost > 0").get();
+    if (spoolAvg?.avg > 0) {
+      filamentCostPerG = spoolAvg.avg;
+    } else {
+      const legacyAvg = db.prepare("SELECT AVG(cost_nok / weight_total_g) as avg FROM filament_inventory WHERE weight_total_g > 0 AND cost_nok > 0").get();
+      filamentCostPerG = legacyAvg?.avg || 0;
+    }
+  }
 
-  const filamentCost = Math.round(filamentUsedG * filamentCostPerG * 100) / 100;
+  const totalFilamentG = filamentUsedG + (wasteG || 0);
+  const filamentCost = Math.round(totalFilamentG * filamentCostPerG * 100) / 100;
   const durationH = durationSeconds / 3600;
   const electricityCost = Math.round(durationH * (printerWattage / 1000) * electricityRate * 100) / 100;
   const depreciationCost = machineLifetimeH > 0 ? Math.round(durationH * (machineCost / machineLifetimeH) * 100) / 100 : 0;

@@ -115,7 +115,9 @@
     "slot": "Spor {{num}}",
     "slot_multi": "AMS{{unit}} Spor {{num}}",
     "empty": "Tom",
-    "external": "Ekstern"
+    "external": "Ekstern",
+    "low_filament": "{{slot}}: {{pct}}% filament igjen",
+    "critical_filament": "{{slot}}: {{pct}}% filament — bytt snart!"
   },
   "filament": {
     "no_data": "Ingen filamentdata",

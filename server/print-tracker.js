@@ -437,8 +437,8 @@ export class PrintTracker {
         } catch (_) {}
       }
 
-      // Auto-save print cost
-      this._savePrintCost(printHistoryId, filamentUsedG, duration, data, status);
+      // Auto-save print cost (include waste in filament cost)
+      this._savePrintCost(printHistoryId, filamentUsedG, duration, data, status, wasteG);
 
       // Update component wear
       this._updateComponentWear(duration, data);
@@ -796,7 +796,7 @@ export class PrintTracker {
     }
   }
 
-  _savePrintCost(printHistoryId, filamentUsedG, durationSeconds, data, printStatus) {
+  _savePrintCost(printHistoryId, filamentUsedG, durationSeconds, data, printStatus, wasteG = 0) {
     try {
       // Find the spool used for cost-per-gram calculation
       let spoolId = null;
@@ -810,7 +810,7 @@ export class PrintTracker {
           }
         }
       }
-      const costs = estimatePrintCostAdvanced(filamentUsedG || 0, durationSeconds || 0, spoolId, this.printerId, printStatus);
+      const costs = estimatePrintCostAdvanced(filamentUsedG || 0, durationSeconds || 0, spoolId, this.printerId, printStatus, wasteG || 0);
       if (costs.total_cost > 0) {
         savePrintCost(printHistoryId, costs);
       }

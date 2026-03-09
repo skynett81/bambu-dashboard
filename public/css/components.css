@@ -1243,6 +1243,77 @@
   z-index: 1;
 }
 
+/* ── Low filament warning banner ── */
+.ams-low-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  margin: 0 14px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.ams-low-banner-warn {
+  background: rgba(240, 136, 62, 0.15);
+  border: 1.5px solid rgba(240, 136, 62, 0.5);
+  color: #f0883e;
+}
+.ams-low-banner-critical {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1.5px solid rgba(239, 68, 68, 0.6);
+  color: #ef4444;
+  animation: ams-banner-pulse 2s ease-in-out infinite;
+}
+@keyframes ams-banner-pulse {
+  0%, 100% { border-color: rgba(239, 68, 68, 0.6); background: rgba(239, 68, 68, 0.15); }
+  50% { border-color: rgba(239, 68, 68, 1); background: rgba(239, 68, 68, 0.25); }
+}
+.ams-low-banner-icon {
+  flex-shrink: 0;
+  line-height: 0;
+}
+.ams-low-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Low filament warning on cards: <=10% */
+.ams-card-low .ams-card-inner {
+  box-shadow: 0 0 0 2px rgba(240, 136, 62, 0.7), 0 0 10px rgba(240, 136, 62, 0.25);
+}
+
+/* Critical filament warning on cards: <=5% */
+.ams-card-critical .ams-card-inner {
+  box-shadow: 0 0 0 2.5px rgba(239, 68, 68, 0.9), 0 0 16px rgba(239, 68, 68, 0.35);
+  animation: ams-pulse-critical 1.5s ease-in-out infinite;
+}
+
+@keyframes ams-pulse-critical {
+  0%, 100% { box-shadow: 0 0 0 2.5px rgba(239, 68, 68, 0.9), 0 0 16px rgba(239, 68, 68, 0.35); }
+  50% { box-shadow: 0 0 0 3.5px rgba(239, 68, 68, 1), 0 0 24px rgba(239, 68, 68, 0.55); }
+}
+
+.ams-card-warn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 2;
+  line-height: 0;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+}
+.ams-card-warn-low { color: #f0883e; }
+.ams-card-warn-critical {
+  color: #ef4444;
+  animation: ams-warn-blink 1s ease-in-out infinite;
+}
+@keyframes ams-warn-blink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.9); }
+}
+
 .ams-card-type {
   font-size: 0.82rem;
   font-weight: 700;

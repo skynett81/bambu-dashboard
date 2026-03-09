@@ -115,7 +115,9 @@
     "slot": "Slot {{num}}",
     "slot_multi": "AMS{{unit}} Slot {{num}}",
     "empty": "Empty",
-    "external": "External"
+    "external": "External",
+    "low_filament": "{{slot}}: {{pct}}% filament remaining",
+    "critical_filament": "{{slot}}: {{pct}}% filament — replace soon!"
   },
   "filament": {
     "no_data": "No filament data",
