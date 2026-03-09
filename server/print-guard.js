@@ -1,4 +1,4 @@
-import { getProtectionSettings, upsertProtectionSettings, addProtectionLog, getProtectionLog, resolveProtectionAlert, getActiveAlerts } from './database.js';
+import { getProtectionSettings, upsertProtectionSettings, addProtectionLog, getProtectionLog, resolveProtectionAlert, getActiveAlerts, clearProtectionLog } from './database.js';
 import { buildPauseCommand, buildStopCommand } from './mqtt-commands.js';
 
 const ACTION_MAP = {
@@ -92,6 +92,12 @@ export class PrintGuardService {
 
   _checkTemperature(printerId, state, settings, printId) {
     if (settings.temp_deviation_action === 'ignore') return;
+
+    // Only check temperature deviation when actively printing (RUNNING)
+    // During HEATING/PREPARE, large deviations are normal as the printer warms up
+    const gcodeState = state.gcode_state;
+    if (gcodeState !== 'RUNNING') return;
+
     const threshold = settings.temp_deviation_threshold || 15;
 
     // Check nozzle temperature deviation
@@ -320,6 +326,10 @@ export class PrintGuardService {
 
   getLog(printerId, limit) {
     return getProtectionLog(printerId, limit);
+  }
+
+  clearLog(printerId, resolvedOnly) {
+    clearProtectionLog(printerId, resolvedOnly);
   }
 
   getAllActiveAlerts() {

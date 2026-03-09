@@ -1,4 +1,5 @@
 import { DatabaseSync } from 'node:sqlite';
+import crypto from 'node:crypto';
 import { join, dirname } from 'node:path';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -247,6 +248,12 @@ function _runMigrations() {
     { version: 81, up: _mig081_file_library },
     { version: 82, up: _mig082_widget_layouts },
     { version: 83, up: _mig083_time_tracking },
+    { version: 84, up: _mig084_cost_estimates },
+    { version: 85, up: _mig085_wear_predictions },
+    { version: 86, up: _mig086_material_recommendations },
+    { version: 87, up: _mig087_error_patterns },
+    { version: 88, up: _mig088_order_management },
+    { version: 89, up: _mig089_plugins },
   ];
 
   for (const m of migrations) {
@@ -4343,6 +4350,18 @@ export function getActiveAlerts(printerId) {
   return db.prepare('SELECT * FROM protection_log WHERE resolved = 0 ORDER BY timestamp DESC').all();
 }
 
+export function clearProtectionLog(printerId, resolvedOnly) {
+  if (printerId && resolvedOnly) {
+    db.prepare('DELETE FROM protection_log WHERE printer_id = ? AND resolved = 1').run(printerId);
+  } else if (printerId) {
+    db.prepare('DELETE FROM protection_log WHERE printer_id = ?').run(printerId);
+  } else if (resolvedOnly) {
+    db.prepare('DELETE FROM protection_log WHERE resolved = 1').run();
+  } else {
+    db.prepare('DELETE FROM protection_log').run();
+  }
+}
+
 // ---- Model Links ----
 
 export function getModelLink(printerId, filename) {
@@ -6832,7 +6851,7 @@ export function addProject(p) {
 export function updateProject(id, updates) {
   const fields = [];
   const values = [];
-  for (const key of ['name', 'description', 'status', 'client_name', 'due_date', 'total_prints', 'completed_prints', 'total_cost', 'notes', 'completed_at']) {
+  for (const key of ['name', 'description', 'status', 'client_name', 'due_date', 'total_prints', 'completed_prints', 'total_cost', 'notes', 'completed_at', 'customer_name', 'customer_email', 'customer_phone', 'deadline', 'priority', 'estimated_cost', 'actual_cost', 'share_token', 'share_enabled']) {
     if (updates[key] !== undefined) { fields.push(`${key} = ?`); values.push(updates[key]); }
   }
   if (updates.tags !== undefined) { fields.push('tags = ?'); values.push(JSON.stringify(updates.tags)); }
@@ -7731,4 +7750,596 @@ export function getTimeTrackingStats() {
     MIN(accuracy_pct) as worst
   FROM print_time_tracking WHERE accuracy_pct IS NOT NULL`).get();
   return row || { total: 0, avg_accuracy: 0, best: 0, worst: 0 };
+}
+
+// ── Migration v84: Cost Estimates ──
+function _mig084_cost_estimates() {
+  db.exec(`CREATE TABLE IF NOT EXISTS cost_estimates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT,
+    file_hash TEXT,
+    filament_data TEXT,
+    estimated_time_min INTEGER,
+    filament_cost REAL,
+    electricity_cost REAL,
+    wear_cost REAL,
+    total_cost REAL,
+    settings TEXT,
+    currency TEXT DEFAULT 'NOK',
+    created_at TEXT DEFAULT (datetime('now'))
+  )`);
+}
+
+// ── Cost Estimate CRUD ──
+export function saveCostEstimate(data) {
+  const r = db.prepare(`INSERT INTO cost_estimates (filename, file_hash, filament_data, estimated_time_min, filament_cost, electricity_cost, wear_cost, total_cost, settings, currency)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    data.filename || null,
+    data.file_hash || null,
+    typeof data.filament_data === 'string' ? data.filament_data : JSON.stringify(data.filament_data || []),
+    data.estimated_time_min || 0,
+    data.filament_cost || 0,
+    data.electricity_cost || 0,
+    data.wear_cost || 0,
+    data.total_cost || 0,
+    typeof data.settings === 'string' ? data.settings : JSON.stringify(data.settings || {}),
+    data.currency || 'NOK'
+  );
+  return Number(r.lastInsertRowid);
+}
+
+export function getCostEstimates(limit = 50) {
+  return db.prepare('SELECT * FROM cost_estimates ORDER BY created_at DESC LIMIT ?').all(limit);
+}
+
+export function getCostEstimate(id) {
+  return db.prepare('SELECT * FROM cost_estimates WHERE id = ?').get(id) || null;
+}
+
+export function deleteCostEstimate(id) {
+  db.prepare('DELETE FROM cost_estimates WHERE id = ?').run(id);
+}
+
+// ── Migration v85: Wear Predictions ──
+
+function _mig085_wear_predictions() {
+  db.exec(`CREATE TABLE IF NOT EXISTS wear_predictions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    printer_id TEXT NOT NULL,
+    component TEXT NOT NULL,
+    predicted_failure_at TEXT,
+    confidence REAL,
+    hours_remaining REAL,
+    cycles_remaining INTEGER,
+    based_on_hours REAL,
+    based_on_cycles INTEGER,
+    calculated_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(printer_id, component)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS wear_alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    printer_id TEXT NOT NULL,
+    component TEXT NOT NULL,
+    alert_type TEXT,
+    message TEXT,
+    acknowledged INTEGER DEFAULT 0,
+    triggered_at TEXT DEFAULT (datetime('now'))
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS maintenance_costs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    printer_id TEXT NOT NULL,
+    component TEXT NOT NULL,
+    cost REAL NOT NULL,
+    currency TEXT DEFAULT 'NOK',
+    maintenance_log_id INTEGER,
+    recorded_at TEXT DEFAULT (datetime('now'))
+  )`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_wear_pred_printer ON wear_predictions(printer_id)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_wear_alerts_printer ON wear_alerts(printer_id)`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_maint_costs_printer ON maintenance_costs(printer_id)`);
+}
+
+// ── Wear Prediction CRUD ──
+
+export function upsertWearPrediction(data) {
+  const existing = db.prepare('SELECT id FROM wear_predictions WHERE printer_id = ? AND component = ?').get(data.printer_id, data.component);
+  if (existing) {
+    db.prepare(`UPDATE wear_predictions SET predicted_failure_at = ?, confidence = ?, hours_remaining = ?, cycles_remaining = ?, based_on_hours = ?, based_on_cycles = ?, calculated_at = datetime('now') WHERE id = ?`).run(
+      data.predicted_failure_at || null, data.confidence || 0, data.hours_remaining || 0, data.cycles_remaining || null,
+      data.based_on_hours || 0, data.based_on_cycles || null, existing.id
+    );
+    return existing.id;
+  }
+  const r = db.prepare(`INSERT INTO wear_predictions (printer_id, component, predicted_failure_at, confidence, hours_remaining, cycles_remaining, based_on_hours, based_on_cycles) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    data.printer_id, data.component, data.predicted_failure_at || null, data.confidence || 0,
+    data.hours_remaining || 0, data.cycles_remaining || null, data.based_on_hours || 0, data.based_on_cycles || null
+  );
+  return Number(r.lastInsertRowid);
+}
+
+export function getWearPredictions(printerId) {
+  return db.prepare('SELECT * FROM wear_predictions WHERE printer_id = ? ORDER BY hours_remaining ASC').all(printerId);
+}
+
+export function getAllWearPredictions() {
+  return db.prepare('SELECT * FROM wear_predictions ORDER BY hours_remaining ASC').all();
+}
+
+export function addWearAlert(data) {
+  const r = db.prepare(`INSERT INTO wear_alerts (printer_id, component, alert_type, message) VALUES (?, ?, ?, ?)`).run(
+    data.printer_id, data.component, data.alert_type || 'warning', data.message || ''
+  );
+  return Number(r.lastInsertRowid);
+}
+
+export function getWearAlerts(printerId) {
+  if (printerId) {
+    return db.prepare('SELECT * FROM wear_alerts WHERE printer_id = ? AND acknowledged = 0 ORDER BY triggered_at DESC').all(printerId);
+  }
+  return db.prepare('SELECT * FROM wear_alerts WHERE acknowledged = 0 ORDER BY triggered_at DESC').all();
+}
+
+export function acknowledgeWearAlert(id) {
+  db.prepare('UPDATE wear_alerts SET acknowledged = 1 WHERE id = ?').run(id);
+}
+
+export function addMaintenanceCost(data) {
+  const r = db.prepare(`INSERT INTO maintenance_costs (printer_id, component, cost, currency, maintenance_log_id) VALUES (?, ?, ?, ?, ?)`).run(
+    data.printer_id, data.component, data.cost, data.currency || 'NOK', data.maintenance_log_id || null
+  );
+  return Number(r.lastInsertRowid);
+}
+
+export function getMaintenanceCosts(printerId) {
+  return db.prepare('SELECT * FROM maintenance_costs WHERE printer_id = ? ORDER BY recorded_at DESC').all(printerId);
+}
+
+export function getTotalMaintenanceCost(printerId) {
+  const row = db.prepare('SELECT COALESCE(SUM(cost), 0) as total, currency FROM maintenance_costs WHERE printer_id = ? GROUP BY currency').get(printerId);
+  return row || { total: 0, currency: 'NOK' };
+}
+
+// ── Migration v86: Material Recommendations ──
+function _mig086_material_recommendations() {
+  db.exec(`CREATE TABLE IF NOT EXISTS material_recommendations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filament_type TEXT NOT NULL,
+    filament_brand TEXT,
+    recommended_nozzle_temp REAL,
+    recommended_bed_temp REAL,
+    recommended_speed_level INTEGER,
+    success_rate REAL,
+    sample_size INTEGER,
+    avg_print_time_min REAL,
+    notes TEXT,
+    calculated_at TEXT DEFAULT (datetime('now')),
+    UNIQUE(filament_type, filament_brand)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS material_comparisons (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filament_type TEXT NOT NULL,
+    metric TEXT NOT NULL,
+    rankings TEXT,
+    calculated_at TEXT DEFAULT (datetime('now'))
+  )`);
+}
+
+// ── Material Recommendations CRUD ──
+export function upsertMaterialRecommendation(data) {
+  const existing = db.prepare('SELECT id FROM material_recommendations WHERE filament_type = ? AND COALESCE(filament_brand, \'\') = COALESCE(?, \'\')').get(data.filament_type, data.filament_brand || null);
+  if (existing) {
+    db.prepare(`UPDATE material_recommendations SET recommended_nozzle_temp = ?, recommended_bed_temp = ?, recommended_speed_level = ?, success_rate = ?, sample_size = ?, avg_print_time_min = ?, notes = ?, calculated_at = datetime('now') WHERE id = ?`).run(
+      data.recommended_nozzle_temp ?? null, data.recommended_bed_temp ?? null, data.recommended_speed_level ?? null,
+      data.success_rate ?? null, data.sample_size ?? null, data.avg_print_time_min ?? null, data.notes || null, existing.id
+    );
+    return existing.id;
+  }
+  const r = db.prepare(`INSERT INTO material_recommendations (filament_type, filament_brand, recommended_nozzle_temp, recommended_bed_temp, recommended_speed_level, success_rate, sample_size, avg_print_time_min, notes)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    data.filament_type, data.filament_brand || null,
+    data.recommended_nozzle_temp ?? null, data.recommended_bed_temp ?? null, data.recommended_speed_level ?? null,
+    data.success_rate ?? null, data.sample_size ?? null, data.avg_print_time_min ?? null, data.notes || null
+  );
+  return Number(r.lastInsertRowid);
+}
+
+export function getMaterialRecommendations() {
+  return db.prepare('SELECT * FROM material_recommendations ORDER BY success_rate DESC').all();
+}
+
+export function getMaterialRecommendation(type, brand) {
+  if (brand) {
+    return db.prepare('SELECT * FROM material_recommendations WHERE filament_type = ? AND filament_brand = ?').get(type, brand) || null;
+  }
+  return db.prepare('SELECT * FROM material_recommendations WHERE filament_type = ? AND filament_brand IS NULL').get(type) || null;
+}
+
+export function saveMaterialComparison(data) {
+  // Delete old comparison for this type+metric, then insert
+  db.prepare('DELETE FROM material_comparisons WHERE filament_type = ? AND metric = ?').run(data.filament_type, data.metric);
+  const r = db.prepare('INSERT INTO material_comparisons (filament_type, metric, rankings) VALUES (?, ?, ?)').run(
+    data.filament_type, data.metric, typeof data.rankings === 'string' ? data.rankings : JSON.stringify(data.rankings)
+  );
+  return Number(r.lastInsertRowid);
+}
+
+export function getMaterialComparisons(type) {
+  return db.prepare('SELECT * FROM material_comparisons WHERE filament_type = ? ORDER BY calculated_at DESC').all(type);
+}
+
+export function getHistoryForRecommendations() {
+  return db.prepare(`SELECT filament_type, filament_brand, status, nozzle_target, bed_target, speed_level, duration_seconds
+    FROM print_history WHERE filament_type IS NOT NULL AND filament_type != ''`).all();
+}
+
+// ── Migration v87: Error Patterns ──
+
+function _mig087_error_patterns() {
+  db.exec(`CREATE TABLE IF NOT EXISTS error_patterns (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    pattern_name TEXT,
+    description TEXT,
+    error_codes TEXT,
+    conditions TEXT,
+    frequency INTEGER,
+    severity TEXT,
+    suggestion TEXT,
+    confidence REAL,
+    first_seen TEXT,
+    last_seen TEXT,
+    calculated_at TEXT DEFAULT (datetime('now'))
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS error_correlations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    error_code TEXT NOT NULL,
+    factor TEXT NOT NULL,
+    factor_value TEXT,
+    correlation_strength REAL,
+    sample_size INTEGER,
+    calculated_at TEXT DEFAULT (datetime('now'))
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS printer_health_scores (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    printer_id TEXT NOT NULL UNIQUE,
+    health_score REAL,
+    error_frequency REAL,
+    mtbf_hours REAL,
+    risk_factors TEXT,
+    trend TEXT,
+    calculated_at TEXT DEFAULT (datetime('now'))
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_error_correlations_code ON error_correlations(error_code)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_printer_health_printer ON printer_health_scores(printer_id)');
+}
+
+// ── Error Patterns CRUD ──
+
+export function saveErrorPattern(data) {
+  const r = db.prepare(`INSERT INTO error_patterns (pattern_name, description, error_codes, conditions, frequency, severity, suggestion, confidence, first_seen, last_seen)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    data.pattern_name || null, data.description || null,
+    typeof data.error_codes === 'string' ? data.error_codes : JSON.stringify(data.error_codes || []),
+    typeof data.conditions === 'string' ? data.conditions : JSON.stringify(data.conditions || {}),
+    data.frequency ?? 0, data.severity || 'info', data.suggestion || null,
+    data.confidence ?? 0, data.first_seen || null, data.last_seen || null
+  );
+  return Number(r.lastInsertRowid);
+}
+
+export function getErrorPatterns() {
+  return db.prepare('SELECT * FROM error_patterns ORDER BY frequency DESC, confidence DESC').all();
+}
+
+export function getErrorPattern(id) {
+  return db.prepare('SELECT * FROM error_patterns WHERE id = ?').get(id) || null;
+}
+
+export function clearErrorPatterns() {
+  db.prepare('DELETE FROM error_patterns').run();
+}
+
+export function saveErrorCorrelation(data) {
+  const r = db.prepare(`INSERT INTO error_correlations (error_code, factor, factor_value, correlation_strength, sample_size)
+    VALUES (?, ?, ?, ?, ?)`).run(
+    data.error_code, data.factor, data.factor_value || null,
+    data.correlation_strength ?? 0, data.sample_size ?? 0
+  );
+  return Number(r.lastInsertRowid);
+}
+
+export function getErrorCorrelations(code) {
+  if (code) {
+    return db.prepare('SELECT * FROM error_correlations WHERE error_code = ? ORDER BY correlation_strength DESC').all(code);
+  }
+  return db.prepare('SELECT * FROM error_correlations ORDER BY correlation_strength DESC').all();
+}
+
+export function clearErrorCorrelations() {
+  db.prepare('DELETE FROM error_correlations').run();
+}
+
+export function upsertPrinterHealthScore(data) {
+  const existing = db.prepare('SELECT id FROM printer_health_scores WHERE printer_id = ?').get(data.printer_id);
+  if (existing) {
+    db.prepare(`UPDATE printer_health_scores SET health_score = ?, error_frequency = ?, mtbf_hours = ?, risk_factors = ?, trend = ?, calculated_at = datetime('now') WHERE id = ?`).run(
+      data.health_score ?? 0, data.error_frequency ?? 0, data.mtbf_hours ?? null,
+      typeof data.risk_factors === 'string' ? data.risk_factors : JSON.stringify(data.risk_factors || []),
+      data.trend || 'stable', existing.id
+    );
+    return existing.id;
+  }
+  const r = db.prepare(`INSERT INTO printer_health_scores (printer_id, health_score, error_frequency, mtbf_hours, risk_factors, trend)
+    VALUES (?, ?, ?, ?, ?, ?)`).run(
+    data.printer_id, data.health_score ?? 0, data.error_frequency ?? 0, data.mtbf_hours ?? null,
+    typeof data.risk_factors === 'string' ? data.risk_factors : JSON.stringify(data.risk_factors || []),
+    data.trend || 'stable'
+  );
+  return Number(r.lastInsertRowid);
+}
+
+export function getPrinterHealthScores() {
+  return db.prepare('SELECT * FROM printer_health_scores ORDER BY health_score ASC').all();
+}
+
+export function getPrinterHealthScore(printerId) {
+  return db.prepare('SELECT * FROM printer_health_scores WHERE printer_id = ?').get(printerId) || null;
+}
+
+export function getErrorsForAnalysis() {
+  return db.prepare(`SELECT e.*, p.name as printer_name FROM error_log e LEFT JOIN printers p ON e.printer_id = p.id ORDER BY e.timestamp DESC`).all();
+}
+
+export function getHistoryForErrorAnalysis() {
+  return db.prepare(`SELECT printer_id, started_at, finished_at, filename, status, duration_seconds, filament_type, filament_brand, speed_level, nozzle_target, bed_target FROM print_history ORDER BY started_at DESC`).all();
+}
+
+// ── Migration v88: Order Management ──
+
+function _mig088_order_management() {
+  // Extend projects table with new columns (wrap each in try/catch since they fail if column exists)
+  const newProjectCols = [
+    ['customer_name', 'TEXT'],
+    ['customer_email', 'TEXT'],
+    ['customer_phone', 'TEXT'],
+    ['deadline', 'TEXT'],
+    ['priority', 'INTEGER DEFAULT 0'],
+    ['estimated_cost', 'REAL'],
+    ['actual_cost', 'REAL'],
+    ['share_token', 'TEXT'],
+    ['share_enabled', 'INTEGER DEFAULT 0'],
+  ];
+  for (const [col, type] of newProjectCols) {
+    try { db.exec(`ALTER TABLE projects ADD COLUMN ${col} ${type}`); } catch (e) { /* exists */ }
+  }
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS project_invoices (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id INTEGER NOT NULL,
+      invoice_number TEXT UNIQUE,
+      customer_name TEXT,
+      customer_email TEXT,
+      items TEXT,
+      subtotal REAL,
+      tax_rate REAL DEFAULT 0,
+      tax_amount REAL DEFAULT 0,
+      total REAL,
+      currency TEXT DEFAULT 'NOK',
+      notes TEXT,
+      status TEXT DEFAULT 'draft',
+      created_at TEXT DEFAULT (datetime('now')),
+      sent_at TEXT
+    );
+    CREATE INDEX IF NOT EXISTS idx_proj_invoices_project ON project_invoices(project_id);
+
+    CREATE TABLE IF NOT EXISTS project_timeline (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      project_id INTEGER NOT NULL,
+      event_type TEXT,
+      description TEXT,
+      timestamp TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_proj_timeline_project ON project_timeline(project_id);
+  `);
+}
+
+// ── Order Management DB Functions ──
+
+export function getProjectWithDetails(id) {
+  const p = db.prepare('SELECT * FROM projects WHERE id = ?').get(id);
+  if (!p) return null;
+  p.prints = db.prepare(`
+    SELECT pp.*, ph.filename as print_filename, ph.status as print_status,
+           ph.duration_seconds, ph.filament_used_g, ph.filament_type,
+           pc.total_cost as print_cost
+    FROM project_prints pp
+    LEFT JOIN print_history ph ON pp.print_history_id = ph.id
+    LEFT JOIN print_costs pc ON ph.id = pc.print_history_id
+    WHERE pp.project_id = ?
+    ORDER BY pp.added_at DESC
+  `).all(id);
+  p.timeline = db.prepare('SELECT * FROM project_timeline WHERE project_id = ? ORDER BY timestamp DESC LIMIT 50').all(id);
+  p.invoices = db.prepare('SELECT * FROM project_invoices WHERE project_id = ? ORDER BY created_at DESC').all(id);
+  return p;
+}
+
+export function generateShareToken(projectId) {
+  const token = crypto.randomUUID();
+  db.prepare('UPDATE projects SET share_token = ?, share_enabled = 1 WHERE id = ?').run(token, projectId);
+  return token;
+}
+
+export function getProjectByShareToken(token) {
+  if (!token) return null;
+  const p = db.prepare('SELECT * FROM projects WHERE share_token = ? AND share_enabled = 1').get(token);
+  if (!p) return null;
+  p.prints = db.prepare(`
+    SELECT pp.*, ph.filename as print_filename, ph.status as print_status,
+           ph.duration_seconds, ph.filament_used_g
+    FROM project_prints pp
+    LEFT JOIN print_history ph ON pp.print_history_id = ph.id
+    WHERE pp.project_id = ?
+    ORDER BY pp.added_at DESC
+  `).all(p.id);
+  return p;
+}
+
+export function createInvoice(data) {
+  const items = typeof data.items === 'string' ? data.items : JSON.stringify(data.items || []);
+  const r = db.prepare(`INSERT INTO project_invoices (project_id, invoice_number, customer_name, customer_email, items, subtotal, tax_rate, tax_amount, total, currency, notes, status)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(
+    data.project_id, data.invoice_number || null,
+    data.customer_name || null, data.customer_email || null,
+    items, data.subtotal ?? 0, data.tax_rate ?? 0, data.tax_amount ?? 0,
+    data.total ?? 0, data.currency || 'NOK', data.notes || null,
+    data.status || 'draft'
+  );
+  return Number(r.lastInsertRowid);
+}
+
+export function getInvoice(id) {
+  const inv = db.prepare('SELECT * FROM project_invoices WHERE id = ?').get(id);
+  if (!inv) return null;
+  try { inv.items = JSON.parse(inv.items || '[]'); } catch { inv.items = []; }
+  return inv;
+}
+
+export function getProjectInvoices(projectId) {
+  return db.prepare('SELECT * FROM project_invoices WHERE project_id = ? ORDER BY created_at DESC').all(projectId);
+}
+
+export function updateInvoiceStatus(id, status, sentAt) {
+  if (status === 'sent' && sentAt) {
+    db.prepare('UPDATE project_invoices SET status = ?, sent_at = ? WHERE id = ?').run(status, sentAt, id);
+  } else {
+    db.prepare('UPDATE project_invoices SET status = ? WHERE id = ?').run(status, id);
+  }
+}
+
+export function addTimelineEvent(projectId, type, description) {
+  const r = db.prepare('INSERT INTO project_timeline (project_id, event_type, description) VALUES (?, ?, ?)').run(projectId, type, description);
+  return Number(r.lastInsertRowid);
+}
+
+export function getProjectTimeline(projectId) {
+  return db.prepare('SELECT * FROM project_timeline WHERE project_id = ? ORDER BY timestamp DESC').all(projectId);
+}
+
+export function getProjectCostSummary(projectId) {
+  const row = db.prepare(`
+    SELECT
+      COUNT(pp.id) as total_prints,
+      SUM(CASE WHEN ph.status = 'finish' OR ph.status = 'completed' THEN 1 ELSE 0 END) as completed_prints,
+      COALESCE(SUM(pc.total_cost), 0) as actual_cost,
+      COALESCE(SUM(pc.filament_cost), 0) as filament_cost,
+      COALESCE(SUM(pc.energy_cost), 0) as energy_cost,
+      COALESCE(SUM(ph.filament_used_g), 0) as total_filament_g,
+      COALESCE(SUM(ph.duration_seconds), 0) as total_duration_s
+    FROM project_prints pp
+    LEFT JOIN print_history ph ON pp.print_history_id = ph.id
+    LEFT JOIN print_costs pc ON ph.id = pc.print_history_id
+    WHERE pp.project_id = ?
+  `).get(projectId);
+  return row || { total_prints: 0, completed_prints: 0, actual_cost: 0, filament_cost: 0, energy_cost: 0, total_filament_g: 0, total_duration_s: 0 };
+}
+
+export function getOverdueProjects() {
+  return db.prepare(`
+    SELECT * FROM projects
+    WHERE (deadline IS NOT NULL AND deadline != '' AND deadline < datetime('now'))
+      AND status NOT IN ('completed', 'cancelled', 'invoiced')
+    ORDER BY deadline ASC
+  `).all();
+}
+
+export function getProjectDashboard() {
+  const active = db.prepare(`SELECT COUNT(*) as count FROM projects WHERE status NOT IN ('completed', 'cancelled', 'invoiced')`).get();
+  const overdue = db.prepare(`SELECT COUNT(*) as count FROM projects WHERE deadline IS NOT NULL AND deadline != '' AND deadline < datetime('now') AND status NOT IN ('completed', 'cancelled', 'invoiced')`).get();
+  const upcoming = db.prepare(`SELECT * FROM projects WHERE deadline IS NOT NULL AND deadline != '' AND deadline >= datetime('now') AND deadline <= datetime('now', '+7 days') AND status NOT IN ('completed', 'cancelled', 'invoiced') ORDER BY deadline ASC LIMIT 10`).all();
+  const revenueMonth = db.prepare(`SELECT COALESCE(SUM(total), 0) as revenue FROM project_invoices WHERE status = 'paid' AND created_at >= datetime('now', 'start of month')`).get();
+  const totalPaid = db.prepare(`SELECT COALESCE(SUM(total), 0) as total, COUNT(*) as count FROM project_invoices WHERE status = 'paid'`).get();
+  const recentTimeline = db.prepare(`SELECT pt.*, p.name as project_name FROM project_timeline pt LEFT JOIN projects p ON pt.project_id = p.id ORDER BY pt.timestamp DESC LIMIT 20`).all();
+  return {
+    active_orders: active?.count || 0,
+    overdue_count: overdue?.count || 0,
+    revenue_this_month: revenueMonth?.revenue || 0,
+    avg_order_value: totalPaid?.count > 0 ? (totalPaid.total / totalPaid.count) : 0,
+    upcoming_deadlines: upcoming,
+    recent_activity: recentTimeline
+  };
+}
+
+// ── Migration v89: Plugin System ──
+function _mig089_plugins() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS plugins (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL UNIQUE,
+      version TEXT,
+      description TEXT,
+      author TEXT,
+      entry_point TEXT NOT NULL,
+      hooks TEXT,
+      settings_schema TEXT,
+      panels TEXT,
+      enabled INTEGER DEFAULT 1,
+      installed_at TEXT DEFAULT (datetime('now'))
+    );
+
+    CREATE TABLE IF NOT EXISTS plugin_state (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      plugin_id INTEGER NOT NULL,
+      key TEXT NOT NULL,
+      value TEXT,
+      UNIQUE(plugin_id, key)
+    );
+  `);
+}
+
+// ── Plugin DB Functions ──
+export function getPlugins() {
+  return db.prepare('SELECT * FROM plugins ORDER BY name ASC').all();
+}
+export function getPlugin(name) {
+  return db.prepare('SELECT * FROM plugins WHERE name = ?').get(name) || null;
+}
+export function getPluginById(id) {
+  return db.prepare('SELECT * FROM plugins WHERE id = ?').get(id) || null;
+}
+export function registerPlugin(data) {
+  const r = db.prepare(`INSERT INTO plugins (name, version, description, author, entry_point, hooks, settings_schema, panels, enabled)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(name) DO UPDATE SET version = excluded.version, description = excluded.description,
+      author = excluded.author, entry_point = excluded.entry_point, hooks = excluded.hooks,
+      settings_schema = excluded.settings_schema, panels = excluded.panels`).run(
+    data.name, data.version || '0.0.1', data.description || '', data.author || '',
+    data.entry_point || 'index.js', data.hooks || '[]', data.settings_schema || '{}',
+    data.panels || '[]', data.enabled !== undefined ? data.enabled : 1
+  );
+  return Number(r.lastInsertRowid);
+}
+export function updatePluginEnabled(name, enabled) {
+  db.prepare('UPDATE plugins SET enabled = ? WHERE name = ?').run(enabled ? 1 : 0, name);
+}
+export function removePlugin(name) {
+  const p = db.prepare('SELECT id FROM plugins WHERE name = ?').get(name);
+  if (p) {
+    db.prepare('DELETE FROM plugin_state WHERE plugin_id = ?').run(p.id);
+  }
+  db.prepare('DELETE FROM plugins WHERE name = ?').run(name);
+}
+export function getPluginState(pluginId, key) {
+  return db.prepare('SELECT value FROM plugin_state WHERE plugin_id = ? AND key = ?').get(pluginId, key) || null;
+}
+export function setPluginState(pluginId, key, value) {
+  db.prepare('INSERT INTO plugin_state (plugin_id, key, value) VALUES (?, ?, ?) ON CONFLICT(plugin_id, key) DO UPDATE SET value = excluded.value').run(pluginId, key, value);
+}
+export function getPluginSettings(pluginId) {
+  const row = db.prepare("SELECT value FROM plugin_state WHERE plugin_id = ? AND key = '_settings'").get(pluginId);
+  if (!row) return {};
+  try { return JSON.parse(row.value); } catch { return {}; }
+}
+export function setPluginSettings(pluginId, settings) {
+  const val = typeof settings === 'string' ? settings : JSON.stringify(settings);
+  db.prepare("INSERT INTO plugin_state (plugin_id, key, value) VALUES (?, '_settings', ?) ON CONFLICT(plugin_id, key) DO UPDATE SET value = excluded.value").run(pluginId, val);
 }

@@ -24,6 +24,7 @@
   let _settings = {};
   let _log = [];
   let _draggedMod = null;
+  let _logFilter = 'all';
 
   function getOrder(tabId) {
     try { const s = localStorage.getItem(STORAGE_PREFIX + tabId); if (s) return JSON.parse(s); } catch {}
@@ -294,10 +295,68 @@
     },
 
     'protection-log': () => {
-      let h = `<div class="card-title">${t('protection.tab_log')}</div>`;
-      if (!_log.length) return h + `<div class="text-muted" style="font-size:0.8rem">${t('protection.no_alerts')}</div>`;
+      const total = _log.length;
+      const unresolved = _log.filter(e => !e.resolved).length;
+      const resolved = total - unresolved;
+
+      // Summary stats
+      const typeCounts = {};
+      for (const e of _log) { typeCounts[e.event_type] = (typeCounts[e.event_type] || 0) + 1; }
+
+      let h = `<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+        <div class="card-title" style="margin:0">${t('protection.tab_log')}</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">`;
+
+      // Filter buttons
+      h += `<button class="form-btn form-btn-sm ${_logFilter === 'all' ? '' : 'form-btn-secondary'}" data-ripple onclick="_setLogFilter('all')">${t('protection.filter_all') || 'Alle'} (${total})</button>`;
+      h += `<button class="form-btn form-btn-sm ${_logFilter === 'active' ? '' : 'form-btn-secondary'}" data-ripple onclick="_setLogFilter('active')" style="${unresolved ? 'color:var(--accent-red)' : ''}">${t('protection.filter_active') || 'Aktive'} (${unresolved})</button>`;
+      h += `<button class="form-btn form-btn-sm ${_logFilter === 'resolved' ? '' : 'form-btn-secondary'}" data-ripple onclick="_setLogFilter('resolved')">${t('protection.filter_resolved') || 'Løst'} (${resolved})</button>`;
+
+      // Clear buttons
+      if (resolved > 0) {
+        h += `<button class="form-btn form-btn-sm form-btn-secondary" data-ripple onclick="_clearProtectionLog(true)" style="margin-left:8px;color:var(--text-muted)" title="${t('protection.clear_resolved') || 'Tøm løste'}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+          ${t('protection.clear_resolved') || 'Tøm løste'}
+        </button>`;
+      }
+      if (total > 0) {
+        h += `<button class="form-btn form-btn-sm form-btn-secondary" data-ripple onclick="_clearProtectionLog(false)" style="color:var(--accent-red)" title="${t('protection.clear_all') || 'Tøm alt'}">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+          ${t('protection.clear_all') || 'Tøm alt'}
+        </button>`;
+      }
+      h += '</div></div>';
+
+      // Event type summary chips
+      if (total > 0) {
+        h += '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">';
+        for (const [et, count] of Object.entries(typeCounts)) {
+          const icon = EVENT_ICONS[et] || '';
+          const label = t(EVENT_LABELS[et] || et);
+          const isSensor = SENSOR_EVENTS.includes(et);
+          const chipColor = isSensor ? 'var(--accent-blue)' : 'var(--accent-red)';
+          h += `<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:12px;font-size:0.7rem;font-weight:600;background:rgba(0,0,0,0.04);border:1px solid var(--border-subtle);color:${chipColor};cursor:pointer" onclick="_setLogFilter('type:${et}')">
+            ${icon} ${label} <span style="opacity:0.6">${count}</span>
+          </span>`;
+        }
+        h += '</div>';
+      }
+
+      // Filter entries
+      let filtered = _log;
+      if (_logFilter === 'active') filtered = _log.filter(e => !e.resolved);
+      else if (_logFilter === 'resolved') filtered = _log.filter(e => e.resolved);
+      else if (_logFilter.startsWith('type:')) { const ft = _logFilter.slice(5); filtered = _log.filter(e => e.event_type === ft); }
+
+      if (!filtered.length) {
+        return h + `<div style="text-align:center;padding:40px;color:var(--text-muted);font-size:0.85rem">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3;margin-bottom:8px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          <div>${t('protection.log_empty') || 'Ingen hendelser'}</div>
+        </div>`;
+      }
+
       h += '<div class="protection-log-cards">';
-      for (const entry of _log) {
+      for (const entry of filtered) {
         const evLabel = t(EVENT_LABELS[entry.event_type] || entry.event_type);
         const actLabel = t(ACTION_LABELS[entry.action_taken] || entry.action_taken);
         const isSensor = SENSOR_EVENTS.includes(entry.event_type);
@@ -313,17 +372,19 @@
               <span class="protection-log-card-icon" style="color:${accentColor}">${icon}</span>
               <span class="protection-log-card-event">${evLabel}</span>
               <span class="pill ${actionPill}">${actLabel}</span>
+              ${entry.resolved
+                ? `<span class="pill pill-completed" style="font-size:0.6rem;margin-left:auto">${t('protection.resolved_label') || 'Løst'}</span>`
+                : `<span class="pill pill-failed" style="font-size:0.6rem;margin-left:auto;animation:ams-warn-blink 1.5s infinite">${t('protection.active_label') || 'Aktiv'}</span>`}
             </div>
             <div class="protection-log-card-meta">
               <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="8" rx="1"/><rect x="2" y="14" width="20" height="8" rx="1"/><line x1="6" y1="18" x2="6" y2="18.01"/></svg> ${esc(printerName(entry.printer_id))}</span>
               <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${fmtTime(entry.timestamp)}</span>
               ${entry.notes ? `<span class="protection-log-card-notes">${esc(entry.notes)}</span>` : ''}
+              ${entry.resolved_at ? `<span style="color:var(--accent-green)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ${fmtTime(entry.resolved_at)}</span>` : ''}
             </div>
-            <div class="protection-log-card-footer">
-              ${entry.resolved
-                ? `<span class="pill pill-completed" style="font-size:0.65rem">${t('protection.resolved_label') || 'Resolved'}</span>`
-                : `<button class="form-btn form-btn-sm" data-ripple onclick="resolveProtectionAlert(${entry.id})">${t('protection.resolve')}</button>`}
-            </div>
+            ${!entry.resolved ? `<div class="protection-log-card-footer">
+              <button class="form-btn form-btn-sm" data-ripple onclick="resolveProtectionAlert(${entry.id})">${t('protection.resolve')}</button>
+            </div>` : ''}
           </div>
         </div>`;
       }
@@ -451,6 +512,28 @@
     if (!_locked) initDrag();
     const base = location.hash.split('/')[0] || '#protection';
     history.replaceState(null, '', tabId === 'status' ? base : `${base}/${tabId}`);
+  };
+
+  window._setLogFilter = function(filter) {
+    _logFilter = filter;
+    render();
+  };
+
+  window._clearProtectionLog = async function(resolvedOnly) {
+    const msg = resolvedOnly
+      ? (t('protection.confirm_clear_resolved') || 'Tøm alle løste hendelser?')
+      : (t('protection.confirm_clear_all') || 'Tøm HELE loggen? Dette kan ikke angres.');
+    if (!confirm(msg)) return;
+    try {
+      const qs = resolvedOnly ? '?resolved_only=1' : '';
+      await fetch('/api/protection/log' + qs, { method: 'DELETE' });
+      await loadData();
+      render();
+      updateBadge();
+      if (typeof showToast === 'function') showToast(t('protection.log_cleared') || 'Logg tømt', 'success');
+    } catch (e) {
+      console.error('[protection] Clear log failed:', e);
+    }
   };
 
   window.toggleProtectionLock = function() {

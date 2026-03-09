@@ -8,7 +8,8 @@ import { config, PUBLIC_DIR, DATA_DIR } from './config.js';
 import { WebSocketHub } from './websocket-hub.js';
 import { initDatabase, getPrinters, addPrinter as dbAddPrinter, getSpoolsDryingStatus, getLowStockSpools, getInventorySetting, setInventorySetting, getPushSubscriptions, deletePushSubscriptionById, autoTrashEmptySpools } from './database.js';
 import { startNightlyBackup } from './backup.js';
-import { handleApiRequest, handleAuthApiRequest, setApiBroadcast, setOnPrinterRemoved, setOnPrinterAdded, setOnPrinterUpdated, setOnDemoPurge, setNotifier, setUpdater, setHub, setGuard, setQueueManager, setTimelapseService, setEcomLicense, setPrinterManager, setFailureDetector, setDiscovery, setBambuCloud, dispatchWebhooksForEvent } from './api-routes.js';
+import { handleApiRequest, handleAuthApiRequest, setApiBroadcast, setOnPrinterRemoved, setOnPrinterAdded, setOnPrinterUpdated, setOnDemoPurge, setNotifier, setUpdater, setHub, setGuard, setQueueManager, setTimelapseService, setEcomLicense, setPrinterManager, setFailureDetector, setDiscovery, setBambuCloud, setMaterialRecommender, setWearPrediction, setErrorPatternAnalyzer, setPluginManager, dispatchWebhooksForEvent } from './api-routes.js';
+import { PluginManager } from './plugin-manager.js';
 import { PrinterDiscovery, testMqttConnection } from './printer-discovery.js';
 import { BambuCloud } from './bambu-cloud.js';
 import { EcomLicenseManager } from './ecom-license.js';
@@ -27,6 +28,7 @@ import { FailureDetectionService } from './failure-detection.js';
 import { buildPauseCommand } from './mqtt-commands.js';
 import { initHaDiscovery, onPrinterStateUpdate, shutdownHaDiscovery } from './ha-discovery.js';
 import { initRemoteNodes, shutdownRemoteNodes } from './remote-nodes.js';
+import { MaterialRecommenderService } from './material-recommender.js';
 
 const IS_DEMO = process.env.BAMBU_DEMO === 'true';
 
@@ -376,6 +378,32 @@ setDiscovery(discovery, testMqttConnection);
 const bambuCloud = new BambuCloud();
 setBambuCloud(bambuCloud);
 
+// Material Recommender Service
+const materialRecommender = new MaterialRecommenderService(broadcastAll);
+setMaterialRecommender(materialRecommender);
+// Initial calculation after a short delay, then every 12 hours
+setTimeout(() => { try { materialRecommender.recalculate(); console.log('[material-rec] Initial beregning fullført'); } catch (e) { console.error('[material-rec] Feil:', e.message); } }, 5000);
+setInterval(() => { try { materialRecommender.recalculate(); } catch (e) { console.error('[material-rec] Periodisk feil:', e.message); } }, 12 * 60 * 60 * 1000);
+
+// Wear Prediction Service
+import { WearPredictionService } from './wear-prediction.js';
+const wearPrediction = new WearPredictionService(broadcastAll);
+wearPrediction.init();
+setWearPrediction(wearPrediction);
+
+// Error Pattern Analyzer
+import { ErrorPatternAnalyzer } from './error-pattern-analyzer.js';
+const errorPatternAnalyzer = new ErrorPatternAnalyzer(broadcastAll);
+setErrorPatternAnalyzer(errorPatternAnalyzer);
+// Initial analysis after 10s delay, then daily recalculation
+setTimeout(() => { try { errorPatternAnalyzer.analyze(); console.log('[error-analysis] Initial analyse fullført'); } catch (e) { console.error('[error-analysis] Feil:', e.message); } }, 10000);
+setInterval(() => { try { errorPatternAnalyzer.analyze(); } catch (e) { console.error('[error-analysis] Periodisk feil:', e.message); } }, 24 * 60 * 60 * 1000);
+
+// Plugin Manager
+const pluginManager = new PluginManager({ broadcast: broadcastAll, dataDir: DATA_DIR, notifier });
+await pluginManager.init();
+setPluginManager(pluginManager);
+
 // Generate VAPID keys for Web Push if not yet set
 if (!getInventorySetting('vapid_public_key')) {
   try {
@@ -506,6 +534,8 @@ for (const [id, entry] of manager.printers) {
       }
       // Start power monitoring for this print
       onPrintStart(id);
+      // Dispatch plugin hook
+      pluginManager.dispatch('onPrintStart', { printerId: id, ...data }).catch(() => {});
     };
 
     entry.tracker.onPrintEnd = (data) => {
@@ -521,6 +551,17 @@ for (const [id, entry] of manager.printers) {
       onPrintEnd(data.printHistoryId || id);
       // Archive milestone screenshots to print history
       if (data.printHistoryId) archivePrintMilestones(id, data.printHistoryId);
+      // Recalculate wear predictions after print
+      wearPrediction.onPrintEnd(id, data);
+      // Dispatch plugin hook
+      pluginManager.dispatch('onPrintEnd', { printerId: id, ...data }).catch(() => {});
+    };
+
+    // Wire plugin dispatch into onError
+    const origOnError = entry.tracker.onError;
+    entry.tracker.onError = (data) => {
+      if (origOnError) origOnError(data);
+      pluginManager.dispatch('onError', { printerId: id, ...data }).catch(() => {});
     };
 
     // Milestone screenshot capture (25/50/75/100%)
@@ -800,6 +841,9 @@ httpServer.listen(PORT, () => {
 
   // Send anonymous telemetry ping (fire-and-forget)
   sendTelemetryPing();
+
+  // Dispatch plugin onServerStart hook
+  pluginManager.dispatch('onServerStart', { port: PORT }).catch(() => {});
 });
 
 if (httpsServer) {

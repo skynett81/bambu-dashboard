@@ -1,4 +1,4 @@
-import { getHistory, getHistoryById, addHistory, getStatistics, getFilament, addFilament, updateFilament, deleteFilament, getErrors, acknowledgeError, deleteError, acknowledgeAllErrors, getPrinters, addPrinter, updatePrinter, deletePrinter, addWaste, deleteWaste, getWasteStats, getWasteHistory, getMaintenanceStatus, addMaintenanceEvent, getMaintenanceLog, getMaintenanceSchedule, upsertMaintenanceSchedule, getActiveNozzleSession, retireNozzleSession, createNozzleSession, getTelemetry, getComponentWear, getFirmwareHistory, getXcamEvents, getXcamStats, getAmsTrayLifetime, getDemoPrinterIds, purgeDemoData, getNotificationLog, getUpdateHistory, getModelLink, setModelLink, deleteModelLink, getRecentModelLinks, getVendors, addVendor, updateVendor, deleteVendor, getFilamentProfiles, getFilamentProfile, addFilamentProfile, updateFilamentProfile, deleteFilamentProfile, getSpools, getSpool, addSpool, updateSpool, deleteSpool, archiveSpool, useSpoolWeight, assignSpoolToSlot, getSpoolUsageLog, getLocations, addLocation, updateLocation, deleteLocation, getInventoryStats, searchSpools, duplicateSpool, measureSpoolWeight, getAllSpoolsForExport, getAllFilamentProfilesForExport, getAllVendorsForExport, findSimilarColors, getDistinctMaterials, getDistinctLotNumbers, getDistinctArticleNumbers, getInventorySetting, setInventorySetting, getAllInventorySettings, importSpools, importFilamentProfiles, importVendors, getFieldSchemas, addFieldSchema, deleteFieldSchema, lengthToWeight, getDryingSessions, getActiveDryingSessions, startDryingSession, completeDryingSession, deleteDryingSession, getDryingPresets, getDryingPreset, upsertDryingPreset, deleteDryingPreset, getSpoolsDryingStatus, getUsagePredictions, getRestockSuggestions, estimatePrintCost, createQueue, getQueues, getQueue, updateQueue, deleteQueue, addQueueItem, getQueueItem, updateQueueItem, deleteQueueItem, reorderQueueItems, getActiveQueueItems, addQueueLog, getQueueLog, getNextPendingItem, getTags, createTag, updateTag, deleteTag, assignTag, unassignTag, getEntityTags, getEntitiesByTag, getNfcMappings, lookupNfcTag, linkNfcTag, unlinkNfcTag, updateNfcScan, checkoutSpool, checkinSpool, getCheckedOutSpools, getCheckoutLog, addSpoolEvent, getSpoolTimeline, getSpoolPrintStats, estimateFilamentFromHistory, backfillFilamentUsage, syncSpoolWeightsFromLog, getRecentSpoolEvents, bulkDeleteSpools, bulkArchiveSpools, bulkRelocateSpools, bulkMarkDried, bulkEditSpools, bulkAssignTag, bulkUnassignTag, bulkDeleteProfiles, bulkEditProfiles, bulkDeleteVendors, bulkStartDrying, getSpoolsForExportByIds, toggleSpoolFavorite, batchAddSpools, createSharedPalette, getSharedPalette, deleteSharedPalette, getSharedPaletteSpools, getMacros, getMacro, addMacro, updateMacro, deleteMacro, getWebhookConfigs, getWebhookConfig, addWebhookConfig, updateWebhookConfig, deleteWebhookConfig, getActiveWebhooks, addWebhookDelivery, updateWebhookDelivery, getWebhookDeliveries, savePrintCost, getPrintCost, getCostReport, getCostSummary, getCostStatistics, estimatePrintCostAdvanced, getMaterials, getMaterial, getMaterialByName, updateMaterial, addMaterial, getHardwareItems, getHardwareItem, addHardwareItem, updateHardwareItem, deleteHardwareItem, assignHardware, unassignHardware, getHardwareForPrinter, getHardwareAssignments, getRoles, getRole, addRole, updateRole, deleteRole, getUsers, getUser, addUser, updateUser, deleteUser, getApiKeys, addApiKey, deleteApiKey, deactivateApiKey, getEcommerceConfigs, getEcommerceConfig, addEcommerceConfig, updateEcommerceConfig, deleteEcommerceConfig, getEcommerceOrders, getEcommerceOrder, addEcommerceOrder, updateEcommerceOrder, getTimelapseRecordings, getTimelapseRecording, deleteTimelapseRecording, getPushSubscriptions, addPushSubscription, deletePushSubscription, getCommunityFilaments, getCommunityFilament, searchCommunityByColor, getCommunityManufacturers, getCommunityMaterials, addCommunityFilament, updateCommunityFilament, deleteCommunityFilament, getCommunityFilamentStats, getOwnedCommunityIds, upsertCommunityFilament, clearCommunityFilaments, getCommunityFilamentCategories, getBrandDefaults, getBrandDefault, upsertBrandDefault, deleteBrandDefault, getCustomFieldDefs, getCustomFieldDef, addCustomFieldDef, updateCustomFieldDef, deleteCustomFieldDef, getCustomFieldValues, setCustomFieldValue, deleteCustomFieldValues, getPrinterGroups, getPrinterGroup, addPrinterGroup, updatePrinterGroup, deletePrinterGroup, addPrinterToGroup, removePrinterFromGroup, getGroupMembers, getPrinterGroupsForPrinter, getProjects, getProject, addProject, updateProject, deleteProject, getProjectPrints, addProjectPrint, updateProjectPrint, deleteProjectPrint, getExportTemplates, getExportTemplate, addExportTemplate, deleteExportTemplate, getUserQuota, upsertUserQuota, addUserTransaction, getUserTransactions, getFailureDetections, getFailureDetection, addFailureDetection, acknowledgeFailureDetection, deleteFailureDetection, getPriceHistory, addPriceEntry, getLowestPrice, getPriceStats, getPriceAlerts, getPriceAlert, addPriceAlert, updatePriceAlert, deletePriceAlert, checkPriceAlerts, triggerPriceAlert, getBuildPlates, getBuildPlate, addBuildPlate, updateBuildPlate, deleteBuildPlate, incrementBuildPlatePrintCount, getDryerModels, getDryerModel, addDryerModel, updateDryerModel, deleteDryerModel, getStorageConditions, getLatestStorageCondition, addStorageCondition, deleteStorageCondition, getCourses, getCourse, addCourse, updateCourse, deleteCourse, getCourseProgress, upsertCourseProgress, getUserCourseProgress, getAllCoursesWithProgress, searchSpoolsByColor, generateSpoolName, getEcomFees, getEcomFeesSummary, getEcomFeesTotal, getKbPrinters, getKbPrinter, addKbPrinter, updateKbPrinter, deleteKbPrinter, getKbAccessories, getKbAccessory, addKbAccessory, updateKbAccessory, deleteKbAccessory, getKbFilaments, getKbFilament, addKbFilament, updateKbFilament, deleteKbFilament, getKbProfiles, getKbProfile, addKbProfile, updateKbProfile, deleteKbProfile, searchKb, getKbStats, getKbTags, addKbTag, deleteKbTag, seedKbData, addBedMesh, getBedMeshHistory, getLatestBedMesh, deleteBedMesh, createFilamentChange, updateFilamentChange, getActiveFilamentChange, getFilamentChangeHistory, shareFilamentProfile, rateCommunityFilament, getCommunityFilamentRatings, submitTdVote, getTdVotes, importCommunityToInventory, mergeSpools, getFifoSpool, getCompatibilityMatrix, addCompatibilityRule, updateCompatibilityRule, deleteCompatibilityRule, getTemperatureGuide, matchPrinterForFilament, autoTrashEmptySpools, getRecentProfiles, getLocationAlerts, getSpoolBySlot, addLayerPause, getLayerPauses, getActiveLayerPauses, deleteLayerPause, deactivateLayerPauses, refillSpool, recalculateAllCosts, getHardwareStats, deduplicateHmsErrors, backfillWaste, getDailyActivity, getActivityStreaks } from './database.js';
+import { getHistory, getHistoryById, addHistory, getStatistics, getFilament, addFilament, updateFilament, deleteFilament, getErrors, acknowledgeError, deleteError, acknowledgeAllErrors, getPrinters, addPrinter, updatePrinter, deletePrinter, addWaste, deleteWaste, getWasteStats, getWasteHistory, getMaintenanceStatus, addMaintenanceEvent, getMaintenanceLog, getMaintenanceSchedule, upsertMaintenanceSchedule, getActiveNozzleSession, retireNozzleSession, createNozzleSession, getTelemetry, getComponentWear, getFirmwareHistory, getXcamEvents, getXcamStats, getAmsTrayLifetime, getDemoPrinterIds, purgeDemoData, getNotificationLog, getUpdateHistory, getModelLink, setModelLink, deleteModelLink, getRecentModelLinks, getVendors, addVendor, updateVendor, deleteVendor, getFilamentProfiles, getFilamentProfile, addFilamentProfile, updateFilamentProfile, deleteFilamentProfile, getSpools, getSpool, addSpool, updateSpool, deleteSpool, archiveSpool, useSpoolWeight, assignSpoolToSlot, getSpoolUsageLog, getLocations, addLocation, updateLocation, deleteLocation, getInventoryStats, searchSpools, duplicateSpool, measureSpoolWeight, getAllSpoolsForExport, getAllFilamentProfilesForExport, getAllVendorsForExport, findSimilarColors, getDistinctMaterials, getDistinctLotNumbers, getDistinctArticleNumbers, getInventorySetting, setInventorySetting, getAllInventorySettings, importSpools, importFilamentProfiles, importVendors, getFieldSchemas, addFieldSchema, deleteFieldSchema, lengthToWeight, getDryingSessions, getActiveDryingSessions, startDryingSession, completeDryingSession, deleteDryingSession, getDryingPresets, getDryingPreset, upsertDryingPreset, deleteDryingPreset, getSpoolsDryingStatus, getUsagePredictions, getRestockSuggestions, estimatePrintCost, createQueue, getQueues, getQueue, updateQueue, deleteQueue, addQueueItem, getQueueItem, updateQueueItem, deleteQueueItem, reorderQueueItems, getActiveQueueItems, addQueueLog, getQueueLog, getNextPendingItem, getTags, createTag, updateTag, deleteTag, assignTag, unassignTag, getEntityTags, getEntitiesByTag, getNfcMappings, lookupNfcTag, linkNfcTag, unlinkNfcTag, updateNfcScan, checkoutSpool, checkinSpool, getCheckedOutSpools, getCheckoutLog, addSpoolEvent, getSpoolTimeline, getSpoolPrintStats, estimateFilamentFromHistory, backfillFilamentUsage, syncSpoolWeightsFromLog, getRecentSpoolEvents, bulkDeleteSpools, bulkArchiveSpools, bulkRelocateSpools, bulkMarkDried, bulkEditSpools, bulkAssignTag, bulkUnassignTag, bulkDeleteProfiles, bulkEditProfiles, bulkDeleteVendors, bulkStartDrying, getSpoolsForExportByIds, toggleSpoolFavorite, batchAddSpools, createSharedPalette, getSharedPalette, deleteSharedPalette, getSharedPaletteSpools, getMacros, getMacro, addMacro, updateMacro, deleteMacro, getWebhookConfigs, getWebhookConfig, addWebhookConfig, updateWebhookConfig, deleteWebhookConfig, getActiveWebhooks, addWebhookDelivery, updateWebhookDelivery, getWebhookDeliveries, savePrintCost, getPrintCost, getCostReport, getCostSummary, getCostStatistics, estimatePrintCostAdvanced, getMaterials, getMaterial, getMaterialByName, updateMaterial, addMaterial, getHardwareItems, getHardwareItem, addHardwareItem, updateHardwareItem, deleteHardwareItem, assignHardware, unassignHardware, getHardwareForPrinter, getHardwareAssignments, getRoles, getRole, addRole, updateRole, deleteRole, getUsers, getUser, addUser, updateUser, deleteUser, getApiKeys, addApiKey, deleteApiKey, deactivateApiKey, getEcommerceConfigs, getEcommerceConfig, addEcommerceConfig, updateEcommerceConfig, deleteEcommerceConfig, getEcommerceOrders, getEcommerceOrder, addEcommerceOrder, updateEcommerceOrder, getTimelapseRecordings, getTimelapseRecording, deleteTimelapseRecording, getPushSubscriptions, addPushSubscription, deletePushSubscription, getCommunityFilaments, getCommunityFilament, searchCommunityByColor, getCommunityManufacturers, getCommunityMaterials, addCommunityFilament, updateCommunityFilament, deleteCommunityFilament, getCommunityFilamentStats, getOwnedCommunityIds, upsertCommunityFilament, clearCommunityFilaments, getCommunityFilamentCategories, getBrandDefaults, getBrandDefault, upsertBrandDefault, deleteBrandDefault, getCustomFieldDefs, getCustomFieldDef, addCustomFieldDef, updateCustomFieldDef, deleteCustomFieldDef, getCustomFieldValues, setCustomFieldValue, deleteCustomFieldValues, getPrinterGroups, getPrinterGroup, addPrinterGroup, updatePrinterGroup, deletePrinterGroup, addPrinterToGroup, removePrinterFromGroup, getGroupMembers, getPrinterGroupsForPrinter, getProjects, getProject, addProject, updateProject, deleteProject, getProjectPrints, addProjectPrint, updateProjectPrint, deleteProjectPrint, getExportTemplates, getExportTemplate, addExportTemplate, deleteExportTemplate, getUserQuota, upsertUserQuota, addUserTransaction, getUserTransactions, getFailureDetections, getFailureDetection, addFailureDetection, acknowledgeFailureDetection, deleteFailureDetection, getPriceHistory, addPriceEntry, getLowestPrice, getPriceStats, getPriceAlerts, getPriceAlert, addPriceAlert, updatePriceAlert, deletePriceAlert, checkPriceAlerts, triggerPriceAlert, getBuildPlates, getBuildPlate, addBuildPlate, updateBuildPlate, deleteBuildPlate, incrementBuildPlatePrintCount, getDryerModels, getDryerModel, addDryerModel, updateDryerModel, deleteDryerModel, getStorageConditions, getLatestStorageCondition, addStorageCondition, deleteStorageCondition, getCourses, getCourse, addCourse, updateCourse, deleteCourse, getCourseProgress, upsertCourseProgress, getUserCourseProgress, getAllCoursesWithProgress, searchSpoolsByColor, generateSpoolName, getEcomFees, getEcomFeesSummary, getEcomFeesTotal, getKbPrinters, getKbPrinter, addKbPrinter, updateKbPrinter, deleteKbPrinter, getKbAccessories, getKbAccessory, addKbAccessory, updateKbAccessory, deleteKbAccessory, getKbFilaments, getKbFilament, addKbFilament, updateKbFilament, deleteKbFilament, getKbProfiles, getKbProfile, addKbProfile, updateKbProfile, deleteKbProfile, searchKb, getKbStats, getKbTags, addKbTag, deleteKbTag, seedKbData, addBedMesh, getBedMeshHistory, getLatestBedMesh, deleteBedMesh, createFilamentChange, updateFilamentChange, getActiveFilamentChange, getFilamentChangeHistory, shareFilamentProfile, rateCommunityFilament, getCommunityFilamentRatings, submitTdVote, getTdVotes, importCommunityToInventory, mergeSpools, getFifoSpool, getCompatibilityMatrix, addCompatibilityRule, updateCompatibilityRule, deleteCompatibilityRule, getTemperatureGuide, matchPrinterForFilament, autoTrashEmptySpools, getRecentProfiles, getLocationAlerts, getSpoolBySlot, addLayerPause, getLayerPauses, getActiveLayerPauses, deleteLayerPause, deactivateLayerPauses, refillSpool, recalculateAllCosts, getHardwareStats, deduplicateHmsErrors, backfillWaste, getDailyActivity, getActivityStreaks, acknowledgeWearAlert, addMaintenanceCost, getMaintenanceCosts, getTotalMaintenanceCost, getProjectWithDetails, generateShareToken, getProjectByShareToken, createInvoice, getInvoice, getProjectInvoices, updateInvoiceStatus, addTimelineEvent, getProjectTimeline, getProjectCostSummary, getOverdueProjects, getProjectDashboard, getPlugins, getPlugin, getPluginById, registerPlugin, updatePluginEnabled, removePlugin, getPluginState, setPluginState, getPluginSettings, setPluginSettings } from './database.js';
 import { createBackup, listBackups, restoreBackup, uploadBackup } from './backup.js';
 import { saveConfig, config, DATA_DIR } from './config.js';
 import { getThumbnail, getModel } from './thumbnail-service.js';
@@ -20,7 +20,7 @@ import { getMilestones, getMilestoneFile, getArchivedMilestones, getArchivedMile
 import { generateReport, sendReportEmail, restartReportService } from './report-service.js';
 import { restartHaDiscovery, getHaDiscoveryStatus } from './ha-discovery.js';
 import { getRemoteNodeStates, restartRemoteNodes, testRemoteNode } from './remote-nodes.js';
-import { getRemoteNodes, getRemoteNode, addRemoteNode, updateRemoteNode, deleteRemoteNode, getScheduledPrints, getScheduledPrint, addScheduledPrint, updateScheduledPrint, deleteScheduledPrint, getFileLibrary, getFileLibraryItem, addFileLibraryItem, updateFileLibraryItem, deleteFileLibraryItem, getFileLibraryCategories, incrementFileLibraryPrintCount, getWidgetLayouts, getActiveWidgetLayout, saveWidgetLayout, setActiveWidgetLayout, deleteWidgetLayout, getTimeTracking, addTimeTracking, getTimeTrackingStats } from './database.js';
+import { getRemoteNodes, getRemoteNode, addRemoteNode, updateRemoteNode, deleteRemoteNode, getScheduledPrints, getScheduledPrint, addScheduledPrint, updateScheduledPrint, deleteScheduledPrint, getFileLibrary, getFileLibraryItem, addFileLibraryItem, updateFileLibraryItem, deleteFileLibraryItem, getFileLibraryCategories, incrementFileLibraryPrintCount, getWidgetLayouts, getActiveWidgetLayout, saveWidgetLayout, setActiveWidgetLayout, deleteWidgetLayout, getTimeTracking, addTimeTracking, getTimeTrackingStats, saveCostEstimate, getCostEstimates, getCostEstimate, deleteCostEstimate } from './database.js';
 import { readFileSync as _readPkg } from 'node:fs';
 
 // API version from package.json
@@ -98,6 +98,10 @@ let _failureDetector = null;
 let _discovery = null;
 let _testMqttConnection = null;
 let _bambuCloud = null;
+let _wearPrediction = null;
+let _materialRecommender = null;
+let _errorPatternAnalyzer = null;
+let _pluginManager = null;
 
 // SpoolmanDB community database cache
 const _spoolmanDbCache = { manufacturers: null, all: null };
@@ -171,6 +175,7 @@ function getRoutePermission(method, path) {
   if (path.startsWith('/api/courses') || path.startsWith('/api/kb')) return 'admin';
   if (path.startsWith('/api/backup')) return 'admin';
   if (path.startsWith('/api/timelapse') && method === 'DELETE') return 'admin';
+  if (path.startsWith('/api/plugins') && method !== 'GET') return 'admin';
   if (path.startsWith('/api/remote-nodes') || path.startsWith('/api/ha-discovery')) return 'admin';
   if (path.startsWith('/api/scheduler') && (method === 'POST' || method === 'PUT' || method === 'DELETE')) return 'controls';
   if (path.startsWith('/api/library') && (method === 'POST' || method === 'PUT' || method === 'DELETE')) return 'controls';
@@ -234,6 +239,22 @@ export function setDiscovery(discovery, testFn) {
 
 export function setBambuCloud(cloud) {
   _bambuCloud = cloud;
+}
+
+export function setWearPrediction(wp) {
+  _wearPrediction = wp;
+}
+
+export function setMaterialRecommender(mr) {
+  _materialRecommender = mr;
+}
+
+export function setErrorPatternAnalyzer(epa) {
+  _errorPatternAnalyzer = epa;
+}
+
+export function setPluginManager(pm) {
+  _pluginManager = pm;
 }
 
 function _mapCloudStatus(task) {
@@ -376,6 +397,27 @@ export async function handleApiRequest(req, res) {
   // Attach rate limit headers to response
   const rateHeaders = getApiRateHeaders(clientIp);
   for (const [k, v] of Object.entries(rateHeaders)) res.setHeader(k, v);
+
+  // Public shared project status — always accessible, no auth required
+  const sharedMatch = path.match(/^\/api\/shared\/([a-f0-9-]+)$/);
+  if (method === 'GET' && sharedMatch) {
+    const project = getProjectByShareToken(sharedMatch[1]);
+    if (!project) return sendJson(res, { error: 'Not found' }, 404);
+    return sendJson(res, {
+      name: project.name,
+      status: project.status,
+      description: project.description,
+      deadline: project.deadline,
+      customer_name: project.customer_name,
+      prints: (project.prints || []).map(p => ({
+        filename: p.print_filename || p.filename,
+        status: p.print_status || p.status,
+        filament_used_g: p.filament_used_g
+      })),
+      total_prints: project.total_prints,
+      completed_prints: project.completed_prints
+    });
+  }
 
   // Public status endpoint — always accessible, no auth required
   if (method === 'GET' && path === '/api/status/public') {
@@ -950,6 +992,342 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    if (method === 'DELETE' && path === '/api/protection/log') {
+      if (!_guard) return sendJson(res, { error: 'Guard not initialized' }, 500);
+      const printerId = url.searchParams.get('printer_id') || null;
+      const resolved = url.searchParams.get('resolved_only');
+      _guard.clearLog(printerId, resolved === '1');
+      return sendJson(res, { ok: true });
+    }
+
+    // ---- Cost Estimator ----
+    if (method === 'POST' && path === '/api/cost-estimator/upload') {
+      const filename = url.searchParams.get('filename') || 'unknown';
+      return readBinaryBody(req, (buffer) => {
+        try {
+          const ext = filename.toLowerCase().split('.').pop();
+          let parsed;
+          if (ext === '3mf') {
+            parsed = parse3mf(buffer);
+          } else if (ext === 'gcode' || ext === 'gco' || ext === 'g') {
+            parsed = parseGcode(buffer);
+          } else {
+            return sendJson(res, { error: 'Unsupported file type. Use 3MF or GCode.' }, 400);
+          }
+          // Compute a simple hash for deduplication
+          const hash = createHmac('sha256', 'cost-est').update(buffer.subarray(0, Math.min(buffer.length, 8192))).digest('hex').substring(0, 16);
+          return sendJson(res, { filename, file_hash: hash, ...parsed });
+        } catch (e) { return sendJson(res, { error: e.message }, 500); }
+      });
+    }
+
+    if (method === 'POST' && path === '/api/cost-estimator/calculate') {
+      return readBody(req, (body) => {
+        try {
+          const filaments = body.filaments || [];
+          const printerId = body.printer_id || null;
+          const spoolIds = body.spool_ids || [];
+          const estimatedTimeMin = body.estimated_time_min || 0;
+          const wattageOverride = body.wattage || null;
+
+          const cs = getPrinterCostSettings(printerId);
+          const wattage = wattageOverride || cs.printer_wattage || 150;
+          const electricityRate = cs.electricity_rate_kwh || 0;
+          const currency = getInventorySetting('cost_currency') || 'NOK';
+          const durationH = estimatedTimeMin / 60;
+
+          // Calculate filament cost per color/spool
+          let totalFilamentCost = 0;
+          const filamentBreakdown = filaments.map((fil, idx) => {
+            const spoolId = spoolIds[idx] || null;
+            let costPerG = 0;
+            let spoolInfo = null;
+            if (spoolId) {
+              const spool = getSpool(spoolId);
+              if (spool) {
+                spoolInfo = { id: spool.id, name: spool.filament_name || spool.material, color: spool.color_hex };
+                if (spool.cost > 0 && spool.initial_weight_g > 0) {
+                  costPerG = spool.cost / spool.initial_weight_g;
+                } else if (spool.profile_price > 0) {
+                  costPerG = spool.profile_price / 1000;
+                }
+              }
+            }
+            if (costPerG <= 0 && body.manual_price_per_kg) {
+              costPerG = body.manual_price_per_kg / 1000;
+            }
+            const cost = Math.round((fil.weight_g || 0) * costPerG * 100) / 100;
+            totalFilamentCost += cost;
+            return { ...fil, spool: spoolInfo, cost_per_g: costPerG, cost };
+          });
+
+          // Electricity cost
+          const currentPrice = _energy.getCurrentPrice();
+          const spotRate = currentPrice ? currentPrice.total : electricityRate;
+          const electricityCost = Math.round(durationH * (wattage / 1000) * spotRate * 100) / 100;
+
+          // Wear cost (nozzle depreciation per hour)
+          const nozzleCostPerHour = parseFloat(getInventorySetting('nozzle_cost_per_hour') || '0');
+          const machineDepreciation = cs.machine_cost > 0 && cs.machine_lifetime_hours > 0
+            ? cs.machine_cost / cs.machine_lifetime_hours : 0;
+          const wearCost = Math.round(durationH * (nozzleCostPerHour + machineDepreciation) * 100) / 100;
+
+          const totalCost = Math.round((totalFilamentCost + electricityCost + wearCost) * 100) / 100;
+
+          return sendJson(res, {
+            filament_breakdown: filamentBreakdown,
+            filament_cost: totalFilamentCost,
+            electricity_cost: electricityCost,
+            electricity_rate: spotRate,
+            wear_cost: wearCost,
+            total_cost: totalCost,
+            currency,
+            estimated_time_min: estimatedTimeMin,
+            wattage,
+            settings: { wattage, electricity_rate: spotRate, nozzle_cost_per_hour: nozzleCostPerHour, machine_depreciation: machineDepreciation }
+          });
+        } catch (e) { return sendJson(res, { error: e.message }, 500); }
+      });
+    }
+
+    if (method === 'GET' && path === '/api/cost-estimator/estimates') {
+      const limit = parseInt(url.searchParams.get('limit') || '50');
+      return sendJson(res, getCostEstimates(limit));
+    }
+
+    const ceIdMatch = path.match(/^\/api\/cost-estimator\/estimates\/(\d+)$/);
+    if (ceIdMatch && method === 'GET') {
+      const est = getCostEstimate(parseInt(ceIdMatch[1]));
+      if (!est) return sendJson(res, { error: 'Not found' }, 404);
+      return sendJson(res, est);
+    }
+
+    if (ceIdMatch && method === 'DELETE') {
+      deleteCostEstimate(parseInt(ceIdMatch[1]));
+      return sendJson(res, { ok: true });
+    }
+
+    if (method === 'POST' && path === '/api/cost-estimator/save') {
+      return readBody(req, (body) => {
+        try {
+          const id = saveCostEstimate(body);
+          return sendJson(res, { ok: true, id }, 201);
+        } catch (e) { return sendJson(res, { error: e.message }, 500); }
+      });
+    }
+
+    if (method === 'POST' && path === '/api/cost-estimator/compare') {
+      return readBody(req, (body) => {
+        try {
+          const filaments = body.filaments || [];
+          const estimatedTimeMin = body.estimated_time_min || 0;
+          const printerId = body.printer_id || null;
+          const compareSpoolIds = body.compare_spool_ids || []; // Array of arrays
+
+          const cs = getPrinterCostSettings(printerId);
+          const wattage = cs.printer_wattage || 150;
+          const electricityRate = cs.electricity_rate_kwh || 0;
+          const currency = getInventorySetting('cost_currency') || 'NOK';
+          const durationH = estimatedTimeMin / 60;
+          const currentPrice = _energy.getCurrentPrice();
+          const spotRate = currentPrice ? currentPrice.total : electricityRate;
+          const electricityCost = Math.round(durationH * (wattage / 1000) * spotRate * 100) / 100;
+          const nozzleCostPerHour = parseFloat(getInventorySetting('nozzle_cost_per_hour') || '0');
+          const machineDepreciation = cs.machine_cost > 0 && cs.machine_lifetime_hours > 0
+            ? cs.machine_cost / cs.machine_lifetime_hours : 0;
+          const wearCost = Math.round(durationH * (nozzleCostPerHour + machineDepreciation) * 100) / 100;
+
+          const results = compareSpoolIds.map(spoolSet => {
+            let filamentCost = 0;
+            const breakdown = filaments.map((fil, idx) => {
+              const spoolId = spoolSet[idx] || null;
+              let costPerG = 0;
+              let spoolInfo = null;
+              if (spoolId) {
+                const spool = getSpool(spoolId);
+                if (spool) {
+                  spoolInfo = { id: spool.id, name: spool.filament_name || spool.material, color: spool.color_hex };
+                  if (spool.cost > 0 && spool.initial_weight_g > 0) {
+                    costPerG = spool.cost / spool.initial_weight_g;
+                  } else if (spool.profile_price > 0) {
+                    costPerG = spool.profile_price / 1000;
+                  }
+                }
+              }
+              const cost = Math.round((fil.weight_g || 0) * costPerG * 100) / 100;
+              filamentCost += cost;
+              return { ...fil, spool: spoolInfo, cost };
+            });
+            const total = Math.round((filamentCost + electricityCost + wearCost) * 100) / 100;
+            return { filament_breakdown: breakdown, filament_cost: filamentCost, electricity_cost: electricityCost, wear_cost: wearCost, total_cost: total };
+          });
+
+          return sendJson(res, { comparisons: results, currency });
+        } catch (e) { return sendJson(res, { error: e.message }, 500); }
+      });
+    }
+
+    // ---- Material Recommendations ----
+    if (method === 'GET' && path === '/api/materials/recommendations') {
+      if (!_materialRecommender) return sendJson(res, []);
+      return sendJson(res, _materialRecommender.getAllRecommendations());
+    }
+
+    if (method === 'GET' && path.startsWith('/api/materials/recommendations/') && !path.includes('/recalculate')) {
+      if (!_materialRecommender) return sendJson(res, { error: 'Service not initialized' }, 500);
+      const type = decodeURIComponent(path.replace('/api/materials/recommendations/', ''));
+      const brand = url.searchParams.get('brand') || null;
+      const rec = _materialRecommender.getRecommendation(type, brand);
+      if (!rec) return sendJson(res, { error: 'No recommendation found' }, 404);
+      return sendJson(res, rec);
+    }
+
+    if (method === 'POST' && path === '/api/materials/recommendations/recalculate') {
+      if (!_materialRecommender) return sendJson(res, { error: 'Service not initialized' }, 500);
+      try {
+        const results = _materialRecommender.recalculate();
+        return sendJson(res, { ok: true, count: results.length, recommendations: results });
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+    }
+
+    if (method === 'GET' && path.startsWith('/api/materials/compare/')) {
+      if (!_materialRecommender) return sendJson(res, []);
+      const type = decodeURIComponent(path.replace('/api/materials/compare/', ''));
+      return sendJson(res, _materialRecommender.compareBrands(type));
+    }
+
+    if (method === 'GET' && path === '/api/materials/suggest-settings') {
+      if (!_materialRecommender) return sendJson(res, { error: 'Service not initialized' }, 500);
+      const type = url.searchParams.get('type');
+      const brand = url.searchParams.get('brand') || null;
+      if (!type) return sendJson(res, { error: 'type parameter required' }, 400);
+      const suggestion = _materialRecommender.suggestSettings(type, brand);
+      if (!suggestion) return sendJson(res, { error: 'No data available for this material' }, 404);
+      return sendJson(res, suggestion);
+    }
+
+    if (method === 'GET' && path === '/api/materials/success-rates') {
+      if (!_materialRecommender) return sendJson(res, []);
+      return sendJson(res, _materialRecommender.getSuccessRates());
+    }
+
+    // ---- Wear Predictions ----
+    if (method === 'GET' && path === '/api/wear/predictions') {
+      const printerId = url.searchParams.get('printer_id');
+      if (_wearPrediction) {
+        return sendJson(res, _wearPrediction.getPredictions(printerId || null));
+      }
+      return sendJson(res, []);
+    }
+
+    if (method === 'GET' && path.match(/^\/api\/wear\/predictions\/[^/]+$/)) {
+      const printerId = path.split('/')[4];
+      if (_wearPrediction) {
+        return sendJson(res, _wearPrediction.getPredictions(printerId));
+      }
+      return sendJson(res, []);
+    }
+
+    if (method === 'POST' && path === '/api/wear/predictions/recalculate') {
+      if (!_wearPrediction) return sendJson(res, { error: 'Wear prediction service not initialized' }, 503);
+      _wearPrediction.recalculate();
+      return sendJson(res, { ok: true });
+    }
+
+    if (method === 'GET' && path === '/api/wear/alerts') {
+      const printerId = url.searchParams.get('printer_id') || null;
+      if (_wearPrediction) {
+        return sendJson(res, _wearPrediction.getAlerts(printerId));
+      }
+      return sendJson(res, []);
+    }
+
+    if (method === 'POST' && path.match(/^\/api\/wear\/alerts\/\d+\/acknowledge$/)) {
+      const alertId = parseInt(path.split('/')[4]);
+      acknowledgeWearAlert(alertId);
+      return sendJson(res, { ok: true });
+    }
+
+    if (method === 'GET' && path === '/api/wear/costs') {
+      const printers = getPrinters();
+      const summary = printers.map(p => {
+        const total = getTotalMaintenanceCost(p.id);
+        const costs = getMaintenanceCosts(p.id);
+        return { printer_id: p.id, printer_name: p.name, total: total.total, currency: total.currency, items: costs };
+      });
+      return sendJson(res, summary);
+    }
+
+    if (method === 'GET' && path.match(/^\/api\/wear\/costs\/[^/]+$/)) {
+      const printerId = path.split('/')[4];
+      const total = getTotalMaintenanceCost(printerId);
+      const costs = getMaintenanceCosts(printerId);
+      return sendJson(res, { printer_id: printerId, total: total.total, currency: total.currency, items: costs });
+    }
+
+    if (method === 'POST' && path === '/api/wear/costs') {
+      return readBody(req, (body) => {
+        if (!body.printer_id || !body.component || body.cost === undefined) {
+          return sendJson(res, { error: 'printer_id, component and cost required' }, 400);
+        }
+        const id = addMaintenanceCost(body);
+        return sendJson(res, { ok: true, id });
+      });
+    }
+
+    // ---- Error Pattern Analysis ----
+    if (method === 'GET' && path === '/api/error-patterns') {
+      if (!_errorPatternAnalyzer) return sendJson(res, []);
+      return sendJson(res, _errorPatternAnalyzer.getAllPatterns());
+    }
+
+    if (method === 'GET' && path.match(/^\/api\/error-patterns\/\d+$/)) {
+      if (!_errorPatternAnalyzer) return sendJson(res, { error: 'Service not initialized' }, 500);
+      const id = parseInt(path.split('/').pop());
+      const pattern = _errorPatternAnalyzer.getPattern(id);
+      if (!pattern) return sendJson(res, { error: 'Pattern not found' }, 404);
+      return sendJson(res, pattern);
+    }
+
+    if (method === 'POST' && path === '/api/error-patterns/analyze') {
+      if (!_errorPatternAnalyzer) return sendJson(res, { error: 'Service not initialized' }, 500);
+      try {
+        _errorPatternAnalyzer.analyze();
+        return sendJson(res, { ok: true, message: 'Analysis complete' });
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+    }
+
+    if (method === 'GET' && path === '/api/error-patterns/suggestions') {
+      if (!_errorPatternAnalyzer) return sendJson(res, []);
+      const printerId = url.searchParams.get('printer_id') || null;
+      return sendJson(res, _errorPatternAnalyzer.getSuggestions(printerId));
+    }
+
+    if (method === 'GET' && path === '/api/error-correlations') {
+      if (!_errorPatternAnalyzer) return sendJson(res, []);
+      const code = url.searchParams.get('code') || null;
+      return sendJson(res, _errorPatternAnalyzer.getAllCorrelations(code));
+    }
+
+    if (method === 'GET' && path.startsWith('/api/error-correlations/')) {
+      if (!_errorPatternAnalyzer) return sendJson(res, []);
+      const code = decodeURIComponent(path.replace('/api/error-correlations/', ''));
+      return sendJson(res, _errorPatternAnalyzer.getAllCorrelations(code));
+    }
+
+    if (method === 'GET' && path === '/api/printer-health') {
+      if (!_errorPatternAnalyzer) return sendJson(res, []);
+      return sendJson(res, _errorPatternAnalyzer.getAllHealthScores());
+    }
+
+    if (method === 'GET' && path.startsWith('/api/printer-health/')) {
+      if (!_errorPatternAnalyzer) return sendJson(res, null);
+      const printerId = decodeURIComponent(path.replace('/api/printer-health/', ''));
+      const score = _errorPatternAnalyzer.getHealthScore(printerId);
+      if (!score) return sendJson(res, { error: 'No health data for this printer' }, 404);
+      return sendJson(res, score);
+    }
+
     // ---- Demo data ----
     if (method === 'GET' && path === '/api/demo/status') {
       const ids = getDemoPrinterIds();
@@ -1312,8 +1690,10 @@ export async function handleApiRequest(req, res) {
       } catch (e) {
         console.warn('[api] History thumb error:', e.message);
       }
-      res.writeHead(404);
-      res.end();
+      // Return 1x1 transparent PNG placeholder to avoid 404 console noise
+      const placeholder = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIABQABNjN9GQAAAAlwSFlzAAAWJQAAFiUBSVIk8AAAAA0lEQVQI12P4z8BQDwAEgAF/QualIQAAAABJRU5ErkJggg==', 'base64');
+      res.writeHead(200, { 'Content-Type': 'image/png', 'Content-Length': placeholder.length, 'Cache-Control': 'public, max-age=300' });
+      res.end(placeholder);
       return;
     }
 
@@ -4059,12 +4439,87 @@ export async function handleApiRequest(req, res) {
     }
 
     // ---- Projects ----
+    if (method === 'GET' && path === '/api/projects/dashboard') {
+      return sendJson(res, getProjectDashboard());
+    }
+
+    if (method === 'GET' && path === '/api/projects/overdue') {
+      return sendJson(res, getOverdueProjects());
+    }
+
     if (method === 'GET' && path === '/api/projects') {
       const status = url.searchParams.get('status');
       return sendJson(res, getProjects(status || null));
     }
 
     const projMatch = path.match(/^\/api\/projects\/(\d+)$/);
+
+    const projDetailsMatch = path.match(/^\/api\/projects\/(\d+)\/details$/);
+    if (projDetailsMatch && method === 'GET') {
+      const p = getProjectWithDetails(parseInt(projDetailsMatch[1]));
+      if (!p) return sendJson(res, { error: 'Not found' }, 404);
+      return sendJson(res, p);
+    }
+
+    const projCostMatch = path.match(/^\/api\/projects\/(\d+)\/cost-summary$/);
+    if (projCostMatch && method === 'GET') {
+      return sendJson(res, getProjectCostSummary(parseInt(projCostMatch[1])));
+    }
+
+    const projTimelineMatch = path.match(/^\/api\/projects\/(\d+)\/timeline$/);
+    if (projTimelineMatch && method === 'GET') {
+      return sendJson(res, getProjectTimeline(parseInt(projTimelineMatch[1])));
+    }
+
+    const projInvoicesMatch = path.match(/^\/api\/projects\/(\d+)\/invoices$/);
+    if (projInvoicesMatch && method === 'GET') {
+      return sendJson(res, getProjectInvoices(parseInt(projInvoicesMatch[1])));
+    }
+
+    if (projInvoicesMatch && method === 'POST') {
+      return readBody(req, (body) => {
+        body.project_id = parseInt(projInvoicesMatch[1]);
+        if (!body.invoice_number) {
+          body.invoice_number = 'INV-' + Date.now();
+        }
+        const id = createInvoice(body);
+        addTimelineEvent(body.project_id, 'invoice_created', 'Invoice ' + body.invoice_number + ' created');
+        sendJson(res, { ok: true, id }, 201);
+      });
+    }
+
+    const projShareMatch = path.match(/^\/api\/projects\/(\d+)\/share$/);
+    if (projShareMatch && method === 'POST') {
+      return readBody(req, (body) => {
+        const projectId = parseInt(projShareMatch[1]);
+        const p = getProject(projectId);
+        if (!p) return sendJson(res, { error: 'Not found' }, 404);
+        if (body.enabled === false) {
+          updateProject(projectId, { share_enabled: 0 });
+          return sendJson(res, { ok: true, share_enabled: false });
+        }
+        let token = p.share_token;
+        if (!token) {
+          token = generateShareToken(projectId);
+        } else {
+          updateProject(projectId, { share_enabled: 1 });
+        }
+        addTimelineEvent(projectId, 'share_toggled', 'Share link ' + (body.enabled === false ? 'disabled' : 'enabled'));
+        sendJson(res, { ok: true, share_token: token, share_enabled: true });
+      });
+    }
+
+    const projLinkQueueMatch = path.match(/^\/api\/projects\/(\d+)\/link-queue$/);
+    if (projLinkQueueMatch && method === 'POST') {
+      return readBody(req, (body) => {
+        const projectId = parseInt(projLinkQueueMatch[1]);
+        if (!body.queue_item_id) return sendJson(res, { error: 'queue_item_id required' }, 400);
+        const id = addProjectPrint({ project_id: projectId, queue_item_id: body.queue_item_id, filename: body.filename || null, status: 'pending' });
+        addTimelineEvent(projectId, 'queue_linked', 'Queue item #' + body.queue_item_id + ' linked');
+        sendJson(res, { ok: true, id }, 201);
+      });
+    }
+
     if (projMatch && method === 'GET') {
       const p = getProject(parseInt(projMatch[1]));
       if (!p) return sendJson(res, { error: 'Not found' }, 404);
@@ -4076,13 +4531,16 @@ export async function handleApiRequest(req, res) {
       return readBody(req, (body) => {
         if (!body.name) return sendJson(res, { error: 'name required' }, 400);
         const id = addProject(body);
+        addTimelineEvent(id, 'project_created', 'Project "' + body.name + '" created');
         sendJson(res, { ok: true, id }, 201);
       });
     }
 
     if (projMatch && method === 'PUT') {
       return readBody(req, (body) => {
-        updateProject(parseInt(projMatch[1]), body);
+        const projectId = parseInt(projMatch[1]);
+        updateProject(projectId, body);
+        if (body.status) addTimelineEvent(projectId, 'status_changed', 'Status changed to ' + body.status);
         sendJson(res, { ok: true });
       });
     }
@@ -4116,6 +4574,33 @@ export async function handleApiRequest(req, res) {
     if (projPrintItemMatch && method === 'DELETE') {
       deleteProjectPrint(parseInt(projPrintItemMatch[1]));
       return sendJson(res, { ok: true });
+    }
+
+    // ---- Invoices ----
+    const invoiceMatch = path.match(/^\/api\/invoices\/(\d+)$/);
+    if (invoiceMatch && method === 'GET') {
+      const inv = getInvoice(parseInt(invoiceMatch[1]));
+      if (!inv) return sendJson(res, { error: 'Not found' }, 404);
+      return sendJson(res, inv);
+    }
+
+    const invoiceHtmlMatch = path.match(/^\/api\/invoices\/(\d+)\/html$/);
+    if (invoiceHtmlMatch && method === 'GET') {
+      const inv = getInvoice(parseInt(invoiceHtmlMatch[1]));
+      if (!inv) return sendJson(res, { error: 'Not found' }, 404);
+      const html = _renderInvoiceHtml(inv);
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(html);
+    }
+
+    const invoiceStatusMatch = path.match(/^\/api\/invoices\/(\d+)\/status$/);
+    if (invoiceStatusMatch && method === 'PUT') {
+      return readBody(req, (body) => {
+        if (!body.status) return sendJson(res, { error: 'status required' }, 400);
+        const sentAt = body.status === 'sent' ? new Date().toISOString() : null;
+        updateInvoiceStatus(parseInt(invoiceStatusMatch[1]), body.status, sentAt);
+        sendJson(res, { ok: true });
+      });
     }
 
     // ---- Export ----
@@ -5160,6 +5645,120 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ---- Plugins ----
+
+    // GET /api/plugins — list all plugins
+    if (method === 'GET' && path === '/api/plugins') {
+      const dbPlugins = getPlugins();
+      const loaded = _pluginManager ? _pluginManager.getLoadedPlugins() : [];
+      const loadedNames = new Set(loaded.map(p => p.name));
+      const result = dbPlugins.map(p => ({
+        ...p,
+        hooks: (() => { try { return JSON.parse(p.hooks || '[]'); } catch { return []; } })(),
+        panels: (() => { try { return JSON.parse(p.panels || '[]'); } catch { return []; } })(),
+        settings_schema: (() => { try { return JSON.parse(p.settings_schema || '{}'); } catch { return {}; } })(),
+        loaded: loadedNames.has(p.name),
+        settings: getPluginSettings(p.id)
+      }));
+      return sendJson(res, result);
+    }
+
+    // GET /api/plugins/hooks — list available hook names
+    if (method === 'GET' && path === '/api/plugins/hooks') {
+      const hooks = _pluginManager ? _pluginManager.getHookNames() : [];
+      return sendJson(res, hooks);
+    }
+
+    // GET /api/plugins/:name — plugin detail
+    const pluginDetailMatch = path.match(/^\/api\/plugins\/([^/]+)$/);
+    if (method === 'GET' && pluginDetailMatch && pluginDetailMatch[1] !== 'hooks') {
+      const p = getPlugin(decodeURIComponent(pluginDetailMatch[1]));
+      if (!p) return sendJson(res, { error: 'Plugin not found' }, 404);
+      p.hooks = (() => { try { return JSON.parse(p.hooks || '[]'); } catch { return []; } })();
+      p.panels = (() => { try { return JSON.parse(p.panels || '[]'); } catch { return []; } })();
+      p.settings_schema = (() => { try { return JSON.parse(p.settings_schema || '{}'); } catch { return {}; } })();
+      p.settings = getPluginSettings(p.id);
+      p.loaded = _pluginManager ? _pluginManager.getLoadedPlugins().some(lp => lp.name === p.name) : false;
+      return sendJson(res, p);
+    }
+
+    // POST /api/plugins/:name/enable
+    const pluginEnableMatch = path.match(/^\/api\/plugins\/([^/]+)\/enable$/);
+    if (method === 'POST' && pluginEnableMatch) {
+      const name = decodeURIComponent(pluginEnableMatch[1]);
+      const p = getPlugin(name);
+      if (!p) return sendJson(res, { error: 'Plugin not found' }, 404);
+      if (_pluginManager) {
+        try {
+          await _pluginManager.enablePlugin(name);
+        } catch (e) {
+          return sendJson(res, { error: e.message }, 500);
+        }
+      } else {
+        updatePluginEnabled(name, 1);
+      }
+      return sendJson(res, { ok: true, name, enabled: true });
+    }
+
+    // POST /api/plugins/:name/disable
+    const pluginDisableMatch = path.match(/^\/api\/plugins\/([^/]+)\/disable$/);
+    if (method === 'POST' && pluginDisableMatch) {
+      const name = decodeURIComponent(pluginDisableMatch[1]);
+      const p = getPlugin(name);
+      if (!p) return sendJson(res, { error: 'Plugin not found' }, 404);
+      if (_pluginManager) {
+        try {
+          await _pluginManager.disablePlugin(name);
+        } catch (e) {
+          return sendJson(res, { error: e.message }, 500);
+        }
+      } else {
+        updatePluginEnabled(name, 0);
+      }
+      return sendJson(res, { ok: true, name, enabled: false });
+    }
+
+    // PUT /api/plugins/:name/settings
+    const pluginSettingsMatch = path.match(/^\/api\/plugins\/([^/]+)\/settings$/);
+    if (method === 'PUT' && pluginSettingsMatch) {
+      const name = decodeURIComponent(pluginSettingsMatch[1]);
+      const p = getPlugin(name);
+      if (!p) return sendJson(res, { error: 'Plugin not found' }, 404);
+      return readBody(req, (body) => {
+        setPluginSettings(p.id, body);
+        sendJson(res, { ok: true, settings: body });
+      });
+    }
+
+    // GET /api/plugins/:name/state
+    const pluginStateMatch = path.match(/^\/api\/plugins\/([^/]+)\/state$/);
+    if (method === 'GET' && pluginStateMatch) {
+      const name = decodeURIComponent(pluginStateMatch[1]);
+      const p = getPlugin(name);
+      if (!p) return sendJson(res, { error: 'Plugin not found' }, 404);
+      const rows = (() => { try { return require('./database.js'); } catch { return null; } })();
+      // Direct query for all state keys
+      const allState = {};
+      // Use getPluginSettings for the _settings key, and expose all keys
+      const settings = getPluginSettings(p.id);
+      allState._settings = settings;
+      return sendJson(res, allState);
+    }
+
+    // DELETE /api/plugins/:name — uninstall (remove from DB, don't delete files)
+    const pluginDeleteMatch = path.match(/^\/api\/plugins\/([^/]+)$/);
+    if (method === 'DELETE' && pluginDeleteMatch) {
+      const name = decodeURIComponent(pluginDeleteMatch[1]);
+      const p = getPlugin(name);
+      if (!p) return sendJson(res, { error: 'Plugin not found' }, 404);
+      // Disable first if loaded
+      if (_pluginManager) {
+        try { await _pluginManager.disablePlugin(name); } catch {}
+      }
+      removePlugin(name);
+      return sendJson(res, { ok: true, name, removed: true });
+    }
+
     // 404
     sendJson(res, { error: 'Ikke funnet' }, 404);
 
@@ -5497,9 +6096,69 @@ function _getApiDocs() {
       // Failure Detection
       { method: 'GET', path: '/api/failure-detections', tag: 'Printers', summary: 'List AI failure detections', permission: 'view' },
       { method: 'POST', path: '/api/failure-detections/:id/acknowledge', tag: 'Printers', summary: 'Acknowledge failure detection', permission: 'controls' },
+      // Error Pattern Analysis
+      { method: 'GET', path: '/api/error-patterns', tag: 'Analysis', summary: 'List discovered error patterns', permission: 'view' },
+      { method: 'GET', path: '/api/error-patterns/:id', tag: 'Analysis', summary: 'Get error pattern detail', permission: 'view' },
+      { method: 'POST', path: '/api/error-patterns/analyze', tag: 'Analysis', summary: 'Trigger error pattern analysis', permission: 'admin' },
+      { method: 'GET', path: '/api/error-patterns/suggestions', tag: 'Analysis', summary: 'Get suggestions (query: printer_id)', permission: 'view' },
+      { method: 'GET', path: '/api/error-correlations', tag: 'Analysis', summary: 'List error correlations (query: code)', permission: 'view' },
+      { method: 'GET', path: '/api/error-correlations/:code', tag: 'Analysis', summary: 'Get correlations for error code', permission: 'view' },
+      { method: 'GET', path: '/api/printer-health', tag: 'Analysis', summary: 'List all printer health scores', permission: 'view' },
+      { method: 'GET', path: '/api/printer-health/:printerId', tag: 'Analysis', summary: 'Get health score for printer', permission: 'view' },
     ],
     rateLimit: { requests: API_RATE_MAX, window: `${API_RATE_WINDOW_MS / 1000}s`, headers: ['X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'] }
   };
+}
+
+function _renderInvoiceHtml(inv) {
+  const items = Array.isArray(inv.items) ? inv.items : [];
+  let itemsHtml = '';
+  for (const it of items) {
+    const lineTotal = ((it.qty || 1) * (it.unit_price || 0)).toFixed(2);
+    itemsHtml += '<tr><td style="padding:8px 12px;border-bottom:1px solid #e5e7eb">' + _escHtml(it.description || '') + '</td>' +
+      '<td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:center">' + (it.qty || 1) + '</td>' +
+      '<td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:right">' + (it.unit_price || 0).toFixed(2) + '</td>' +
+      '<td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;text-align:right">' + lineTotal + '</td></tr>';
+  }
+  const currency = inv.currency || 'NOK';
+  const invoiceDate = inv.created_at ? inv.created_at.split('T')[0] : '';
+  const sentDate = inv.sent_at ? inv.sent_at.split('T')[0] : '';
+  return '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice ' + _escHtml(inv.invoice_number || '') + '</title>' +
+    '<style>@media print { body { margin: 0; } .no-print { display: none; } } ' +
+    'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1f2937; max-width: 800px; margin: 20px auto; padding: 40px; } ' +
+    'h1 { margin: 0 0 4px; font-size: 28px; } .header { display: flex; justify-content: space-between; margin-bottom: 40px; } ' +
+    '.meta { text-align: right; color: #6b7280; font-size: 14px; } .meta strong { color: #1f2937; } ' +
+    'table { width: 100%; border-collapse: collapse; margin: 24px 0; } ' +
+    'th { background: #f9fafb; padding: 10px 12px; text-align: left; font-weight: 600; border-bottom: 2px solid #e5e7eb; } ' +
+    '.totals { text-align: right; margin-top: 16px; } .totals .row { display: flex; justify-content: flex-end; gap: 40px; padding: 4px 0; } ' +
+    '.totals .total { font-size: 20px; font-weight: 700; border-top: 2px solid #1f2937; padding-top: 8px; margin-top: 8px; } ' +
+    '.notes { margin-top: 40px; padding: 16px; background: #f9fafb; border-radius: 8px; font-size: 14px; color: #6b7280; } ' +
+    '.badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; } ' +
+    '.badge-draft { background: #fef3c7; color: #92400e; } .badge-sent { background: #dbeafe; color: #1e40af; } .badge-paid { background: #d1fae5; color: #065f46; }' +
+    '</style></head><body>' +
+    '<div class="header"><div><h1>FAKTURA</h1><p style="color:#6b7280;margin:0">Bambu Dashboard</p></div>' +
+    '<div class="meta"><p><strong>' + _escHtml(inv.invoice_number || '') + '</strong></p>' +
+    '<p>Dato: ' + _escHtml(invoiceDate) + '</p>' +
+    (sentDate ? '<p>Sendt: ' + _escHtml(sentDate) + '</p>' : '') +
+    '<p><span class="badge badge-' + (inv.status || 'draft') + '">' + _escHtml((inv.status || 'draft').toUpperCase()) + '</span></p></div></div>' +
+    '<div style="margin-bottom:32px"><h3 style="margin:0 0 4px;font-size:14px;color:#6b7280">Kunde</h3>' +
+    '<p style="margin:0;font-weight:600">' + _escHtml(inv.customer_name || '--') + '</p>' +
+    (inv.customer_email ? '<p style="margin:2px 0;color:#6b7280">' + _escHtml(inv.customer_email) + '</p>' : '') +
+    '</div>' +
+    '<table><thead><tr><th>Beskrivelse</th><th style="text-align:center">Antall</th><th style="text-align:right">Pris</th><th style="text-align:right">Sum</th></tr></thead>' +
+    '<tbody>' + itemsHtml + '</tbody></table>' +
+    '<div class="totals">' +
+    '<div class="row"><span>Subtotal:</span><span>' + (inv.subtotal || 0).toFixed(2) + ' ' + currency + '</span></div>' +
+    '<div class="row"><span>MVA (' + ((inv.tax_rate || 0) * 100).toFixed(0) + '%):</span><span>' + (inv.tax_amount || 0).toFixed(2) + ' ' + currency + '</span></div>' +
+    '<div class="row total"><span>Total:</span><span>' + (inv.total || 0).toFixed(2) + ' ' + currency + '</span></div></div>' +
+    (inv.notes ? '<div class="notes"><strong>Notater:</strong> ' + _escHtml(inv.notes) + '</div>' : '') +
+    '<div style="margin-top:60px;text-align:center;color:#9ca3af;font-size:12px">Generert av Bambu Dashboard</div>' +
+    '</body></html>';
+}
+
+function _escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function sendJson(res, data, status = 200) {

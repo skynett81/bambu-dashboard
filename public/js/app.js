@@ -268,6 +268,7 @@ const PANEL_TITLES = {
   queue: 'queue.title',
   history: 'tabs.history',
   stats: 'tabs.statistics',
+  analysis: 'tabs.analysis',
   telemetry: 'tabs.telemetry',
   filament: 'tabs.filament',
   errors: 'tabs.errors',
@@ -288,47 +289,63 @@ const PANEL_TITLES = {
   comparison: 'tabs.comparison',
   forecast: 'tabs.forecast',
   multicolor: 'tabs.multicolor',
+  diagnostics: 'tabs.diagnostics',
   labels: 'tabs.labels',
   widgets: 'tabs.widgets',
   timetracker: 'tabs.timetracker',
   printermatrix: 'tabs.printermatrix',
+  costestimator: 'tabs.costestimator',
+  plugins: 'tabs.plugins',
   backup: 'tabs.backup',
   playground: 'tabs.playground',
-  settings: 'tabs.settings'
+  settings: 'tabs.settings',
+  materialrec: 'material_rec.title',
+  wearprediction: 'wear.title',
+  erroranalysis: 'error_analysis.title',
+  orders: 'orders.title'
 };
 
 const PANEL_LOADERS = {
   controls: () => { if (typeof loadControlsPanel === 'function') loadControlsPanel(); },
   queue: () => { if (typeof loadQueuePanel === 'function') loadQueuePanel(); },
   history: () => { if (typeof loadHistoryPanel === 'function') loadHistoryPanel(); },
-  stats: () => { if (typeof loadStatsPanel === 'function') loadStatsPanel(); },
-  telemetry: () => { if (typeof loadTelemetryPanel === 'function') loadTelemetryPanel(); },
+  analysis: () => { if (typeof loadAnalysisPanel === 'function') loadAnalysisPanel(); },
   filament: () => { if (typeof loadFilamentPanel === 'function') loadFilamentPanel(); },
   errors: () => { if (typeof loadErrorsPanel === 'function') loadErrorsPanel(); },
-  waste: () => { if (typeof loadWastePanel === 'function') loadWastePanel(); },
   maintenance: () => { if (typeof loadMaintenancePanel === 'function') loadMaintenancePanel(); },
   protection: () => { if (typeof loadProtectionPanel === 'function') loadProtectionPanel(); },
-  modelinfo: () => { if (typeof loadModelInfoPanel === 'function') loadModelInfoPanel(); },
-  learning: () => { if (typeof loadLearningPanel === 'function') loadLearningPanel(); },
   knowledge: () => { if (typeof loadKnowledgePanel === 'function') loadKnowledgePanel(); },
-  activity: () => { if (typeof loadActivityPanel === 'function') loadActivityPanel(); },
-  gallery: () => { if (typeof loadGalleryPanel === 'function') loadGalleryPanel(); },
   fleet: () => { if (typeof loadFleetPanel === 'function') loadFleetPanel(); },
-  scheduler: () => { if (typeof loadSchedulerPanel === 'function') loadSchedulerPanel(); },
   library: () => { if (typeof loadLibraryPanel === 'function') loadLibraryPanel(); },
-  bedmesh: () => { if (typeof loadBedMeshPanel === 'function') loadBedMeshPanel(); },
-  gcode: () => { if (typeof loadGcodePanel === 'function') loadGcodePanel(); },
-  health: () => { if (typeof loadHealthPanel === 'function') loadHealthPanel(); },
-  comparison: () => { if (typeof loadComparisonPanel === 'function') loadComparisonPanel(); },
-  forecast: () => { if (typeof loadForecastPanel === 'function') loadForecastPanel(); },
-  multicolor: () => { if (typeof loadMulticolorPanel === 'function') loadMulticolorPanel(); },
+  diagnostics: () => { if (typeof loadDiagnosticsPanel === 'function') loadDiagnosticsPanel(); },
   labels: () => { if (typeof loadLabelPanel === 'function') loadLabelPanel(); },
   widgets: () => { if (typeof loadWidgetsPanel === 'function') loadWidgetsPanel(); },
-  timetracker: () => { if (typeof loadTimeTrackerPanel === 'function') loadTimeTrackerPanel(); },
-  printermatrix: () => { if (typeof loadPrinterMatrixPanel === 'function') loadPrinterMatrixPanel(); },
+  plugins: () => { if (typeof loadPluginsPanel === 'function') loadPluginsPanel(); },
   backup: () => { if (typeof loadBackupPanel === 'function') loadBackupPanel(); },
   playground: () => { if (typeof loadPlaygroundPanel === 'function') loadPlaygroundPanel(); },
-  settings: () => { if (typeof loadSettingsPanel === 'function') loadSettingsPanel(); }
+  costestimator: () => { if (typeof loadCostEstimatorPanel === 'function') loadCostEstimatorPanel(); },
+  settings: () => { if (typeof loadSettingsPanel === 'function') loadSettingsPanel(); },
+  materialrec: () => { if (typeof loadMaterialRecommendationsPanel === 'function') loadMaterialRecommendationsPanel(); },
+  wearprediction: () => { if (typeof loadWearPredictionPanel === 'function') loadWearPredictionPanel(); },
+  erroranalysis: () => { if (typeof loadErrorAnalysisPanel === 'function') loadErrorAnalysisPanel(); },
+  orders: () => { if (typeof loadOrderPanel === 'function') loadOrderPanel(); },
+  // Redirects — sub-panels call the parent wrapper loader with initialTab parameter
+  scheduler: () => { if (typeof _switchQueueTab === 'function') _switchQueueTab('scheduler'); },
+  gallery: () => { if (typeof _switchHistoryTab === 'function') _switchHistoryTab('gallery'); },
+  activity: () => { if (typeof _switchHistoryTab === 'function') _switchHistoryTab('activity'); },
+  stats: () => { if (typeof _switchAnalysisTab === 'function') _switchAnalysisTab('stats'); },
+  timetracker: () => { if (typeof _switchAnalysisTab === 'function') _switchAnalysisTab('timetracker'); },
+  comparison: () => { if (typeof _switchAnalysisTab === 'function') _switchAnalysisTab('comparison'); },
+  printermatrix: () => { if (typeof _switchAnalysisTab === 'function') _switchAnalysisTab('printermatrix'); },
+  waste: () => { if (typeof _switchAnalysisTab === 'function') _switchAnalysisTab('waste'); },
+  telemetry: () => { if (typeof _switchDiagTab === 'function') _switchDiagTab('telemetry'); },
+  bedmesh: () => { if (typeof _switchDiagTab === 'function') _switchDiagTab('bedmesh'); },
+  health: () => { if (typeof _switchDiagTab === 'function') _switchDiagTab('health'); },
+  gcode: () => { if (typeof _switchLibraryTab === 'function') _switchLibraryTab('gcode'); },
+  forecast: () => { if (typeof _switchFilamentTab === 'function') _switchFilamentTab('forecast'); },
+  multicolor: () => { if (typeof _switchFilamentTab === 'function') _switchFilamentTab('multicolor'); },
+  learning: () => { if (typeof _switchKnowledgeTab === 'function') _switchKnowledgeTab('learning'); },
+  modelinfo: () => { if (typeof _switchKnowledgeTab === 'function') _switchKnowledgeTab('modelinfo'); },
 };
 
 window._activePanel = null;
@@ -351,7 +368,10 @@ window.openPanel = function(name, skipHash) {
 
   // Highlight sidebar button and expand its section
   document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
-  document.querySelector(`.sidebar-btn[data-panel="${name}"]`)?.classList.add('active');
+  // Map old panel names to their new merged parent for sidebar highlighting
+  const _panelParentMap = {};
+  const sidebarName = _panelParentMap[name] || name;
+  document.querySelector(`.sidebar-btn[data-panel="${sidebarName}"]`)?.classList.add('active');
   _expandSectionForPanel(name);
 
   // Hide dashboard + stats strip, show panel
@@ -362,7 +382,7 @@ window.openPanel = function(name, skipHash) {
   // Show skeleton while content loads — tailored per panel type
   const body = document.getElementById('overlay-panel-body');
   if (body) {
-    const gridPanels = ['controls', 'filament', 'stats', 'maintenance', 'learning', 'knowledge'];
+    const gridPanels = ['controls', 'filament', 'analysis', 'maintenance', 'learning', 'knowledge', 'diagnostics'];
     const tablePanels = ['history', 'errors', 'queue', 'waste'];
     let skel;
     if (gridPanels.includes(name)) {
