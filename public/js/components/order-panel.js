@@ -2,205 +2,162 @@
 (function() {
   'use strict';
 
-  let _currentTab = 'overview';
+  let _activeTab = 'overview';
   let _dashboard = null;
   let _projects = [];
   let _activeProject = null;
   let _invoices = [];
 
   function _esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  function _tl(key, fb) { return (typeof window.t === 'function' ? window.t(key) : '') || fb; }
 
   function formatCurrency(val, currency) {
     if (val === null || val === undefined) return '--';
     return Number(val).toFixed(2) + ' ' + (currency || 'NOK');
   }
-
   function formatDate(iso) {
     if (!iso) return '--';
     const locale = (window.i18n?.getLocale() || 'nb').replace('_', '-');
     return new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
-
   function formatDateTime(iso) {
     if (!iso) return '--';
     const locale = (window.i18n?.getLocale() || 'nb').replace('_', '-');
     return new Date(iso).toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
   }
+  function isOverdue(deadline) { return deadline ? new Date(deadline) < new Date() : false; }
 
-  function isOverdue(deadline) {
-    if (!deadline) return false;
-    return new Date(deadline) < new Date();
+  // Tab bar
+  const TABS = [
+    { id: 'overview', labelKey: 'orders.tab_overview', fallback: 'Oversikt' },
+    { id: 'orders', labelKey: 'orders.tab_orders', fallback: 'Bestillinger' },
+    { id: 'invoices', labelKey: 'orders.tab_invoices', fallback: 'Fakturaer' }
+  ];
+
+  function _tabBarHtml() {
+    return '<div class="tabs _wrapper-tabs">' + TABS.map(tab => {
+      const label = _tl(tab.labelKey, tab.fallback);
+      const active = _activeTab === tab.id ? ' active' : '';
+      return `<button class="tab-btn${active}" onclick="_orderSwitchTab('${tab.id}')">${label}</button>`;
+    }).join('') + '</div>';
   }
-
-  // ═══ API calls ═══
-
-  async function fetchDashboard() {
-    const res = await fetch('/api/projects/dashboard');
-    if (!res.ok) throw new Error('Failed');
-    return res.json();
-  }
-
-  async function fetchProjects(status) {
-    const q = status ? '?status=' + encodeURIComponent(status) : '';
-    const res = await fetch('/api/projects' + q);
-    if (!res.ok) throw new Error('Failed');
-    return res.json();
-  }
-
-  async function fetchProjectDetails(id) {
-    const res = await fetch('/api/projects/' + id + '/details');
-    if (!res.ok) throw new Error('Failed');
-    return res.json();
-  }
-
-  async function fetchCostSummary(id) {
-    const res = await fetch('/api/projects/' + id + '/cost-summary');
-    if (!res.ok) throw new Error('Failed');
-    return res.json();
-  }
-
-  async function apiCreateProject(data) {
-    const res = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    if (!res.ok) { const e = await res.json().catch(() => ({})); throw new Error(e.error || 'Failed'); }
-    return res.json();
-  }
-
-  async function apiUpdateProject(id, data) {
-    const res = await fetch('/api/projects/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    if (!res.ok) throw new Error('Failed');
-    return res.json();
-  }
-
-  async function apiCreateInvoice(projectId, data) {
-    const res = await fetch('/api/projects/' + projectId + '/invoice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) });
-    if (!res.ok) throw new Error('Failed');
-    return res.json();
-  }
-
-  async function apiUpdateInvoiceStatus(id, status) {
-    const res = await fetch('/api/invoices/' + id + '/status', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) });
-    if (!res.ok) throw new Error('Failed');
-    return res.json();
-  }
-
-  async function apiToggleShare(projectId, enabled) {
-    const res = await fetch('/api/projects/' + projectId + '/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) });
-    if (!res.ok) throw new Error('Failed');
-    return res.json();
-  }
-
-  async function apiLinkQueue(projectId, queueItemId, filename) {
-    const res = await fetch('/api/projects/' + projectId + '/link-queue', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ queue_item_id: queueItemId, filename }) });
-    if (!res.ok) throw new Error('Failed');
-    return res.json();
-  }
-
-  // ═══ Tab system ═══
-
-  function switchTab(tab) {
-    _currentTab = tab;
-    document.querySelectorAll('.order-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    const body = document.getElementById('order-tab-content');
+  function _ensureTabBar() {
+    const body = document.getElementById('overlay-panel-body');
     if (!body) return;
-    if (tab === 'overview') renderOverview(body);
-    else if (tab === 'orders') renderOrders(body);
-    else if (tab === 'invoices') renderInvoiceList(body);
+    const old = body.querySelector('._wrapper-tabs');
+    if (old) old.remove();
+    body.insertAdjacentHTML('afterbegin', _tabBarHtml());
   }
 
-  // ═══ Overview tab ═══
+  // API
+  async function fetchDashboard() { const r = await fetch('/api/projects/dashboard'); return r.ok ? r.json() : { active_orders: 0, overdue_count: 0, revenue_this_month: 0, avg_order_value: 0, upcoming_deadlines: [], recent_activity: [] }; }
+  async function fetchProjects(status) { const q = status ? '?status=' + encodeURIComponent(status) : ''; const r = await fetch('/api/projects' + q); return r.ok ? r.json() : []; }
+  async function fetchProjectDetails(id) { const r = await fetch('/api/projects/' + id + '/details'); if (!r.ok) throw new Error('Failed'); return r.json(); }
+  async function fetchCostSummary(id) { const r = await fetch('/api/projects/' + id + '/cost-summary'); return r.ok ? r.json() : null; }
+  async function apiCreateProject(data) { const r = await fetch('/api/projects', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); if (!r.ok) throw new Error('Failed'); return r.json(); }
+  async function apiUpdateProject(id, data) { const r = await fetch('/api/projects/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); if (!r.ok) throw new Error('Failed'); return r.json(); }
+  async function apiCreateInvoice(projectId, data) { const r = await fetch('/api/projects/' + projectId + '/invoice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); if (!r.ok) throw new Error('Failed'); return r.json(); }
+  async function apiUpdateInvoiceStatus(id, status) { const r = await fetch('/api/invoices/' + id + '/status', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) }); if (!r.ok) throw new Error('Failed'); return r.json(); }
+  async function apiToggleShare(projectId, enabled) { const r = await fetch('/api/projects/' + projectId + '/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) }); if (!r.ok) throw new Error('Failed'); return r.json(); }
+  async function apiLinkQueue(projectId, queueItemId) { const r = await fetch('/api/projects/' + projectId + '/link-queue', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ queue_item_id: queueItemId }) }); if (!r.ok) throw new Error('Failed'); return r.json(); }
 
-  async function renderOverview(container) {
-    container.innerHTML = '<div class="skeleton" style="height:200px;border-radius:8px"></div>';
-    try {
-      _dashboard = await fetchDashboard();
-    } catch { _dashboard = { active_orders: 0, overdue_count: 0, revenue_this_month: 0, avg_order_value: 0, upcoming_deadlines: [], recent_activity: [] }; }
+  // Overview
+  async function _renderOverview() {
+    const container = document.getElementById('ord-content');
+    if (!container) return;
+    container.innerHTML = '<div class="matrec-empty"><div class="matrec-spinner"></div></div>';
 
+    try { _dashboard = await fetchDashboard(); }
+    catch { _dashboard = { active_orders: 0, overdue_count: 0, revenue_this_month: 0, avg_order_value: 0, upcoming_deadlines: [], recent_activity: [] }; }
     const d = _dashboard;
-    let html = '<div class="order-stats-row">' +
-      _statCard(t('orders.active_orders'), d.active_orders, 'var(--accent-blue)') +
-      _statCard(t('orders.overdue'), d.overdue_count, d.overdue_count > 0 ? 'var(--accent-red)' : 'var(--accent-green)') +
-      _statCard(t('orders.revenue_month'), formatCurrency(d.revenue_this_month), 'var(--accent-green)') +
-      _statCard(t('orders.avg_value'), formatCurrency(d.avg_order_value), 'var(--accent-purple)') +
-      '</div>';
 
-    // Upcoming deadlines
-    html += '<div class="order-section"><h3>' + _esc(t('orders.upcoming_deadlines')) + '</h3>';
+    let html = `<div class="stats-strip ord-stats">
+      <div class="spark-panel"><span class="spark-label">${_tl('orders.active_orders', 'Aktive')}</span><span class="spark-value" style="color:var(--accent-blue)">${d.active_orders}</span></div>
+      <div class="spark-panel"><span class="spark-label">${_tl('orders.overdue', 'Forsinket')}</span><span class="spark-value" style="color:${d.overdue_count > 0 ? 'var(--accent-red)' : 'var(--accent-green)'}">${d.overdue_count}</span></div>
+      <div class="spark-panel"><span class="spark-label">${_tl('orders.revenue_month', 'Inntekt mnd')}</span><span class="spark-value">${formatCurrency(d.revenue_this_month)}</span></div>
+      <div class="spark-panel" style="border-right:none"><span class="spark-label">${_tl('orders.avg_value', 'Snitt verdi')}</span><span class="spark-value">${formatCurrency(d.avg_order_value)}</span></div>
+    </div>`;
+
+    // Deadlines
+    html += `<div class="card ord-section">
+      <div class="card-title">${_tl('orders.upcoming_deadlines', 'Kommende frister')}</div>`;
     if (d.upcoming_deadlines?.length) {
-      html += '<div class="order-deadline-list">';
       for (const p of d.upcoming_deadlines) {
-        const overdue = isOverdue(p.deadline);
-        html += '<div class="order-deadline-item' + (overdue ? ' overdue' : '') + '" onclick="window._orderOpenDetail(' + p.id + ')">' +
-          '<span class="order-deadline-name">' + _esc(p.name) + '</span>' +
-          '<span class="order-deadline-customer">' + _esc(p.customer_name || p.client_name || '') + '</span>' +
-          '<span class="order-deadline-date' + (overdue ? ' text-danger' : '') + '">' + formatDate(p.deadline || p.due_date) + '</span>' +
-          '</div>';
+        const overdue = isOverdue(p.deadline || p.due_date);
+        html += `<div class="ord-deadline${overdue ? ' ord-deadline--overdue' : ''}" onclick="window._orderOpenDetail(${p.id})">
+          <span class="ord-deadline-name">${_esc(p.name)}</span>
+          <span class="ord-deadline-customer">${_esc(p.customer_name || p.client_name || '')}</span>
+          <span class="ord-deadline-date${overdue ? ' ord-text-danger' : ''}">${formatDate(p.deadline || p.due_date)}</span>
+        </div>`;
       }
-      html += '</div>';
     } else {
-      html += '<p class="text-muted">' + _esc(t('orders.no_deadlines')) + '</p>';
+      html += `<div class="ord-empty-note">${_tl('orders.no_deadlines', 'Ingen kommende frister')}</div>`;
     }
     html += '</div>';
 
-    // Recent activity
-    html += '<div class="order-section"><h3>' + _esc(t('orders.recent_activity')) + '</h3>';
+    // Activity
+    html += `<div class="card ord-section">
+      <div class="card-title">${_tl('orders.recent_activity', 'Siste aktivitet')}</div>`;
     if (d.recent_activity?.length) {
-      html += '<div class="order-timeline">';
+      html += '<div class="ord-timeline">';
       for (const ev of d.recent_activity) {
-        html += '<div class="order-timeline-item">' +
-          '<div class="order-timeline-dot"></div>' +
-          '<div class="order-timeline-content">' +
-          '<span class="order-timeline-project">' + _esc(ev.project_name || '') + '</span>' +
-          '<span class="order-timeline-desc">' + _esc(ev.description || '') + '</span>' +
-          '<span class="order-timeline-time">' + formatDateTime(ev.timestamp) + '</span>' +
-          '</div></div>';
+        html += `<div class="ord-timeline-item">
+          <div class="ord-timeline-dot"></div>
+          <div class="ord-timeline-body">
+            <div class="ord-timeline-project">${_esc(ev.project_name || '')}</div>
+            <div class="ord-timeline-desc">${_esc(ev.description || '')}</div>
+            <div class="ord-timeline-time">${formatDateTime(ev.timestamp)}</div>
+          </div>
+        </div>`;
       }
       html += '</div>';
     } else {
-      html += '<p class="text-muted">' + _esc(t('orders.no_activity')) + '</p>';
+      html += `<div class="ord-empty-note">${_tl('orders.no_activity', 'Ingen aktivitet ennå')}</div>`;
     }
     html += '</div>';
 
     container.innerHTML = html;
   }
 
-  function _statCard(label, value, color) {
-    return '<div class="order-stat-card"><div class="order-stat-value" style="color:' + color + '">' + _esc(String(value)) + '</div>' +
-      '<div class="order-stat-label">' + _esc(label) + '</div></div>';
-  }
-
-  // ═══ Orders tab (Kanban) ═══
-
-  async function renderOrders(container) {
-    container.innerHTML = '<div class="skeleton" style="height:300px;border-radius:8px"></div>';
-    try {
-      _projects = await fetchProjects();
-    } catch { _projects = []; }
+  // Orders (Kanban)
+  async function _renderOrders() {
+    const container = document.getElementById('ord-content');
+    if (!container) return;
+    container.innerHTML = '<div class="matrec-empty"><div class="matrec-spinner"></div></div>';
+    try { _projects = await fetchProjects(); } catch { _projects = []; }
 
     const columns = [
-      { key: 'active', label: t('orders.status_received'), color: 'var(--accent-blue)' },
-      { key: 'printing', label: t('orders.status_printing'), color: 'var(--accent-orange)' },
-      { key: 'completed', label: t('orders.status_completed'), color: 'var(--accent-green)' },
-      { key: 'invoiced', label: t('orders.status_invoiced'), color: 'var(--accent-purple)' }
+      { key: 'active', label: _tl('orders.status_received', 'Mottatt'), color: 'var(--accent-blue)' },
+      { key: 'printing', label: _tl('orders.status_printing', 'Printer'), color: 'var(--accent-orange)' },
+      { key: 'completed', label: _tl('orders.status_completed', 'Ferdig'), color: 'var(--accent-green)' },
+      { key: 'invoiced', label: _tl('orders.status_invoiced', 'Fakturert'), color: 'var(--accent-purple, #7b2ff2)' }
     ];
 
-    let html = '<div style="display:flex;justify-content:flex-end;margin-bottom:12px">' +
-      '<button class="btn btn-primary btn-sm" onclick="window._orderNewProject()">' + _esc(t('orders.new_order')) + '</button></div>';
+    let html = `<div class="matrec-toolbar" style="margin-bottom:12px">
+      <div></div>
+      <button class="matrec-recalc-btn" onclick="window._orderNewProject()" style="margin-left:auto">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        ${_tl('orders.new_order', 'Ny bestilling')}
+      </button>
+    </div>`;
 
-    html += '<div class="order-kanban">';
+    html += '<div class="ord-kanban">';
     for (const col of columns) {
       const items = _projects.filter(p => p.status === col.key);
-      html += '<div class="order-kanban-col">' +
-        '<div class="order-kanban-header" style="border-top:3px solid ' + col.color + '">' +
-        '<span>' + _esc(col.label) + '</span><span class="order-kanban-count">' + items.length + '</span></div>' +
-        '<div class="order-kanban-items">';
+      html += `<div class="ord-kanban-col">
+        <div class="ord-kanban-header" style="--col-color:${col.color}">
+          <span>${_esc(col.label)}</span>
+          <span class="ord-kanban-count">${items.length}</span>
+        </div>
+        <div class="ord-kanban-items">`;
       for (const p of items) {
         const overdue = isOverdue(p.deadline || p.due_date);
-        html += '<div class="order-kanban-card' + (overdue ? ' overdue' : '') + '" onclick="window._orderOpenDetail(' + p.id + ')">' +
-          '<div class="order-card-name">' + _esc(p.name) + '</div>' +
-          '<div class="order-card-customer">' + _esc(p.customer_name || p.client_name || '--') + '</div>' +
-          (p.deadline || p.due_date ? '<div class="order-card-deadline' + (overdue ? ' text-danger' : '') + '">' + formatDate(p.deadline || p.due_date) + '</div>' : '') +
-          (p.priority > 0 ? '<span class="order-priority-badge">' + _esc(t('orders.priority')) + '</span>' : '') +
-          '</div>';
+        html += `<div class="ord-kanban-card${overdue ? ' ord-kanban-card--overdue' : ''}" onclick="window._orderOpenDetail(${p.id})">
+          <div class="ord-card-name">${_esc(p.name)}</div>
+          <div class="ord-card-customer">${_esc(p.customer_name || p.client_name || '--')}</div>
+          ${p.deadline || p.due_date ? '<div class="ord-card-deadline' + (overdue ? ' ord-text-danger' : '') + '">' + formatDate(p.deadline || p.due_date) + '</div>' : ''}
+          ${p.priority > 0 ? '<span class="ord-priority-badge">' + _tl('orders.priority', 'Prioritet') + '</span>' : ''}
+        </div>`;
       }
       html += '</div></div>';
     }
@@ -209,218 +166,230 @@
     container.innerHTML = html;
   }
 
-  // ═══ Order detail ═══
+  // Detail
+  async function _renderDetail(projectId) {
+    const container = document.getElementById('ord-content');
+    if (!container) return;
+    container.innerHTML = '<div class="matrec-empty"><div class="matrec-spinner"></div></div>';
 
-  async function openDetail(projectId) {
-    _currentTab = 'detail';
-    const body = document.getElementById('order-tab-content');
-    if (!body) return;
-    body.innerHTML = '<div class="skeleton" style="height:400px;border-radius:8px"></div>';
+    try { _activeProject = await fetchProjectDetails(projectId); }
+    catch { container.innerHTML = '<div class="matrec-empty"><p>Kunne ikke laste prosjekt</p></div>'; return; }
 
-    try {
-      _activeProject = await fetchProjectDetails(projectId);
-    } catch {
-      body.innerHTML = '<p class="text-danger">Failed to load project</p>';
-      return;
-    }
-
-    const costSummary = await fetchCostSummary(projectId).catch(() => null);
+    const costSummary = await fetchCostSummary(projectId);
     const p = _activeProject;
-    const overdue = isOverdue(p.deadline || p.due_date);
 
-    let html = '<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">' +
-      '<button class="btn btn-ghost btn-sm" onclick="window._orderSwitchTab(\'orders\')">&larr; ' + _esc(t('orders.back')) + '</button>' +
-      '<h2 style="margin:0;flex:1">' + _esc(p.name) + '</h2>' +
-      '<span class="order-status-badge order-status-' + (p.status || 'active') + '">' + _esc(p.status || 'active') + '</span></div>';
+    let html = `<div class="ord-detail-header">
+      <button class="ce-secondary-btn" onclick="window._orderSwitchTab('orders')" style="padding:5px 12px">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        ${_tl('orders.back', 'Tilbake')}
+      </button>
+      <span class="ord-detail-title">${_esc(p.name)}</span>
+      <span class="ord-status-badge ord-status--${p.status || 'active'}">${_esc(p.status || 'active')}</span>
+    </div>`;
 
-    // Customer info form
-    html += '<div class="order-detail-grid"><div class="order-detail-section">' +
-      '<h3>' + _esc(t('orders.customer_info')) + '</h3>' +
-      '<div class="order-form-grid">' +
-      _formField('customer_name', t('orders.customer_name'), p.customer_name || p.client_name || '') +
-      _formField('customer_email', t('orders.customer_email'), p.customer_email || '', 'email') +
-      _formField('customer_phone', t('orders.customer_phone'), p.customer_phone || '', 'tel') +
-      '</div>' +
-      '<div class="order-form-grid">' +
-      '<div class="form-group"><label>' + _esc(t('orders.deadline')) + '</label>' +
-      '<input type="date" class="form-input" id="order-deadline" value="' + _esc((p.deadline || p.due_date || '').split('T')[0]) + '"></div>' +
-      '<div class="form-group"><label>' + _esc(t('orders.priority_label')) + '</label>' +
-      '<select class="form-input" id="order-priority">' +
-      '<option value="0"' + (p.priority == 0 ? ' selected' : '') + '>' + _esc(t('orders.priority_normal')) + '</option>' +
-      '<option value="1"' + (p.priority == 1 ? ' selected' : '') + '>' + _esc(t('orders.priority_high')) + '</option>' +
-      '<option value="2"' + (p.priority == 2 ? ' selected' : '') + '>' + _esc(t('orders.priority_urgent')) + '</option>' +
-      '</select></div>' +
-      '<div class="form-group"><label>' + _esc(t('orders.status')) + '</label>' +
-      '<select class="form-input" id="order-status">' +
-      ['active', 'printing', 'completed', 'invoiced', 'cancelled'].map(s =>
-        '<option value="' + s + '"' + (p.status === s ? ' selected' : '') + '>' + _esc(s) + '</option>'
-      ).join('') +
-      '</select></div>' +
-      '</div>' +
-      '<div class="form-group"><label>' + _esc(t('orders.estimated_cost')) + '</label>' +
-      '<input type="number" class="form-input" id="order-estimated-cost" value="' + (p.estimated_cost || '') + '" step="0.01"></div>' +
-      '<button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="window._orderSaveDetail()">' + _esc(t('orders.save')) + '</button>' +
-      '</div>';
+    // Two-column grid
+    html += '<div class="ord-detail-grid">';
+
+    // Customer info
+    html += `<div class="card ord-section">
+      <div class="card-title">${_tl('orders.customer_info', 'Kundeinformasjon')}</div>
+      <div class="ord-form-grid">
+        ${_formField('customer_name', _tl('orders.customer_name', 'Kundenavn'), p.customer_name || p.client_name || '')}
+        ${_formField('customer_email', _tl('orders.customer_email', 'E-post'), p.customer_email || '', 'email')}
+        ${_formField('customer_phone', _tl('orders.customer_phone', 'Telefon'), p.customer_phone || '', 'tel')}
+      </div>
+      <div class="ord-form-grid">
+        <div class="ce-field"><span class="ce-field-label">${_tl('orders.deadline', 'Frist')}</span><input type="date" class="ce-input" style="border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:8px 12px" id="order-deadline" value="${_esc((p.deadline || p.due_date || '').split('T')[0])}"></div>
+        <div class="ce-field"><span class="ce-field-label">${_tl('orders.priority_label', 'Prioritet')}</span>
+          <select class="matrec-select" style="width:100%" id="order-priority">
+            <option value="0"${p.priority == 0 ? ' selected' : ''}>${_tl('orders.priority_normal', 'Normal')}</option>
+            <option value="1"${p.priority == 1 ? ' selected' : ''}>${_tl('orders.priority_high', 'Høy')}</option>
+            <option value="2"${p.priority == 2 ? ' selected' : ''}>${_tl('orders.priority_urgent', 'Haster')}</option>
+          </select>
+        </div>
+        <div class="ce-field"><span class="ce-field-label">${_tl('orders.status', 'Status')}</span>
+          <select class="matrec-select" style="width:100%" id="order-status">
+            ${['active', 'printing', 'completed', 'invoiced', 'cancelled'].map(s => `<option value="${s}"${p.status === s ? ' selected' : ''}>${s}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="ce-field" style="margin-top:8px"><span class="ce-field-label">${_tl('orders.estimated_cost', 'Estimert kostnad')}</span>
+        <div class="ce-input-wrap"><input type="number" class="ce-input" id="order-estimated-cost" value="${p.estimated_cost || ''}" step="0.01"><span class="ce-input-suffix">NOK</span></div>
+      </div>
+      <button class="matrec-recalc-btn" style="margin-left:0;margin-top:12px" onclick="window._orderSaveDetail()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/></svg>
+        ${_tl('orders.save', 'Lagre')}
+      </button>
+    </div>`;
 
     // Cost summary
-    html += '<div class="order-detail-section">' +
-      '<h3>' + _esc(t('orders.cost_summary')) + '</h3>';
+    html += `<div class="card ord-section">
+      <div class="card-title">${_tl('orders.cost_summary', 'Kostnadssammendrag')}</div>`;
     if (costSummary) {
-      html += '<div class="order-cost-grid">' +
-        _costRow(t('orders.total_prints'), costSummary.total_prints) +
-        _costRow(t('orders.completed_prints'), costSummary.completed_prints) +
-        _costRow(t('orders.filament_cost'), formatCurrency(costSummary.filament_cost)) +
-        _costRow(t('orders.energy_cost'), formatCurrency(costSummary.energy_cost)) +
-        _costRow(t('orders.actual_cost'), formatCurrency(costSummary.actual_cost)) +
-        _costRow(t('orders.filament_used'), (costSummary.total_filament_g || 0).toFixed(1) + ' g') +
-        '</div>';
+      html += `<div class="ord-cost-list">
+        ${_costRow(_tl('orders.total_prints', 'Totalt utskrifter'), costSummary.total_prints)}
+        ${_costRow(_tl('orders.completed_prints', 'Fullførte'), costSummary.completed_prints)}
+        ${_costRow(_tl('orders.filament_cost', 'Filament'), formatCurrency(costSummary.filament_cost))}
+        ${_costRow(_tl('orders.energy_cost', 'Strøm'), formatCurrency(costSummary.energy_cost))}
+        ${_costRow(_tl('orders.actual_cost', 'Faktisk kostnad'), formatCurrency(costSummary.actual_cost))}
+        ${_costRow(_tl('orders.filament_used', 'Filament brukt'), (costSummary.total_filament_g || 0).toFixed(1) + ' g')}
+      </div>`;
       if (p.estimated_cost) {
         const diff = (costSummary.actual_cost || 0) - p.estimated_cost;
-        html += '<div class="order-cost-diff" style="color:' + (diff > 0 ? 'var(--accent-red)' : 'var(--accent-green)') + '">' +
-          _esc(t('orders.cost_diff')) + ': ' + (diff > 0 ? '+' : '') + formatCurrency(diff) + '</div>';
+        html += `<div class="ord-cost-diff" style="color:${diff > 0 ? 'var(--accent-red)' : 'var(--accent-green)'}">
+          ${_tl('orders.cost_diff', 'Avvik')}: ${diff > 0 ? '+' : ''}${formatCurrency(diff)}
+        </div>`;
       }
     } else {
-      html += '<p class="text-muted">' + _esc(t('orders.no_cost_data')) + '</p>';
+      html += `<div class="ord-empty-note">${_tl('orders.no_cost_data', 'Ingen kostnadsdata')}</div>`;
     }
     html += '</div></div>';
 
     // Linked prints
-    html += '<div class="order-detail-section"><h3>' + _esc(t('orders.linked_prints')) + '</h3>';
+    html += `<div class="card ord-section">
+      <div class="card-title">${_tl('orders.linked_prints', 'Koblede utskrifter')}</div>`;
     if (p.prints?.length) {
-      html += '<table class="order-prints-table"><thead><tr>' +
-        '<th>' + _esc(t('orders.filename')) + '</th>' +
-        '<th>' + _esc(t('orders.status')) + '</th>' +
-        '<th>' + _esc(t('orders.cost')) + '</th>' +
-        '</tr></thead><tbody>';
+      html += '<table class="matrec-table"><thead><tr><th style="text-align:left">' + _tl('orders.filename', 'Fil') + '</th><th>' + _tl('orders.status', 'Status') + '</th><th>' + _tl('orders.cost', 'Kostnad') + '</th></tr></thead><tbody>';
       for (const pr of p.prints) {
-        html += '<tr><td>' + _esc(pr.print_filename || pr.filename || '--') + '</td>' +
-          '<td><span class="order-print-status order-ps-' + (pr.print_status || pr.status || 'pending') + '">' + _esc(pr.print_status || pr.status || 'pending') + '</span></td>' +
-          '<td>' + formatCurrency(pr.print_cost) + '</td></tr>';
+        const st = pr.print_status || pr.status || 'pending';
+        const stCls = st === 'finish' || st === 'completed' ? 'good' : st === 'failed' ? 'bad' : 'warn';
+        html += `<tr><td style="text-align:left">${_esc(pr.print_filename || pr.filename || '--')}</td><td><span class="hs-badge hs-badge-${stCls}">${_esc(st)}</span></td><td>${formatCurrency(pr.print_cost)}</td></tr>`;
       }
       html += '</tbody></table>';
     } else {
-      html += '<p class="text-muted">' + _esc(t('orders.no_prints_linked')) + '</p>';
+      html += `<div class="ord-empty-note">${_tl('orders.no_prints_linked', 'Ingen utskrifter koblet')}</div>`;
     }
-    html += '<button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="window._orderLinkQueue()">' + _esc(t('orders.link_queue_item')) + '</button>';
-    html += '</div>';
+    html += `<button class="ce-secondary-btn" style="margin-top:8px" onclick="window._orderLinkQueue()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+      ${_tl('orders.link_queue_item', 'Koble køelement')}
+    </button></div>`;
 
-    // Share link
-    html += '<div class="order-detail-section"><h3>' + _esc(t('orders.share_link')) + '</h3>' +
-      '<div style="display:flex;align-items:center;gap:12px">' +
-      '<label class="toggle-label"><input type="checkbox" id="order-share-toggle" ' + (p.share_enabled ? 'checked' : '') +
-      ' onchange="window._orderToggleShare()"> ' + _esc(t('orders.share_enabled')) + '</label>';
-    if (p.share_enabled && p.share_token) {
-      const shareUrl = location.origin + '/api/shared/' + p.share_token;
-      html += '<input type="text" class="form-input" readonly value="' + _esc(shareUrl) + '" id="order-share-url" style="flex:1">' +
-        '<button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById(\'order-share-url\').value);if(typeof showToast===\'function\')showToast(\'' + _esc(t('orders.link_copied')) + '\',\'success\',2000)">' + _esc(t('orders.copy')) + '</button>';
-    }
-    html += '</div></div>';
-
-    // Actions
-    html += '<div class="order-detail-section"><h3>' + _esc(t('orders.actions')) + '</h3>' +
-      '<div style="display:flex;gap:8px;flex-wrap:wrap">' +
-      '<button class="btn btn-primary btn-sm" onclick="window._orderGenerateInvoice()">' + _esc(t('orders.generate_invoice')) + '</button>' +
-      '</div></div>';
+    // Share & Actions
+    html += `<div class="ord-actions-row">
+      <div class="card ord-section" style="flex:1">
+        <div class="card-title">${_tl('orders.share_link', 'Delingslenke')}</div>
+        <div class="ord-share-row">
+          <label class="wp-toggle"><input type="checkbox" id="order-share-toggle" ${p.share_enabled ? 'checked' : ''} onchange="window._orderToggleShare()"><span class="wp-toggle-track"></span><span class="wp-toggle-knob"></span></label>
+          <span style="font-size:0.8rem">${_tl('orders.share_enabled', 'Deling aktivert')}</span>
+        </div>
+        ${p.share_enabled && p.share_token ? `<div class="ord-share-url">
+          <input type="text" class="ce-input" style="border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:6px 10px;font-size:0.75rem;flex:1" readonly value="${_esc(location.origin + '/api/shared/' + p.share_token)}" id="order-share-url">
+          <button class="ce-secondary-btn" style="padding:5px 10px;font-size:0.72rem" onclick="navigator.clipboard.writeText(document.getElementById('order-share-url').value);if(typeof showToast==='function')showToast('Kopiert','success',2000)">${_tl('orders.copy', 'Kopier')}</button>
+        </div>` : ''}
+      </div>
+      <div class="card ord-section" style="flex:1">
+        <div class="card-title">${_tl('orders.actions', 'Handlinger')}</div>
+        <button class="matrec-recalc-btn" style="margin-left:0" onclick="window._orderGenerateInvoice()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          ${_tl('orders.generate_invoice', 'Generer faktura')}
+        </button>
+      </div>
+    </div>`;
 
     // Timeline
-    html += '<div class="order-detail-section"><h3>' + _esc(t('orders.timeline')) + '</h3>';
+    html += `<div class="card ord-section">
+      <div class="card-title">${_tl('orders.timeline', 'Tidslinje')}</div>`;
     if (p.timeline?.length) {
-      html += '<div class="order-timeline">';
+      html += '<div class="ord-timeline">';
       for (const ev of p.timeline) {
-        html += '<div class="order-timeline-item">' +
-          '<div class="order-timeline-dot"></div>' +
-          '<div class="order-timeline-content">' +
-          '<span class="order-timeline-desc">' + _esc(ev.description || '') + '</span>' +
-          '<span class="order-timeline-time">' + formatDateTime(ev.timestamp) + '</span>' +
-          '</div></div>';
+        html += `<div class="ord-timeline-item"><div class="ord-timeline-dot"></div><div class="ord-timeline-body">
+          <div class="ord-timeline-desc">${_esc(ev.description || '')}</div>
+          <div class="ord-timeline-time">${formatDateTime(ev.timestamp)}</div>
+        </div></div>`;
       }
       html += '</div>';
     } else {
-      html += '<p class="text-muted">' + _esc(t('orders.no_timeline')) + '</p>';
+      html += `<div class="ord-empty-note">${_tl('orders.no_timeline', 'Ingen hendelser ennå')}</div>`;
     }
     html += '</div>';
 
-    body.innerHTML = html;
+    container.innerHTML = html;
   }
 
   function _formField(id, label, value, type) {
-    return '<div class="form-group"><label>' + _esc(label) + '</label>' +
-      '<input type="' + (type || 'text') + '" class="form-input" id="order-' + id + '" value="' + _esc(value) + '"></div>';
+    return `<div class="ce-field"><span class="ce-field-label">${_esc(label)}</span><input type="${type || 'text'}" class="ce-input" style="border:1px solid var(--border-color);border-radius:var(--radius-sm);padding:8px 12px" id="order-${id}" value="${_esc(value)}"></div>`;
   }
-
   function _costRow(label, value) {
-    return '<div class="order-cost-row"><span>' + _esc(label) + '</span><span>' + _esc(String(value)) + '</span></div>';
+    return `<div class="ord-cost-row"><span>${_esc(label)}</span><span>${_esc(String(value))}</span></div>`;
   }
 
-  // ═══ Invoice list tab ═══
+  // Invoices
+  async function _renderInvoices() {
+    const container = document.getElementById('ord-content');
+    if (!container) return;
+    container.innerHTML = '<div class="matrec-empty"><div class="matrec-spinner"></div></div>';
 
-  async function renderInvoiceList(container) {
-    container.innerHTML = '<div class="skeleton" style="height:200px;border-radius:8px"></div>';
     try {
       const all = await fetchProjects();
       _invoices = [];
       for (const p of all) {
         try {
           const res = await fetch('/api/projects/' + p.id + '/invoices');
-          if (res.ok) {
-            const invs = await res.json();
-            for (const inv of invs) { inv._project_name = p.name; _invoices.push(inv); }
-          }
+          if (res.ok) { const invs = await res.json(); for (const inv of invs) { inv._project_name = p.name; _invoices.push(inv); } }
         } catch {}
       }
     } catch { _invoices = []; }
 
-    let html = '';
-    if (_invoices.length === 0) {
-      html = '<p class="text-muted">' + _esc(t('orders.no_invoices')) + '</p>';
-    } else {
-      html = '<table class="order-prints-table"><thead><tr>' +
-        '<th>' + _esc(t('orders.invoice_number')) + '</th>' +
-        '<th>' + _esc(t('orders.project')) + '</th>' +
-        '<th>' + _esc(t('orders.customer_name')) + '</th>' +
-        '<th>' + _esc(t('orders.total')) + '</th>' +
-        '<th>' + _esc(t('orders.status')) + '</th>' +
-        '<th>' + _esc(t('orders.actions')) + '</th>' +
-        '</tr></thead><tbody>';
-      for (const inv of _invoices) {
-        html += '<tr>' +
-          '<td>' + _esc(inv.invoice_number || '--') + '</td>' +
-          '<td>' + _esc(inv._project_name || '--') + '</td>' +
-          '<td>' + _esc(inv.customer_name || '--') + '</td>' +
-          '<td>' + formatCurrency(inv.total, inv.currency) + '</td>' +
-          '<td><span class="order-invoice-badge order-inv-' + (inv.status || 'draft') + '">' + _esc(inv.status || 'draft') + '</span></td>' +
-          '<td><div style="display:flex;gap:4px">' +
-          '<button class="btn btn-ghost btn-xs" onclick="window.open(\'/api/invoices/' + inv.id + '/html\',\'_blank\')">' + _esc(t('orders.view')) + '</button>';
-        if (inv.status === 'draft') {
-          html += '<button class="btn btn-ghost btn-xs" onclick="window._orderSetInvoiceStatus(' + inv.id + ',\'sent\')">' + _esc(t('orders.mark_sent')) + '</button>';
-        }
-        if (inv.status === 'sent') {
-          html += '<button class="btn btn-ghost btn-xs" onclick="window._orderSetInvoiceStatus(' + inv.id + ',\'paid\')">' + _esc(t('orders.mark_paid')) + '</button>';
-        }
-        html += '</div></td></tr>';
-      }
-      html += '</tbody></table>';
+    if (!_invoices.length) {
+      container.innerHTML = `<div class="matrec-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3;margin-bottom:12px"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <p>${_tl('orders.no_invoices', 'Ingen fakturaer ennå')}</p>
+      </div>`;
+      return;
     }
+
+    let html = `<div class="card" style="padding:0;overflow:hidden">
+      <table class="matrec-table">
+        <thead><tr>
+          <th style="text-align:left">${_tl('orders.invoice_number', 'Fakturanr')}</th>
+          <th style="text-align:left">${_tl('orders.project', 'Prosjekt')}</th>
+          <th style="text-align:left">${_tl('orders.customer_name', 'Kunde')}</th>
+          <th>${_tl('orders.total', 'Total')}</th>
+          <th>${_tl('orders.status', 'Status')}</th>
+          <th>${_tl('orders.actions', 'Handlinger')}</th>
+        </tr></thead>
+        <tbody>`;
+    for (const inv of _invoices) {
+      const stCls = inv.status === 'paid' ? 'good' : inv.status === 'sent' ? 'warn' : '';
+      html += `<tr>
+        <td style="text-align:left;font-weight:600">${_esc(inv.invoice_number || '--')}</td>
+        <td style="text-align:left">${_esc(inv._project_name || '--')}</td>
+        <td style="text-align:left">${_esc(inv.customer_name || '--')}</td>
+        <td style="font-weight:700">${formatCurrency(inv.total, inv.currency)}</td>
+        <td><span class="hs-badge${stCls ? ' hs-badge-' + stCls : ''}">${_esc(inv.status || 'draft')}</span></td>
+        <td><div style="display:flex;gap:4px;justify-content:center">
+          <button class="ce-secondary-btn" style="padding:3px 8px;font-size:0.7rem" onclick="window.open('/api/invoices/${inv.id}/html','_blank')">${_tl('orders.view', 'Vis')}</button>
+          ${inv.status === 'draft' ? `<button class="ce-secondary-btn" style="padding:3px 8px;font-size:0.7rem" onclick="window._orderSetInvoiceStatus(${inv.id},'sent')">${_tl('orders.mark_sent', 'Sendt')}</button>` : ''}
+          ${inv.status === 'sent' ? `<button class="matrec-recalc-btn" style="padding:3px 8px;font-size:0.7rem;margin-left:0" onclick="window._orderSetInvoiceStatus(${inv.id},'paid')">${_tl('orders.mark_paid', 'Betalt')}</button>` : ''}
+        </div></td>
+      </tr>`;
+    }
+    html += '</tbody></table></div>';
     container.innerHTML = html;
   }
 
-  // ═══ Actions ═══
+  // Main render
+  async function _render() {
+    const body = document.getElementById('overlay-panel-body');
+    if (!body) return;
 
-  window._orderSwitchTab = function(tab) { switchTab(tab); };
+    body.innerHTML = '<div class="ord-panel"><div id="ord-content"></div></div>';
+    _ensureTabBar();
 
-  window._orderOpenDetail = function(id) { openDetail(id); };
+    if (_activeTab === 'overview') await _renderOverview();
+    else if (_activeTab === 'orders') await _renderOrders();
+    else if (_activeTab === 'invoices') await _renderInvoices();
+    else if (_activeTab === 'detail' && _activeProject) await _renderDetail(_activeProject.id);
+  }
 
+  // Global handlers
+  window._orderSwitchTab = function(tab) { _activeTab = tab; _render(); };
+  window._orderOpenDetail = function(id) { _activeTab = 'detail'; _renderDetail(id).then(() => _ensureTabBar()); };
   window._orderNewProject = function() {
-    const name = prompt(t('orders.enter_name'));
+    const name = prompt(_tl('orders.enter_name', 'Navn på bestilling'));
     if (!name) return;
-    apiCreateProject({ name, status: 'active' }).then(() => {
-      if (typeof showToast === 'function') showToast(t('orders.created'), 'success', 2000);
-      switchTab('orders');
-    }).catch(e => {
-      if (typeof showToast === 'function') showToast(e.message, 'error', 3000);
-    });
+    apiCreateProject({ name, status: 'active' }).then(() => { if (typeof showToast === 'function') showToast(_tl('orders.created', 'Opprettet'), 'success'); _activeTab = 'orders'; _render(); }).catch(e => { if (typeof showToast === 'function') showToast(e.message, 'error'); });
   };
-
   window._orderSaveDetail = function() {
     if (!_activeProject) return;
     const data = {
@@ -432,183 +401,59 @@
       status: document.getElementById('order-status')?.value || 'active',
       estimated_cost: parseFloat(document.getElementById('order-estimated-cost')?.value) || null
     };
-    apiUpdateProject(_activeProject.id, data).then(() => {
-      if (typeof showToast === 'function') showToast(t('orders.saved'), 'success', 2000);
-      openDetail(_activeProject.id);
-    }).catch(e => {
-      if (typeof showToast === 'function') showToast(e.message, 'error', 3000);
-    });
+    apiUpdateProject(_activeProject.id, data).then(() => { if (typeof showToast === 'function') showToast(_tl('orders.saved', 'Lagret'), 'success'); _renderDetail(_activeProject.id).then(() => _ensureTabBar()); }).catch(e => { if (typeof showToast === 'function') showToast(e.message, 'error'); });
   };
-
   window._orderToggleShare = function() {
     if (!_activeProject) return;
     const enabled = document.getElementById('order-share-toggle')?.checked;
-    apiToggleShare(_activeProject.id, enabled).then(() => {
-      openDetail(_activeProject.id);
-    }).catch(e => {
-      if (typeof showToast === 'function') showToast(e.message, 'error', 3000);
-    });
+    apiToggleShare(_activeProject.id, enabled).then(() => _renderDetail(_activeProject.id).then(() => _ensureTabBar())).catch(e => { if (typeof showToast === 'function') showToast(e.message, 'error'); });
   };
-
   window._orderLinkQueue = function() {
     if (!_activeProject) return;
-    const queueItemId = prompt(t('orders.enter_queue_id'));
+    const queueItemId = prompt(_tl('orders.enter_queue_id', 'Kø-element ID'));
     if (!queueItemId) return;
-    apiLinkQueue(_activeProject.id, parseInt(queueItemId)).then(() => {
-      if (typeof showToast === 'function') showToast(t('orders.queue_linked'), 'success', 2000);
-      openDetail(_activeProject.id);
-    }).catch(e => {
-      if (typeof showToast === 'function') showToast(e.message, 'error', 3000);
-    });
+    apiLinkQueue(_activeProject.id, parseInt(queueItemId)).then(() => { if (typeof showToast === 'function') showToast(_tl('orders.queue_linked', 'Koblet'), 'success'); _renderDetail(_activeProject.id).then(() => _ensureTabBar()); }).catch(e => { if (typeof showToast === 'function') showToast(e.message, 'error'); });
   };
-
   window._orderGenerateInvoice = async function() {
     if (!_activeProject) return;
     const p = _activeProject;
     try {
       const cost = await fetchCostSummary(p.id);
-      const subtotal = cost.actual_cost || 0;
+      const subtotal = cost?.actual_cost || 0;
       const taxRate = 0.25;
-      const taxAmount = subtotal * taxRate;
-      const total = subtotal + taxAmount;
       const items = [];
-      if (p.prints) {
-        for (const pr of p.prints) {
-          items.push({
-            description: pr.print_filename || pr.filename || 'Print job',
-            qty: 1,
-            unit_price: pr.print_cost || 0
-          });
-        }
-      }
-      if (items.length === 0) {
-        items.push({ description: p.name, qty: 1, unit_price: subtotal });
-      }
-      await apiCreateInvoice(p.id, {
-        customer_name: p.customer_name || p.client_name || '',
-        customer_email: p.customer_email || '',
-        items,
-        subtotal,
-        tax_rate: taxRate,
-        tax_amount: taxAmount,
-        total,
-        currency: 'NOK'
-      });
-      if (typeof showToast === 'function') showToast(t('orders.invoice_created'), 'success', 2000);
-      openDetail(p.id);
-    } catch (e) {
-      if (typeof showToast === 'function') showToast(e.message, 'error', 3000);
-    }
+      if (p.prints) { for (const pr of p.prints) items.push({ description: pr.print_filename || pr.filename || 'Print job', qty: 1, unit_price: pr.print_cost || 0 }); }
+      if (!items.length) items.push({ description: p.name, qty: 1, unit_price: subtotal });
+      await apiCreateInvoice(p.id, { customer_name: p.customer_name || p.client_name || '', customer_email: p.customer_email || '', items, subtotal, tax_rate: taxRate, tax_amount: subtotal * taxRate, total: subtotal * (1 + taxRate), currency: 'NOK' });
+      if (typeof showToast === 'function') showToast(_tl('orders.invoice_created', 'Faktura opprettet'), 'success');
+      _renderDetail(p.id).then(() => _ensureTabBar());
+    } catch (e) { if (typeof showToast === 'function') showToast(e.message, 'error'); }
   };
-
   window._orderSetInvoiceStatus = function(id, status) {
-    apiUpdateInvoiceStatus(id, status).then(() => {
-      if (typeof showToast === 'function') showToast(t('orders.status_updated'), 'success', 2000);
-      if (_currentTab === 'invoices') {
-        const body = document.getElementById('order-tab-content');
-        if (body) renderInvoiceList(body);
-      } else if (_activeProject) {
-        openDetail(_activeProject.id);
-      }
-    }).catch(e => {
-      if (typeof showToast === 'function') showToast(e.message, 'error', 3000);
-    });
+    apiUpdateInvoiceStatus(id, status).then(() => { if (typeof showToast === 'function') showToast(_tl('orders.status_updated', 'Status oppdatert'), 'success'); if (_activeTab === 'invoices') _renderInvoices(); else if (_activeProject) _renderDetail(_activeProject.id).then(() => _ensureTabBar()); }).catch(e => { if (typeof showToast === 'function') showToast(e.message, 'error'); });
   };
 
-  // ═══ Main render ═══
-
-  function t(key) {
-    if (typeof window.t === 'function') return window.t(key);
-    return key.split('.').pop();
-  }
-
-  window.loadOrderPanel = function() {
+  window.loadOrderPanel = async function(initialTab) {
+    _activeTab = (typeof initialTab === 'string') ? initialTab : 'overview';
     const body = document.getElementById('overlay-panel-body');
     if (!body) return;
-
-    body.innerHTML = '<div class="order-panel">' +
-      '<div class="order-tabs">' +
-      '<button class="order-tab-btn active" data-tab="overview" onclick="window._orderSwitchTab(\'overview\')">' + _esc(t('orders.tab_overview')) + '</button>' +
-      '<button class="order-tab-btn" data-tab="orders" onclick="window._orderSwitchTab(\'orders\')">' + _esc(t('orders.tab_orders')) + '</button>' +
-      '<button class="order-tab-btn" data-tab="invoices" onclick="window._orderSwitchTab(\'invoices\')">' + _esc(t('orders.tab_invoices')) + '</button>' +
-      '</div>' +
-      '<div id="order-tab-content"></div>' +
-      '</div>' +
-      '<style>' +
-      '.order-panel { padding: 0; }' +
-      '.order-tabs { display: flex; gap: 4px; padding: 0 0 12px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }' +
-      '.order-tab-btn { background: none; border: none; padding: 8px 16px; border-radius: 6px 6px 0 0; cursor: pointer; font-weight: 500; color: var(--text-muted); transition: all .15s; }' +
-      '.order-tab-btn:hover { background: var(--bg-card-hover, rgba(255,255,255,.05)); }' +
-      '.order-tab-btn.active { color: var(--accent-blue); border-bottom: 2px solid var(--accent-blue); }' +
-      '.order-stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 24px; }' +
-      '.order-stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }' +
-      '.order-stat-value { font-size: 1.8rem; font-weight: 700; }' +
-      '.order-stat-label { font-size: .85rem; color: var(--text-muted); margin-top: 4px; }' +
-      '.order-section { margin-bottom: 24px; }' +
-      '.order-section h3 { margin: 0 0 12px; font-size: 1rem; }' +
-      '.order-deadline-list { display: flex; flex-direction: column; gap: 6px; }' +
-      '.order-deadline-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: border-color .15s; }' +
-      '.order-deadline-item:hover { border-color: var(--accent-blue); }' +
-      '.order-deadline-item.overdue { border-left: 3px solid var(--accent-red); }' +
-      '.order-deadline-name { font-weight: 600; flex: 1; }' +
-      '.order-deadline-customer { color: var(--text-muted); font-size: .85rem; }' +
-      '.order-deadline-date { font-size: .85rem; font-weight: 500; }' +
-      '.order-timeline { display: flex; flex-direction: column; gap: 0; padding-left: 16px; border-left: 2px solid var(--border); }' +
-      '.order-timeline-item { display: flex; gap: 12px; padding: 8px 0; position: relative; }' +
-      '.order-timeline-dot { width: 10px; height: 10px; background: var(--accent-blue); border-radius: 50%; margin-top: 4px; position: absolute; left: -22px; }' +
-      '.order-timeline-content { display: flex; flex-direction: column; gap: 2px; }' +
-      '.order-timeline-project { font-weight: 600; font-size: .85rem; }' +
-      '.order-timeline-desc { font-size: .85rem; }' +
-      '.order-timeline-time { font-size: .75rem; color: var(--text-muted); }' +
-      '.order-kanban { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; }' +
-      '.order-kanban-col { flex: 1; min-width: 220px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; }' +
-      '.order-kanban-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; font-weight: 600; font-size: .9rem; border-radius: 10px 10px 0 0; }' +
-      '.order-kanban-count { background: var(--bg-hover, rgba(255,255,255,.1)); padding: 2px 8px; border-radius: 10px; font-size: .75rem; }' +
-      '.order-kanban-items { padding: 8px; display: flex; flex-direction: column; gap: 8px; max-height: 500px; overflow-y: auto; }' +
-      '.order-kanban-card { padding: 12px; background: var(--bg-main, #1a1a2e); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: all .15s; }' +
-      '.order-kanban-card:hover { border-color: var(--accent-blue); transform: translateY(-1px); }' +
-      '.order-kanban-card.overdue { border-left: 3px solid var(--accent-red); }' +
-      '.order-card-name { font-weight: 600; margin-bottom: 4px; }' +
-      '.order-card-customer { font-size: .8rem; color: var(--text-muted); }' +
-      '.order-card-deadline { font-size: .8rem; margin-top: 4px; }' +
-      '.order-priority-badge { display: inline-block; background: var(--accent-orange); color: #fff; font-size: .65rem; font-weight: 700; padding: 1px 6px; border-radius: 4px; margin-top: 6px; }' +
-      '.order-status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: .8rem; font-weight: 600; }' +
-      '.order-status-active { background: #dbeafe; color: #1e40af; }' +
-      '.order-status-printing { background: #fef3c7; color: #92400e; }' +
-      '.order-status-completed { background: #d1fae5; color: #065f46; }' +
-      '.order-status-invoiced { background: #ede9fe; color: #5b21b6; }' +
-      '.order-status-cancelled { background: #fee2e2; color: #991b1b; }' +
-      '.order-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px; }' +
-      '@media (max-width: 768px) { .order-detail-grid { grid-template-columns: 1fr; } .order-kanban { flex-direction: column; } }' +
-      '.order-detail-section { margin-bottom: 24px; }' +
-      '.order-detail-section h3 { margin: 0 0 12px; font-size: 1rem; }' +
-      '.order-form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 12px; }' +
-      '.form-group { display: flex; flex-direction: column; gap: 4px; }' +
-      '.form-group label { font-size: .8rem; font-weight: 500; color: var(--text-muted); }' +
-      '.form-input { padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-card); color: var(--text); font-size: .9rem; }' +
-      '.form-input:focus { outline: none; border-color: var(--accent-blue); }' +
-      '.order-cost-grid { display: flex; flex-direction: column; gap: 6px; }' +
-      '.order-cost-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: .9rem; }' +
-      '.order-cost-diff { margin-top: 8px; font-weight: 600; font-size: .9rem; }' +
-      '.order-prints-table { width: 100%; border-collapse: collapse; font-size: .85rem; }' +
-      '.order-prints-table th { text-align: left; padding: 8px 10px; border-bottom: 2px solid var(--border); font-weight: 600; color: var(--text-muted); font-size: .8rem; }' +
-      '.order-prints-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); }' +
-      '.order-print-status, .order-invoice-badge { display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: .75rem; font-weight: 600; }' +
-      '.order-ps-finish, .order-ps-completed { background: #d1fae5; color: #065f46; }' +
-      '.order-ps-pending { background: #e5e7eb; color: #4b5563; }' +
-      '.order-ps-printing { background: #fef3c7; color: #92400e; }' +
-      '.order-ps-failed { background: #fee2e2; color: #991b1b; }' +
-      '.order-inv-draft { background: #e5e7eb; color: #4b5563; }' +
-      '.order-inv-sent { background: #dbeafe; color: #1e40af; }' +
-      '.order-inv-paid { background: #d1fae5; color: #065f46; }' +
-      '.toggle-label { display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: .9rem; }' +
-      '.text-danger { color: var(--accent-red); }' +
-      '.text-muted { color: var(--text-muted); }' +
-      '.btn-xs { padding: 3px 8px; font-size: .75rem; }' +
-      '</style>';
-
-    _currentTab = 'overview';
-    const content = document.getElementById('order-tab-content');
-    if (content) renderOverview(content);
+    // Check ecom license before rendering
+    try {
+      const res = await fetch('/api/ecommerce/license');
+      const lic = await res.json();
+      if (!lic.active) {
+        body.innerHTML = `<div class="matrec-empty" style="padding:3rem">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.3;margin-bottom:12px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <p style="font-weight:600;margin-bottom:4px">${_tl('orders.license_required', 'Premium-lisens kreves')}</p>
+          <p style="font-size:0.85rem;color:var(--text-muted)">${_tl('orders.license_required_desc', 'Aktiver e-handelslisensen under Innstillinger → System → Integrasjoner for å bruke ordrebehandling.')}</p>
+          <button class="matrec-recalc-btn" style="margin-top:12px" onclick="openPanel('settings');setTimeout(()=>{window._switchSystemSubTab&&window._switchSystemSubTab('integrations')},200)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            ${_tl('orders.go_to_settings', 'Gå til integrasjoner')}
+          </button>
+        </div>`;
+        return;
+      }
+    } catch { /* continue if check fails */ }
+    _render();
   };
 })();

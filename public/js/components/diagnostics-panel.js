@@ -8,15 +8,20 @@
     { id: 'bedmesh', labelKey: 'tabs.bedmesh', fallback: 'Bed Mesh' }
   ];
 
-  function _buildTabBar() {
-    const div = document.createElement('div');
-    div.className = 'tabs';
-    div.innerHTML = TABS.map(tab => {
+  function _tabBarHtml() {
+    return '<div class="tabs _wrapper-tabs">' + TABS.map(tab => {
       const label = (typeof t === 'function' ? t(tab.labelKey) : '') || tab.fallback;
       const active = _activeTab === tab.id ? ' active' : '';
       return `<button class="tab-btn${active}" onclick="_switchDiagTab('${tab.id}')">${label}</button>`;
-    }).join('');
-    return div;
+    }).join('') + '</div>';
+  }
+
+  function _ensureTabBar() {
+    const body = document.getElementById('overlay-panel-body');
+    if (!body) return;
+    const old = body.querySelector('._wrapper-tabs');
+    if (old) old.remove();
+    body.insertAdjacentHTML('afterbegin', _tabBarHtml());
   }
 
   window._switchDiagTab = function(tab) {
@@ -28,10 +33,7 @@
     if (_activeTab === 'health' && typeof loadHealthPanel === 'function') await loadHealthPanel();
     else if (_activeTab === 'telemetry' && typeof loadTelemetryPanel === 'function') await loadTelemetryPanel();
     else if (_activeTab === 'bedmesh' && typeof loadBedMeshPanel === 'function') await loadBedMeshPanel();
-
-    const body = document.getElementById('overlay-panel-body');
-    if (!body) return;
-    body.insertBefore(_buildTabBar(), body.firstChild);
+    _ensureTabBar();
   }
 
   window.loadDiagnosticsPanel = function(initialTab) {

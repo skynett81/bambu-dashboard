@@ -52,6 +52,7 @@
     { key: 'settings.ai_detection_title', kw: 'ai failure detection camera spaghetti', tab: 'system', sub: 'automation' },
     { key: 'settings.timelapse_title', kw: 'timelapse recording ffmpeg video', tab: 'system', sub: 'automation' },
     { key: 'settings.ecom_title', kw: 'ecommerce shopify woocommerce orders shop', tab: 'system', sub: 'integrations' },
+    { key: 'orders.title', kw: 'orders order kanban invoice project management faktura ordrer', tab: 'system', sub: 'integrations' },
     { key: 'settings.spoolman_title', kw: 'spoolman filament sync external', tab: 'system', sub: 'integrations' },
     { key: 'settings.custom_fields_title', kw: 'custom field spool printer profile project', tab: 'system', sub: 'data' },
     { key: 'settings.brand_defaults_title', kw: 'brand default temperature filament material', tab: 'system', sub: 'data' },
@@ -609,9 +610,11 @@
     } else if (_systemSubTab === 'integrations') {
       let h = '<div class="settings-grid">';
       h += `<div class="settings-card" id="ecom-premium-card"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem"><span class="premium-badge" id="ecom-premium-badge">${t('settings.ecom_premium')}</span><div class="card-title">${t('settings.ecom_title')}</div></div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.ecom_desc')}</p><div id="ecom-license-area"><div class="text-muted" style="font-size:0.8rem">${t('settings.ecom_license_checking')}</div></div><div id="ecom-section" style="display:none"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div><button class="form-btn form-btn-primary mt-sm" id="ecom-add-btn" style="display:none" data-ripple onclick="showEcomEditor()">${t('settings.ecom_add')}</button></div>`;
+      h += `<div class="settings-card" id="orders-premium-card"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem"><span class="premium-badge" id="orders-premium-badge">${t('settings.ecom_premium')}</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><div class="card-title">${t('orders.title')}</div></div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.orders_desc') || 'Ordrebehandling, kanban-tavle, fakturering og prosjektstyring.'}</p><div id="orders-license-area"><div class="text-muted" style="font-size:0.8rem">${t('settings.ecom_license_checking')}</div></div><button class="form-btn form-btn-primary mt-sm" id="orders-open-btn" style="display:none" data-ripple onclick="openPanel('orders')">${t('orders.title')} \u2192</button></div>`;
       h += '</div>';
       el.innerHTML = h;
       loadEcomLicenseStatus();
+      _loadOrdersLicenseStatus();
 
     } else if (_systemSubTab === 'nodes') {
       let h = '<div class="settings-grid">';
@@ -2166,6 +2169,30 @@
       } catch (e) { showToast(e.message, 'error'); }
     }, { danger: true });
   };
+
+  // ---- Orders License (reuses ecom license) ----
+
+  async function _loadOrdersLicenseStatus() {
+    const licArea = document.getElementById('orders-license-area');
+    const openBtn = document.getElementById('orders-open-btn');
+    const badge = document.getElementById('orders-premium-badge');
+    if (!licArea) return;
+    try {
+      const res = await fetch('/api/ecommerce/license');
+      const lic = await res.json();
+      if (lic.active) {
+        if (badge) { badge.classList.add('active'); badge.textContent = t('settings.ecom_premium') + ' \u2713'; }
+        licArea.innerHTML = `<div style="font-size:0.85rem;color:var(--accent-green)">${t('settings.orders_license_active') || 'Lisens aktiv — ordrebehandling tilgjengelig.'}</div>`;
+        if (openBtn) openBtn.style.display = '';
+      } else {
+        if (badge) { badge.classList.remove('active'); }
+        licArea.innerHTML = `<div style="font-size:0.85rem;color:var(--text-muted)">${t('settings.orders_license_required') || 'Krever aktiv e-handelslisens. Aktiver ovenfor for å bruke ordrebehandling.'}</div>`;
+        if (openBtn) openBtn.style.display = 'none';
+      }
+    } catch {
+      licArea.innerHTML = `<span class="text-muted" style="font-size:0.8rem">${t('settings.orders_license_error') || 'Kunne ikke sjekke lisens.'}</span>`;
+    }
+  }
 
   // ---- E-Commerce License + Management ----
 

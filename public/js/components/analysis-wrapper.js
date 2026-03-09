@@ -9,15 +9,19 @@
     { id: 'timetracker', labelKey: 'tabs.timetracker', fallback: 'Tidsanalyse' },
     { id: 'waste', labelKey: 'tabs.waste', fallback: 'Avfall' }
   ];
-  function _buildTabBar() {
-    const div = document.createElement('div');
-    div.className = 'tabs';
-    div.innerHTML = TABS.map(tab => {
+  function _tabBarHtml() {
+    return '<div class="tabs _wrapper-tabs">' + TABS.map(tab => {
       const label = (typeof t === 'function' ? t(tab.labelKey) : '') || tab.fallback;
       const active = _activeTab === tab.id ? ' active' : '';
       return `<button class="tab-btn${active}" onclick="_switchAnalysisTab('${tab.id}')">${label}</button>`;
-    }).join('');
-    return div;
+    }).join('') + '</div>';
+  }
+  function _ensureTabBar() {
+    const body = document.getElementById('overlay-panel-body');
+    if (!body) return;
+    const old = body.querySelector('._wrapper-tabs');
+    if (old) old.remove();
+    body.insertAdjacentHTML('afterbegin', _tabBarHtml());
   }
   window._switchAnalysisTab = function(tab) { _activeTab = tab; _render(); };
   async function _render() {
@@ -26,11 +30,10 @@
     else if (_activeTab === 'printermatrix' && typeof loadPrinterMatrixPanel === 'function') await loadPrinterMatrixPanel();
     else if (_activeTab === 'timetracker' && typeof loadTimeTrackerPanel === 'function') await loadTimeTrackerPanel();
     else if (_activeTab === 'waste' && typeof loadWastePanel === 'function') await loadWastePanel();
-    const body = document.getElementById('overlay-panel-body');
-    if (body) body.insertBefore(_buildTabBar(), body.firstChild);
+    _ensureTabBar();
   }
   window.loadAnalysisPanel = function(initialTab) {
-    if (typeof initialTab === 'string') _activeTab = initialTab;
+    _activeTab = (typeof initialTab === 'string') ? initialTab : 'stats';
     _render();
   };
 })();
