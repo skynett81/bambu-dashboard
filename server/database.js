@@ -265,6 +265,8 @@ function _runMigrations() {
     { version: 91, up: _mig091_screenshots },
     { version: 92, up: _mig092_filament_enrichment },
     { version: 93, up: _mig093_reseed_spoolmandb },
+    { version: 94, up: _mig094_reseed_knowledge_base },
+    { version: 95, up: _mig095_reseed_learning_center },
   ];
 
   for (const m of migrations) {
@@ -1854,6 +1856,296 @@ function _mig054_learning_center_v2() {
         { title: 'Flexible & rubber-like', description: 'TPU 95A: medium flex, most versatile (phone cases, bumpers). TPU 90A: softer, better for gaskets. TPU 85A: very soft, good for squeezable items. All TPU: print slow, no retraction, external spool only.', action: '#knowledge' },
         { title: 'Maximum strength', description: 'PA-CF (carbon fiber nylon): strongest common 3D print material. PA6-CF: even stronger, more demanding to print. PET-CF: strong without moisture sensitivity of nylon. For best strength: 4 walls, 40%+ infill, Gyroid pattern, align longest dimension with print bed.', action: '#knowledge' }
       ]
+    },
+    {
+      title: 'Bambu Studio Essentials',
+      description: 'Master the official slicer software — from importing your first model to advanced multi-color painting and profile tuning.',
+      category: 'printing', difficulty: 1, estimated_minutes: 20,
+      steps: [
+        { title: 'Install and connect', description: 'Download Bambu Studio from bambulab.com. Create a Bambu Lab account and sign in. Your printers on the same network will be discovered automatically. You can also connect via LAN IP for local-only printing.', action: null },
+        { title: 'Import and prepare a model', description: 'Drag a .STL, .3MF, or .STEP file onto the build plate. Use the tools on the left to move, rotate, scale, and mirror. Right-click the model for options like "Place on face" to orient it optimally. Check the model fits within the build volume.', action: null },
+        { title: 'Select printer and filament', description: 'Choose your printer model and nozzle size in the top toolbar. Select the filament type matching what\'s loaded in your printer or AMS. Bambu Studio has built-in profiles for all Bambu Lab filaments with optimized settings.', action: null },
+        { title: 'Choose print settings', description: 'Select a quality preset (0.08mm Ultra Fine → 0.28mm Draft). Adjust infill pattern (Gyroid for strength, Grid for speed) and percentage (15% standard, 30-40% functional). Set wall count (2 standard, 3-4 for strength). Enable supports if needed.', action: null },
+        { title: 'Slice and preview', description: 'Click "Slice plate" to generate the toolpath. Use the preview slider to scrub through layers and check for issues: unsupported overhangs, thin walls, infill coverage. Check the estimated time, filament usage, and cost breakdown.', action: null },
+        { title: 'Send to printer', description: 'Click "Print plate" to send directly via WiFi/LAN, or export to SD card for offline printing. Select the print bed type (smooth PEI, textured PEI, or High Temp). Enable timelapse if desired. Monitor the print via the built-in camera view.', action: null },
+        { title: 'Multi-color painting', description: 'With an AMS loaded, switch to Paint mode to assign colors to different surfaces. Use the brush tools (Smart Fill is easiest — click faces to paint them). Add filaments in the right panel matching your AMS slots. The prime tower handles color transitions.', action: null }
+      ]
+    },
+    {
+      title: 'OrcaSlicer for Power Users',
+      description: 'Unlock advanced features with OrcaSlicer — the community-driven slicer fork with calibration tools, per-object settings, and multi-printer support.',
+      category: 'printing', difficulty: 2, estimated_minutes: 15,
+      steps: [
+        { title: 'Why OrcaSlicer?', description: 'OrcaSlicer is a community fork of Bambu Studio with extra features: built-in calibration tools, per-object process settings, more detailed configuration, and support for non-Bambu printers. Full compatibility with all Bambu Lab printers and AMS systems.', action: null },
+        { title: 'Built-in calibration suite', description: 'OrcaSlicer includes calibration tests you can generate with one click: flow rate calibration, pressure advance tuning, temperature tower, retraction test, max volumetric speed test. Run these when dialing in a new filament to get perfect results.', action: null },
+        { title: 'Per-object process settings', description: 'Assign different print settings to different objects on the same plate. For example: one model at 0.12mm detail, another at 0.28mm draft — printed simultaneously. Great for mixing quality needs in a single print job.', action: null },
+        { title: 'Advanced modifier meshes', description: 'Add modifier volumes (cubes, cylinders, or custom shapes) to change settings in specific regions: more infill in stress areas, lower speed for fine details, different wall count for appearance vs. hidden surfaces.', action: null },
+        { title: 'Profile import and sharing', description: 'Import Bambu Studio profiles directly — they\'re compatible. OrcaSlicer also supports importing/exporting JSON profiles for sharing on forums and Discord. The community maintains tuned profiles for many printer/filament combinations.', action: null }
+      ]
+    },
+    {
+      title: 'Troubleshooting Print Failures',
+      description: 'Diagnose and fix the most common 3D printing problems — from stringing and warping to layer adhesion failures and spaghetti.',
+      category: 'printing', difficulty: 2, estimated_minutes: 25,
+      steps: [
+        { title: 'Stringing and oozing', description: 'Thin threads between parts of the print. Causes: filament is wet (most common!), nozzle temp too high, retraction too low. Fixes: 1) Dry the filament. 2) Lower nozzle temp by 5°C. 3) Increase retraction by 0.2mm. 4) Enable wipe and coasting. 5) For PETG: some stringing is normal — accept minor stringing.', action: null },
+        { title: 'Warping and corner lifting', description: 'Edges lift off the bed during printing. Causes: bed not hot enough, drafts/cold air, no brim, material shrinkage. Fixes: 1) Clean bed with IPA. 2) Increase bed temp 5-10°C. 3) Add brim (5-8mm). 4) Close enclosure doors for ABS/ASA. 5) Slow first layer to 15mm/s. 6) Increase first layer squish.', action: null },
+        { title: 'Layer adhesion / delamination', description: 'Layers split apart or the print breaks along layer lines. Causes: nozzle temp too low, print speed too fast, fan too high, wet filament, drafts. Fixes: 1) Increase nozzle temp by 5-10°C. 2) Reduce fan speed (especially for ABS). 3) Reduce print speed. 4) Dry filament. 5) Close enclosure.', action: null },
+        { title: 'Spaghetti / print detachment', description: 'Print breaks free from the bed and the nozzle extrudes into air creating a tangled mess. Causes: poor bed adhesion, part too tall/narrow, collision with nozzle. Fixes: 1) Clean bed. 2) Use brim. 3) Enable Lidar spaghetti detection. 4) Use wider base for tall parts. 5) Check for bed leveling issues.', action: null },
+        { title: 'Elephant foot', description: 'First layer is wider than the rest of the print, causing a bulge at the bottom. Causes: bed temp too high, nozzle too close to bed, first layer squish too aggressive. Fixes: 1) Lower bed temp by 5°C. 2) Increase Z-offset slightly. 3) Enable "Elephant foot compensation" in slicer (0.1-0.2mm).', action: null },
+        { title: 'Under-extrusion', description: 'Gaps between lines, thin walls, missing infill. Causes: clogged nozzle, wet filament, flow rate too low, extruder grinding, PTFE tube worn. Fixes: 1) Cold pull to clear nozzle clog. 2) Check extruder tension. 3) Increase flow rate by 2-5%. 4) Replace nozzle. 5) Check PTFE tube for damage.', action: null },
+        { title: 'Over-extrusion', description: 'Blobs, rough surfaces, excess material oozing. Causes: flow rate too high, nozzle temp too high, wrong filament diameter setting. Fixes: 1) Reduce flow rate by 2-5%. 2) Lower nozzle temp. 3) Verify 1.75mm diameter in slicer. 4) Run a flow calibration test in OrcaSlicer.', action: null },
+        { title: 'Z-seam visibility', description: 'Visible vertical line or bumps where layers start and end. This is inherent to FDM printing but can be minimized. Fixes: 1) Set Z-seam to "Aligned" (creates a clean line in one spot). 2) Set to "Random" (distributes seam marks but makes surface dotted). 3) Place seam on an edge or corner. 4) Reduce retraction on seam. 5) Enable wipe.', action: null }
+      ]
+    },
+    {
+      title: 'Support Structures Explained',
+      description: 'When and how to use supports effectively — covering tree supports, normal supports, support materials, and support-free design strategies.',
+      category: 'printing', difficulty: 2, estimated_minutes: 15,
+      steps: [
+        { title: 'When supports are needed', description: 'Supports are required for overhangs exceeding ~45° from vertical and for bridges longer than ~15mm without support underneath. The slicer automatically detects and generates supports based on your overhang angle setting (default 45°). Preview in slicer to check.', action: null },
+        { title: 'Tree supports vs. normal supports', description: 'Tree supports: grow branch-like structures from the bed, touching the model only where needed. Use less material, leave smaller marks, easier to remove. Best for organic shapes. Normal supports: grid/line patterns under every overhang. More reliable for large flat overhangs, easier to predict.', action: null },
+        { title: 'Support materials (PVA, Support W)', description: 'PVA: dissolves in warm water, leaving zero marks. Best for display models. Extremely moisture-sensitive — keep dry! Support W: snaps off mechanically. Easier to handle than PVA, leaves minor marks. Both work with AMS for automatic switching.', action: null },
+        { title: 'Support interface settings', description: 'Interface layers (2-3 layers) between support and model create a clean separation surface. Interface gap (0.15-0.2mm) determines how easily supports detach. Too small = hard to remove. Too large = rough supported surface. Default settings work for most prints.', action: null },
+        { title: 'Design for support-free printing', description: 'Design tips to avoid supports: keep overhangs under 45°, use chamfers instead of sharp overhangs, bridge short distances instead of adding supports, orient the model so overhangs face up, split complex models into parts that print flat. Supports waste material and leave marks — avoid when possible.', action: null }
+      ]
+    },
+    {
+      title: 'Print Speed vs. Quality',
+      description: 'Understand the trade-offs between fast printing and high quality, and learn when to use each setting for optimal results.',
+      category: 'printing', difficulty: 2, estimated_minutes: 12,
+      steps: [
+        { title: 'Layer height impact', description: '0.08mm: finest detail, slowest (2-3x time). Use for miniatures, display pieces. 0.12mm: high detail, good for small parts. 0.2mm: standard balance of speed and quality. 0.28mm: draft quality, fast. 0.3-0.4mm with 0.6mm nozzle: fastest practical, visible layers but strong parts.', action: null },
+        { title: 'Speed settings breakdown', description: 'Outer wall speed: most visible — lower for better quality (150-200mm/s for good finish). Inner wall speed: can be faster since it\'s hidden (200-300mm/s). Infill speed: fastest setting (300-500mm/s), not visible. Travel speed: movement without extrusion (400-700mm/s). Acceleration matters more than max speed for small parts.', action: null },
+        { title: 'When to go fast', description: 'Use maximum speed for: functional parts where appearance doesn\'t matter, prototypes and test fits, infill-heavy parts, large simple shapes with long straight walls. PLA handles speed best. The 0.6mm nozzle at 0.3mm layer height is the fastest practical setup.', action: null },
+        { title: 'When to slow down', description: 'Reduce speed for: display pieces and miniatures, detailed surfaces with fine features, overhangs and bridges (50mm/s max for bridges), ABS/ASA (to prevent layer splitting), PA-CF and engineering materials (for layer adhesion). Outer wall speed has the biggest visual impact — slow just that.', action: null },
+        { title: 'Speed profiles strategy', description: 'Create three profiles per material: Standard (balanced), Draft (max speed, thick layers), Detail (slow, thin layers). Switch based on the current project. Most functional parts are fine at standard speed — only slow down when quality is the goal.', action: null }
+      ]
+    },
+    {
+      title: 'Vase Mode & Spiral Printing',
+      description: 'Create beautiful single-wall vases, lampshades, and decorative items using spiralize outer contour mode.',
+      category: 'printing', difficulty: 1, estimated_minutes: 8,
+      steps: [
+        { title: 'What is vase mode?', description: 'Vase mode (Spiralize Outer Contour in slicer) prints a single continuous wall in a spiral — no layer lines, no seam, no infill. The nozzle moves continuously upward, creating a smooth, seamless surface. Prints are incredibly fast since there\'s only one wall.', action: null },
+        { title: 'Design requirements', description: 'Models must be watertight with no overhangs, no holes in the walls, and ideally a single closed perimeter. Simple shapes work best: vases, bowls, cups, lampshades, pen holders. The model should be designed for a single wall thickness (~0.4mm for 0.4mm nozzle, ~0.6mm for 0.6mm nozzle).', action: null },
+        { title: 'Best materials for vase mode', description: 'PLA Silk: stunning silk sheen on the spiral surface. PLA Translucent: beautiful lampshades when backlit. PLA Gradient/Multi-Color: color transitions along the spiral height. PETG Translucent: heat-resistant lampshades. Any material works, but decorative PLAs shine in vase mode.', action: null },
+        { title: 'Optimal settings', description: 'Enable "Spiral vase" in Bambu Studio quality settings. Layer height: 0.2mm for smooth, 0.28mm for speed. Speed: normal speed works fine. No supports, no infill (ignored in vase mode). Bottom layers: 3-4 for a solid base. For strength: use a 0.6mm nozzle for thicker walls.', action: null }
+      ]
+    },
+    {
+      title: 'Infill Patterns & Strength',
+      description: 'Choose the right infill pattern and percentage for structural integrity, weight, material usage, and print speed.',
+      category: 'printing', difficulty: 2, estimated_minutes: 10,
+      steps: [
+        { title: 'Gyroid — the all-rounder', description: 'Gyroid is the best general-purpose infill pattern. It provides equal strength in all directions (isotropic), good for compression and tension, prints without sharp direction changes (less vibration), and looks beautiful. Default recommendation for most prints. Use 15-30%.', action: null },
+        { title: 'Grid & Lines — speed optimized', description: 'Grid: simple cross-hatch pattern that prints quickly. Strong in the X/Y plane but weak in Z. Good for flat parts and draft prints. Lines (Rectilinear): alternating direction each layer. Fastest infill pattern, adequate strength for non-structural parts.', action: null },
+        { title: 'Honeycomb — maximum strength', description: 'Honeycomb provides excellent strength-to-weight ratio. Slightly slower to print than grid due to many direction changes. Best for: parts that need to resist compression (shelving, brackets). Use 20-40% for structural parts.', action: null },
+        { title: 'Infill percentage guide', description: '0-5%: decorative only, fragile. 10-15%: standard for non-structural parts. 20-30%: functional parts, moderate strength. 40-60%: high-strength structural parts. 80-100%: maximum strength, heaviest, most material. Most parts only need 15-20% — walls carry more load than infill.', action: null },
+        { title: 'Walls vs. infill for strength', description: 'Adding one more wall (perimeter) adds more strength than increasing infill by 20%. For most functional parts: 3-4 walls at 15% infill beats 2 walls at 40% infill — and prints faster. Focus on wall count for load-bearing parts, infill for compression resistance.', action: null }
+      ]
+    },
+    {
+      title: 'Post-Processing Techniques',
+      description: 'Transform your prints from raw FDM output to professional-looking finished pieces with sanding, painting, acetone smoothing, and more.',
+      category: 'printing', difficulty: 3, estimated_minutes: 20,
+      steps: [
+        { title: 'Sanding basics', description: 'Start with 200 grit to remove major layer lines, progress through 400, 600, 800 grit for smoothness. Use wet sanding (sandpaper in water) from 400+ grit to prevent clogging and heat. PLA, ABS, and PETG all sand well. PC sands to near-optical finish. Work in one direction per grit, then switch direction.', action: null },
+        { title: 'Priming and filling', description: 'Apply filler primer (Rust-Oleum Filler Primer or similar) in light coats. The primer fills small layer lines and provides a uniform base for paint. Sand lightly with 600 grit between primer coats. 2-3 coats of filler primer makes layer lines nearly invisible.', action: null },
+        { title: 'Painting FDM prints', description: 'After priming: spray paint or hand-paint with acrylics. Spray paint: use light, even coats from 15-20cm distance. Let each coat dry fully. Hand painting: acrylic craft paints work well. For metallic finishes: use metallic spray paint over smooth primer. Seal with clear coat for durability.', action: null },
+        { title: 'Acetone smoothing (ABS/ASA only)', description: 'Place the print on a platform inside a sealed container. Add acetone to a cloth or paper towel (NOT pooled liquid). Seal and wait 30-60 minutes. The acetone vapor melts the surface slightly, eliminating layer lines. WARNING: acetone is flammable — no open flames, good ventilation, work in a well-ventilated area.', action: null },
+        { title: 'Heat-set brass inserts', description: 'For threaded connections: use heat-set brass inserts with a soldering iron. Drill a pilot hole slightly smaller than the insert. Heat the soldering iron to 220-260°C (depending on material). Press the insert straight into the hole — it melts its way in. Works excellently in PLA, PETG, ABS, PA-CF. Results in strong, reusable threaded connections.', action: null },
+        { title: 'Gluing and assembly', description: 'Super glue (CA): fast bonding for PLA, ABS, PETG. Works on most plastics. Epoxy: strongest bond, fills gaps, waterproof. Best for structural assemblies. ABS/ASA: acetone welding — apply acetone to surfaces and press together for a chemical bond stronger than the plastic. PETG: solvent welding with dichloromethane (extreme caution required).', action: null }
+      ]
+    },
+    {
+      title: 'Print Orientation Best Practices',
+      description: 'Learn how part orientation affects strength, surface quality, support needs, and print success rate.',
+      category: 'printing', difficulty: 2, estimated_minutes: 10,
+      steps: [
+        { title: 'Strength considerations', description: 'FDM parts are weakest between layers (Z-axis). Orient so the primary load direction is along X/Y (within layers), not Z (across layers). For a bracket: print it flat so the load is along the layers. For a tube: print it upright so the walls are continuous circles. Think about where force will be applied.', action: null },
+        { title: 'Minimizing supports', description: 'Orient the model to reduce overhangs beyond 45°. Flat surfaces should face down (no support needed for bottom faces). Holes print best horizontally (no support needed for round holes up to ~10mm diameter). Teardrop-shaped holes eliminate the need for support at the top of vertical holes.', action: null },
+        { title: 'Surface quality', description: 'The bottom surface (touching the bed) has the best finish on smooth PEI. Upward-facing surfaces show layer lines most visibly. Side surfaces show stair-stepping on curves. Orient the most visible or important surface facing down for best finish, or up for easiest post-processing access.', action: null },
+        { title: 'Splitting complex models', description: 'For complex parts: split into simpler pieces that each print without supports. Join with glue, screws, or snap-fits after printing. Example: a full helmet can be split into top and bottom halves, each printing flat. Use alignment pins (printed) or dowel holes for precise assembly.', action: null }
+      ]
+    },
+    {
+      title: 'Multi-Color Printing Guide',
+      description: 'Create stunning multi-color prints using the AMS — from basic two-color designs to complex painted models.',
+      category: 'printing', difficulty: 2, estimated_minutes: 15,
+      steps: [
+        { title: 'AMS setup for multi-color', description: 'Load different colored filaments into each AMS slot. Use the same material type across all slots (all PLA, or all PETG — don\'t mix types). In Bambu Studio, add each filament in the right panel matching your AMS slot assignments. The printer will automatically switch between colors.', action: null },
+        { title: 'Color painting in the slicer', description: 'In Bambu Studio: enter Paint mode (bucket icon). Use Smart Fill (click faces) or Brush mode to assign colors. The slicer generates color changes at the painted boundaries. For text/logos: use the Text tool to add raised or engraved text with different colors.', action: null },
+        { title: 'Prime tower management', description: 'The prime tower purges old color and primes new color during switches. It uses filament — factor in 5-15% extra material for multi-color prints. Enable "Flush into infill" to reduce waste. Place the prime tower where it won\'t interfere with the model. Larger prime towers give cleaner color transitions.', action: null },
+        { title: 'Reducing color bleeding', description: 'High-contrast color changes (black → white) may show residual color. Increase purge volume for dark-to-light transitions in slicer settings. Use lighter-to-darker color order when possible. Some bleeding is inevitable with single-nozzle multi-color — the Vortek system (H2C) eliminates this with dedicated nozzles per color.', action: null },
+        { title: 'Multi-color design tips', description: 'Keep color boundaries on flat surfaces or sharp edges — gradual curves show color bleed more. Design with clear color separation (no thin color details). Text should be at least 2mm wide for reliable color separation. Use 3+ perimeters for opaque color borders. Preview the painted model in slicer before printing.', action: null }
+      ]
+    },
+    {
+      title: 'Filament Storage Best Practices',
+      description: 'Protect your filament investment with proper storage techniques — from vacuum bags to dry cabinets.',
+      category: 'filament', difficulty: 1, estimated_minutes: 10,
+      steps: [
+        { title: 'Why storage matters', description: 'Most filaments absorb moisture from the air (hygroscopic). Wet filament causes: popping/crackling sounds during printing, rough surface finish with bubbles, stringing and oozing, reduced mechanical strength, clogged nozzles. PLA is mildly affected, nylon is severely affected. Proper storage prevents these issues.', action: null },
+        { title: 'Vacuum bags with desiccant', description: 'The simplest storage: vacuum-sealed bags with silica gel desiccant packs. After opening a spool, seal it back in a bag with fresh desiccant between uses. Vacuum sealers (food-grade work fine) remove air and moisture. Replace desiccant when the indicator turns pink (saturated).', action: null },
+        { title: 'Sealed containers', description: 'Plastic storage bins with airtight gasket lids. Add silica gel packs (100-200g per large bin). Can hold multiple spools. Label containers by material type. Add a hygrometer to monitor humidity inside — aim for below 20% RH. Cereal containers work for single spools as budget option.', action: null },
+        { title: 'Dry cabinets', description: 'For serious users with engineering materials: electronic dry cabinets maintain 10-20% RH actively. No desiccant replacement needed. Essential for PA, PA-CF, PVA, and other extremely hygroscopic materials. Sized from 20L (4-6 spools) to 100L+ (20+ spools). Investment pays for itself in saved failed prints.', action: null },
+        { title: 'Material-specific requirements', description: 'PLA: can survive weeks in open air — seal for best results. PETG: absorbs moisture in 1-3 weeks — seal between uses. ABS/ASA: least sensitive — can handle open storage in moderate humidity. TPU: absorbs quickly — seal always. Nylon (PA): absorbs in hours — vacuum seal immediately after use. PVA: most sensitive — vacuum seal at all times.', action: null }
+      ]
+    },
+    {
+      title: 'Filament Drying Guide',
+      description: 'Detailed temperature and time settings for drying every common filament type, plus how to tell if your filament needs drying.',
+      category: 'filament', difficulty: 2, estimated_minutes: 12,
+      steps: [
+        { title: 'Signs your filament is wet', description: 'Listen for: popping/crackling/sizzling sounds during extrusion. Look for: tiny bubbles on the surface, rough/hairy texture, excessive stringing, reduced clarity on transparent materials. Feel: some wet filaments become soft or sticky (especially PVA, TPU). If you notice any of these, dry before printing.', action: null },
+        { title: 'PLA & PLA variants', description: 'Temperature: 45-50°C (never exceed 55°C — PLA deforms). Time: 4-6 hours. PLA is mildly hygroscopic — dry if you notice popping or surface roughness. Silk and specialty PLAs may be slightly more moisture-sensitive than basic PLA. Standard PLA can often print fine without drying if recently opened.', action: null },
+        { title: 'PETG & PET variants', description: 'Temperature: 50-55°C. Time: 6-8 hours. PETG absorbs moisture faster than PLA but slower than nylon. Transparent PETG shows moisture most obviously — becomes cloudy when wet. Dry PETG every time if stored in open air for more than a week.', action: null },
+        { title: 'ABS, ASA & HIPS', description: 'Temperature: 60-65°C. Time: 4 hours. These styrene-based materials are the least moisture-sensitive. ABS can often print fine even with moderate moisture exposure. Drying is recommended but not critical for most prints. ASA behaves identically to ABS for drying.', action: null },
+        { title: 'TPU & flexible materials', description: 'Temperature: 50°C (never exceed 55°C — TPU deforms easily). Time: 4-6 hours. TPU absorbs moisture relatively quickly. Dry before every print session for best results. Wet TPU shows excessive stringing and surface bubbles. Consider an inline dryer (dryer → printer) for long prints.', action: null },
+        { title: 'Nylon (PA, PA-CF, PA6-CF)', description: 'Temperature: 80-90°C. Time: 8-12 hours minimum. Nylon is EXTREMELY hygroscopic — absorbs measurable moisture in 30-60 minutes. Always dry before printing. Use inline dryer for prints over 2 hours. Molecular sieve desiccant (not silica gel) for storage. PA6-CF needs 85-90°C for 12+ hours.', action: null },
+        { title: 'PC, PAHT-CF & high-temp materials', description: 'PC: 80°C for 6-8 hours. PAHT-CF: 90-100°C for 12+ hours (most demanding). PPS-CF: 90-100°C for 12+ hours. These materials require extreme drying protocols. Professional dry cabinets are strongly recommended for regular use. A $50 filament dryer can save hundreds in failed prints.', action: null }
+      ]
+    },
+    {
+      title: 'Third-Party Filaments on Bambu',
+      description: 'How to use non-Bambu Lab filaments successfully — spool compatibility, AMS tips, and recommended brands.',
+      category: 'filament', difficulty: 1, estimated_minutes: 10,
+      steps: [
+        { title: 'Spool compatibility', description: 'Bambu printers work with any 1.75mm filament. AMS fits spools up to 200mm diameter and 68mm width (standard 1kg spools). Most 1kg spools from major brands fit fine. 2-3kg spools are too large for the AMS — use the external spool holder. Check spool dimensions before buying in bulk.', action: null },
+        { title: 'Creating custom profiles', description: 'In Bambu Studio/OrcaSlicer: start with the closest Bambu Lab filament profile. Adjust nozzle temp (check filament packaging for range), bed temp, fan speed, and retraction. Run a temp tower calibration for optimal temperature. Save as a custom profile for reuse.', action: null },
+        { title: 'Recommended PLA brands', description: 'eSUN PLA+: best value, improved toughness. Polymaker PolyLite: best color accuracy and surface finish. Prusament: tightest diameter tolerance (±0.02mm). Hatchbox: reliable budget option. add:north E-PLA: premium Scandinavian quality. All work excellently in Bambu printers and AMS.', action: '#knowledge' },
+        { title: 'Recommended PETG brands', description: 'eSUN PETG: good value, wide color range. Polymaker PolyMax PETG: best impact resistance (nano-reinforced). Fiberlogy Easy PETG: significantly less stringing than standard PETG. Overture PETG: great packaging, consistent quality. All print with standard PETG settings on Bambu printers.', action: '#knowledge' },
+        { title: 'AMS with third-party filament', description: 'Most third-party 1kg spools work in the AMS. If the spool is slightly different: 3D print a spool adapter (many designs on Printables). For RFID: Bambu Lab spools have RFID tags for auto-detection — third-party spools need manual material selection in the slicer. Filament quality varies by brand — stick to recommended brands for AMS reliability.', action: null }
+      ]
+    },
+    {
+      title: 'Nozzle Maintenance & Replacement',
+      description: 'Keep your nozzle in perfect condition with cleaning techniques, know when to replace, and understand nozzle materials.',
+      category: 'maintenance', difficulty: 2, estimated_minutes: 12,
+      steps: [
+        { title: 'When to replace your nozzle', description: 'Replace when: print quality degrades (rough surface, inconsistent extrusion), first layer has gaps despite correct Z-offset, under-extrusion persists after other troubleshooting, visible wear on the nozzle tip (deformed or enlarged opening). Brass nozzles: every 500-2000 hours with standard materials, 50-100 hours with abrasives. Hardened steel: 2000-5000+ hours.', action: null },
+        { title: 'Cold pull cleaning', description: 'The best nozzle cleaning technique: 1) Heat nozzle to 250°C, push in cleaning filament (or nylon). 2) Cool to 90°C (for nylon) or 160°C (for PLA cleaning filament). 3) Pull the filament straight out firmly — it brings debris with it. 4) Repeat until the filament tip comes out clean. Cold pulls can save a clogged nozzle from replacement.', action: null },
+        { title: 'Acupuncture needle cleaning', description: 'For minor clogs: heat the nozzle to printing temp, insert a 0.35mm acupuncture needle (for 0.4mm nozzle) from below. Gently push up and down to clear the obstruction. DO NOT force it — you can damage the nozzle bore. This clears small debris but won\'t fix burned-in carbonized residue.', action: null },
+        { title: 'Proprietary vs. MK8 nozzles', description: 'X1C/P1S/P2S/H2 series: proprietary quick-swap nozzles. Twist and pull to remove, push in to install. No tools needed, no recalibration. A1/A1 mini: standard MK8 threaded nozzles. Require a wrench to remove (heat nozzle first!). Third-party MK8 nozzles cost $0.50-$5 each.', action: null },
+        { title: 'Nozzle material guide', description: 'Brass: best thermal conductivity, cheapest, wears fast with abrasives. Use for PLA, PETG, ABS, TPU. Stainless steel: moderate wear resistance, food-safe. Use for silk, metallic, mildly abrasive PLA. Hardened steel: excellent wear resistance. Required for CF, GF, glow-in-dark. Tungsten carbide (H2D Pro): extreme durability, outlasts HS by 10-50x.', action: '#knowledge' }
+      ]
+    },
+    {
+      title: 'Belt & Rod Maintenance',
+      description: 'Maintain the mechanical components of your Bambu printer for consistent performance and long life.',
+      category: 'maintenance', difficulty: 2, estimated_minutes: 10,
+      steps: [
+        { title: 'Belt tension check', description: 'CoreXY printers (X1C, P1S, P2S, H2): belts should be firm but not guitar-string tight. Pluck the belt — it should vibrate briefly, not be completely slack. Loose belts cause: ringing artifacts, layer shifting, inconsistent dimensions. Most Bambu printers have automatic belt tensioning — run the calibration if available.', action: null },
+        { title: 'Linear rod/rail maintenance', description: 'Clean rods/rails with a lint-free cloth every 200-500 print hours. Apply a thin film of light machine oil (sewing machine oil or PTFE lubricant). Avoid WD-40 (it\'s a solvent, not a lubricant). For the A1/A1 mini bed-slinger: the Y-axis rod needs more frequent attention due to heavy bed movement.', action: null },
+        { title: 'Lead screw care', description: 'The Z-axis lead screw raises and lowers the build plate or gantry. Clean and lubricate with white lithium grease every 500 hours. Apply a small amount to the screw and run the Z-axis up and down to distribute. Over-lubrication attracts dust — use sparingly.', action: null },
+        { title: 'Signs of wear', description: 'Belt wear: visible fraying, stretch marks, missing teeth. Rail wear: grinding sounds, inconsistent movement, backlash. Lead screw wear: Z-banding (repeating pattern in print), wobble in Z-axis. If you notice any of these, contact Bambu Lab support or replace the component.', action: null }
+      ]
+    },
+    {
+      title: 'Firmware Updates Guide',
+      description: 'Keep your printer firmware up to date for the latest features, bug fixes, and compatibility improvements.',
+      category: 'maintenance', difficulty: 1, estimated_minutes: 8,
+      steps: [
+        { title: 'Why update firmware', description: 'Firmware updates include: new features and capabilities, bug fixes for print quality or connectivity issues, compatibility with new filaments and accessories, security patches, performance improvements. Bambu Lab releases updates regularly. Always update before contacting support for issues.', action: null },
+        { title: 'How to update', description: 'Via Bambu Studio: open the printer settings and check for updates. A banner appears when updates are available. Click Update and wait — the printer will download and install automatically. Via printer touchscreen: some updates appear directly on the printer display. Via Bambu Handy app: check for updates in the printer management section.', action: null },
+        { title: 'After updating', description: 'After a firmware update: 1) Run full calibration (vibration comp + flow dynamics). 2) Check Z-offset calibration. 3) Do a test print before starting important jobs. 4) Review release notes for new features or changed behaviors. Some updates change default settings — verify your preferences are preserved.', action: null },
+        { title: 'Downgrading firmware', description: 'If an update causes issues: Bambu Lab sometimes provides previous firmware versions for download. Flash via SD card if needed. Note: downgrading may disable newer features. Report issues on the Bambu Lab community forum — many problems are fixed in subsequent updates.', action: null }
+      ]
+    },
+    {
+      title: 'Printer Calibration Deep Dive',
+      description: 'Understand all calibration procedures — from bed leveling to vibration compensation and flow dynamics.',
+      category: 'maintenance', difficulty: 3, estimated_minutes: 15,
+      steps: [
+        { title: 'Bed mesh calibration', description: 'The printer probes the bed surface at multiple points to create a compensation mesh. This corrects for slight warps in the build plate. Run after: installing a new plate, bumping the printer, or noticing uneven first layers. On Lidar printers: automatic and very accurate. On P1S/P1P: uses strain gauge — less granular.', action: null },
+        { title: 'Z-offset calibration', description: 'Z-offset controls the gap between nozzle and bed on the first layer. Too close = elephant foot, nozzle scrapes plate. Too far = poor adhesion, gaps between lines. Lidar printers (X1C, P2S, A1, H2): mostly automatic. P1S/P1P: manual adjustment needed. Recalibrate after: changing nozzle, changing plate, firmware update.', action: null },
+        { title: 'Vibration compensation', description: 'Input shaping that cancels resonance artifacts (ringing/ghosting) at high print speeds. Bambu printers run this automatically during calibration. The printer vibrates the toolhead at various frequencies and measures the response. Result: sharper corners and smoother surfaces at high speeds. Re-run after moving the printer.', action: null },
+        { title: 'Flow dynamics calibration', description: 'Calibrates the extruder\'s pressure advance and flow rate for accurate extrusion. Compensates for the slight delay between extruder movement and filament flow from the nozzle. This improves corner quality and reduces blobs at direction changes. Run when: changing nozzle size, switching to very different materials.', action: null },
+        { title: 'Motor noise cancellation', description: 'The X1C/X1E/P2S/H2 series includes motor noise cancellation that identifies and compensates for stepper motor resonance frequencies. This reduces the characteristic whining sound at certain speeds. Runs automatically during full calibration. Results in quieter printing, especially during fast infill moves.', action: null }
+      ]
+    },
+    {
+      title: 'Energy Monitoring & Costs',
+      description: 'Track electricity usage, integrate with Nordpool energy prices, and understand the true cost of 3D printing.',
+      category: 'automation', difficulty: 2, estimated_minutes: 12,
+      steps: [
+        { title: 'Configure electricity rates', description: 'In Settings > General, set your electricity cost per kWh. For fixed rates: enter your provider\'s rate. For variable rates: the dashboard supports Nordpool spot pricing for automatic rate tracking. The system calculates power consumption based on printer wattage and active print time.', action: '#settings/general' },
+        { title: 'Nordpool integration', description: 'Enable Nordpool spot pricing to automatically track variable electricity costs. Select your price zone (NO1-NO5 for Norway, SE1-SE4 for Sweden, etc.). The dashboard fetches daily prices and applies the correct rate to each print based on when it was printed. Great for finding the cheapest time to start large prints.', action: '#settings/general' },
+        { title: 'Per-print cost breakdown', description: 'Each completed print shows a cost breakdown: filament cost (based on weight used × price per gram), electricity cost (based on print time × wattage × rate), labor cost (if configured), and total. View in History panel for any past print.', action: '#history' },
+        { title: 'Cost optimization tips', description: 'Print during off-peak hours for lower electricity rates. Use draft settings for non-critical parts (faster = less electricity). PLA uses less energy than ABS/PA (lower temps, no chamber heating). The A1 mini uses ~100W vs X1C ~350W — consider which printer for which job. Batch similar prints to reduce warmup cycles.', action: null }
+      ]
+    },
+    {
+      title: 'Dashboard API & Integrations',
+      description: 'Use the REST API to integrate Bambu Dashboard with Home Assistant, Node-RED, custom scripts, and automation workflows.',
+      category: 'automation', difficulty: 3, estimated_minutes: 15,
+      steps: [
+        { title: 'API overview', description: 'Bambu Dashboard exposes a comprehensive REST API at /api/*. Full OpenAPI documentation is available at /api/docs in your browser. The API covers: printer status, print history, filament inventory, queue management, statistics, and more. All responses are JSON.', action: null },
+        { title: 'Authentication', description: 'If authentication is enabled: generate an API key in Settings > System. Include it as a Bearer token in the Authorization header: "Authorization: Bearer YOUR_KEY". Without auth enabled, all endpoints are open (suitable for local network use only).', action: '#settings/system' },
+        { title: 'Key API endpoints', description: 'GET /api/status — all printer statuses. GET /api/printers — printer list and details. GET /api/history — print history with filters. GET /api/spools — filament inventory. POST /api/queue/items — add to print queue. GET /api/stats/summary — statistics overview. Full list at /api/docs.', action: null },
+        { title: 'Home Assistant integration', description: 'Use Home Assistant\'s REST sensor integration to pull printer status data. Create sensors for: print progress, temperatures, filament remaining, active print name. Trigger automations based on print events: lights on when printing, notifications when done, fan control for ventilation.', action: null },
+        { title: 'WebSocket real-time data', description: 'Connect to the WebSocket endpoint for real-time updates without polling. The WebSocket sends live printer telemetry: temperatures, print progress, AMS status, and error events. Use for: live dashboards, monitoring scripts, real-time notifications.', action: null }
+      ]
+    },
+    {
+      title: 'MQTT & Smart Home',
+      description: 'Connect your Bambu printer to MQTT for smart home integration, automation, and custom monitoring.',
+      category: 'automation', difficulty: 3, estimated_minutes: 12,
+      steps: [
+        { title: 'What is MQTT?', description: 'MQTT is a lightweight messaging protocol used by Bambu Lab printers for real-time communication. The printer publishes status updates (temperature, progress, errors) to MQTT topics. The dashboard subscribes to these topics for live monitoring. You can also subscribe with your own tools.', action: null },
+        { title: 'Bambu printer MQTT', description: 'Each Bambu printer has a built-in MQTT client that publishes to its local broker or Bambu Cloud. Topics include: device/{serial}/report for status updates. The dashboard connects to the printer\'s MQTT port (8883 TLS) using the access code from the printer\'s settings menu.', action: null },
+        { title: 'Home Assistant MQTT', description: 'If you run an MQTT broker (Mosquitto), you can bridge Bambu printer data to your Home Assistant MQTT instance. This enables: automations triggered by print events, dashboards with printer status tiles, notifications via HA\'s notification system, energy monitoring integration.', action: null },
+        { title: 'Automation examples', description: 'Examples: Turn on ventilation fan when ABS printing starts. Flash smart lights when print completes. Send Telegram/Discord message on print failure. Turn off printer power via smart plug after cooldown. Log print data to InfluxDB/Grafana for analytics. All achievable via MQTT + Home Assistant or Node-RED.', action: null }
+      ]
+    },
+    {
+      title: 'Designing for 3D Printing',
+      description: 'Learn fundamental design rules that make your models printable, strong, and beautiful on FDM printers.',
+      category: 'printing', difficulty: 2, estimated_minutes: 15,
+      steps: [
+        { title: 'Wall thickness minimums', description: 'Minimum wall thickness: 2× nozzle diameter. For 0.4mm nozzle: minimum 0.8mm walls (2 perimeters). Thinner walls may not print or be extremely fragile. For functional parts: 1.2-1.6mm walls (3-4 perimeters) minimum. Text height should be at least 1.5mm for readability.', action: null },
+        { title: 'Overhang rules', description: 'FDM can print overhangs up to ~45° without supports. Beyond 45°: quality degrades, supports may be needed. At 90° (horizontal ceiling): supports are mandatory. Design around this: use chamfers (45° angles) instead of 90° overhangs. Round holes up to 10mm diameter print without support if oriented correctly.', action: null },
+        { title: 'Bridging capabilities', description: 'Bambu printers can bridge (print in mid-air between two points) up to 15-20mm for PLA, less for PETG/ABS. Fan speed and bridge speed settings matter. Design bridges short and wide. For longer spans: add intermediate support points or redesign as an arch.', action: null },
+        { title: 'Tolerances and fit', description: 'For parts that must fit together: add 0.2-0.3mm clearance between mating surfaces. Press-fit: 0.1-0.15mm interference (part slightly larger than hole). Sliding fit: 0.3-0.4mm clearance. Threaded connections: use heat-set brass inserts instead of printed threads for reliability. Test with a small calibration piece first.', action: null },
+        { title: 'Strengthening techniques', description: 'Fillets (rounded internal corners) reduce stress concentration dramatically. Gussets (triangular ribs) reinforce joints cheaply. Dovetail and interlocking joints for assembled parts. Orient the strongest axis (X/Y) along the primary load direction. Add ribs along flat surfaces to prevent flexing.', action: null }
+      ]
+    },
+    {
+      title: 'Your First Print: Start to Finish',
+      description: 'A complete walkthrough for absolute beginners — from unboxing your printer to holding your first successful print.',
+      category: 'getting_started', difficulty: 1, estimated_minutes: 20,
+      steps: [
+        { title: 'Unboxing and assembly', description: 'Bambu Lab printers come mostly assembled. Remove all packing materials, foam, and tape (including inside the enclosure). Install the spool holder, build plate, and any accessories. Connect the power cable. For the AMS: install it on top of the printer and connect the data cable and PTFE tube.', action: null },
+        { title: 'Initial setup and WiFi', description: 'Power on the printer. Follow the on-screen setup wizard (X1C/P2S/H2) or use Bambu Studio (A1/A1 mini). Connect to your WiFi network. Create or sign into your Bambu Lab account. The printer will check for firmware updates — install any available updates before your first print.', action: null },
+        { title: 'Load filament', description: 'For AMS: open the AMS lid, insert a spool, and feed the filament end into the slot until the AMS grabs it. Close the lid. For external spool holder: mount the spool, feed filament through the PTFE tube to the extruder. The printer will automatically load and prime the nozzle.', action: null },
+        { title: 'Install build plate', description: 'Place the magnetic spring steel build plate on the heated bed — it snaps into alignment. Use the smooth PEI plate for PLA (glossy bottom finish). Clean the plate with isopropyl alcohol (IPA) before your first print to remove factory oils. Wipe in one direction with a lint-free cloth.', action: null },
+        { title: 'Slice and print a test model', description: 'Open Bambu Studio, connect your printer (it should appear automatically). Download a simple model from MakerWorld, Printables, or Thingiverse (.stl file). Import it, select your printer and PLA filament, use the default 0.2mm Standard profile. Click Slice, then Print. Watch the first layer through the camera or in person.', action: null },
+        { title: 'Monitor and remove', description: 'Watch the first few layers — they should be smooth, even, and well-adhered. The Lidar (if equipped) will scan the first layer automatically. Let the print complete fully. When done, wait for the bed to cool to room temperature. Flex the spring steel plate — the print should pop off cleanly. Congratulations on your first print!', action: null }
+      ]
+    },
+    {
+      title: 'Bambu Dashboard Setup Guide',
+      description: 'Install and configure Bambu Dashboard to monitor, control, and manage your 3D printing workflow from one central interface.',
+      category: 'getting_started', difficulty: 1, estimated_minutes: 15,
+      steps: [
+        { title: 'Installation', description: 'Bambu Dashboard runs on Node.js 22+. Download or clone from GitHub. Run the install script or start with "node server/index.js". The dashboard starts on https://localhost:3443 by default. Access from any device on your local network.', action: null },
+        { title: 'Add your printers', description: 'Go to Settings > Printers and click Add Printer. You need: printer IP address (find in printer WiFi settings), serial number (printed on the printer or in Bambu Studio), access code (generated in printer network settings). The dashboard connects via MQTT for real-time data.', action: '#settings/printers' },
+        { title: 'Configure dashboard settings', description: 'Set your preferred language (English, Norwegian). Configure electricity rates for cost tracking. Set your currency and units. Choose between light and dark theme. Configure notification preferences for print events.', action: '#settings/general' },
+        { title: 'Set up filament tracking', description: 'Add your filament vendors and profiles in the Filament panel. Register physical spools with weights and colors. The dashboard automatically tracks filament usage from each print, deducting weight from active spools.', action: '#filament/manage' },
+        { title: 'Explore the panels', description: 'Dashboard: live printer overview. Controls: direct printer control. History: print history and statistics. Queue: print job management. Filament: inventory tracking. Maintenance: hardware tracking. Knowledge: learning resources. Statistics: charts and analytics. Telemetry: real-time sensor data.', action: null }
+      ]
+    },
+    {
+      title: 'Scaling & Dimensional Accuracy',
+      description: 'Get precise dimensions in your prints — understand shrinkage compensation, tolerance testing, and measurement techniques.',
+      category: 'printing', difficulty: 3, estimated_minutes: 12,
+      steps: [
+        { title: 'Material shrinkage rates', description: 'All materials shrink as they cool. PLA: 0.3-0.5% (minimal — usually ignorable). PETG: 0.3-0.5% (similar to PLA). ABS: 0.5-0.7% (significant — scale model up for precision parts). ASA: 0.5-0.7% (same as ABS). Nylon: 0.7-1.5% (high, especially crystalline PA6). PC: 0.5-0.7%. Most slicers can apply shrinkage compensation automatically.', action: null },
+        { title: 'Calibration test prints', description: 'Print a calibration cube (20×20×20mm) and measure with calipers. If 20mm dimension measures 19.9mm → scale factor is 20/19.9 = 1.005 (0.5% compensation). Apply this in the slicer\'s "Scale" setting or per-axis in advanced settings. Test each axis independently — X/Y may differ from Z.', action: null },
+        { title: 'Tolerance testing', description: 'For mating parts: print a tolerance test (available on Printables/Thingiverse). These have holes and pins at various clearances (0.1mm, 0.2mm, 0.3mm, etc.). Find the clearance where parts just fit together smoothly. This is your printer\'s tolerance — use it for all future designs requiring fit.', action: null },
+        { title: 'Achieving precision', description: 'For maximum dimensional accuracy: use 0.12mm layer height (less material = less shrinkage per layer). Lower print speed (100-150mm/s). Let parts cool completely before measuring (thermal contraction). Use hard materials (PLA, PLA-CF) — flexible materials are harder to measure precisely. Calipers > rulers for measurement.', action: null }
+      ]
     }
   ];
 
@@ -2310,7 +2602,55 @@ function _mig055_knowledge_base() {
       'Silicone insulation cover that fits over the printer hotend heater block. The sock prevents filament from sticking to the heater block, improves thermal stability, and protects against accidental burns. A consumable that should be replaced when torn, loose, or degraded.',
       7,
       'Silicone Sock tips:\n- Prevents filament from accumulating on the heater block — avoids messy blobs\n- Improves thermal stability by reducing heat loss from the heater block\n- Safety feature — reduces burn risk when working near the hot end\n- Replace when torn, deformed, or filament has bonded to it\n- Different models for different printer series — check compatibility\n- The sock should fit snugly but not be forced — stretching reduces lifespan\n- Keep 2-3 spares on hand — they\'re inexpensive and a common wear item\n- If filament accumulates on the heater block after sock damage, heat the hotend and carefully remove with pliers',
-      JSON.stringify({material:"High-temperature silicone",max_temp:"300°C+",function:"Hotend insulation and protection",installation:"Slip-on (tool-free)",lifespan:"500-1000 hours typical"})]
+      JSON.stringify({material:"High-temperature silicone",max_temp:"300°C+",function:"Hotend insulation and protection",installation:"Slip-on (tool-free)",lifespan:"500-1000 hours typical"})],
+
+    ['Bambu Liquid Glue','tool','Bambu Lab','["X1C","X1C Combo","X1E","P1S","P1S Combo","P1P","P2S","P2S Combo","H2S","H2D","H2C"]',
+      'Bambu Lab\'s liquid adhesive for build plate adhesion with engineering materials. Essential for PA-CF, PA6-CF, PAHT-CF, PC, and other high-temp materials on the High Temp Plate. Also used as a release agent for PETG on smooth PEI.\n\nThe liquid glue provides a thin, even adhesive layer that grips during printing but allows clean release when the plate cools. Available in a pen-style applicator for easy, mess-free application.',
+      14.99,
+      'Liquid Glue guide:\n- ESSENTIAL for: PA-CF, PA6-CF, PAHT-CF, PPS-CF, PPA-CF, PC on High Temp Plate\n- Apply a thin, even coat before each print — too much causes uneven adhesion\n- Let the glue dry for 30-60 seconds before starting the print (becomes tacky)\n- One coat per print is usually sufficient. Reapply for each new print\n- Clean old glue residue with warm water and a cloth before reapplying\n- For PETG on smooth PEI: use as a RELEASE agent — prevents permanent bonding\n- The pen-style applicator makes application easy and mess-free\n- Store upright with the cap on to prevent drying out\n- One bottle lasts approximately 50-100 prints depending on bed coverage\n- For large parts: apply glue to the entire bed area, not just the part footprint — prevents edge peeling',
+      JSON.stringify({type:"Liquid adhesive pen",application:"Direct pen tip",drying_time:"30-60 seconds",coverage:"50-100 prints per bottle",essential_for:"PA-CF, PA6-CF, PAHT-CF, PC, PPS-CF on High Temp Plate",also_used_for:"PETG release agent on smooth PEI"})],
+
+    ['Bambu Glue Stick','tool','Bambu Lab','["X1C","X1C Combo","X1E","P1S","P1S Combo","P1P","P2S","P2S Combo","A1","A1 mini","H2S","H2D","H2C"]',
+      'Standard PVP-based glue stick for general-purpose build plate adhesion improvement. Primarily used as a release agent for PETG on smooth PEI plates, and as an adhesion booster for ABS, ASA, and other materials on smooth PEI.\n\nThe glue stick provides a water-soluble adhesive layer that can be easily cleaned with warm water. It\'s a simpler alternative to liquid glue for materials that don\'t require the strongest possible adhesion.',
+      6.99,
+      'Glue Stick guide:\n- Primary use: PETG release agent on smooth PEI (prevents permanent bonding)\n- Secondary use: ABS/ASA adhesion improvement on smooth PEI\n- Apply a thin, even layer — visible but not thick. Let dry briefly before printing\n- Clean and reapply every 5-10 prints. Old glue buildup causes uneven adhesion\n- Clean with warm water and a cloth — water-soluble, easy removal\n- NOT sufficient for PA-CF, PAHT-CF, or PC — use Bambu Liquid Glue for those\n- Any PVP-based school glue stick works as a cheaper alternative\n- For textured PEI: usually not needed for PETG (textured surface already provides release)\n- Keep spare glue sticks near the printer — running out mid-session is frustrating\n- Works on all Bambu printers with all build plate types',
+      JSON.stringify({type:"PVP-based glue stick",application:"Twist-up stick",water_soluble:true,primary_use:"PETG release agent on smooth PEI",secondary_use:"ABS/ASA adhesion on smooth PEI",alternative:"Standard PVP school glue sticks"})],
+
+    ['MK8 Brass Nozzle 0.4mm','nozzle','Bambu Lab','["A1","A1 mini","A1 Combo","A1 mini Combo"]',
+      'Standard MK8-style brass nozzle for the A-series printers (A1 and A1 mini). The default nozzle for PLA, PETG, and other non-abrasive filaments. MK8 is the most common nozzle standard in 3D printing, meaning cheap third-party replacements are widely available.\n\nBrass provides the best thermal conductivity of any nozzle material, ensuring consistent flow and the best surface finish for standard materials.',
+      4.99,
+      'MK8 Brass Nozzle tips:\n- The default nozzle for A1 and A1 mini printers\n- Best thermal conductivity = best flow consistency and surface finish for standard materials\n- ONLY for non-abrasive filaments: PLA, PETG, ABS, ASA, TPU, PA (unfilled)\n- DO NOT use with carbon fiber, glass fiber, glow-in-dark, or metallic filaments — brass wears out fast\n- MK8 is a universal standard — third-party replacements cost as little as $0.50-$2 each\n- Buy a variety pack: 0.2mm for detail, 0.4mm for general use, 0.6mm for speed\n- Replace when you notice degraded print quality, rough extrusion, or flow inconsistency\n- Typical lifespan: 500-2000 hours with standard PLA depending on quality\n- The A1/A1 mini nozzle change requires a wrench — not quick-swap like X1/P1 series\n- Clean nozzle with acupuncture needle or cold pull when clogged',
+      JSON.stringify({nozzle_diameter:"0.4 mm",material:"Brass",max_temperature:"300°C",thermal_conductivity:"~120 W/mK (best of any nozzle material)",nozzle_standard:"MK8 (universal, widely available)",installation:"Wrench-based (tool required)",compatible_printers:"A1, A1 mini",recommended_for:"PLA, PETG, ABS, ASA, TPU",NOT_for:"CF, GF, glow-in-dark, metallic filaments",lifespan_with_pla:"500-2000 hours"})],
+
+    ['MK8 Hardened Steel Nozzle 0.4mm','nozzle','Bambu Lab','["A1","A1 mini","A1 Combo","A1 mini Combo"]',
+      'Hardened steel MK8-style nozzle for the A-series printers, designed for abrasive filaments like PLA-CF, glow-in-the-dark, and metallic PLA. Essential if you want to print carbon fiber or glass fiber materials on the A1 or A1 mini.\n\nThird-party MK8 hardened steel nozzles are widely available at competitive prices.',
+      9.99,
+      'MK8 Hardened Steel tips:\n- Required for abrasive filaments on A1/A1 mini: PLA-CF, glow-in-dark, metallic, wood-fill\n- Third-party MK8 HS nozzles are available for $3-8 — check quality reviews\n- Lower thermal conductivity than brass — increase nozzle temp by 5-10°C\n- Lasts 2000+ hours with CF filaments vs 50-100 hours for brass\n- Same wrench installation as standard MK8 brass nozzle\n- Buy one dedicated to CF printing so you don\'t swap back and forth\n- Clean with brass brush — don\'t use steel brush on hardened steel',
+      JSON.stringify({nozzle_diameter:"0.4 mm",material:"Hardened tool steel",max_temperature:"300°C",nozzle_standard:"MK8",installation:"Wrench-based",compatible_printers:"A1, A1 mini",recommended_for:"PLA-CF, glow-in-dark, metallic, wood-fill, stone-fill"})],
+
+    ['AMS Lite Hub','upgrade','Bambu Lab','["A1","A1 mini","A1 Combo","A1 mini Combo"]',
+      'Hub for connecting multiple AMS Lite units to A-series printers, enabling up to 16-color printing. Functions similarly to the AMS Hub for X1/P1 series but designed specifically for the AMS Lite form factor.',
+      29.99,
+      'AMS Lite Hub tips:\n- Connects up to 4 AMS Lite units for 16 colors on A1/A1 mini\n- Required to connect more than one AMS Lite\n- Same multi-color capabilities as the full AMS Hub on X1/P1 series\n- Keep tubes tidy and avoid sharp bends for reliable feeding\n- Multi-color prints with many colors generate significant prime tower waste',
+      JSON.stringify({max_ams_lite_units:4,max_filament_slots:16,compatible_printers:"A1, A1 mini"})],
+
+    ['Bambu Studio','tool','Bambu Lab','["X1C","X1C Combo","X1E","P1S","P1S Combo","P1P","P2S","P2S Combo","A1","A1 mini","A1 Combo","A1 mini Combo","H2S","H2D","H2C","H2D Pro"]',
+      'Bambu Lab\'s official slicer software — a fork of PrusaSlicer with added Bambu-specific features. Free, open-source, and available for Windows, macOS, and Linux. The primary way to prepare models for printing on Bambu Lab printers.\n\nBambu Studio handles: model slicing with Bambu-optimized profiles, printer discovery and connection, print job management, multi-color painting, support generation, timelapse control, AMS management, firmware updates, and remote monitoring.',
+      0,
+      'Bambu Studio essentials:\n- Download free from bambulab.com — available for Windows, macOS, Linux\n- Automatic printer discovery on the same network — just sign in and your printers appear\n- Built-in profiles for all Bambu Lab filaments — select your material and printer for instant optimized settings\n- Multi-color painting: directly paint colors onto your model for AMS multi-color prints\n- Tree supports: generates efficient tree-shaped support structures that use less material and remove easier\n- Plate management: arrange multiple parts on the same plate with automatic spacing\n- Send to printer: slice and send directly via WiFi/LAN — no SD card needed\n- Remote monitoring: view camera feed and print progress without the Bambu Handy app\n- Firmware updates: update printer firmware directly from Bambu Studio\n- Regular updates add new features — keep it updated for latest capabilities\n- Alternative: OrcaSlicer (community fork) adds additional features and supports non-Bambu printers',
+      JSON.stringify({type:"Slicer software (free)",platform:"Windows, macOS, Linux",based_on:"PrusaSlicer (forked)",license:"Open source (AGPL)",features:["Model slicing","Multi-color painting","AMS management","Remote monitoring","Printer discovery","Firmware updates","Timelapse control","Tree supports"],alternative:"OrcaSlicer (community fork)"})],
+
+    ['OrcaSlicer','tool','Community','["X1C","X1C Combo","X1E","P1S","P1S Combo","P1P","P2S","P2S Combo","A1","A1 mini","A1 Combo","A1 mini Combo","H2S","H2D","H2C","H2D Pro"]',
+      'OrcaSlicer is a popular community-maintained slicer that\'s a fork of Bambu Studio (which is itself a fork of PrusaSlicer). It adds features not available in Bambu Studio while maintaining full compatibility with all Bambu Lab printers.\n\nOrcaSlicer is the preferred slicer for many advanced Bambu Lab users due to its additional features, faster development cycle, and support for non-Bambu printers.',
+      0,
+      'OrcaSlicer highlights:\n- Free and open-source — same as Bambu Studio\n- Full Bambu Lab printer support — all features including AMS, Lidar, camera\n- Additional features over Bambu Studio: calibration tools, more detailed settings, experimental features\n- Supports non-Bambu printers too (Prusa, Voron, Creality, etc.) — great if you have multiple printer brands\n- Built-in calibration suite: flow rate, pressure advance, retraction, temp tower — generate calibration prints directly\n- Faster feature development than Bambu Studio — community contributions add features quickly\n- Same multi-color and AMS support as Bambu Studio\n- Network printer discovery works the same as Bambu Studio\n- Download from github.com/SoftFever/OrcaSlicer\n- Profiles from Bambu Studio can be imported — easy migration\n- Many YouTube guides cover OrcaSlicer-specific features and workflows',
+      JSON.stringify({type:"Slicer software (free, community)",platform:"Windows, macOS, Linux",based_on:"Bambu Studio / PrusaSlicer (forked)",license:"Open source",features:["All Bambu Studio features","Calibration tools","Advanced settings","Multi-printer brand support","Active community development"],github:"SoftFever/OrcaSlicer"})],
+
+    ['Bambu Handy','tool','Bambu Lab','["X1C","X1C Combo","X1E","P1S","P1S Combo","P1P","P2S","P2S Combo","A1","A1 mini","A1 Combo","A1 mini Combo","H2S","H2D","H2C","H2D Pro"]',
+      'Bambu Lab\'s official mobile app for iOS and Android. Provides remote monitoring, print control, and printer management from your phone or tablet.\n\nView the live camera feed, check print progress, start/stop prints, manage the AMS, and receive notifications about print status — all from your mobile device.',
+      0,
+      'Bambu Handy tips:\n- Available free on iOS App Store and Google Play\n- Remote camera monitoring: view live feed from printers with built-in cameras (X1C, X1E, A1, A1 mini)\n- Push notifications when prints complete, fail, or need attention\n- Start, pause, stop, and cancel prints remotely\n- View print progress: estimated time remaining, current layer, filament usage\n- Manage AMS: see which filaments are loaded and their remaining amounts\n- Works over WiFi (local) and Bambu Cloud (remote, anywhere with internet)\n- For LAN-only users: only works on the same network as the printer\n- Multiple printers can be managed from one app\n- Print history shows past prints with thumbnails and statistics',
+      JSON.stringify({type:"Mobile app (free)",platform:"iOS, Android",features:["Remote camera monitoring","Push notifications","Print control (start/stop/pause)","AMS management","Print progress tracking","Multi-printer management"],connectivity:"WiFi (local), Bambu Cloud (remote)"})]
   ];
   for (const a of accessories) ia.run(...a);
 
@@ -2651,7 +2991,43 @@ function _mig055_knowledge_base() {
       'Specialized support material for high-temperature engineering filaments: PAHT-CF, PPA-CF, PA6-GF, PET-CF, and similar materials. Breaks away cleanly from engineering parts at high temps.\n\nPrint settings:\n- Higher temps than standard support materials: 260-275°C nozzle\n- Enclosure required\n- Designed to withstand the high chamber temperatures needed for engineering materials',
       'Moderately moisture-sensitive. Dry at 65°C for 4-6 hours.',
       'Support for PA/PET:\n- The ONLY support material designed for high-temp engineering filaments\n- Works with PAHT-CF, PPA-CF, PA6-GF, PET-CF\n- Withstands the high chamber temps (50-60°C) these materials require\n- Available at $39.99/0.5kg\n- Essential for complex engineering parts that need support structures\n- Breakaway interface separates cleanly from nylon and PET-based parts\n- Available in Green for easy visual distinction from the primary material',
-      '["X1C","X1E","H2S","H2D","H2D Pro","H2C"]']
+      '["X1C","X1E","H2S","H2D","H2D Pro","H2C"]'],
+
+    ['PA','Bambu Lab','Basic Nylon','engineering',3,250,280,80,100,0,0,30,1,'brass',0,5,4,3,4,4,0,0,
+      'PA (Polyamide / Nylon) is unfilled nylon — no carbon fiber or glass fiber reinforcement. It offers excellent toughness, impact resistance, and natural flexibility that the filled variants lack. PA is the best choice when you need parts that can absorb impacts, flex without breaking, or resist fatigue from repeated stress.\n\nPrint settings:\n- Nozzle: 260-275°C\n- Bed: 85-100°C on High Temp Plate with liquid glue\n- Fan: 0-30%. Low fan for best layer adhesion\n- Enclosure required — nylon warps aggressively without heated chamber\n- Speed: 150-200mm/s\n- Brass nozzle is fine — unfilled PA is NOT abrasive\n- Brim: 5-8mm for all parts\n- PA has natural lubricity — great for gears, bearings, and sliding parts\n- Unfilled PA is more flexible than PA-CF — parts bend rather than snap',
+      'PA is EXTREMELY moisture-sensitive — same as PA-CF.\n\nDrying protocol:\n- Dry at 80°C for 8-12 hours minimum\n- PA absorbs moisture aggressively — use within hours of drying\n- Inline dryer recommended for best results\n- Signs of wet PA: popping, rough surface, poor layer adhesion, reduced toughness\n- Store in vacuum-sealed bags with molecular sieve desiccant\n- The AMS provides some protection but is NOT sufficient for long-term PA storage',
+      'Unfilled PA advantages over PA-CF:\n- More flexible and impact-resistant — parts bend instead of snap\n- No hardened steel nozzle needed — brass works perfectly\n- Better for: gears, bearings, hinges, living hinges, clips, snap-fits\n- Natural lubricity makes PA excellent for sliding/rotating mechanical parts\n- Abrasion resistance is excellent — PA parts resist wear from rubbing and sliding\n- PA is naturally white/translucent — can be dyed after printing\n- Heat resistance: 80-100°C (lower than PA-CF but still good)\n- Chemical resistance: excellent against oils, greases, fuels, and many solvents\n- PA absorbs water and swells slightly — not ideal for precision water-contact parts\n- Tensile strength: 40-60 MPa (lower than PA-CF but much higher elongation at break)',
+      '["X1C","X1E","P2S","H2S","H2D","H2C"]'],
+
+    ['HIPS','Generic','Standard','support',2,220,250,90,110,0,0,30,1,'brass',0,2,3,2,3,3,0,0,
+      'HIPS (High Impact Polystyrene) serves dual purpose: as a standalone printing material and as a dissolvable support material for ABS. HIPS dissolves in limonene (d-Limonene), making it an excellent support material for complex ABS prints.\n\nPrint settings:\n- Nozzle: 230-245°C\n- Bed: 95-110°C\n- Fan: 0-20%\n- Enclosure required — same as ABS\n- Speed: 200-300mm/s — prints at similar speeds to ABS\n- Very similar printing characteristics to ABS\n- Can be used as a standalone material — lighter and slightly softer than ABS\n- Works as dissolvable support for ABS (dissolves in limonene)',
+      'Same as ABS storage — low moisture sensitivity.\n\nDrying: 60°C for 4 hours if needed.\n\nHIPS is one of the least moisture-sensitive filaments — handles storage well.',
+      'HIPS dual-purpose material:\n- As support for ABS: dissolves in d-Limonene (citrus-based solvent) leaving clean surfaces\n- Limonene dissolution takes 12-24 hours depending on support volume and agitation\n- Limonene is available from chemical suppliers and some Amazon sellers\n- As a standalone material: lighter than ABS, good impact resistance, easy to sand and paint\n- HIPS can be acetone smoothed like ABS (it\'s a styrene-based polymer)\n- Heat resistance: 80-90°C — slightly lower than ABS\n- Great for: lightweight models, theatrical props, display items, packaging prototypes\n- ABS + HIPS dual-material with AMS gives fully dissolvable supports for complex geometries\n- HIPS is food-safe in many jurisdictions (it\'s used for food packaging)\n- Cheaper than PVA and doesn\'t have the extreme moisture sensitivity issues',
+      '["X1C","X1E","P2S","H2S","H2D","H2C"]'],
+
+    ['PLA','Bambu Lab','Dual Color Silk','specialty',2,200,230,50,65,0,80,100,0,'brass',0,2,3,1,2,3,0,0,
+      'PLA Dual Color Silk shifts between two silk colors as the filament extrudes, creating stunning two-tone effects from a single spool. The color shift happens along the filament length, producing beautiful transitions in tall prints.\n\nPrint settings:\n- Standard PLA settings: 200-220°C, 55-60°C bed\n- The dual-color effect is most visible on tall prints and vases\n- Vase mode (spiralize outer contour) showcases the two-tone effect beautifully\n- Available in multiple dual-color combinations',
+      'Same as standard PLA storage.',
+      'Dual Color Silk applications:\n- Single-spool two-tone silk effect — no AMS needed\n- Stunning on vases, decorative items, and art pieces\n- Each print is unique — color transitions depend on spool position\n- The silk finish adds an extra dimension to the dual-color effect\n- Great for gifts and display pieces that catch light beautifully\n- Standard PLA mechanical properties — mainly aesthetic\n- Works in AMS but the color effect is randomized per print',
+      '["X1C","P1S","P1P","P2S","A1","A1 mini","H2S","H2D","H2C"]'],
+
+    ['PLA','Bambu Lab','Impact Tough','standard',2,200,230,50,65,0,80,100,0,'brass',0,2,4,3,2,5,0,0,
+      'PLA Impact Tough is an enhanced PLA with dramatically improved impact resistance — up to 12x standard PLA. Specifically engineered for functional parts that experience drops, bumps, or mechanical stress.\n\nPrint settings:\n- Standard PLA settings: 200-220°C nozzle, 55-60°C bed\n- Fan: 80-100%\n- No enclosure needed\n- Same printability as standard PLA\n- Available in Black, White, and Gray',
+      'Same as standard PLA storage.',
+      'Impact Tough PLA properties:\n- Up to 12x impact resistance compared to standard PLA\n- Significantly better flexibility — parts bend instead of snapping\n- No enclosure or special settings needed — prints like standard PLA\n- Excellent for: tool handles, protective cases, mechanical parts, brackets\n- Heat resistance: ~55-60°C — same as standard PLA\n- The impact improvement makes it viable for functional parts that would fail in standard PLA\n- Available in neutral colors (Black, White, Gray) for functional applications\n- Consider this over PETG when you want PLA ease-of-printing with better toughness',
+      '["X1C","P1S","P1P","P2S","A1","A1 mini","H2S","H2D","H2C"]'],
+
+    ['PETG','Bambu Lab','Matte','standard',2,220,260,70,90,0,30,50,0,'brass',0,3,3,2,3,4,0,0,
+      'PETG Matte produces a flat, non-reflective surface finish that hides layer lines significantly better than standard glossy PETG. Combines PETG\'s functional properties (toughness, heat resistance, chemical resistance) with a professional-looking matte appearance.\n\nPrint settings:\n- Same as standard PETG: 230-245°C nozzle, 75-85°C bed on textured PEI\n- Fan: 30-50%\n- The matte finish is consistent across different speeds and temperatures\n- Available in 8 colors',
+      'Standard PETG storage — sealed bag with desiccant. The matte additive slightly increases moisture sensitivity.',
+      'PETG Matte advantages:\n- Matte finish hides layer lines much better than standard glossy PETG\n- Same mechanical properties as standard PETG: toughness, heat resistance (80-85°C), chemical resistance\n- Professional-looking finish without post-processing\n- 8 color options for design flexibility\n- Great for: functional parts that also need to look professional\n- The matte surface takes paint and primer well\n- Water-resistant — same as standard PETG\n- Choose over standard PETG when appearance matters alongside function',
+      '["X1C","P1S","P1P","P2S","A1","A1 mini","H2S","H2D","H2C"]'],
+
+    ['ABS','Bambu Lab','Matte','standard',3,230,260,90,110,0,0,30,1,'brass',0,2,4,2,4,4,0,0,
+      'ABS Matte produces a flat, non-reflective surface finish while maintaining all of ABS\'s functional properties. The matte finish hides layer lines and imperfections better than standard glossy ABS.\n\nPrint settings:\n- Same as standard ABS: 240-250°C nozzle, 100-110°C bed\n- Enclosure required\n- Fan: 0-20%\n- Can still be acetone vapor smoothed for a satin/semi-gloss finish\n- Available in 5 colors',
+      'Same as standard ABS storage — low moisture sensitivity.',
+      'ABS Matte features:\n- Matte finish hides layer lines better than standard ABS\n- Same heat resistance (100-105°C) and impact resistance as standard ABS\n- Can be acetone smoothed — the matte finish becomes semi-gloss with light smoothing\n- Available in 5 functional colors\n- Great for: visible functional parts, electronic enclosures, automotive interior parts\n- Fume management: same as standard ABS — use carbon filter or ventilation\n- Shrinkage: same 0.5-0.7% as standard ABS',
+      '["X1C","X1E","P2S","H2S","H2D","H2C"]']
   ];
   for (const f of filaments) fi.run(...f);
 
@@ -2884,7 +3260,57 @@ function _mig055_knowledge_base() {
     ['ASA Outdoor','H2C','ASA','Bambu Lab',0.4,0.2,300,20,3,5,4,0.8,30,
       'ASA profile for the H2C. Multi-color UV-stable outdoor parts — the induction nozzle makes color changes faster than any other printer. Active chamber reduces warping.\n\nSuitable for: multi-color outdoor parts, signage, decorative outdoor items.',
       'H2C ASA tips:\n- Active chamber + induction nozzle = fastest multi-color ASA\n- UV stable — perfect for outdoor multi-color parts\n- Same temps and settings as ABS\n- Acetone smoothing seals layer lines for weatherproofing\n- 300mm/s achievable with active chamber\n- Close all doors during printing\n- Minimal purge waste between ASA colors',
-      JSON.stringify({nozzle_temp:245,nozzle_temp_first_layer:250,bed_temp:105,bed_temp_first_layer:110,chamber_temp:"55-60°C active",fan_speed:"0-10%",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:15,outer_wall_speed:200,inner_wall_speed:300,infill_speed:300,travel_speed:500,z_hop:0.4,build_plate:"Textured PEI",brim_width:"3-5mm",enclosure:"REQUIRED — closed",line_width:0.42,infill_pattern:"Gyroid",max_volumetric_speed:18,nozzle_system:"Vortek Induction"}),'Bambu Lab',3]
+      JSON.stringify({nozzle_temp:245,nozzle_temp_first_layer:250,bed_temp:105,bed_temp_first_layer:110,chamber_temp:"55-60°C active",fan_speed:"0-10%",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:15,outer_wall_speed:200,inner_wall_speed:300,infill_speed:300,travel_speed:500,z_hop:0.4,build_plate:"Textured PEI",brim_width:"3-5mm",enclosure:"REQUIRED — closed",line_width:0.42,infill_pattern:"Gyroid",max_volumetric_speed:18,nozzle_system:"Vortek Induction"}),'Bambu Lab',3],
+
+    ['PLA Standard','H2S','PLA','Bambu Lab',0.4,0.2,500,15,2,4,4,0.8,30,
+      'PLA profile for the H2S — Bambu Lab\'s next-generation single-nozzle CoreXY with 120% larger build volume (340×320×340mm) than the X1C. The H2S\'s 1000mm/s capability and active chamber heating make it the fastest PLA printer in the lineup.\n\nThe larger build volume opens up entirely new possibilities for PLA projects — print parts that simply didn\'t fit on the X1C.\n\nSuitable for: all PLA printing, especially large parts that need the extra build volume.',
+      'H2S PLA tips:\n- Leave enclosure open for PLA — active chamber heating is not needed\n- The 340mm build volume is 120% larger than X1C — print much bigger parts\n- 500mm/s is realistic for PLA on long straight walls. Small features are acceleration-limited\n- The larger build volume means longer travel moves — travel speed matters more\n- Clean the larger bed with IPA regularly — more surface area = more maintenance\n- For large PLA parts: consider 3mm brim to ensure adhesion on the bigger plate\n- AMS 2 compatible for multi-color\n- The H2S replaces the X1C as the flagship single-nozzle printer\n- Vibration compensation handles 500mm/s with minimal ringing',
+      JSON.stringify({nozzle_temp:210,nozzle_temp_first_layer:215,bed_temp:55,bed_temp_first_layer:60,fan_speed:"100% after layer 1",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:20,outer_wall_speed:350,inner_wall_speed:500,infill_speed:500,travel_speed:700,bridge_speed:60,z_hop:0.4,line_width:0.42,infill_pattern:"Gyroid",seam_position:"Aligned",max_volumetric_speed:28,acceleration:20000,build_volume:"340x320x340mm",note:"Open enclosure for PLA. 500mm/s on long walls."}),'Bambu Lab',1],
+
+    ['PETG Standard','H2S','PETG','Bambu Lab',0.4,0.2,350,15,2,4,4,1.0,30,
+      'PETG profile for the H2S with the larger 340mm build volume. Active chamber heating provides stable temperatures for large PETG parts that would warp on passive enclosures.\n\nSuitable for: large functional PETG parts, enclosures, structural components.',
+      'H2S PETG tips:\n- Use Textured PEI plate — same rule for PETG on all Bambu printers\n- Active chamber at 40°C helps large PETG parts stay flat — a big advantage over X1C\n- The larger build volume is excellent for large functional PETG enclosures\n- 350mm/s is reliable for PETG on the H2S\n- Keep enclosure closed for stable chamber temperature\n- For very large flat parts: use 5-8mm brim\n- Dry PETG before printing — moisture causes stringing\n- Camera monitoring catches adhesion failures early',
+      JSON.stringify({nozzle_temp:235,nozzle_temp_first_layer:240,bed_temp:80,bed_temp_first_layer:85,fan_speed:"40% after layer 3",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:15,outer_wall_speed:250,inner_wall_speed:350,infill_speed:350,travel_speed:600,z_hop:0.4,build_plate:"Textured PEI",chamber_temp:"40°C",build_volume:"340x320x340mm",line_width:0.42,infill_pattern:"Gyroid",max_volumetric_speed:22,wipe_enabled:true}),'Bambu Lab',2],
+
+    ['ABS Standard','H2S','ABS','Bambu Lab',0.4,0.2,350,15,3,5,4,0.8,30,
+      'ABS profile for the H2S with active chamber heating up to 65°C. The active heating is transformative for ABS — consistent chamber temperature eliminates warping even on large parts that were impossible on passively heated printers.\n\nSuitable for: large ABS parts, production ABS, parts requiring minimal warping.',
+      'H2S ABS tips:\n- Active chamber to 60°C+ = dramatically less warping\n- The 340mm build volume enables large ABS parts that were impossible on X1C\n- 350mm/s ABS is achievable with the heated chamber\n- Fan: 0% is recommended — active chamber provides thermal stability\n- Brim: 3-5mm (reduced from X1C thanks to active heating)\n- Carbon filter handles fumes — replace regularly\n- ABS shrinkage is more uniform with active chamber\n- Post-print: gradual active cooling prevents thermal shock',
+      JSON.stringify({nozzle_temp:245,nozzle_temp_first_layer:250,bed_temp:105,bed_temp_first_layer:110,chamber_temp:"60°C active",fan_speed:"0% (max 15%)",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:15,outer_wall_speed:250,inner_wall_speed:350,infill_speed:350,travel_speed:500,z_hop:0.4,build_plate:"Textured PEI or Smooth PEI with glue",brim_width:"3-5mm",enclosure:"REQUIRED — closed",line_width:0.42,infill_pattern:"Gyroid",max_volumetric_speed:20,build_volume:"340x320x340mm"}),'Bambu Lab',3],
+
+    ['PA-CF Engineering','H2S','PA-CF','Bambu Lab',0.4,0.2,200,15,3,5,4,0.5,20,
+      'PA-CF profile for the H2S with active chamber heating. The 340mm build volume combined with 65°C active chamber makes the H2S excellent for large engineering PA-CF parts.\n\nCRITICAL: Hardened steel nozzle, bone-dry filament, High Temp Plate with liquid glue.\n\nSuitable for: large structural parts, industrial prototypes, functional engineering components.',
+      'H2S PA-CF tips:\n- Active chamber at 55-60°C is excellent for PA-CF — better than X1C passive chamber\n- DRY the filament: 80°C for 8-12 hours — non-negotiable\n- The 340mm build volume enables large PA-CF parts impossible on X1C\n- Use inline dryer for multi-hour prints\n- Hardened steel nozzle is mandatory\n- Brim: 8mm for all parts\n- 200mm/s gives good results with excellent layer adhesion\n- Parts reach full strength after 24-48h crystallization\n- High Temp Plate with Bambu liquid glue for adhesion',
+      JSON.stringify({nozzle_temp:280,nozzle_temp_first_layer:285,bed_temp:90,bed_temp_first_layer:100,chamber_temp:"55-60°C active",fan_speed:"0-20%",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:10,outer_wall_speed:150,inner_wall_speed:200,infill_speed:200,travel_speed:400,z_hop:0.3,build_plate:"High Temp Plate + liquid glue",brim_width:"8mm",enclosure:"REQUIRED — closed",nozzle_type:"HARDENED STEEL",line_width:0.42,infill_pattern:"Gyroid",max_volumetric_speed:14,filament_drying:"80°C for 8-12h",build_volume:"340x320x340mm"}),'Bambu Lab',4],
+
+    ['PLA Standard','H2C','PLA','Bambu Lab',0.4,0.2,500,15,2,4,4,0.8,30,
+      'PLA profile for the H2C with Vortek nozzle-swap system. The H2C uses induction hotends that heat in ~8 seconds, enabling near-zero waste multi-color PLA printing.\n\nThe Vortek system assigns each color its own dedicated hotend, eliminating the purge waste and color bleeding of AMS-based multi-color.\n\nSuitable for: high-quality multi-color PLA prints with minimal waste.',
+      'H2C PLA tips:\n- Each induction hotend gets its own color — no purging between color changes\n- 8-second hotend swap = very fast multi-color printing\n- Near-zero purge waste saves significant material vs AMS multi-color\n- Open the enclosure for PLA — active chamber not needed\n- Up to 7 colors with the Vortek system (1 fixed + 6 induction hotends)\n- Quality of multi-color transitions is excellent — no color bleeding\n- 500mm/s achievable for single-color PLA sections\n- For single-color PLA, performance is identical to H2S\n- Clean induction hotend tips periodically for best results',
+      JSON.stringify({nozzle_temp:210,nozzle_temp_first_layer:215,bed_temp:55,bed_temp_first_layer:60,fan_speed:"100% after layer 1",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:20,outer_wall_speed:350,inner_wall_speed:500,infill_speed:500,travel_speed:700,bridge_speed:60,z_hop:0.4,line_width:0.42,infill_pattern:"Gyroid",max_volumetric_speed:28,nozzle_system:"Vortek (1 fixed + 6 induction)",purge_waste:"Near-zero",note:"Open enclosure for PLA."}),'Bambu Lab',1],
+
+    ['PETG Standard','H2C','PETG','Bambu Lab',0.4,0.2,350,15,2,4,4,1.0,30,
+      'PETG profile for the H2C. Multi-color PETG with Vortek nozzle system — each color gets a dedicated hotend for clean color transitions without purge waste.\n\nSuitable for: functional multi-color PETG parts, enclosures with color-coded sections.',
+      'H2C PETG tips:\n- Textured PEI plate required for PETG\n- Active chamber at 40°C helps large parts stay flat\n- Vortek nozzles eliminate PETG purge waste — significant material savings\n- Each hotend maintains its own PETG color — no cross-contamination\n- 350mm/s reliable for PETG\n- Dry PETG before loading into Vortek hotends\n- Keep enclosure closed for stable chamber temp',
+      JSON.stringify({nozzle_temp:235,nozzle_temp_first_layer:240,bed_temp:80,bed_temp_first_layer:85,fan_speed:"40% after layer 3",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:15,outer_wall_speed:250,inner_wall_speed:350,infill_speed:350,travel_speed:600,z_hop:0.4,build_plate:"Textured PEI",chamber_temp:"40°C",line_width:0.42,infill_pattern:"Gyroid",max_volumetric_speed:22,nozzle_system:"Vortek Induction"}),'Bambu Lab',2],
+
+    ['PC Standard','X1C','PC','Bambu Lab',0.4,0.2,120,15,3,5,4,0.5,20,
+      'Polycarbonate profile for the X1C. PC is one of the most challenging materials to print but produces the toughest parts of any common FDM material — nearly unbreakable with excellent heat resistance up to 140°C.\n\nCRITICAL: Enclosure required, High Temp Plate with liquid glue, bone-dry filament.\n\nSuitable for: impact-resistant parts, heat-resistant enclosures, transparent/translucent parts, safety equipment.',
+      'PC printing strategy:\n- DRY THE FILAMENT: 80°C for 6-8 hours. Wet PC bubbles and delaminates\n- High Temp Plate with Bambu liquid glue — standard PEI plates don\'t hold PC at 120°C\n- Preheat chamber for 15 minutes before starting — PC warps aggressively\n- Close ALL enclosure openings — PC is extremely draft-sensitive\n- Fan: 0% is safest. Max 10% for critical overhangs\n- 120mm/s is safe — going faster risks poor layer adhesion\n- Brim: 10mm for all parts. PC warping forces are extreme\n- First layer: extra squish, 10mm/s speed, 0% fan\n- PC shrinks 0.5-0.7% — account for this in precision parts\n- For transparent PC: reduce nozzle temp by 5°C, 0.1mm layer height, slow speed\n- PC releases BPA fumes — use carbon filter or good ventilation\n- Let parts cool VERY slowly in the closed enclosure — rapid cooling = warping and cracking',
+      JSON.stringify({nozzle_temp:275,nozzle_temp_first_layer:280,bed_temp:110,bed_temp_first_layer:120,fan_speed:"0% (max 10%)",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:10,outer_wall_speed:80,inner_wall_speed:120,infill_speed:120,travel_speed:300,bridge_speed:20,z_hop:0.3,build_plate:"High Temp Plate + Bambu liquid glue",brim_width:"10mm",enclosure:"REQUIRED — fully sealed",chamber_preheat:"15 minutes minimum",line_width:0.42,infill_pattern:"Gyroid",seam_position:"Aligned",max_volumetric_speed:10,filament_drying:"80°C for 6-8h",shrinkage:"0.5-0.7%",fumes:"BPA — use carbon filter"}),'Bambu Lab',4],
+
+    ['PAHT-CF Advanced','X1E','PAHT-CF','Bambu Lab',0.4,0.2,100,15,4,6,4,0.5,20,
+      'PAHT-CF profile for the X1E — the only Bambu printer with 60°C active chamber heating and 320°C nozzle capability required for this material. PAHT-CF is the highest-performance filament Bambu Lab offers.\n\nCRITICAL REQUIREMENTS: X1E printer (active chamber heating), hardened steel nozzle, BONE DRY filament (90°C for 12h+), High Temp Plate with liquid glue.\n\nSuitable for: aerospace prototypes, automotive engine components, industrial tooling, high-stress/high-temp functional parts.',
+      'PAHT-CF is the most demanding filament to print:\n- DRY FILAMENT: 90-100°C for 12+ hours — this is MANDATORY. Wet PAHT-CF = catastrophic failure\n- Use inline dryer feeding to printer — PAHT-CF absorbs moisture in 15-30 minutes\n- Active chamber: set to 55-60°C. This is why the X1E is required — passive heating isn\'t enough\n- Let chamber reach target temperature BEFORE starting the print\n- Nozzle: 310-320°C — near the X1E\'s maximum\n- HARDENED STEEL NOZZLE: absolutely mandatory. Carbon fibers are extremely abrasive\n- High Temp Plate with Bambu liquid glue — apply thin, even coat\n- Brim: 10mm minimum for all parts — extreme warping forces\n- Speed: 100mm/s maximum. Don\'t rush — layer adhesion is critical at these extremes\n- 4 walls for maximum strength — CF fibers align along perimeters\n- Fan: 0-10% maximum — PAHT-CF needs slow crystallization\n- Post-print: let cool in CLOSED enclosure for at least 2 hours. Rapid cooling causes cracking\n- Parts reach full mechanical properties after 48-72 hours of room-temperature crystallization\n- Annealing at 140-160°C for 4-6h further improves heat resistance',
+      JSON.stringify({nozzle_temp:315,nozzle_temp_first_layer:320,bed_temp:115,bed_temp_first_layer:120,chamber_temp:"55-60°C ACTIVE HEATING (X1E required)",fan_speed:"0-10%",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:8,outer_wall_speed:60,inner_wall_speed:100,infill_speed:100,travel_speed:250,bridge_speed:15,z_hop:0.3,build_plate:"High Temp Plate + Bambu liquid glue",brim_width:"10mm",enclosure:"REQUIRED — X1E with active chamber heating",nozzle_type:"HARDENED STEEL — mandatory",support_type:"Support for PA/PET (if needed)",line_width:0.42,infill_pattern:"Gyroid",seam_position:"Aligned",max_volumetric_speed:8,filament_drying:"90-100°C for 12h+ — MANDATORY",post_print_cooling:"2+ hours in closed enclosure",crystallization:"48-72 hours at room temp for full strength",annealing:"140-160°C for 4-6h (optional, improves heat resistance)"}),'Bambu Lab',5],
+
+    ['PLA Standard','P1P','PLA','Bambu Lab',0.4,0.2,300,15,2,4,4,0.8,30,
+      'PLA profile for the P1P open-frame printer. The open design provides excellent natural airflow for PLA cooling, making the P1P excellent for PLA overhangs and bridges despite being the most affordable CoreXY.\n\nSuitable for: general-purpose PLA printing, prototypes, household items, PLA that benefits from maximum cooling.',
+      'P1P PLA tips:\n- Open frame = excellent natural cooling for PLA — overhangs and bridges print very cleanly\n- No enclosure means drafts can cause issues — avoid placing near air vents or open windows\n- Strain gauge bed leveling — run Z-offset calibration with each new plate\n- 300mm/s works well for PLA on the CoreXY motion system\n- Clean the smooth PEI plate with IPA every few prints\n- No camera — consider an aftermarket USB webcam for monitoring\n- AMS works on the P1P for multi-color PLA — same as P1S\n- The P1P is essentially a \"P1S without walls\" — same speed, same quality for PLA\n- Keep linear rods and belts clean — open frame collects dust faster\n- The open frame makes maintenance easy — everything is accessible',
+      JSON.stringify({nozzle_temp:210,nozzle_temp_first_layer:215,bed_temp:55,bed_temp_first_layer:60,fan_speed:"100% after layer 1",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:20,outer_wall_speed:200,inner_wall_speed:300,infill_speed:300,travel_speed:500,bridge_speed:50,z_hop:0.4,line_width:0.42,infill_pattern:"Gyroid",seam_position:"Aligned",max_volumetric_speed:21,acceleration:10000,open_frame:true,note:"Open frame = excellent PLA cooling. Avoid drafty locations."}),'Bambu Lab',1],
+
+    ['PETG Standard','A1','PETG','Bambu Lab',0.4,0.2,250,15,2,4,4,1.0,30,
+      'PETG profile for the A1 bed-slinger printer. The A1 handles PETG well with its Lidar providing accurate first-layer calibration — critical for PETG\'s sensitivity to Z-offset.\n\nSuitable for: functional PETG parts on the A1 platform.',
+      'A1 PETG tips:\n- Use textured PEI plate — PETG bonds permanently to smooth PEI\n- Lidar auto-calibration is especially valuable for PETG Z-offset\n- Some stringing is normal with PETG — dry the filament to reduce it\n- 250mm/s is reliable for PETG on the A1\n- For tall heavy PETG parts: reduce speed to 150mm/s (bed-slinger limitation)\n- AMS Lite works with PETG — increase retraction by 0.3mm in AMS settings\n- The open frame means no fume control — PETG fumes are minimal but present\n- Fan: 30-40% for good balance of overhang quality and layer adhesion\n- Clean textured plate with IPA regularly',
+      JSON.stringify({nozzle_temp:235,nozzle_temp_first_layer:240,bed_temp:80,bed_temp_first_layer:85,fan_speed:"40% after layer 3",fan_speed_first_layer:"0%",first_layer_height:0.2,first_layer_speed:15,outer_wall_speed:200,inner_wall_speed:250,infill_speed:250,travel_speed:400,z_hop:0.4,build_plate:"Textured PEI",line_width:0.42,infill_pattern:"Gyroid",max_volumetric_speed:18,wipe_enabled:true,note:"Use textured PEI. Reduce speed for tall parts."}),'Bambu Lab',2]
   ];
   for (const p of profiles) pi.run(...p);
 }
@@ -8541,4 +8967,14 @@ export function deleteScreenshot(id) {
 export function deleteScreenshotsBulk(ids) {
   const placeholders = ids.map(() => '?').join(',');
   return db.prepare(`DELETE FROM screenshots WHERE id IN (${placeholders})`).run(...ids);
+}
+
+function _mig094_reseed_knowledge_base() {
+  // Re-seed KB with comprehensive data (printers, accessories, filaments, profiles)
+  seedKbData();
+}
+
+function _mig095_reseed_learning_center() {
+  // Re-seed learning center with expanded course library
+  _mig054_learning_center_v2();
 }

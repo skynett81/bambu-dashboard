@@ -140,7 +140,7 @@
       if (_activeTab === 'printers' && ['list','status'].includes(hashParts[2])) _printerSubTab = hashParts[2];
       if (_activeTab === 'general' && ['preferences','auth','obs'].includes(hashParts[2])) _generalSubTab = hashParts[2];
       if (_activeTab === 'appearance' && ['theme','customize'].includes(hashParts[2])) _appearanceSubTab = hashParts[2];
-      if (_activeTab === 'system' && ['updates','security','printers','automation','integrations','nodes','data'].includes(hashParts[2])) _systemSubTab = hashParts[2];
+      if (_activeTab === 'system' && ['updates','security','printers','automation','energy','integrations','nodes','data'].includes(hashParts[2])) _systemSubTab = hashParts[2];
       if (_activeTab === 'notifications' && ['channels','log','webhooks'].includes(hashParts[2])) _notifSubTab = hashParts[2];
     }
 
@@ -368,6 +368,20 @@
       h += '<label class="toggle-switch"><input type="checkbox" id="compact-mode-toggle" ' + (document.body.classList.contains('compact-mode') ? 'checked' : '') + ' onchange="toggleCompactMode()"><span class="toggle-slider"></span></label>';
       h += '<span style="font-size:0.75rem;color:var(--text-muted);margin-left:8px">' + (t('settings.compact_mode_desc') || 'Denser layout with smaller spacing') + '</span>';
       h += '</div></div></div>';
+
+      // Dashboard columns selector
+      const curCols = typeof getDashboardColumns === 'function' ? getDashboardColumns() : 3;
+      h += '<div class="settings-card mt-md">';
+      h += '<div class="card-title">' + (t('settings.dashboard_columns') || 'Dashboard Columns') + '</div>';
+      h += '<div class="dashboard-cols-selector">';
+      h += '<button class="dashboard-cols-btn' + (curCols === 2 ? ' active' : '') + '" onclick="setDashboardColumns(2);document.querySelectorAll(\'.dashboard-cols-btn\').forEach(b=>b.classList.remove(\'active\'));this.classList.add(\'active\')">';
+      h += '<svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="12" height="18" rx="2"/><rect x="15" y="1" width="12" height="18" rx="2"/></svg>';
+      h += '<span>2 ' + (t('settings.columns') || 'kolonner') + '</span></button>';
+      h += '<button class="dashboard-cols-btn' + (curCols === 3 ? ' active' : '') + '" onclick="setDashboardColumns(3);document.querySelectorAll(\'.dashboard-cols-btn\').forEach(b=>b.classList.remove(\'active\'));this.classList.add(\'active\')">';
+      h += '<svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="7.3" height="18" rx="1.5"/><rect x="10.3" y="1" width="7.3" height="18" rx="1.5"/><rect x="19.7" y="1" width="7.3" height="18" rx="1.5"/></svg>';
+      h += '<span>3 ' + (t('settings.columns') || 'kolonner') + '</span></button>';
+      h += '</div></div>';
+
       el.innerHTML = h;
     }
   }
@@ -431,7 +445,93 @@
       loadAuthSettings();
 
     } else if (_generalSubTab === 'obs') {
-      el.innerHTML = `<div class="settings-card"><div class="card-title">${t('settings.obs_title')}</div><p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.obs_description')}</p><div style="display:flex;gap:8px;align-items:center"><input class="form-input" id="obs-url-display" readonly value="${location.origin}/obs.html" style="flex:1;font-size:0.8rem"><button class="form-btn form-btn-sm" data-ripple onclick="copyObsUrl()">${t('camera.copy')}</button></div><p class="text-muted" style="font-size:0.75rem;margin-top:6px">${t('settings.obs_params')}</p></div>`;
+      const printerOpts = (p || []).map(pr => `<option value="${pr.id}">${pr.name || pr.id}</option>`).join('');
+      let h = '<div class="settings-grid">';
+
+      // URL Generator card
+      h += `<div class="settings-card" style="grid-column:1/-1">
+        <div class="card-title">${t('settings.obs_title')}</div>
+        <p class="text-muted" style="font-size:0.85rem;margin-bottom:12px">${t('settings.obs_description')}</p>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+          <div>
+            <label class="form-label">Printer</label>
+            <select id="obs-cfg-printer" class="form-input" onchange="window._obsUpdateUrl()">
+              <option value="">Alle / første printer</option>
+              ${printerOpts}
+            </select>
+          </div>
+          <div>
+            <label class="form-label">Bakgrunn</label>
+            <select id="obs-cfg-bg" class="form-input" onchange="window._obsUpdateUrl()">
+              <option value="transparent">Transparent (anbefalt)</option>
+              <option value="">Standard (svart)</option>
+              <option value="custom">Egendefinert farge</option>
+            </select>
+            <input type="color" id="obs-cfg-bg-color" class="form-input" value="#000000" style="display:none;margin-top:4px;height:32px;padding:2px" onchange="window._obsUpdateUrl()">
+          </div>
+        </div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px">
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer">
+            <input type="checkbox" id="obs-cfg-compact" onchange="window._obsUpdateUrl()"> Kompakt modus
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer">
+            <input type="checkbox" id="obs-cfg-hide-idle" onchange="window._obsUpdateUrl()"> Skjul ved idle
+          </label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer">
+            <input type="checkbox" id="obs-cfg-no-camera" onchange="window._obsUpdateUrl()"> Uten kamera
+          </label>
+        </div>
+
+        <label class="form-label">Generert URL</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input class="form-input" id="obs-url-display" readonly style="flex:1;font-size:0.8rem;font-family:monospace">
+          <button class="form-btn form-btn-sm form-btn-primary" data-ripple onclick="window.copyObsUrl()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+            ${t('camera.copy')}
+          </button>
+        </div>
+      </div>`;
+
+      // OBS Setup Guide card
+      h += `<div class="settings-card">
+        <div class="card-title">OBS Oppsett</div>
+        <ol style="font-size:0.85rem;line-height:1.8;padding-left:20px;color:var(--text-secondary)">
+          <li>Kopier URLen ovenfor</li>
+          <li>I OBS: <strong>Kilder → + → Nettleser</strong></li>
+          <li>Lim inn URL i feltet</li>
+          <li>Sett bredde: <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px">1920</code> høyde: <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px">1080</code></li>
+          <li>Huk av <strong>Shutdown source when not visible</strong></li>
+          <li>Klikk OK</li>
+        </ol>
+        <div style="margin-top:12px;padding:10px;border-radius:8px;background:color-mix(in srgb, var(--accent-cyan) 8%, transparent);border:1px solid color-mix(in srgb, var(--accent-cyan) 20%, transparent);font-size:0.8rem;color:var(--text-secondary)">
+          <strong style="color:var(--accent-cyan)">Tips:</strong> Bruk «Transparent» bakgrunn og legg overlayet over kamerakilden din i OBS for best resultat.
+        </div>
+      </div>`;
+
+      // Live Preview card
+      h += `<div class="settings-card">
+        <div class="card-title">Forhåndsvisning</div>
+        <div style="position:relative;border-radius:8px;overflow:hidden;background:#000;aspect-ratio:16/9">
+          <iframe id="obs-preview-frame" style="width:100%;height:100%;border:none;pointer-events:none" src=""></iframe>
+        </div>
+        <button class="form-btn form-btn-sm form-btn-secondary mt-sm" data-ripple onclick="window._obsRefreshPreview()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+          Oppdater forhåndsvisning
+        </button>
+      </div>`;
+
+      h += '</div>';
+      el.innerHTML = h;
+      window._obsUpdateUrl();
+      window._obsRefreshPreview();
+
+      // Show/hide custom color picker
+      document.getElementById('obs-cfg-bg')?.addEventListener('change', function() {
+        const colorPicker = document.getElementById('obs-cfg-bg-color');
+        if (colorPicker) colorPicker.style.display = this.value === 'custom' ? '' : 'none';
+      });
     }
   }
 
@@ -1744,13 +1844,46 @@
     }
   }
 
-  // ---- OBS URL Copy ----
+  // ---- OBS URL Builder ----
+  window._obsUpdateUrl = function() {
+    const base = location.origin + '/obs.html';
+    const params = new URLSearchParams();
+    const printer = document.getElementById('obs-cfg-printer')?.value;
+    const bgSel = document.getElementById('obs-cfg-bg')?.value;
+    const bgColor = document.getElementById('obs-cfg-bg-color')?.value;
+    const compact = document.getElementById('obs-cfg-compact')?.checked;
+    const hideIdle = document.getElementById('obs-cfg-hide-idle')?.checked;
+    const noCamera = document.getElementById('obs-cfg-no-camera')?.checked;
+
+    if (printer) params.set('printer', printer);
+    if (bgSel === 'transparent') params.set('bg', 'transparent');
+    else if (bgSel === 'custom' && bgColor) params.set('bg', bgColor);
+    if (compact) params.set('compact', '');
+    if (hideIdle) params.set('hide_idle', '');
+    if (noCamera) params.set('no_camera', '');
+
+    const qs = params.toString();
+    const url = qs ? base + '?' + qs : base;
+    const input = document.getElementById('obs-url-display');
+    if (input) input.value = url;
+  };
+
+  window._obsRefreshPreview = function() {
+    const input = document.getElementById('obs-url-display');
+    const frame = document.getElementById('obs-preview-frame');
+    if (input && frame) frame.src = input.value;
+  };
+
   window.copyObsUrl = function() {
     const input = document.getElementById('obs-url-display');
     if (!input) return;
     navigator.clipboard.writeText(input.value).then(() => {
-      const btn = input.nextElementSibling;
-      if (btn) { btn.textContent = t('camera.copied'); setTimeout(() => { btn.textContent = t('camera.copy'); }, 1500); }
+      const btn = input.parentElement.querySelector('button');
+      if (btn) {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> Kopiert!';
+        setTimeout(() => { btn.innerHTML = orig; }, 1500);
+      }
     });
   };
 

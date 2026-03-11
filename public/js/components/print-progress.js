@@ -21,10 +21,11 @@
   // Live countdown state
   let _remainingSeconds = 0;
   let _countdownInterval = null;
-  let _lastGcodeState = 'IDLE';
+  let _lastGcodeState = null;
   let _lastServerMins = -1;
   let _lastPercent = 0;
   let _completionFired = false;
+  let _initialized = false;
 
   function initProgressRing() {
     const svg = document.getElementById('progress-ring');
@@ -124,8 +125,8 @@
       percentText.textContent = `${percent}%`;
     }
 
-    // Completion celebration — glow burst on ring
-    if (state === 'FINISH' && prevState !== 'FINISH' && !_completionFired) {
+    // Completion celebration — glow burst on ring (only on real RUNNING→FINISH transition)
+    if (state === 'FINISH' && prevState === 'RUNNING' && _initialized && !_completionFired) {
       _completionFired = true;
       if (ring) {
         ring.classList.remove('ring-complete');
@@ -137,9 +138,10 @@
       }
     }
     if (state !== 'FINISH') _completionFired = false;
+    _initialized = true;
 
-    // Error shake on FAILED
-    if (state === 'FAILED' && prevState !== 'FAILED' && ring) {
+    // Error shake on FAILED (only on real transition, not on page load)
+    if (state === 'FAILED' && prevState === 'RUNNING' && ring) {
       ring.style.animation = 'none';
       void ring.offsetWidth;
       ring.style.animation = 'badgeDisconnect 0.5s ease';

@@ -97,8 +97,10 @@
     // Play notification sound for error toasts
     if (type === 'error' && typeof notificationSound !== 'undefined') notificationSound.error();
 
-    // Feed notification center
-    if (typeof addNotification === 'function') addNotification(message, '', type);
+    // Feed notification center — only for errors and warnings, not routine toasts
+    if ((type === 'error' || type === 'warning') && typeof addNotification === 'function') {
+      addNotification(message, '', type);
+    }
 
     const container = _ensureToastContainer();
 
