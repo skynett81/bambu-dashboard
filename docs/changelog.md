@@ -4,6 +4,45 @@ All notable changes to Bambu Dashboard.
 
 ---
 
+## v1.1.10 — Spool Visuals, Learning Center, Knowledge Base & UI Overhaul (2026-03-12)
+
+### Spool Visuals
+- All filament color indicators replaced with realistic spool SVG visuals across the entire dashboard
+- New global `miniSpool()` and `spoolIcon()` utilities for consistent spool rendering
+- Filament ring card redesigned with responsive spool visual, winding detail and container queries
+- Active filament, history, statistics, waste, forecast and filament tracker all use spool visuals
+
+### Knowledge Base & Learning Center
+- Knowledge base expanded to 169 items: 18 printers, 35 accessories, 62 filaments, 54 profiles
+- Added 8 new accessories (Liquid Glue, Hardened Steel Nozzle, AMS Lite Hub, Bambu Studio, OrcaSlicer, etc.)
+- Added 6 new filaments (PA Basic Nylon, HIPS, PLA Dual Color Silk, PLA Impact Tough, PETG Matte, ABS Matte)
+- Added 10 new printer profiles (H2S, H2C, X1C, X1E, P1P, A1 configurations)
+- Learning center expanded from 18 to 42 courses across all 5 categories
+- New courses covering slicer guides, troubleshooting, print techniques, filament care, maintenance and automation
+
+### UI Redesign
+- Complete CSS design system overhaul with refined transitions, grid layouts and glass morphism
+- Redesigned panels: protection, health, diagnostics, error analysis, queue, bedmesh, AMS
+- Improved filament tracker, statistics, telemetry, waste, calendar and multicolor panels
+- Redesigned login, setup and public status pages
+- Updated theme system with improved animations and variables
+
+### New Features
+- Achievements system expanded to 103 achievements with XP progression
+- Forecast panel rewritten with improved material predictions
+- OBS overlay settings page with URL builder, live preview and setup guide
+- History stats moved to dedicated analysis panel
+- Sidebar navigation consolidated with filament sub-tabs
+
+### Bug Fixes
+- Fixed false "Print complete" notification on page load when printer already in FINISH state
+- Only error/warning toasts now feed into notification center (no more routine message spam)
+- Fixed `#settings/system/energy` hash routing (energy tab was missing from route list)
+- Fixed AMS gram display accuracy and cost calculations
+- Removed unused dashboard-dnd and favorites components
+
+---
+
 ## v1.1.9 — Print Guard, History Sorting, AMS Redesign & 3D Progress Fix (2026-03-08)
 
 ### Print Guard / Protection System

@@ -249,7 +249,7 @@ docker compose pull && docker compose up -d
 
 - **[Features](docs/features.md)** — complete feature list
 - **[Architecture](docs/architecture.md)** — stack, modules, components, project structure, systemd, Pterodactyl
-- **[Changelog](docs/changelog.md)** — version history from v1.0.0 to v1.1.9
+- **[Changelog](docs/changelog.md)** — version history from v1.0.0 to v1.1.10
 - **[Installation Guide](INSTALL.md)** — detailed step-by-step install instructions
 
 ---
