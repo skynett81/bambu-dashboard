@@ -6493,10 +6493,9 @@ html[data-theme="dark"] .theme-toggle-btn:hover {
 }
 
 .fil-ams-color {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .fil-ams-info {
@@ -7947,7 +7946,8 @@ tr:hover .filament-edit-btn {
 }
 
 /* Inventory modal overlay */
-.inv-modal-overlay {
+.inv-modal-overlay,
+.inv-modal-backdrop {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0,0,0,0.45);
@@ -7957,6 +7957,7 @@ tr:hover .filament-edit-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: fadeIn 0.15s ease;
 }
 .inv-modal {
   background: var(--bg-card);
@@ -8981,7 +8982,7 @@ tr:hover .filament-edit-btn {
   display: flex; flex-direction: column;
 }
 .db-filament-card:hover { border-color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
-.db-card-color { height: 5px; width: 100%; flex-shrink: 0; position: relative; }
+.db-card-color { padding: 10px 0 4px; width: 100%; flex-shrink: 0; position: relative; display: flex; align-items: center; justify-content: center; }
 .db-card-body { padding: 8px 10px; flex: 1; }
 .db-card-brand { font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .db-card-name { font-weight: 600; font-size: 0.82rem; margin: 1px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

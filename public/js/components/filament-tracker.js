@@ -909,7 +909,7 @@
     ].filter(Boolean).join(' ');
 
     return `
-      <div class="filament-card inv-spool-card ${lowClass} ${archivedClass}" data-spool-id="${s.id}">
+      <div class="filament-card inv-spool-card ${lowClass} ${archivedClass}" data-spool-id="${s.id}" onclick="if(!event.target.closest('button,input,a,.fil-spool-actions'))window._showSpoolDetail(${s.id})" style="cursor:pointer">
         <div class="fil-spool-top">
           <div class="fil-spool-identity">
             <input type="checkbox" class="fil-bulk-check" onclick="toggleSpoolSelect(${s.id}, this)" ${_selectedSpools.has(s.id) ? 'checked' : ''} title="${t('filament.bulk_select')}">
@@ -1294,8 +1294,8 @@
       const color = hexToRgb(s.color_hex);
       const name = _cleanProfileName(s);
       const favIcon = s.is_favorite ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="#e53935" stroke="#e53935" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' : '';
-      h += `<div class="inv-list-row" data-spool-id="${s.id}">
-        <span class="filament-color-swatch" style="background:${color};width:14px;height:14px;border-radius:50%;flex-shrink:0"></span>
+      h += `<div class="inv-list-row" data-spool-id="${s.id}" onclick="if(!event.target.closest('button,input,a'))window._showSpoolDetail(${s.id})" style="cursor:pointer">
+        ${miniSpool(color, 14, pct)}
         <span class="inv-list-name">${favIcon} <strong>${esc(name)}</strong> <span class="text-muted">${esc(s.vendor_name || '')}</span></span>
         <span class="inv-list-material">${s.material || '--'}</span>
         <div class="inv-list-bar"><div class="filament-bar" style="width:80px;height:6px"><div class="filament-bar-fill" style="width:${pct}%;background:${(pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams) ? 'var(--accent-orange)' : color}"></div></div></div>
@@ -1324,8 +1324,8 @@
       const pct = s.initial_weight_g > 0 ? Math.round((s.remaining_weight_g / s.initial_weight_g) * 100) : 0;
       const color = hexToRgb(s.color_hex);
       const name = _cleanProfileName(s);
-      h += `<tr data-spool-id="${s.id}" class="${s.archived ? 'filament-card-archived' : ''}">
-        <td><span class="filament-color-swatch" style="background:${color};width:12px;height:12px;border-radius:50%;display:inline-block"></span></td>
+      h += `<tr data-spool-id="${s.id}" class="${s.archived ? 'filament-card-archived' : ''}" onclick="if(!event.target.closest('button,input,a'))window._showSpoolDetail(${s.id})" style="cursor:pointer">
+        <td>${miniSpool(color, 12, pct)}</td>
         <td><strong>${esc(name)}</strong>${s.is_favorite ? ' <span style="color:#e53935">♥</span>' : ''}</td>
         <td>${s.material || '--'}</td>
         <td>${esc(s.vendor_name || '--')}</td>
@@ -1392,7 +1392,7 @@
             // Find linked spool
             const linkedSpool = _spools.find(sp => sp.printer_id === id && sp.ams_unit === u && sp.ams_tray === i && !sp.archived);
             html += `<div class="fil-ams-tray ${isActive ? 'fil-ams-tray-active' : ''}">
-              <div class="fil-ams-color" style="background:${color};${light ? 'border:1px solid var(--border-color);' : ''}"></div>
+              <div class="fil-ams-color">${miniSpool(color, 18, remain)}</div>
               <div class="fil-ams-info">
                 <span class="fil-ams-type">${tray.tray_type}${brand ? ' · ' + brand : ''}</span>
                 ${linkedSpool ? `<span class="fil-ams-linked text-muted" style="font-size:0.65rem">🔗 ${esc(linkedSpool.profile_name || '')} (${Math.round(linkedSpool.remaining_weight_g)}g)</span>` : ''}
@@ -1650,7 +1650,7 @@
         const src = entry.source === 'auto' ? t('filament.usage_auto') : t('filament.usage_manual');
         html += `<tr>
           <td>${date}</td>
-          <td><span class="filament-color-swatch" style="background:${hexToRgb(entry.color_hex)};width:10px;height:10px;display:inline-block;border-radius:50%;margin-right:4px"></span>${esc(entry.profile_name || '--')} <span class="text-muted">${esc(entry.vendor_name || '')}</span></td>
+          <td>${miniSpool(hexToRgb(entry.color_hex), 10)} ${esc(entry.profile_name || '--')} <span class="text-muted">${esc(entry.vendor_name || '')}</span></td>
           <td>${Math.round(entry.used_weight_g * 10) / 10}g</td>
           <td><span class="inv-source-badge inv-source-${entry.source}">${src}</span></td>
         </tr>`;
@@ -2061,7 +2061,7 @@
           <div class="fil-spool-top">
             <div class="fil-spool-identity">
               ${canWrite ? `<input type="checkbox" class="fil-bulk-check fil-profile-check" ${_selectedProfiles.has(p.id) ? 'checked' : ''} onclick="window.toggleProfileSelect(${p.id}, this)">` : ''}
-              <span class="filament-color-swatch" style="background:${color}"></span>
+              ${miniSpool(color, 16)}
               <div>
                 <strong>${esc(p.name)}</strong>
                 <span class="text-muted" style="font-size:0.75rem">${esc(p.vendor_name || '--')}</span>
@@ -2178,7 +2178,7 @@
       for (const s of locSpools) {
         const color = hexToRgb(s.color_hex);
         h += `<div class="inv-dnd-spool" draggable="true" data-spool-id="${s.id}" ondragstart="event.dataTransfer.setData('text/plain','${s.id}')">
-          <span class="filament-color-swatch" style="background:${color};width:10px;height:10px"></span>
+          ${miniSpool(color, 10)}
           <span>${esc(s.profile_name || s.material || '--')} · ${Math.round(s.remaining_weight_g)}g</span>
         </div>`;
       }
@@ -3158,7 +3158,7 @@
     let listHtml = '';
     for (const r of results) {
       listHtml += `<div class="inv-similar-item">
-        <span class="filament-color-swatch" style="background:${hexToRgb(r.color_hex)}"></span>
+        ${miniSpool(hexToRgb(r.color_hex), 14)}
         <span>${esc(r.name)} · ${esc(r.material)}</span>
         <span class="text-muted">ΔE ${r.delta_e.toFixed(1)}</span>
       </div>`;
@@ -3242,7 +3242,7 @@
       for (const f of filaments) {
         const color = f.color_hex ? hexToRgb(f.color_hex) : '#888';
         h += `<div class="inv-spoolmandb-fil">
-          <span class="filament-color-swatch" style="background:${color};width:10px;height:10px"></span>
+          ${miniSpool(color, 10)}
           <span>${esc(f.name || '')} · ${esc(f.material || '')}</span>
           <button class="form-btn form-btn-sm" data-ripple onclick='importSpoolmanDbFilament(${JSON.stringify(f).replace(/'/g,"&#39;")})'>${t('filament.import')}</button>
         </div>`;
@@ -4458,7 +4458,7 @@
       for (const s of spools) {
         const color = hexToRgb(s.color_hex);
         h += `<div class="fil-checkout-item">
-          <span class="filament-color-swatch" style="background:${color}"></span>
+          ${miniSpool(color, 16)}
           <div class="fil-checkout-info">
             <strong>${esc(s.profile_name || s.material || '--')}</strong>
             <span class="text-muted" style="font-size:0.75rem">${s.checked_out_by ? t('filament.checked_out_by') + ': ' + esc(s.checked_out_by) : ''} ${s.checked_out_from ? '· ' + esc(s.checked_out_from) : ''}</span>
@@ -4753,7 +4753,7 @@
       for (const m of mappings) {
         const color = m.color_hex ? hexToRgb(m.color_hex) : '#888';
         h += `<div class="fil-nfc-item">
-          <span class="filament-color-swatch" style="background:${color}"></span>
+          ${miniSpool(color, 16)}
           <div class="fil-nfc-info">
             <strong>${esc(m.spool_name || t('filament.nfc_unlinked'))}</strong>
             <span class="text-muted" style="font-size:0.75rem">UID: ${esc(m.tag_uid)} · ${esc(m.standard || 'openspool')}</span>
@@ -6053,7 +6053,7 @@
         } catch { /* ignore */ }
       }
       h += `<div class="db-filament-card" onclick="window._dbShowDetail(${f.id})">
-        <div class="db-card-color" style="${colorStyle}">${isOwned ? `<span style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:#4ade80;font-size:0.6rem;padding:1px 5px;border-radius:8px">✓ ${t('filament.owned')}</span>` : ''}</div>
+        <div class="db-card-color" style="display:flex;align-items:center;justify-content:center;position:relative">${typeof spoolIcon === 'function' ? spoolIcon(color, 52) : `<div style="width:100%;height:100%;${colorStyle}"></div>`}${isOwned ? `<span style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,0.6);color:#4ade80;font-size:0.6rem;padding:1px 5px;border-radius:8px">✓ ${t('filament.owned')}</span>` : ''}</div>
         <div class="db-card-body">
           <div class="db-card-brand">${esc(f.manufacturer || '')}${ratingAvg ? ` <span style="color:#fbbf24;font-size:0.7rem">${stars} (${ratingAvg})</span>` : ''}</div>
           <div class="db-card-name">${esc(f.name || f.material)}</div>
@@ -6134,14 +6134,14 @@
     );
 
     let html = `<div class="inv-modal-backdrop" onclick="if(event.target===this)this.remove()">
-      <div class="inv-modal" style="max-width:520px">
+      <div class="inv-modal" style="max-width:520px;max-height:90vh;overflow-y:auto">
         <div class="inv-modal-header">
           <span>${esc(f.manufacturer || '')} — ${esc(f.name || f.material)}</span>
           <button class="inv-modal-close" onclick="this.closest('.inv-modal-backdrop').remove()">&times;</button>
         </div>
         <div class="inv-modal-body">
           <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px">
-            <div style="width:48px;height:48px;border-radius:8px;background:${color};border:2px solid var(--border-color);flex-shrink:0"></div>
+            <div style="flex-shrink:0">${typeof spoolIcon === 'function' ? spoolIcon(color, 48) : `<div style="width:48px;height:48px;border-radius:8px;background:${color};border:2px solid var(--border-color)"></div>`}</div>
             <div>
               <div style="font-weight:600;font-size:1rem">${esc(f.name || f.material)}</div>
               <div class="text-muted text-sm">${esc(f.manufacturer || '')} &middot; ${esc(f.material)}${f.material_type ? ' ' + esc(f.material_type) : ''}</div>
