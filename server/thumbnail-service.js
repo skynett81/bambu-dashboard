@@ -657,9 +657,11 @@ export async function getThumbnail(printerId, hub) {
   // Real printer: fetch via FTPS
   const printers = getPrinters();
   const printer = printers.find(p => p.id === printerId);
-  if (!printer || !printer.ip || !printer.access_code) return null;
+  if (!printer || !printer.ip) return null;
+  const thumbAccessCode = printer.access_code || printer.accessCode;
+  if (!thumbAccessCode) return null;
 
-  const png = await fetchThumbnailFromPrinter(printer.ip, printer.access_code, gcodeFile);
+  const png = await fetchThumbnailFromPrinter(printer.ip, thumbAccessCode, gcodeFile);
   if (!png) return null;
 
   const entry = { subtask, buffer: png, contentType: 'image/png' };
@@ -699,9 +701,10 @@ export async function getModel(printerId, hub) {
   // Real printer: fetch 3MF via FTPS and parse model XML
   const printers = getPrinters();
   const printer = printers.find(p => p.id === printerId);
-  if (!printer || !printer.ip || !printer.access_code) return null;
-
-  const zipBuf = await download3mf(printer.ip, printer.access_code, gcodeFile);
+  if (!printer || !printer.ip) return null;
+  const accessCode = printer.access_code || printer.accessCode;
+  if (!accessCode) return null;
+  const zipBuf = await download3mf(printer.ip, accessCode, gcodeFile);
   if (!zipBuf) return null;
 
   const modelXml = extractFromZip(zipBuf, MODEL_PATHS);
@@ -728,18 +731,55 @@ async function download3mf(ip, accessCode, gcodeFile) {
   const client = new ftp.Client();
   client.ftp.verbose = false;
 
+  // Try multiple paths: original, /cache/, /sdcard/
+  const basename = threeMfPath.split('/').pop();
+  const pathsToTry = [
+    threeMfPath,
+    `/cache/${basename}`,
+    `/sdcard/${basename}`,
+    `/data/Metadata/${basename}`,
+  ];
+
   try {
     await client.access({
       host: ip, port: 990, user: 'bblp', password: accessCode,
       secure: 'implicit', secureOptions: { rejectUnauthorized: false }
     });
 
-    const chunks = [];
-    const { Writable } = await import('node:stream');
-    const writable = new Writable({ write(chunk, _enc, cb) { chunks.push(chunk); cb(); } });
-    await client.downloadTo(writable, threeMfPath);
-    return Buffer.concat(chunks);
-  } catch {
+    for (const path of pathsToTry) {
+      try {
+        const chunks = [];
+        const { Writable } = await import('node:stream');
+        const writable = new Writable({ write(chunk, _enc, cb) { chunks.push(chunk); cb(); } });
+        await client.downloadTo(writable, path);
+        const buf = Buffer.concat(chunks);
+        if (buf.length > 0) {
+          log.info(`download3mf: OK from ${path} (${(buf.length / 1024 / 1024).toFixed(1)}MB)`);
+          return buf;
+        }
+      } catch {
+        log.info(`download3mf: failed ${path}`);
+      }
+    }
+
+    // Try listing directories to find the 3MF
+    try {
+      const cacheList = await client.list('/cache/');
+      const match = cacheList.find(f => f.name.endsWith('.3mf'));
+      if (match) {
+        log.info(`download3mf: found in /cache/: ${match.name}`);
+        const chunks = [];
+        const { Writable } = await import('node:stream');
+        const writable = new Writable({ write(chunk, _enc, cb) { chunks.push(chunk); cb(); } });
+        await client.downloadTo(writable, `/cache/${match.name}`);
+        return Buffer.concat(chunks);
+      }
+    } catch { /* ignore listing errors */ }
+
+    log.info(`download3mf: no 3MF found for ${gcodeFile}`);
+    return null;
+  } catch (err) {
+    log.info(`download3mf: FTPS connection failed: ${err.message}`);
     return null;
   } finally {
     client.close();

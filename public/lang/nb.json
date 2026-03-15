@@ -1329,6 +1329,8 @@
     "busiest_days": "Travleste dager",
     "no_prints": "Ingen utskrifter",
     "no_data": "Ingen data tilgjengelig",
+    "avg_per_day": "Snitt/dag",
+    "success_rate": "Suksessrate",
     "less": "Mindre",
     "more": "Mer"
   },

@@ -3659,8 +3659,9 @@
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
-  padding: 14px 16px;
+  padding: 14px 12px;
   text-align: center;
+  overflow: hidden;
   transition: all 0.25s var(--ease-out);
 }
 
@@ -3683,6 +3684,9 @@
   font-size: 1.3rem;
   font-weight: 800;
   margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Heatmap */

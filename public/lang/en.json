@@ -1329,6 +1329,8 @@
     "busiest_days": "Busiest days",
     "no_prints": "No prints",
     "no_data": "No data available",
+    "avg_per_day": "Avg/day",
+    "success_rate": "Success rate",
     "less": "Less",
     "more": "More"
   },
