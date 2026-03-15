@@ -245,12 +245,11 @@
         const linkedSpool = _getLinkedSpool(printerId, _selectedUnit, i);
 
         let remain;
-        if (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g > 0) {
-          remain = Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100);
-        } else if (tray.remain >= 0) {
+        // Prioritet: 1) Printer RFID/sensor, 2) linked spool beregning
+        if (tray.remain >= 0 && tray.remain <= 100) {
           remain = Math.round(tray.remain);
-        } else if (linkedSpool && linkedSpool.initial_weight_g > 0) {
-          remain = Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100);
+        } else if (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g >= 0) {
+          remain = Math.max(0, Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100));
         } else {
           remain = null;
         }
@@ -269,7 +268,10 @@
 
         // Calculate remaining grams for display
         let displayGrams = null;
-        if (linkedSpool && linkedSpool.remaining_weight_g > 0) {
+        if (remain !== null) {
+          const tw = tray.tray_weight ? parseFloat(tray.tray_weight) : (linkedSpool ? linkedSpool.initial_weight_g : null);
+          if (tw > 0) displayGrams = Math.round(tw * remain / 100);
+        } else if (linkedSpool && linkedSpool.remaining_weight_g > 0) {
           displayGrams = linkedSpool.remaining_weight_g;
         } else if (remain !== null) {
           const tw = tray.tray_weight ? parseFloat(tray.tray_weight) : null;

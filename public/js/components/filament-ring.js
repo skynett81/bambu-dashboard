@@ -53,12 +53,10 @@
     const printerId = window.printerState?.getActivePrinterId?.() || null;
     const linkedSpool = window.getLinkedSpool?.(printerId, amsUnitIdx, amsTrayIdx);
     let remain;
-    if (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g > 0) {
-      remain = Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100);
-    } else if (tray.remain >= 0) {
+    if (tray.remain >= 0 && tray.remain <= 100) {
       remain = Math.round(tray.remain);
-    } else if (linkedSpool && linkedSpool.initial_weight_g > 0) {
-      remain = Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100);
+    } else if (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g >= 0) {
+      remain = Math.max(0, Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100));
     } else {
       return 0;
     }

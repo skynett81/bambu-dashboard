@@ -2,6 +2,14 @@
 (function() {
 
   // ═══ Constants & Helpers ═══
+  // Accurate spool percentage: uses max(initial, remaining+used) as denominator
+  function spoolPct(s) {
+    if (!s) return 0;
+    const init = s.initial_weight_g || 0;
+    const rem = s.remaining_weight_g || 0;
+    return init > 0 ? Math.max(0, Math.round((rem / init) * 100)) : 0;
+  }
+
   const FILAMENT_TYPES = {
     'Standard': ['PLA', 'PLA+', 'PLA Matte', 'PLA Silk', 'PLA Marble', 'PLA Metal', 'PLA Glow', 'PLA Galaxy', 'PLA Sparkle', 'PLA Wood'],
     'Engineering': ['PETG', 'PETG-CF', 'ABS', 'ASA', 'PC', 'PA', 'PA-CF', 'PA-GF', 'PA6-CF', 'PA6-GF', 'PAHT-CF', 'PET-CF', 'PPA-CF', 'PPA-GF'],
@@ -313,7 +321,7 @@
       for (const s of active) {
         totalRemaining += s.remaining_weight_g || 0;
         if (s.cost) totalValue += s.cost;
-        const pct = s.initial_weight_g > 0 ? (s.remaining_weight_g / s.initial_weight_g) * 100 : 0;
+        const pct = spoolPct(s);
         if ((pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams)) lowStockCount++;
       }
       const lowColor = lowStockCount > 0 ? '#f0883e' : '#00e676';
@@ -328,7 +336,7 @@
     'low-stock-alert': (spools) => {
       const low = spools.filter(s => {
         if (s.archived) return false;
-        const pct = s.initial_weight_g > 0 ? (s.remaining_weight_g / s.initial_weight_g) * 100 : 100;
+        const pct = spoolPct(s) || 100;
         return (pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams);
       });
       if (low.length === 0) return '';
@@ -629,7 +637,7 @@
       if (active.length === 0) return '';
       let full = 0, half = 0, low = 0, empty = 0, totalPct = 0;
       for (const s of active) {
-        const pct = s.initial_weight_g > 0 ? (s.remaining_weight_g / s.initial_weight_g) * 100 : 0;
+        const pct = spoolPct(s);
         totalPct += pct;
         if (pct > 75) full++;
         else if (pct > 40) half++;
@@ -863,14 +871,14 @@
 
   function renderColorSwatch(s, size) {
     const color = hexToRgb(s.color_hex);
-    const pct = s.initial_weight_g > 0 ? Math.round((s.remaining_weight_g / s.initial_weight_g) * 100) : 80;
+    const pct = spoolPct(s) || 80;
     if (typeof miniSpool === 'function') return miniSpool(color, size || 16, pct);
     const bg = _buildColorStyle(s.color_hex, s.multi_color_hexes, s.multi_color_direction);
     return `<span class="filament-color-swatch" style="background:${bg}"></span>`;
   }
 
   function renderSpoolCard(s) {
-    const pct = s.initial_weight_g > 0 ? Math.round((s.remaining_weight_g / s.initial_weight_g) * 100) : 0;
+    const pct = spoolPct(s);
     const color = hexToRgb(s.color_hex);
     const isLow = (pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams);
     const isEmpty = pct === 0 && s.used_weight_g > 0;
@@ -1031,7 +1039,7 @@
   }
 
   function _renderSpoolVisualCard(s) {
-    const pct = s.initial_weight_g > 0 ? Math.round((s.remaining_weight_g / s.initial_weight_g) * 100) : 0;
+    const pct = spoolPct(s);
     const cleanName = _cleanProfileName(s);
     const vendorName = s.vendor_name || '--';
     const remaining = `${Math.round(s.remaining_weight_g)}g / ${Math.round(s.initial_weight_g)}g`;
@@ -1061,7 +1069,7 @@
   window._showSpoolDetail = async function(id) {
     const s = _spools.find(sp => sp.id === id);
     if (!s) return;
-    const pct = s.initial_weight_g > 0 ? Math.round((s.remaining_weight_g / s.initial_weight_g) * 100) : 0;
+    const pct = spoolPct(s);
     const colorStyle = _buildColorStyle(s.color_hex, s.multi_color_hexes, s.multi_color_direction);
     const isLight = isLightColor(s.color_hex);
     const textColor = isLight ? '#333' : '#fff';
@@ -1290,7 +1298,7 @@
   function _renderSpoolList(spools) {
     let h = '<div class="inv-list-view">';
     for (const s of spools) {
-      const pct = s.initial_weight_g > 0 ? Math.round((s.remaining_weight_g / s.initial_weight_g) * 100) : 0;
+      const pct = spoolPct(s);
       const color = hexToRgb(s.color_hex);
       const name = _cleanProfileName(s);
       const favIcon = s.is_favorite ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="#e53935" stroke="#e53935" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' : '';
@@ -1321,7 +1329,7 @@
         <th>${t('filament.location')}</th><th>${t('filament.price')}</th><th>${t('common.printer')}</th><th></th>
       </tr></thead><tbody>`;
     for (const s of spools) {
-      const pct = s.initial_weight_g > 0 ? Math.round((s.remaining_weight_g / s.initial_weight_g) * 100) : 0;
+      const pct = spoolPct(s);
       const color = hexToRgb(s.color_hex);
       const name = _cleanProfileName(s);
       h += `<tr data-spool-id="${s.id}" class="${s.archived ? 'filament-card-archived' : ''}" onclick="if(!event.target.closest('button,input,a'))window._showSpoolDetail(${s.id})" style="cursor:pointer">
@@ -4685,7 +4693,7 @@
         h += `<div class="fil-color-group"><div class="fil-color-group-title">${esc(mat)}</div><div class="fil-color-swatches">`;
         for (const s of grouped[mat]) {
           const c = hexToRgb(s.color_hex);
-          const pct = s.initial_weight_g > 0 ? Math.round((s.remaining_weight_g / s.initial_weight_g) * 100) : 80;
+          const pct = spoolPct(s) || 80;
           h += `<div class="fil-color-swatch-card" title="${esc(s.vendor_name || '')} ${esc(s.name || '')}\n${esc(s.color_name || '')}">
             ${typeof spoolIcon === 'function' ? spoolIcon(c, 48, pct) : `<div class="fil-color-swatch-big" style="background:${c}"></div>`}
             <div class="fil-color-swatch-name">${esc(s.color_name || s.name || '')}</div>
