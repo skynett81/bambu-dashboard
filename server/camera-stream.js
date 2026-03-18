@@ -38,6 +38,8 @@ export class CameraStream {
     this._authDeniedTimer = null;
     this._watchdogTimer = null;
     this._lastFrameTime = 0;
+    this._lastFrame = null; // Last JPEG frame buffer for snapshot/MJPEG
+    this._mjpegClients = new Set(); // HTTP MJPEG stream clients
   }
 
   start() {
@@ -305,13 +307,62 @@ export class CameraStream {
   }
 
   /**
-   * Send JPEG frame to all WebSocket clients.
+   * Send JPEG frame to all WebSocket clients + MJPEG HTTP clients.
+   * Also stores last frame for snapshot endpoint.
    */
   _broadcastJpeg(frame) {
+    this._lastFrame = frame;
+
+    // WebSocket clients
     for (const ws of this.clients) {
       if (ws.readyState === 1) {
         ws.send(frame, { binary: true });
       }
+    }
+
+    // MJPEG HTTP clients (multipart/x-mixed-replace)
+    for (const res of this._mjpegClients) {
+      try {
+        if (!res.writableEnded) {
+          res.write(`--mjpegboundary\r\nContent-Type: image/jpeg\r\nContent-Length: ${frame.length}\r\n\r\n`);
+          res.write(frame);
+          res.write('\r\n');
+        } else {
+          this._mjpegClients.delete(res);
+        }
+      } catch {
+        this._mjpegClients.delete(res);
+      }
+    }
+  }
+
+  /** Get last captured JPEG frame (for snapshot endpoint). */
+  getLastFrame() {
+    return this._lastFrame;
+  }
+
+  /** Add a MJPEG HTTP stream client. */
+  addMjpegClient(res) {
+    res.writeHead(200, {
+      'Content-Type': 'multipart/x-mixed-replace; boundary=mjpegboundary',
+      'Cache-Control': 'no-cache, no-store',
+      'Connection': 'close',
+    });
+
+    this._mjpegClients.add(res);
+
+    // Send last frame immediately if available
+    if (this._lastFrame) {
+      res.write(`--mjpegboundary\r\nContent-Type: image/jpeg\r\nContent-Length: ${this._lastFrame.length}\r\n\r\n`);
+      res.write(this._lastFrame);
+      res.write('\r\n');
+    }
+
+    res.on('close', () => this._mjpegClients.delete(res));
+
+    // Start stream if not running
+    if (!this.ffmpeg && !this.tlsSocket && !this._authDenied) {
+      this._startStream();
     }
   }
 

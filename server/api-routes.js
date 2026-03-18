@@ -1462,6 +1462,33 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ---- Camera: MJPEG stream + snapshot ----
+
+    const mjpegMatch = path.match(/^\/api\/printers\/([^/]+)\/stream\.mjpeg$/);
+    if (mjpegMatch && method === 'GET') {
+      const pid = decodeURIComponent(mjpegMatch[1]);
+      const entry = _printerManager?.printers?.get(pid);
+      if (!entry?.camera) return sendJson(res, { error: 'Kamera ikke tilgjengelig' }, 404);
+      entry.camera.addMjpegClient(res);
+      return;
+    }
+
+    const frameMatch = path.match(/^\/api\/printers\/([^/]+)\/frame\.jpeg$/);
+    if (frameMatch && method === 'GET') {
+      const pid = decodeURIComponent(frameMatch[1]);
+      const entry = _printerManager?.printers?.get(pid);
+      if (!entry?.camera) return sendJson(res, { error: 'Kamera ikke tilgjengelig' }, 404);
+      const frame = entry.camera.getLastFrame();
+      if (!frame) return sendJson(res, { error: 'Ingen frame tilgjengelig ennå' }, 503);
+      res.writeHead(200, {
+        'Content-Type': 'image/jpeg',
+        'Content-Length': frame.length,
+        'Cache-Control': 'no-cache, no-store',
+      });
+      res.end(frame);
+      return;
+    }
+
     if (method === 'GET' && path === '/api/printers') {
       const printers = getPrinters().map(p => ({
         ...p,
@@ -7361,6 +7388,8 @@ function _getApiDocs() {
       { method: 'GET', path: '/api/printers/:id/files', tag: 'Printers', summary: 'List files on printer SD', permission: 'view' },
       { method: 'POST', path: '/api/printers/:id/files/print', tag: 'Printers', summary: 'Start printing a file', permission: 'print' },
       { method: 'GET', path: '/api/printers/:id/camera', tag: 'Printers', summary: 'Get camera snapshot', permission: 'view' },
+      { method: 'GET', path: '/api/printers/:id/stream.mjpeg', tag: 'Camera', summary: 'MJPEG live stream (multipart/x-mixed-replace)', permission: 'view' },
+      { method: 'GET', path: '/api/printers/:id/frame.jpeg', tag: 'Camera', summary: 'Siste JPEG-frame fra kamera', permission: 'view' },
       // History & Stats
       { method: 'GET', path: '/api/history', tag: 'History', summary: 'Get print history (paginated)', permission: 'view' },
       { method: 'GET', path: '/api/history/export', tag: 'History', summary: 'Export history as CSV', permission: 'view' },
