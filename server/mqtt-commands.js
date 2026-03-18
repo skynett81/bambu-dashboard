@@ -104,6 +104,37 @@ export function buildFormatStorageCommand() {
   return { print: { sequence_id: nextSeq(), command: 'gcode_line', param: 'M662' } };
 }
 
+/** Start AMS tørking — sender tørkeparametre via MQTT. */
+export function buildAmsDryCommand(amsId, tempC, durationMin) {
+  return {
+    print: {
+      sequence_id: nextSeq(),
+      command: 'ams_control',
+      param: 'start',
+      ams_id: parseInt(amsId) || 0,
+      dry_temp: parseInt(tempC) || 55,
+      dry_duration: parseInt(durationMin) || 240,
+    }
+  };
+}
+
+/** Stopp AMS tørking. */
+export function buildAmsStopDryCommand(amsId) {
+  return {
+    print: {
+      sequence_id: nextSeq(),
+      command: 'ams_control',
+      param: 'stop',
+      ams_id: parseInt(amsId) || 0,
+    }
+  };
+}
+
+/** Hent MQTT debug-melding (pushall for full state dump). */
+export function buildPushAllCommand() {
+  return { pushing: { sequence_id: nextSeq(), command: 'pushall' } };
+}
+
 export function buildCommandFromClientMessage(msg) {
   switch (msg.action) {
     case 'pause': return buildPauseCommand();
@@ -115,6 +146,9 @@ export function buildCommandFromClientMessage(msg) {
     case 'skip_objects': return msg.obj_list ? buildSkipObjectsCommand(msg.obj_list) : null;
     case 'print_file': return msg.filename ? buildPrintCommand(msg.filename, msg.plate_id) : null;
     case 'format_storage': return buildFormatStorageCommand();
+    case 'ams_dry': return buildAmsDryCommand(msg.ams_id, msg.temp, msg.duration);
+    case 'ams_stop_dry': return buildAmsStopDryCommand(msg.ams_id);
+    case 'pushall': return buildPushAllCommand();
     default: return null;
   }
 }

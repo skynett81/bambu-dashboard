@@ -50,8 +50,15 @@ export class WebSocketHub {
             ws._subscribedLogs = false;
             return;
           }
+          if (msg.type === 'subscribe_mqtt_debug') {
+            ws._subscribedMqttDebug = true;
+            return;
+          }
+          if (msg.type === 'unsubscribe_mqtt_debug') {
+            ws._subscribedMqttDebug = false;
+            return;
+          }
           if (msg.type === 'command' && this.onCommand) {
-            // Check permission for commands (requires 'controls' permission)
             if (!hasPermission(ws._user?.permissions, 'controls')) {
               ws.send(JSON.stringify({ type: 'error', data: { error: 'Forbidden', message: 'Permission denied: controls' } }));
               return;
@@ -85,6 +92,18 @@ export class WebSocketHub {
         }
       }
     });
+  }
+
+  broadcastMqttDebug(printerId, direction, topic, payload) {
+    const msg = JSON.stringify({
+      type: 'mqtt_debug',
+      data: { printer_id: printerId, direction, topic, payload, ts: new Date().toISOString() }
+    });
+    for (const ws of this.clients) {
+      if (ws.readyState === 1 && ws._subscribedMqttDebug) {
+        ws.send(msg);
+      }
+    }
   }
 
   setPrinterMeta(printerId, meta) {

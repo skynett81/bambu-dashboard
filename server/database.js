@@ -305,6 +305,7 @@ function _runMigrations() {
     { version: 99, up: _mig099_spoolease_features },
     { version: 100, up: _mig100_bambu_rfid_library },
     { version: 101, up: _mig101_print_stages },
+    { version: 102, up: _mig102_bambuddy_features },
   ];
 
   for (const m of migrations) {
@@ -10230,6 +10231,60 @@ export function getBambuColorsByMaterial(materialName) {
 }
 
 function _mig101_print_stages() {
-  // Add print_stage column to telemetry for historical stage tracking
   try { db.exec('ALTER TABLE telemetry ADD COLUMN print_stage INTEGER'); } catch {}
+}
+
+function _mig102_bambuddy_features() {
+  // 1. Link screenshots to print_history
+  try { db.exec('ALTER TABLE screenshots ADD COLUMN print_history_id INTEGER REFERENCES print_history(id) ON DELETE SET NULL'); } catch {}
+  try { db.exec('CREATE INDEX IF NOT EXISTS idx_screenshots_print ON screenshots(print_history_id)'); } catch {}
+
+  // 2. Firmware update tracking
+  try { db.exec('ALTER TABLE firmware_history ADD COLUMN latest_available TEXT'); } catch {}
+  try { db.exec('ALTER TABLE firmware_history ADD COLUMN update_available INTEGER DEFAULT 0'); } catch {}
+
+  // 3. MQTT debug log table (ring buffer, max 500 entries)
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS mqtt_debug_log (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      printer_id TEXT NOT NULL,
+      direction TEXT DEFAULT 'in',
+      topic TEXT,
+      payload TEXT,
+      timestamp TEXT DEFAULT (datetime('now'))
+    );
+    CREATE INDEX IF NOT EXISTS idx_mdl_printer ON mqtt_debug_log(printer_id);
+    CREATE INDEX IF NOT EXISTS idx_mdl_time ON mqtt_debug_log(timestamp);
+  `);
+}
+
+// ── BamBuddy features: functions ──
+
+export function linkScreenshotToPrint(screenshotId, printHistoryId) {
+  db.prepare('UPDATE screenshots SET print_history_id = ? WHERE id = ?').run(printHistoryId, screenshotId);
+}
+
+export function getScreenshotsForPrint(printHistoryId) {
+  return db.prepare('SELECT id, printer_id, filename, print_file, thumbnail_data, notes, captured_at FROM screenshots WHERE print_history_id = ? ORDER BY captured_at DESC')
+    .all(printHistoryId);
+}
+
+export function addMqttDebugEntry(printerId, direction, topic, payload) {
+  db.prepare('INSERT INTO mqtt_debug_log (printer_id, direction, topic, payload) VALUES (?, ?, ?, ?)').run(printerId, direction, topic, payload);
+  // Ring buffer: keep max 500 entries per printer
+  db.prepare('DELETE FROM mqtt_debug_log WHERE printer_id = ? AND id NOT IN (SELECT id FROM mqtt_debug_log WHERE printer_id = ? ORDER BY id DESC LIMIT 500)').run(printerId, printerId);
+}
+
+export function getMqttDebugLog(printerId, limit = 100) {
+  return db.prepare('SELECT * FROM mqtt_debug_log WHERE printer_id = ? ORDER BY id DESC LIMIT ?').all(printerId, limit);
+}
+
+export function clearMqttDebugLog(printerId) {
+  db.prepare('DELETE FROM mqtt_debug_log WHERE printer_id = ?').run(printerId);
+}
+
+export function checkFirmwareUpdate(printerId) {
+  const modules = db.prepare(`SELECT module, MAX(sw_ver) as current_ver, latest_available, update_available
+    FROM firmware_history WHERE printer_id = ? GROUP BY module ORDER BY module`).all(printerId);
+  return modules;
 }

@@ -55,6 +55,10 @@ export class BambuMqttClient {
       try {
         const msg = JSON.parse(payload.toString());
         this._handleMessage(msg);
+        // MQTT debug: broadcast raw message to debug subscribers
+        if (this.hub?.broadcastMqttDebug) {
+          this.hub.broadcastMqttDebug(this.serial, 'in', topic, payload.toString().substring(0, 8000));
+        }
       } catch (e) {
         // Binary or non-JSON message, ignore
       }
