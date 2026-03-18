@@ -869,7 +869,7 @@ export async function handleApiRequest(req, res) {
       if (!_bambuCloud || !_bambuCloud.isAuthenticated()) return sendJson(res, { error: 'Ikke autentisert' }, 401);
       const params = new URL(req.url, 'http://localhost').searchParams;
       const filename = params.get('filename');
-      if (!filename) return sendJson(res, { error: 'Filnavn paakrevd (?filename=)' }, 400);
+      if (!filename) return sendJson(res, { error: 'Filnavn påkrevd (?filename=)' }, 400);
       // Collect raw body
       const chunks = [];
       req.on('data', c => chunks.push(c));
@@ -890,7 +890,7 @@ export async function handleApiRequest(req, res) {
       if (!_bambuCloud || !_bambuCloud.isAuthenticated()) return sendJson(res, { error: 'Ikke autentisert' }, 401);
       const params = new URL(req.url, 'http://localhost').searchParams;
       const filename = params.get('filename');
-      if (!filename) return sendJson(res, { error: 'Filnavn paakrevd' }, 400);
+      if (!filename) return sendJson(res, { error: 'Filnavn påkrevd' }, 400);
       try {
         const data = await _bambuCloud.getUploadUrl(filename);
         return sendJson(res, data);
@@ -903,7 +903,7 @@ export async function handleApiRequest(req, res) {
       if (!_bambuCloud || !_bambuCloud.isAuthenticated()) return sendJson(res, { error: 'Ikke autentisert' }, 401);
       return readBody(req, async (body) => {
         const { device_id, filename, url, settings } = body;
-        if (!device_id || !filename) return sendJson(res, { error: 'device_id og filename paakrevd' }, 400);
+        if (!device_id || !filename) return sendJson(res, { error: 'device_id og filename påkrevd' }, 400);
         try {
           const data = await _bambuCloud.startCloudPrint(device_id, filename, url, settings || {});
           sendJson(res, data);
@@ -931,7 +931,7 @@ export async function handleApiRequest(req, res) {
       if (!_bambuCloud || !_bambuCloud.isAuthenticated()) return sendJson(res, { error: 'Ikke autentisert' }, 401);
       return readBody(req, async (body) => {
         const { device_id, access_code } = body;
-        if (!device_id || !access_code) return sendJson(res, { error: 'device_id og access_code paakrevd' }, 400);
+        if (!device_id || !access_code) return sendJson(res, { error: 'device_id og access_code påkrevd' }, 400);
         try {
           const data = await _bambuCloud.bindDevice(device_id, access_code);
           sendJson(res, data);
@@ -945,7 +945,7 @@ export async function handleApiRequest(req, res) {
       if (!_bambuCloud || !_bambuCloud.isAuthenticated()) return sendJson(res, { error: 'Ikke autentisert' }, 401);
       const params = new URL(req.url, 'http://localhost').searchParams;
       const deviceId = params.get('device_id');
-      if (!deviceId) return sendJson(res, { error: 'device_id paakrevd' }, 400);
+      if (!deviceId) return sendJson(res, { error: 'device_id påkrevd' }, 400);
       try {
         const data = await _bambuCloud.unbindDevice(deviceId);
         return sendJson(res, data);
@@ -960,7 +960,7 @@ export async function handleApiRequest(req, res) {
       if (!_bambuCloud || !_bambuCloud.isAuthenticated()) return sendJson(res, { error: 'Ikke autentisert' }, 401);
       const params = new URL(req.url, 'http://localhost').searchParams;
       const deviceId = params.get('device_id');
-      if (!deviceId) return sendJson(res, { error: 'device_id paakrevd' }, 400);
+      if (!deviceId) return sendJson(res, { error: 'device_id påkrevd' }, 400);
       try {
         const data = await _bambuCloud.getCloudVideoUrl(deviceId);
         return sendJson(res, data);
@@ -1019,7 +1019,7 @@ export async function handleApiRequest(req, res) {
       if (!_bambuCloud) return sendJson(res, { error: 'Cloud ikke tilgjengelig' }, 503);
       return readBody(req, async (body) => {
         const { email } = body;
-        if (!email) return sendJson(res, { error: 'E-post paakrevd' }, 400);
+        if (!email) return sendJson(res, { error: 'E-post påkrevd' }, 400);
         try {
           const data = await _bambuCloud.sendVerificationEmail(email);
           sendJson(res, data);
@@ -1416,7 +1416,7 @@ export async function handleApiRequest(req, res) {
     if (method === 'POST' && path.match(/^\/api\/screenshots\/\d+\/link$/)) {
       const screenshotId = parseInt(path.split('/')[3]);
       return readBody(req, (body) => {
-        if (!body.print_history_id) return sendJson(res, { error: 'print_history_id paakrevd' }, 400);
+        if (!body.print_history_id) return sendJson(res, { error: 'print_history_id påkrevd' }, 400);
         linkScreenshotToPrint(screenshotId, body.print_history_id);
         sendJson(res, { ok: true });
       });
