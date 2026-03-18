@@ -453,7 +453,7 @@
         <div class="card-title">${t('settings.obs_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:12px">${t('settings.obs_description')}</p>
 
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
           <div>
             <label class="form-label">Printer</label>
             <select id="obs-cfg-printer" class="form-input" onchange="window._obsUpdateUrl()">
@@ -465,10 +465,17 @@
             <label class="form-label">Bakgrunn</label>
             <select id="obs-cfg-bg" class="form-input" onchange="window._obsUpdateUrl()">
               <option value="transparent">Transparent (anbefalt)</option>
-              <option value="">Standard (svart)</option>
+              <option value="">Standard (mørk)</option>
               <option value="custom">Egendefinert farge</option>
             </select>
             <input type="color" id="obs-cfg-bg-color" class="form-input" value="#000000" style="display:none;margin-top:4px;height:32px;padding:2px" onchange="window._obsUpdateUrl()">
+          </div>
+          <div>
+            <label class="form-label">Posisjon</label>
+            <select id="obs-cfg-pos" class="form-input" onchange="window._obsUpdateUrl()">
+              <option value="right">Høyre side</option>
+              <option value="left">Venstre side</option>
+            </select>
           </div>
         </div>
 
@@ -477,10 +484,7 @@
             <input type="checkbox" id="obs-cfg-compact" onchange="window._obsUpdateUrl()"> Kompakt modus
           </label>
           <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer">
-            <input type="checkbox" id="obs-cfg-hide-idle" onchange="window._obsUpdateUrl()"> Skjul ved idle
-          </label>
-          <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer">
-            <input type="checkbox" id="obs-cfg-no-camera" onchange="window._obsUpdateUrl()"> Uten kamera
+            <input type="checkbox" id="obs-cfg-hide-idle" onchange="window._obsUpdateUrl()"> Skjul ved inaktiv
           </label>
         </div>
 
@@ -501,13 +505,33 @@
           <li>Kopier URLen ovenfor</li>
           <li>I OBS: <strong>Kilder → + → Nettleser</strong></li>
           <li>Lim inn URL i feltet</li>
-          <li>Sett bredde: <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px">1920</code> høyde: <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px">1080</code></li>
+          <li>Sett bredde: <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px">320</code> høyde: <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px">900</code> (sidepanel)</li>
           <li>Huk av <strong>Shutdown source when not visible</strong></li>
           <li>Klikk OK</li>
         </ol>
         <div style="margin-top:12px;padding:10px;border-radius:8px;background:color-mix(in srgb, var(--accent-cyan) 8%, transparent);border:1px solid color-mix(in srgb, var(--accent-cyan) 20%, transparent);font-size:0.8rem;color:var(--text-secondary)">
-          <strong style="color:var(--accent-cyan)">Tips:</strong> Bruk «Transparent» bakgrunn og legg overlayet over kamerakilden din i OBS for best resultat.
+          <strong style="color:var(--accent-cyan)">Tips:</strong> Bruk «Transparent» bakgrunn for å legge sidepanelet over kamerakilden. Panelet viser print-status med progress-ring, temperaturer, AMS-spoler med SVG-visualisering og print-stage.
         </div>
+      </div>`;
+
+      // Direct URL cards
+      h += `<div class="settings-card">
+        <div class="card-title">Direkte kamera-URLer</div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:10px">Bruk disse for Home Assistant, VLC, eller andre integrasjoner.</p>
+        <div style="display:flex;flex-direction:column;gap:8px">`;
+      for (const pr of (p || [])) {
+        h += `<div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:0.8rem;font-weight:600;min-width:80px">${_esc(pr.name || pr.id)}</span>
+          <code style="font-size:0.72rem;background:var(--bg-tertiary);padding:3px 8px;border-radius:4px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${location.origin}/api/printers/${encodeURIComponent(pr.id)}/stream.mjpeg</code>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.65rem;padding:2px 6px" onclick="navigator.clipboard.writeText('${location.origin}/api/printers/${encodeURIComponent(pr.id)}/stream.mjpeg');showToast('Kopiert!','success')">Kopier</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:0.8rem;min-width:80px"></span>
+          <code style="font-size:0.72rem;background:var(--bg-tertiary);padding:3px 8px;border-radius:4px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${location.origin}/api/printers/${encodeURIComponent(pr.id)}/frame.jpeg</code>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.65rem;padding:2px 6px" onclick="navigator.clipboard.writeText('${location.origin}/api/printers/${encodeURIComponent(pr.id)}/frame.jpeg');showToast('Kopiert!','success')">Kopier</button>
+        </div>`;
+      }
+      h += `</div>
       </div>`;
 
       // Live Preview card
@@ -1853,14 +1877,14 @@
     const bgColor = document.getElementById('obs-cfg-bg-color')?.value;
     const compact = document.getElementById('obs-cfg-compact')?.checked;
     const hideIdle = document.getElementById('obs-cfg-hide-idle')?.checked;
-    const noCamera = document.getElementById('obs-cfg-no-camera')?.checked;
+    const pos = document.getElementById('obs-cfg-pos')?.value;
 
     if (printer) params.set('printer', printer);
     if (bgSel === 'transparent') params.set('bg', 'transparent');
     else if (bgSel === 'custom' && bgColor) params.set('bg', bgColor);
     if (compact) params.set('compact', '');
     if (hideIdle) params.set('hide_idle', '');
-    if (noCamera) params.set('no_camera', '');
+    if (pos && pos !== 'right') params.set('pos', pos);
 
     const qs = params.toString();
     const url = qs ? base + '?' + qs : base;
