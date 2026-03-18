@@ -3,6 +3,37 @@
   let _updateTimer = null;
   let _cameraIntervals = {};
   let _sortMode = 'name';
+  let _gridLayout = localStorage.getItem('fleet-grid-layout') || 'auto';
+
+  window._setFleetLayout = function(layout) {
+    _gridLayout = layout;
+    localStorage.setItem('fleet-grid-layout', layout);
+    const grid = document.getElementById('fleet-grid');
+    if (grid) _applyGridLayout(grid);
+    document.querySelectorAll('.fleet-layout-btn').forEach(b => b.classList.toggle('active', b.dataset.layout === layout));
+  };
+
+  function _applyGridLayout(grid) {
+    const layouts = {
+      'auto': 'repeat(auto-fill, minmax(320px, 1fr))',
+      '1': '1fr',
+      '2': 'repeat(2, 1fr)',
+      '3': 'repeat(3, 1fr)',
+      '4': 'repeat(4, 1fr)',
+    };
+    grid.style.gridTemplateColumns = layouts[_gridLayout] || layouts.auto;
+  }
+
+  function _layoutButtons() {
+    const items = [
+      { id: 'auto', label: 'Auto', svg: '<rect x="2" y="2" width="8" height="8" rx="1"/><rect x="14" y="2" width="8" height="8" rx="1"/><rect x="2" y="14" width="8" height="8" rx="1"/><rect x="14" y="14" width="8" height="8" rx="1"/>' },
+      { id: '1', label: '1', svg: '<rect x="3" y="3" width="18" height="18" rx="1"/>' },
+      { id: '2', label: '2', svg: '<rect x="2" y="3" width="9" height="18" rx="1"/><rect x="13" y="3" width="9" height="18" rx="1"/>' },
+      { id: '3', label: '3', svg: '<rect x="1" y="3" width="6" height="18" rx="1"/><rect x="9" y="3" width="6" height="18" rx="1"/><rect x="17" y="3" width="6" height="18" rx="1"/>' },
+      { id: '4', label: '4', svg: '<rect x="1" y="2" width="5" height="9" rx="1"/><rect x="7" y="2" width="5" height="9" rx="1"/><rect x="13" y="2" width="5" height="9" rx="1"/><rect x="19" y="2" width="4" height="9" rx="1"/>' },
+    ];
+    return items.map(i => `<button class="fleet-layout-btn${_gridLayout === i.id ? ' active' : ''}" data-layout="${i.id}" onclick="_setFleetLayout('${i.id}')" title="${i.label} ${i.label === 'Auto' ? 'kolonner' : (i.label === '1' ? 'kolonne' : 'kolonner')}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">${i.svg}</svg></button>`).join('');
+  }
 
   window._sortFleet = function(mode) {
     _sortMode = mode;
@@ -60,7 +91,7 @@
     if (!el) return;
 
     el.innerHTML = `<style>
-      .fleet-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px; padding:0; }
+      .fleet-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px; padding:0; transition:grid-template-columns 0.3s; }
       .fleet-card { background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius); overflow:hidden; transition:box-shadow 0.2s; cursor:pointer; }
       .fleet-card:hover { box-shadow:var(--shadow-lg); }
       .fleet-card-header { display:flex; align-items:center; justify-content:space-between; padding:12px 14px 8px; }
@@ -97,20 +128,29 @@
       .fleet-summary-dot-offline { background:var(--text-muted); }
       .fleet-summary-dot-error { background:var(--accent-red); }
       @keyframes fleetPulse { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
-      @media (max-width:700px) { .fleet-grid { grid-template-columns:1fr; } }
+      .fleet-layout-group { display:flex; gap:2px; padding:2px; background:var(--bg-tertiary); border:1px solid var(--border-subtle); border-radius:6px; }
+      .fleet-layout-btn { width:28px; height:28px; border:none; border-radius:4px; background:transparent; color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; }
+      .fleet-layout-btn:hover { color:var(--text-primary); }
+      .fleet-layout-btn.active { background:var(--bg-secondary); color:var(--text-primary); box-shadow:var(--shadow-sm); }
+      @media (max-width:700px) { .fleet-grid { grid-template-columns:1fr !important; } }
     </style>
     <div class="fleet-summary" id="fleet-summary"></div>
     <div style="display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap">
-      <span style="font-size:0.75rem;color:var(--text-muted)">${t('fleet.sort_by') || 'Sort:'}</span>
-      <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_sortFleet('name')">${t('fleet.sort_name') || 'Name'}</button>
+      <span style="font-size:0.75rem;color:var(--text-muted)">${t('fleet.sort_by') || 'Sorter:'}</span>
+      <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_sortFleet('name')">${t('fleet.sort_name') || 'Navn'}</button>
       <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_sortFleet('status')">${t('fleet.sort_status') || 'Status'}</button>
-      <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_sortFleet('progress')">${t('fleet.sort_progress') || 'Progress'}</button>
+      <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_sortFleet('progress')">${t('fleet.sort_progress') || 'Fremdrift'}</button>
+      <div class="fleet-layout-group">${_layoutButtons()}</div>
       <div style="display:flex;gap:8px;margin-left:auto">
-        <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_fleetPauseAll()" data-tooltip="Pause all printing">${t('fleet.pause_all') || 'Pause All'}</button>
-        <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_fleetResumeAll()" data-tooltip="Resume all paused">${t('fleet.resume_all') || 'Resume All'}</button>
+        <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_fleetPauseAll()" data-tooltip="${t('fleet.pause_all_tip') || 'Pause alle som printer'}">${t('fleet.pause_all') || 'Pause alle'}</button>
+        <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_fleetResumeAll()" data-tooltip="${t('fleet.resume_all_tip') || 'Fortsett alle pausede'}">${t('fleet.resume_all') || 'Fortsett alle'}</button>
       </div>
     </div>
     <div class="fleet-grid" id="fleet-grid"></div>`;
+
+    // Apply saved layout
+    const grid = document.getElementById('fleet-grid');
+    if (grid) _applyGridLayout(grid);
 
     _renderAll();
     // Live updates every 2 seconds
