@@ -254,35 +254,19 @@
           remain = null;
         }
 
-        // Adjust for in-progress filament consumption (match active-filament.js)
-        if (isActive && isPrinting && est && est.weight_g > 0 && remain !== null) {
-          const pct = data.mc_percent || 0;
-          const totalG = linkedSpool ? linkedSpool.initial_weight_g : (tray.tray_weight ? parseFloat(tray.tray_weight) : null);
-          const remainG = linkedSpool ? linkedSpool.remaining_weight_g : (totalG ? totalG * (remain / 100) : null);
-          if (remainG !== null && totalG > 0) {
-            const consumedG = Math.round(est.weight_g * pct / 100);
-            const remainingPrintG = est.weight_g - consumedG;
-            remain = Math.max(0, Math.round(((remainG - remainingPrintG) / totalG) * 100));
-          }
-        }
-
-        // Calculate remaining grams for display
+        // Real-time filament calculation
+        const _totalG = linkedSpool ? linkedSpool.initial_weight_g : (tray.tray_weight ? parseFloat(tray.tray_weight) : null);
+        const _remainG = linkedSpool ? linkedSpool.remaining_weight_g : (_totalG ? _totalG * (remain / 100) : null);
         let displayGrams = null;
-        if (remain !== null) {
-          const tw = tray.tray_weight ? parseFloat(tray.tray_weight) : (linkedSpool ? linkedSpool.initial_weight_g : null);
+        if (remain !== null && typeof window.realtimeFilament === 'function') {
+          const rt = window.realtimeFilament({ remainG: _remainG, totalG: _totalG, isActive, data });
+          remain = rt.current;
+          displayGrams = rt.currentG;
+        } else if (remain !== null) {
+          const tw = _totalG || (tray.tray_weight ? parseFloat(tray.tray_weight) : null);
           if (tw > 0) displayGrams = Math.round(tw * remain / 100);
         } else if (linkedSpool && linkedSpool.remaining_weight_g > 0) {
           displayGrams = linkedSpool.remaining_weight_g;
-        } else if (remain !== null) {
-          const tw = tray.tray_weight ? parseFloat(tray.tray_weight) : null;
-          if (tw > 0) displayGrams = Math.round(tw * remain / 100);
-        }
-        // Adjust grams for in-progress consumption
-        if (isActive && isPrinting && est && est.weight_g > 0 && displayGrams !== null) {
-          const pct = data.mc_percent || 0;
-          const consumedG = Math.round(est.weight_g * pct / 100);
-          const remainingPrintG = est.weight_g - consumedG;
-          displayGrams = Math.max(0, Math.round(displayGrams - remainingPrintG));
         }
 
         const hasRfid = !!(tray.tag_uid || tray.tray_uuid);
@@ -409,20 +393,15 @@
           remain = null;
         }
 
-        // Adjust for in-progress filament consumption
-        if (isExtActive && isPrinting && est && est.weight_g > 0 && remain !== null) {
-          const pct = data.mc_percent || 0;
-          const totalG = linkedSpool ? linkedSpool.initial_weight_g : (vtTray.tray_weight ? parseFloat(vtTray.tray_weight) : null);
-          const remainG = linkedSpool ? linkedSpool.remaining_weight_g : (totalG ? totalG * (remain / 100) : null);
-          if (remainG !== null && totalG > 0) {
-            const consumedG = Math.round(est.weight_g * pct / 100);
-            const remainingPrintG = est.weight_g - consumedG;
-            remain = Math.max(0, Math.round(((remainG - remainingPrintG) / totalG) * 100));
-          }
-        }
-
+        // Real-time filament calculation
+        const _vtTotalG = linkedSpool ? linkedSpool.initial_weight_g : (vtTray.tray_weight ? parseFloat(vtTray.tray_weight) : null);
+        const _vtRemainG = linkedSpool ? linkedSpool.remaining_weight_g : (_vtTotalG ? _vtTotalG * (remain / 100) : null);
         let displayGrams = null;
-        if (linkedSpool && linkedSpool.remaining_weight_g > 0) {
+        if (remain !== null && typeof window.realtimeFilament === 'function') {
+          const rt = window.realtimeFilament({ remainG: _vtRemainG, totalG: _vtTotalG, isActive: isExtActive, data });
+          remain = rt.current;
+          displayGrams = rt.currentG;
+        } else if (linkedSpool && linkedSpool.remaining_weight_g > 0) {
           displayGrams = linkedSpool.remaining_weight_g;
         } else if (remain !== null) {
           const tw = vtTray.tray_weight ? parseFloat(vtTray.tray_weight) : null;

@@ -694,6 +694,9 @@ body {
   grid-column: 3;
 }
 
+/* Hide standalone countdown — it's now embedded in progress-card */
+#countdown-timer { display: none; }
+
 /* ── 2-column layout ── */
 .dashboard-cols-2 {
   grid-template-columns: 1fr 1fr !important;

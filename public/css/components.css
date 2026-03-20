@@ -96,7 +96,7 @@
 .print-viewport {
   position: relative;
   flex: 1 1 0;
-  min-height: 500px;
+  min-height: 380px;
   overflow: hidden;
   background:
     radial-gradient(circle at 50% 50%, rgba(0, 174, 66, 0.03) 0%, transparent 70%),
@@ -1054,34 +1054,9 @@
   100% { filter: drop-shadow(0 0 4px rgba(0, 174, 66, 0.15)); transform: scale(1); }
 }
 
-.hud-stats {
-  flex: 1;
-  min-width: 0;
-}
-
-.hud-pct {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: var(--text-primary);
-}
-
-.progress-countdown {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-
-.progress-eta {
-  font-size: 0.75rem;
-  color: var(--accent-green);
-  font-weight: 600;
-}
-
-.hud-layers {
-  font-size: 0.7rem;
-  color: var(--text-secondary);
-}
+/* Legacy hud-stats (hidden, kept for JS compat) */
+.hud-stats { display: none; }
+.progress-countdown { display: none; }
 
 .hud-filament {
   flex-shrink: 0;
@@ -4072,10 +4047,10 @@
 
 /* SVG Spool Visual */
 .spool-svg { display: block; }
-.spool-flange { fill: var(--bg-card); stroke: var(--border-color); stroke-width: 1.5; }
-.spool-filament { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.15)); }
-.spool-hub { fill: var(--bg-card); stroke: var(--border-color); stroke-width: 1.5; }
-.spool-hole { fill: var(--bg-tertiary); stroke: var(--border-color); stroke-width: 0.8; }
+.spool-flange { fill: var(--bg-card); stroke: rgba(255,255,255,0.35); stroke-width: 3; filter: drop-shadow(0 0 2px rgba(255,255,255,0.1)); }
+.spool-filament { filter: drop-shadow(0 1px 3px rgba(0,0,0,0.25)); }
+.spool-hub { fill: var(--bg-card); stroke: var(--border-color); stroke-width: 2; }
+.spool-hole { fill: var(--bg-tertiary); stroke: var(--border-color); stroke-width: 1; }
 .spool-vcard-badge {
   position: absolute;
   top: 8px;
@@ -4547,6 +4522,19 @@
   color: var(--accent-green, #00e676);
   font-weight: 500;
   margin-top: 4px;
+}
+.filament-after-print-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  margin-top: 4px;
+}
+.filament-after-label {
+  opacity: 0.6;
+}
+.filament-after-value {
+  font-weight: 600;
+  color: var(--accent-warning, #f0a030);
 }
 
 .filament-usage-bar {
@@ -12348,6 +12336,66 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
 
 /* ═══ Countdown Timer Widget ═══ */
 .countdown-card { text-align: center; padding: 24px; align-self: start; }
+
+/* Unified print status bar layout */
+.hud-center {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.hud-center-top {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.hud-center-top .hud-pct {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+.hud-center-top .hud-layers {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+.hud-center-top .hud-eta {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--accent-green);
+}
+.hud-separator {
+  color: var(--text-muted);
+  opacity: 0.3;
+  font-size: 0.78rem;
+}
+.hud-center-bottom {
+  font-size: 0.75rem;
+}
+.hud-timer {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 2px;
+}
+.hud-timer .countdown-idle { display: none; }
+.ct-inline-time {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.5px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  line-height: 1;
+}
+.ct-inline-eta {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent-green);
+  white-space: nowrap;
+}
 .countdown-ring { position: relative; width: 220px; height: 220px; margin: 0 auto 12px; }
 .countdown-ring svg { transform: rotate(-90deg); }
 .countdown-ring-bg { fill: none; stroke: var(--bg-tertiary); stroke-width: 8; }
@@ -12396,22 +12444,74 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
   line-height: 1.2;
   text-shadow: 0 1px 4px rgba(0,0,0,0.6);
 }
+.filament-ring-weight {
+  font-size: clamp(0.7rem, 3.5cqi, 0.85rem);
+  opacity: 0.6;
+}
+.filament-ring-stats {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+.filament-ring-stat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: clamp(0.7rem, 3.5cqi, 0.85rem);
+}
+.filament-ring-stat-label {
+  opacity: 0.5;
+}
+.filament-ring-stat-value {
+  font-weight: 600;
+  color: var(--accent-warning, #f0a030);
+}
+.filament-ring-tray-after {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--accent-warning, #f0a030);
+  line-height: 1;
+}
+.filament-ring-identity {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.filament-ring-brand {
+  font-size: clamp(0.85rem, 4cqi, 1.1rem);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.filament-ring-type-badge {
+  font-size: clamp(0.55rem, 2.5cqi, 0.65rem);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(18, 121, 255, 0.15);
+  color: var(--accent-blue, #1279ff);
+}
 .filament-ring-info {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  gap: 6px;
   margin-bottom: 10px;
-}
-.filament-ring-type-label {
-  font-size: clamp(0.7rem, 3.5cqi, 0.9rem);
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--text-primary);
-}
-.filament-ring-color-name {
-  font-size: clamp(0.6rem, 3cqi, 0.8rem);
+  font-size: clamp(0.65rem, 3cqi, 0.78rem);
   color: var(--text-muted);
+}
+.filament-ring-info > span:not(:last-child)::after {
+  content: '·';
+  margin-left: 6px;
+  opacity: 0.4;
 }
 .filament-ring-trays {
   display: flex;

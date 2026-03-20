@@ -2,12 +2,44 @@
 (function() {
 
   // ═══ Constants & Helpers ═══
-  // Accurate spool percentage: uses max(initial, remaining+used) as denominator
+  // Real-time spool percentage: adjusts for active print consumption
   function spoolPct(s) {
     if (!s) return 0;
     const init = s.initial_weight_g || 0;
     const rem = s.remaining_weight_g || 0;
-    return init > 0 ? Math.max(0, Math.round((rem / init) * 100)) : 0;
+    if (init <= 0) return 0;
+    // Check if this spool is currently active in AMS
+    if (typeof window.realtimeFilament === 'function' && s.printer_id && s.ams_unit != null && s.ams_tray != null) {
+      const state = window.printerState?.getActivePrinterState?.();
+      const ams = state?.ams || state?.print?.ams;
+      if (ams) {
+        const activeIdx = ams.tray_now != null ? parseInt(ams.tray_now) : -1;
+        const spoolIdx = s.ams_unit * 4 + s.ams_tray;
+        const isActive = spoolIdx === activeIdx;
+        const rt = window.realtimeFilament({ remainG: rem, totalG: init, isActive, data: state });
+        return rt.current;
+      }
+    }
+    return Math.max(0, Math.round((rem / init) * 100));
+  }
+
+  // Real-time remaining grams for a spool
+  function spoolRemainG(s) {
+    if (!s) return 0;
+    const init = s.initial_weight_g || 0;
+    const rem = s.remaining_weight_g || 0;
+    if (typeof window.realtimeFilament === 'function' && s.printer_id && s.ams_unit != null && s.ams_tray != null) {
+      const state = window.printerState?.getActivePrinterState?.();
+      const ams = state?.ams || state?.print?.ams;
+      if (ams) {
+        const activeIdx = ams.tray_now != null ? parseInt(ams.tray_now) : -1;
+        const spoolIdx = s.ams_unit * 4 + s.ams_tray;
+        const isActive = spoolIdx === activeIdx;
+        const rt = window.realtimeFilament({ remainG: rem, totalG: init, isActive, data: state });
+        return rt.currentG;
+      }
+    }
+    return Math.round(rem);
   }
 
   const FILAMENT_TYPES = {
@@ -318,10 +350,11 @@
       let totalRemaining = 0, totalValue = 0, lowStockCount = 0;
       const active = spools.filter(s => !s.archived);
       for (const s of active) {
-        totalRemaining += s.remaining_weight_g || 0;
+        totalRemaining += spoolRemainG(s);
         if (s.cost) totalValue += s.cost;
         const pct = spoolPct(s);
-        if ((pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams)) lowStockCount++;
+        const rG = spoolRemainG(s);
+        if ((pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && rG > 0 && rG < _lowStockGrams)) lowStockCount++;
       }
       const lowColor = lowStockCount > 0 ? '#f0883e' : '#00e676';
       return `<div class="fil-hero-grid">
@@ -477,8 +510,8 @@
         const favB = b.is_favorite ? 1 : 0;
         if (favB !== favA) return favB - favA;
         if (_sortBy === 'name') return (a.profile_name || '').localeCompare(b.profile_name || '');
-        if (_sortBy === 'remaining_asc') return (a.remaining_weight_g || 0) - (b.remaining_weight_g || 0);
-        if (_sortBy === 'remaining_desc') return (b.remaining_weight_g || 0) - (a.remaining_weight_g || 0);
+        if (_sortBy === 'remaining_asc') return spoolRemainG(a) - spoolRemainG(b);
+        if (_sortBy === 'remaining_desc') return spoolRemainG(b) - spoolRemainG(a);
         if (_sortBy === 'fifo') {
           const aD = a.purchase_date || a.created_at || '';
           const bD = b.purchase_date || b.created_at || '';
@@ -559,7 +592,7 @@
         const tp = s.material || 'Unknown';
         if (!byType[tp]) byType[tp] = { count: 0, remaining_g: 0 };
         byType[tp].count++;
-        byType[tp].remaining_g += s.remaining_weight_g || 0;
+        byType[tp].remaining_g += spoolRemainG(s);
       }
       const sorted = Object.entries(byType).sort((a, b) => b[1].count - a[1].count);
       const mx = sorted[0]?.[1].count || 1;
@@ -971,7 +1004,7 @@
           <div class="filament-bar">
             <div class="filament-bar-fill" style="width:${pct}%;background:${isLow || isEmpty ? 'var(--accent-orange)' : color}"></div>
           </div>
-          <span class="fil-bar-weight">${Math.round(s.remaining_weight_g)}g / ${Math.round(s.initial_weight_g)}g</span>
+          <span class="fil-bar-weight">${spoolRemainG(s)}g / ${Math.round(s.initial_weight_g)}g</span>
         </div>
         <div class="fil-spool-info">${infoParts.join(' · ')}${dryIcon}${compatIcon}</div>
         <div class="fil-spool-footer">
@@ -1041,7 +1074,7 @@
     const pct = spoolPct(s);
     const cleanName = _cleanProfileName(s);
     const vendorName = s.vendor_name || '--';
-    const remaining = `${Math.round(s.remaining_weight_g)}g / ${Math.round(s.initial_weight_g)}g`;
+    const remaining = `${spoolRemainG(s)}g / ${Math.round(s.initial_weight_g)}g`;
     const isLow = (pct > 0 && pct < _lowStockPct);
     const isEmpty = pct === 0 && s.used_weight_g > 0;
     const statusColor = isEmpty ? 'var(--accent-red)' : isLow ? 'var(--accent-orange)' : 'var(--accent-green)';
@@ -1116,7 +1149,7 @@
             <div class="spool-detail-bar-wrap">
               <div class="spool-vcard-bar spool-detail-bar"><div class="spool-vcard-bar-fill spool-detail-bar-fill" style="width:${pct}%;background:${statusColor}"></div></div>
               <div class="spool-detail-weight-row">
-                <span>${Math.round(s.remaining_weight_g)}g ${t('filament.remaining_short', 'igjen')}</span>
+                <span>${spoolRemainG(s)}g ${t('filament.remaining_short', 'igjen')}</span>
                 <span>${Math.round(s.initial_weight_g)}g ${t('filament.total_short', 'total')}</span>
               </div>
             </div>
@@ -1149,7 +1182,7 @@
             </div>
             <div class="ph-detail-field">
               <span class="ph-detail-label">${t('filament.remaining', 'Gjenstående')}</span>
-              <span class="ph-detail-value">${Math.round(s.remaining_weight_g)}g (${pct}%)</span>
+              <span class="ph-detail-value">${spoolRemainG(s)}g (${pct}%)</span>
             </div>
             <div class="ph-detail-field">
               <span class="ph-detail-label">${t('common.printer', 'Printer')}</span>
@@ -1306,7 +1339,7 @@
         <span class="inv-list-name">${favIcon} <strong>${esc(name)}</strong> <span class="text-muted">${esc(s.vendor_name || '')}</span></span>
         <span class="inv-list-material">${s.material || '--'}</span>
         <div class="inv-list-bar"><div class="filament-bar" style="width:80px;height:6px"><div class="filament-bar-fill" style="width:${pct}%;background:${(pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams) ? 'var(--accent-orange)' : color}"></div></div></div>
-        <span class="inv-list-weight">${Math.round(s.remaining_weight_g)}g / ${Math.round(s.initial_weight_g)}g</span>
+        <span class="inv-list-weight">${spoolRemainG(s)}g / ${Math.round(s.initial_weight_g)}g</span>
         <span class="inv-list-loc text-muted">${s.location || ''}</span>
         <span class="inv-list-cost">${s.cost ? formatCurrency(s.cost) : ''}</span>
         <span class="inv-list-actions">
@@ -1336,7 +1369,7 @@
         <td><strong>${esc(name)}</strong>${s.is_favorite ? ' <span style="color:#e53935">♥</span>' : ''}</td>
         <td>${s.material || '--'}</td>
         <td>${esc(s.vendor_name || '--')}</td>
-        <td>${Math.round(s.remaining_weight_g)}g / ${Math.round(s.initial_weight_g)}g</td>
+        <td>${spoolRemainG(s)}g / ${Math.round(s.initial_weight_g)}g</td>
         <td style="color:${(pct > 0 && pct < _lowStockPct) || (_lowStockGrams > 0 && s.remaining_weight_g > 0 && s.remaining_weight_g < _lowStockGrams) ? 'var(--accent-orange)' : 'inherit'}">${pct}%</td>
         <td>${esc(s.location || '--')}</td>
         <td>${s.cost ? formatCurrency(s.cost) : '--'}</td>

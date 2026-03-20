@@ -184,14 +184,28 @@
 
     // Inventory by type
     const activeSpools = spools.filter(s => !s.archived);
-    const totalStock = activeSpools.reduce((s, sp) => s + (sp.remaining_weight_g || 0), 0);
+    // Real-time remaining helper for forecast
+    function _rtRemain(sp) {
+      if (typeof window.realtimeFilament === 'function' && sp.printer_id && sp.ams_unit != null && sp.ams_tray != null) {
+        const st = window.printerState?.getActivePrinterState?.();
+        const amsData = st?.ams || st?.print?.ams;
+        if (amsData) {
+          const aIdx = amsData.tray_now != null ? parseInt(amsData.tray_now) : -1;
+          const sIdx = sp.ams_unit * 4 + sp.ams_tray;
+          const rt = window.realtimeFilament({ remainG: sp.remaining_weight_g || 0, totalG: sp.initial_weight_g || 0, isActive: sIdx === aIdx, data: st });
+          return rt.currentG;
+        }
+      }
+      return sp.remaining_weight_g || 0;
+    }
+    const totalStock = activeSpools.reduce((s, sp) => s + _rtRemain(sp), 0);
     const stockByType = {};
     let totalCostPerKg = 0;
     let costCount = 0;
     for (const sp of activeSpools) {
       const type = sp.material || 'Unknown';
       if (!stockByType[type]) stockByType[type] = { weight: 0, count: 0, cost: 0 };
-      stockByType[type].weight += (sp.remaining_weight_g || 0);
+      stockByType[type].weight += _rtRemain(sp);
       stockByType[type].count++;
       if (sp.price && sp.total_weight_g) {
         const cpk = (sp.price / sp.total_weight_g) * 1000;

@@ -406,21 +406,26 @@
               <span id="progress-time">--</span>
             </div>
           </div>
-          <!-- Print info bar (below 3D) -->
+          <!-- Unified print status bar -->
           <div class="print-info-bar">
             <div class="hud-ring-wrap">
               <svg class="progress-ring" viewBox="0 0 140 140" id="progress-ring"></svg>
             </div>
-            <div class="hud-stats">
-              <div class="hud-pct" id="hud-pct">0%</div>
-              <div class="progress-countdown" id="progress-countdown"></div>
-              <div class="progress-eta" id="progress-eta"></div>
-              <div class="hud-layers" id="progress-layers">--</div>
+            <div class="hud-center">
+              <div class="hud-center-top">
+                <span class="hud-pct" id="hud-pct">0%</span>
+                <span class="hud-separator">·</span>
+                <span class="hud-layers" id="progress-layers">--</span>
+              </div>
+              <div style="display:none"><span id="progress-eta"></span></div>
+              <div class="hud-center-bottom" id="active-filament">
+                <span class="text-muted" data-i18n-key="progress.waiting">Venter...</span>
+              </div>
             </div>
-            <div class="hud-filament" id="active-filament">
-              <span class="text-muted" data-i18n-key="progress.waiting">Venter...</span>
-            </div>
+            <div class="hud-timer" id="countdown-embed"></div>
           </div>
+          <!-- Hidden elements for components that write to progress-countdown -->
+          <div style="display:none"><span id="progress-countdown"></span></div>
           <div class="model-meta-bar" id="model-meta-bar" style="display:none"></div>
         </div>
 
@@ -438,6 +443,8 @@
             </div>
           </div>
         </div>
+
+        <div class="card countdown-card" id="countdown-timer"></div>
 
         <div class="card" id="temp-card">
           <div class="card-title" data-i18n-key="temperature.title">Temperaturer</div>
@@ -493,8 +500,6 @@
         <!-- MakerWorld info — compact, under 3D preview, beside temperatures -->
         <!-- Model Info strip (MakerWorld / Printables / Thingiverse) -->
         <div class="model-info-strip" id="model-info" style="display:none"></div>
-
-        <div class="card countdown-card" id="countdown-timer"></div>
 
       </main>
 

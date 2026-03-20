@@ -75,8 +75,7 @@
       remainG = null;
     }
 
-    // Estimate filament consumption during active print
-    const est = window._printEstimates;
+    // Real-time filament consumption
     const gcodeState = data.gcode_state || 'IDLE';
     const isPrinting = gcodeState === 'RUNNING' || gcodeState === 'PAUSE';
     const pct = data.mc_percent || 0;
@@ -84,18 +83,25 @@
     let usageHtml = '';
     let displayRemain = remain;
     let displayRemainG = remainG;
-    if (isPrinting && est && est.weight_g > 0) {
-      const consumedG = Math.round(est.weight_g * pct / 100);
-      const remainingPrintG = est.weight_g - consumedG;
-      if (remainG !== null && totalG > 0) {
-        displayRemainG = Math.max(0, remainG - remainingPrintG);
-        displayRemain = Math.round((displayRemainG / totalG) * 100);
+    let afterPrint = null;
+    let afterPrintG = null;
+    if (typeof window.realtimeFilament === 'function') {
+      const rt = window.realtimeFilament({ remainG, totalG, isActive: true, data });
+      displayRemain = rt.current;
+      displayRemainG = rt.currentG;
+      afterPrint = rt.afterPrint;
+      afterPrintG = rt.afterPrintG;
+      if (rt.isPrinting) {
+        usageHtml = `
+          <div class="filament-usage-estimate">
+            <span>${t('filament.print_using')}: ${rt.usedG}g / ${rt.totalPrintG}g</span>
+            <div class="filament-usage-bar"><div class="filament-usage-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+          </div>
+          <div class="filament-after-print-row">
+            <span class="filament-after-label">${t('filament.after_print') || 'Etter print'}</span>
+            <span class="filament-after-value">${afterPrint}% · ${afterPrintG}g</span>
+          </div>`;
       }
-      usageHtml = `
-        <div class="filament-usage-estimate">
-          <span>${t('filament.print_using')}: ${consumedG}g / ${Math.round(est.weight_g)}g</span>
-          <div class="filament-usage-bar"><div class="filament-usage-bar-fill" style="width:${pct}%;background:${color}"></div></div>
-        </div>`;
     }
 
     // Color for the bar - low remaining = warn

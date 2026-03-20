@@ -38,6 +38,7 @@
       const amsRoot = state?.ams || state?.print?.ams;
       if (!amsRoot?.ams) return;
       const units = amsRoot.ams;
+      const activeIdx = amsRoot.tray_now != null ? parseInt(amsRoot.tray_now) : -1;
       for (let u = 0; u < units.length; u++) {
         const trays = units[u]?.tray || [];
         for (let ti = 0; ti < trays.length; ti++) {
@@ -45,6 +46,18 @@
           if (!tray || !tray.tray_type) continue;
           const color = tray.tray_color ? '#' + tray.tray_color.substring(0, 6) : '#808080';
           const slotLabel = (typeof window.t === 'function' ? window.t('multicolor.slot') : null) || 'Slot';
+          const globalIdx = u * 4 + ti;
+          const isActive = globalIdx === activeIdx;
+          // Real-time remaining
+          let remainG = tray.remain >= 0 ? Math.round(tray.remain) : null;
+          const printerId = window.printerState?.getActivePrinterId?.() || null;
+          const linked = window.getLinkedSpool?.(printerId, u, ti);
+          const tG = linked ? linked.initial_weight_g : (tray.tray_weight ? parseFloat(tray.tray_weight) : null);
+          const rG = linked ? linked.remaining_weight_g : (tG && remainG != null ? tG * remainG / 100 : null);
+          if (typeof window.realtimeFilament === 'function' && rG != null && tG > 0) {
+            const rt = window.realtimeFilament({ remainG: rG, totalG: tG, isActive, data: state });
+            remainG = rt.currentG;
+          }
           _amsTrays.push({
             _ams: true,
             _unit: u,
@@ -53,7 +66,7 @@
             name: tray.tray_sub_brands || tray.tray_type,
             material: tray.tray_type,
             color_hex: color,
-            remaining_weight_g: tray.remain >= 0 ? Math.round(tray.remain) : null,
+            remaining_weight_g: remainG,
             _label: `AMS ${u+1} - ${slotLabel} ${ti+1}`
           });
         }
@@ -62,6 +75,16 @@
       const vt = amsRoot.vt_tray;
       if (vt && vt.tray_type) {
         const color = vt.tray_color ? '#' + vt.tray_color.substring(0, 6) : '#808080';
+        let vtRemainG = vt.remain >= 0 ? Math.round(vt.remain) : null;
+        const printerId = window.printerState?.getActivePrinterId?.() || null;
+        const vtLinked = window.getLinkedSpool?.(printerId, 255, 0);
+        const vtTG = vtLinked ? vtLinked.initial_weight_g : (vt.tray_weight ? parseFloat(vt.tray_weight) : null);
+        const vtRG = vtLinked ? vtLinked.remaining_weight_g : (vtTG && vtRemainG != null ? vtTG * vtRemainG / 100 : null);
+        const vtIsActive = activeIdx === 254;
+        if (typeof window.realtimeFilament === 'function' && vtRG != null && vtTG > 0) {
+          const rt = window.realtimeFilament({ remainG: vtRG, totalG: vtTG, isActive: vtIsActive, data: state });
+          vtRemainG = rt.currentG;
+        }
         _amsTrays.push({
           _ams: true,
           _unit: 255,
@@ -70,7 +93,7 @@
           name: vt.tray_sub_brands || vt.tray_type,
           material: vt.tray_type,
           color_hex: color,
-          remaining_weight_g: vt.remain >= 0 ? Math.round(vt.remain) : null,
+          remaining_weight_g: vtRemainG,
           _label: t('multicolor.external') || 'External'
         });
       }

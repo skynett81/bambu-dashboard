@@ -31,19 +31,33 @@
 
   // Build the static DOM structure once
   function _buildDOM(container) {
-    container.innerHTML =
-      '<div class="countdown-ring">' +
-        '<svg width="220" height="220" viewBox="0 0 220 220">' +
-          '<circle class="countdown-ring-bg" cx="110" cy="110" r="' + CIRCLE_RADIUS + '"/>' +
-          '<circle class="countdown-ring-progress" cx="110" cy="110" r="' + CIRCLE_RADIUS + '" id="ct-progress"' +
-            ' stroke-dasharray="' + CIRCLE_CIRCUMFERENCE + '"' +
-            ' stroke-dashoffset="' + CIRCLE_CIRCUMFERENCE + '"/>' +
-        '</svg>' +
-        '<div class="countdown-time" id="ct-time">--:--:--</div>' +
-      '</div>' +
-      '<div class="countdown-info" id="ct-info"></div>' +
-      '<div class="countdown-finish" id="ct-finish"></div>' +
-      '<div class="countdown-filename" id="ct-filename"></div>';
+    const isEmbed = container.id === 'countdown-embed';
+    if (isEmbed) {
+      container.innerHTML =
+        '<span class="ct-inline-time" id="ct-time">--:--:--</span>' +
+        '<span class="ct-inline-eta" id="ct-finish"></span>';
+      // Hidden elements needed by _updateValues
+      const hidden = document.createElement('div');
+      hidden.style.display = 'none';
+      hidden.innerHTML = '<span id="ct-progress"></span><span id="ct-info"></span><span id="ct-filename"></span>';
+      container.appendChild(hidden);
+      _built = true;
+      return;
+    } else {
+      container.innerHTML =
+        '<div class="countdown-ring">' +
+          '<svg width="220" height="220" viewBox="0 0 220 220">' +
+            '<circle class="countdown-ring-bg" cx="110" cy="110" r="' + CIRCLE_RADIUS + '"/>' +
+            '<circle class="countdown-ring-progress" cx="110" cy="110" r="' + CIRCLE_RADIUS + '" id="ct-progress"' +
+              ' stroke-dasharray="' + CIRCLE_CIRCUMFERENCE + '"' +
+              ' stroke-dashoffset="' + CIRCLE_CIRCUMFERENCE + '"/>' +
+          '</svg>' +
+          '<div class="countdown-time" id="ct-time">--:--:--</div>' +
+        '</div>' +
+        '<div class="countdown-info" id="ct-info"></div>' +
+        '<div class="countdown-finish" id="ct-finish"></div>' +
+        '<div class="countdown-filename" id="ct-filename"></div>';
+    }
     _built = true;
   }
 
@@ -56,7 +70,7 @@
 
   // Update only changed text/attributes — no innerHTML replacement
   function _updateValues() {
-    const container = document.getElementById('countdown-timer');
+    const container = document.getElementById('countdown-embed') || document.getElementById('countdown-timer');
     if (!container) return;
 
     const data = _lastData;
