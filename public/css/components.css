@@ -3436,6 +3436,26 @@
   word-break: break-all;
 }
 
+.ph-model-link-icon {
+  color: var(--text-secondary, #888);
+  opacity: 0.6;
+  transition: opacity 0.15s, color 0.15s;
+}
+.ph-model-link-icon:hover {
+  opacity: 1;
+  color: var(--accent-blue, #4aa3df);
+}
+
+.ph-model-link {
+  color: var(--accent-blue, #4aa3df);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.ph-model-link:hover {
+  color: var(--accent-green, #5cb85c);
+  text-decoration: underline;
+}
+
 .ph-detail-divider {
   height: 1px;
   background: var(--border-color);
