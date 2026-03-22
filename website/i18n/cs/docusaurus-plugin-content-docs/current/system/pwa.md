@@ -12,7 +12,7 @@ Bambu Dashboard lze nainstalovat jako Progressive Web App (PWA) — zážitek po
 
 ### Desktop (Chrome / Edge / Chromium)
 
-1. Otevřete **https://localhost:3443** v prohlížeči
+1. Otevřete `https://localhost:3443` v prohlížeči
 2. Hledejte ikonu **Instalovat** v adresním řádku (šipka dolů s ikonou monitoru)
 3. Klikněte na ni
 4. Klikněte na **Instalovat** v dialogu

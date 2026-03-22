@@ -12,7 +12,7 @@ Bambu Dashboard, bir Progresif Web Uygulaması (PWA) olarak yüklenebilir — uy
 
 ### Masaüstü (Chrome / Edge / Chromium)
 
-1. Tarayıcıda **https://localhost:3443**'ü açın
+1. Tarayıcıda `https://localhost:3443`'ü açın
 2. Adres çubuğunda **Yükle** simgesini arayın (ekran simgeli aşağı ok)
 3. Üzerine tıklayın
 4. İletişim kutusunda **Yükle**'ye tıklayın

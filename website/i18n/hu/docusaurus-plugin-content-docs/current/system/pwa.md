@@ -12,7 +12,7 @@ A Bambu Dashboard telepíthető Progressive Web App (PWA) formájában — alkal
 
 ### Asztali gép (Chrome / Edge / Chromium)
 
-1. Nyisd meg a **https://localhost:3443** oldalt a böngészőben
+1. Nyisd meg a `https://localhost:3443` oldalt a böngészőben
 2. Keresd a **Telepítés** ikont a címsorban (lefelé mutató nyíl monitorikonnal)
 3. Kattints rá
 4. Kattints a **Telepítés** gombra a párbeszédablakban
