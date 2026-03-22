@@ -3793,6 +3793,22 @@
             <label class="form-label">${t('filament.labor_rate')}</label>
             <input class="form-input" id="set-labor-rate" type="number" step="0.01" value="${settings.labor_rate_hourly || ''}" placeholder="0.00">
           </div>
+          <div class="form-group">
+            <label class="form-label">${t('filament.setup_time') || 'Oppsett-tid per print (min)'}</label>
+            <input class="form-input" id="set-setup-minutes" type="number" step="1" value="${settings.labor_setup_minutes || ''}" placeholder="5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">${t('filament.markup_pct') || 'Påslag / profittmargin (%)'}</label>
+            <input class="form-input" id="set-markup-pct" type="number" step="0.1" value="${settings.markup_pct || ''}" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">${t('filament.nozzle_cost_hour') || 'Dysekostnad per time (kr)'}</label>
+            <input class="form-input" id="set-nozzle-cost" type="number" step="0.01" value="${settings.nozzle_cost_per_hour || ''}" placeholder="0.05">
+          </div>
+          <div class="form-group">
+            <label class="form-label">${t('filament.waste_factor') || 'Avfallsfaktor (f.eks. 1.1 = 10% ekstra)'}</label>
+            <input class="form-input" id="set-waste-factor" type="number" step="0.01" value="${settings.material_waste_factor || '1.1'}" placeholder="1.1">
+          </div>
         </div>
       </div>
       <div class="inv-modal-footer">
@@ -3816,7 +3832,11 @@
       ['printer_wattage', document.getElementById('set-printer-wattage')?.value],
       ['machine_cost', document.getElementById('set-machine-cost')?.value],
       ['machine_lifetime_hours', document.getElementById('set-machine-lifetime')?.value],
-      ['labor_rate_hourly', document.getElementById('set-labor-rate')?.value]
+      ['labor_rate_hourly', document.getElementById('set-labor-rate')?.value],
+      ['labor_setup_minutes', document.getElementById('set-setup-minutes')?.value],
+      ['markup_pct', document.getElementById('set-markup-pct')?.value],
+      ['nozzle_cost_per_hour', document.getElementById('set-nozzle-cost')?.value],
+      ['material_waste_factor', document.getElementById('set-waste-factor')?.value]
     ];
     for (const [key, value] of keys) {
       if (value != null) await fetch(`/api/inventory/settings/${key}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ value }) });

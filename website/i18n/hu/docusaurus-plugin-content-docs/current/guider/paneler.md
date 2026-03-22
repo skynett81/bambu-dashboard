@@ -1,12 +1,12 @@
 ---
 sidebar_position: 8
-title: Az irányítópult navigációja
-description: Ismerje meg az irányítópult navigációját — oldalsáv, panelek, billentyűparancsok és testreszabás
+title: Navigálás a dashboardban
+description: Ismerd meg a Bambu Dashboard navigációját — oldalsáv, panelek, billentyűparancsok és testreszabás
 ---
 
-# Az irányítópult navigációja
+# Navigálás a dashboardban
 
-Ez az útmutató gyors bevezetést nyújt az irányítópult szervezéséhez és a hatékony navigációhoz.
+Ez az útmutató gyors bevezetést nyújt a dashboard szervezéséhez és a hatékony navigációhoz.
 
 ## Oldalsáv
 
@@ -24,7 +24,7 @@ Az oldalsáv balra van, a navigációs központja. Szekciókra van szervezve:
 │ Előzmények         │
 │ Projektek          │
 │ Sor                │
-│ Ütemezõ            │
+│ Ütemező            │
 ├────────────────────┤
 │ Monitorozás        │
 │  └ Print Guard     │
@@ -41,7 +41,7 @@ Az oldalsáv balra van, a navigációs központja. Szekciókra van szervezve:
 └────────────────────┘
 ```
 
-**Az oldalsáv elrejthető** az oldalsáv felső részén lévő hamburger ikonra (☰) kattintva. Hasznos kisebb képernyőkön vagy kioszk módban.
+**Az oldalsáv elrejthető** a bal felső sarokban lévő hamburger ikonra (☰) kattintva. Hasznos kisebb képernyőkön vagy kioszk módban.
 
 ## Fő panel
 
@@ -52,7 +52,7 @@ Amikor az oldalsávon rákattint egy elemre, a tartalom a jobb oldalon megjeleni
 | Áttekintés | Kártya-rács az összes nyomtatóval |
 | Aktív nyomtatás | Nagy részlet kártya + hőmérsékleti görbék |
 | Előzmények | Szűrhető táblázat |
-| Filament | Kártya nézet orsolákkal |
+| Filament | Kártyanézet tekercsekkel |
 | Elemzés | Grafikák és diagramok |
 
 ## Kattintson a nyomtató státuszára a részletekhez

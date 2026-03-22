@@ -6,14 +6,14 @@ description: A Bambu Dashboard automatikus és manuális biztonsági másolata, 
 
 # Biztonsági másolat és visszaállítás
 
-A Bambu Dashboard az összes adatot helyileg tárola — nyomtatási előzmények, filamenttárolás, beállítások, felhasználók és egyebek. Az szabályos biztonsági másolat biztosítja, hogy ne veszítse el az adatokat szerver meghibasodása vagy átköltözés esetén.
+A Bambu Dashboard az összes adatot helyileg tárolja — nyomtatási előzmények, filamentkészlet, beállítások, felhasználók és egyebek. A rendszeres biztonsági mentés gondoskodik arról, hogy szerverhiba vagy költözés esetén se veszítsünk el semmit.
 
 ## Mit tartalmaznak a biztonsági másolatok?
 
 | Adat | Mellékelt | Megjegyzés |
 |------|-----------|---------|
 | Nyomtatási előzmények | Igen | Összes napló és statisztika |
-| Filmenttárolás | Igen | Orsók, súlyok, márkák |
+| Filamentkészlet | Igen | Tekercse, súlyok, márkák |
 | Beállítások | Igen | Az összes rendszerbeállítás |
 | Nyomtató beállítása | Igen | IP-címek, hozzáférési kódok |
 | Felhasználók és szerepkörök | Igen | Jelszavak hashed |
@@ -112,7 +112,7 @@ Csak a beállításokat szeretné megmenteni (nem az összes előzményt)?
 4. Kattintson az **Importálás** gombra
 
 :::tip Hasznos új telepítésnél
-Az exportált beállítások praktikus egy új szerverig. Importálja őket az új telepítés után az összes beállítás újbóli beállításának elkerüléshez.
+Az exportált beállítások kényelmessé teszik az új szerverre való átállást. Importáld őket az új telepítés után, hogy ne kelljen mindent újra beállítani.
 :::
 
 ## Áthelyezés új szerverre
@@ -133,7 +133,7 @@ cd bambu-dashboard
 ./install.sh
 ```
 
-Kövesse a telepítési útmutatót. Nem szükséges semmit konfigurálni — csak kapja meg az irányítópultot és fusson.
+Kövesd a telepítési útmutatót. Nem szükséges semmit konfigurálni — csak hozd működésbe a dashboardot.
 
 ### 3. lépés — Állítsa vissza a biztonsági másolatot
 
@@ -143,7 +143,7 @@ Ha az irányítópult az új szerveren fut:
 2. Töltse fel a biztonsági másolat fájlt a régi szerverről
 3. Kattintson a **Visszaállítás most** gombra
 
-Minden a helyén van: előzmények, filmenttárolás, beállítások és felhasználók.
+Minden a helyén van: előzmények, filamentkészlet, beállítások és felhasználók.
 
 ### 4. lépés — Ellenőrizze a kapcsolatot
 

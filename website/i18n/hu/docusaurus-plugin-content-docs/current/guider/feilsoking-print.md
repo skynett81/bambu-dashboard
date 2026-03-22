@@ -1,114 +1,114 @@
 ---
 sidebar_position: 5
-title: Hibás nyomtatás elhárítása
-description: Diagnosztizáljon és oldjon meg gyakori nyomtatási hibákat a Bambu Dashboard hibanapló és eszközeivel
+title: Sikertelen nyomtatás hibaelhárítása
+description: Diagnosztizáld és oldd meg a gyakori nyomtatási hibákat a Bambu Dashboard hibanaplói és eszközei segítségével
 ---
 
-# Hibás nyomtatás elhárítása
+# Sikertelen nyomtatás hibaelhárítása
 
-Valami elromlott? Ne csüggedjen — a legtöbb nyomtatási hiba egyszerű megoldásokat tartalmaz. A Bambu Dashboard segít gyorsan megtalálni az okot.
+Valami rosszul sült el? Ne aggódj — a legtöbb nyomtatási hibának egyszerű megoldása van. A Bambu Dashboard segít gyorsan megtalálni az okot.
 
-## 1. lépés — Ellenőrizze a HMS-hibakódokat
+## 1. lépés — Ellenőrizd a HMS-hibakódokat
 
-Az HMS (kezelés, nyomon követés, érzékelés) a Bambu Labs hibaredszere. Minden hiba automatikusan naplóz az irányítópulton.
+A HMS (Handling, Monitoring, Sensing) a Bambu Labs hibakezelő rendszere. Minden hiba automatikusan naplózódik a dashboardban.
 
-1. Lépjen a **Monitorozás → Hibák** menübe
-2. Keresse meg a hibás nyomtatást
-3. Kattintson a hibakódra a részletes leírás és javasolt megoldás megtekintéséhez
+1. Menj a **Megfigyelés → Hibák** menüpontra
+2. Keresd meg a sikertelen nyomtatást
+3. Kattints a hibakódra a részletes leírásért és a javasolt megoldásért
 
 Gyakori HMS-kódok:
 
 | Kód | Leírás | Gyors megoldás |
-|-----|-----------|--------------|
-| 0700 1xxx | AMS-hiba (megtancolva, motorprobléma) | Ellenőrizze a filament útvonalát az AMS-ben |
-| 0300 0xxx | Extrudálási hiba (alul/felül extrudálása) | Tisztítsa meg a fúvókát, ellenőrizze a filamentet |
-| 0500 xxxx | Kalibrálási hiba | Futtassa a re-kalibrálást |
-| 1200 xxxx | Hőmérséklet eltérése | Ellenőrizze a kábel csatlakozásokat |
-| 0C00 xxxx | Kamerahiba | Indítsa újra a nyomtatót |
+|-----|--------|----------------|
+| 0700 1xxx | AMS-hiba (elakadás, motorprobléma) | Ellenőrizd a filament útját az AMS-ben |
+| 0300 0xxx | Extruziós hiba (alul/felül-extrudálás) | Tisztítsd meg a fúvókát, ellenőrizd a filamentet |
+| 0500 xxxx | Kalibrálási hiba | Futtass újrakalibrálást |
+| 1200 xxxx | Hőmérsékleti eltérés | Ellenőrizd a kábel csatlakozásait |
+| 0C00 xxxx | Kamerahiba | Indítsd újra a nyomtatót |
 
 :::tip Hibakódok az előzményekben
-Az **Előzmények → [Nyomtatás] → HMS-napló** alatt megtekintheti az összes hibakódot, amely az alatt fordult elő — még akkor is, ha a nyomtatás "befejeződött".
+Az **Előzmények → [Nyomtatás] → HMS-napló** menüpontban láthatod az összes hibakódot, amely a folyamat során keletkezett — még akkor is, ha a nyomtatás „befejeződött".
 :::
 
 ## Gyakori hibák és megoldások
 
-### Rossz tapadás (az első réteg nem ragad a lemezhez)
+### Rossz tapadás (az első réteg nem tapad)
 
-**Tünetek:** A nyomtatás a lemezről elválik, görbülhet, első réteg hiányzik
+**Tünetek:** A nyomtatás leválik a lemezről, felkunkorodik, az első réteg hiányzik
 
 **Okok és megoldások:**
 
 | Ok | Megoldás |
-|-------|---------|
-| Szennyezett lemez | Törölje le IPA-alkohollal |
-| Helytelen lemez hőmérséklet | Emelje meg 5°C-vel |
-| Z-offset hiba | Futtassa az Auto Bed Leveling-et újra |
-| Hiányzik ragasztóstift (PETG/ABS) | Vigyen fel vékony ragasztóstift réteget |
-| Túl gyors első réteg sebesség | Csökkentse 20–30 mm/s-ra az első rétegben |
+|----|---------|
+| Piszkos lemez | Töröld meg IPA-alkohollal |
+| Helytelen lemezhőmérséklet | Emeld 5°C-kal |
+| Helytelen Z-eltolás | Futtasd újra az Auto Bed Leveling-et |
+| Hiányzó ragasztóstift (PETG/ABS) | Vigyél fel egy vékony réteg ragasztóstiftet |
+| Túl gyors első réteg sebesség | Csökkentsd 20–30 mm/s-ra az első rétegnél |
 
-**Gyors ellenőrzési lista:**
-1. Clean lemez? (IPA + szálmentes papírtörlő)
-2. Helyes lemez a filament típusához? (lásd [Helyes lemez kiválasztása](./velge-rett-plate))
-3. Z-kalibrálás a legutóbbi lemez csere után?
+**Gyors ellenőrzőlista:**
+1. Tiszta a lemez? (IPA + szálmentes törlőpapír)
+2. Megfelelő lemezt használsz a filament típusához? (lásd [Megfelelő lemez kiválasztása](./velge-rett-plate))
+3. Elvégezted-e a Z-kalibrálást az utolsó lemezcsere után?
 
 ---
 
-### Warping (a sarkok felemelkednek)
+### Vetemedés (a sarkok felemelkednek)
 
-**Tünetek:** A sarkok felfelé hajlanak a lemezről, különösen nagy lapos modelleken
+**Tünetek:** A sarkok felfelé hajlanak a lemezről, különösen nagy, lapos modelleknél
 
 **Okok és megoldások:**
 
 | Ok | Megoldás |
-|-------|---------|
-| Hőmérséklet különbség | Zárja be az ajtót a nyomtatón |
-| Hiányzik a szegély | Aktiválja a szegélyt a Bambu Studio-ban (3–5 mm) |
-| Túl hideg lemez | Emelje meg a lemez hőmérsékletét 5–10°C-kal |
-| Filament magas zsugorodásával (ABS) | Engineering Plate + kamra >40°C |
+|----|---------|
+| Hőmérséklet-különbség | Zárd be az elülső ajtót a nyomtatón |
+| Hiányzó brim | Engedélyezd a brimet a Bambu Studioban (3–5 mm) |
+| Túl hideg lemez | Emeld a lemezhőmérsékletet 5–10°C-kal |
+| Nagy zsugorodású filament (ABS) | Engineering Plate + kamrahőmérséklet >40°C |
 
-**Az ABS és az ASA különösen sérülékeny.** Mindig gondoskodjon:
-- Ajtó zárva
-- Minimum szellőztetés
+**Az ABS és az ASA különösen érzékeny.** Mindig biztosítsd:
+- Elülső ajtó zárva
+- Minimális szellőzés
 - Engineering Plate + ragasztóstift
-- Kamra hőmérséklet 40°C+
+- Kamrahőmérséklet 40°C+
 
 ---
 
-### Stringing (szálak az alkatrészek között)
+### Stringing (szálak a részek között)
 
-**Tünetek:** Finom műanyag szálak a modell különálló részei között
+**Tünetek:** Finom műanyagszálak a modell különálló részei között
 
 **Okok és megoldások:**
 
 | Ok | Megoldás |
-|-------|---------|
-| Nedves filament | Szárítsa meg a filamentet 6–8 órán keresztül (60–70°C) |
-| Túl magas fúvóka hőmérséklet | Csökkentse 5°C-vel |
-| Túl kevés retrakció | Növelje a retraksciót a Bambu Studio-ban |
-| Túl alacsony utazási sebesség | Növelje az utazási sebességet 200+ mm/s-ra |
+|----|---------|
+| Nedves filament | Szárítsd a filamentet 6–8 óráig (60–70°C) |
+| Túl magas fúvókahőmérséklet | Csökkentsd 5°C-kal |
+| Túl kevés visszahúzás | Növeld a visszahúzás hosszát a Bambu Studioban |
+| Túl lassú mozgási sebesség | Növeld az utazási sebességet 200+ mm/s-ra |
 
-**Páratartalom teszt:** Hallgasson meg pattanó hangokon vagy lásson boborékokat az extrudálásban — ez nedves filamentet jelez. A Bambu AMS beépített páratartalom-méréseket tartalmaz; ellenőrizze a páratartalmot az **AMS-status** alatt.
+**A nedvességteszt:** Figyelj pattanó hangokra, vagy keress buborékokat az extrudálásban — ez nedves filamentre utal. A Bambu AMS beépített páratartalom-mérővel rendelkezik; ellenőrizd a páratartalmat az **AMS-állapot** menüpontban.
 
-:::tip Filament szárító
-Fektessen egy filament szárítóban (pl. Bambu Filament Dryer), ha nylonaval vagy TPU-val dolgozik — ezek 12 óra alatt felszívnak nedvességet.
+:::tip Filamentszárító
+Fektess be egy filamentszárítóba (pl. Bambu Filament Dryer), ha nylonnal vagy TPU-val dolgozol — ezek 12 órán belül felszívják a nedvességet.
 :::
 
 ---
 
-### Spagetti (a nyomtatás egy klumphoz omlik össze)
+### Spagetti (a nyomtatás összeomlik egy csomóvá)
 
-**Tünetek:** A filament lógó szálakban lógó, a nyomtatás nem ismerkedik fel
+**Tünetek:** A filament lazán lóg a levegőben, a nyomtatás felismerhetetlen
 
 **Okok és megoldások:**
 
 | Ok | Megoldás |
-|-------|---------|
-| Rossz tapadás korai → elváló → összeesés | Lásd a tapadás részt fent |
-| Túl gyors sebesség | Csökkentse a sebességet 20–30%-kal |
-| Hibás támasz konfiguráció | Aktiválja a támasztást a Bambu Studio-ban |
-| Az túlnyúlás túl meredek | Ossza fel a modellt, vagy fordítsa 45°-kal |
+|----|---------|
+| Korai rossz tapadás → leváló → összeomlás | Lásd a tapadás részt fentebb |
+| Túl magas sebesség | Csökkentsd a sebességet 20–30%-kal |
+| Helytelen támasztékkonfiguráció | Engedélyezd a támasztékot a Bambu Studioban |
+| Túl meredek túlnyúlás | Oszd fel a modellt, vagy forgasd 45°-kal |
 
-**Használja a Print Guard-ot a spagetti automatikus leállításához** — lásd a következő részt.
+**Használd a Print Guardot a spagetti automatikus megállításához** — lásd a következő részt.
 
 ---
 
@@ -119,52 +119,52 @@ Fektessen egy filament szárítóban (pl. Bambu Filament Dryer), ha nylonaval va
 **Okok és megoldások:**
 
 | Ok | Megoldás |
-|-------|---------|
-| Fúvóka részben eldugult | Futtassa a Cold Pull-t (lásd karbantartás) |
-| Túl nedves filament | Szárítsa meg a filamentet |
-| Túl alacsony hőmérséklet | Emelje meg a fúvóka hőmérsékletét 5–10°C-kal |
-| Túl gyors sebesség | Csökkentse 20–30%-kal |
-| PTFE-cső sérült | Vizsgáljon meg és cseréljen PTFE-csövet |
+|----|---------|
+| Részlegesen eltömött fúvóka | Végezz hideg lehúzást (Cold Pull, lásd karbantartás) |
+| Túl nedves filament | Szárítsd a filamentet |
+| Túl alacsony hőmérséklet | Emeld a fúvókahőmérsékletet 5–10°C-kal |
+| Túl magas sebesség | Csökkentsd 20–30%-kal |
+| Sérült PTFE-cső | Vizsgáld meg és cseréld ki a PTFE-csövet |
 
 ## A Print Guard használata automatikus védelemhez
 
 A Print Guard figyelemmel követi a kamerákat a képfelismerés segítségével, és automatikusan leállítja a nyomtatást, ha spagettit észlel.
 
-**Print Guard aktiválása:**
-1. Lépjen a **Monitorozás → Print Guard** menübe
-2. Engedélyezze az **Automatikus felismerés**
-3. Válassza a műveletet: **Szünetel** (ajánlott) vagy **Záró**
-4. Állítsa az érzékenységet (kezdje az **Közepes**-vel)
+**A Print Guard engedélyezése:**
+1. Menj a **Megfigyelés → Print Guard** menüpontra
+2. Engedélyezd az **Automatikus észlelés** opciót
+3. Válassz műveletet: **Szünet** (ajánlott) vagy **Megszakítás**
+4. Állítsd be az érzékenységet (kezdd **Közepesen**)
 
-**Amikor a Print Guard avatkozik be:**
-1. Értesítést kap az opplöség alapján való kamerakép
+**Amikor a Print Guard beavatkozik:**
+1. Értesítést kapsz egy kameraképpel arról, amit észlelt
 2. A nyomtatás szünetel
-3. Választhat: **Folytatás** (ha hamis pozitív) vagy **Nyomtatás lemondása**
+3. Választhatsz: **Folytatás** (ha hamis pozitív) vagy **Nyomtatás megszakítása**
 
 :::info Hamis pozitívok
 A Print Guard néha sok vékony oszlopból álló modelleken reagálhat. Csökkentse az érzékenységet, vagy ideiglenesen tiltsa le az összetett modellekhez.
 :::
 
-## Diagnosztikai eszközök az irányítópulton
+## Diagnosztikai eszközök a dashboardban
 
-### Hőmérséklet napló
-Az **Előzmények → [Nyomtatás] → Hőmérsékletek** alatt megtekintheti a hőmérsékleti görbét az egész nyomtatáson keresztül. Keresse:
-- Hirtelen hőmérséklet csökkenést (fúvóka vagy lemez probléma)
-- Egyenetlen hőmérsékletek (kalibrálásra van szükség)
+### Hőmérsékleti napló
+Az **Előzmények → [Nyomtatás] → Hőmérsékletek** menüpontban láthatod a hőmérsékleti görbét a teljes nyomtatás során. Figyeld:
+- Hirtelen hőmérsékletesések (fúvóka- vagy lemezhiba)
+- Egyenetlen hőmérsékletek (kalibrálási igény)
 
-### Filament statisztika
-Ellenőrizze, hogy a felhasznált filament megegyezik-e a becsléssel. A nagy eltérés alul extrudálást vagy filament szünetet jelezhet.
+### Filamentstatisztikák
+Ellenőrizd, hogy a felhasznált filament megegyezik-e a becslésekkel. Nagy eltérés alulextrudálásra vagy filamenttörésre utalhat.
 
-## Mikor kapcsolódjon be a támogatáshoz?
+## Mikor fordulj a támogatáshoz?
 
-Vegye fel a kapcsolatot a Bambu Labs támogatásával, ha:
-- A HMS-kód ismétlődik az összes megoldási javaslat követése után
-- A nyomtatón mechanikai sérüléseket lát (hajlított rudak, sérült fogaskerekek)
-- A hőmérséklet értékei lehetetlenek (pl. fúvóka -40°C-ot olvas)
-- A firmware frissítés nem oldja meg a problémát
+Lépj kapcsolatba a Bambu Labs támogatásával, ha:
+- A HMS-kód ismétlődik, miután követted az összes javasolt megoldást
+- Mechanikai sérülést látsz a nyomtatón (hajlított rudak, törött fogaskerekek)
+- A hőmérsékleti értékek lehetetlenek (pl. a fúvóka -40°C-ot mutat)
+- A firmware-frissítés nem oldja meg a problémát
 
-**Hasznos a támogatáshoz:**
-- HMS-hibakódok az irányítópult hibanapljából
+**Hasznos, ha kéznél van a támogatáshoz:**
+- HMS-hibakódok a dashboard hibanaplójából
 - Kamerakép a hibáról
-- Mely filament és beállítások lettek felhasználva (az előzményekből exportálhatók)
-- Nyomtató modell és firmware verzió (megjelenik az **Beállítások → Nyomtató → Info** alatt)
+- Melyik filamentet és beállításokat használtad (exportálható az előzményekből)
+- Nyomtatómodell és firmware-verzió (megjelenik a **Beállítások → Nyomtató → Információ** menüpontban)

@@ -300,11 +300,56 @@
           </div>
           <div class="ce-cost-bar"><div class="ce-cost-bar-fill" style="width:${_costPct(c.wear_cost, c.total_cost)}%;background:var(--accent-purple, #7b2ff2)"></div></div>
         </div>
+        ${c.labor_cost > 0 ? `<div class="ce-cost-item">
+          <div class="ce-cost-icon" style="background:rgba(74,163,223,0.08);color:var(--accent-blue)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="ce-cost-detail">
+            <span class="ce-cost-label">${_tl('cost_estimator.labor_cost', 'Arbeid')}</span>
+            <span class="ce-cost-value">${formatCurrency(c.labor_cost, cur)}</span>
+          </div>
+          <div class="ce-cost-bar"><div class="ce-cost-bar-fill" style="width:${_costPct(c.labor_cost, c.total_cost)}%;background:var(--accent-blue)"></div></div>
+        </div>` : ''}
+        ${c.waste_material_cost > 0 ? `<div class="ce-cost-item">
+          <div class="ce-cost-icon" style="background:rgba(229,57,53,0.08);color:var(--accent-red)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          </div>
+          <div class="ce-cost-detail">
+            <span class="ce-cost-label">${_tl('cost_estimator.waste_cost', 'Avfall/svinn')}</span>
+            <span class="ce-cost-value">${formatCurrency(c.waste_material_cost, cur)}</span>
+          </div>
+          <div class="ce-cost-bar"><div class="ce-cost-bar-fill" style="width:${_costPct(c.waste_material_cost, c.total_cost)}%;background:var(--accent-red)"></div></div>
+        </div>` : ''}
       </div>
-      <div class="ce-total-row">
-        <span class="ce-total-label">${_tl('cost_estimator.total_cost', 'Total')}</span>
+      <div class="ce-total-row" style="border-top:1px solid var(--border-color);padding-top:8px">
+        <span class="ce-total-label">${_tl('cost_estimator.subtotal', 'Produksjonskostnad')}</span>
+        <span class="ce-total-value">${formatCurrency(c.subtotal || c.total_cost, cur)}</span>
+      </div>
+      ${c.markup_amount > 0 ? `<div class="ce-total-row" style="color:var(--accent-green)">
+        <span class="ce-total-label">${_tl('cost_estimator.markup', 'Påslag')} (${c.markup_pct || 0}%)</span>
+        <span class="ce-total-value">+ ${formatCurrency(c.markup_amount, cur)}</span>
+      </div>` : ''}
+      <div class="ce-total-row ce-grand-total">
+        <span class="ce-total-label">${_tl('cost_estimator.total_cost', 'Totalkostnad')}</span>
         <span class="ce-total-value">${formatCurrency(c.total_cost, cur)}</span>
       </div>
+      ${c.suggested_prices ? `<div class="ce-pricing-section" style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-color)">
+        <div style="font-size:0.75rem;font-weight:600;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px">${_tl('cost_estimator.suggested_prices', 'Foreslåtte salgspriser')}</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+          <div class="ce-price-card" style="text-align:center;padding:10px;border-radius:var(--radius);background:var(--bg-tertiary)">
+            <div style="font-size:0.7rem;color:var(--text-muted)">2× margin</div>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--accent-green)">${formatCurrency(c.suggested_prices.low, cur)}</div>
+          </div>
+          <div class="ce-price-card" style="text-align:center;padding:10px;border-radius:var(--radius);background:var(--bg-tertiary);border:2px solid var(--accent-green)">
+            <div style="font-size:0.7rem;color:var(--text-muted)">2.5× margin</div>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--accent-green)">${formatCurrency(c.suggested_prices.medium, cur)}</div>
+          </div>
+          <div class="ce-price-card" style="text-align:center;padding:10px;border-radius:var(--radius);background:var(--bg-tertiary)">
+            <div style="font-size:0.7rem;color:var(--text-muted)">3× margin</div>
+            <div style="font-size:1.1rem;font-weight:700;color:var(--accent-green)">${formatCurrency(c.suggested_prices.high, cur)}</div>
+          </div>
+        </div>
+      </div>` : ''}
     </div>`;
 
     // Filament detail breakdown

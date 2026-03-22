@@ -1,7 +1,7 @@
 ---
 sidebar_position: 7
 title: Értesítések beállítása
-description: Konfigurálja a Telegram, Discord, e-mail és push értesítéseket a Bambu Dashboard-ban
+description: Telegram, Discord, e-mail és push értesítések konfigurálása a Bambu Dashboardban
 ---
 
 # Értesítések beállítása
@@ -26,7 +26,7 @@ A Bambu Dashboard értesíthet a befejezett nyomtatásoktól a kritikus hibákig
 1. Nyissa meg a Telegramot, és keresse meg a **@BotFather** alkalmazást
 2. Küldje el a `/newbot` parancsot
 3. Adjon nevet a botnak (pl. "Bambu Értesítések")
-4. Adjon brukernevet a botnak (pl. `bambu_alerts_bot`) — `-nek kell végződnie bot`
+4. Adjon felhasználónevet a botnak (pl. `bambu_alerts_bot`) — `bot`-ra kell végződnie
 5. A BotFather egy **API-tokent** válaszol: `123456789:ABCdefGHIjklMNOpqrsTUVwxyz`
 6. Másolja és tartsa meg ezt a tokent
 
@@ -34,7 +34,7 @@ A Bambu Dashboard értesíthet a befejezett nyomtatásoktól a kritikus hibákig
 
 1. Indítson egy beszélgetést a bottal (keresse meg a felhasználónevet, és kattintson a **Kezdés** gombra)
 2. Küldjön üzenetet a botnak (pl. "hi")
-3. Lépjen a `https://api.telegram.org/bot<YOUR_TOKEN>/getUpdates` webhelyre a böngészőben
+3. Lépjen a `https://api.telegram.org/bot<SAJÁT_TOKEN>/getUpdates` webhelyre a böngészőben
 4. Keresse meg a `"chat":{"id": 123456789}` — ez az ön chat ID
 
 ### 3. lépés — Kapcsolódjon az irányítópulthoz
@@ -101,9 +101,9 @@ A Gmail blokkolja a szokásos jelszóval való bejelentkezést. Létre kell hozn
    - **SMTP-szerver**: pl. `smtp.gmail.com`
    - **Port**: `587`
    - **Felhasználónév**: az e-mail cím
-   - **Jelszó**: alkalmazás-jelszó vagy szokásos jelszó
-   - **Címzett**: az e-mail, ahonnan az értesítés érkezik
-   - **Címzett**: az e-mail, amely fogadja az értesítéseket
+   - **Jelszó**: alkalmazásjelszó vagy normál jelszó
+   - **Feladó**: az e-mail cím, amelyről az értesítés érkezik
+   - **Címzett**: az e-mail cím, amelyre az értesítéseket fogadni szeretnéd
 3. Kattintson az **E-mail tesztelése** gombra
 4. Kattintson a **Mentés** gombra
 

@@ -323,7 +323,7 @@ export function estimatePrintCostAdvanced(filamentUsedG, durationSeconds, spoolI
   const printerWattage = cs.printer_wattage;
   const machineCost = cs.machine_cost;
   const machineLifetimeH = cs.machine_lifetime_hours;
-  const laborRate = parseFloat(getInventorySetting('labor_rate_hour') || '0');
+  const laborRate = parseFloat(getInventorySetting('labor_rate_hourly') || getInventorySetting('labor_rate_hour') || '0');
   const setupMinutes = parseFloat(getInventorySetting('labor_setup_minutes') || '0');
   const markupPct = parseFloat(getInventorySetting('markup_pct') || '0');
   const currency = getInventorySetting('cost_currency') || 'NOK';

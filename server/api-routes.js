@@ -2091,25 +2091,61 @@ export async function handleApiRequest(req, res) {
           const spotRate = currentPrice ? currentPrice.total : electricityRate;
           const electricityCost = Math.round(durationH * (wattage / 1000) * spotRate * 100) / 100;
 
-          // Wear cost (nozzle depreciation per hour)
+          // Waste factor — material inefficiency (default 1.1 = 10% waste)
+          const wasteFactor = parseFloat(getInventorySetting('material_waste_factor') || '1.0');
+          const adjustedFilamentCost = Math.round(totalFilamentCost * wasteFactor * 100) / 100;
+          const wasteCost = Math.round((adjustedFilamentCost - totalFilamentCost) * 100) / 100;
+
+          // Wear cost (nozzle + machine depreciation per hour)
           const nozzleCostPerHour = parseFloat(getInventorySetting('nozzle_cost_per_hour') || '0');
           const machineDepreciation = cs.machine_cost > 0 && cs.machine_lifetime_hours > 0
             ? cs.machine_cost / cs.machine_lifetime_hours : 0;
           const wearCost = Math.round(durationH * (nozzleCostPerHour + machineDepreciation) * 100) / 100;
 
-          const totalCost = Math.round((totalFilamentCost + electricityCost + wearCost) * 100) / 100;
+          // Labor cost (hourly rate + setup time)
+          const laborRate = parseFloat(getInventorySetting('labor_rate_hourly') || '0');
+          const setupMinutes = parseFloat(getInventorySetting('labor_setup_minutes') || '0');
+          const laborCost = Math.round((durationH * laborRate + (setupMinutes / 60) * laborRate) * 100) / 100;
+
+          // Subtotal (all production costs)
+          const subtotal = Math.round((adjustedFilamentCost + electricityCost + wearCost + laborCost) * 100) / 100;
+
+          // Markup / profit margin
+          const markupPct = parseFloat(getInventorySetting('markup_pct') || '0');
+          const markupAmount = Math.round(subtotal * (markupPct / 100) * 100) / 100;
+          const totalCost = Math.round((subtotal + markupAmount) * 100) / 100;
+
+          // Suggested selling prices at different margins
+          const suggestedPrices = {
+            cost: subtotal,
+            low: Math.ceil(subtotal * 2),
+            medium: Math.ceil(subtotal * 2.5),
+            high: Math.ceil(subtotal * 3),
+            custom: totalCost
+          };
 
           return sendJson(res, {
             filament_breakdown: filamentBreakdown,
             filament_cost: totalFilamentCost,
+            waste_material_cost: wasteCost,
+            adjusted_filament_cost: adjustedFilamentCost,
             electricity_cost: electricityCost,
             electricity_rate: spotRate,
             wear_cost: wearCost,
+            labor_cost: laborCost,
+            subtotal,
+            markup_pct: markupPct,
+            markup_amount: markupAmount,
             total_cost: totalCost,
+            suggested_prices: suggestedPrices,
             currency,
             estimated_time_min: estimatedTimeMin,
             wattage,
-            settings: { wattage, electricity_rate: spotRate, nozzle_cost_per_hour: nozzleCostPerHour, machine_depreciation: machineDepreciation }
+            settings: {
+              wattage, electricity_rate: spotRate, nozzle_cost_per_hour: nozzleCostPerHour,
+              machine_depreciation: machineDepreciation, labor_rate: laborRate,
+              setup_minutes: setupMinutes, markup_pct: markupPct, waste_factor: wasteFactor
+            }
           });
         } catch (e) { return sendJson(res, { error: e.message }, 500); }
       });

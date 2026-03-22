@@ -1,29 +1,29 @@
 ---
 sidebar_position: 10
-title: 3D nyomtatás közvetítése az OBS-be
-description: A Bambu Dashboard beállítása az OBS Studio-ban való átlátszó layerként a professzionális 3D-nyomtatás streamléséhez
+title: Streamelés OBS-sel
+description: A Bambu Dashboard beállítása OBS Studio overlay-ként professzionális 3D nyomtatási streamhez
 ---
 
-# 3D nyomtatás közvetítése az OBS-be
+# 3D nyomtatás streamelése OBS-sel
 
-A Bambu Dashboard egy beépített OBS-átlátszó réteget tartalmaz, amely a nyomtató státuszát, haladást, hőmérsékleteket és kamerafeed-et közvetlenül a streambe jeleníti meg.
+A Bambu Dashboard beépített OBS-overlayt tartalmaz, amely a nyomtató állapotát, az előrehaladást, a hőmérsékleteket és a kameraképet közvetlenül a streamedbe jeleníti meg.
 
-## Követelmények
+## Előfeltételek
 
-- Az OBS Studio telepített ([obsproject.com](https://obsproject.com))
-- Bambu Dashboard futó és csatlakoztatott nyomtatóval
-- (Opcionális) Bambu kamera aktiválva az élő feed-hez
+- OBS Studio telepítve ([obsproject.com](https://obsproject.com))
+- Bambu Dashboard fut és csatlakoztatott nyomtatóval rendelkezik
+- (Opcionális) Bambu kamera engedélyezve az élő képhez
 
-## 1. lépés — OBS böngésző forrása
+## 1. lépés — OBS Browser Source
 
-Az OBS beépített **böngésző forráskód** egy weboldalt közvetlenül a jelenetig jeleníti meg.
+Az OBS beépített **Browser Source** funkciója egy weboldalt közvetlenül a jelenetedbe jelenít meg.
 
-**Átlátszó réteg hozzáadása az OBS-ben:**
+**Overlay hozzáadása az OBS-ben:**
 
 1. Nyissa meg az OBS Studio-t
 2. A **Források** alatt kattintson a **+** gombra
 3. Válassza a **Böngésző** (Browser) lehetőséget
-4. Adjon nevet a forrásnak, pl. "Bambu átlátszó"
+4. Adjon nevet a forrásnak, pl. „Bambu Overlay"
 5. Töltse ki:
 
 | Beállítás | Érték |
@@ -37,18 +37,18 @@ Az OBS beépített **böngésző forráskód** egy weboldalt közvetlenül a jel
 6. Jelölje be az **Audio kezelése az OBS-ből** lehetőséget
 7. Kattintson az **OK** gombra
 
-:::info Az URL-t az Ön szervéhez igazítsa
-Az irányítópult egy másik gépen fut, mint az OBS? Cserélje le a `localhost` szerver IP-címével, pl. `http://192.168.1.50:3000/obs/overlay`
+:::info Igazítsd az URL-t a te szerveredhez
+A dashboard egy másik gépen fut, mint az OBS? Cseréld le a `localhost` értéket a szerver IP-címével, pl. `http://192.168.1.50:3000/obs/overlay`
 :::
 
 ## 2. lépés — Átlátszó háttér
 
-Ahhoz, hogy az átlátszó réteg beolvadjon a képbe, a háttérnek átlátszónak kell lennie:
+Ahhoz, hogy az overlay beolvadjon a képbe, a háttérnek átlátszónak kell lennie:
 
-**Az OBS böngésző forrás beállításaiban:**
-- Jelölje be az **Háttér eltávolítása** (Shutdown source when not visible / Remove background) lehetőséget
+**Az OBS Browser Source beállításaiban:**
+- Jelöld be a **Háttér eltávolítása** (Remove background) opciót
 
-**Egyéni CSS az átlátszóság kényszerítéséhez:**
+**Egyéni CSS az átlátszóság kikényszerítéséhez:**
 ```css
 body {
   background-color: rgba(0, 0, 0, 0) !important;
@@ -57,79 +57,79 @@ body {
 }
 ```
 
-Illessze be ezt az **Egyéni CSS** mezőbe a böngésző forrás beállításaiban.
+Illeszd be ezt az **Egyéni CSS** mezőbe a Browser Source beállításaiban.
 
-Az átlátszó réteg csak a widgetet jeleníti meg — fehér vagy fekete háttér nélkül.
+Az overlay ezután csak magát a widgetet jeleníti meg — fehér vagy fekete háttér nélkül.
 
-## 3. lépés — Az átlátszó réteg testreszabása
+## 3. lépés — Az overlay testreszabása
 
-A Bambu Dashboard-ban beállíthatja, hogy az átlátszó réteg mit jelenít meg:
+A Bambu Dashboardban konfigurálhatod, mit jelenítsen meg az overlay:
 
-1. Lépjen a **Funkciók → OBS-átlátszó** menübe
-2. Konfigurálása:
+1. Menj a **Funkciók → OBS-overlay** menüpontra
+2. Konfiguráld:
 
 | Beállítás | Lehetőségek |
 |-----------|------------|
-| Pozíció | Felül bal, jobb, lent bal, jobb |
+| Pozíció | Felül bal, felül jobb, alul bal, alul jobb |
 | Méret | Kicsi, közepes, nagy |
 | Téma | Sötét, világos, átlátszó |
-| Szín akcentus | Válassza ki a streamhez illő színt |
-| Elemek | Válassza ki, mi legyen megjelenítve (lásd alább) |
+| Akcentszín | Válassz a stream stílusához illő színt |
+| Elemek | Válaszd ki, mi jelenjen meg (lásd alább) |
 
-**Elérhető átlátszó elemek:**
+**Elérhető overlay-elemek:**
 
-- Nyomtató névés státusz (online/nyomtatás/hiba)
-- Haladási sáv százalékkal és hátralévő idővel
+- Nyomtató neve és állapota (online/nyomtat/hiba)
+- Előrehaladási sáv százalékkal és hátralévő idővel
 - Filament és szín
-- Fúvóka és lemez hőmérséklet
+- Fúvóka- és lemezhőmérséklet
 - Felhasznált filament (gramm)
 - AMS-áttekintés (kompakt)
-- Print Guard státusz
+- Print Guard állapota
 
-3. Kattintson az **Előnézet** gombra az eredmény megtekintéséhez az OBS váltása nélkül
-4. Kattintson a **Mentés** gombra
+3. Kattints az **Előnézet** gombra az eredmény megtekintéséhez OBS-váltás nélkül
+4. Kattints a **Mentés** gombra
 
 :::tip URL nyomtatónként
-Több nyomtatóval rendelkezik? Használjon külön átlátszó URL-eket:
+Több nyomtatód van? Használj külön overlay URL-eket:
 ```
 /obs/overlay?printer=1
 /obs/overlay?printer=2
 ```
 :::
 
-## Kamera feed az OBS-ben (külön forrás)
+## Kamerakép az OBS-ben (külön forrás)
 
-A Bambu kamera külön forrásként adható hozzá az OBS-hez — az átlátszó rétegtől függetlenül:
+A Bambu kamera külön forrásként adható hozzá az OBS-hez — az overlay-től függetlenül:
 
-**1. lehetőség: Az irányítópult kamera proxy-ja által**
+**1. lehetőség: A dashboard kamera-proxyn keresztül**
 
-1. Lépjen a **Rendszer → Kamera** menübe
-2. Másolja az **RTSP- vagy MJPEG-streelming URL-ét**
-3. Az OBS-ben: Kattintson a **+** → **Médiaforrás** (Media Source) gombra
-4. Illessze be az URL-t
-5. Jelölje be az **Ismétlés** (Loop) és a helyi fájlok kikapcsolása
+1. Menj a **Rendszer → Kamera** menüpontra
+2. Másold az **RTSP- vagy MJPEG-streaming URL-jét**
+3. Az OBS-ben: Kattints a **+** → **Médiaforrás** (Media Source) gombra
+4. Illeszd be az URL-t
+5. Jelöld be az **Ismétlés** (Loop) opciót, és kapcsold ki a helyi fájlok beállítást
 
-**2. lehetőség: Böngésző forrás kamera nézet**
+**2. lehetőség: Browser Source kameranézettel**
 
-1. Az OBS-ben: Adjon hozzá **böngésző forrást**
+1. Az OBS-ben: Adj hozzá **Browser Source-t**
 2. URL: `http://localhost:3000/obs/camera?printer=1`
-3. Szélesség/magasság: megegyezik a kamera felbontásával (1080p vagy 720p)
+3. Szélesség/magasság: egyezzen a kamera felbontásával (1080p vagy 720p)
 
-Most a kamerafeed-et szabadon helyezheti a jelenetbe, és az átlátszó réteget ráteheti.
+A kameraképet ezután szabadon elhelyezheted a jelenetben, és az overlayt rárakhatod.
 
-## Tippek a jó streamléséhez
+## Tippek a jó streamhez
 
-### Jelenetbeállítás a streamléséhez
+### Jelenetfelépítés streamhez
 
-Egy tipikus jelenet a 3D-nyomtatás streamléséhez:
+Egy tipikus jelenet 3D nyomtatás streameléshez:
 
 ```
 ┌─────────────────────────────────────────┐
 │                                         │
-│      [Kamera feed a nyomtatóból]        │
+│      [Kamerakép a nyomtatóból]          │
 │                                         │
 │  ┌──────────────────┐                  │
-│  │ Bambu átlátszó   │  ← Lent bal      │
+│  │ Bambu Overlay    │  ← Alul bal      │
 │  │ Print: Logo.3mf  │                  │
 │  │ ████████░░ 82%   │                  │
 │  │ 1ó 24p maradt    │                  │
@@ -142,34 +142,34 @@ Egy tipikus jelenet a 3D-nyomtatás streamléséhez:
 
 | Paraméter | Ajánlott érték |
 |-----------|---------------|
-| Átlátszó méret | Közepes (nem túl domináns) |
-| Frissítési frekvencia | 30 FPS (az OBS-nek felel meg) |
-| Átlátszó pozíció | Lent bal (kerülje az arcot/csevegést) |
-| Szín téma | Sötét kék akcentussal |
+| Overlay mérete | Közepes (ne legyen túl domináns) |
+| Frissítési frekvencia | 30 FPS (az OBS-hez igazítva) |
+| Overlay pozíciója | Alul bal (kerüli az arcot/chatet) |
+| Színtéma | Sötét, kék akcentussal |
 
 ### Jelenetek és jelenetváltás
 
-Hozzon létre saját OBS-jeleneteket:
+Hozz létre saját OBS-jeleneteket:
 
-- **"Nyomtatás folyamatban"** — kameranézet + átlátszó
-- **"Szünetel / vár"** — statikus kép + átlátszó
-- **"Kész"** — eredmény kép + átlátszó "Kész" mutatva
+- **„Nyomtatás folyamatban"** — kameranézet + overlay
+- **„Szünet / várakozás"** — statikus kép + overlay
+- **„Kész"** — eredménykép + overlay „Befejezve" felirattal
 
-Billentyűparancs vagy jelenet gyűjtemény segítségével váltson a jelenetek között az OBS-ben.
+Váltogass a jelenetek között OBS billentyűparancsokkal vagy Scene Collectionnel.
 
-### Kamera obraz stabilizálása
+### Kamerakép stabilizálása
 
-A Bambu kamera néha lefagyhat. Az irányítópulton az **Rendszer → Kamera** alatt:
-- Engedélyezze az **Automatikus újracsatlakozás** — az irányítópult automatikusan újracsatlakozik
-- Állítsa az **Újracsatlakozás intervallumát** 10 másodpercre
+A Bambu kamera néha lefagyhat. A dashboardon a **Rendszer → Kamera** menüpontban:
+- Engedélyezd az **Automatikus újracsatlakozás** funkciót — a dashboard automatikusan újracsatlakozik
+- Állítsd az **Újracsatlakozási intervallumot** 10 másodpercre
 
-### Hangok
+### Hang
 
-A 3D nyomtatók zajosak — különösen az AMS és hűtés. Vegyük figyelembe:
-- Helyezze a mikrofont messze a nyomtatótól
-- Adjon hozzá zajszűrőt a mikrofonhoz az OBS-ben (Noise Suppression)
-- Vagy használjon háttérzene / csevegési hangot
+A 3D nyomtatók zajosak — különösen az AMS és a hűtés. Vedd figyelembe:
+- Helyezd a mikrofont messze a nyomtatótól
+- Adj zajszűrőt a mikrofonhoz az OBS-ben (Noise Suppression)
+- Vagy használj háttérzenét / chat hangot helyette
 
-:::tip Automatikus jelenet váltása
-Az OBS beépített támogatása a jelenet váltására a címek alapján. Kombináljon egy bővítménnyel (pl. obs-websocket) és a Bambu Dashboard API-val a jelenet automatikus váltásához a nyomtatás kezdésekor és megállításakor.
+:::tip Automatikus jelenetváltás
+Az OBS támogatja a jelenetváltást eseményalapú logikával. Kombináld egy bővítménnyel (pl. obs-websocket) és a Bambu Dashboard API-val, hogy a jelenet automatikusan váltson, amikor a nyomtatás elindul vagy leáll.
 :::
