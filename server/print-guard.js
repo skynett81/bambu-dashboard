@@ -130,6 +130,11 @@ export class PrintGuardService {
     // Skip if nozzle target is low (< 150°C) — typically standby/cooldown during print
     if (nozzleTarget != null && nozzleTarget < 150) return;
 
+    // Skip if actual nozzle temp is in standby range (< 160°C) — Bambu printers
+    // hold nozzle at ~140°C between color changes/plates while gcode_state is still RUNNING
+    // and nozzle_target_temper remains at the print temperature (e.g. 220°C)
+    if (nozzleTemp != null && nozzleTemp < 160) return;
+
     // Check nozzle temperature — only alert if target is stable and temp is way off
     if (nozzleTemp != null && nozzleTarget != null && nozzleTarget >= 150) {
       const diff = Math.abs(nozzleTemp - nozzleTarget);

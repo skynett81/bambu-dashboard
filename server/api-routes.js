@@ -5633,7 +5633,7 @@ export async function handleApiRequest(req, res) {
           body.invoice_number = 'INV-' + Date.now();
         }
         const id = createInvoice(body);
-        addTimelineEvent(body.project_id, 'invoice_created', 'Invoice ' + body.invoice_number + ' created');
+        addTimelineEvent(body.project_id, 'invoice_created', 'Faktura ' + body.invoice_number + ' opprettet');
         sendJson(res, { ok: true, id }, 201);
       });
     }
@@ -5646,6 +5646,7 @@ export async function handleApiRequest(req, res) {
         if (!p) return sendJson(res, { error: 'Not found' }, 404);
         if (body.enabled === false) {
           updateProject(projectId, { share_enabled: 0 });
+          addTimelineEvent(projectId, 'share_toggled', 'Delingslenke deaktivert');
           return sendJson(res, { ok: true, share_enabled: false });
         }
         let token = p.share_token;
@@ -5654,7 +5655,7 @@ export async function handleApiRequest(req, res) {
         } else {
           updateProject(projectId, { share_enabled: 1 });
         }
-        addTimelineEvent(projectId, 'share_toggled', 'Share link ' + (body.enabled === false ? 'disabled' : 'enabled'));
+        addTimelineEvent(projectId, 'share_toggled', 'Delingslenke aktivert');
         sendJson(res, { ok: true, share_token: token, share_enabled: true });
       });
     }
@@ -5665,7 +5666,7 @@ export async function handleApiRequest(req, res) {
         const projectId = parseInt(projLinkQueueMatch[1]);
         if (!body.queue_item_id) return sendJson(res, { error: 'queue_item_id required' }, 400);
         const id = addProjectPrint({ project_id: projectId, queue_item_id: body.queue_item_id, filename: body.filename || null, status: 'pending' });
-        addTimelineEvent(projectId, 'queue_linked', 'Queue item #' + body.queue_item_id + ' linked');
+        addTimelineEvent(projectId, 'queue_linked', 'Køelement #' + body.queue_item_id + ' koblet');
         sendJson(res, { ok: true, id }, 201);
       });
     }
@@ -5681,7 +5682,7 @@ export async function handleApiRequest(req, res) {
       return readBody(req, res, (body) => {
         if (!body.name) return sendJson(res, { error: 'name required' }, 400);
         const id = addProject(body);
-        addTimelineEvent(id, 'project_created', 'Project "' + body.name + '" created');
+        addTimelineEvent(id, 'project_created', 'Bestilling "' + body.name + '" opprettet');
         sendJson(res, { ok: true, id }, 201);
       });
     }
@@ -5690,7 +5691,7 @@ export async function handleApiRequest(req, res) {
       return readBody(req, res, (body) => {
         const projectId = parseInt(projMatch[1]);
         updateProject(projectId, body);
-        if (body.status) addTimelineEvent(projectId, 'status_changed', 'Status changed to ' + body.status);
+        if (body.status) addTimelineEvent(projectId, 'status_changed', 'Status endret til ' + body.status);
         sendJson(res, { ok: true });
       });
     }
