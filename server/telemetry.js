@@ -7,6 +7,7 @@ import { randomUUID } from 'node:crypto';
 import { platform, arch, totalmem } from 'node:os';
 import { config, ROOT_DIR, DATA_DIR } from './config.js';
 import { getPrinters, getSpools, getFilamentProfiles, getInventorySetting } from './database.js';
+import { getDb } from './db/connection.js';
 
 const TELEMETRY_URL = 'https://telemetry.geektech.no/ping';
 const ID_FILE = join(DATA_DIR, '.install-id');
@@ -75,10 +76,22 @@ function getAggregateStats() {
       models[m] = (models[m] || 0) + 1;
     }
 
+    // Count prints
+    let totalPrints = 0;
+    let completedPrints = 0;
+    try {
+      const db = getDb();
+      const counts = db.prepare("SELECT COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM print_history").get();
+      totalPrints = counts.total || 0;
+      completedPrints = counts.completed || 0;
+    } catch {}
+
     return {
       printerCount: printers.length,
       printerModels: models,
       totalSpools: spools.length || 0,
+      totalPrints,
+      completedPrints,
       totalProfiles: profiles.length || 0,
       language: language || null
     };
