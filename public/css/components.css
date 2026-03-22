@@ -654,13 +654,12 @@
 
 .mi-section {
   background: var(--bg-card);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius);
   padding: 16px;
 }
 
 .mi-section-title {
-  font-family: var(--font-heading);
   font-size: 0.85rem;
   color: var(--text-primary);
   margin: 0 0 12px 0;
@@ -714,13 +713,12 @@
 }
 .mi-input {
   flex: 1;
-  background: var(--bg-body);
-  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   padding: 6px 10px;
   font-size: 0.8rem;
-  font-family: var(--font-body);
 }
 .mi-input::placeholder {
   color: var(--text-muted);
@@ -730,14 +728,13 @@
   border-color: var(--accent-blue);
 }
 .mi-select {
-  background: var(--bg-body);
-  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   color-scheme: light;
   padding: 6px 8px;
   font-size: 0.75rem;
-  font-family: var(--font-body);
 }
 .mi-select option {
   background: var(--bg-card);
@@ -767,8 +764,8 @@
   align-items: center;
   gap: 10px;
   padding: 8px;
-  background: var(--bg-body);
-  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   transition: border-color 0.2s;
 }
@@ -863,8 +860,8 @@
 .mi-recent-card {
   display: flex;
   border-radius: var(--radius-sm);
-  background: var(--bg-body);
-  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
   overflow: hidden;
   transition: border-color 0.2s;
 }
@@ -912,10 +909,9 @@
 .mi-description, .mi-print-settings {
   margin-top: 12px;
   padding-top: 12px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border-color);
 }
 .mi-sub-title {
-  font-family: var(--font-heading);
   font-size: 0.7rem;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -1103,7 +1099,7 @@
 }
 
 .ams-humidity-icon {
-  color: #58b87a;
+  color: var(--accent-green);
   opacity: 0.9;
 }
 
@@ -1286,12 +1282,12 @@
 .ams-low-banner-warn {
   background: rgba(240, 136, 62, 0.15);
   border: 1.5px solid rgba(240, 136, 62, 0.5);
-  color: #f0883e;
+  color: var(--accent-orange);
 }
 .ams-low-banner-critical {
   background: rgba(239, 68, 68, 0.15);
   border: 1.5px solid rgba(239, 68, 68, 0.6);
-  color: #ef4444;
+  color: var(--accent-red);
   animation: ams-banner-pulse 2s ease-in-out infinite;
 }
 @keyframes ams-banner-pulse {
@@ -1345,9 +1341,9 @@
   line-height: 0;
   filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
 }
-.ams-card-warn-low { color: #f0883e; }
+.ams-card-warn-low { color: var(--accent-orange); }
 .ams-card-warn-critical {
-  color: #ef4444;
+  color: var(--accent-red);
   animation: ams-warn-blink 1s ease-in-out infinite;
 }
 @keyframes ams-warn-blink {
@@ -2782,7 +2778,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #f5f5f5;
+  background: var(--bg-tertiary);
 }
 
 .fs-mw-bg {
@@ -3279,7 +3275,7 @@
 .ph-detail-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 9998;
   background: rgba(0,0,0,0.65);
   display: flex;
   align-items: center;
@@ -5485,7 +5481,7 @@ tr:hover .filament-delete-btn,
 .update-overlay-spinner {
   width: 48px;
   height: 48px;
-  border: 4px solid var(--border);
+  border: 4px solid var(--border-color);
   border-top-color: var(--accent-yellow, #f5a623);
   border-radius: 50%;
   margin: 0 auto 20px;
@@ -8962,7 +8958,7 @@ tr:hover .filament-edit-btn {
   min-width: 80px;
 }
 .ctrl-upload-box {
-  border: 2px dashed var(--border);
+  border: 2px dashed var(--border-color);
   border-radius: 8px;
   margin-bottom: 8px;
   transition: border-color 0.2s;
@@ -9003,7 +8999,7 @@ tr:hover .filament-edit-btn {
 
 /* ═══ Phase 4: Webhooks ═══ */
 .wh-list { display: flex; flex-direction: column; gap: 8px; }
-.wh-item { background: var(--bg-secondary); border-radius: var(--radius); padding: 0.75rem; border: 1px solid var(--border); }
+.wh-item { background: var(--bg-secondary); border-radius: var(--radius); padding: 0.75rem; border: 1px solid var(--border-color); }
 .wh-item.wh-disabled { opacity: 0.6; }
 .wh-item-header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 .wh-badge { font-size: 0.7rem; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
@@ -9015,7 +9011,7 @@ tr:hover .filament-edit-btn {
 
 /* ═══ Phase 4: Material Reference ═══ */
 .fil-matref-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; }
-.fil-matref-card { background: var(--bg-secondary); border-radius: var(--radius); padding: 0.75rem; border: 1px solid var(--border); cursor: pointer; transition: border-color 0.2s; }
+.fil-matref-card { background: var(--bg-secondary); border-radius: var(--radius); padding: 0.75rem; border: 1px solid var(--border-color); cursor: pointer; transition: border-color 0.2s; }
 .fil-matref-card:hover { border-color: var(--accent); }
 .fil-matref-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
 .fil-matref-cat { font-size: 0.7rem; padding: 2px 6px; border-radius: 3px; background: var(--bg-tertiary); color: var(--text-muted); text-transform: capitalize; }
@@ -9048,7 +9044,7 @@ tr:hover .filament-edit-btn {
 .db-results-count { font-size: 0.78rem; color: var(--text-muted); margin-left: auto; }
 .db-card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
 .db-filament-card {
-  background: var(--bg-secondary); border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: var(--radius);
   overflow: hidden; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
   display: flex; flex-direction: column;
 }
@@ -9065,7 +9061,7 @@ tr:hover .filament-edit-btn {
 .db-detail-label { color: var(--text-muted); font-size: 0.7rem; margin-bottom: 1px; }
 .db-detail-value { font-weight: 600; }
 .db-compare-bar {
-  position: sticky; bottom: 0; background: var(--bg-secondary); border-top: 1px solid var(--border);
+  position: sticky; bottom: 0; background: var(--bg-secondary); border-top: 1px solid var(--border-color);
   padding: 8px 12px; display: flex; align-items: center; gap: 8px; border-radius: 0 0 var(--radius) var(--radius);
   font-size: 0.82rem;
 }
@@ -9074,7 +9070,7 @@ tr:hover .filament-edit-btn {
 
 /* ═══ Phase 4: Hardware ═══ */
 .hw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px; }
-.hw-card { background: var(--bg-secondary); border-radius: var(--radius); padding: 0.75rem; border: 1px solid var(--border); }
+.hw-card { background: var(--bg-secondary); border-radius: var(--radius); padding: 0.75rem; border: 1px solid var(--border-color); }
 .hw-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .hw-card-cat { font-size: 0.7rem; padding: 2px 6px; border-radius: 3px; background: var(--bg-tertiary); color: var(--text-muted); }
 .hw-card-meta { font-size: 0.8rem; color: var(--text-muted); }
@@ -10215,7 +10211,7 @@ input[type="range"]::-webkit-slider-thumb:active {
 
 .kb-search-input {
   flex: 1;
-  background: var(--bg-body);
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   padding: 8px 12px;
@@ -10234,7 +10230,7 @@ input[type="range"]::-webkit-slider-thumb:active {
   width: auto;
   min-width: 140px;
   max-width: 200px;
-  background: var(--bg-body);
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   padding: 8px 28px 8px 10px;

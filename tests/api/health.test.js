@@ -7,8 +7,13 @@ import assert from 'node:assert/strict';
 import { createServer } from 'node:http';
 import http from 'node:http';
 import { setupTestDb } from '../test-helper.js';
-import { sendJson } from '../../server/api-helpers.js';
 import { getPrinters } from '../../server/db/printers.js';
+
+function sendJson(res, data, status = 200) {
+  const body = JSON.stringify(data);
+  res.writeHead(status, { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) });
+  res.end(body);
+}
 
 // ---- Minimal testserver ----
 function createTestServer() {

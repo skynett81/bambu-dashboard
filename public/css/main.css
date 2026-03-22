@@ -169,7 +169,7 @@ body {
   z-index: 100;
   overflow-y: auto;
   transition: transform 0.45s var(--ease-out);
-  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.12);
 }
 
 /* Sidebar glowing right edge */

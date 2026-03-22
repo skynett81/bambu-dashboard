@@ -121,6 +121,7 @@ export function runMigrations() {
     { version: 101, up: _mig101_print_stages },
     { version: 102, up: _mig102_bambuddy_features },
     { version: 103, up: _mig103_printer_maintenance_mode },
+    { version: 104, up: _mig104_model_links_in_history },
   ];
 
   for (const m of migrations) {
@@ -4320,6 +4321,13 @@ function _mig102_bambuddy_features(db) {
     CREATE INDEX IF NOT EXISTS idx_mdl_printer ON mqtt_debug_log(printer_id);
     CREATE INDEX IF NOT EXISTS idx_mdl_time ON mqtt_debug_log(timestamp);
   `);
+}
+
+function _mig104_model_links_in_history(db) {
+  try { db.exec('ALTER TABLE print_history ADD COLUMN model_name TEXT'); } catch {}
+  try { db.exec('ALTER TABLE print_history ADD COLUMN model_url TEXT'); } catch {}
+  try { db.exec('ALTER TABLE print_history ADD COLUMN plate_compatibility TEXT'); } catch {}
+  try { db.exec('ALTER TABLE kb_filaments ADD COLUMN plate_compatibility TEXT'); } catch {}
 }
 
 function _mig103_printer_maintenance_mode(db) {
