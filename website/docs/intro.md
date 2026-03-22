@@ -20,7 +20,7 @@ Bambu Dashboard kobler seg direkte til printeren din via MQTT over LAN, uten avh
 - **Planlegger** — kalendervisning og print-kø
 - **Printerkontroll** — temperatur, hastighet, vifter, G-code konsoll
 - **Varsler** — 7 kanaler (Telegram, Discord, e-post, ntfy, Pushover, SMS, webhook)
-- **Multi-printer** — støtter P1S, P1P, X1C, A1, og A1 Mini
+- **Multi-printer** — støtter hele Bambu Lab-serien: X1C, X1E, P1S, P1P, P2S, A1, A1 mini, A1 Combo, H2S, H2D, H2C og mer
 - **Selvdriftet** — ingen sky-avhengighet, dine data på din maskin
 
 ## Hurtigstart
@@ -39,9 +39,11 @@ Du kan prøve dashboardet uten en fysisk printer ved å kjøre `npm run demo`. D
 
 ## Støttede printere
 
-- Bambu Lab **X1C** / X1E
-- Bambu Lab **P1S** / P1P
-- Bambu Lab **A1** / A1 Mini
+- **X1-serien**: X1C, X1C Combo, X1E
+- **P1-serien**: P1S, P1S Combo, P1P
+- **P2-serien**: P2S, P2S Combo
+- **A-serien**: A1, A1 Combo, A1 mini
+- **H2-serien**: H2S, H2D (dobbel dyse), H2C (verktøybytter, 6 hoder)
 
 ## Teknisk oversikt
 

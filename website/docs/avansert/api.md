@@ -1,12 +1,12 @@
 ---
 sidebar_position: 1
 title: API-referanse
-description: REST API med 177 endepunkter, autentisering og rate limiting
+description: REST API med 284+ endepunkter, autentisering og rate limiting
 ---
 
 # API-referanse
 
-Bambu Dashboard eksponerer et fullverdig REST API med 177 endepunkter. API-dokumentasjonen er tilgjengelig direkte i dashboardet.
+Bambu Dashboard eksponerer et fullverdig REST API med 284+ endepunkter. API-dokumentasjonen er tilgjengelig direkte i dashboardet.
 
 ## Interaktiv dokumentasjon
 

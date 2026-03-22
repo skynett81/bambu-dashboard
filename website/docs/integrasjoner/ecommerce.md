@@ -8,7 +8,7 @@ description: Administrer ordrer, kunder og fakturering for salg av 3D-prints —
 
 E-handelmodulen gir deg et komplett system for å administrere kunder, ordrer og fakturering — perfekt for de som selger 3D-prints profesjonelt eller semi-profesjonelt.
 
-Gå til: **https://localhost:3443/#ecommerce**
+Gå til: **https://localhost:3443/#orders**
 
 :::danger E-handelslisens påkrevd
 E-handelmodulen krever en gyldig lisens. Lisenser kan **kun kjøpes via [geektech.no](https://geektech.no)**. Uten aktiv lisens er modulen låst og utilgjengelig.

@@ -18,7 +18,7 @@ Administrer registrerte printere:
 |---|---|
 | Legg til printer | Registrer en ny printer med serienummer og tilgangsnøkkel |
 | Printernavn | Egendefinert visningsnavn |
-| Printermodell | X1C / P1S / P1P / A1 / A1 Mini |
+| Printermodell | X1C / X1C Combo / X1E / P1S / P1S Combo / P1P / P2S / P2S Combo / A1 / A1 Combo / A1 mini / H2S / H2D / H2C |
 | MQTT-tilkobling | Bambu Cloud MQTT eller lokal MQTT |
 | Tilgangsnøkkel | LAN Access Code fra Bambu Lab-appen |
 | IP-adresse | For lokal (LAN) modus |

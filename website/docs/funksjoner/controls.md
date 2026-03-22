@@ -19,8 +19,12 @@ Kontrolipanelet gir deg full manuell kontroll over printeren direkte fra dashboa
 - Angi måltemperatur mellom 0–120 °C
 - Automatisk slukking etter print (konfigurerbart)
 
-### Kammer (kun X1C og P1S)
-- Se kammertemperatur (passiv — ikke kontrollerbar)
+### Kammer
+- Se kammertemperatur (sanntidsavlesning)
+- **X1E, H2S, H2D, H2C**: Aktiv kammervarmestyring via M141 (kontrollerbar måltemperatur)
+- **X1C**: Passiv innhylling — kammertemperatur vises, men kan ikke styres direkte
+- **P1S**: Passiv innhylling — viser temperatur, ingen aktiv kammervarmestyring
+- **P1P, A1, A1 mini og H-serien uten chamberHeat**: Ingen kammersensor
 
 :::warning Maks temperaturer
 Overskrid ikke anbefalte temperaturer for dyse og seng. For herdet stål-dyse (HF-type): maks 300 °C. For messing: maks 260 °C. Se printerens manual.

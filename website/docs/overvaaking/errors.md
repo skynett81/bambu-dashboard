@@ -6,7 +6,7 @@ description: Komplett oversikt over HMS-feilkoder fra printerne med alvorlighets
 
 # Feillogg
 
-Feilloggen samler alle feil og HMS-varsler (Health, Maintenance, Safety) fra printerne dine. Bambu Dashboard har en innebygd database med 268 HMS-koder for Bambu Lab-printere.
+Feilloggen samler alle feil og HMS-varsler (Health, Maintenance, Safety) fra printerne dine. Bambu Dashboard har en innebygd database med 269+ HMS-koder for Bambu Lab-printere.
 
 Gå til: **https://localhost:3443/#errors**
 
@@ -21,7 +21,7 @@ Bambu Lab-printere sender HMS-koder via MQTT når noe er galt. Bambu Dashboard o
 | `0700 0300 0003 0001` | Bed leveling failed | Byggplate |
 | `0700 0500 0001 0001` | MC disconnect | Elektronikk |
 
-Den komplette listen dekker alle 268 kjente koder for X1C, P1S, P1P, A1 og A1 Mini.
+Den komplette listen dekker alle 269+ kjente koder for X1C, X1C Combo, X1E, P1S, P1S Combo, P1P, P2S, P2S Combo, A1, A1 Combo, A1 mini, H2S, H2D og H2C.
 
 ## Alvorlighetsgrad
 

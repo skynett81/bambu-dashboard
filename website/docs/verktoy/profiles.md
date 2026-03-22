@@ -17,7 +17,7 @@ Gå til: **https://localhost:3443/#profiles**
 3. Fyll inn:
    - **Profilnavn** — beskrivende navn, f.eks. «PLA - Rask produksjon»
    - **Materiale** — velg fra liste (PLA / PETG / ABS / PA / PC / TPU / osv.)
-   - **Printermodell** — X1C / P1S / P1P / A1 / A1 Mini / Alle
+   - **Printermodell** — X1C / X1C Combo / X1E / P1S / P1S Combo / P1P / P2S / P2S Combo / A1 / A1 Combo / A1 mini / H2S / H2D / H2C / Alle
    - **Beskrivelse** — valgfri tekst
 
 4. Fyll inn innstillinger (se seksjoner under)

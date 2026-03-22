@@ -33,61 +33,62 @@ Bambu Dashboard publiserer nå discovery-meldinger for alle registrerte printere
 
 Etter aktivering vises en ny enhet per printer i Home Assistant (**Innstillinger → Enheter og tjenester → MQTT**):
 
+### Entitet-ID-mønster
+
+Entitet-IDer følger mønsteret `sensor.{printer_name_slug}_{sensor_id}`, der `printer_name_slug` er printernavnet i lowercase med spesialtegn erstattet av understrek. Eksempel: en printer med navn «Min P1S» gir `sensor.min_p1s_status`.
+
 ### Sensorer (lese)
 
-| Entitet | Enhet | Eksempel |
+| Sensor-ID | Enhet | Eksempel |
 |---|---|---|
-| `sensor.printer_nozzle_temp` | °C | `220.5` |
-| `sensor.printer_bed_temp` | °C | `60.1` |
-| `sensor.printer_chamber_temp` | °C | `34.2` |
-| `sensor.printer_progress` | % | `47` |
-| `sensor.printer_remaining_time` | min | `83` |
-| `sensor.printer_filament_used` | g | `23.4` |
-| `sensor.printer_status` | tekst | `printing` |
-| `sensor.printer_current_file` | tekst | `benchy.3mf` |
-| `sensor.printer_layer` | tekst | `124 / 280` |
+| `{slug}_status` | tekst | `RUNNING` |
+| `{slug}_progress` | % | `47` |
+| `{slug}_remaining` | min | `83` |
+| `{slug}_layer` | tall | `124` |
+| `{slug}_total_layers` | tall | `280` |
+| `{slug}_nozzle_temp` | °C | `220.5` |
+| `{slug}_nozzle_target` | °C | `220.0` |
+| `{slug}_bed_temp` | °C | `60.1` |
+| `{slug}_bed_target` | °C | `60.0` |
+| `{slug}_chamber_temp` | °C | `34.2` |
+| `{slug}_current_file` | tekst | `benchy.3mf` |
+| `{slug}_speed` | % | `100` |
+| `{slug}_wifi_signal` | tekst | `-65dBm` |
 
 ### Binære sensorer
 
-| Entitet | Tilstand |
+| Sensor-ID | Tilstand |
 |---|---|
-| `binary_sensor.printer_printing` | `on` / `off` |
-| `binary_sensor.printer_error` | `on` / `off` |
-| `binary_sensor.printer_door_open` | `on` / `off` (X1C) |
+| `{slug}_printing` | `on` / `off` |
+| `{slug}_online` | `on` / `off` |
 
-### Knapper (handlinger)
-
-| Entitet | Handling |
-|---|---|
-| `button.printer_pause` | Pause pågående print |
-| `button.printer_resume` | Gjenoppta pauset print |
-| `button.printer_stop` | Stopp pågående print |
-
-:::danger Stoppeknapp
-Stoppe-knappen i Home Assistant avbryter printen uten bekreftelsesdialog. Bruk med forsiktighet i automatiseringer.
+:::info Merk
+Knapper (pause/resume/stopp) publiseres ikke via MQTT Discovery. Bruk Bambu Dashboard-APIet for å sende kommandoer fra automatiseringer.
 :::
 
 ## Automatiseringseksempler
 
 ### Varsle på mobil når print er ferdig
 
+Erstatt `min_p1s` med din printers navn-slug.
+
 ```yaml
 automation:
   - alias: "Bambu - Print ferdig"
     trigger:
       - platform: state
-        entity_id: binary_sensor.printer_printing
+        entity_id: binary_sensor.min_p1s_printing
         from: "on"
         to: "off"
     condition:
       - condition: state
-        entity_id: sensor.printer_status
-        state: "finish"
+        entity_id: sensor.min_p1s_status
+        state: "FINISH"
     action:
       - service: notify.mobile_app_min_telefon
         data:
           title: "Print ferdig!"
-          message: "{{ states('sensor.printer_current_file') }} er ferdig."
+          message: "{{ states('sensor.min_p1s_current_file') }} er ferdig."
 ```
 
 ### Slå av lys når print starter
@@ -97,7 +98,7 @@ automation:
   - alias: "Bambu - Dimm lys under printing"
     trigger:
       - platform: state
-        entity_id: binary_sensor.printer_printing
+        entity_id: binary_sensor.min_p1s_printing
         to: "on"
     action:
       - service: light.turn_on
@@ -109,9 +110,4 @@ automation:
 
 ## Energiovervåking
 
-Kombinert med [Strømmåling](./power) eksponeres også:
-
-- `sensor.printer_power_watts` — øyeblikkelig effekt
-- `sensor.printer_energy_kwh` — energiforbruk for pågående print
-
-Se [Strømmåling](./power) for oppsett av smartplugg.
+Strømmåling via Shelly eller Tasmota håndteres separat og eksponeres ikke direkte via MQTT Discovery til Home Assistant. Se [Strømmåling](./power) for oppsett av smartplugg.

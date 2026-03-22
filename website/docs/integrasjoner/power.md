@@ -16,8 +16,8 @@ Gå til: **https://localhost:3443/#settings** → **Integrasjoner → Strømmål
 |---|---|---|
 | **Shelly Plug S / Plus Plug S** | HTTP REST / MQTT | Anbefalt — enkel oppsett |
 | **Shelly 1PM / 2PM** | HTTP REST / MQTT | For fastmontert installasjon |
+| **Shelly Gen2 / Gen3** | HTTP REST / MQTT | Nyere modeller med utvidet API |
 | **Tasmota-enheter** | MQTT | Fleksibelt for egenbygde oppsett |
-| **TP-Link Kasa (EP25)** | HTTP REST | Fungerer, men begrenset støtte |
 
 :::tip Anbefalt enhet
 Shelly Plug S Plus med fastvare 1.0+ er testet og anbefalt. Støtter Wi-Fi, MQTT og HTTP REST uten sky-avhengighet.
@@ -75,7 +75,6 @@ Dataene lagres i printhistorikken og er tilgjengelig for analyse.
 
 - **Dashboardet** — som en ekstra widget (aktiver i widget-innstillinger)
 - **Flåteoversikten** — som en liten indikator på printerkortet
-- **Home Assistant** — eksponert som `sensor.printer_power_watts`
 
 ## Sammenligning med estimat
 

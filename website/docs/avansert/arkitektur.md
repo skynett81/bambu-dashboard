@@ -19,7 +19,7 @@ Dashboardet kommuniserer med printeren via MQTT over TLS (port 8883) og kameraet
 
 | Lag | Teknologi |
 |-----|-----------|
-| Frontend | Vanilla HTML/CSS/JS — 31 komponentmoduler, ingen build-steg, ingen rammeverk |
+| Frontend | Vanilla HTML/CSS/JS — 76 komponentmoduler, ingen build-steg, ingen rammeverk |
 | Backend | Node.js 22 med 3 npm-pakker: `mqtt`, `ws`, `basic-ftp` |
 | Database | SQLite (innebygd i Node.js 22 via `--experimental-sqlite`) |
 | Kamera | ffmpeg transkoder RTSPS til MPEG1, jsmpeg rendrer i nettleseren |
@@ -36,14 +36,14 @@ Dashboardet kommuniserer med printeren via MQTT over TLS (port 8883) og kameraet
 | 8883 | MQTTS | Ut | Tilkobling til printer |
 | 322 | RTSPS | Ut | Kamera fra printer |
 
-## Servermoduler (24)
+## Servermoduler (44)
 
 | Modul | Formål |
 |-------|--------|
 | `index.js` | HTTP/HTTPS-servere, auto-SSL, CSP/HSTS-headere, statiske filer, demo-modus |
 | `config.js` | Konfigurasjonslasting, standardverdier, env-overstyringer og migrasjoner |
-| `database.js` | SQLite-skjema, 60 migrasjoner, CRUD-operasjoner |
-| `api-routes.js` | REST API (177 endepunkter) |
+| `database.js` | SQLite-skjema, 105 migrasjoner, CRUD-operasjoner |
+| `api-routes.js` | REST API (284+ endepunkter) |
 | `auth.js` | Autentisering og sesjonsadministrasjon |
 | `backup.js` | Backup og gjenoppretting |
 | `printer-manager.js` | Printer-livssyklus, MQTT-tilkoblingsadministrasjon |
@@ -64,8 +64,27 @@ Dashboardet kommuniserer med printeren via MQTT over TLS (port 8883) og kameraet
 | `setup-wizard.js` | Nettbasert oppsettveiviser for første gangs bruk |
 | `ecom-license.js` | Lisensadministrasjon |
 | `failure-detection.js` | Feildeteksjon og -analyse |
+| `bambu-cloud.js` | Bambu Cloud API-integrasjon |
+| `bambu-rfid-data.js` | RFID-filamentdata fra AMS |
+| `circuit-breaker.js` | Kretstrykksmønster for tjenestestabilitet |
+| `energy-service.js` | Energi- og strømprisberegning |
+| `error-pattern-analyzer.js` | Mønsteranalyse av HMS-feil |
+| `file-parser.js` | Parsing av 3MF/GCode-filer |
+| `logger.js` | Strukturert logging |
+| `material-recommender.js` | Materialanbefalinger |
+| `milestone-service.js` | Milepæl- og prestasjonssporing |
+| `plugin-manager.js` | Plugin-system for utvidelser |
+| `power-monitor.js` | Strømmåler-integrasjon (Shelly/Tasmota) |
+| `price-checker.js` | Strømpris-henting (Tibber/Nordpool) |
+| `printer-discovery.js` | Automatisk printer-oppdagelse på LAN |
+| `remote-nodes.js` | Fler-node-administrasjon |
+| `report-service.js` | Rapportgenerering |
+| `seed-filament-db.js` | Seeding av filamentdatabase |
+| `spoolease-data.js` | SpoolEase-integrasjon |
+| `validate.js` | Inndata-validering |
+| `wear-prediction.js` | Slitasjepredikering for komponenter |
 
-## Frontend-komponenter (31)
+## Frontend-komponenter (76)
 
 Alle komponenter er vanilla JavaScript-moduler uten build-steg. De lastes direkte i nettleseren via `<script type="module">`.
 
@@ -85,7 +104,7 @@ Alle komponenter er vanilla JavaScript-moduler uten build-steg. De lastes direkt
 
 ## Database
 
-SQLite-databasen er innebygd i Node.js 22 og krever ingen ekstern instalasjon. Skjemaet håndteres av 60 migrasjoner i `database.js`.
+SQLite-databasen er innebygd i Node.js 22 og krever ingen ekstern instalasjon. Skjemaet håndteres av 105 migrasjoner i `db/migrations.js`.
 
 Hoveddatabeller:
 
