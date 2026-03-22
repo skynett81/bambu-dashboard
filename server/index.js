@@ -1,6 +1,6 @@
 import { createServer as createHttpServer } from 'node:http';
 import { createServer as createHttpsServer } from 'node:https';
-import { readFileSync, existsSync, mkdirSync, writeFileSync, chmodSync, createReadStream } from 'node:fs';
+import { readFileSync, existsSync, mkdirSync, writeFileSync, chmodSync, createReadStream, statSync } from 'node:fs';
 import { join, extname, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
@@ -234,32 +234,48 @@ function handleRequest(req, res) {
   }
 
   // Serve Docusaurus documentation from /docs/
+  // Build structure: build/assets/ (static), build/docs/ (pages), build/blog/, build/img/
+  // URL /docs/X maps to build/X (assets, img, blog) or build/docs/X (doc pages)
   const DOCS_BUILD = join(dirname(fileURLToPath(import.meta.url)), '..', 'website', 'build');
   if (pathname.startsWith('/docs') && existsSync(DOCS_BUILD)) {
-    // Map URL path directly to build directory (Docusaurus uses baseUrl: '/docs/')
-    let docsPath = pathname;
-    // Try exact file first (for assets like .js, .css, .png)
-    let docsFile = join(DOCS_BUILD, docsPath);
-    if (!docsFile.startsWith(DOCS_BUILD)) { res.writeHead(403); res.end(); return; }
+    const relative = pathname.replace(/^\/docs\/?/, '') || '';
 
-    // If no extension, try as directory with index.html
-    if (!extname(docsFile) && existsSync(join(docsFile, 'index.html'))) {
-      docsFile = join(docsFile, 'index.html');
-    }
-
-    if (existsSync(docsFile) && !docsFile.endsWith('/')) {
-      const ext = extname(docsFile);
+    const _tryServe = (filePath) => {
+      if (!filePath.startsWith(DOCS_BUILD)) return false;
+      try {
+        const stat = statSync(filePath, { throwIfNoEntry: false });
+        // If it's a directory, try index.html inside
+        if (stat?.isDirectory()) {
+          filePath = join(filePath, 'index.html');
+          if (!existsSync(filePath)) return false;
+        } else if (!stat) {
+          return false;
+        }
+      } catch { return false; }
+      const ext = extname(filePath);
       const ct = MIME_TYPES[ext] || 'application/octet-stream';
-      const cache = ['.js', '.css', '.woff2', '.png', '.svg'].includes(ext) ? 'public, max-age=86400' : 'no-cache';
+      const cache = ['.js', '.css', '.woff2', '.png', '.svg', '.jpg', '.jpeg'].includes(ext) ? 'public, max-age=86400' : 'no-cache';
       res.writeHead(200, { 'Content-Type': ct, 'Cache-Control': cache });
-      return createReadStream(docsFile).pipe(res);
+      createReadStream(filePath).pipe(res);
+      return true;
+    };
+
+    // 1) Try build/{relative} first (assets, img, blog, 404.html, sitemap)
+    if (_tryServe(join(DOCS_BUILD, relative))) return;
+
+    // 2) Try build/docs/{relative} (actual doc pages)
+    if (_tryServe(join(DOCS_BUILD, 'docs', relative))) return;
+
+    // 3) /docs/ root → redirect to intro
+    if (!relative || relative === '/') {
+      if (_tryServe(join(DOCS_BUILD, 'docs', 'intro'))) return;
     }
 
-    // SPA fallback for client-side routing
-    const spaFallback = join(DOCS_BUILD, 'docs', 'intro', 'index.html');
-    if (existsSync(spaFallback)) {
+    // 4) SPA fallback — use 404.html for client-side routing
+    const fallback = join(DOCS_BUILD, '404.html');
+    if (existsSync(fallback)) {
       res.writeHead(200, { 'Content-Type': 'text/html', 'Cache-Control': 'no-cache' });
-      return createReadStream(spaFallback).pipe(res);
+      return createReadStream(fallback).pipe(res);
     }
   }
 
