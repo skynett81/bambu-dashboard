@@ -56,8 +56,8 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
-  // Skip non-GET, API, and WebSocket requests
-  if (e.request.method !== 'GET' || url.pathname.startsWith('/api/') || url.protocol === 'ws:' || url.protocol === 'wss:') {
+  // Skip non-GET, API, WebSocket, and docs requests (Docusaurus has own routing)
+  if (e.request.method !== 'GET' || url.pathname.startsWith('/api/') || url.pathname.startsWith('/docs/') || url.protocol === 'ws:' || url.protocol === 'wss:') {
     return;
   }
 
