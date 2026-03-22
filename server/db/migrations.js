@@ -124,6 +124,7 @@ export function runMigrations() {
     { version: 104, up: _mig104_model_links_in_history },
     { version: 105, up: _mig105_index_history_started_at },
     { version: 106, up: _mig106_ecom_license_fields },
+    { version: 107, up: _mig107_ecom_license_identifiers },
   ];
 
   for (const m of migrations) {
@@ -4354,6 +4355,15 @@ function _mig106_ecom_license_fields(db) {
   try { db.exec('ALTER TABLE ecom_license ADD COLUMN allowed_ips TEXT'); } catch {}
   try { db.exec('ALTER TABLE ecom_license ADD COLUMN allowed_macs TEXT'); } catch {}
   try { db.exec('ALTER TABLE ecom_license ADD COLUMN verify_count INTEGER DEFAULT 0'); } catch {}
+}
+
+function _mig107_ecom_license_identifiers(db) {
+  try { db.exec("ALTER TABLE ecom_license ADD COLUMN license_type TEXT DEFAULT 'domain'"); } catch {}
+  try { db.exec('ALTER TABLE ecom_license ADD COLUMN allowed_ips TEXT'); } catch {}
+  try { db.exec('ALTER TABLE ecom_license ADD COLUMN allowed_macs TEXT'); } catch {}
+  try { db.exec('ALTER TABLE ecom_license ADD COLUMN verify_count INTEGER DEFAULT 0'); } catch {}
+  // Fiks API-URL fra /api/v1 til /api (GeekTech endret endepunkt)
+  try { db.exec("UPDATE ecom_license SET geektech_api_url = 'https://geektech.no/api' WHERE geektech_api_url = 'https://geektech.no/api/v1'"); } catch {}
 }
 
 function _mig103_printer_maintenance_mode(db) {

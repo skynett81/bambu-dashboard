@@ -92,7 +92,7 @@ export function setEcomLicense(data) {
   if (!row) return;
   const fields = [];
   const values = [];
-  for (const key of ['license_key', 'geektech_email', 'geektech_api_url', 'instance_id', 'status', 'holder_name', 'plan', 'features', 'expires_at', 'last_validated', 'cached_response', 'last_report_at']) {
+  for (const key of ['license_key', 'geektech_email', 'geektech_api_url', 'instance_id', 'status', 'holder_name', 'plan', 'features', 'expires_at', 'last_validated', 'cached_response', 'last_report_at', 'domain', 'phone', 'max_printers', 'pin_code', 'is_pinned', 'notes', 'attachments', 'license_type', 'allowed_ips', 'allowed_macs', 'verify_count']) {
     if (data[key] !== undefined) { fields.push(`${key} = ?`); values.push(data[key]); }
   }
   if (fields.length === 0) return;

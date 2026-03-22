@@ -161,13 +161,17 @@ export class EcomLicenseManager {
     const apiUrl = this._license.geektech_api_url || 'https://geektech.no/api';
     try {
       // GeekTech API: POST /api/license/verify
-      // Lisenstype kan være: domene, IP, MAC, IP+MAC, eller kombinasjon
       // Sender alle identifikatorer — serveren validerer basert på lisenstype
-      const os = await import('node:os');
-      const nets = os.networkInterfaces();
-      const allInterfaces = Object.values(nets).flat().filter(n => !n.internal);
-      const ipAddress = allInterfaces.find(n => n.family === 'IPv4')?.address || null;
-      const macAddress = allInterfaces.find(n => n.mac && n.mac !== '00:00:00:00:00:00')?.mac?.toUpperCase() || null;
+      let ipAddress = null;
+      let macAddress = null;
+      try {
+        const osModule = await import('node:os');
+        const os = osModule.default || osModule;
+        const nets = os.networkInterfaces();
+        const allInterfaces = Object.values(nets).flat().filter(n => !n.internal);
+        ipAddress = allInterfaces.find(n => n.family === 'IPv4')?.address || null;
+        macAddress = allInterfaces.find(n => n.mac && n.mac !== '00:00:00:00:00:00')?.mac?.toUpperCase() || null;
+      } catch (e) { log.debug('Kunne ikke hente nettverksinfo: ' + e.message); }
 
       const { status, data } = await _httpPost(`${apiUrl}/license/verify`, {
         license_key: this._license.license_key,
@@ -177,18 +181,20 @@ export class EcomLicenseManager {
       });
 
       if (status >= 200 && status < 300 && data.valid) {
-        // Oppdater verify_count
+        // GeekTech respons: { valid, message, branding, license: { domain, lock_type, expires_at } }
+        const lic = data.license || {};
         const currentCount = this._license.verify_count || 0;
         setEcomLicense({
           status: 'active',
-          holder_name: data.holder || data.customer_name || null,
-          plan: data.plan || null,
-          features: JSON.stringify(data.features || []),
-          max_printers: data.max_printers || data.units || 1,
-          license_type: data.license_type || this._license.license_type || 'domain',
-          allowed_ips: data.allowed_ips || null,
-          allowed_macs: data.allowed_macs || null,
-          expires_at: data.expires_at || null,
+          holder_name: data.holder || data.customer_name || lic.customer_name || null,
+          plan: data.plan || lic.plan || null,
+          features: JSON.stringify(data.features || lic.features || []),
+          max_printers: data.max_printers || lic.max_printers || lic.units || 1,
+          license_type: lic.lock_type || data.license_type || this._license.license_type || 'none',
+          allowed_ips: lic.allowed_ips || data.allowed_ips || null,
+          allowed_macs: lic.allowed_macs || data.allowed_macs || null,
+          domain: lic.domain || this._license.domain || null,
+          expires_at: lic.expires_at || data.expires_at || null,
           last_validated: new Date().toISOString(),
           verify_count: currentCount + 1,
           cached_response: JSON.stringify(data)
@@ -202,6 +208,7 @@ export class EcomLicenseManager {
         return { valid: false, error: data.error || 'Invalid license' };
       }
     } catch (e) {
+      log.error('License validate error: ' + e.message + ' stack: ' + e.stack);
       // Network error — use cached if available
       if (this._license.cached_response) {
         try {
