@@ -1,0 +1,38 @@
+{
+  "sidebar.guideSidebar.category.Kom i gang": {
+    "message": "Kom igång"
+  },
+  "sidebar.guideSidebar.category.Funksjoner": {
+    "message": "Funktioner"
+  },
+  "sidebar.guideSidebar.category.Overvåking": {
+    "message": "Övervakning"
+  },
+  "sidebar.guideSidebar.category.Analyse": {
+    "message": "Analys"
+  },
+  "sidebar.guideSidebar.category.Verktøy": {
+    "message": "Verktyg"
+  },
+  "sidebar.guideSidebar.category.Integrasjoner": {
+    "message": "Integrationer"
+  },
+  "sidebar.guideSidebar.category.System": {
+    "message": "System"
+  },
+  "sidebar.guideSidebar.category.Avansert": {
+    "message": "Avancerat"
+  },
+  "sidebar.kbSidebar.category.Filamenter": {
+    "message": "Filament"
+  },
+  "sidebar.kbSidebar.category.Byggplater": {
+    "message": "Byggplattor"
+  },
+  "sidebar.kbSidebar.category.Vedlikehold": {
+    "message": "Underhåll"
+  },
+  "sidebar.kbSidebar.category.Feilsøking": {
+    "message": "Felsökning"
+  }
+}

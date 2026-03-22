@@ -1,0 +1,38 @@
+{
+  "sidebar.guideSidebar.category.Kom i gang": {
+    "message": "はじめに"
+  },
+  "sidebar.guideSidebar.category.Funksjoner": {
+    "message": "機能"
+  },
+  "sidebar.guideSidebar.category.Overvåking": {
+    "message": "モニタリング"
+  },
+  "sidebar.guideSidebar.category.Analyse": {
+    "message": "分析"
+  },
+  "sidebar.guideSidebar.category.Verktøy": {
+    "message": "ツール"
+  },
+  "sidebar.guideSidebar.category.Integrasjoner": {
+    "message": "統合"
+  },
+  "sidebar.guideSidebar.category.System": {
+    "message": "システム"
+  },
+  "sidebar.guideSidebar.category.Avansert": {
+    "message": "上級"
+  },
+  "sidebar.kbSidebar.category.Filamenter": {
+    "message": "フィラメント"
+  },
+  "sidebar.kbSidebar.category.Byggplater": {
+    "message": "ビルドプレート"
+  },
+  "sidebar.kbSidebar.category.Vedlikehold": {
+    "message": "メンテナンス"
+  },
+  "sidebar.kbSidebar.category.Feilsøking": {
+    "message": "トラブルシューティング"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "sidebar.guideSidebar.category.Kom i gang": {
+    "message": "Getting Started"
+  },
+  "sidebar.guideSidebar.category.Funksjoner": {
+    "message": "Features"
+  },
+  "sidebar.guideSidebar.category.Overvåking": {
+    "message": "Monitoring"
+  },
+  "sidebar.guideSidebar.category.Analyse": {
+    "message": "Analysis"
+  },
+  "sidebar.guideSidebar.category.Verktøy": {
+    "message": "Tools"
+  },
+  "sidebar.guideSidebar.category.Integrasjoner": {
+    "message": "Integrations"
+  },
+  "sidebar.guideSidebar.category.System": {
+    "message": "System"
+  },
+  "sidebar.guideSidebar.category.Avansert": {
+    "message": "Advanced"
+  },
+  "sidebar.kbSidebar.category.Filamenter": {
+    "message": "Filaments"
+  },
+  "sidebar.kbSidebar.category.Byggplater": {
+    "message": "Build Plates"
+  },
+  "sidebar.kbSidebar.category.Vedlikehold": {
+    "message": "Maintenance"
+  },
+  "sidebar.kbSidebar.category.Feilsøking": {
+    "message": "Troubleshooting"
+  }
+}

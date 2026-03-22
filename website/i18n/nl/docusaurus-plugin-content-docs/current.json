@@ -1,0 +1,38 @@
+{
+  "sidebar.guideSidebar.category.Kom i gang": {
+    "message": "Aan de slag"
+  },
+  "sidebar.guideSidebar.category.Funksjoner": {
+    "message": "Functies"
+  },
+  "sidebar.guideSidebar.category.Overvåking": {
+    "message": "Monitoring"
+  },
+  "sidebar.guideSidebar.category.Analyse": {
+    "message": "Analyse"
+  },
+  "sidebar.guideSidebar.category.Verktøy": {
+    "message": "Gereedschap"
+  },
+  "sidebar.guideSidebar.category.Integrasjoner": {
+    "message": "Integraties"
+  },
+  "sidebar.guideSidebar.category.System": {
+    "message": "Systeem"
+  },
+  "sidebar.guideSidebar.category.Avansert": {
+    "message": "Geavanceerd"
+  },
+  "sidebar.kbSidebar.category.Filamenter": {
+    "message": "Filamenten"
+  },
+  "sidebar.kbSidebar.category.Byggplater": {
+    "message": "Bouwplaten"
+  },
+  "sidebar.kbSidebar.category.Vedlikehold": {
+    "message": "Onderhoud"
+  },
+  "sidebar.kbSidebar.category.Feilsøking": {
+    "message": "Probleemoplossing"
+  }
+}

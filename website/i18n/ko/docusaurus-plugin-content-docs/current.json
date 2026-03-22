@@ -1,0 +1,38 @@
+{
+  "sidebar.guideSidebar.category.Kom i gang": {
+    "message": "시작하기"
+  },
+  "sidebar.guideSidebar.category.Funksjoner": {
+    "message": "기능"
+  },
+  "sidebar.guideSidebar.category.Overvåking": {
+    "message": "모니터링"
+  },
+  "sidebar.guideSidebar.category.Analyse": {
+    "message": "분석"
+  },
+  "sidebar.guideSidebar.category.Verktøy": {
+    "message": "도구"
+  },
+  "sidebar.guideSidebar.category.Integrasjoner": {
+    "message": "통합"
+  },
+  "sidebar.guideSidebar.category.System": {
+    "message": "시스템"
+  },
+  "sidebar.guideSidebar.category.Avansert": {
+    "message": "고급"
+  },
+  "sidebar.kbSidebar.category.Filamenter": {
+    "message": "필라멘트"
+  },
+  "sidebar.kbSidebar.category.Byggplater": {
+    "message": "빌드 플레이트"
+  },
+  "sidebar.kbSidebar.category.Vedlikehold": {
+    "message": "유지보수"
+  },
+  "sidebar.kbSidebar.category.Feilsøking": {
+    "message": "문제 해결"
+  }
+}

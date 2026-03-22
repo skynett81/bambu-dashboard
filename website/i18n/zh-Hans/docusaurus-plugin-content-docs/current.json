@@ -1,0 +1,38 @@
+{
+  "sidebar.guideSidebar.category.Kom i gang": {
+    "message": "入门"
+  },
+  "sidebar.guideSidebar.category.Funksjoner": {
+    "message": "功能"
+  },
+  "sidebar.guideSidebar.category.Overvåking": {
+    "message": "监控"
+  },
+  "sidebar.guideSidebar.category.Analyse": {
+    "message": "分析"
+  },
+  "sidebar.guideSidebar.category.Verktøy": {
+    "message": "工具"
+  },
+  "sidebar.guideSidebar.category.Integrasjoner": {
+    "message": "集成"
+  },
+  "sidebar.guideSidebar.category.System": {
+    "message": "系统"
+  },
+  "sidebar.guideSidebar.category.Avansert": {
+    "message": "高级"
+  },
+  "sidebar.kbSidebar.category.Filamenter": {
+    "message": "耗材"
+  },
+  "sidebar.kbSidebar.category.Byggplater": {
+    "message": "打印板"
+  },
+  "sidebar.kbSidebar.category.Vedlikehold": {
+    "message": "维护"
+  },
+  "sidebar.kbSidebar.category.Feilsøking": {
+    "message": "故障排除"
+  }
+}

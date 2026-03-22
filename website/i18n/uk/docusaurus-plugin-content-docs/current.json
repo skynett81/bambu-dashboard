@@ -1,0 +1,38 @@
+{
+  "sidebar.guideSidebar.category.Kom i gang": {
+    "message": "Початок роботи"
+  },
+  "sidebar.guideSidebar.category.Funksjoner": {
+    "message": "Функції"
+  },
+  "sidebar.guideSidebar.category.Overvåking": {
+    "message": "Моніторинг"
+  },
+  "sidebar.guideSidebar.category.Analyse": {
+    "message": "Аналіз"
+  },
+  "sidebar.guideSidebar.category.Verktøy": {
+    "message": "Інструменти"
+  },
+  "sidebar.guideSidebar.category.Integrasjoner": {
+    "message": "Інтеграції"
+  },
+  "sidebar.guideSidebar.category.System": {
+    "message": "Система"
+  },
+  "sidebar.guideSidebar.category.Avansert": {
+    "message": "Розширені"
+  },
+  "sidebar.kbSidebar.category.Filamenter": {
+    "message": "Філаменти"
+  },
+  "sidebar.kbSidebar.category.Byggplater": {
+    "message": "Робочі пластини"
+  },
+  "sidebar.kbSidebar.category.Vedlikehold": {
+    "message": "Обслуговування"
+  },
+  "sidebar.kbSidebar.category.Feilsøking": {
+    "message": "Усунення несправностей"
+  }
+}

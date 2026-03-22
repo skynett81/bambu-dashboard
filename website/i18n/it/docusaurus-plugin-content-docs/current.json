@@ -1,0 +1,38 @@
+{
+  "sidebar.guideSidebar.category.Kom i gang": {
+    "message": "Per iniziare"
+  },
+  "sidebar.guideSidebar.category.Funksjoner": {
+    "message": "Funzionalità"
+  },
+  "sidebar.guideSidebar.category.Overvåking": {
+    "message": "Monitoraggio"
+  },
+  "sidebar.guideSidebar.category.Analyse": {
+    "message": "Analisi"
+  },
+  "sidebar.guideSidebar.category.Verktøy": {
+    "message": "Strumenti"
+  },
+  "sidebar.guideSidebar.category.Integrasjoner": {
+    "message": "Integrazioni"
+  },
+  "sidebar.guideSidebar.category.System": {
+    "message": "Sistema"
+  },
+  "sidebar.guideSidebar.category.Avansert": {
+    "message": "Avanzato"
+  },
+  "sidebar.kbSidebar.category.Filamenter": {
+    "message": "Filamenti"
+  },
+  "sidebar.kbSidebar.category.Byggplater": {
+    "message": "Piani di stampa"
+  },
+  "sidebar.kbSidebar.category.Vedlikehold": {
+    "message": "Manutenzione"
+  },
+  "sidebar.kbSidebar.category.Feilsøking": {
+    "message": "Risoluzione dei problemi"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "sidebar.guideSidebar.category.Kom i gang": {
+    "message": "Začínáme"
+  },
+  "sidebar.guideSidebar.category.Funksjoner": {
+    "message": "Funkce"
+  },
+  "sidebar.guideSidebar.category.Overvåking": {
+    "message": "Monitorování"
+  },
+  "sidebar.guideSidebar.category.Analyse": {
+    "message": "Analýza"
+  },
+  "sidebar.guideSidebar.category.Verktøy": {
+    "message": "Nástroje"
+  },
+  "sidebar.guideSidebar.category.Integrasjoner": {
+    "message": "Integrace"
+  },
+  "sidebar.guideSidebar.category.System": {
+    "message": "Systém"
+  },
+  "sidebar.guideSidebar.category.Avansert": {
+    "message": "Pokročilé"
+  },
+  "sidebar.kbSidebar.category.Filamenter": {
+    "message": "Filamenty"
+  },
+  "sidebar.kbSidebar.category.Byggplater": {
+    "message": "Tiskové podložky"
+  },
+  "sidebar.kbSidebar.category.Vedlikehold": {
+    "message": "Údržba"
+  },
+  "sidebar.kbSidebar.category.Feilsøking": {
+    "message": "Řešení problémů"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "sidebar.guideSidebar.category.Kom i gang": {
+    "message": "Başlarken"
+  },
+  "sidebar.guideSidebar.category.Funksjoner": {
+    "message": "Özellikler"
+  },
+  "sidebar.guideSidebar.category.Overvåking": {
+    "message": "İzleme"
+  },
+  "sidebar.guideSidebar.category.Analyse": {
+    "message": "Analiz"
+  },
+  "sidebar.guideSidebar.category.Verktøy": {
+    "message": "Araçlar"
+  },
+  "sidebar.guideSidebar.category.Integrasjoner": {
+    "message": "Entegrasyonlar"
+  },
+  "sidebar.guideSidebar.category.System": {
+    "message": "Sistem"
+  },
+  "sidebar.guideSidebar.category.Avansert": {
+    "message": "Gelişmiş"
+  },
+  "sidebar.kbSidebar.category.Filamenter": {
+    "message": "Filamentler"
+  },
+  "sidebar.kbSidebar.category.Byggplater": {
+    "message": "Baskı Plakaları"
+  },
+  "sidebar.kbSidebar.category.Vedlikehold": {
+    "message": "Bakım"
+  },
+  "sidebar.kbSidebar.category.Feilsøking": {
+    "message": "Sorun Giderme"
+  }
+}

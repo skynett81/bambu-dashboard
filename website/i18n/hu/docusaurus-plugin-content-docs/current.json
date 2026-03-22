@@ -1,0 +1,38 @@
+{
+  "sidebar.guideSidebar.category.Kom i gang": {
+    "message": "Első lépések"
+  },
+  "sidebar.guideSidebar.category.Funksjoner": {
+    "message": "Funkciók"
+  },
+  "sidebar.guideSidebar.category.Overvåking": {
+    "message": "Felügyelet"
+  },
+  "sidebar.guideSidebar.category.Analyse": {
+    "message": "Elemzés"
+  },
+  "sidebar.guideSidebar.category.Verktøy": {
+    "message": "Eszközök"
+  },
+  "sidebar.guideSidebar.category.Integrasjoner": {
+    "message": "Integrációk"
+  },
+  "sidebar.guideSidebar.category.System": {
+    "message": "Rendszer"
+  },
+  "sidebar.guideSidebar.category.Avansert": {
+    "message": "Haladó"
+  },
+  "sidebar.kbSidebar.category.Filamenter": {
+    "message": "Filamentek"
+  },
+  "sidebar.kbSidebar.category.Byggplater": {
+    "message": "Nyomtatólapok"
+  },
+  "sidebar.kbSidebar.category.Vedlikehold": {
+    "message": "Karbantartás"
+  },
+  "sidebar.kbSidebar.category.Feilsøking": {
+    "message": "Hibaelhárítás"
+  }
+}
