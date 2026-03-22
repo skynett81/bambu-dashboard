@@ -1,0 +1,15 @@
+{
+  "link.title.Dokumentasjon": { "message": "Dokumentáció" },
+  "link.title.Kunnskapsbase": { "message": "Tudásbázis" },
+  "link.title.Lenker": { "message": "Hivatkozások" },
+  "link.item.label.Kom i gang": { "message": "Első lépések" },
+  "link.item.label.Funksjoner": { "message": "Funkciók" },
+  "link.item.label.API-referanse": { "message": "API referencia" },
+  "link.item.label.Filamenter": { "message": "Filamentek" },
+  "link.item.label.Byggplater": { "message": "Nyomtatóágyak" },
+  "link.item.label.Vedlikehold": { "message": "Karbantartás" },
+  "link.item.label.Dashboard": { "message": "Dashboard" },
+  "link.item.label.GitHub": { "message": "GitHub" },
+  "link.item.label.MakerWorld": { "message": "MakerWorld" },
+  "copyright": { "message": "Bambu Dashboard v1.1.11 — 2026" }
+}

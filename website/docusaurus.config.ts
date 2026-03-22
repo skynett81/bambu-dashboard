@@ -22,7 +22,7 @@ const config: Config = {
 
   i18n: {
     defaultLocale: 'nb',
-    locales: ['nb', 'en', 'de', 'fr', 'es', 'sv'],
+    locales: ['nb', 'en', 'de', 'fr', 'es', 'sv', 'cs', 'hu', 'it', 'ja', 'ko', 'nl', 'pl', 'pt-BR', 'tr', 'uk', 'zh-Hans'],
     localeConfigs: {
       nb: { label: 'Norsk', direction: 'ltr' },
       en: { label: 'English', direction: 'ltr' },
@@ -30,6 +30,17 @@ const config: Config = {
       fr: { label: 'Français', direction: 'ltr' },
       es: { label: 'Español', direction: 'ltr' },
       sv: { label: 'Svenska', direction: 'ltr' },
+      cs: { label: 'Čeština', direction: 'ltr' },
+      hu: { label: 'Magyar', direction: 'ltr' },
+      it: { label: 'Italiano', direction: 'ltr' },
+      ja: { label: '日本語', direction: 'ltr' },
+      ko: { label: '한국어', direction: 'ltr' },
+      nl: { label: 'Nederlands', direction: 'ltr' },
+      pl: { label: 'Polski', direction: 'ltr' },
+      'pt-BR': { label: 'Português (Brasil)', direction: 'ltr' },
+      tr: { label: 'Türkçe', direction: 'ltr' },
+      uk: { label: 'Українська', direction: 'ltr' },
+      'zh-Hans': { label: '中文（简体）', direction: 'ltr' },
     },
   },
 

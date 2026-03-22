@@ -40,19 +40,34 @@ Et timelapse med 500 bilder i 1080p bruker ca. 200–400 MB før sammenslåing. 
 
 ## Lagring
 
-Bilder og ferdige videoer lagres i mappen konfigurert under **Innstillinger → Timelapse → Lagringsmappe**:
+Timelapse-bilder og videoer lagres i `data/timelapse/` under prosjektmappen. Strukturen organiseres per printer og print:
 
 ```
-/media/skynett81/Stuff/bambu-dashboard/timelapse/
-├── PRINTER_ID/
-│   ├── 2026-03-22_benchy/
-│   │   ├── frame_001.jpg
-│   │   ├── frame_002.jpg
-│   │   └── ...
-│   └── 2026-03-22_benchy.mp4
+data/timelapse/
+├── <printer-id>/                     ← Unik printer-ID
+│   ├── 2026-03-22_modellnavn/        ← Print-sesjon (dato_modellnavn)
+│   │   ├── frame_0001.jpg
+│   │   ├── frame_0002.jpg
+│   │   ├── frame_0003.jpg
+│   │   └── ...                       ← Råbilder (slettes etter sammenslåing)
+│   ├── 2026-03-22_modellnavn.mp4     ← Ferdig timelapse-video
+│   ├── 2026-03-20_3dbenchy.mp4
+│   └── 2026-03-15_telefonstativ.mp4
+├── <printer-id-2>/                   ← Flere printere (ved multi-printer)
+│   └── ...
 ```
 
-Du kan endre lagringsmappen til en ekstern disk for å spare plass på systemdisken.
+:::tip Ekstern lagring
+For å spare plass på systemdisken kan du symlinke timelapse-mappen til en ekstern disk:
+```bash
+# Eksempel: flytt til en ekstern disk montert på /mnt/storage
+mv data/timelapse /mnt/storage/timelapse
+
+# Opprett symlink tilbake
+ln -s /mnt/storage/timelapse data/timelapse
+```
+Dashboardet følger symlinken automatisk. Du kan bruke hvilken som helst disk eller nettverksshare.
+:::
 
 ## Automatisk sammenslåing
 

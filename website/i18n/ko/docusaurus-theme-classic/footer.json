@@ -1,0 +1,15 @@
+{
+  "link.title.Dokumentasjon": { "message": "문서" },
+  "link.title.Kunnskapsbase": { "message": "지식 베이스" },
+  "link.title.Lenker": { "message": "링크" },
+  "link.item.label.Kom i gang": { "message": "시작하기" },
+  "link.item.label.Funksjoner": { "message": "기능" },
+  "link.item.label.API-referanse": { "message": "API 참조" },
+  "link.item.label.Filamenter": { "message": "필라멘트" },
+  "link.item.label.Byggplater": { "message": "빌드 플레이트" },
+  "link.item.label.Vedlikehold": { "message": "유지보수" },
+  "link.item.label.Dashboard": { "message": "Dashboard" },
+  "link.item.label.GitHub": { "message": "GitHub" },
+  "link.item.label.MakerWorld": { "message": "MakerWorld" },
+  "copyright": { "message": "Bambu Dashboard v1.1.11 — 2026" }
+}

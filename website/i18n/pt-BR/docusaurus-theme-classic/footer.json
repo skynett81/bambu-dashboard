@@ -1,0 +1,15 @@
+{
+  "link.title.Dokumentasjon": { "message": "Documentação" },
+  "link.title.Kunnskapsbase": { "message": "Base de Conhecimento" },
+  "link.title.Lenker": { "message": "Links" },
+  "link.item.label.Kom i gang": { "message": "Primeiros passos" },
+  "link.item.label.Funksjoner": { "message": "Funcionalidades" },
+  "link.item.label.API-referanse": { "message": "Referência da API" },
+  "link.item.label.Filamenter": { "message": "Filamentos" },
+  "link.item.label.Byggplater": { "message": "Placas de impressão" },
+  "link.item.label.Vedlikehold": { "message": "Manutenção" },
+  "link.item.label.Dashboard": { "message": "Dashboard" },
+  "link.item.label.GitHub": { "message": "GitHub" },
+  "link.item.label.MakerWorld": { "message": "MakerWorld" },
+  "copyright": { "message": "Bambu Dashboard v1.1.11 — 2026" }
+}

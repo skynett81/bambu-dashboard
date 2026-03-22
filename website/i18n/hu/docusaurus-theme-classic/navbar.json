@@ -1,0 +1,8 @@
+{
+  "title": { "message": "Bambu Dashboard" },
+  "item.label.Dokumentasjon": { "message": "Dokumentáció" },
+  "item.label.Kunnskapsbase": { "message": "Tudásbázis" },
+  "item.label.Oppdateringer": { "message": "Frissítések" },
+  "item.label.← Dashboard": { "message": "← Dashboard" },
+  "item.label.GitHub": { "message": "GitHub" }
+}

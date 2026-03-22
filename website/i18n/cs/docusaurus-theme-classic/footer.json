@@ -1,0 +1,15 @@
+{
+  "link.title.Dokumentasjon": { "message": "Dokumentace" },
+  "link.title.Kunnskapsbase": { "message": "Znalostní báze" },
+  "link.title.Lenker": { "message": "Odkazy" },
+  "link.item.label.Kom i gang": { "message": "Začínáme" },
+  "link.item.label.Funksjoner": { "message": "Funkce" },
+  "link.item.label.API-referanse": { "message": "API reference" },
+  "link.item.label.Filamenter": { "message": "Filamenty" },
+  "link.item.label.Byggplater": { "message": "Tiskové podložky" },
+  "link.item.label.Vedlikehold": { "message": "Údržba" },
+  "link.item.label.Dashboard": { "message": "Dashboard" },
+  "link.item.label.GitHub": { "message": "GitHub" },
+  "link.item.label.MakerWorld": { "message": "MakerWorld" },
+  "copyright": { "message": "Bambu Dashboard v1.1.11 — 2026" }
+}

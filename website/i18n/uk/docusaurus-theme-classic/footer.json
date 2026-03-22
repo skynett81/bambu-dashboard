@@ -1,0 +1,15 @@
+{
+  "link.title.Dokumentasjon": { "message": "Документація" },
+  "link.title.Kunnskapsbase": { "message": "База знань" },
+  "link.title.Lenker": { "message": "Посилання" },
+  "link.item.label.Kom i gang": { "message": "Початок роботи" },
+  "link.item.label.Funksjoner": { "message": "Функції" },
+  "link.item.label.API-referanse": { "message": "Довідник API" },
+  "link.item.label.Filamenter": { "message": "Філаменти" },
+  "link.item.label.Byggplater": { "message": "Платформи для друку" },
+  "link.item.label.Vedlikehold": { "message": "Обслуговування" },
+  "link.item.label.Dashboard": { "message": "Dashboard" },
+  "link.item.label.GitHub": { "message": "GitHub" },
+  "link.item.label.MakerWorld": { "message": "MakerWorld" },
+  "copyright": { "message": "Bambu Dashboard v1.1.11 — 2026" }
+}

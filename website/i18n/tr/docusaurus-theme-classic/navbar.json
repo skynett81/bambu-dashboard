@@ -1,0 +1,8 @@
+{
+  "title": { "message": "Bambu Dashboard" },
+  "item.label.Dokumentasjon": { "message": "Belgeler" },
+  "item.label.Kunnskapsbase": { "message": "Bilgi Bankası" },
+  "item.label.Oppdateringer": { "message": "Güncellemeler" },
+  "item.label.← Dashboard": { "message": "← Dashboard" },
+  "item.label.GitHub": { "message": "GitHub" }
+}

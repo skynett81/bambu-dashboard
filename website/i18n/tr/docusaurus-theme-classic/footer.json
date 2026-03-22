@@ -1,0 +1,15 @@
+{
+  "link.title.Dokumentasjon": { "message": "Belgeler" },
+  "link.title.Kunnskapsbase": { "message": "Bilgi Bankası" },
+  "link.title.Lenker": { "message": "Bağlantılar" },
+  "link.item.label.Kom i gang": { "message": "Başlarken" },
+  "link.item.label.Funksjoner": { "message": "Özellikler" },
+  "link.item.label.API-referanse": { "message": "API referansı" },
+  "link.item.label.Filamenter": { "message": "Filamentler" },
+  "link.item.label.Byggplater": { "message": "Yapı plakaları" },
+  "link.item.label.Vedlikehold": { "message": "Bakım" },
+  "link.item.label.Dashboard": { "message": "Dashboard" },
+  "link.item.label.GitHub": { "message": "GitHub" },
+  "link.item.label.MakerWorld": { "message": "MakerWorld" },
+  "copyright": { "message": "Bambu Dashboard v1.1.11 — 2026" }
+}

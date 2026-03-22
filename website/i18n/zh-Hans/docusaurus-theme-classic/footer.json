@@ -1,0 +1,15 @@
+{
+  "link.title.Dokumentasjon": { "message": "文档" },
+  "link.title.Kunnskapsbase": { "message": "知识库" },
+  "link.title.Lenker": { "message": "链接" },
+  "link.item.label.Kom i gang": { "message": "快速入门" },
+  "link.item.label.Funksjoner": { "message": "功能" },
+  "link.item.label.API-referanse": { "message": "API 参考" },
+  "link.item.label.Filamenter": { "message": "耗材" },
+  "link.item.label.Byggplater": { "message": "打印平台" },
+  "link.item.label.Vedlikehold": { "message": "维护" },
+  "link.item.label.Dashboard": { "message": "Dashboard" },
+  "link.item.label.GitHub": { "message": "GitHub" },
+  "link.item.label.MakerWorld": { "message": "MakerWorld" },
+  "copyright": { "message": "Bambu Dashboard v1.1.11 — 2026" }
+}

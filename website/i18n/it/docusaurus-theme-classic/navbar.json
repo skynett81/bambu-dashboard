@@ -1,0 +1,8 @@
+{
+  "title": { "message": "Bambu Dashboard" },
+  "item.label.Dokumentasjon": { "message": "Documentazione" },
+  "item.label.Kunnskapsbase": { "message": "Base di conoscenza" },
+  "item.label.Oppdateringer": { "message": "Aggiornamenti" },
+  "item.label.← Dashboard": { "message": "← Dashboard" },
+  "item.label.GitHub": { "message": "GitHub" }
+}
