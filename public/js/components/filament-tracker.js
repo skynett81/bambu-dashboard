@@ -706,7 +706,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
         ${t('filament.restock_title')}
       </div>`;
-      h += `<div id="restock-container"><span class="text-muted text-sm">Loading...</span></div>`;
+      h += `<div id="restock-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
       setTimeout(() => _loadRestockSuggestions(), 0);
       return h;
     },
@@ -716,7 +716,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         ${t('filament.usage_predictions')}
       </div>`;
-      h += `<div id="usage-predictions-container"><span class="text-muted text-sm">Loading...</span></div>`;
+      h += `<div id="usage-predictions-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
       setTimeout(() => _loadUsagePredictions(), 0);
       return h;
     },
@@ -726,7 +726,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
         ${t('filament.cost_estimate')}
       </div>`;
-      h += `<div id="cost-estimation-container"><span class="text-muted text-sm">Loading...</span></div>`;
+      h += `<div id="cost-estimation-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
       setTimeout(() => _loadCostEstimation(), 0);
       return h;
     },
@@ -736,7 +736,7 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         ${t('filament.usage_history')}
       </div>`;
-      h += `<div id="usage-history-container"><span class="text-muted text-sm">Loading...</span></div>`;
+      h += `<div id="usage-history-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
       setTimeout(() => loadUsageHistory(), 0);
       return h;
     },
@@ -787,7 +787,7 @@
       ];
       let h = `<div class="drying-sub-tabs">`;
       for (const tab of tabs) {
-        h += `<button class="drying-sub-tab${_toolsSubTab === tab.id ? ' active' : ''}" onclick="window._switchToolsSubTab('${tab.id}')" class="drying-sub-tab-inner">${tab.icon} ${tab.label}</button>`;
+        h += `<button class="drying-sub-tab${_toolsSubTab === tab.id ? ' active' : ''}" onclick="window._switchToolsSubTab('${tab.id}')">${tab.icon} ${tab.label}</button>`;
       }
       h += `</div>`;
       h += `<div id="tools-sub-content"></div>`;
@@ -802,7 +802,7 @@
         ${t('filament.tab_database')}
       </div>`;
       if (!_dbStats) {
-        h += '<div id="db-hero-container"><span class="text-muted text-sm">Loading...</span></div>';
+        h += `<div id="db-hero-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
         setTimeout(() => _loadDbStats(), 0);
         return h;
       }
@@ -863,7 +863,7 @@
       // Results
       h += '<div id="db-results-container">';
       if (!_dbLoaded) {
-        h += '<span class="text-muted text-sm">Loading...</span>';
+        h += `<span class="text-muted text-sm">${t('common.loading')}...</span>`;
         setTimeout(() => _loadDbFilaments(), 0);
       } else if (_dbFilaments.length === 0) {
         h += `<p class="text-muted" style="font-size:0.85rem;padding:20px 0;text-align:center">${t('filament.db_no_results')}</p>`;
@@ -2071,7 +2071,7 @@
     } else if (_manageSubTab === 'tags') {
       el.innerHTML = _renderTagsList();
     } else if (_manageSubTab === 'prices') {
-      el.innerHTML = `<div id="price-watch-container"><span class="text-muted text-sm">Loading...</span></div>`;
+      el.innerHTML = `<div id="price-watch-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
       _loadPriceWatch();
     } else if (_manageSubTab === 'insights') {
       el.innerHTML = `<div id="insights-container"><span class="text-muted text-sm">${t('filament.ai_loading')}</span></div>`;
@@ -4624,12 +4624,12 @@
           ${t('filament.checked_out_spools')}
         </span>
       </div>
-      <div id="checked-out-container"><span class="text-muted text-sm">Loading...</span></div>
+      <div id="checked-out-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>
       <div class="ctrl-card-title" style="margin-top:16px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
         ${t('filament.spool_timeline')}
       </div>
-      <div id="timeline-container"><span class="text-muted text-sm">Loading...</span></div>`;
+      <div id="timeline-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
       _loadCheckedOut();
       _loadTimeline();
     } else if (_toolsSubTab === 'colors') {
@@ -4646,7 +4646,7 @@
           </button>
         </div>
       </div>
-      <div id="color-card-container"><span class="text-muted text-sm">Loading...</span></div>`;
+      <div id="color-card-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
       _loadColorCard();
     } else if (_toolsSubTab === 'tags') {
       el.innerHTML = `<div class="ctrl-card-title" style="display:flex;align-items:center;justify-content:space-between">
@@ -4656,7 +4656,7 @@
         </span>
         <button class="form-btn form-btn-sm" data-ripple onclick="openTagScanner()">${t('filament.tag_scan')}</button>
       </div>
-      <div id="nfc-container"><span class="text-muted text-sm">Loading...</span></div>`;
+      <div id="nfc-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
       _loadNfcMappings();
     } else if (_toolsSubTab === 'reference') {
       el.innerHTML = `<div class="ctrl-card-title">
@@ -4665,31 +4665,31 @@
       </div>
       <div class="fil-matref-filter mb-sm">
         <select class="form-input form-input-sm" id="matref-category-filter" onchange="filterMaterials()">
-          <option value="">All Categories</option>
-          <option value="standard">Standard</option>
-          <option value="engineering">Engineering</option>
-          <option value="composite">Composite</option>
-          <option value="flexible">Flexible</option>
-          <option value="specialty">Specialty</option>
-          <option value="support">Support</option>
-          <option value="high-performance">High Performance</option>
+          <option value="">${t('filament.filter_all')} kategorier</option>
+          <option value="standard">${t('filament.cat_standard') || 'Standard'}</option>
+          <option value="engineering">${t('filament.cat_engineering') || 'Engineering'}</option>
+          <option value="composite">${t('filament.cat_composite') || 'Kompositt'}</option>
+          <option value="flexible">${t('filament.cat_flexible') || 'Fleksibel'}</option>
+          <option value="specialty">${t('filament.cat_specialty') || 'Spesial'}</option>
+          <option value="support">${t('filament.cat_support') || 'Støttemateriale'}</option>
+          <option value="high-performance">${t('filament.cat_high_perf') || 'Høyytelses'}</option>
         </select>
       </div>
-      <div id="matref-container"><span class="text-muted text-sm">Loading...</span></div>`;
+      <div id="matref-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
       _loadMaterials();
     } else if (_toolsSubTab === 'compat') {
       el.innerHTML = `<div class="ctrl-card-title">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
         ${t('filament.compatibility')}
       </div>
-      <div id="compat-container"><span class="text-muted text-sm">Loading...</span></div>`;
+      <div id="compat-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
       _loadCompatMatrix();
     } else if (_toolsSubTab === 'tempguide') {
       el.innerHTML = `<div class="ctrl-card-title">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
         ${t('filament.temp_guide')}
       </div>
-      <div id="tempguide-container"><span class="text-muted text-sm">Loading...</span></div>`;
+      <div id="tempguide-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
       _loadTempGuide();
     }
   }
