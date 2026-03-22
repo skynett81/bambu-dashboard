@@ -64,7 +64,7 @@
       ]);
       _showCompareModal(r1, r2);
     } catch (err) {
-      if (typeof showToast === 'function') showToast('Failed to load print data', 'error', 3000);
+      if (typeof showToast === 'function') showToast((typeof t === 'function' ? t('history.compare_load_failed') : '') || 'Kunne ikke laste utskriftsdata', 'error', 3000);
     }
   };
 
@@ -81,11 +81,11 @@
 
     let html = `<div class="modal-content" style="max-width:550px">
       <div class="modal-header">
-        <h3>Select two prints to compare</h3>
+        <h3>${(typeof t === 'function' ? t('history.compare_prints') : '') || 'Sammenlign utskrifter'}</h3>
         <button class="modal-close" onclick="document.getElementById('print-compare-modal')?.remove()">&times;</button>
       </div>
       <div class="modal-body">
-        <p class="text-muted" style="font-size:0.8rem;margin-bottom:10px">Check exactly two prints, then click Compare.</p>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:10px">${(typeof t === 'function' ? t('history.compare_select_hint') : '') || 'Velg nøyaktig to utskrifter, klikk deretter Sammenlign.'}</p>
         <div class="compare-select-list">`;
 
     for (const p of prints) {
@@ -102,8 +102,8 @@
 
     html += `</div></div>
       <div class="modal-footer">
-        <button class="form-btn form-btn-secondary" onclick="document.getElementById('print-compare-modal')?.remove()">Cancel</button>
-        <button class="form-btn form-btn-primary" id="compare-go-btn" disabled onclick="window._compareSelected()">Compare</button>
+        <button class="form-btn form-btn-secondary" onclick="document.getElementById('print-compare-modal')?.remove()">${(typeof t === 'function' ? t('common.cancel') : '') || 'Avbryt'}</button>
+        <button class="form-btn form-btn-primary" id="compare-go-btn" disabled onclick="window._compareSelected()">${(typeof t === 'function' ? t('history.compare_btn') : '') || 'Sammenlign'}</button>
       </div>
     </div>`;
 
@@ -131,16 +131,17 @@
   function _showCompareModal(a, b) {
     const overlay = _createOverlay();
 
+    const _tl = (key, fallback) => (typeof t === 'function' ? t(key) : '') || fallback;
     const fields = [
-      { label: 'Filename', key: 'filename', fmt: v => _esc((v || '--').replace(/\.(3mf|gcode)$/i, '')) },
-      { label: 'Status', key: 'status', fmt: v => `<span style="color:${_statusColor(v)};font-weight:600">${_statusLabel(v)}</span>`, compare: 'status' },
-      { label: 'Duration', key: 'duration_seconds', fmt: v => _formatDuration(v), compare: 'lower' },
-      { label: 'Start', key: 'started_at', fmt: v => _formatDate(v) },
-      { label: 'End', key: 'ended_at', fmt: v => _formatDate(v) },
-      { label: 'Filament Used', key: 'filament_used_g', fmt: v => v ? v.toFixed(1) + 'g' : '--', compare: 'lower' },
-      { label: 'Filament Type', key: 'filament_type', fmt: v => _esc(v || '--') },
-      { label: 'Layers', key: 'layer_count', fmt: v => v ? String(v) : '--' },
-      { label: 'Notes', key: 'notes', fmt: v => _esc(v || '--') }
+      { label: _tl('history.filename', 'Filnavn'), key: 'filename', fmt: v => _esc((v || '--').replace(/\.(3mf|gcode)$/i, '')) },
+      { label: _tl('history.status', 'Status'), key: 'status', fmt: v => `<span style="color:${_statusColor(v)};font-weight:600">${_statusLabel(v)}</span>`, compare: 'status' },
+      { label: _tl('history.duration', 'Varighet'), key: 'duration_seconds', fmt: v => _formatDuration(v), compare: 'lower' },
+      { label: _tl('history.started', 'Startet'), key: 'started_at', fmt: v => _formatDate(v) },
+      { label: _tl('history.ended', 'Avsluttet'), key: 'ended_at', fmt: v => _formatDate(v) },
+      { label: _tl('history.filament', 'Filament brukt'), key: 'filament_used_g', fmt: v => v ? v.toFixed(1) + 'g' : '--', compare: 'lower' },
+      { label: _tl('history.filament_type', 'Filamenttype'), key: 'filament_type', fmt: v => _esc(v || '--') },
+      { label: _tl('history.layers', 'Lag'), key: 'layer_count', fmt: v => v ? String(v) : '--' },
+      { label: _tl('history.notes', 'Notater'), key: 'notes', fmt: v => _esc(v || '--') }
     ];
 
     function classFor(field, valA, valB, side) {
@@ -165,7 +166,7 @@
 
     let html = `<div class="modal-content" style="max-width:700px">
       <div class="modal-header">
-        <h3>Print Comparison</h3>
+        <h3>${_tl('history.compare_title', 'Sammenlign utskrifter')}</h3>
         <button class="modal-close" onclick="document.getElementById('print-compare-modal')?.remove()">&times;</button>
       </div>
       <div class="modal-body" style="padding:0">
@@ -198,7 +199,7 @@
 
     html += `</div>
       <div class="modal-footer">
-        <button class="form-btn form-btn-secondary" onclick="document.getElementById('print-compare-modal')?.remove()">Close</button>
+        <button class="form-btn form-btn-secondary" onclick="document.getElementById('print-compare-modal')?.remove()">${_tl('common.close', 'Lukk')}</button>
       </div>
     </div>`;
 

@@ -87,7 +87,7 @@
       showToast(t('gallery.captured') || 'Screenshot saved!', 'success');
       if (window._activePanel === 'screenshots') loadScreenshotGallery();
     }).catch(e => {
-      showToast('Failed to save screenshot', 'error');
+      showToast(t('gallery.save_failed') || 'Kunne ikke lagre skjermbilde', 'error');
     });
   };
 
@@ -101,21 +101,21 @@
           <div style="font-size:0.85rem;font-weight:600">${esc(shot.filename)}</div>
           <div style="font-size:0.75rem;color:var(--text-muted);margin-top:4px">${new Date(shot.captured_at).toLocaleString()}${shot.print_file ? ' — ' + esc(shot.print_file) : ''}</div>
           <div style="display:flex;gap:8px;justify-content:center;margin-top:16px">
-            <a href="${shot.data}" download="${shot.filename}" class="form-btn form-btn-secondary">Download</a>
-            <button class="form-btn form-btn-danger" onclick="_deleteScreenshot(${id}); document.querySelector('.ix-modal-overlay')?.remove();">Delete</button>
-            <button class="form-btn form-btn-secondary" data-close-modal>Close</button>
+            <a href="${shot.data}" download="${shot.filename}" class="form-btn form-btn-secondary">${t('common.download') || 'Last ned'}</a>
+            <button class="form-btn form-btn-danger" onclick="_deleteScreenshot(${id}); document.querySelector('.ix-modal-overlay')?.remove();">${t('common.delete') || 'Slett'}</button>
+            <button class="form-btn form-btn-secondary" data-close-modal>${t('common.close') || 'Lukk'}</button>
           </div>
         </div>
       `;
       openModal(html, { style: 'max-width:800px;width:95%;padding:20px' });
     } catch (e) {
-      showToast('Failed to load screenshot', 'error');
+      showToast(t('gallery.load_failed') || 'Kunne ikke laste skjermbilde', 'error');
     }
   };
 
   window._deleteScreenshot = async function(id) {
     await fetch(`/api/screenshots/${id}`, { method: 'DELETE' });
-    showToast('Screenshot deleted', 'success');
+    showToast(t('gallery.deleted') || 'Skjermbilde slettet', 'success');
     if (window._activePanel === 'screenshots') loadScreenshotGallery();
   };
 })();

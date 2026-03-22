@@ -145,7 +145,7 @@
         const live = window.printerState?._printers?.[p.id] || {};
         const gcState = live.gcode_state || 'IDLE';
         const isPrinting = ['RUNNING', 'PAUSE', 'PREPARE', 'HEATING'].includes(gcState);
-        const _stateMap = { RUNNING: 'Printing', PAUSE: 'Paused', IDLE: 'Idle', PREPARE: 'Preparing', HEATING: 'Heating', FINISH: 'Finished' };
+        const _stateMap = { RUNNING: t('state.running') || 'Skriver ut', IDLE: t('state.idle') || 'Inaktiv', PAUSE: t('state.pause') || 'Pauset', FINISH: t('state.finish') || 'Fullført', FAILED: t('state.failed') || 'Feilet', PREPARE: t('state.prepare') || 'Forbereder' };
         const stateLabel = _stateMap[gcState] || gcState;
 
         h += `<div class="pp-printer-card">

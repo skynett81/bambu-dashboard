@@ -99,7 +99,7 @@
   window._logViewerTogglePause = function() {
     _paused = !_paused;
     const btn = document.getElementById('log-pause-btn');
-    if (btn) btn.textContent = _paused ? 'Resume' : 'Pause';
+    if (btn) btn.textContent = _paused ? (t('controls.resume') || 'Fortsett') : (t('controls.pause') || 'Pause');
     if (!_paused) {
       _renderAll();
     }

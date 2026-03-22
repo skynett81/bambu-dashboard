@@ -4090,7 +4090,7 @@
         h += '</div>';
       }
       container.innerHTML = h;
-    } catch { container.innerHTML = '<span class="text-muted">Error</span>'; }
+    } catch { container.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   }
 
   async function _loadPriceWatch() {
@@ -4565,7 +4565,7 @@
       }
       h += '</div>';
       el.innerHTML = h;
-    } catch { el.innerHTML = '<span class="text-muted">Error</span>'; }
+    } catch { el.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   }
 
   window.checkoutSpoolItem = async function(id) {
@@ -4728,7 +4728,7 @@
       }
       h += '</tbody></table></div>';
       el.innerHTML = h;
-    } catch { el.innerHTML = '<span class="text-muted">Error</span>'; }
+    } catch { el.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   }
 
   // ═══ Compatibility Matrix ═══
@@ -4759,7 +4759,7 @@
       }
       h += '</tbody></table></div>';
       el.innerHTML = h;
-    } catch { el.innerHTML = '<span class="text-muted">Error</span>'; }
+    } catch { el.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   }
 
   // ═══ Color Card ═══
@@ -4792,7 +4792,7 @@
       }
       h += '</div>';
       el.innerHTML = h;
-    } catch { el.innerHTML = '<span class="text-muted">Error</span>'; }
+    } catch { el.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   }
 
   window.exportColorCard = function() {
@@ -4862,7 +4862,7 @@
       }
       h += '</div>';
       el.innerHTML = h;
-    } catch { el.innerHTML = '<span class="text-muted">Error</span>'; }
+    } catch { el.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   }
 
   // ── Multi-method Tag Scanner ──
@@ -5086,7 +5086,7 @@
         </div>`;
       }
     } catch {
-      resultEl.innerHTML = `<span class="text-muted">Error</span>`;
+      resultEl.innerHTML = `<span class="text-muted">${t('common.error')}</span>`;
     }
   }
 
@@ -5198,7 +5198,7 @@
       }
       h += '</div>';
       el.innerHTML = h;
-    } catch { el.innerHTML = '<span class="text-muted">Error</span>'; }
+    } catch { el.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   }
 
   // ═══ Spool Timeline Dialog (per spool) ═══

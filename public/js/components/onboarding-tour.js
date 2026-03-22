@@ -4,38 +4,41 @@
 
   const TOUR_KEY = 'onboarding-completed';
 
-  const TOUR_STEPS = [
-    {
-      target: '#sidebar',
-      title: 'Navigation',
-      text: 'Use the sidebar to navigate between Dashboard, Controls, Filament, History, and more. Sections are collapsible.',
-      position: 'right'
-    },
-    {
-      target: '#stats-strip',
-      title: 'Live Stats',
-      text: 'Real-time sparkline charts showing nozzle, bed, and chamber temperatures, fan speed, print speed, and layer progress.',
-      position: 'bottom'
-    },
-    {
-      target: '#dashboard-grid',
-      title: 'Dashboard',
-      text: 'Your main overview with print progress, camera feed, AMS status, temperature gauges, and quick controls.',
-      position: 'top'
-    },
-    {
-      target: '.printer-selector',
-      title: 'Printer Selector',
-      text: 'If you have multiple printers, switch between them here. Each printer has its own status and data.',
-      position: 'bottom'
-    },
-    {
-      target: '#theme-toggle',
-      title: 'Theme & Display',
-      text: 'Toggle between light and dark mode. Press T for quick toggle, or ? to see all keyboard shortcuts.',
-      position: 'bottom'
-    }
-  ];
+  function _getTourSteps() {
+    const _tl = (key, fallback) => (typeof t === 'function' ? t(key) : '') || fallback;
+    return [
+      {
+        target: '#sidebar',
+        title: _tl('tour.nav_title', 'Navigasjon'),
+        text: _tl('tour.nav_text', 'Bruk sidebaren til å navigere mellom Dashboard, Kontroller, Filament, Historikk og mer. Seksjoner kan minimeres.'),
+        position: 'right'
+      },
+      {
+        target: '#stats-strip',
+        title: _tl('tour.stats_title', 'Sanntidsstatistikk'),
+        text: _tl('tour.stats_text', 'Sanntidsgrafer som viser dyse-, seng- og kammertemperaturer, viftehastighet, utskriftshastighet og lagfremgang.'),
+        position: 'bottom'
+      },
+      {
+        target: '#dashboard-grid',
+        title: _tl('tour.dashboard_title', 'Dashboard'),
+        text: _tl('tour.dashboard_text', 'Din hovedoversikt med utskriftsfremgang, kamerafeed, AMS-status, temperaturmålere og hurtigkontroller.'),
+        position: 'top'
+      },
+      {
+        target: '.printer-selector',
+        title: _tl('tour.printer_selector_title', 'Printervalg'),
+        text: _tl('tour.printer_selector_text', 'Hvis du har flere printere, kan du bytte mellom dem her. Hver printer har sin egen status og data.'),
+        position: 'bottom'
+      },
+      {
+        target: '#theme-toggle',
+        title: _tl('tour.theme_title', 'Tema og visning'),
+        text: _tl('tour.theme_text', 'Veksle mellom lyst og mørkt tema. Trykk T for rask veksling, eller ? for å se alle tastatursnarveier.'),
+        position: 'bottom'
+      }
+    ];
+  }
 
   function _createOverlay() {
     const overlay = document.createElement('div');
@@ -54,6 +57,7 @@
   }
 
   function _showStep(idx) {
+    const TOUR_STEPS = _getTourSteps();
     const step = TOUR_STEPS[idx];
     const target = document.querySelector(step.target);
     const tooltip = document.getElementById('tour-tooltip') || _createTooltip();
@@ -74,10 +78,10 @@
       <div class="tour-title">${step.title}</div>
       <div class="tour-text">${step.text}</div>
       <div class="tour-actions">
-        <button class="form-btn form-btn-secondary tour-skip" onclick="endTour()">Skip</button>
+        <button class="form-btn form-btn-secondary tour-skip" onclick="endTour()">${(typeof t === 'function' ? t('tour.skip') : '') || 'Hopp over'}</button>
         <div style="display:flex;gap:6px">
-          ${!isFirst ? '<button class="form-btn form-btn-secondary tour-prev" onclick="tourPrev()">Back</button>' : ''}
-          <button class="form-btn tour-next" onclick="${isLast ? 'endTour()' : 'tourNext()'}">${isLast ? 'Finish' : 'Next'}</button>
+          ${!isFirst ? `<button class="form-btn form-btn-secondary tour-prev" onclick="tourPrev()">${(typeof t === 'function' ? t('tour.back') : '') || 'Tilbake'}</button>` : ''}
+          <button class="form-btn tour-next" onclick="${isLast ? 'endTour()' : 'tourNext()'}">${isLast ? ((typeof t === 'function' ? t('tour.finish') : '') || 'Fullfør') : ((typeof t === 'function' ? t('tour.next') : '') || 'Neste')}</button>
         </div>
       </div>
     `;
@@ -141,7 +145,7 @@
   window.tourNext = function() {
     _clearHighlights();
     _currentStep++;
-    if (_currentStep < TOUR_STEPS.length) {
+    if (_currentStep < _getTourSteps().length) {
       _showStep(_currentStep);
     } else {
       endTour();

@@ -66,16 +66,16 @@
         <option value="step">STEP</option>
       </select>
       <button class="lib-upload-btn" onclick="_libShowUpload()">+ ${t('library.upload')}</button>
-      <button class="form-btn form-btn-secondary" onclick="_toggleFileSelectMode()" id="file-select-toggle" style="padding:4px 10px;font-size:0.75rem">${_fileSelectMode ? '\u2713 Done' : '\u2610 Select'}</button>
+      <button class="form-btn form-btn-secondary" onclick="_toggleFileSelectMode()" id="file-select-toggle" style="padding:4px 10px;font-size:0.75rem">${_fileSelectMode ? '\u2713 Ferdig' : '\u2610 ' + (t('library.select') || 'Velg')}</button>
     </div>
     <div class="lib-cat-pills" id="lib-cats"></div>
     <div class="lib-grid" id="lib-grid"></div>
     <div id="lib-load-more-wrap"></div>
     <div class="batch-bar" id="file-batch-bar" style="display:none">
       <span id="file-batch-count">0 selected</span>
-      <button class="form-btn form-btn-secondary" onclick="_batchAddToQueue()" style="padding:4px 10px;font-size:0.75rem">Add to Queue</button>
-      <button class="form-btn form-btn-danger" onclick="_batchDeleteFiles()" style="padding:4px 10px;font-size:0.75rem">Delete</button>
-      <button class="form-btn form-btn-secondary" onclick="_clearFileSelection()" style="padding:4px 10px;font-size:0.75rem">Clear</button>
+      <button class="form-btn form-btn-secondary" onclick="_batchAddToQueue()" style="padding:4px 10px;font-size:0.75rem">${t('library.add_to_queue') || 'Legg i kø'}</button>
+      <button class="form-btn form-btn-danger" onclick="_batchDeleteFiles()" style="padding:4px 10px;font-size:0.75rem">${t('common.delete') || 'Slett'}</button>
+      <button class="form-btn form-btn-secondary" onclick="_clearFileSelection()" style="padding:4px 10px;font-size:0.75rem">${t('library.clear') || 'Tøm'}</button>
     </div>`;
 
     _offset = 0;
@@ -368,7 +368,7 @@
     _renderGrid();
     _updateBatchBar();
     const toggle = document.getElementById('file-select-toggle');
-    if (toggle) toggle.textContent = _fileSelectMode ? '\u2713 Done' : '\u2610 Select';
+    if (toggle) toggle.textContent = _fileSelectMode ? '\u2713 Ferdig' : '\u2610 ' + (t('library.select') || 'Velg');
   };
 
   window._toggleFileCheck = function(id) {
@@ -391,7 +391,7 @@
     const bar = document.getElementById('file-batch-bar');
     const count = document.getElementById('file-batch-count');
     if (bar) bar.style.display = (_fileSelectMode && _selectedFiles.size > 0) ? 'flex' : 'none';
-    if (count) count.textContent = `${_selectedFiles.size} selected`;
+    if (count) count.textContent = `${_selectedFiles.size} ${t('library.selected') || 'valgt'}`;
   }
 
   window._clearFileSelection = function() {
@@ -403,7 +403,7 @@
   window._batchDeleteFiles = function() {
     if (_selectedFiles.size === 0) return;
     if (typeof confirmAction === 'function') {
-      confirmAction(`Delete ${_selectedFiles.size} file${_selectedFiles.size > 1 ? 's' : ''}?`, async () => {
+      confirmAction(`${t('library.delete_confirm_prefix') || 'Slette'} ${_selectedFiles.size} ${_selectedFiles.size > 1 ? (t('library.files') || 'filer') : (t('library.file') || 'fil')}?`, async () => {
         let deleted = 0;
         for (const fileId of _selectedFiles) {
           try {
@@ -411,11 +411,11 @@
             if (r.ok) deleted++;
           } catch (_) {}
         }
-        if (typeof showToast === 'function') showToast(`Deleted ${deleted} file${deleted > 1 ? 's' : ''}`, 'success');
+        if (typeof showToast === 'function') showToast(`${t('library.deleted_prefix') || 'Slettet'} ${deleted} ${deleted > 1 ? (t('library.files') || 'filer') : (t('library.file') || 'fil')}`, 'success');
         _selectedFiles.clear();
         _fileSelectMode = false;
         const toggle = document.getElementById('file-select-toggle');
-        if (toggle) toggle.textContent = '\u2610 Select';
+        if (toggle) toggle.textContent = '\u2610 ' + (t('library.select') || 'Velg');
         _loadFiles(true);
         _loadCategories();
       }, { danger: true });
@@ -425,8 +425,8 @@
   window._batchAddToQueue = function() {
     if (_selectedFiles.size === 0) return;
     if (typeof showToast === 'function') {
-      showToast(`${_selectedFiles.size} file${_selectedFiles.size > 1 ? 's' : ''} ready to queue \u2014 select a queue in the Queue panel`, 'info', 0, [
-        { label: 'Open Queue', onClick: () => { if (typeof openPanel === 'function') openPanel('queue'); } }
+      showToast(`${_selectedFiles.size} ${_selectedFiles.size > 1 ? (t('library.files') || 'filer') : (t('library.file') || 'fil')} ${t('library.ready_to_queue') || 'klar for kø \u2014 velg en kø i Kø-panelet'}`, 'info', 0, [
+        { label: t('library.open_queue') || 'Åpne kø', onClick: () => { if (typeof openPanel === 'function') openPanel('queue'); } }
       ]);
     }
   };

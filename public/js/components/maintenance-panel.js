@@ -93,8 +93,8 @@
           <div class="form-group" style="margin-bottom:8px">
             <label class="form-label">${t('maintenance.nozzle_type')}</label>
             <select class="form-input" id="nozzle-type-input">
-              <option value="stainless_steel">Stainless Steel</option>
-              <option value="hardened_steel">Hardened Steel</option>
+              <option value="stainless_steel">${t('maintenance.stainless_steel') || 'Rustfritt stål'}</option>
+              <option value="hardened_steel">${t('maintenance.hardened_steel') || 'Herdet stål'}</option>
             </select>
           </div>
           <div class="form-group" style="margin-bottom:8px">
@@ -350,8 +350,8 @@
           <div class="form-group" style="flex:1;min-width:140px;margin-bottom:0">
             <label class="form-label">${t('maintenance.nozzle_type')}</label>
             <select class="form-input" id="global-nozzle-type">
-              <option value="stainless_steel">Stainless Steel</option>
-              <option value="hardened_steel">Hardened Steel</option>
+              <option value="stainless_steel">${t('maintenance.stainless_steel') || 'Rustfritt stål'}</option>
+              <option value="hardened_steel">${t('maintenance.hardened_steel') || 'Herdet stål'}</option>
             </select>
           </div>
           <div class="form-group" style="flex:1;min-width:100px;margin-bottom:0">

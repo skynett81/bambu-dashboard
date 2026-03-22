@@ -441,7 +441,7 @@
       el.innerHTML = h;
 
     } else if (_generalSubTab === 'auth') {
-      el.innerHTML = '<div id="auth-settings-section"><div class="settings-card"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div></div>';
+      el.innerHTML = `<div id="auth-settings-section"><div class="settings-card"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div></div>`;
       loadAuthSettings();
 
     } else if (_generalSubTab === 'obs') {
@@ -572,13 +572,13 @@
     const el = document.getElementById('notif-sub-content');
     if (!el) return;
     if (_notifSubTab === 'channels') {
-      el.innerHTML = `<div id="notif-server-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div>`;
+      el.innerHTML = `<div id="notif-server-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div>`;
       loadNotifSettings();
     } else if (_notifSubTab === 'log') {
-      el.innerHTML = `<div class="settings-card"><div class="card-title">${t('settings.notif_log_title')}</div><div id="notif-log-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div></div>`;
+      el.innerHTML = `<div class="settings-card"><div class="card-title">${t('settings.notif_log_title')}</div><div id="notif-log-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div></div>`;
       loadNotifLog();
     } else if (_notifSubTab === 'webhooks') {
-      el.innerHTML = `<div class="settings-card"><div class="card-title">${t('settings.webhooks_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.webhooks_desc')}</p><div id="webhooks-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showWebhookEditor()">${t('settings.webhook_add')}</button></div>`;
+      el.innerHTML = `<div class="settings-card"><div class="card-title">${t('settings.webhooks_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.webhooks_desc')}</p><div id="webhooks-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showWebhookEditor()">${t('settings.webhook_add')}</button></div>`;
       loadWebhooks();
     }
   }
@@ -599,13 +599,13 @@
     if (_systemSubTab === 'updates') {
       let h = '<div class="settings-grid">';
       // Updates card
-      h += `<div class="settings-card"><div class="card-title">${t('update.title')}</div><div id="update-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div></div>`;
+      h += `<div class="settings-card"><div class="card-title">${t('update.title')}</div><div id="update-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div></div>`;
       // System info card
-      h += `<div class="settings-card"><div class="card-title" style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> ${t('settings.system_info_title')}</div><div id="system-info-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div></div>`;
+      h += `<div class="settings-card"><div class="card-title" style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> ${t('settings.system_info_title')}</div><div id="system-info-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div></div>`;
       // Scheduled tasks card
       h += `<div class="settings-card"><div class="card-title" style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${t('settings.scheduled_tasks_title')}</div><div id="scheduled-tasks-section"></div></div>`;
       // Backups card (full width)
-      h += `<div class="settings-card" style="grid-column:1/-1"><div class="card-title" style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> ${t('settings.backup_title')}</span><div style="display:flex;gap:6px"><label class="form-btn form-btn-sm" data-ripple style="cursor:pointer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> ${t('settings.backup_upload')}<input type="file" accept=".db" style="display:none" onchange="window._uploadBackup(this)"></label><button class="form-btn form-btn-primary form-btn-sm" data-ripple id="backup-create-btn" onclick="window._createBackup()">${t('settings.backup_create')}</button></div></div><p class="text-muted" style="font-size:0.8rem;margin:4px 0 8px">${t('settings.backup_desc')}</p><div id="backup-list-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div></div>`;
+      h += `<div class="settings-card" style="grid-column:1/-1"><div class="card-title" style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> ${t('settings.backup_title')}</span><div style="display:flex;gap:6px"><label class="form-btn form-btn-sm" data-ripple style="cursor:pointer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> ${t('settings.backup_upload')}<input type="file" accept=".db" style="display:none" onchange="window._uploadBackup(this)"></label><button class="form-btn form-btn-primary form-btn-sm" data-ripple id="backup-create-btn" onclick="window._createBackup()">${t('settings.backup_create')}</button></div></div><p class="text-muted" style="font-size:0.8rem;margin:4px 0 8px">${t('settings.backup_desc')}</p><div id="backup-list-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div></div>`;
       // Demo data
       h += '<div id="demo-data-section" style="display:none"></div>';
       h += '</div>';
@@ -619,8 +619,8 @@
 
     } else if (_systemSubTab === 'security') {
       let h = '<div class="settings-grid">';
-      h += `<div class="settings-card"><div class="card-title">${t('settings.users_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.users_desc')}</p><div id="users-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showUserEditor()">${t('settings.user_add')}</button></div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.api_keys_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.api_keys_desc')}</p><div id="api-keys-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showApiKeyEditor()">${t('settings.api_key_add')}</button></div>`;
+      h += `<div class="settings-card"><div class="card-title">${t('settings.users_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.users_desc')}</p><div id="users-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showUserEditor()">${t('settings.user_add')}</button></div>`;
+      h += `<div class="settings-card"><div class="card-title">${t('settings.api_keys_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.api_keys_desc')}</p><div id="api-keys-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showApiKeyEditor()">${t('settings.api_key_add')}</button></div>`;
       h += `<div class="settings-card"><div class="card-title">${t('settings.push_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.push_desc')}</p><div style="display:flex;gap:0.5rem;flex-wrap:wrap"><button class="form-btn form-btn-primary" data-ripple onclick="subscribePush()">${t('settings.push_enable')}</button><button class="form-btn" data-ripple onclick="unsubscribePush()">${t('settings.push_disable')}</button></div></div>`;
       h += '</div>';
       el.innerHTML = h;
@@ -628,7 +628,7 @@
 
     } else if (_systemSubTab === 'printers') {
       let h = '<div class="settings-grid">';
-      h += `<div class="settings-card"><div class="card-title">${t('settings.printer_groups_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.printer_groups_desc')}</p><div id="printer-groups-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showPrinterGroupEditor()">${t('settings.printer_groups_add')}</button></div>`;
+      h += `<div class="settings-card"><div class="card-title">${t('settings.printer_groups_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.printer_groups_desc')}</p><div id="printer-groups-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showPrinterGroupEditor()">${t('settings.printer_groups_add')}</button></div>`;
       h += `<div class="settings-card"><div class="card-title">${t('settings.hub_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.hub_desc')}</p><div id="hub-settings-section"><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="hub-mode" onchange="toggleHubMode(this.checked)"><span>${t('settings.hub_enable')}</span></label><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="kiosk-mode" onchange="toggleKioskMode(this.checked)"><span>${t('settings.kiosk_enable')}</span></label></div></div>`;
       h += '</div>';
       el.innerHTML = h;
@@ -765,7 +765,7 @@
 
     } else if (_systemSubTab === 'integrations') {
       let h = '<div class="settings-grid">';
-      h += `<div class="settings-card" id="ecom-premium-card"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem"><span class="premium-badge" id="ecom-premium-badge">${t('settings.ecom_premium')}</span><div class="card-title">${t('settings.ecom_title')}</div></div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.ecom_desc')}</p><div id="ecom-license-area"><div class="text-muted" style="font-size:0.8rem">${t('settings.ecom_license_checking')}</div></div><div id="ecom-section" style="display:none"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div><button class="form-btn form-btn-primary mt-sm" id="ecom-add-btn" style="display:none" data-ripple onclick="showEcomEditor()">${t('settings.ecom_add')}</button></div>`;
+      h += `<div class="settings-card" id="ecom-premium-card"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem"><span class="premium-badge" id="ecom-premium-badge">${t('settings.ecom_premium')}</span><div class="card-title">${t('settings.ecom_title')}</div></div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.ecom_desc')}</p><div id="ecom-license-area"><div class="text-muted" style="font-size:0.8rem">${t('settings.ecom_license_checking')}</div></div><div id="ecom-section" style="display:none"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div><button class="form-btn form-btn-primary mt-sm" id="ecom-add-btn" style="display:none" data-ripple onclick="showEcomEditor()">${t('settings.ecom_add')}</button></div>`;
       h += `<div class="settings-card" id="orders-premium-card"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem"><span class="premium-badge" id="orders-premium-badge">${t('settings.ecom_premium')}</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><div class="card-title">${t('orders.title')}</div></div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.orders_desc') || 'Ordrebehandling, kanban-tavle, fakturering og prosjektstyring.'}</p><div id="orders-license-area"><div class="text-muted" style="font-size:0.8rem">${t('settings.ecom_license_checking')}</div></div><button class="form-btn form-btn-primary mt-sm" id="orders-open-btn" style="display:none" data-ripple onclick="openPanel('orders')">${t('orders.title')} \u2192</button></div>`;
       h += '</div>';
       el.innerHTML = h;
@@ -776,7 +776,7 @@
       let h = '<div class="settings-grid">';
       h += `<div class="settings-card"><div class="card-title">${t('settings.nodes_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.nodes_desc')}</p>
-        <div id="remote-nodes-list"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div>
+        <div id="remote-nodes-list"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div>
         <button class="form-btn form-btn-primary mt-sm" data-ripple onclick="window._showAddNodeDialog()">${t('settings.nodes_add')}</button>
       </div>`;
       h += '</div>';
@@ -785,8 +785,8 @@
 
     } else if (_systemSubTab === 'data') {
       let h = '<div class="settings-grid">';
-      h += `<div class="settings-card"><div class="card-title">${t('settings.custom_fields_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.custom_fields_desc')}</p><div id="custom-fields-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showCustomFieldEditor()">${t('settings.custom_fields_add')}</button></div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.brand_defaults_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.brand_defaults_desc')}</p><div id="brand-defaults-section"><div class="text-muted" style="font-size:0.8rem">Loading...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showBrandDefaultEditor()">${t('settings.brand_defaults_add')}</button></div>`;
+      h += `<div class="settings-card"><div class="card-title">${t('settings.custom_fields_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.custom_fields_desc')}</p><div id="custom-fields-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showCustomFieldEditor()">${t('settings.custom_fields_add')}</button></div>`;
+      h += `<div class="settings-card"><div class="card-title">${t('settings.brand_defaults_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.brand_defaults_desc')}</p><div id="brand-defaults-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showBrandDefaultEditor()">${t('settings.brand_defaults_add')}</button></div>`;
       h += `<div class="settings-card" style="cursor:pointer" onclick="openPanel('learning')"><div class="card-title">${t('settings.courses_title')}</div><p class="text-muted" style="font-size:0.85rem">${t('settings.courses_desc')}</p><button class="form-btn form-btn-sm mt-sm" data-ripple onclick="openPanel('learning')">${t('learning.go_to')} \u2192</button></div>`;
       // Export & Import card
       h += `<div class="settings-card">
@@ -845,7 +845,7 @@
       el.innerHTML = '<div class="stats-detail-list">' + rows.map(([k, v]) =>
         `<div class="stats-detail-row"><span class="stats-detail-label">${k}</span><span class="stats-detail-value">${v}</span></div>`
       ).join('') + '</div>';
-    } catch { el.innerHTML = '<span class="text-muted">Error</span>'; }
+    } catch { el.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   }
 
   function _loadScheduledTasks() {
@@ -895,7 +895,7 @@
       }
       h += '</div>';
       el.innerHTML = h;
-    } catch { el.innerHTML = '<span class="text-muted">Error</span>'; }
+    } catch { el.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   }
 
   window._createBackup = async function() {

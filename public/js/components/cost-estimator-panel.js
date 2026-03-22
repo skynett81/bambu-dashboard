@@ -354,7 +354,7 @@
     // Energy info section
     html += '<div class="card" style="margin-top:12px">';
     html += '<div class="card-title">\u26A1 ' + (_tl('cost.energy_info', '') || 'Energy Prices') + '</div>';
-    html += '<div id="cost-energy-info" style="font-size:0.85rem;color:var(--text-muted)">Loading...</div>';
+    html += `<div id="cost-energy-info" style="font-size:0.85rem;color:var(--text-muted)">${t('common.loading')}...</div>`;
     html += '</div>';
 
     el.innerHTML = html;

@@ -725,7 +725,7 @@
         h += '</div>';
       }
       el.innerHTML = h;
-    } catch { el.innerHTML = '<span class="text-muted">Error</span>'; }
+    } catch { el.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   }
 
   // loadMacros is called from renderControls after DOM is ready
@@ -820,7 +820,7 @@
   window.loadPrinterFiles = async function(printerId) {
     const el = document.getElementById('ctrl-files-list');
     if (!el) return;
-    el.innerHTML = '<span class="text-muted" style="font-size:0.8rem">Loading...</span>';
+    el.innerHTML = `<span class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</span>`;
     try {
       const res = await fetch(`/api/printers/${encodeURIComponent(printerId)}/files`);
       const files = await res.json();
@@ -1031,7 +1031,7 @@
     const el = document.getElementById('ctrl-bed-mesh');
     if (!el) return;
     _meshPrinterId = printerId;
-    el.innerHTML = '<span class="text-muted" style="font-size:0.8rem">Loading...</span>';
+    el.innerHTML = `<span class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</span>`;
     try {
       const res = await fetch(`/api/printers/${encodeURIComponent(printerId)}/bed-mesh`);
       const data = await res.json();
@@ -1289,7 +1289,7 @@
         </div>`;
       }
       el.innerHTML = h;
-    } catch { el.innerHTML = '<span class="text-muted">Error</span>'; }
+    } catch { el.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   };
 
   window._deleteLayerPause = async function(printerId, pauseId) {
