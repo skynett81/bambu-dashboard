@@ -58,6 +58,7 @@
   async function apiUpdateProject(id, data) { const r = await fetch('/api/projects/' + id, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); if (!r.ok) throw new Error('Failed'); return r.json(); }
   async function apiCreateInvoice(projectId, data) { const r = await fetch('/api/projects/' + projectId + '/invoice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); if (!r.ok) throw new Error('Failed'); return r.json(); }
   async function apiUpdateInvoiceStatus(id, status) { const r = await fetch('/api/invoices/' + id + '/status', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) }); if (!r.ok) throw new Error('Failed'); return r.json(); }
+  async function apiDeleteProject(id) { const r = await fetch('/api/projects/' + id, { method: 'DELETE' }); if (!r.ok) throw new Error('Failed'); return r.json(); }
   async function apiToggleShare(projectId, enabled) { const r = await fetch('/api/projects/' + projectId + '/share', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) }); if (!r.ok) throw new Error('Failed'); return r.json(); }
   async function apiLinkQueue(projectId, queueItemId) { const r = await fetch('/api/projects/' + projectId + '/link-queue', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ queue_item_id: queueItemId }) }); if (!r.ok) throw new Error('Failed'); return r.json(); }
 
@@ -320,6 +321,14 @@
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
           ${_tl('orders.generate_invoice', 'Generer faktura')}
         </button>
+        <button class="matrec-recalc-btn" style="margin-left:0" onclick="window._orderDuplicate()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          ${_tl('orders.duplicate', 'Dupliser')}
+        </button>
+        <button class="form-btn form-btn-danger" style="font-size:0.8rem" data-ripple onclick="window._orderDelete()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+          ${_tl('orders.delete', 'Slett')}
+        </button>
       </div>
     </div>`;
 
@@ -433,9 +442,77 @@
   window._orderSwitchTab = function(tab) { _activeTab = tab; _render(); };
   window._orderOpenDetail = function(id) { _activeTab = 'detail'; _renderDetail(id).then(() => _ensureTabBar()); };
   window._orderNewProject = function() {
-    const name = prompt(_tl('orders.enter_name', 'Navn på bestilling'));
-    if (!name) return;
-    apiCreateProject({ name, status: 'active' }).then(() => { if (typeof showToast === 'function') showToast(_tl('orders.created', 'Opprettet'), 'success'); _activeTab = 'orders'; _render(); }).catch(e => { if (typeof showToast === 'function') showToast(e.message, 'error'); });
+    const overlay = document.createElement('div');
+    overlay.className = 'ph-detail-overlay';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+    overlay.innerHTML = `<div class="ph-detail-panel" style="max-width:500px">
+      <button class="ph-detail-close" onclick="this.closest('.ph-detail-overlay').remove()">&times;</button>
+      <h3 style="margin:0 0 16px">${_tl('orders.new_order', 'Ny bestilling')}</h3>
+      <div class="form-group">
+        <label class="form-label">${_tl('orders.order_name', 'Bestillingsnavn')} *</label>
+        <input class="form-input" id="new-ord-name" placeholder="F.eks. Telefonstativ for Ola Nordmann">
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="form-group">
+          <label class="form-label">${_tl('orders.customer_name', 'Kundenavn')}</label>
+          <input class="form-input" id="new-ord-customer">
+        </div>
+        <div class="form-group">
+          <label class="form-label">${_tl('orders.customer_email', 'E-post')}</label>
+          <input class="form-input" id="new-ord-email" type="email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">${_tl('orders.customer_phone', 'Telefon')}</label>
+          <input class="form-input" id="new-ord-phone" type="tel">
+        </div>
+        <div class="form-group">
+          <label class="form-label">${_tl('orders.deadline', 'Frist')}</label>
+          <input class="form-input" id="new-ord-deadline" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">${_tl('orders.priority_label', 'Prioritet')}</label>
+          <select class="form-input" id="new-ord-priority">
+            <option value="0">${_tl('orders.priority_normal', 'Normal')}</option>
+            <option value="1">${_tl('orders.priority_high', 'Høy')}</option>
+            <option value="2">${_tl('orders.priority_urgent', 'Haster')}</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">${_tl('orders.estimated_cost', 'Estimert pris (kr)')}</label>
+          <input class="form-input" id="new-ord-est-cost" type="number" step="0.01">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">${_tl('orders.description', 'Beskrivelse / notater')}</label>
+        <textarea class="form-input" id="new-ord-desc" rows="3" style="resize:vertical"></textarea>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="form-btn form-btn-primary" data-ripple onclick="window._orderSubmitNew()">${_tl('orders.create', 'Opprett bestilling')}</button>
+        <button class="form-btn" data-ripple onclick="this.closest('.ph-detail-overlay').remove()">${_tl('common.cancel', 'Avbryt')}</button>
+      </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.querySelector('#new-ord-name').focus();
+  };
+  window._orderSubmitNew = function() {
+    const name = document.getElementById('new-ord-name')?.value?.trim();
+    if (!name) { if (typeof showToast === 'function') showToast(_tl('orders.name_required', 'Navn er påkrevd'), 'warning'); return; }
+    const data = {
+      name,
+      customer_name: document.getElementById('new-ord-customer')?.value?.trim() || null,
+      customer_email: document.getElementById('new-ord-email')?.value?.trim() || null,
+      customer_phone: document.getElementById('new-ord-phone')?.value?.trim() || null,
+      deadline: document.getElementById('new-ord-deadline')?.value || null,
+      priority: parseInt(document.getElementById('new-ord-priority')?.value || '0'),
+      estimated_cost: parseFloat(document.getElementById('new-ord-est-cost')?.value) || null,
+      description: document.getElementById('new-ord-desc')?.value?.trim() || null,
+      status: 'active'
+    };
+    apiCreateProject(data).then(() => {
+      document.querySelector('.ph-detail-overlay')?.remove();
+      if (typeof showToast === 'function') showToast(_tl('orders.created', 'Bestilling opprettet'), 'success');
+      _activeTab = 'orders'; _render();
+    }).catch(e => { if (typeof showToast === 'function') showToast(e.message, 'error'); });
   };
   window._orderSaveDetail = function() {
     if (!_activeProject) return;
@@ -475,6 +552,42 @@
       if (typeof showToast === 'function') showToast(_tl('orders.invoice_created', 'Faktura opprettet'), 'success');
       _renderDetail(p.id).then(() => _ensureTabBar());
     } catch (e) { if (typeof showToast === 'function') showToast(e.message, 'error'); }
+  };
+  window._orderDelete = function() {
+    if (!_activeProject) return;
+    if (typeof confirmAction === 'function') {
+      confirmAction(_tl('orders.confirm_delete', 'Er du sikker på at du vil slette denne bestillingen?'), () => {
+        apiDeleteProject(_activeProject.id).then(() => {
+          if (typeof showToast === 'function') showToast(_tl('orders.deleted', 'Bestilling slettet'), 'success');
+          _activeProject = null; _activeTab = 'orders'; _render();
+        }).catch(e => { if (typeof showToast === 'function') showToast(e.message, 'error'); });
+      });
+    } else {
+      if (!confirm(_tl('orders.confirm_delete', 'Er du sikker på at du vil slette denne bestillingen?'))) return;
+      apiDeleteProject(_activeProject.id).then(() => {
+        if (typeof showToast === 'function') showToast(_tl('orders.deleted', 'Bestilling slettet'), 'success');
+        _activeProject = null; _activeTab = 'orders'; _render();
+      }).catch(e => { if (typeof showToast === 'function') showToast(e.message, 'error'); });
+    }
+  };
+  window._orderDuplicate = function() {
+    if (!_activeProject) return;
+    const p = _activeProject;
+    apiCreateProject({
+      name: p.name + ' (kopi)',
+      customer_name: p.customer_name || p.client_name || null,
+      customer_email: p.customer_email || null,
+      customer_phone: p.customer_phone || null,
+      deadline: null,
+      priority: p.priority || 0,
+      estimated_cost: p.estimated_cost || null,
+      description: p.description || null,
+      status: 'active'
+    }).then((result) => {
+      if (typeof showToast === 'function') showToast(_tl('orders.duplicated', 'Bestilling duplisert'), 'success');
+      if (result.id) { _activeTab = 'detail'; _renderDetail(result.id).then(() => _ensureTabBar()); }
+      else { _activeTab = 'orders'; _render(); }
+    }).catch(e => { if (typeof showToast === 'function') showToast(e.message, 'error'); });
   };
   window._orderSetInvoiceStatus = function(id, status) {
     apiUpdateInvoiceStatus(id, status).then(() => { if (typeof showToast === 'function') showToast(_tl('orders.status_updated', 'Status oppdatert'), 'success'); if (_activeTab === 'invoices') _renderInvoices(); else if (_activeProject) _renderDetail(_activeProject.id).then(() => _ensureTabBar()); }).catch(e => { if (typeof showToast === 'function') showToast(e.message, 'error'); });
