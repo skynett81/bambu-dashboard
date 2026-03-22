@@ -34,39 +34,90 @@ The E-commerce module requires a valid license. Licenses can **only be purchased
 ### Activating the license
 
 1. Go to **Settings → E-commerce** in the dashboard
-2. Paste the **license key** in the field
-3. Click **Activate license**
-4. The dashboard authenticates the key against geektech.no servers
-5. Upon successful activation, the license type, expiry date, and number of printers are shown
+2. Fill in the following fields:
 
-:::warning The license key is tied to your installation
-The key is activated for one Bambu Dashboard installation. Contact [geektech.no](https://geektech.no) if you need to move the license to a new server.
+| Field | Description | Required |
+|-------|-------------|----------|
+| **License key** | 32-character hex key from geektech.no | ✅ Yes |
+| **Email address** | The email you used when purchasing | ✅ Yes |
+| **Domain** | The domain the dashboard runs on (without https://) | Recommended |
+| **Phone** | Contact phone (with country code, e.g. +1) | Optional |
+
+### License type — identifier binding
+
+geektech.no binds the license to one or more identifiers:
+
+| Type | Validates against | Use case |
+|------|-------------------|----------|
+| **Domain** | Domain name (e.g. `dashboard.company.com`) | Fixed server with own domain |
+| **IP** | Public IP address(es) | Server without domain, fixed IP |
+| **MAC** | MAC address(es) of the network card | Hardware binding |
+| **IP + MAC** | Both IP and MAC must match | Highest security |
+
+:::info Automatic identification
+The dashboard automatically sends the server's IP address and MAC address with each validation. You do not need to fill these in manually — geektech.no registers them at first activation.
+:::
+
+Multiple IP addresses and MAC addresses can be allowed (one per line in the geektech.no admin). This is useful for servers with multiple network cards or dynamic IP.
+
+3. Click **Activate license**
+4. The dashboard sends an activation request to geektech.no
+5. Upon successful activation, the following are shown:
+   - **License type** (Hobby / Professional / Enterprise)
+   - **Expiry date**
+   - **Max number of printers**
+   - **License holder**
+   - **Instance ID** (unique to your installation)
+
+:::warning The license key is tied to your domain and installation
+The key is activated for one specific Bambu Dashboard installation and domain. Contact [geektech.no](https://geektech.no) support if you need to:
+- Move the license to a new server
+- Change domain
+- Increase number of printers
 :::
 
 ### License validation
 
-- The license is **validated online** at startup and then every 24 hours
-- In case of network outage, the license works for up to **7 days offline**
-- Expired license → module is locked, but existing data is retained
-- Renewal is done via **[geektech.no](https://geektech.no)** → My licenses → Renew
+The license is authenticated and synchronized with geektech.no:
+
+- **Validation at startup** — the license is checked automatically
+- **Ongoing validation** — revalidated every 24 hours against geektech.no
+- **Offline mode** — in case of network outage, the license works for up to **7 days** with cached validation
+- **Expired license** → the module is locked, but existing data (orders, customers) is retained
+- **PIN code** — geektech.no can lock/unlock the license via the PIN system
+- **Renewal** — via **[geektech.no](https://geektech.no)** → My licenses → Renew
+
+### License types and restrictions
+
+| Plan | Printers | Platforms | Fee | Price |
+|------|----------|-----------|-----|-------|
+| **Hobby** | 1 | 1 (Shopify OR WooCommerce) | 5% | See geektech.no |
+| **Professional** | 1–5 | All | 5% | See geektech.no |
+| **Enterprise** | Unlimited | All + API | 3% | See geektech.no |
 
 ### Checking license status
 
 Go to **Settings → E-commerce** or call the API:
 
 ```bash
-curl -sk https://localhost:3443/api/ecom-license/status
+curl -sk https://localhost:3443/api/ecommerce/license
 ```
 
 The response contains:
 ```json
 {
   "active": true,
-  "type": "professional",
-  "expires": "2027-03-22",
-  "printers": 5,
-  "licensee": "Company Name",
-  "provider": "geektech.no"
+  "status": "active",
+  "plan": "professional",
+  "holder": "Company Name Ltd",
+  "email": "company@example.com",
+  "domain": "dashboard.companyname.com",
+  "max_printers": 5,
+  "expires_at": "2027-03-22",
+  "provider": "geektech.no",
+  "fees_pending": 2,
+  "fees_this_month": 450.00,
+  "orders_this_month": 12
 }
 ```
 
@@ -149,7 +200,7 @@ Set up invoice number series under **Settings → E-commerce**:
 - **Start number**: e.g. `1001`
 - Invoice numbers are assigned automatically in ascending order
 
-## Reporting and taxes
+## Reporting and fees
 
 ### Fee reporting
 

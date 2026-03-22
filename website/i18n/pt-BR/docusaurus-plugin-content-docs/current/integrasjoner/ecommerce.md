@@ -34,39 +34,90 @@ O módulo de e-commerce requer uma licença válida. As licenças **só podem se
 ### Ativar licença
 
 1. Vá em **Configurações → E-commerce** no dashboard
-2. Cole a **chave de licença** no campo
-3. Clique em **Ativar licença**
-4. O dashboard autentica a chave nos servidores da geektech.no
-5. Após a ativação bem-sucedida, são exibidos o tipo de licença, data de validade e número de impressoras
+2. Preencha os seguintes campos:
 
-:::warning A chave de licença está vinculada à sua instalação
-A chave é ativada para uma instalação do Bambu Dashboard. Entre em contato com [geektech.no](https://geektech.no) se precisar transferir a licença para um novo servidor.
+| Campo | Descrição | Obrigatório |
+|-------|-----------|-------------|
+| **Chave de licença** | Chave hexadecimal de 32 caracteres da geektech.no | ✅ Sim |
+| **Endereço de e-mail** | O e-mail usado na compra | ✅ Sim |
+| **Domínio** | O domínio em que o dashboard é executado (sem https://) | Recomendado |
+| **Telefone** | Telefone de contato (com código do país, ex.: +55) | Opcional |
+
+### Tipo de licença — vinculação por identificador
+
+geektech.no vincula a licença a um ou mais identificadores:
+
+| Tipo | Valida contra | Caso de uso |
+|------|---------------|-------------|
+| **Domínio** | Nome de domínio (ex.: `dashboard.empresa.com.br`) | Servidor fixo com domínio próprio |
+| **IP** | Endereço(s) IP público(s) | Servidor sem domínio, IP fixo |
+| **MAC** | Endereço(s) MAC da placa de rede | Vinculação de hardware |
+| **IP + MAC** | IP e MAC devem corresponder | Máxima segurança |
+
+:::info Identificação automática
+O dashboard envia automaticamente o endereço IP e o endereço MAC do servidor a cada validação. Você não precisa preenchê-los manualmente — geektech.no os registra na primeira ativação.
+:::
+
+Vários endereços IP e MAC podem ser permitidos (um por linha no admin geektech.no). Útil para servidores com múltiplas placas de rede ou IP dinâmico.
+
+3. Clique em **Ativar licença**
+4. O dashboard envia uma solicitação de ativação para geektech.no
+5. Após a ativação bem-sucedida, são exibidos:
+   - **Tipo de licença** (Hobby / Profissional / Enterprise)
+   - **Data de validade**
+   - **Número máximo de impressoras**
+   - **Titular da licença**
+   - **ID de instância** (exclusivo para sua instalação)
+
+:::warning A chave de licença está vinculada ao seu domínio e instalação
+A chave é ativada para uma instalação e domínio específicos do Bambu Dashboard. Entre em contato com o suporte da [geektech.no](https://geektech.no) se precisar:
+- Transferir a licença para um novo servidor
+- Alterar o domínio
+- Aumentar o número de impressoras
 :::
 
 ### Validação de licença
 
-- A licença é **validada online** na inicialização e a cada 24 horas
-- Em caso de falha de rede, a licença funciona por até **7 dias offline**
-- Licença expirada → o módulo é bloqueado, mas os dados existentes são mantidos
-- A renovação é feita via **[geektech.no](https://geektech.no)** → Minhas licenças → Renovar
+A licença é autenticada e sincronizada com geektech.no:
+
+- **Validação na inicialização** — a licença é verificada automaticamente
+- **Validação contínua** — revalidada a cada 24 horas contra geektech.no
+- **Modo offline** — em caso de falha de rede, a licença funciona por até **7 dias** com validação em cache
+- **Licença expirada** → o módulo é bloqueado, mas os dados existentes (pedidos, clientes) são mantidos
+- **Código PIN** — geektech.no pode bloquear/desbloquear a licença pelo sistema PIN
+- **Renovação** — via **[geektech.no](https://geektech.no)** → Minhas licenças → Renovar
+
+### Tipos de licença e restrições
+
+| Plano | Impressoras | Plataformas | Taxa | Preço |
+|-------|-------------|-------------|------|-------|
+| **Hobby** | 1 | 1 (Shopify OU WooCommerce) | 5% | Ver geektech.no |
+| **Profissional** | 1–5 | Todas | 5% | Ver geektech.no |
+| **Enterprise** | Ilimitado | Todas + API | 3% | Ver geektech.no |
 
 ### Verificar status da licença
 
 Vá em **Configurações → E-commerce** ou chame a API:
 
 ```bash
-curl -sk https://localhost:3443/api/ecom-license/status
+curl -sk https://localhost:3443/api/ecommerce/license
 ```
 
 A resposta contém:
 ```json
 {
   "active": true,
-  "type": "professional",
-  "expires": "2027-03-22",
-  "printers": 5,
-  "licensee": "Nome da empresa",
-  "provider": "geektech.no"
+  "status": "active",
+  "plan": "professional",
+  "holder": "Nome da empresa",
+  "email": "empresa@exemplo.com.br",
+  "domain": "dashboard.nomeempresa.com.br",
+  "max_printers": 5,
+  "expires_at": "2027-03-22",
+  "provider": "geektech.no",
+  "fees_pending": 2,
+  "fees_this_month": 450.00,
+  "orders_this_month": 12
 }
 ```
 
@@ -149,7 +200,7 @@ Configure a série de numeração de faturas em **Configurações → E-commerce
 - **Número inicial**: ex.: `1001`
 - O número da fatura é atribuído automaticamente em ordem crescente
 
-## Relatórios e impostos
+## Relatórios e taxas
 
 ### Relatório de taxas
 

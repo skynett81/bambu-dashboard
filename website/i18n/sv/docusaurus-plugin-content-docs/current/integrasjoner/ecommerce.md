@@ -34,39 +34,90 @@ E-handelsmodulen kräver en giltig licens. Licenser kan **endast köpas via [gee
 ### Aktivera licens
 
 1. Gå till **Inställningar → E-handel** i dashboardet
-2. Klistra in **licensnyckeln** i fältet
-3. Klicka **Aktivera licens**
-4. Dashboardet autentiserar nyckeln mot geektech.no:s servrar
-5. Vid lyckad aktivering visas licenstyp, utgångsdatum och antal skrivare
+2. Fyll i följande fält:
 
-:::warning Licensnyckeln är kopplad till din installation
-Nyckeln aktiveras för en Bambu Dashboard-installation. Kontakta [geektech.no](https://geektech.no) om du behöver flytta licensen till en ny server.
+| Fält | Beskrivning | Obligatorisk |
+|------|-------------|--------------|
+| **Licensnyckel** | 32-teckens hex-nyckel från geektech.no | ✅ Ja |
+| **E-postadress** | E-posten du använde vid köpet | ✅ Ja |
+| **Domän** | Domänen som dashboardet körs på (utan https://) | Rekommenderat |
+| **Telefon** | Kontakttelefon (med landskod, t.ex. +46) | Valfritt |
+
+### Licenstyp — identifikatorbindning
+
+geektech.no binder licensen till en eller flera identifierare:
+
+| Typ | Validerar mot | Användningsområde |
+|-----|---------------|-------------------|
+| **Domän** | Domännamn (t.ex. `dashboard.foretag.se`) | Fast server med egen domän |
+| **IP** | Offentlig IP-adress(er) | Server utan domän, fast IP |
+| **MAC** | MAC-adress(er) på nätverkskortet | Hårdvarubindning |
+| **IP + MAC** | Både IP och MAC måste matcha | Högsta säkerhet |
+
+:::info Automatisk identifiering
+Dashboardet skickar automatiskt serverns IP-adress och MAC-adress vid varje validering. Du behöver inte fylla i dessa manuellt — geektech.no registrerar dem vid första aktiveringen.
+:::
+
+Flera IP-adresser och MAC-adresser kan tillåtas (en per rad i geektech.no admin). Detta är användbart för servrar med flera nätverkskort eller dynamisk IP.
+
+3. Klicka **Aktivera licens**
+4. Dashboardet skickar en aktiveringsförfrågan till geektech.no
+5. Vid lyckad aktivering visas:
+   - **Licenstyp** (Hobby / Professionell / Enterprise)
+   - **Utgångsdatum**
+   - **Maximalt antal skrivare**
+   - **Licensinnehavare**
+   - **Instans-ID** (unikt för din installation)
+
+:::warning Licensnyckeln är kopplad till domän och installation
+Nyckeln aktiveras för en specifik Bambu Dashboard-installation och domän. Kontakta [geektech.no](https://geektech.no) support om du behöver:
+- Flytta licensen till en ny server
+- Ändra domän
+- Öka antalet skrivare
 :::
 
 ### Licensvalidering
 
-- Licensen **valideras online** vid uppstart och sedan var 24:e timme
-- Vid nätverksavbrott fungerar licensen i upp till **7 dagar offline**
-- Utgången licens → modulen låses, men befintlig data behålls
-- Förnyelse sker via **[geektech.no](https://geektech.no)** → Mina licenser → Förnya
+Licensen autentiseras och synkroniseras med geektech.no:
+
+- **Validering vid uppstart** — licensen kontrolleras automatiskt
+- **Löpande validering** — revalideras var 24:e timme mot geektech.no
+- **Offline-läge** — vid nätverksavbrott fungerar licensen i upp till **7 dagar** med cachad validering
+- **Utgången licens** → modulen låses, men befintlig data (beställningar, kunder) behålls
+- **PIN-kod** — geektech.no kan låsa/frigöra licensen via PIN-systemet
+- **Förnyelse** — via **[geektech.no](https://geektech.no)** → Mina licenser → Förnya
+
+### Licenstyper och begränsningar
+
+| Plan | Skrivare | Plattformar | Avgift | Pris |
+|------|----------|-------------|--------|------|
+| **Hobby** | 1 | 1 (Shopify ELLER WooCommerce) | 5% | Se geektech.no |
+| **Professionell** | 1–5 | Alla | 5% | Se geektech.no |
+| **Enterprise** | Obegränsat | Alla + API | 3% | Se geektech.no |
 
 ### Kontrollera licensstatus
 
 Gå till **Inställningar → E-handel** eller anropa API:et:
 
 ```bash
-curl -sk https://localhost:3443/api/ecom-license/status
+curl -sk https://localhost:3443/api/ecommerce/license
 ```
 
 Svaret innehåller:
 ```json
 {
   "active": true,
-  "type": "professional",
-  "expires": "2027-03-22",
-  "printers": 5,
-  "licensee": "Företagsnamn AB",
-  "provider": "geektech.no"
+  "status": "active",
+  "plan": "professional",
+  "holder": "Företagsnamn AB",
+  "email": "foretag@exempel.se",
+  "domain": "dashboard.foretagsnamn.se",
+  "max_printers": 5,
+  "expires_at": "2027-03-22",
+  "provider": "geektech.no",
+  "fees_pending": 2,
+  "fees_this_month": 450.00,
+  "orders_this_month": 12
 }
 ```
 

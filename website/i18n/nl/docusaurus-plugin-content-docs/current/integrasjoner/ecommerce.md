@@ -34,39 +34,90 @@ De e-commercemodule vereist een geldige licentie. Licenties kunnen **uitsluitend
 ### Licentie activeren
 
 1. Ga naar **Instellingen → E-commerce** in het dashboard
-2. Plak de **licentiesleutel** in het veld
-3. Klik op **Licentie activeren**
-4. Het dashboard authenticeert de sleutel bij de servers van geektech.no
-5. Bij succesvolle activering worden het licentietype, de vervaldatum en het aantal printers weergegeven
+2. Vul de volgende velden in:
 
-:::warning De licentiesleutel is gekoppeld aan uw installatie
-De sleutel wordt geactiveerd voor één Bambu Dashboard-installatie. Neem contact op met [geektech.no](https://geektech.no) als u de licentie naar een nieuwe server wilt verplaatsen.
+| Veld | Beschrijving | Verplicht |
+|------|-------------|-----------|
+| **Licentiesleutel** | 32-tekens hexadecimale sleutel van geektech.no | ✅ Ja |
+| **E-mailadres** | Het e-mailadres waarmee u hebt gekocht | ✅ Ja |
+| **Domein** | Het domein waarop het dashboard draait (zonder https://) | Aanbevolen |
+| **Telefoon** | Contacttelefoon (met landnummer, bijv. +31) | Optioneel |
+
+### Licentietype — identifikatorbinding
+
+geektech.no koppelt de licentie aan één of meer identifikatoren:
+
+| Type | Valideert tegen | Gebruiksscenario |
+|------|-----------------|-----------------|
+| **Domein** | Domeinnaam (bijv. `dashboard.bedrijf.nl`) | Vaste server met eigen domein |
+| **IP** | Openbaar IP-adres(sen) | Server zonder domein, vast IP |
+| **MAC** | MAC-adres(sen) van de netwerkkaart | Hardwarebinding |
+| **IP + MAC** | Zowel IP als MAC moet overeenkomen | Hoogste beveiliging |
+
+:::info Automatische identificatie
+Het dashboard stuurt bij elke validering automatisch het IP-adres en MAC-adres van de server. U hoeft deze niet handmatig in te voeren — geektech.no registreert ze bij de eerste activering.
+:::
+
+Meerdere IP-adressen en MAC-adressen kunnen worden toegestaan (één per regel in de geektech.no admin). Dit is handig voor servers met meerdere netwerkkaarten of dynamisch IP.
+
+3. Klik op **Licentie activeren**
+4. Het dashboard stuurt een activeringsverzoek naar geektech.no
+5. Bij succesvolle activering worden het volgende weergegeven:
+   - **Licentietype** (Hobby / Professioneel / Enterprise)
+   - **Vervaldatum**
+   - **Maximum aantal printers**
+   - **Licentiehouder**
+   - **Instantie-ID** (uniek voor uw installatie)
+
+:::warning De licentiesleutel is gekoppeld aan uw domein en installatie
+De sleutel wordt geactiveerd voor één specifieke Bambu Dashboard-installatie en domein. Neem contact op met [geektech.no](https://geektech.no) support als u:
+- De licentie naar een nieuwe server wilt verplaatsen
+- Het domein wilt wijzigen
+- Het aantal printers wilt verhogen
 :::
 
 ### Licentievalidatie
 
-- De licentie wordt **online gevalideerd** bij het opstarten en vervolgens elke 24 uur
-- Bij netwerkstoringen werkt de licentie tot **7 dagen offline**
-- Verlopen licentie → de module wordt vergrendeld, maar bestaande data blijft behouden
-- Verlenging via **[geektech.no](https://geektech.no)** → Mijn licenties → Verlengen
+De licentie wordt geverifieerd en gesynchroniseerd met geektech.no:
+
+- **Validering bij opstart** — de licentie wordt automatisch gecontroleerd
+- **Doorlopende validering** — elke 24 uur opnieuw gevalideerd bij geektech.no
+- **Offline-modus** — bij netwerkstoringen werkt de licentie tot **7 dagen** met gecachede validering
+- **Verlopen licentie** → de module wordt vergrendeld, maar bestaande data (bestellingen, klanten) blijft behouden
+- **PIN-code** — geektech.no kan de licentie vergrendelen/vrijgeven via het PIN-systeem
+- **Verlenging** — via **[geektech.no](https://geektech.no)** → Mijn licenties → Verlengen
+
+### Licentietypen en beperkingen
+
+| Plan | Printers | Platforms | Vergoeding | Prijs |
+|------|----------|-----------|------------|-------|
+| **Hobby** | 1 | 1 (Shopify OF WooCommerce) | 5% | Zie geektech.no |
+| **Professioneel** | 1–5 | Alle | 5% | Zie geektech.no |
+| **Enterprise** | Onbeperkt | Alle + API | 3% | Zie geektech.no |
 
 ### Licentiestatus controleren
 
 Ga naar **Instellingen → E-commerce** of roep de API aan:
 
 ```bash
-curl -sk https://localhost:3443/api/ecom-license/status
+curl -sk https://localhost:3443/api/ecommerce/license
 ```
 
 Het antwoord bevat:
 ```json
 {
   "active": true,
-  "type": "professional",
-  "expires": "2027-03-22",
-  "printers": 5,
-  "licensee": "Bedrijfsnaam BV",
-  "provider": "geektech.no"
+  "status": "active",
+  "plan": "professional",
+  "holder": "Bedrijfsnaam BV",
+  "email": "bedrijf@voorbeeld.nl",
+  "domain": "dashboard.bedrijfsnaam.nl",
+  "max_printers": 5,
+  "expires_at": "2027-03-22",
+  "provider": "geektech.no",
+  "fees_pending": 2,
+  "fees_this_month": 450.00,
+  "orders_this_month": 12
 }
 ```
 
@@ -149,14 +200,14 @@ Stel de factuurnummerreeks in via **Instellingen → E-commerce**:
 - **Startnummer**: bijv. `1001`
 - Factuurnummers worden automatisch in oplopende volgorde toegewezen
 
-## Rapportage en belastingen
+## Rapportage en vergoedingen
 
-### Kostenrapportage
+### Vergoedingsrapportage
 
-Het systeem volgt alle transactiekosten:
-- Bekijk kosten via **E-commerce → Kosten**
-- Markeer kosten als gerapporteerd voor boekhoudkundige doeleinden
-- Exporteer kostensamenvatting per periode
+Het systeem volgt alle transactievergoedingen:
+- Bekijk vergoedingen via **E-commerce → Vergoedingen**
+- Markeer vergoedingen als gerapporteerd voor boekhoudkundige doeleinden
+- Exporteer vergoedingssamenvatting per periode
 
 ### Statistieken
 

@@ -34,39 +34,90 @@ Das E-Commerce-Modul erfordert eine gültige Lizenz. Lizenzen können **ausschli
 ### Lizenz aktivieren
 
 1. Gehen Sie zu **Einstellungen → E-Commerce** im Dashboard
-2. **Lizenzschlüssel** in das Feld einfügen
-3. Klicken Sie auf **Lizenz aktivieren**
-4. Das Dashboard authentifiziert den Schlüssel gegenüber den Servern von geektech.no
-5. Bei erfolgreicher Aktivierung werden Lizenztyp, Ablaufdatum und Anzahl der Drucker angezeigt
+2. Füllen Sie folgende Felder aus:
 
-:::warning Der Lizenzschlüssel ist an Ihre Installation gebunden
-Der Schlüssel wird für eine Bambu Dashboard-Installation aktiviert. Kontaktieren Sie [geektech.no](https://geektech.no), wenn Sie die Lizenz auf einen neuen Server übertragen müssen.
+| Feld | Beschreibung | Erforderlich |
+|------|-------------|--------------|
+| **Lizenzschlüssel** | 32-stelliger Hex-Schlüssel von geektech.no | ✅ Ja |
+| **E-Mail-Adresse** | Die E-Mail, die Sie beim Kauf verwendet haben | ✅ Ja |
+| **Domain** | Die Domain, auf der das Dashboard läuft (ohne https://) | Empfohlen |
+| **Telefon** | Kontakttelefon (mit Ländervorwahl, z.B. +49) | Optional |
+
+### Lizenztyp — Identifikator-Bindung
+
+geektech.no bindet die Lizenz an einen oder mehrere Identifikatoren:
+
+| Typ | Validiert gegen | Verwendungszweck |
+|-----|-----------------|-----------------|
+| **Domain** | Domainname (z.B. `dashboard.firma.de`) | Fester Server mit eigener Domain |
+| **IP** | Öffentliche IP-Adresse(n) | Server ohne Domain, feste IP |
+| **MAC** | MAC-Adresse(n) der Netzwerkkarte | Hardware-Bindung |
+| **IP + MAC** | Sowohl IP als auch MAC müssen übereinstimmen | Höchste Sicherheit |
+
+:::info Automatische Identifikation
+Das Dashboard sendet bei jeder Validierung automatisch die IP-Adresse und MAC-Adresse des Servers. Sie müssen diese nicht manuell eingeben — geektech.no registriert sie bei der ersten Aktivierung.
+:::
+
+Mehrere IP-Adressen und MAC-Adressen können erlaubt werden (eine pro Zeile im geektech.no Admin). Dies ist nützlich für Server mit mehreren Netzwerkkarten oder dynamischer IP.
+
+3. Klicken Sie auf **Lizenz aktivieren**
+4. Das Dashboard sendet eine Aktivierungsanfrage an geektech.no
+5. Bei erfolgreicher Aktivierung werden angezeigt:
+   - **Lizenztyp** (Hobby / Professionell / Enterprise)
+   - **Ablaufdatum**
+   - **Maximale Anzahl Drucker**
+   - **Lizenzinhaber**
+   - **Instanz-ID** (einzigartig für Ihre Installation)
+
+:::warning Der Lizenzschlüssel ist an Domain und Installation gebunden
+Der Schlüssel wird für eine bestimmte Bambu Dashboard-Installation und Domain aktiviert. Kontaktieren Sie den [geektech.no](https://geektech.no) Support, wenn Sie:
+- Die Lizenz auf einen neuen Server übertragen müssen
+- Die Domain ändern müssen
+- Die Anzahl der Drucker erhöhen möchten
 :::
 
 ### Lizenzvalidierung
 
-- Die Lizenz wird **online validiert** beim Start und danach alle 24 Stunden
-- Bei Netzwerkausfall funktioniert die Lizenz bis zu **7 Tage offline**
-- Abgelaufene Lizenz → Modul wird gesperrt, vorhandene Daten bleiben erhalten
-- Verlängerung über **[geektech.no](https://geektech.no)** → Meine Lizenzen → Verlängern
+Die Lizenz wird authentifiziert und mit geektech.no synchronisiert:
+
+- **Validierung beim Start** — die Lizenz wird automatisch geprüft
+- **Laufende Validierung** — alle 24 Stunden gegen geektech.no revalidiert
+- **Offline-Modus** — bei Netzwerkausfall funktioniert die Lizenz bis zu **7 Tage** mit gecachter Validierung
+- **Abgelaufene Lizenz** → Modul wird gesperrt, vorhandene Daten (Bestellungen, Kunden) bleiben erhalten
+- **PIN-Code** — geektech.no kann die Lizenz über das PIN-System sperren/freigeben
+- **Verlängerung** — über **[geektech.no](https://geektech.no)** → Meine Lizenzen → Verlängern
+
+### Lizenztypen und Einschränkungen
+
+| Plan | Drucker | Plattformen | Gebühr | Preis |
+|------|---------|-------------|--------|-------|
+| **Hobby** | 1 | 1 (Shopify ODER WooCommerce) | 5% | Siehe geektech.no |
+| **Professionell** | 1–5 | Alle | 5% | Siehe geektech.no |
+| **Enterprise** | Unbegrenzt | Alle + API | 3% | Siehe geektech.no |
 
 ### Lizenzstatus prüfen
 
 Gehen Sie zu **Einstellungen → E-Commerce** oder rufen Sie die API auf:
 
 ```bash
-curl -sk https://localhost:3443/api/ecom-license/status
+curl -sk https://localhost:3443/api/ecommerce/license
 ```
 
 Die Antwort enthält:
 ```json
 {
   "active": true,
-  "type": "professional",
-  "expires": "2027-03-22",
-  "printers": 5,
-  "licensee": "Firmenname GmbH",
-  "provider": "geektech.no"
+  "status": "active",
+  "plan": "professional",
+  "holder": "Firmenname GmbH",
+  "email": "firma@beispiel.de",
+  "domain": "dashboard.firmenname.de",
+  "max_printers": 5,
+  "expires_at": "2027-03-22",
+  "provider": "geektech.no",
+  "fees_pending": 2,
+  "fees_this_month": 450.00,
+  "orders_this_month": 12
 }
 ```
 
@@ -149,7 +200,7 @@ Rechnungsnummernserie unter **Einstellungen → E-Commerce** einrichten:
 - **Startnummer**: z.B. `1001`
 - Rechnungsnummern werden automatisch in aufsteigender Reihenfolge vergeben
 
-## Berichterstattung und Steuern
+## Berichterstattung und Gebühren
 
 ### Gebührenberichterstattung
 

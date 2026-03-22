@@ -34,39 +34,90 @@ Az e-kereskedelmi modul érvényes licencet igényel. A licencek **kizárólag a
 ### Licenc aktiválása
 
 1. Navigálj a **Beállítások → E-kereskedelem** menüpontra a dashboardban
-2. Illeszd be a **licenckulcsot** a mezőbe
-3. Kattints a **Licenc aktiválása** gombra
-4. A dashboard hitelesíti a kulcsot a geektech.no szerverei ellen
-5. Sikeres aktiválás esetén a licenctípus, lejárati dátum és nyomtatók száma jelenik meg
+2. Töltsd ki a következő mezőket:
 
-:::warning A licenckulcs a telepítésedhez van kötve
-A kulcs egy Bambu Dashboard telepítéshez aktiválódik. Vedd fel a kapcsolatot a [geektech.no](https://geektech.no) oldallal, ha új szerverre kell áthelyezned a licencet.
+| Mező | Leírás | Kötelező |
+|------|--------|----------|
+| **Licenckulcs** | 32 karakteres hexadecimális kulcs a geektech.no-tól | ✅ Igen |
+| **E-mail cím** | A vásárláshoz használt e-mail | ✅ Igen |
+| **Domain** | A domain, amelyen a dashboard fut (https:// nélkül) | Ajánlott |
+| **Telefon** | Kapcsolattartó telefon (országkóddal, pl. +36) | Opcionális |
+
+### Licenctípus — azonosítóhoz kötés
+
+geektech.no a licencet egy vagy több azonosítóhoz köti:
+
+| Típus | Érvényesítés ellen | Felhasználási eset |
+|-------|-------------------|-------------------|
+| **Domain** | Tartománynév (pl. `dashboard.cegnev.hu`) | Saját domainnel rendelkező fix szerver |
+| **IP** | Nyilvános IP-cím(ek) | Domain nélküli szerver, fix IP |
+| **MAC** | Hálózati kártya MAC-cím(ei) | Hardverhez kötés |
+| **IP + MAC** | Mind IP, mind MAC egyeznie kell | Legmagasabb biztonság |
+
+:::info Automatikus azonosítás
+A dashboard minden ellenőrzésnél automatikusan elküldi a szerver IP-címét és MAC-címét. Ezeket nem kell kézzel kitölteni — geektech.no az első aktiváláskor rögzíti őket.
+:::
+
+Több IP-cím és MAC-cím is engedélyezhető (soronként egy a geektech.no adminban). Ez hasznos több hálózati kártyával vagy dinamikus IP-vel rendelkező szerverekhez.
+
+3. Kattints a **Licenc aktiválása** gombra
+4. A dashboard aktiválási kérelmet küld a geektech.no-nak
+5. Sikeres aktiválás esetén a következők jelennek meg:
+   - **Licenctípus** (Hobbi / Professzionális / Enterprise)
+   - **Lejárati dátum**
+   - **Maximális nyomtatószám**
+   - **Licenctulajdonos**
+   - **Példány-azonosító** (egyedi a telepítésedhez)
+
+:::warning A licenckulcs a domainhez és a telepítéshez van kötve
+A kulcs egy adott Bambu Dashboard telepítéshez és domainhez aktiválódik. Vedd fel a kapcsolatot a [geektech.no](https://geektech.no) támogatással, ha szükséges:
+- A licenc áthelyezése új szerverre
+- Domain módosítása
+- Nyomtatószám növelése
 :::
 
 ### Licencérvényesítés
 
-- A licenc **online érvényesítődik** indításkor, majd minden 24 órában
-- Hálózati kiesés esetén a licenc legfeljebb **7 napig offline** működik
-- Lejárt licenc → a modul zárolódik, de a meglévő adatok megmaradnak
-- Megújítás: **[geektech.no](https://geektech.no)** → Saját licencek → Megújítás
+A licenc hitelesítése és szinkronizálása a geektech.no-val történik:
+
+- **Érvényesítés indításkor** — a licenc automatikusan ellenőrzésre kerül
+- **Folyamatos érvényesítés** — 24 óránként újraérvényesítés a geektech.no-val szemben
+- **Offline mód** — hálózati kiesés esetén a licenc legfeljebb **7 napig** működik gyorsítótárazott érvényesítéssel
+- **Lejárt licenc** → a modul zárolódik, de a meglévő adatok (rendelések, ügyfelek) megmaradnak
+- **PIN-kód** — geektech.no a PIN-rendszeren keresztül zárolhatja/felszabadíthatja a licencet
+- **Megújítás**: **[geektech.no](https://geektech.no)** → Saját licencek → Megújítás
+
+### Licenctípusok és korlátozások
+
+| Csomag | Nyomtatók | Platformok | Díj | Ár |
+|--------|-----------|------------|-----|-----|
+| **Hobbi** | 1 | 1 (Shopify VAGY WooCommerce) | 5% | Lásd geektech.no |
+| **Professzionális** | 1–5 | Összes | 5% | Lásd geektech.no |
+| **Enterprise** | Korlátlan | Összes + API | 3% | Lásd geektech.no |
 
 ### Licencállapot ellenőrzése
 
 Navigálj a **Beállítások → E-kereskedelem** menüpontra, vagy hívd meg az API-t:
 
 ```bash
-curl -sk https://localhost:3443/api/ecom-license/status
+curl -sk https://localhost:3443/api/ecommerce/license
 ```
 
 A válasz tartalmazza:
 ```json
 {
   "active": true,
-  "type": "professional",
-  "expires": "2027-03-22",
-  "printers": 5,
-  "licensee": "Cégnév Kft.",
-  "provider": "geektech.no"
+  "status": "active",
+  "plan": "professional",
+  "holder": "Cégnév Kft.",
+  "email": "ceg@pelda.hu",
+  "domain": "dashboard.cegnev.hu",
+  "max_printers": 5,
+  "expires_at": "2027-03-22",
+  "provider": "geektech.no",
+  "fees_pending": 2,
+  "fees_this_month": 450.00,
+  "orders_this_month": 12
 }
 ```
 
@@ -133,7 +184,7 @@ Frissítsd az állapotot a rendelésre kattintva → **Állapot módosítása**.
 
 ## Számlázás
 
-A részletes számlázási dokumentációért lásd a [Projektek → Számlázás](../funksjoner/projects#számlázás) oldalt.
+A részletes számlázási dokumentációért lásd a [Projektek → Számlázás](../funksjoner/projects#fakturering) oldalt.
 
 Számla közvetlenül rendelésből is generálható:
 
@@ -149,7 +200,7 @@ Számla közvetlenül rendelésből is generálható:
 - **Kezdőszám**: pl. `1001`
 - A számlaszámok automatikusan növekvő sorrendben kerülnek kiosztásra
 
-## Jelentéskészítés és adók
+## Jelentéskészítés és díjak
 
 ### Díjjelentés
 

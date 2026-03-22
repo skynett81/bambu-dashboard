@@ -34,39 +34,90 @@ Modul e-commerce vyžaduje platnou licenci. Licence lze **zakoupit pouze na [gee
 ### Aktivace licence
 
 1. Přejděte na **Nastavení → E-commerce** v dashboardu
-2. Vložte **licenční klíč** do pole
-3. Klikněte na **Aktivovat licenci**
-4. Dashboard ověří klíč vůči serverům geektech.no
-5. Po úspěšné aktivaci se zobrazí typ licence, datum vypršení a počet tiskáren
+2. Vyplňte následující pole:
 
-:::warning Licenční klíč je vázán na vaši instalaci
-Klíč se aktivuje pro jednu instalaci Bambu Dashboard. Kontaktujte [geektech.no](https://geektech.no), pokud potřebujete přesunout licenci na nový server.
+| Pole | Popis | Povinné |
+|------|-------|---------|
+| **Licenční klíč** | 32znakový hexadecimální klíč z geektech.no | ✅ Ano |
+| **E-mailová adresa** | E-mail použitý při nákupu | ✅ Ano |
+| **Doména** | Doména, na které dashboard běží (bez https://) | Doporučeno |
+| **Telefon** | Kontaktní telefon (s předvolbou, např. +420) | Volitelné |
+
+### Typ licence — vazba identifikátoru
+
+geektech.no váže licenci na jeden nebo více identifikátorů:
+
+| Typ | Ověřuje proti | Případ použití |
+|-----|---------------|----------------|
+| **Doména** | Název domény (např. `dashboard.firma.cz`) | Pevný server s vlastní doménou |
+| **IP** | Veřejná IP adresa/adresy | Server bez domény, pevná IP |
+| **MAC** | MAC adresa/adresy síťové karty | Hardwarová vazba |
+| **IP + MAC** | Musí souhlasit jak IP, tak MAC | Nejvyšší bezpečnost |
+
+:::info Automatická identifikace
+Dashboard automaticky odesílá IP adresu a MAC adresu serveru při každém ověření. Není třeba je zadávat ručně — geektech.no je registruje při první aktivaci.
+:::
+
+Lze povolit více IP adres a MAC adres (jeden na řádek v administraci geektech.no). Je to užitečné pro servery s více síťovými kartami nebo dynamickou IP.
+
+3. Klikněte na **Aktivovat licenci**
+4. Dashboard odešle žádost o aktivaci na geektech.no
+5. Po úspěšné aktivaci se zobrazí:
+   - **Typ licence** (Hobby / Profesionální / Enterprise)
+   - **Datum vypršení**
+   - **Maximální počet tiskáren**
+   - **Držitel licence**
+   - **ID instance** (jedinečné pro vaši instalaci)
+
+:::warning Licenční klíč je vázán na vaši doménu a instalaci
+Klíč se aktivuje pro konkrétní instalaci Bambu Dashboard a doménu. Kontaktujte podporu [geektech.no](https://geektech.no), pokud potřebujete:
+- Přesunout licenci na nový server
+- Změnit doménu
+- Zvýšit počet tiskáren
 :::
 
 ### Ověření licence
 
-- Licence se **ověřuje online** při spuštění a pak každých 24 hodin
-- Při výpadku sítě licence funguje až **7 dní offline**
-- Vypršená licence → modul se uzamkne, ale existující data se zachovají
-- Obnovení přes **[geektech.no](https://geektech.no)** → Moje licence → Obnovit
+Licence se ověřuje a synchronizuje s geektech.no:
+
+- **Ověření při spuštění** — licence se kontroluje automaticky
+- **Průběžné ověřování** — každých 24 hodin revalidace vůči geektech.no
+- **Offline režim** — při výpadku sítě licence funguje až **7 dní** s uloženou validací
+- **Vypršená licence** → modul se uzamkne, ale existující data (objednávky, zákazníci) se zachovají
+- **PIN kód** — geektech.no může uzamknout/odemknout licenci prostřednictvím systému PIN
+- **Obnovení** — přes **[geektech.no](https://geektech.no)** → Moje licence → Obnovit
+
+### Typy licencí a omezení
+
+| Plán | Tiskárny | Platformy | Poplatek | Cena |
+|------|----------|-----------|----------|------|
+| **Hobby** | 1 | 1 (Shopify NEBO WooCommerce) | 5% | Viz geektech.no |
+| **Profesionální** | 1–5 | Všechny | 5% | Viz geektech.no |
+| **Enterprise** | Neomezeno | Všechny + API | 3% | Viz geektech.no |
 
 ### Kontrola stavu licence
 
 Přejděte na **Nastavení → E-commerce** nebo zavolejte API:
 
 ```bash
-curl -sk https://localhost:3443/api/ecom-license/status
+curl -sk https://localhost:3443/api/ecommerce/license
 ```
 
 Odpověď obsahuje:
 ```json
 {
   "active": true,
-  "type": "professional",
-  "expires": "2027-03-22",
-  "printers": 5,
-  "licensee": "Název firmy s.r.o.",
-  "provider": "geektech.no"
+  "status": "active",
+  "plan": "professional",
+  "holder": "Název firmy s.r.o.",
+  "email": "firma@priklad.cz",
+  "domain": "dashboard.nazevfirmy.cz",
+  "max_printers": 5,
+  "expires_at": "2027-03-22",
+  "provider": "geektech.no",
+  "fees_pending": 2,
+  "fees_this_month": 450.00,
+  "orders_this_month": 12
 }
 ```
 
@@ -149,7 +200,7 @@ Nastavte číselnou řadu faktur v části **Nastavení → E-commerce**:
 - **Počáteční číslo**: např. `1001`
 - Čísla faktur se přiřazují automaticky ve vzestupném pořadí
 
-## Přehledy a daně
+## Přehledy a poplatky
 
 ### Výkazy poplatků
 

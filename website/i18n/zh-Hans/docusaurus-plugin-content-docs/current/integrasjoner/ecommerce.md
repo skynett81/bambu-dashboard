@@ -34,39 +34,90 @@ description: 管理 3D 打印销售的订单、客户和开票 — 需要来自 
 ### 激活许可证
 
 1. 在仪表板中进入**设置 → 电商**
-2. 在字段中粘贴**许可证密钥**
-3. 点击**激活许可证**
-4. 仪表板将通过 geektech.no 服务器验证密钥
-5. 成功激活后将显示许可证类型、到期日期和打印机数量
+2. 填写以下字段：
 
-:::warning 许可证密钥与您的安装绑定
-密钥针对一个 Bambu Dashboard 安装激活。如果您需要将许可证迁移到新服务器，请联系 [geektech.no](https://geektech.no)。
+| 字段 | 说明 | 必填 |
+|------|------|------|
+| **许可证密钥** | 来自 geektech.no 的 32 位十六进制密钥 | ✅ 是 |
+| **电子邮件地址** | 购买时使用的邮件 | ✅ 是 |
+| **域名** | 仪表板运行所在的域名（不含 https://） | 推荐 |
+| **电话** | 联系电话（含国家代码，例如 +86） | 可选 |
+
+### 许可证类型 — 标识符绑定
+
+geektech.no 将许可证绑定到一个或多个标识符：
+
+| 类型 | 验证对象 | 使用场景 |
+|------|---------|---------|
+| **域名** | 域名（例如 `dashboard.company.cn`） | 具有专属域名的固定服务器 |
+| **IP** | 公网 IP 地址 | 无域名、固定 IP 的服务器 |
+| **MAC** | 网卡 MAC 地址 | 硬件绑定 |
+| **IP + MAC** | IP 和 MAC 必须同时匹配 | 最高安全性 |
+
+:::info 自动识别
+仪表板在每次验证时会自动发送服务器的 IP 地址和 MAC 地址。您无需手动填写——geektech.no 将在首次激活时注册这些信息。
+:::
+
+可以允许多个 IP 地址和 MAC 地址（在 geektech.no 管理后台每行一个）。适用于拥有多个网卡或动态 IP 的服务器。
+
+3. 点击**激活许可证**
+4. 仪表板向 geektech.no 发送激活请求
+5. 成功激活后将显示：
+   - **许可证类型**（爱好者 / 专业版 / 企业版）
+   - **到期日期**
+   - **最大打印机数量**
+   - **许可证持有人**
+   - **实例 ID**（您的安装唯一标识）
+
+:::warning 许可证密钥与域名和安装绑定
+密钥针对特定的 Bambu Dashboard 安装和域名激活。如需以下操作，请联系 [geektech.no](https://geektech.no) 支持：
+- 将许可证迁移到新服务器
+- 更改域名
+- 增加打印机数量
 :::
 
 ### 许可证验证
 
-- 许可证在启动时**在线验证**，此后每 24 小时验证一次
-- 网络中断时，许可证可离线使用最多 **7 天**
-- 许可证过期 → 模块锁定，但现有数据保留
-- 续期通过 **[geektech.no](https://geektech.no)** → 我的许可证 → 续期
+许可证通过 geektech.no 进行认证和同步：
+
+- **启动时验证** — 许可证自动检查
+- **持续验证** — 每 24 小时对 geektech.no 重新验证
+- **离线模式** — 网络中断时，使用缓存验证，许可证可离线使用最多 **7 天**
+- **许可证过期** → 模块锁定，但现有数据（订单、客户）保留
+- **PIN 码** — geektech.no 可通过 PIN 系统锁定/解锁许可证
+- **续期** — 通过 **[geektech.no](https://geektech.no)** → 我的许可证 → 续期
+
+### 许可证类型与限制
+
+| 计划 | 打印机 | 平台 | 费率 | 价格 |
+|------|--------|------|------|------|
+| **爱好者** | 1 | 1（Shopify 或 WooCommerce） | 5% | 见 geektech.no |
+| **专业版** | 1–5 | 全部 | 5% | 见 geektech.no |
+| **企业版** | 无限 | 全部 + API | 3% | 见 geektech.no |
 
 ### 检查许可证状态
 
 进入**设置 → 电商**或调用 API：
 
 ```bash
-curl -sk https://localhost:3443/api/ecom-license/status
+curl -sk https://localhost:3443/api/ecommerce/license
 ```
 
 响应包含：
 ```json
 {
   "active": true,
-  "type": "professional",
-  "expires": "2027-03-22",
-  "printers": 5,
-  "licensee": "公司名称",
-  "provider": "geektech.no"
+  "status": "active",
+  "plan": "professional",
+  "holder": "公司名称",
+  "email": "company@example.cn",
+  "domain": "dashboard.companyname.cn",
+  "max_printers": 5,
+  "expires_at": "2027-03-22",
+  "provider": "geektech.no",
+  "fees_pending": 2,
+  "fees_this_month": 450.00,
+  "orders_this_month": 12
 }
 ```
 
@@ -149,7 +200,7 @@ curl -sk https://localhost:3443/api/ecom-license/status
 - **起始编号**：例如 `1001`
 - 发票编号按升序自动分配
 
-## 报告和税务
+## 报告和费用
 
 ### 费用报告
 

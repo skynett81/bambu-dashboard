@@ -34,39 +34,90 @@ E-ticaret modülü geçerli bir lisans gerektirir. Lisanslar **yalnızca [geekte
 ### Lisans Aktivasyonu
 
 1. Panoda **Ayarlar → E-Ticaret**'e gidin
-2. **Lisans anahtarını** alana yapıştırın
-3. **Lisansı Etkinleştir**'e tıklayın
-4. Pano, anahtarı geektech.no sunucularına karşı doğrular
-5. Başarılı aktivasyonda lisans türü, son kullanma tarihi ve yazıcı sayısı gösterilir
+2. Aşağıdaki alanları doldurun:
 
-:::warning Lisans Anahtarı Kurulumunuza Bağlıdır
-Anahtar, bir Bambu Dashboard kurulumu için etkinleştirilir. Lisansı yeni bir sunucuya taşımanız gerekiyorsa [geektech.no](https://geektech.no) ile iletişime geçin.
+| Alan | Açıklama | Zorunlu |
+|------|----------|---------|
+| **Lisans anahtarı** | geektech.no'dan 32 karakterli onaltılık anahtar | ✅ Evet |
+| **E-posta adresi** | Satın alma sırasında kullandığınız e-posta | ✅ Evet |
+| **Alan adı** | Panonun çalıştığı alan adı (https:// olmadan) | Önerilen |
+| **Telefon** | İletişim telefonu (ülke kodu ile, ör. +90) | İsteğe bağlı |
+
+### Lisans Türü — Tanımlayıcı Bağlama
+
+geektech.no, lisansı bir veya daha fazla tanımlayıcıya bağlar:
+
+| Tür | Doğrulama Hedefi | Kullanım Durumu |
+|-----|-----------------|----------------|
+| **Alan adı** | Alan adı (ör. `dashboard.sirket.com.tr`) | Kendi alan adına sahip sabit sunucu |
+| **IP** | Genel IP adresi/adresleri | Alan adı olmayan sunucu, sabit IP |
+| **MAC** | Ağ kartının MAC adresi/adresleri | Donanım bağlama |
+| **IP + MAC** | Hem IP hem MAC eşleşmeli | En yüksek güvenlik |
+
+:::info Otomatik Tanımlama
+Pano, her doğrulamada sunucunun IP adresini ve MAC adresini otomatik olarak gönderir. Bunları manuel olarak girmeniz gerekmez — geektech.no ilk aktivasyonda kaydeder.
+:::
+
+Birden fazla IP adresi ve MAC adresine izin verilebilir (geektech.no admin'de satır başına bir tane). Bu, birden fazla ağ kartı veya dinamik IP'ye sahip sunucular için kullanışlıdır.
+
+3. **Lisansı Etkinleştir**'e tıklayın
+4. Pano, geektech.no'ya aktivasyon isteği gönderir
+5. Başarılı aktivasyonda şunlar gösterilir:
+   - **Lisans türü** (Hobi / Profesyonel / Kurumsal)
+   - **Son kullanma tarihi**
+   - **Maksimum yazıcı sayısı**
+   - **Lisans sahibi**
+   - **Örnek Kimliği** (kurulumunuza özgü)
+
+:::warning Lisans Anahtarı Alan Adınıza ve Kurulumunuza Bağlıdır
+Anahtar, belirli bir Bambu Dashboard kurulumu ve alan adı için etkinleştirilir. Aşağıdaki durumlarda [geektech.no](https://geektech.no) desteğiyle iletişime geçin:
+- Lisansı yeni bir sunucuya taşımak
+- Alan adını değiştirmek
+- Yazıcı sayısını artırmak
 :::
 
 ### Lisans Doğrulaması
 
-- Lisans başlangıçta **çevrimiçi olarak doğrulanır** ve ardından her 24 saatte bir
-- Ağ kesintisinde lisans en fazla **7 gün çevrimdışı** çalışır
-- Süresi dolmuş lisans → modül kilitlenir, ancak mevcut veriler korunur
-- Yenileme **[geektech.no](https://geektech.no)** → Lisanslarım → Yenile üzerinden yapılır
+Lisans, geektech.no ile kimlik doğrulaması ve senkronizasyon yapar:
+
+- **Başlangıçta doğrulama** — lisans otomatik olarak kontrol edilir
+- **Sürekli doğrulama** — geektech.no'ya karşı her 24 saatte bir yeniden doğrulanır
+- **Çevrimdışı mod** — ağ kesintisinde lisans, önbelleğe alınmış doğrulama ile en fazla **7 gün** çalışır
+- **Süresi dolmuş lisans** → modül kilitlenir, ancak mevcut veriler (siparişler, müşteriler) korunur
+- **PIN kodu** — geektech.no, PIN sistemi aracılığıyla lisansı kilitleyebilir/açabilir
+- **Yenileme** — **[geektech.no](https://geektech.no)** → Lisanslarım → Yenile üzerinden
+
+### Lisans Türleri ve Kısıtlamalar
+
+| Plan | Yazıcılar | Platformlar | Ücret | Fiyat |
+|------|-----------|-------------|-------|-------|
+| **Hobi** | 1 | 1 (Shopify VEYA WooCommerce) | 5% | geektech.no'ya bakın |
+| **Profesyonel** | 1–5 | Tümü | 5% | geektech.no'ya bakın |
+| **Kurumsal** | Sınırsız | Tümü + API | 3% | geektech.no'ya bakın |
 
 ### Lisans Durumunu Kontrol Etme
 
 **Ayarlar → E-Ticaret**'e gidin veya API'yi çağırın:
 
 ```bash
-curl -sk https://localhost:3443/api/ecom-license/status
+curl -sk https://localhost:3443/api/ecommerce/license
 ```
 
 Yanıt şunları içerir:
 ```json
 {
   "active": true,
-  "type": "professional",
-  "expires": "2027-03-22",
-  "printers": 5,
-  "licensee": "Şirket Adı",
-  "provider": "geektech.no"
+  "status": "active",
+  "plan": "professional",
+  "holder": "Şirket Adı",
+  "email": "sirket@ornek.com.tr",
+  "domain": "dashboard.sirketadi.com.tr",
+  "max_printers": 5,
+  "expires_at": "2027-03-22",
+  "provider": "geektech.no",
+  "fees_pending": 2,
+  "fees_this_month": 450.00,
+  "orders_this_month": 12
 }
 ```
 
@@ -149,7 +200,7 @@ Fatura doğrudan bir siparişten oluşturulabilir:
 - **Başlangıç numarası**: örn. `1001`
 - Fatura numarası otomatik olarak artan sırada atanır
 
-## Raporlama ve Vergiler
+## Raporlama ve Ücretler
 
 ### Ücret Raporlaması
 

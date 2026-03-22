@@ -34,39 +34,90 @@ description: 3D 프린트 판매를 위한 주문, 고객 및 청구 관리 — 
 ### 라이선스 활성화
 
 1. 대시보드에서 **설정 → 전자상거래**로 이동합니다
-2. 필드에 **라이선스 키** 붙여넣기
-3. **라이선스 활성화** 클릭
-4. 대시보드가 geektech.no 서버에서 키 인증
-5. 성공적으로 활성화되면 라이선스 유형, 만료일 및 프린터 수가 표시됩니다
+2. 다음 필드를 입력합니다:
 
-:::warning 라이선스 키는 설치에 연결됩니다
-키는 하나의 Bambu Dashboard 설치에 활성화됩니다. 새 서버로 라이선스를 이전해야 하는 경우 [geektech.no](https://geektech.no)에 문의하십시오.
+| 필드 | 설명 | 필수 |
+|------|------|------|
+| **라이선스 키** | geektech.no에서 받은 32자리 16진수 키 | ✅ 예 |
+| **이메일 주소** | 구매 시 사용한 이메일 | ✅ 예 |
+| **도메인** | 대시보드가 실행되는 도메인 (https:// 제외) | 권장 |
+| **전화번호** | 연락처 전화번호 (국가코드 포함, 예: +82) | 선택 |
+
+### 라이선스 유형 — 식별자 바인딩
+
+geektech.no는 라이선스를 하나 이상의 식별자에 바인딩합니다:
+
+| 유형 | 검증 대상 | 사용 사례 |
+|------|----------|----------|
+| **도메인** | 도메인 이름 (예: `dashboard.company.kr`) | 고유 도메인을 가진 고정 서버 |
+| **IP** | 공개 IP 주소 | 도메인 없음, 고정 IP 서버 |
+| **MAC** | 네트워크 카드의 MAC 주소 | 하드웨어 바인딩 |
+| **IP + MAC** | IP와 MAC 모두 일치해야 함 | 최고 보안 |
+
+:::info 자동 식별
+대시보드는 각 검증 시 서버의 IP 주소와 MAC 주소를 자동으로 전송합니다. 수동으로 입력할 필요가 없습니다 — geektech.no가 첫 번째 활성화 시 등록합니다.
+:::
+
+여러 IP 주소와 MAC 주소를 허용할 수 있습니다 (geektech.no 관리에서 줄당 하나). 여러 네트워크 카드나 동적 IP를 가진 서버에 유용합니다.
+
+3. **라이선스 활성화** 클릭
+4. 대시보드가 geektech.no에 활성화 요청을 보냅니다
+5. 성공적으로 활성화되면 다음이 표시됩니다:
+   - **라이선스 유형** (Hobby / Professional / Enterprise)
+   - **만료일**
+   - **최대 프린터 수**
+   - **라이선스 보유자**
+   - **인스턴스 ID** (설치에 고유)
+
+:::warning 라이선스 키는 도메인과 설치에 연결됩니다
+키는 특정 Bambu Dashboard 설치와 도메인에 활성화됩니다. 다음이 필요한 경우 [geektech.no](https://geektech.no) 지원팀에 문의하십시오:
+- 새 서버로 라이선스 이전
+- 도메인 변경
+- 프린터 수 증가
 :::
 
 ### 라이선스 유효성 검사
 
-- 라이선스는 시작 시 **온라인으로 검증**되며 이후 24시간마다 검증
-- 네트워크 오류 시 라이선스는 최대 **7일 오프라인** 작동
-- 만료된 라이선스 → 모듈이 잠기지만 기존 데이터는 유지
-- 갱신은 **[geektech.no](https://geektech.no)** → 내 라이선스 → 갱신에서 진행
+라이선스는 geektech.no와 인증 및 동기화됩니다:
+
+- **시작 시 검증** — 라이선스가 자동으로 확인됩니다
+- **지속적 검증** — geektech.no에 대해 24시간마다 재검증
+- **오프라인 모드** — 네트워크 오류 시 캐시된 검증으로 라이선스는 최대 **7일** 작동합니다
+- **만료된 라이선스** → 모듈이 잠기지만 기존 데이터(주문, 고객)는 유지됩니다
+- **PIN 코드** — geektech.no는 PIN 시스템을 통해 라이선스를 잠금/해제할 수 있습니다
+- **갱신** — **[geektech.no](https://geektech.no)** → 내 라이선스 → 갱신에서 진행
+
+### 라이선스 유형 및 제한
+
+| 플랜 | 프린터 | 플랫폼 | 수수료 | 가격 |
+|------|--------|--------|--------|------|
+| **Hobby** | 1 | 1 (Shopify 또는 WooCommerce) | 5% | geektech.no 참조 |
+| **Professional** | 1–5 | 전체 | 5% | geektech.no 참조 |
+| **Enterprise** | 무제한 | 전체 + API | 3% | geektech.no 참조 |
 
 ### 라이선스 상태 확인
 
 **설정 → 전자상거래**로 이동하거나 API 호출:
 
 ```bash
-curl -sk https://localhost:3443/api/ecom-license/status
+curl -sk https://localhost:3443/api/ecommerce/license
 ```
 
 응답에 포함된 정보:
 ```json
 {
   "active": true,
-  "type": "professional",
-  "expires": "2027-03-22",
-  "printers": 5,
-  "licensee": "회사명",
-  "provider": "geektech.no"
+  "status": "active",
+  "plan": "professional",
+  "holder": "회사명",
+  "email": "company@example.kr",
+  "domain": "dashboard.companyname.kr",
+  "max_printers": 5,
+  "expires_at": "2027-03-22",
+  "provider": "geektech.no",
+  "fees_pending": 2,
+  "fees_this_month": 450.00,
+  "orders_this_month": 12
 }
 ```
 
@@ -133,7 +184,7 @@ curl -sk https://localhost:3443/api/ecom-license/status
 
 ## 청구
 
-청구에 대한 자세한 문서는 [프로젝트 → 청구](../funksjoner/projects#청구)를 참조하세요.
+청구에 대한 자세한 문서는 [프로젝트 → 청구](../funksjoner/projects#fakturering)를 참조하세요.
 
 주문에서 직접 인보이스를 생성할 수 있습니다:
 
@@ -149,7 +200,7 @@ curl -sk https://localhost:3443/api/ecom-license/status
 - **시작 번호**: 예: `1001`
 - 인보이스 번호는 오름차순으로 자동 할당
 
-## 보고 및 세금
+## 보고 및 수수료
 
 ### 수수료 보고
 

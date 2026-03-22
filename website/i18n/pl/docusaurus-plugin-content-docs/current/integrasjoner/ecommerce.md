@@ -34,39 +34,90 @@ Moduł e-handlu wymaga ważnej licencji. Licencje można **kupić wyłącznie pr
 ### Aktywowanie licencji
 
 1. Przejdź do **Ustawienia → E-handel** w dashboardzie
-2. Wklej **klucz licencyjny** w polu
-3. Kliknij **Aktywuj licencję**
-4. Dashboard uwierzytelnia klucz w serwerach geektech.no
-5. Po pomyślnej aktywacji wyświetlany jest typ licencji, data wygaśnięcia i liczba drukarek
+2. Wypełnij następujące pola:
 
-:::warning Klucz licencyjny jest powiązany z twoją instalacją
-Klucz jest aktywowany dla jednej instalacji Bambu Dashboard. Skontaktuj się z [geektech.no](https://geektech.no), jeśli musisz przenieść licencję na nowy serwer.
+| Pole | Opis | Wymagane |
+|------|------|----------|
+| **Klucz licencyjny** | 32-znakowy klucz szesnastkowy z geektech.no | ✅ Tak |
+| **Adres e-mail** | E-mail użyty podczas zakupu | ✅ Tak |
+| **Domena** | Domena, na której działa dashboard (bez https://) | Zalecane |
+| **Telefon** | Telefon kontaktowy (z kodem kraju, np. +48) | Opcjonalne |
+
+### Typ licencji — wiązanie identyfikatorów
+
+geektech.no wiąże licencję z jednym lub więcej identyfikatorami:
+
+| Typ | Weryfikuje przeciwko | Przypadek użycia |
+|-----|---------------------|-----------------|
+| **Domena** | Nazwa domeny (np. `dashboard.firma.pl`) | Stały serwer z własną domeną |
+| **IP** | Publiczny adres/adresy IP | Serwer bez domeny, stały IP |
+| **MAC** | Adres/adresy MAC karty sieciowej | Wiązanie sprzętowe |
+| **IP + MAC** | Zarówno IP, jak i MAC muszą pasować | Najwyższe bezpieczeństwo |
+
+:::info Automatyczna identyfikacja
+Dashboard automatycznie wysyła adres IP i adres MAC serwera przy każdej weryfikacji. Nie musisz wypełniać ich ręcznie — geektech.no rejestruje je przy pierwszej aktywacji.
+:::
+
+Można zezwolić na wiele adresów IP i MAC (jeden na linię w panelu admin geektech.no). Jest to przydatne w przypadku serwerów z wieloma kartami sieciowymi lub dynamicznym IP.
+
+3. Kliknij **Aktywuj licencję**
+4. Dashboard wysyła żądanie aktywacji do geektech.no
+5. Po pomyślnej aktywacji wyświetlane są:
+   - **Typ licencji** (Hobby / Profesjonalny / Enterprise)
+   - **Data wygaśnięcia**
+   - **Maksymalna liczba drukarek**
+   - **Posiadacz licencji**
+   - **ID instancji** (unikalne dla twojej instalacji)
+
+:::warning Klucz licencyjny jest powiązany z domeną i instalacją
+Klucz jest aktywowany dla konkretnej instalacji Bambu Dashboard i domeny. Skontaktuj się ze wsparciem [geektech.no](https://geektech.no), jeśli potrzebujesz:
+- Przenieść licencję na nowy serwer
+- Zmienić domenę
+- Zwiększyć liczbę drukarek
 :::
 
 ### Weryfikacja licencji
 
-- Licencja jest **weryfikowana online** przy uruchomieniu i co 24 godziny
-- W przypadku awarii sieci licencja działa do **7 dni offline**
-- Wygasła licencja → moduł jest zablokowany, ale istniejące dane są zachowane
-- Odnowienie odbywa się przez **[geektech.no](https://geektech.no)** → Moje licencje → Odnów
+Licencja jest uwierzytelniana i synchronizowana z geektech.no:
+
+- **Weryfikacja przy uruchomieniu** — licencja jest sprawdzana automatycznie
+- **Bieżąca weryfikacja** — reweryfikacja co 24 godziny w geektech.no
+- **Tryb offline** — w przypadku awarii sieci licencja działa do **7 dni** z buforowaną weryfikacją
+- **Wygasła licencja** → moduł jest zablokowany, ale istniejące dane (zamówienia, klienci) są zachowane
+- **Kod PIN** — geektech.no może zablokować/odblokować licencję przez system PIN
+- **Odnowienie** — przez **[geektech.no](https://geektech.no)** → Moje licencje → Odnów
+
+### Typy licencji i ograniczenia
+
+| Plan | Drukarki | Platformy | Opłata | Cena |
+|------|----------|-----------|--------|------|
+| **Hobby** | 1 | 1 (Shopify LUB WooCommerce) | 5% | Patrz geektech.no |
+| **Profesjonalny** | 1–5 | Wszystkie | 5% | Patrz geektech.no |
+| **Enterprise** | Nieograniczone | Wszystkie + API | 3% | Patrz geektech.no |
 
 ### Sprawdzanie statusu licencji
 
 Przejdź do **Ustawienia → E-handel** lub wywołaj API:
 
 ```bash
-curl -sk https://localhost:3443/api/ecom-license/status
+curl -sk https://localhost:3443/api/ecommerce/license
 ```
 
 Odpowiedź zawiera:
 ```json
 {
   "active": true,
-  "type": "professional",
-  "expires": "2027-03-22",
-  "printers": 5,
-  "licensee": "Nazwa Firmy Sp. z o.o.",
-  "provider": "geektech.no"
+  "status": "active",
+  "plan": "professional",
+  "holder": "Nazwa Firmy Sp. z o.o.",
+  "email": "firma@przyklad.pl",
+  "domain": "dashboard.nazwafirmy.pl",
+  "max_printers": 5,
+  "expires_at": "2027-03-22",
+  "provider": "geektech.no",
+  "fees_pending": 2,
+  "fees_this_month": 450.00,
+  "orders_this_month": 12
 }
 ```
 
@@ -133,7 +184,7 @@ Aktualizuj status klikając zamówienie → **Zmień status**.
 
 ## Fakturowanie
 
-Zobacz [Projekty → Fakturowanie](../funksjoner/projects#fakturowanie) dla szczegółowej dokumentacji fakturowania.
+Zobacz [Projekty → Fakturowanie](../funksjoner/projects#fakturering) dla szczegółowej dokumentacji fakturowania.
 
 Fakturę można wygenerować bezpośrednio z zamówienia:
 
@@ -149,7 +200,7 @@ Skonfiguruj serię numerów faktur w **Ustawienia → E-handel**:
 - **Numer startowy**: np. `1001`
 - Numery faktur są przypisywane automatycznie w kolejności rosnącej
 
-## Raportowanie i podatki
+## Raportowanie i opłaty
 
 ### Raportowanie opłat
 
