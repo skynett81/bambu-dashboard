@@ -527,6 +527,24 @@
       } catch {}
     }
 
+    // Glue stick recommendation
+    if (f.glue_stick) {
+      const glueLabels = { required: 'Påkrevd', recommended: 'Anbefalt', optional: 'Valgfritt', not_needed: 'Ikke nødvendig' };
+      const glueColors = { required: '#e53935', recommended: '#f0883e', optional: '#4aa3df', not_needed: 'var(--accent-green)' };
+      const glueIcons = { required: '⚠️', recommended: '📌', optional: 'ℹ️', not_needed: '✅' };
+      const glueLabel = glueLabels[f.glue_stick] || f.glue_stick;
+      const glueColor = glueColors[f.glue_stick] || 'var(--text-muted)';
+      const glueIcon = glueIcons[f.glue_stick] || '';
+      html += '<div class="kb-detail-section"><div class="kb-detail-section-title">Limstift</div>';
+      html += '<div class="kb-glue-card" style="border-left:3px solid ' + glueColor + '">';
+      html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
+      html += '<span style="font-size:1.1rem">' + glueIcon + '</span>';
+      html += '<span style="font-weight:700;color:' + glueColor + '">' + glueLabel + '</span>';
+      html += '</div>';
+      if (f.plate_notes) html += '<div style="font-size:0.8rem;color:var(--text-secondary);line-height:1.5">' + _esc(f.plate_notes) + '</div>';
+      html += '</div></div>';
+    }
+
     // Tips
     if (f.tips_print) html += '<div class="kb-detail-section"><div class="kb-detail-section-title">' + t('kb.tips_print') + '</div><div class="kb-tips-box">' + _esc(f.tips_print) + '</div></div>';
     if (f.tips_storage) html += '<div class="kb-detail-section"><div class="kb-detail-section-title">' + t('kb.tips_storage') + '</div><div class="kb-tips-box">' + _esc(f.tips_storage) + '</div></div>';

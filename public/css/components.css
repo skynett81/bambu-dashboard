@@ -10572,6 +10572,12 @@ input[type="range"]::-webkit-slider-thumb:active {
   margin-top: 4px;
 }
 
+.kb-glue-card {
+  background: var(--bg-tertiary);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+
 .kb-detail-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

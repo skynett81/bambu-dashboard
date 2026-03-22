@@ -4331,6 +4331,8 @@ function _mig104_model_links_in_history(db) {
   try { db.exec('ALTER TABLE print_history ADD COLUMN model_url TEXT'); } catch {}
   try { db.exec('ALTER TABLE print_history ADD COLUMN plate_compatibility TEXT'); } catch {}
   try { db.exec('ALTER TABLE kb_filaments ADD COLUMN plate_compatibility TEXT'); } catch {}
+  try { db.exec('ALTER TABLE kb_filaments ADD COLUMN glue_stick TEXT'); } catch {}
+  try { db.exec('ALTER TABLE kb_filaments ADD COLUMN plate_notes TEXT'); } catch {}
 }
 
 function _mig105_index_history_started_at(db) {

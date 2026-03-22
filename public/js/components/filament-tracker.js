@@ -1289,6 +1289,64 @@
     </div>`;
 
     document.body.appendChild(overlay);
+
+    // Async: load plate compatibility from KB for this material
+    if (s.material) {
+      fetch('/api/kb/filaments?material=' + encodeURIComponent(s.material))
+        .then(r => r.json())
+        .then(kbFils => {
+          const kbFil = Array.isArray(kbFils) ? kbFils[0] : null;
+          if (!kbFil) return;
+          let plateHtml = '';
+
+          // Plate compatibility section
+          if (kbFil.plate_compatibility) {
+            try {
+              const plates = typeof kbFil.plate_compatibility === 'string' ? JSON.parse(kbFil.plate_compatibility) : kbFil.plate_compatibility;
+              const plateNames = { cool_plate: 'Cool Plate', engineering_plate: 'Engineering Plate', high_temp_plate: 'High Temp Plate', textured_pei: 'Textured PEI' };
+              const ratingColors = { excellent: '#00c864', good: '#4aa3df', fair: '#f0883e', poor: '#e53935', not_recommended: '#888' };
+              const ratingLabels = { excellent: 'Utmerket', good: 'Bra', fair: 'Greit', poor: 'Dårlig', not_recommended: 'Ikke anbefalt' };
+              const ratingIcons = { excellent: '★★★', good: '★★', fair: '★', poor: '✗', not_recommended: '⊘' };
+
+              plateHtml += '<div class="ph-detail-divider"></div>';
+              plateHtml += '<div class="ph-detail-field ph-detail-field-wide"><span class="ph-detail-label">Plate-kompatibilitet for ' + esc(s.material) + '</span></div>';
+              plateHtml += '<div class="kb-plate-grid" style="margin-bottom:8px">';
+              for (const [key, rating] of Object.entries(plates)) {
+                const name = plateNames[key] || key;
+                const color = ratingColors[rating] || '#888';
+                const label = ratingLabels[rating] || rating;
+                const icon = ratingIcons[rating] || '';
+                const best = rating === 'excellent';
+                plateHtml += '<div class="kb-plate-card' + (best ? ' kb-plate-best' : '') + '" style="border-color:' + color + '">';
+                plateHtml += '<div class="kb-plate-name">' + name + '</div>';
+                plateHtml += '<div class="kb-plate-rating" style="color:' + color + '">' + icon + ' ' + label + '</div>';
+                if (best) plateHtml += '<div class="kb-plate-rec">Anbefalt</div>';
+                plateHtml += '</div>';
+              }
+              plateHtml += '</div>';
+            } catch {}
+          }
+
+          // Glue stick info
+          if (kbFil.glue_stick) {
+            const glueLabels = { required: 'Påkrevd', recommended: 'Anbefalt', optional: 'Valgfritt', not_needed: 'Ikke nødvendig' };
+            const glueColors = { required: '#e53935', recommended: '#f0883e', optional: '#4aa3df', not_needed: '#00c864' };
+            const glueIcons = { required: '⚠️', recommended: '📌', optional: 'ℹ️', not_needed: '✅' };
+            plateHtml += '<div class="kb-glue-card" style="border-left:3px solid ' + (glueColors[kbFil.glue_stick] || '#888') + ';margin-bottom:8px">';
+            plateHtml += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">';
+            plateHtml += '<span style="font-size:1rem">' + (glueIcons[kbFil.glue_stick] || '') + '</span>';
+            plateHtml += '<span style="font-weight:700;font-size:0.85rem">Limstift: <span style="color:' + (glueColors[kbFil.glue_stick] || '#888') + '">' + (glueLabels[kbFil.glue_stick] || '') + '</span></span>';
+            plateHtml += '</div>';
+            if (kbFil.plate_notes) plateHtml += '<div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.4">' + esc(kbFil.plate_notes) + '</div>';
+            plateHtml += '</div>';
+          }
+
+          if (plateHtml) {
+            const actionsDiv = overlay.querySelector('.spool-detail-actions');
+            if (actionsDiv) actionsDiv.insertAdjacentHTML('beforebegin', plateHtml);
+          }
+        }).catch(() => {});
+    }
   };
 
   function _renderSpoolGroups(spools) {
