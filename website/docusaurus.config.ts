@@ -11,11 +11,15 @@ const config: Config = {
     v4: true,
   },
 
-  url: 'https://localhost:3443',
-  baseUrl: '/docs/',
+  // For lokal bruk: /docs/ under dashboardet
+  // For GitHub Pages: sett DOCUSAURUS_URL og DOCUSAURUS_BASE_URL miljøvariabler
+  url: process.env.DOCUSAURUS_URL || 'https://localhost:3443',
+  baseUrl: process.env.DOCUSAURUS_BASE_URL || '/docs/',
 
   organizationName: 'skynett81',
   projectName: 'bambu-dashboard',
+  trailingSlash: false,
+  deploymentBranch: 'gh-pages',
 
   onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',

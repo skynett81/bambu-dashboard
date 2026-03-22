@@ -8,6 +8,7 @@
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
+    "deploy:ghpages": "DOCUSAURUS_URL=https://skynett81.github.io DOCUSAURUS_BASE_URL=/bambu-dashboard/ docusaurus build",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",

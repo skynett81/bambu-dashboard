@@ -97,7 +97,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Avansert',
-      items: ['avansert/api', 'avansert/arkitektur', 'avansert/docker', 'avansert/plugins'],
+      items: ['avansert/api', 'avansert/arkitektur', 'avansert/docker', 'avansert/plugins', 'avansert/changelog'],
     },
   ],
   kbSidebar: [
