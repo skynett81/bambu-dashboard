@@ -1464,7 +1464,7 @@ function _mig053_ecom_license(db) {
       id INTEGER PRIMARY KEY CHECK (id = 1),
       license_key TEXT,
       geektech_email TEXT,
-      geektech_api_url TEXT DEFAULT 'https://geektech.no/api/v1',
+      geektech_api_url TEXT DEFAULT 'https://geektech.no/api',
       instance_id TEXT NOT NULL,
       status TEXT DEFAULT 'inactive',
       holder_name TEXT,

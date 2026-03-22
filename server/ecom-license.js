@@ -154,13 +154,18 @@ export class EcomLicenseManager {
     }
 
     // Online validation
-    const apiUrl = this._license.geektech_api_url || 'https://geektech.no/api/v1';
+    const apiUrl = this._license.geektech_api_url || 'https://geektech.no/api';
     try {
-      const { status, data } = await _httpPost(`${apiUrl}/license/validate`, {
+      // GeekTech API: POST /api/license/verify
+      // Sender license_key, domain og ip_address
+      const os = await import('node:os');
+      const nets = os.networkInterfaces();
+      const ipAddress = Object.values(nets).flat().find(n => n.family === 'IPv4' && !n.internal)?.address || null;
+
+      const { status, data } = await _httpPost(`${apiUrl}/license/verify`, {
         license_key: this._license.license_key,
-        product: 'bambu-dashboard-ecommerce',
-        instance_id: this._license.instance_id,
-        domain: this._license.domain || null
+        domain: this._license.domain || null,
+        ip_address: ipAddress
       });
 
       if (status >= 200 && status < 300 && data.valid) {
@@ -195,8 +200,13 @@ export class EcomLicenseManager {
   }
 
   async activate(licenseKey, email, domain, phone) {
+    // Lisensnøkkel må være 32 tegn hex
+    if (!licenseKey || !/^[0-9a-fA-F]{32}$/.test(licenseKey.replace(/-/g, ''))) {
+      return { valid: false, error: 'Lisensnøkkel må være 32 tegn hex (fra geektech.no)' };
+    }
+
     setEcomLicense({
-      license_key: licenseKey,
+      license_key: licenseKey.replace(/-/g, ''),
       geektech_email: email || null,
       domain: domain || null,
       phone: phone || null,
@@ -242,7 +252,7 @@ export class EcomLicenseManager {
     const unreported = getUnreportedFees();
     if (!unreported.length) return { ok: true, accepted: 0 };
 
-    const apiUrl = this._license.geektech_api_url || 'https://geektech.no/api/v1';
+    const apiUrl = this._license.geektech_api_url || 'https://geektech.no/api';
     const orders = unreported.map(f => ({
       order_id: f.platform_order_id || String(f.order_id),
       platform: f.platform || 'custom',
