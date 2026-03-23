@@ -169,14 +169,14 @@ Generiske profiler er et godt startpunkt. Finjuster temperatur med ±5 °C baser
 
 Mange ledende leverandører tilbyr ferdige Bambu Studio-profiler optimalisert for akkurat sitt filament:
 
-| Leverandør | Tilgjengelige profiler |
-|---|---|
-| Polyalkemi | PLA, PLA High Speed, PETG, PETG-CF, ABS |
-| eSUN | PLA+, ePLA-Lite, PETG, eABS |
-| Fillamentum | Nonoilen PLA, PLA, PET-G |
-| Spectrum | PETG FR V0, PETG-HT100 |
-| Fiberlogy | Easy-PETG, Matte-PETG, TPU 30D |
-| add:north | PLA, PETG, AduraX, X-PLA |
+| Leverandør | Tilgjengelige profiler | Last ned |
+|---|---|---|
+| [Polyalkemi](https://polyalkemi.no) | PLA, PLA High Speed, PETG, PETG-CF, ABS | [Bambu Lab-profiler](https://gammel.polyalkemi.no/bambulabprofiler/) |
+| [eSUN](https://www.esun3d.com) | PLA+, ePLA-Lite, PETG, eABS | [eSUN-profiler](https://www.esun3d.com/bambu-lab-3d-printer-filament-setting/) |
+| [Fillamentum](https://fillamentum.com) | Nonoilen PLA, PLA, PET-G | [Fillamentum-profiler](https://fillamentum.com/pages/bambu-lab-print-profiles) |
+| [Spectrum](https://spectrumfilaments.com) | PETG FR V0, PETG-HT100 | [Spectrum-profiler](https://spectrumfilaments.com/bambu-lab-profiles/) |
+| [Fiberlogy](https://fiberlogy.com) | Easy-PETG, Matte-PETG, TPU 30D | [Fiberlogy-profiler](https://fiberlogy.com/en/printing-profiles/) |
+| [add:north](https://addnorth.com) | PLA, PETG, AduraX, X-PLA | [add:north-profiler](https://addnorth.com/printing-profiles) |
 
 :::info Hvor finne profiler?
 - **Bambu Studio:** Innebygde profiler for Bambu Lab-materialer og mange tredjeparter
