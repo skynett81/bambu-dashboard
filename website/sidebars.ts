@@ -105,7 +105,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Filamenter',
-      items: ['kb/filamenter/pla', 'kb/filamenter/petg', 'kb/filamenter/abs', 'kb/filamenter/tpu', 'kb/filamenter/nylon', 'kb/filamenter/kompositt', 'kb/filamenter/spesial', 'kb/filamenter/profiler'],
+      items: ['kb/filamenter/pla', 'kb/filamenter/petg', 'kb/filamenter/abs', 'kb/filamenter/tpu', 'kb/filamenter/nylon', 'kb/filamenter/kompositt', 'kb/filamenter/spesial', 'kb/filamenter/profiler', 'kb/filamenter/sammenligning'],
     },
     {
       type: 'category',
@@ -115,12 +115,12 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Vedlikehold',
-      items: ['kb/vedlikehold/dyse', 'kb/vedlikehold/plate', 'kb/vedlikehold/ams', 'kb/vedlikehold/smoring'],
+      items: ['kb/vedlikehold/dyse', 'kb/vedlikehold/plate', 'kb/vedlikehold/ams', 'kb/vedlikehold/smoring', 'kb/vedlikehold/torking'],
     },
     {
       type: 'category',
       label: 'Feilsøking',
-      items: ['kb/feilsoking/heft', 'kb/feilsoking/warping', 'kb/feilsoking/stringing'],
+      items: ['kb/feilsoking/heft', 'kb/feilsoking/warping', 'kb/feilsoking/stringing', 'kb/feilsoking/overflate'],
     },
   ],
 };
