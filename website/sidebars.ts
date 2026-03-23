@@ -105,7 +105,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Filamenter',
-      items: ['kb/filamenter/pla', 'kb/filamenter/petg', 'kb/filamenter/abs', 'kb/filamenter/tpu', 'kb/filamenter/nylon', 'kb/filamenter/kompositt', 'kb/filamenter/spesial'],
+      items: ['kb/filamenter/pla', 'kb/filamenter/petg', 'kb/filamenter/abs', 'kb/filamenter/tpu', 'kb/filamenter/nylon', 'kb/filamenter/kompositt', 'kb/filamenter/spesial', 'kb/filamenter/profiler'],
     },
     {
       type: 'category',
