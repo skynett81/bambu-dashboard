@@ -10,20 +10,50 @@
   function fmtW(g) { return g >= 1000 ? `${(g/1000).toFixed(1)} kg` : `${Math.round(g)}g`; }
   function sRow(lbl, val, clr) { return `<div class="stats-detail-item"><span class="stats-detail-item-label">${lbl}</span><span class="stats-detail-item-value"${clr?` style="color:${clr}"`:''}>${val}</span></div>`; }
 
-  const COMPONENTS = ['nozzle', 'ptfe_tube', 'linear_rods', 'carbon_rods', 'build_plate', 'general'];
-  const ACTIONS = ['cleaned', 'replaced', 'lubricated', 'inspected'];
+  const COMPONENTS = ['nozzle', 'ptfe_tube', 'linear_rods', 'carbon_rods', 'z_axis', 'linear_bearings', 'build_plate', 'ams', 'ams_sensors', 'filament_drying', 'general'];
+  const ACTIONS = ['cleaned', 'replaced', 'lubricated', 'inspected', 'dried', 'calibrated'];
+  // Wear limits from KB docs (hours unless noted)
   const WEAR_LIMITS = {
     fan_cooling: 3000, fan_aux: 3000, fan_chamber: 3000, fan_heatbreak: 3000,
     hotend_heater: 2000, bed_heater: 5000,
     belts_x: 5000, belts_y: 5000,
     linear_rails: 10000, extruder_motor: 5000
   };
+  // Default maintenance intervals (hours) aligned with KB vedlikehold docs
+  const KB_INTERVALS = {
+    nozzle: 50,           // Cold pull every 50h, or when changing material
+    ptfe_tube: 200,       // Visual inspection monthly, replace on visible wear
+    linear_rods: 250,     // Oil XY rods every 200-300h
+    carbon_rods: 250,     // Oil carbon rods every 200-300h
+    z_axis: 200,          // Grease Z leadscrew every 200h
+    linear_bearings: 400, // Grease linear bearings every 300-500h (X1C/P1S)
+    build_plate: 100,     // Deep clean monthly (~100h), IPA between prints
+    ams: 100,             // Clean filament path every 100h
+    ams_sensors: 200,     // Inspect sensors monthly
+    filament_drying: 50,  // Check/dry hygroscopic filament regularly
+    general: 500          // Full maintenance cycle every 500h
+  };
+  // Nozzle lifespan by type (from KB dyse.md)
+  const NOZZLE_LIFESPAN = {
+    brass: { min: 200, max: 500, label: 'Messing', maxTemp: 300 },
+    stainless_steel: { min: 200, max: 500, label: 'Rustfritt stål', maxTemp: 300 },
+    hardened_steel: { min: 300, max: 600, label: 'Herdet stål', maxTemp: 300 },
+    hs01: { min: 500, max: 1000, label: 'HS01 (Bambu)', maxTemp: 300 }
+  };
+  // Build plate lifespan (prints, from KB plate.md)
+  const PLATE_LIFESPAN = {
+    cool_plate: { normal: '200–500', intensive: '100–200' },
+    engineering_plate: { normal: '300–700', intensive: '200–400' },
+    high_temp_plate: { normal: '200–400', intensive: '100–200' },
+    textured_pei: { normal: '300–600', intensive: '200–300' }
+  };
 
   // ═══ Tab config ═══
   const TAB_CONFIG = {
     nozzle:     { label: 'maintenance.tab_nozzle',     modules: ['alerts', 'lifetime-stats', 'active-nozzle', 'nozzle-history'] },
-    components: { label: 'maintenance.tab_components', modules: ['component-status', 'wear-tracking', 'schedule'] },
+    components: { label: 'maintenance.tab_components', modules: ['component-status', 'wear-tracking', 'kb-intervals', 'schedule'] },
     log:        { label: 'maintenance.tab_log',        modules: ['log-form', 'recent-events'] },
+    guide:      { label: 'maintenance.tab_guide',      modules: ['kb-guide'] },
     wearprediction: { label: 'wear.title', modules: ['wear-prediction-embed'], external: true }
   };
   const MODULE_SIZE = {
@@ -32,6 +62,7 @@
     'component-status': 'half', 'wear-tracking': 'half',
     'schedule': 'full',
     'log-form': 'half', 'recent-events': 'half',
+    'kb-intervals': 'full', 'kb-guide': 'full',
     'wear-prediction-embed': 'full'
   };
 
@@ -80,11 +111,15 @@
         const n = s.active_nozzle;
         const w = n.wear_estimate;
         const wearColor = w.percentage >= 80 ? 'var(--accent-red)' : w.percentage >= 50 ? 'var(--accent-orange)' : 'var(--accent-green)';
-        h += `<div class="nozzle-type">${n.type || 'Unknown'} ${n.diameter}mm</div>
+        const nozzleInfo = NOZZLE_LIFESPAN[n.type] || NOZZLE_LIFESPAN.stainless_steel;
+        const lifespanLabel = nozzleInfo ? `${nozzleInfo.min}–${nozzleInfo.max}${t('time.h')}` : '';
+        h += `<div class="nozzle-type">${nozzleInfo?.label || n.type || 'Unknown'} ${n.diameter}mm</div>
           <div class="nozzle-stats">${n.print_hours}${t('time.h')} | ${fmtW(n.filament_g)} | ${n.print_count} prints</div>
+          ${lifespanLabel ? `<div class="text-muted" style="font-size:0.7rem;margin:2px 0">${t('maintenance.expected_lifespan') || 'Forventet levetid'}: ${lifespanLabel}</div>` : ''}
           <div class="nozzle-wear-bar"><div class="nozzle-wear-fill" style="width:${w.percentage}%;background:${wearColor}"></div></div>
           <div class="nozzle-wear-text" style="color:${wearColor}">${t('maintenance.wear')}: ${w.percentage}%</div>
-          ${n.abrasive_g > 0 ? `<div class="text-muted" style="font-size:0.75rem;margin-top:4px">${t('maintenance.abrasive_used')}: ${fmtW(n.abrasive_g)}</div>` : ''}`;
+          ${n.abrasive_g > 0 ? `<div class="text-muted" style="font-size:0.75rem;margin-top:4px">${t('maintenance.abrasive_used')}: ${fmtW(n.abrasive_g)}</div>` : ''}
+          ${n.type === 'brass' ? `<div class="text-muted" style="font-size:0.7rem;margin-top:2px;color:var(--accent-orange)">⚠ ${t('maintenance.brass_cf_warning') || 'Bruk aldri CF/GF-filamenter med messingdyse'}</div>` : ''}`;
       } else {
         h += `<p class="text-muted">${t('maintenance.no_nozzle_data')}</p>`;
       }
@@ -94,7 +129,9 @@
             <label class="form-label">${t('maintenance.nozzle_type')}</label>
             <select class="form-input" id="nozzle-type-input">
               <option value="stainless_steel">${t('maintenance.stainless_steel') || 'Rustfritt stål'}</option>
+              <option value="brass">${t('maintenance.brass') || 'Messing (standard)'}</option>
               <option value="hardened_steel">${t('maintenance.hardened_steel') || 'Herdet stål'}</option>
+              <option value="hs01">${t('maintenance.hs01') || 'HS01 (Bambu)'}</option>
             </select>
           </div>
           <div class="form-group" style="margin-bottom:8px">
@@ -198,6 +235,104 @@
             <button class="form-btn" data-ripple onclick="submitMaintenance()">${t('maintenance.save')}</button>
           </div>
         </div>`;
+    },
+
+    'kb-intervals': () => {
+      const rows = [
+        { comp: 'nozzle', action: t('maintenance.action_cleaned') || 'Cold pull', interval: '50', note: t('maintenance.kb_nozzle_note') || 'Eller ved materialbytter' },
+        { comp: 'nozzle', action: t('maintenance.action_replaced') || 'Dysbytte', interval: '200–1000', note: t('maintenance.kb_nozzle_replace_note') || 'Avhenger av dysetype (messing→HS01)' },
+        { comp: 'linear_rods', action: t('maintenance.action_lubricated') || 'Olje XY', interval: '200–300', note: t('maintenance.kb_rods_note') || 'Lett olje, minimal mengde' },
+        { comp: 'z_axis', action: t('maintenance.action_lubricated') || 'Fett Z-spindel', interval: '200', note: t('maintenance.kb_z_note') || 'Tykt smørefett' },
+        { comp: 'linear_bearings', action: t('maintenance.action_lubricated') || 'Fett leiere', interval: '300–500', note: t('maintenance.kb_bearings_note') || 'X1C/P1S — litiumfett' },
+        { comp: 'ams', action: t('maintenance.action_cleaned') || 'Rens filamentbane', interval: '100', note: t('maintenance.kb_ams_note') || 'Trykkluft + nylon gjennom bane' },
+        { comp: 'ptfe_tube', action: t('maintenance.action_inspected') || 'Inspeksjon', interval: t('maintenance.monthly') || 'Månedlig', note: t('maintenance.kb_ptfe_note') || 'Sjekk for knekk og slitasje' },
+        { comp: 'ams_sensors', action: t('maintenance.action_cleaned') || 'Rengjøring', interval: t('maintenance.monthly') || 'Månedlig', note: t('maintenance.kb_sensors_note') || 'Tørk av sensorlinser forsiktig' },
+        { comp: 'build_plate', action: t('maintenance.action_cleaned') || 'Dyprengjøring', interval: t('maintenance.monthly') || 'Månedlig', note: t('maintenance.kb_plate_note') || 'Varm vann + mildt oppvaskmiddel' },
+        { comp: 'build_plate', action: 'IPA', interval: t('maintenance.between_prints') || 'Mellom prints', note: t('maintenance.kb_plate_ipa_note') || 'Unngå fingeravtrykk på plate' },
+        { comp: 'general', action: t('maintenance.full_cycle') || 'Full syklus', interval: '500', note: t('maintenance.kb_full_note') || 'Smøring + rengjøring + inspeksjon' }
+      ];
+      let h = `<div class="card-title">${t('maintenance.kb_intervals_title') || 'Anbefalte intervaller'} <a href="/docs/kb/vedlikehold/dyse" target="_blank" class="text-muted" style="font-size:0.65rem;margin-left:6px">📖 ${t('maintenance.see_docs') || 'Se dokumentasjon'}</a></div>`;
+      h += `<table class="data-table"><thead><tr>
+        <th>${t('maintenance.component')}</th>
+        <th>${t('maintenance.action')}</th>
+        <th>${t('maintenance.interval') || 'Intervall'}</th>
+        <th>${t('maintenance.notes')}</th>
+      </tr></thead><tbody>`;
+      for (const r of rows) {
+        h += `<tr><td>${t('maintenance.comp_' + r.comp)}</td><td>${r.action}</td><td>${r.interval}${typeof r.interval === 'string' && /^\d/.test(r.interval) ? t('time.h') : ''}</td><td class="text-muted">${r.note}</td></tr>`;
+      }
+      h += '</tbody></table>';
+
+      // Nozzle lifespan table
+      h += `<div class="card-title" style="margin-top:12px">${t('maintenance.nozzle_lifespan') || 'Dyselevetid'}</div>`;
+      h += `<table class="data-table"><thead><tr><th>${t('maintenance.nozzle_type')}</th><th>${t('maintenance.lifespan') || 'Levetid'}</th><th>${t('maintenance.materials') || 'Materialer'}</th></tr></thead><tbody>`;
+      h += `<tr><td>Messing (standard)</td><td>200–500${t('time.h')}</td><td>PLA, PETG, ABS, TPU</td></tr>`;
+      h += `<tr><td>Herdet stål</td><td>300–600${t('time.h')}</td><td>Alle inkl. CF/GF</td></tr>`;
+      h += `<tr><td>HS01 (Bambu)</td><td>500–1000${t('time.h')}</td><td>Alle inkl. CF/GF</td></tr>`;
+      h += '</tbody></table>';
+
+      // Build plate lifespan
+      h += `<div class="card-title" style="margin-top:12px">${t('maintenance.plate_lifespan') || 'Platelevetid (prints)'}</div>`;
+      h += `<table class="data-table"><thead><tr><th>${t('maintenance.plate_type') || 'Plate'}</th><th>${t('maintenance.normal_use') || 'Normal bruk'}</th><th>${t('maintenance.intensive_use') || 'Intensiv bruk'}</th></tr></thead><tbody>`;
+      for (const [key, val] of Object.entries(PLATE_LIFESPAN)) {
+        const label = key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+        h += `<tr><td>${label}</td><td>${val.normal}</td><td>${val.intensive}</td></tr>`;
+      }
+      h += '</tbody></table>';
+      return h;
+    },
+
+    'kb-guide': () => {
+      let h = `<div class="card-title">${t('maintenance.guide_title') || 'Vedlikeholdsguide'}</div>`;
+      h += '<div class="maint-guide-grid">';
+
+      // Dyse section
+      h += `<div class="settings-card">
+        <h4 style="margin:0 0 6px">🔧 ${t('maintenance.comp_nozzle')}</h4>
+        <p class="text-muted" style="font-size:0.75rem;margin:0 0 6px">${t('maintenance.kb_nozzle_desc') || 'Cold pull er den mest effektive metoden for å fjerne forurensning og karbonrester.'}</p>
+        <div style="font-size:0.75rem"><strong>Cold pull:</strong> Varm opp → nylon → 80-90°C → trekk raskt ut. Gjenta 3-5x.</div>
+        <div class="text-muted" style="font-size:0.7rem;margin-top:4px">⚠ Bytt alltid mens dysen er varm (200°C). Aldri CF/GF med messing.</div>
+        <a href="/docs/kb/vedlikehold/dyse" target="_blank" class="form-btn form-btn-sm" style="margin-top:8px;font-size:0.7rem">📖 ${t('maintenance.read_more') || 'Les mer'}</a>
+      </div>`;
+
+      // Smøring section
+      h += `<div class="settings-card">
+        <h4 style="margin:0 0 6px">🛢️ ${t('maintenance.comp_linear_rods') || 'Smøring'}</h4>
+        <p class="text-muted" style="font-size:0.75rem;margin:0 0 6px">${t('maintenance.kb_lub_desc') || 'Korrekt smøring reduserer slitasje og støy. Minimal mengde er nøkkelen.'}</p>
+        <div style="font-size:0.75rem"><strong>XY:</strong> 1 dråpe lett olje per punkt, flytt vognen 10x, tørk av. <strong>Z:</strong> Tynt lag fett langs spindel.</div>
+        <div class="text-muted" style="font-size:0.7rem;margin-top:4px">⚠ For mye olje trekker støv og lager slipende pasta.</div>
+        <a href="/docs/kb/vedlikehold/smoring" target="_blank" class="form-btn form-btn-sm" style="margin-top:8px;font-size:0.7rem">📖 ${t('maintenance.read_more') || 'Les mer'}</a>
+      </div>`;
+
+      // AMS section
+      h += `<div class="settings-card">
+        <h4 style="margin:0 0 6px">📦 ${t('maintenance.comp_ams') || 'AMS'}</h4>
+        <p class="text-muted" style="font-size:0.75rem;margin:0 0 6px">${t('maintenance.kb_ams_desc') || 'PTFE-rør, filamentbane og fuktighetsforebygging.'}</p>
+        <div style="font-size:0.75rem"><strong>Filamentbane:</strong> Trykkluft + nylon gjennom. <strong>Sensorer:</strong> Tørk av med myk pensel.</div>
+        <div class="text-muted" style="font-size:0.7rem;margin-top:4px">⚠ Unngå olje på drivhjul — kalibrert for tørr drift. Bytt silikagel ved 30%+ RH.</div>
+        <a href="/docs/kb/vedlikehold/ams" target="_blank" class="form-btn form-btn-sm" style="margin-top:8px;font-size:0.7rem">📖 ${t('maintenance.read_more') || 'Les mer'}</a>
+      </div>`;
+
+      // Plate section
+      h += `<div class="settings-card">
+        <h4 style="margin:0 0 6px">🛏️ ${t('maintenance.comp_build_plate')}</h4>
+        <p class="text-muted" style="font-size:0.75rem;margin:0 0 6px">${t('maintenance.kb_plate_desc') || 'IPA mellom prints, dyprengjøring månedlig. Bøy for å fjerne, aldri metallskraper.'}</p>
+        <div style="font-size:0.75rem"><strong>IPA:</strong> Påfør på lofritt papir, tørk i sirkler, la tørke 30-60s. <strong>Dyp:</strong> Varmt vann + oppvaskmiddel.</div>
+        <div class="text-muted" style="font-size:0.7rem;margin-top:4px">⚠ Ikke spray kald IPA på varm plate. Håndter i kantene.</div>
+        <a href="/docs/kb/vedlikehold/plate" target="_blank" class="form-btn form-btn-sm" style="margin-top:8px;font-size:0.7rem">📖 ${t('maintenance.read_more') || 'Les mer'}</a>
+      </div>`;
+
+      // Tørking section
+      h += `<div class="settings-card">
+        <h4 style="margin:0 0 6px">💨 ${t('maintenance.comp_filament_drying') || 'Filamenttørking'}</h4>
+        <p class="text-muted" style="font-size:0.75rem;margin:0 0 6px">${t('maintenance.kb_drying_desc') || 'Fuktig filament gir popping, stringing og svake deler.'}</p>
+        <div style="font-size:0.75rem"><strong>PLA:</strong> 45-50°C 4-6h | <strong>PETG/ABS:</strong> 65-70°C 4-6h | <strong>PA:</strong> 70-80°C 8-12h (PÅKREVD)</div>
+        <div class="text-muted" style="font-size:0.7rem;margin-top:4px">⚠ Tørk FØR du justerer print-innstillinger. Print PA/PC/PVA direkte fra tørker.</div>
+        <a href="/docs/kb/vedlikehold/torking" target="_blank" class="form-btn form-btn-sm" style="margin-top:8px;font-size:0.7rem">📖 ${t('maintenance.read_more') || 'Les mer'}</a>
+      </div>`;
+
+      h += '</div>';
+      return h;
     },
 
     'recent-events': (s, log) => {
@@ -351,7 +486,9 @@
             <label class="form-label">${t('maintenance.nozzle_type')}</label>
             <select class="form-input" id="global-nozzle-type">
               <option value="stainless_steel">${t('maintenance.stainless_steel') || 'Rustfritt stål'}</option>
+              <option value="brass">${t('maintenance.brass') || 'Messing (standard)'}</option>
               <option value="hardened_steel">${t('maintenance.hardened_steel') || 'Herdet stål'}</option>
+              <option value="hs01">${t('maintenance.hs01') || 'HS01 (Bambu)'}</option>
             </select>
           </div>
           <div class="form-group" style="flex:1;min-width:100px;margin-bottom:0">

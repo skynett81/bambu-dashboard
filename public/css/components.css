@@ -7138,6 +7138,14 @@ tr:hover .filament-edit-btn {
 
 /* ---- Maintenance Alert Banner ---- */
 
+.maint-guide-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.maint-guide-grid .settings-card {
+  padding: 12px 14px;
+}
 .maint-schedule-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
