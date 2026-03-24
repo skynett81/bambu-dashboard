@@ -443,14 +443,13 @@ export class PrintTracker {
       log.info('Bruker cloud-estimat for filament: ' + filamentUsedG.toFixed(1) + 'g (AMS-diff var 0)');
     }
 
-    // Waste = startup purge + color change waste + failed print filament
+    // Waste = startup purge + color change waste
+    // For feilede/kansellerte prints: filament_used_g inneholder TOTAL forbruk fra AMS
+    // Waste skal IKKE inkludere filament_used_g — det ville dobbeltelle
+    // I stedet markerer vi bare den vanlige purge/color-change waste
     const startupPurgeG = parseFloat(getInventorySetting('startup_purge_g')) || 1.0;
     const wastePerChange = parseFloat(getInventorySetting('waste_per_change_g')) || this.wastePerChangeG;
     let wasteG = startupPurgeG + (this.colorChanges * wastePerChange);
-    if (status === 'failed' || status === 'cancelled') {
-      // All filament used in a failed/cancelled print is waste
-      wasteG += filamentUsedG;
-    }
     wasteG = Math.round(wasteG * 10) / 10;
 
     const record = {
