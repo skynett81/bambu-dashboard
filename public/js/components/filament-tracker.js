@@ -1483,12 +1483,20 @@
           if (tray && tray.tray_type) {
             const color = hexToRgbColor(tray.tray_color);
             const light = isLightColor(tray.tray_color);
-            const remain = tray.remain >= 0 ? Math.round(tray.remain) : '?';
+            // Find linked spool
+            const linkedSpool = _spools.find(sp => sp.printer_id === id && sp.ams_unit === u && sp.ams_tray === i && !sp.archived);
+            // Bruk laveste av AMS-sensor og spoldatabasen
+            const _amsR = tray.remain >= 0 ? Math.round(tray.remain) : null;
+            const _spoolR = (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g >= 0)
+              ? Math.max(0, Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100)) : null;
+            let remain;
+            if (_amsR !== null && _spoolR !== null) remain = Math.min(_amsR, _spoolR);
+            else if (_amsR !== null) remain = _amsR;
+            else if (_spoolR !== null) remain = _spoolR;
+            else remain = '?';
             const brand = tray.tray_sub_brands || '';
             const slotLabel = amsData.ams.length > 1 ? `AMS${u+1}:${i+1}` : `${i+1}`;
             const remColor = remain < 20 ? 'var(--accent-orange)' : 'var(--accent-green)';
-            // Find linked spool
-            const linkedSpool = _spools.find(sp => sp.printer_id === id && sp.ams_unit === u && sp.ams_tray === i && !sp.archived);
             html += `<div class="fil-ams-tray ${isActive ? 'fil-ams-tray-active' : ''}">
               <div class="fil-ams-color">${miniSpool(color, 18, remain)}</div>
               <div class="fil-ams-info">

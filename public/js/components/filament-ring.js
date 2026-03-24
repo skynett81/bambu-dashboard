@@ -55,11 +55,19 @@
   function _getTrayPercent(tray, amsUnitIdx, amsTrayIdx, isActive, data) {
     const printerId = window.printerState?.getActivePrinterId?.() || null;
     const linkedSpool = window.getLinkedSpool?.(printerId, amsUnitIdx, amsTrayIdx);
+    // Bruk den laveste av AMS-sensor og spoldatabasen
+    // AMS-sensor kan vise for høyt etter feilede prints der filament ble kastet
+    const amsRemain = (tray.remain >= 0 && tray.remain <= 100) ? Math.round(tray.remain) : null;
+    const spoolRemain = (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g >= 0)
+      ? Math.max(0, Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100)) : null;
+
     let baseRemain;
-    if (tray.remain >= 0 && tray.remain <= 100) {
-      baseRemain = Math.round(tray.remain);
-    } else if (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g >= 0) {
-      baseRemain = Math.max(0, Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100));
+    if (amsRemain !== null && spoolRemain !== null) {
+      baseRemain = Math.min(amsRemain, spoolRemain);
+    } else if (amsRemain !== null) {
+      baseRemain = amsRemain;
+    } else if (spoolRemain !== null) {
+      baseRemain = spoolRemain;
     } else {
       return { current: 0, afterPrint: null, isPrinting: false };
     }
@@ -253,7 +261,7 @@
     const displayName = activeBrand || activeType;
     const showType = activeBrand && activeBrand !== activeType;
 
-    let html = '<div class="card-title">Filament</div>';
+    let html = '<div class="card-title">Filament <span class="ams-live-badge" title="Live data fra AMS via MQTT">LIVE</span></div>';
 
     // Main spool visual — shows current real-time percentage
     html += '<div class="filament-ring-main">';
@@ -268,12 +276,29 @@
     if (showType) html += `<span class="filament-ring-type-badge">${activeType}</span>`;
     html += '</div>';
 
-    // Details row — color · weight · slot
+    // Details row — color · weight · slot · data source
     html += '<div class="filament-ring-info">';
     if (colorName) html += `<span>${colorName}</span>`;
     if (activeInfo.currentG != null) html += `<span>${activeInfo.currentG}g</span>`;
     html += `<span>AMS${amsNum} S${slotNum}</span>`;
     html += '</div>';
+
+    // Data source indicator
+    const _srcAmsPct = (activeTray.remain >= 0 && activeTray.remain <= 100) ? Math.round(activeTray.remain) : null;
+    const _srcLinked = window.getLinkedSpool?.(window.printerState?.getActivePrinterId?.(), activeEntry.unitIdx, activeEntry.trayIdx);
+    const _srcDbPct = (_srcLinked && _srcLinked.initial_weight_g > 0 && _srcLinked.remaining_weight_g >= 0)
+      ? Math.max(0, Math.round((_srcLinked.remaining_weight_g / _srcLinked.initial_weight_g) * 100)) : null;
+    let srcLabel = '';
+    if (_srcAmsPct !== null && _srcDbPct !== null) {
+      srcLabel = `AMS: ${_srcAmsPct}% · DB: ${_srcDbPct}%`;
+    } else if (_srcAmsPct !== null) {
+      srcLabel = `AMS: ${_srcAmsPct}%`;
+    } else if (_srcDbPct !== null) {
+      srcLabel = `DB: ${_srcDbPct}%`;
+    }
+    if (srcLabel) {
+      html += `<div class="filament-ring-source" title="Viser laveste verdi av AMS-sensor og spoldatabasen">${srcLabel}</div>`;
+    }
 
     // Print usage stats — shown below spool when printing
     if (activeInfo.isPrinting) {

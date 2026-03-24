@@ -34,7 +34,16 @@ export function getWasteStats(printerId = null, startupPurgeG = 1.0, wastePerCha
   const manualWaste = db.prepare(`SELECT COALESCE(SUM(waste_g), 0) as total, COUNT(*) as count FROM filament_waste${where}`).get(...params);
 
   // From print_history (auto-tracked)
-  const autoWaste = db.prepare(`SELECT COALESCE(SUM(waste_g), 0) as total, COALESCE(SUM(color_changes), 0) as changes, COUNT(CASE WHEN color_changes > 0 THEN 1 END) as prints_with_changes, COUNT(CASE WHEN waste_g > 0 THEN 1 END) as prints_with_waste FROM print_history${where}`).get(...params);
+  // waste_g = mechanical waste (purge, color changes)
+  // For failed/cancelled prints, filament_used_g is also waste (object is discarded)
+  const autoWaste = db.prepare(`SELECT
+    COALESCE(SUM(waste_g), 0) as total,
+    COALESCE(SUM(CASE WHEN status IN ('failed','cancelled') THEN filament_used_g ELSE 0 END), 0) as failed_waste,
+    COALESCE(SUM(color_changes), 0) as changes,
+    COUNT(CASE WHEN color_changes > 0 THEN 1 END) as prints_with_changes,
+    COUNT(CASE WHEN waste_g > 0 THEN 1 END) as prints_with_waste,
+    COUNT(CASE WHEN status IN ('failed','cancelled') THEN 1 END) as failed_count
+    FROM print_history${where}`).get(...params);
 
   // Total prints for average
   const totalPrints = db.prepare(`SELECT COUNT(*) as count FROM print_history${where}`).get(...params);
@@ -125,7 +134,8 @@ export function getWasteStats(printerId = null, startupPurgeG = 1.0, wastePerCha
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
     .slice(0, 20);
 
-  const totalWasteG = manualWaste.total + autoWaste.total;
+  // Total waste = manual + auto (purge/color changes) + failed print filament
+  const totalWasteG = manualWaste.total + autoWaste.total + (autoWaste.failed_waste || 0);
   const avgPerG = costInfo.avg_cost_per_g;
 
   return {
@@ -356,7 +366,13 @@ export function estimatePrintCostAdvanced(filamentUsedG, durationSeconds, spoolI
     }
   }
 
-  const totalFilamentG = filamentUsedG + (wasteG || 0);
+  // For failed/cancelled prints: ALL filament used is waste (object is discarded)
+  // filament_used_g = total consumed, waste_g = mechanical waste (purge, color changes)
+  // Avoid double-counting: total = max(filament_used_g, waste_g) for failed, or sum for completed
+  const isFailed = printStatus === 'failed' || printStatus === 'cancelled';
+  const totalFilamentG = isFailed
+    ? Math.max(filamentUsedG, wasteG || 0)  // All consumed is waste, don't add purge on top
+    : filamentUsedG + (wasteG || 0);         // Completed: product filament + waste
   const filamentCost = Math.round(totalFilamentG * filamentCostPerG * 100) / 100;
   const durationH = durationSeconds / 3600;
   const electricityCost = Math.round(durationH * (printerWattage / 1000) * electricityRate * 100) / 100;

@@ -56,23 +56,29 @@
     const printerId = window.printerState?.getActivePrinterId?.() || null;
     const linkedSpool = window.getLinkedSpool?.(printerId, amsUnitIdx, isExternal ? 0 : amsTrayIdx);
 
+    // Bruk den laveste av AMS-sensor og spoldatabasen
+    // AMS-sensor kan vise for høyt etter feilede prints der filament ble kastet
+    const amsRemain = (tray.remain >= 0 && tray.remain <= 100) ? Math.round(tray.remain) : null;
+    const spoolRemain = (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g >= 0)
+      ? Math.max(0, Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100)) : null;
+
     let remain, totalG, remainG;
-    if (linkedSpool && linkedSpool.initial_weight_g > 0 && linkedSpool.remaining_weight_g > 0) {
-      totalG = linkedSpool.initial_weight_g;
-      remainG = linkedSpool.remaining_weight_g;
-      remain = Math.round((remainG / totalG) * 100);
-    } else if (tray.remain >= 0) {
-      remain = Math.round(tray.remain);
-      totalG = tray.tray_weight ? parseFloat(tray.tray_weight) : null;
-      remainG = totalG ? totalG * (remain / 100) : null;
-    } else if (linkedSpool && linkedSpool.initial_weight_g > 0) {
-      totalG = linkedSpool.initial_weight_g;
-      remainG = linkedSpool.remaining_weight_g;
-      remain = Math.round((remainG / totalG) * 100);
+    if (amsRemain !== null && spoolRemain !== null) {
+      remain = Math.min(amsRemain, spoolRemain);
+    } else if (amsRemain !== null) {
+      remain = amsRemain;
+    } else if (spoolRemain !== null) {
+      remain = spoolRemain;
     } else {
       remain = 0;
+    }
+
+    if (linkedSpool && linkedSpool.initial_weight_g > 0) {
+      totalG = linkedSpool.initial_weight_g;
+      remainG = totalG * remain / 100;
+    } else {
       totalG = tray.tray_weight ? parseFloat(tray.tray_weight) : null;
-      remainG = null;
+      remainG = totalG ? totalG * (remain / 100) : null;
     }
 
     // Real-time filament consumption

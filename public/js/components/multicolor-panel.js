@@ -61,9 +61,17 @@
           const globalIdx = u * 4 + ti;
           const isActive = globalIdx === activeIdx;
           // Real-time remaining
-          let remainG = tray.remain >= 0 ? Math.round(tray.remain) : null;
           const printerId = window.printerState?.getActivePrinterId?.() || null;
           const linked = window.getLinkedSpool?.(printerId, u, ti);
+          // Bruk laveste av AMS-sensor og spoldatabasen
+          const _amsR = tray.remain >= 0 ? Math.round(tray.remain) : null;
+          const _spoolR = (linked && linked.initial_weight_g > 0 && linked.remaining_weight_g >= 0)
+            ? Math.max(0, Math.round((linked.remaining_weight_g / linked.initial_weight_g) * 100)) : null;
+          let remainG;
+          if (_amsR !== null && _spoolR !== null) remainG = Math.min(_amsR, _spoolR);
+          else if (_amsR !== null) remainG = _amsR;
+          else if (_spoolR !== null) remainG = _spoolR;
+          else remainG = null;
           const tG = linked ? linked.initial_weight_g : (tray.tray_weight ? parseFloat(tray.tray_weight) : null);
           const rG = linked ? linked.remaining_weight_g : (tG && remainG != null ? tG * remainG / 100 : null);
           if (typeof window.realtimeFilament === 'function' && rG != null && tG > 0) {

@@ -437,20 +437,29 @@ export class PrintTracker {
 
     // Fallback: use cloud estimate if AMS diff is too low (e.g. after server restart)
     const cloudWeight = this.currentPrint.cloud_weight_g;
-    if (filamentUsedG < 1 && cloudWeight && cloudWeight > 1 && status === 'completed') {
-      const pctDone = completionPct || 100;
-      filamentUsedG = cloudWeight * (pctDone / 100);
-      log.info('Bruker cloud-estimat for filament: ' + filamentUsedG.toFixed(1) + 'g (AMS-diff var 0)');
+    if (filamentUsedG < 1 && cloudWeight && cloudWeight > 1) {
+      const pctDone = completionPct || (status === 'completed' ? 100 : 0);
+      if (pctDone > 0) {
+        filamentUsedG = cloudWeight * (pctDone / 100);
+        log.info('Bruker cloud-estimat for filament: ' + filamentUsedG.toFixed(1) + 'g ved ' + pctDone + '% (' + status + ', AMS-diff var 0)');
+      }
     }
 
-    // Waste = startup purge + color change waste
-    // For feilede/kansellerte prints: filament_used_g inneholder TOTAL forbruk fra AMS
-    // Waste skal IKKE inkludere filament_used_g — det ville dobbeltelle
-    // I stedet markerer vi bare den vanlige purge/color-change waste
+    // Waste = startup purge + color change waste (mechanical waste, always present)
     const startupPurgeG = parseFloat(getInventorySetting('startup_purge_g')) || 1.0;
     const wastePerChange = parseFloat(getInventorySetting('waste_per_change_g')) || this.wastePerChangeG;
     let wasteG = startupPurgeG + (this.colorChanges * wastePerChange);
     wasteG = Math.round(wasteG * 10) / 10;
+
+    // For failed/cancelled prints: all filament used is effectively waste
+    // (the printed object is discarded). We track this via status + completion_pct,
+    // not by inflating waste_g, to avoid double-counting in cost calculations.
+    // waste_g = mechanical waste only (purge, color changes)
+    // filament_used_g = total consumed from spool
+    // Cost calculation uses status to determine if filament_used_g is productive or waste
+    if (status === 'failed' || status === 'cancelled') {
+      log.info('Feilet/kansellert ved ' + completionPct + '% — ' + filamentUsedG.toFixed(1) + 'g brukt (alt er waste)');
+    }
 
     const record = {
       printer_id: this.printerId,
@@ -504,7 +513,7 @@ export class PrintTracker {
       this._saveHistoryThumbnail(printHistoryId);
 
       // Update spool inventory from AMS data
-      this._updateSpoolUsage(data, printHistoryId);
+      this._updateSpoolUsage(data, printHistoryId, filamentUsedG);
 
       // Update nozzle session counters
       this._updateNozzleSession(duration, filamentUsedG, this.currentPrint.filament_type);
@@ -1032,28 +1041,51 @@ export class PrintTracker {
     }
   }
 
-  _updateSpoolUsage(data, printHistoryId) {
-    if (!this.amsSnapshot) return;
-    try {
-      const currentAms = this._getAmsRemaining(data);
-      for (const [key, startRemain] of Object.entries(this.amsSnapshot)) {
-        const endRemain = currentAms[key] ?? startRemain;
-        const diff = startRemain - endRemain;
-        if (diff > 0) {
-          const [unitId, trayId] = key.split('_').map(Number);
-          const trayWeight = this.amsTrayWeights[key] || 1000;
-          const usedG = (diff / 100) * trayWeight;
-          // Look up spool assigned to this AMS slot
-          const spool = getSpoolBySlot(this.printerId, unitId, trayId);
-          if (spool) {
-            useSpoolWeight(spool.id, usedG, 'auto', printHistoryId, this.printerId);
-            trackConsumedSinceWeight(spool.id, usedG);
-            log.info('Spool #' + spool.id + ' usage: ' + usedG.toFixed(1) + 'g (AMS' + unitId + ':' + trayId + ')');
+  _updateSpoolUsage(data, printHistoryId, filamentUsedG = 0) {
+    let spoolUpdated = false;
+
+    // Method 1: AMS snapshot diff (most accurate)
+    if (this.amsSnapshot) {
+      try {
+        const currentAms = this._getAmsRemaining(data);
+        for (const [key, startRemain] of Object.entries(this.amsSnapshot)) {
+          const endRemain = currentAms[key] ?? startRemain;
+          const diff = startRemain - endRemain;
+          if (diff > 0) {
+            const [unitId, trayId] = key.split('_').map(Number);
+            const trayWeight = this.amsTrayWeights[key] || 1000;
+            const usedG = (diff / 100) * trayWeight;
+            const spool = getSpoolBySlot(this.printerId, unitId, trayId);
+            if (spool) {
+              useSpoolWeight(spool.id, usedG, 'auto', printHistoryId, this.printerId);
+              trackConsumedSinceWeight(spool.id, usedG);
+              log.info('Spool #' + spool.id + ' usage: ' + usedG.toFixed(1) + 'g (AMS' + unitId + ':' + trayId + ')');
+              spoolUpdated = true;
+            }
           }
         }
+      } catch (e) {
+        log.error('Spool usage update feilet: ' + e.message);
       }
-    } catch (e) {
-      log.error('Spool usage update feilet: ' + e.message);
+    }
+
+    // Method 2: Fallback to cloud estimate if AMS snapshot was missing (server restart)
+    if (!spoolUpdated && filamentUsedG > 0 && data.ams?.tray_now != null) {
+      try {
+        const activeTray = parseInt(data.ams.tray_now);
+        if (activeTray >= 0 && activeTray < 254) {
+          const unitId = Math.floor(activeTray / 4);
+          const trayId = activeTray % 4;
+          const spool = getSpoolBySlot(this.printerId, unitId, trayId);
+          if (spool) {
+            useSpoolWeight(spool.id, filamentUsedG, 'estimate', printHistoryId, this.printerId);
+            trackConsumedSinceWeight(spool.id, filamentUsedG);
+            log.info('Spool #' + spool.id + ' usage (cloud-estimat): ' + filamentUsedG.toFixed(1) + 'g (aktiv tray ' + activeTray + ')');
+          }
+        }
+      } catch (e) {
+        log.error('Spool fallback usage update feilet: ' + e.message);
+      }
     }
   }
 

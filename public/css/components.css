@@ -12571,6 +12571,30 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
   margin-left: 6px;
   opacity: 0.4;
 }
+.ams-live-badge {
+  display: inline-block;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: var(--accent-green, #00ae42);
+  color: #fff;
+  vertical-align: middle;
+  margin-left: 6px;
+  animation: ams-live-pulse 2s ease-in-out infinite;
+}
+@keyframes ams-live-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.filament-ring-source {
+  text-align: center;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  opacity: 0.7;
+}
 .filament-ring-trays {
   display: flex;
   justify-content: center;
