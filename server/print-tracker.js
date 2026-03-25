@@ -447,8 +447,10 @@ export class PrintTracker {
       }
     }
 
-    // Fallback: use cloud estimate if AMS diff is too low (e.g. after server restart)
+    // Fallback: use cloud estimate if AMS diff is too low
+    // This covers: server restart (no snapshot), EXT on P2S/A1 (no vt_tray sensor data)
     const cloudWeight = this.currentPrint.cloud_weight_g;
+    const isExt = this.currentPrint.is_ext;
     if (filamentUsedG < 1 && cloudWeight && cloudWeight > 1) {
       const pctDone = completionPct || (status === 'completed' ? 100 : 0);
       if (pctDone > 0) {
