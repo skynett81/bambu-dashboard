@@ -6,6 +6,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   create-blog-post:
@@ -45,3 +47,45 @@ jobs:
           git add website/blog/
           git commit -m "blog: auto-generate post for ${{ github.event.release.tag_name }}" || exit 0
           git push
+
+  # Deploy docs after blog post is committed
+  # (github-actions[bot] commits don't trigger push workflows, so we build+deploy here)
+  deploy-docs:
+    needs: create-blog-post
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: website
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          # Fetch the latest commit (including the blog post just pushed)
+          fetch-depth: 0
+
+      - name: Pull latest (includes blog post)
+        run: git pull origin main
+        working-directory: .
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Docusaurus
+        env:
+          DOCUSAURUS_URL: https://skynett81.github.io
+          DOCUSAURUS_BASE_URL: /bambu-dashboard/
+        run: npm run build
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: website/build
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
