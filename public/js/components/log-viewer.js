@@ -117,30 +117,114 @@
     _renderAll();
   }
 
+  let _activeLogTab = 'realtime';
+  let _activityData = null;
+  let _activityFilter = 'all';
+
+  async function _loadActivity() {
+    const container = document.getElementById('activity-log-content');
+    if (!container) return;
+    if (!_activityData) {
+      container.innerHTML = '<div class="text-muted" style="padding:1rem">' + (t('common.loading') || 'Loading...') + '</div>';
+      try {
+        const res = await fetch('/api/activity-log?limit=200');
+        _activityData = await res.json();
+      } catch { _activityData = []; }
+    }
+    _renderActivity();
+  }
+
+  function _renderActivity() {
+    const container = document.getElementById('activity-log-content');
+    if (!container) return;
+    let filtered = _activityData || [];
+    if (_activityFilter === 'prints') filtered = filtered.filter(e => e.type === 'print');
+    else if (_activityFilter === 'errors') filtered = filtered.filter(e => e.type === 'error');
+    else if (_activityFilter === 'maintenance') filtered = filtered.filter(e => e.type === 'maintenance');
+    else if (_activityFilter === 'other') filtered = filtered.filter(e => !['print','error','maintenance'].includes(e.type));
+
+    if (!filtered.length) {
+      container.innerHTML = '<div class="text-muted" style="padding:1rem;text-align:center">' + (t('errors.no_activity') || 'No activity yet') + '</div>';
+      return;
+    }
+
+    const typeColors = { print: '#00ae42', error: '#ff4444', maintenance: '#ffaa00', notification: '#00d4ff', protection: '#ff6b6b', spool: '#8b5cf6', xcam: '#06b6d4', queue: '#6366f1' };
+    const typeIcons = { print: '⬤', error: '▲', maintenance: '⚙', notification: '🔔', protection: '🛡', spool: '◉', xcam: '📷', queue: '📋' };
+
+    // Group by date
+    const groups = {};
+    for (const e of filtered) {
+      const d = new Date(e.timestamp);
+      const key = d.toLocaleDateString((window.i18n?.getLocale() || 'nb').replace('_', '-'), { day: '2-digit', month: 'long', year: 'numeric' });
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(e);
+    }
+
+    let html = '';
+    for (const [date, items] of Object.entries(groups)) {
+      html += '<div style="margin-bottom:12px"><div style="font-size:0.75rem;font-weight:600;color:var(--text-muted);padding:4px 0;border-bottom:1px solid var(--border-color);margin-bottom:4px">' + date + ' (' + items.length + ')</div>';
+      for (const e of items) {
+        const color = typeColors[e.type] || '#888';
+        const icon = typeIcons[e.type] || '•';
+        const time = new Date(e.timestamp).toLocaleTimeString((window.i18n?.getLocale() || 'nb').replace('_', '-'), { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        const printer = e.printer_id ? '<span style="color:var(--text-muted);font-size:0.7rem;margin-left:4px">[' + (window.printerState?._printerMeta?.[e.printer_id]?.name || e.printer_id) + ']</span>' : '';
+        html += '<div style="display:flex;align-items:flex-start;gap:8px;padding:3px 0;font-size:0.8rem">';
+        html += '<span style="color:' + color + ';flex-shrink:0;font-size:0.7rem;margin-top:2px">' + icon + '</span>';
+        html += '<span style="color:var(--text-muted);flex-shrink:0;font-size:0.7rem;min-width:60px">' + time + '</span>';
+        html += '<span style="flex:1">' + _escapeHtml(e.message || '') + printer + '</span>';
+        if (e.details) html += '<span style="color:var(--text-muted);font-size:0.7rem;flex-shrink:0">' + _escapeHtml(e.details) + '</span>';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    container.innerHTML = html;
+  }
+
+  window._logFilterActivity = function(type) {
+    _activityFilter = type;
+    document.querySelectorAll('.activity-filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === type));
+    _renderActivity();
+  };
+
   window.loadLogViewer = function() {
     const body = document.getElementById('overlay-panel-body');
     if (!body) return;
 
-    // Subscribe to logs via WebSocket
-    _subscribe();
-
+    // Tab bar
     body.innerHTML = `
-      <div class="log-viewer">
-        <div class="log-toolbar">
-          <button class="form-btn form-btn-secondary form-btn-sm" onclick="_logViewerClear()">T&oslash;m</button>
-          <button class="form-btn form-btn-secondary form-btn-sm" id="log-pause-btn" onclick="_logViewerTogglePause()">Pause</button>
-          <label style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:var(--text-secondary)">
-            <input type="checkbox" id="log-filter-info" checked> <span style="color:#00d4ff">info</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:var(--text-secondary)">
-            <input type="checkbox" id="log-filter-warn" checked> <span style="color:#ffaa00">warn</span>
-          </label>
-          <label style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:var(--text-secondary)">
-            <input type="checkbox" id="log-filter-error" checked> <span style="color:#ff4444">error</span>
-          </label>
-          <input type="text" class="log-filter-input" placeholder="Filtrer prefix..." id="log-prefix-filter">
+      <div class="tabs" style="margin-bottom:10px">
+        <button class="tab-btn ${_activeLogTab === 'realtime' ? 'active' : ''}" onclick="window._switchLogTab('realtime')">${t('logs.realtime') || 'Live'}</button>
+        <button class="tab-btn ${_activeLogTab === 'activity' ? 'active' : ''}" onclick="window._switchLogTab('activity')">${t('errors.tab_activity') || 'Activity'}</button>
+      </div>
+      <div id="log-tab-realtime" style="display:${_activeLogTab === 'realtime' ? '' : 'none'}">
+        <div class="log-viewer">
+          <div class="log-toolbar">
+            <button class="form-btn form-btn-secondary form-btn-sm" onclick="_logViewerClear()">${t('logs.clear') || 'Clear'}</button>
+            <button class="form-btn form-btn-secondary form-btn-sm" id="log-pause-btn" onclick="_logViewerTogglePause()">${t('controls.pause') || 'Pause'}</button>
+            <label style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:var(--text-secondary)">
+              <input type="checkbox" id="log-filter-info" checked> <span style="color:#00d4ff">info</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:var(--text-secondary)">
+              <input type="checkbox" id="log-filter-warn" checked> <span style="color:#ffaa00">warn</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:var(--text-secondary)">
+              <input type="checkbox" id="log-filter-error" checked> <span style="color:#ff4444">error</span>
+            </label>
+            <input type="text" class="log-filter-input" placeholder="${t('logs.filter_prefix') || 'Filter prefix...'}" id="log-prefix-filter">
+          </div>
+          <div class="log-output" id="log-output"></div>
         </div>
-        <div class="log-output" id="log-output"></div>
+      </div>
+      <div id="log-tab-activity" style="display:${_activeLogTab === 'activity' ? '' : 'none'}">
+        <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap">
+          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'all' ? 'active' : ''}" data-filter="all" onclick="_logFilterActivity('all')">${t('errors.filter_all') || 'All'}</button>
+          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'prints' ? 'active' : ''}" data-filter="prints" onclick="_logFilterActivity('prints')">${t('errors.filter_prints') || 'Prints'}</button>
+          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'errors' ? 'active' : ''}" data-filter="errors" onclick="_logFilterActivity('errors')">${t('errors.filter_errors') || 'Errors'}</button>
+          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'maintenance' ? 'active' : ''}" data-filter="maintenance" onclick="_logFilterActivity('maintenance')">${t('errors.filter_maintenance') || 'Maintenance'}</button>
+          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'other' ? 'active' : ''}" data-filter="other" onclick="_logFilterActivity('other')">${t('errors.filter_other') || 'Other'}</button>
+          <button class="form-btn form-btn-sm" style="margin-left:auto" onclick="_activityData=null;_loadActivity()">${t('common.refresh') || 'Refresh'}</button>
+        </div>
+        <div id="activity-log-content" style="max-height:calc(100vh - 250px);overflow-y:auto"></div>
       </div>
     `;
 
@@ -150,8 +234,28 @@
     document.getElementById('log-filter-error')?.addEventListener('change', _onFilterChange);
     document.getElementById('log-prefix-filter')?.addEventListener('input', _onPrefixChange);
 
+    // Subscribe to realtime logs
+    _subscribe();
+
     // Render existing lines
     _renderAll();
+
+    // Load activity if that tab is active
+    if (_activeLogTab === 'activity') _loadActivity();
+  };
+
+  window._switchLogTab = function(tab) {
+    _activeLogTab = tab;
+    const rtEl = document.getElementById('log-tab-realtime');
+    const actEl = document.getElementById('log-tab-activity');
+    if (rtEl) rtEl.style.display = tab === 'realtime' ? '' : 'none';
+    if (actEl) actEl.style.display = tab === 'activity' ? '' : 'none';
+    document.querySelectorAll('.tabs .tab-btn').forEach((b, i) => b.classList.toggle('active', (i === 0 && tab === 'realtime') || (i === 1 && tab === 'activity')));
+    if (tab === 'activity') _loadActivity();
+    if (tab === 'realtime' && !_paused) {
+      const output = document.getElementById('log-output');
+      if (output) output.scrollTop = output.scrollHeight;
+    }
   };
 
   // Patch openPanel and showDashboard to unsubscribe when leaving logs panel

@@ -3107,7 +3107,10 @@
     "title": "Screenshots"
   },
   "logs": {
-    "title": "Server log"
+    "title": "Server log",
+    "realtime": "Live",
+    "clear": "Clear",
+    "filter_prefix": "Filter prefix..."
   },
   "status": {
     "printing": "Printing",

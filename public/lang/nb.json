@@ -3107,7 +3107,10 @@
     "title": "Skjermbilder"
   },
   "logs": {
-    "title": "Serverlogg"
+    "title": "Serverlogg",
+    "realtime": "Sanntid",
+    "clear": "Tøm",
+    "filter_prefix": "Filtrer prefix..."
   },
   "status": {
     "printing": "Skriver ut",
