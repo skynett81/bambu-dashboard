@@ -1166,7 +1166,22 @@
     "ctx_chamber": "Chamber",
     "ctx_fan": "Fan",
     "ctx_occurrences": "Occurrences",
-    "search_code": "Search for this error code"
+    "search_code": "Search for this error code",
+    "tab_activity": "Активність",
+    "no_activity": "Немає записаної активності.",
+    "activity_print_started": "Друк розпочато: {{name}}",
+    "activity_print_completed": "Друк завершено: {{name}} ({{filament}}г)",
+    "activity_print_failed": "Друк невдалий: {{name}}",
+    "activity_maintenance": "Обслуговування: {{action}} {{component}}",
+    "activity_notification": "Сповіщення надіслано: {{channel}}",
+    "activity_protection": "Print Guard: {{message}}",
+    "activity_spool": "Використано філамент: {{weight}}г",
+    "activity_xcam": "Камера: {{event}}",
+    "filter_all": "Усе",
+    "filter_prints": "Друки",
+    "filter_errors": "Помилки",
+    "filter_maintenance": "Обслуговування",
+    "filter_other": "Інше"
   },
   "settings": {
     "printers_title": "Принтери",

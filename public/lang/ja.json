@@ -1166,7 +1166,22 @@
     "ctx_chamber": "Chamber",
     "ctx_fan": "Fan",
     "ctx_occurrences": "Occurrences",
-    "search_code": "Search for this error code"
+    "search_code": "Search for this error code",
+    "tab_activity": "アクティビティ",
+    "no_activity": "記録されたアクティビティはありません。",
+    "activity_print_started": "印刷開始: {{name}}",
+    "activity_print_completed": "印刷完了: {{name}} ({{filament}}g)",
+    "activity_print_failed": "印刷失敗: {{name}}",
+    "activity_maintenance": "メンテナンス: {{action}} {{component}}",
+    "activity_notification": "通知送信: {{channel}}",
+    "activity_protection": "Print Guard: {{message}}",
+    "activity_spool": "フィラメント使用: {{weight}}g",
+    "activity_xcam": "カメラ: {{event}}",
+    "filter_all": "すべて",
+    "filter_prints": "印刷",
+    "filter_errors": "エラー",
+    "filter_maintenance": "メンテナンス",
+    "filter_other": "その他"
   },
   "settings": {
     "printers_title": "プリンター",

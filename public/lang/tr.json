@@ -1166,7 +1166,22 @@
     "ctx_chamber": "Chamber",
     "ctx_fan": "Fan",
     "ctx_occurrences": "Occurrences",
-    "search_code": "Search for this error code"
+    "search_code": "Search for this error code",
+    "tab_activity": "Etkinlik",
+    "no_activity": "Kayıtlı etkinlik yok.",
+    "activity_print_started": "Baskı başladı: {{name}}",
+    "activity_print_completed": "Baskı tamamlandı: {{name}} ({{filament}}g)",
+    "activity_print_failed": "Baskı başarısız: {{name}}",
+    "activity_maintenance": "Bakım: {{action}} {{component}}",
+    "activity_notification": "Bildirim gönderildi: {{channel}}",
+    "activity_protection": "Print Guard: {{message}}",
+    "activity_spool": "Filament kullanıldı: {{weight}}g",
+    "activity_xcam": "Kamera: {{event}}",
+    "filter_all": "Tümü",
+    "filter_prints": "Baskılar",
+    "filter_errors": "Hatalar",
+    "filter_maintenance": "Bakım",
+    "filter_other": "Diğer"
   },
   "settings": {
     "printers_title": "Yazıcılar",

@@ -85,17 +85,123 @@
     if (!_playCustom(event) && fallbackFn) fallbackFn();
   }
 
+  // Rich metallic tone — layered oscillators for synth-like sound
+  function _metalTone(freq, duration, vol) {
+    if (!_enabled) return;
+    const ctx = _ctx();
+    if (!ctx) return;
+    const v = (vol || 0.12) * _volume;
+    const now = ctx.currentTime;
+    // Layer 1: fundamental (sawtooth)
+    const o1 = ctx.createOscillator(); const g1 = ctx.createGain();
+    o1.type = 'sawtooth'; o1.frequency.value = freq;
+    g1.gain.setValueAtTime(v, now); g1.gain.exponentialRampToValueAtTime(0.001, now + duration);
+    o1.connect(g1); g1.connect(ctx.destination);
+    o1.start(now); o1.stop(now + duration);
+    // Layer 2: fifth above (adds richness)
+    const o2 = ctx.createOscillator(); const g2 = ctx.createGain();
+    o2.type = 'square'; o2.frequency.value = freq * 1.5;
+    g2.gain.setValueAtTime(v * 0.3, now); g2.gain.exponentialRampToValueAtTime(0.001, now + duration * 0.7);
+    o2.connect(g2); g2.connect(ctx.destination);
+    o2.start(now); o2.stop(now + duration);
+  }
+
+  // Percussion hit — short metallic click
+  function _percHit(freq, vol) {
+    if (!_enabled) return;
+    const ctx = _ctx();
+    if (!ctx) return;
+    const v = (vol || 0.15) * _volume;
+    const now = ctx.currentTime;
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.type = 'square'; o.frequency.setValueAtTime(freq, now);
+    o.frequency.exponentialRampToValueAtTime(freq * 0.5, now + 0.08);
+    g.gain.setValueAtTime(v, now); g.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+    o.connect(g); g.connect(ctx.destination);
+    o.start(now); o.stop(now + 0.12);
+  }
+
   // Built-in tone sequences
   const BUILTIN = {
-    print_complete: () => { _playTone(523, 0.12); setTimeout(() => _playTone(659, 0.12), 120); setTimeout(() => _playTone(784, 0.12), 240); setTimeout(() => _playTone(1047, 0.25), 360); },
-    print_failed: () => { _playTone(440, 0.2, 'sawtooth', 0.08); setTimeout(() => _playTone(370, 0.2, 'sawtooth', 0.08), 200); setTimeout(() => _playTone(311, 0.3, 'sawtooth', 0.08), 400); },
-    print_started: () => { _playTone(587, 0.2, 'sine', 0.1); },
-    print_paused: () => { _playTone(440, 0.15); setTimeout(() => _playTone(330, 0.2), 200); },
-    filament_low: () => { _playTone(440, 0.15); setTimeout(() => _playTone(440, 0.15), 200); },
-    temperature_warning: () => { _playTone(880, 0.1, 'square', 0.08); setTimeout(() => _playTone(880, 0.1, 'square', 0.08), 150); setTimeout(() => _playTone(880, 0.1, 'square', 0.08), 300); },
-    countdown_1min: () => { _playTone(523, 0.12); setTimeout(() => _playTone(659, 0.12), 120); setTimeout(() => _playTone(784, 0.12), 240); },
-    maintenance_due: () => { _playTone(392, 0.2); setTimeout(() => _playTone(440, 0.2), 250); },
-    error: () => { _playTone(330, 0.2, 'square', 0.1); setTimeout(() => _playTone(262, 0.3, 'square', 0.1), 200); },
+    // Print complete: Victory fanfare — recognizable ascending major chord
+    print_complete: () => {
+      // Classic "ta-da-da-DAAA!" victory jingle
+      const t = (d, f, dur) => setTimeout(() => _metalTone(f, dur, 0.12), d);
+      t(0, 392, 0.15);    // G4
+      t(150, 494, 0.15);  // B4
+      t(300, 587, 0.15);  // D5
+      t(450, 784, 0.5);   // G5 — big sustained finish
+      setTimeout(() => _playTone(784, 0.4, 'sine', 0.06), 500); // shimmer
+    },
+
+    // Print failed: Alarm siren — two-tone alternating
+    print_failed: () => {
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => _metalTone(440, 0.15, 0.15), i * 300);
+        setTimeout(() => _metalTone(330, 0.15, 0.15), i * 300 + 150);
+      }
+    },
+
+    // Print started: Boot-up sequence — ascending digital blips
+    print_started: () => {
+      const notes = [262, 330, 392, 523]; // C E G C
+      notes.forEach((f, i) => setTimeout(() => _playTone(f, 0.08, 'square', 0.08), i * 80));
+      setTimeout(() => _playTone(523, 0.2, 'sine', 0.06), 350); // confirmation ping
+    },
+
+    // Print paused: Two gentle descending tones
+    print_paused: () => {
+      _playTone(523, 0.15, 'sine', 0.1);
+      setTimeout(() => _playTone(392, 0.2, 'sine', 0.1), 200);
+    },
+
+    // Filament low: Urgent triple beep
+    filament_low: () => {
+      for (let i = 0; i < 3; i++) {
+        setTimeout(() => _playTone(880, 0.1, 'square', 0.1), i * 200);
+      }
+    },
+
+    // Temperature warning: Fast urgent alarm
+    temperature_warning: () => {
+      for (let i = 0; i < 4; i++) {
+        setTimeout(() => _playTone(1047, 0.06, 'square', 0.1), i * 120);
+        setTimeout(() => _playTone(784, 0.06, 'square', 0.1), i * 120 + 60);
+      }
+    },
+
+    // Countdown 1min: Terminator theme — DUN DUN DUN DUN-DUN
+    // Brad Fiedel's iconic metallic percussion pattern
+    countdown_1min: () => {
+      const bpm = 120;
+      const beat = 60000 / bpm; // 500ms per beat
+      const hit = (d) => setTimeout(() => { _percHit(82, 0.2); _metalTone(82, 0.12, 0.1); }, d);
+      const hitHigh = (d) => setTimeout(() => { _percHit(110, 0.2); _metalTone(110, 0.12, 0.1); }, d);
+      // Bar 1: DUN . DUN . DUN . DUN-DUN
+      hit(0);
+      hit(beat);
+      hit(beat * 2);
+      hit(beat * 3);
+      hitHigh(beat * 3.5);
+      // Bar 2: DUN . DUN . DUN . DUN-DUN
+      hit(beat * 4.5);
+      hit(beat * 5.5);
+      hit(beat * 6.5);
+      hit(beat * 7.5);
+      hitHigh(beat * 8);
+    },
+
+    // Maintenance due: Gentle reminder — ascending two notes
+    maintenance_due: () => {
+      _playTone(440, 0.15, 'sine', 0.08);
+      setTimeout(() => _playTone(554, 0.2, 'sine', 0.08), 250);
+    },
+
+    // Error: Deep buzz + alarm
+    error: () => {
+      _metalTone(110, 0.3, 0.15);
+      setTimeout(() => _metalTone(82, 0.4, 0.15), 300);
+    },
   };
 
   window.notificationSound = {

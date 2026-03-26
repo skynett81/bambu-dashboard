@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bambu-dash-v26';
+const CACHE_NAME = 'bambu-dash-v37';
 const PRECACHE = [
   '/',
   '/css/main.css',
@@ -56,103 +56,29 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
-  // Skip non-GET, API, WebSocket, and docs requests (Docusaurus has own routing)
+  // Skip non-GET, API, WebSocket, and docs requests
   if (e.request.method !== 'GET' || url.pathname.startsWith('/api/') || url.pathname.startsWith('/docs/') || url.protocol === 'ws:' || url.protocol === 'wss:') {
     return;
   }
 
-  // Network-first for HTML (always fresh), cache-first for assets
-  if (e.request.headers.get('accept')?.includes('text/html')) {
-    e.respondWith(
-      fetch(e.request).then(res => {
+  // Network-first for EVERYTHING — always serve fresh content
+  // Falls back to cache only when offline
+  e.respondWith(
+    fetch(e.request).then(res => {
+      if (res.ok) {
         const clone = res.clone();
         caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
-        return res;
-      }).catch(() => caches.match(e.request).then(cached => cached || new Response(OFFLINE_HTML, { headers: { 'Content-Type': 'text/html' } })))
-    );
-  } else {
-    // Stale-while-revalidate for assets
-    e.respondWith(
-      caches.match(e.request).then(cached => {
-        const fetchPromise = fetch(e.request).then(res => {
-          if (res.ok) {
-            const clone = res.clone();
-            caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
-          }
-          return res;
-        }).catch(() => cached);
-
-        return cached || fetchPromise;
-      })
-    );
-  }
-});
-
-// ---- Push Notifications ----
-
-self.addEventListener('push', (e) => {
-  if (!e.data) return;
-
-  let payload;
-  try {
-    payload = e.data.json();
-  } catch {
-    payload = { title: 'Bambu Dashboard', body: e.data.text() };
-  }
-
-  const title = payload.title || 'Bambu Dashboard';
-  const options = {
-    body: payload.body || payload.message || '',
-    icon: '/assets/icon-192.png',
-    badge: '/assets/favicon.svg',
-    tag: payload.tag || payload.event || 'general',
-    data: { url: payload.url || '/', event: payload.event },
-    vibrate: [200, 100, 200],
-    actions: []
-  };
-
-  // Add action buttons based on event type
-  if (payload.event === 'print_finished' || payload.event === 'print_failed') {
-    options.actions.push({ action: 'view', title: 'View Details' });
-  }
-  if (payload.event === 'queue_item_completed') {
-    options.actions.push({ action: 'queue', title: 'View Queue' });
-  }
-
-  e.waitUntil(self.registration.showNotification(title, options));
-});
-
-self.addEventListener('notificationclick', (e) => {
-  e.notification.close();
-
-  const url = e.notification.data?.url || '/';
-  let targetUrl = url;
-
-  if (e.action === 'view') targetUrl = '/#history';
-  if (e.action === 'queue') targetUrl = '/#queue';
-
-  e.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-      // Focus existing window if available
-      for (const client of windowClients) {
-        if (client.url.includes(self.registration.scope) && 'focus' in client) {
-          client.focus();
-          client.navigate(targetUrl);
-          return;
-        }
       }
-      // Open new window
-      return clients.openWindow(targetUrl);
+      return res;
+    }).catch(() => {
+      return caches.match(e.request).then(cached => {
+        if (cached) return cached;
+        // HTML fallback for offline
+        if (e.request.headers.get('accept')?.includes('text/html')) {
+          return new Response(OFFLINE_HTML, { headers: { 'Content-Type': 'text/html' } });
+        }
+        return new Response('', { status: 503 });
+      });
     })
   );
-});
-
-// ---- Background Sync ----
-
-self.addEventListener('sync', (e) => {
-  if (e.tag === 'sync-queue') {
-    e.waitUntil(
-      fetch('/api/queue/dispatch', { method: 'POST' }).catch(() => {})
-    );
-  }
 });

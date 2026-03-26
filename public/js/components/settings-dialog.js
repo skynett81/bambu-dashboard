@@ -407,75 +407,77 @@
       const current = window.i18n.getLocale();
       let opts = '';
       for (const loc of locales) opts += `<option value="${loc}" ${loc === current ? 'selected' : ''}>${names[loc]}</option>`;
-      let h = '<div class="settings-grid"><div>';
-      h += `<div class="settings-card"><div class="card-title">${t('settings.language')}</div><select class="form-input" id="lang-select" onchange="changeLanguage(this.value)">${opts}</select></div>`;
-      h += `<div class="settings-card mt-md"><div class="card-title">${t('settings.notifications_title')}</div><label class="settings-checkbox"><input type="checkbox" id="notify-toggle" ${typeof Notification !== 'undefined' && Notification.permission === 'granted' ? 'checked' : ''} onchange="toggleNotificationsPerm(this.checked)"><span>${t('settings.notifications_browser')}</span></label></div>`;
-      h += `<div class="settings-card mt-md"><div class="card-title">${t('settings.server_title')}</div><div class="text-muted" style="font-size:0.8rem">Port: ${location.port || '3000'} | ${t('settings.printers_title')}: ${p.length}</div></div>`;
-      h += '<div class="settings-card mt-md"><div class="settings-row">';
-      h += '<div class="settings-label">' + (t('settings.onboarding_tour') || 'Guided Tour') + '</div>';
-      h += '<div class="settings-control">';
-      h += '<button class="form-btn form-btn-secondary" onclick="localStorage.removeItem(\'onboarding-completed\'); startTour(); document.querySelector(\'.ix-modal-overlay\')?.remove();">' + (t('settings.restart_tour') || 'Restart Tour') + '</button>';
-      h += '<span style="font-size:0.75rem;color:var(--text-muted);margin-left:8px">' + (t('settings.restart_tour_desc') || 'Show the guided introduction again') + '</span>';
-      h += '</div></div></div>';
-      // Notification sounds — full configuration
-      h += '<div class="settings-card mt-md">';
-      h += '<div class="card-title">' + (t('settings.sound_title') || 'Sound Notifications') + '</div>';
-      if (typeof notificationSound !== 'undefined') {
-        const ns = notificationSound;
-        // Master toggle + volume
-        h += '<div class="settings-row" style="margin-bottom:8px">';
-        h += '<label class="settings-checkbox"><input type="checkbox" id="sound-toggle" ' + (ns.isEnabled() ? 'checked' : '') + ' onchange="notificationSound.setEnabled(this.checked);if(this.checked)notificationSound.play(\'print_started\')"><span>' + (t('settings.sound_enable') || 'Enable sounds') + '</span></label>';
-        h += '<div style="display:flex;align-items:center;gap:6px;margin-left:auto">';
-        h += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg>';
-        h += '<input type="range" id="sound-volume" min="0" max="100" value="' + Math.round(ns.getVolume() * 100) + '" style="width:80px" oninput="notificationSound.setVolume(this.value/100);document.getElementById(\'vol-pct\').textContent=this.value+\'%\'">';
-        h += '<span id="vol-pct" style="font-size:0.7rem;min-width:28px">' + Math.round(ns.getVolume() * 100) + '%</span>';
-        h += '</div></div>';
-        // Per-event configuration
+      var _arVal = parseInt(localStorage.getItem('autoRefreshMs')) || 0;
+      const _notifGranted = typeof Notification !== 'undefined' && Notification.permission === 'granted';
+      const _hasSound = typeof notificationSound !== 'undefined';
+      const ns = _hasSound ? notificationSound : null;
+
+      let h = '';
+
+      // ── General Settings — compact inline rows ──
+      h += '<div class="settings-card">';
+      h += '<div class="card-title">' + (t('settings.general') || 'General') + '</div>';
+      h += '<div class="prefs-compact-grid">';
+      // Language
+      h += '<div class="prefs-row"><span class="prefs-label">' + t('settings.language') + '</span><select class="form-input prefs-input" id="lang-select" onchange="changeLanguage(this.value)">' + opts + '</select></div>';
+      // Browser notifications
+      h += '<div class="prefs-row"><span class="prefs-label">' + t('settings.notifications_title') + '</span><label class="settings-checkbox"><input type="checkbox" id="notify-toggle" ' + (_notifGranted ? 'checked' : '') + ' onchange="toggleNotificationsPerm(this.checked)"><span>' + t('settings.notifications_browser') + '</span></label></div>';
+      // Auto-refresh
+      h += '<div class="prefs-row"><span class="prefs-label">Auto-refresh</span><select class="form-input prefs-input" id="auto-refresh-select" onchange="if(typeof window.setAutoRefresh===\'function\')window.setAutoRefresh(this.value)">';
+      h += '<option value="0"' + (_arVal === 0 ? ' selected' : '') + '>Off</option><option value="10000"' + (_arVal === 10000 ? ' selected' : '') + '>10s</option><option value="30000"' + (_arVal === 30000 ? ' selected' : '') + '>30s</option><option value="60000"' + (_arVal === 60000 ? ' selected' : '') + '>60s</option><option value="300000"' + (_arVal === 300000 ? ' selected' : '') + '>5min</option></select></div>';
+      // Server info
+      h += '<div class="prefs-row"><span class="prefs-label">' + t('settings.server_title') + '</span><span class="text-muted">Port ' + (location.port || '3000') + ' · ' + p.length + ' ' + t('settings.printers_title') + '</span></div>';
+      // Tour
+      h += '<div class="prefs-row"><span class="prefs-label">' + (t('settings.onboarding_tour') || 'Guided Tour') + '</span><button class="form-btn form-btn-sm" onclick="localStorage.removeItem(\'onboarding-completed\'); startTour(); document.querySelector(\'.ix-modal-overlay\')?.remove();">' + (t('settings.restart_tour') || 'Restart') + '</button></div>';
+      h += '</div></div>';
+
+      // ── Sound Notifications + Buzzer — 2-column card ──
+      h += '<div class="settings-card mt-sm">';
+      h += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
+      h += '<div class="card-title" style="margin:0">' + (t('settings.sound_title') || 'Sound Notifications') + '</div>';
+      if (_hasSound) {
+        h += '<div style="display:flex;align-items:center;gap:8px">';
+        h += '<label class="settings-checkbox"><input type="checkbox" id="sound-toggle" ' + (ns.isEnabled() ? 'checked' : '') + ' onchange="notificationSound.setEnabled(this.checked);if(this.checked)notificationSound.play(\'print_started\')"><span>' + (t('settings.sound_enable') || 'On') + '</span></label>';
+        h += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg>';
+        h += '<input type="range" id="sound-volume" min="0" max="100" value="' + Math.round(ns.getVolume() * 100) + '" style="width:100px;accent-color:var(--accent-green)" oninput="notificationSound.setVolume(this.value/100);document.getElementById(\'vol-pct\').textContent=this.value+\'%\'">';
+        h += '<span id="vol-pct" style="font-size:0.75rem;opacity:0.6;min-width:30px">' + Math.round(ns.getVolume() * 100) + '%</span>';
+        h += '</div>';
+      }
+      h += '</div>';
+
+      if (_hasSound) {
         h += '<div class="sound-events-grid">';
         for (const event of ns.EVENTS) {
           const label = ns.EVENT_LABELS[event] || event;
           const isOn = ns.isEventEnabled(event);
           const custom = ns.getCustomSound(event);
           h += '<div class="sound-event-row">';
-          h += '<label class="settings-checkbox" style="flex:1"><input type="checkbox" ' + (isOn ? 'checked' : '') + ' onchange="notificationSound.setEventEnabled(\'' + event + '\',this.checked)"><span style="font-size:0.8rem">' + label + '</span></label>';
-          h += '<div style="display:flex;gap:4px;align-items:center">';
+          h += '<label class="settings-checkbox" style="flex:1;min-width:0"><input type="checkbox" ' + (isOn ? 'checked' : '') + ' onchange="notificationSound.setEventEnabled(\'' + event + '\',this.checked)"><span>' + label + '</span></label>';
+          h += '<div class="sound-event-actions">';
           if (custom) {
-            h += '<span class="pill pill-completed" style="font-size:0.6rem" title="' + (custom.name || 'Custom') + '">' + (custom.name || 'Custom').slice(0, 15) + '</span>';
-            h += '<button class="form-btn form-btn-sm" style="padding:2px 4px;font-size:0.65rem" onclick="notificationSound.removeCustomSound(\'' + event + '\');loadSettings()">✕</button>';
+            h += '<span class="pill pill-completed sound-custom-pill" title="' + (custom.name || '') + '">' + (custom.name || 'Custom').slice(0, 12) + '</span>';
+            h += '<button class="sound-action-btn sound-action-remove" onclick="notificationSound.removeCustomSound(\'' + event + '\');loadSettings()" title="Remove">✕</button>';
           }
-          h += '<button class="form-btn form-btn-sm" style="padding:2px 6px;font-size:0.65rem" onclick="notificationSound.play(\'' + event + '\')" title="Test">▶</button>';
-          h += '<label class="form-btn form-btn-sm" style="padding:2px 6px;font-size:0.65rem;cursor:pointer" title="' + (t('settings.sound_upload') || 'Upload custom sound (max 10s, 500KB)') + '"><input type="file" accept="audio/*" style="display:none" onchange="uploadEventSound(\'' + event + '\',this.files[0])">♪</label>';
+          h += '<button class="sound-action-btn" onclick="notificationSound.play(\'' + event + '\')" title="Test">▶</button>';
+          h += '<button class="sound-action-btn sound-action-upload" onclick="document.getElementById(\'snd-file-' + event + '\').click()" title="' + (t('settings.sound_upload') || 'Upload sound') + '">♪</button>';
+          h += '<input type="file" id="snd-file-' + event + '" accept="audio/*" style="display:none" onchange="uploadEventSound(\'' + event + '\',this.files[0])">';
           h += '</div></div>';
         }
         h += '</div>';
-        h += '<div class="text-muted" style="font-size:0.65rem;margin-top:6px">' + (t('settings.sound_hint') || 'Upload custom MP3/OGG/WAV files (max 10 seconds, 500 KB). Click ▶ to test, ♪ to upload.') + '</div>';
+        h += '<div class="text-muted" style="font-size:0.7rem;margin-top:8px">' + (t('settings.sound_hint') || 'MP3/OGG/WAV max 10s 500KB. ▶ test · ♪ upload') + '</div>';
       } else {
-        h += '<div class="text-muted">' + (t('settings.sound_unsupported') || 'Audio not supported in this browser') + '</div>';
+        h += '<div class="text-muted">' + (t('settings.sound_unsupported') || 'Audio not supported') + '</div>';
       }
+
+      // Buzzer row at bottom of sound card
+      h += '<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-color);display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
+      h += '<span style="font-weight:600;font-size:0.85rem">' + (t('settings.buzzer_title') || 'Printer Speaker') + '</span>';
+      h += '<label class="settings-checkbox"><input type="checkbox" id="buzzer-enabled" onchange="window._toggleBuzzer(this.checked)"><span>' + (t('settings.buzzer_enable') || 'Play on printer') + '</span></label>';
+      h += '<button class="form-btn form-btn-sm" onclick="window._testBuzzer()" style="margin-left:auto">' + (t('settings.buzzer_test') || 'Test') + '</button>';
+      h += '<span class="text-muted" style="font-size:0.7rem;flex-basis:100%">' + (t('settings.buzzer_desc') || 'M300 G-code melodies on printer buzzer') + '</span>';
       h += '</div>';
-      // Printer buzzer / speaker
-      h += '<div class="settings-card mt-md">';
-      h += '<div class="card-title">' + (t('settings.buzzer_title') || 'Printer Speaker') + '</div>';
-      h += '<p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">' + (t('settings.buzzer_desc') || 'Uses M300 G-code to play melodies on the printer\'s built-in buzzer') + '</p>';
-      h += '<div class="settings-row" style="margin-bottom:8px">';
-      h += '<label class="settings-checkbox"><input type="checkbox" id="buzzer-enabled" onchange="window._toggleBuzzer(this.checked)"><span>' + (t('settings.buzzer_enable') || 'Play sounds on printer speaker') + '</span></label>';
-      h += '<button class="form-btn form-btn-sm" style="margin-left:auto;padding:2px 8px;font-size:0.75rem" onclick="window._testBuzzer()">' + (t('settings.buzzer_test') || 'Test buzzer') + '</button>';
-      h += '</div></div>';
-      // Auto-refresh setting
-      var _arVal = parseInt(localStorage.getItem('autoRefreshMs')) || 0;
-      h += '<div class="settings-card mt-md"><div class="settings-row">';
-      h += '<div class="settings-label">Auto-refresh</div>';
-      h += '<div class="settings-control">';
-      h += '<select class="form-input" id="auto-refresh-select" onchange="if(typeof window.setAutoRefresh===\'function\')window.setAutoRefresh(this.value)">';
-      h += '<option value="0"' + (_arVal === 0 ? ' selected' : '') + '>Av</option>';
-      h += '<option value="10000"' + (_arVal === 10000 ? ' selected' : '') + '>10s</option>';
-      h += '<option value="30000"' + (_arVal === 30000 ? ' selected' : '') + '>30s</option>';
-      h += '<option value="60000"' + (_arVal === 60000 ? ' selected' : '') + '>60s</option>';
-      h += '<option value="300000"' + (_arVal === 300000 ? ' selected' : '') + '>5min</option>';
-      h += '</select>';
-      h += '<span style="font-size:0.75rem;color:var(--text-muted);margin-left:8px">Automatically reload panel content</span>';
-      h += '</div></div></div>';
-      h += '</div></div>';
+
+      h += '</div>';
       el.innerHTML = h;
       _loadBuzzerSetting();
 

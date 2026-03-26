@@ -4832,6 +4832,29 @@
   gap: 16px;
   align-items: start;
 }
+.prefs-compact-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.prefs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  gap: 12px;
+}
+.prefs-row:last-child { border-bottom: none; }
+.prefs-label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+  min-width: 100px;
+}
+.prefs-input {
+  max-width: 200px;
+}
 
 /* Settings Card */
 .settings-card {
@@ -4869,8 +4892,8 @@
 }
 
 .sound-events-grid {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 4px;
   margin-top: 8px;
 }
@@ -4878,13 +4901,73 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 4px 8px;
+  padding: 6px 10px;
   border-radius: 6px;
-  background: rgba(255,255,255,0.02);
+  background: rgba(255,255,255,0.03);
   gap: 8px;
+  transition: background 0.15s;
 }
 .sound-event-row:hover {
-  background: rgba(255,255,255,0.05);
+  background: rgba(255,255,255,0.07);
+}
+.sound-event-row .settings-checkbox span {
+  font-size: 0.8rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sound-event-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.sound-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border-radius: 6px;
+  border: none;
+  background: #1a5cff;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sound-action-btn:hover {
+  background: #3d7aff;
+  transform: scale(1.05);
+}
+.sound-action-upload {
+  background: #8b5cf6;
+  cursor: pointer;
+}
+.sound-action-upload:hover {
+  background: #a78bfa;
+}
+.sound-action-remove {
+  background: #ef4444;
+  font-size: 0.7rem;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+}
+.sound-action-remove:hover {
+  background: #f87171;
+}
+.sound-custom-pill {
+  font-size: 0.6rem !important;
+  padding: 2px 6px !important;
+  max-width: 90px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--accent-green) !important;
+  color: #fff !important;
 }
 .settings-checkbox input {
   accent-color: var(--accent-green);

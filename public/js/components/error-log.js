@@ -67,17 +67,74 @@
     return Math.min(100, Math.round((v / max) * 100)) + '%';
   }
 
+  // ═══ Activity type icons & colors ═══
+  const ACTIVITY_ICONS = {
+    print: {
+      completed: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>',
+      failed: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
+      started: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
+    },
+    error: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+    maintenance: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
+    notification: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
+    protection: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    spool: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>',
+    xcam: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+    queue: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>'
+  };
+
+  function activityIcon(entry) {
+    if (entry.type === 'print') {
+      return ACTIVITY_ICONS.print[entry.subtype] || ACTIVITY_ICONS.print.started;
+    }
+    return ACTIVITY_ICONS[entry.type] || ACTIVITY_ICONS.error;
+  }
+
+  function activityColor(entry) {
+    switch (entry.type) {
+      case 'print':
+        if (entry.subtype === 'completed') return 'var(--accent-green)';
+        if (entry.subtype === 'failed') return 'var(--accent-red)';
+        return 'var(--accent-blue)';
+      case 'error':
+        if (entry.subtype === 'fatal' || entry.subtype === 'critical') return 'var(--accent-red)';
+        if (entry.subtype === 'warning') return 'var(--accent-yellow, #e3b341)';
+        return 'var(--accent-orange)';
+      case 'maintenance': return 'var(--accent-blue)';
+      case 'notification': return 'var(--accent-purple, #a371f7)';
+      case 'protection': return 'var(--accent-red)';
+      case 'spool': return 'var(--accent-teal, #3fb9a0)';
+      case 'xcam': return 'var(--accent-purple, #a371f7)';
+      case 'queue': return 'var(--accent-blue)';
+      default: return 'var(--text-secondary)';
+    }
+  }
+
+  function activityTypeLabel(type) {
+    switch (type) {
+      case 'print': return t('errors.filter_prints');
+      case 'error': return t('errors.filter_errors');
+      case 'maintenance': return t('errors.filter_maintenance');
+      default: return t('errors.filter_other');
+    }
+  }
+
   // ═══ Tab config ═══
   const TAB_CONFIG = {
-    log:   { label: 'errors.tab_log',   modules: ['error-summary', 'error-filters', 'error-list'] },
-    stats: { label: 'errors.tab_stats', modules: ['severity-breakdown', 'printer-breakdown', 'common-errors'] }
+    log:      { label: 'errors.tab_log',      modules: ['error-summary', 'error-filters', 'error-list'] },
+    stats:    { label: 'errors.tab_stats',     modules: ['severity-breakdown', 'printer-breakdown', 'common-errors'] },
+    activity: { label: 'errors.tab_activity',  modules: ['activity-filters', 'activity-feed'] }
   };
   const MODULE_SIZE = {
     'error-summary': 'half', 'error-filters': 'half', 'error-list': 'full',
-    'severity-breakdown': 'half', 'printer-breakdown': 'half', 'common-errors': 'full'
+    'severity-breakdown': 'half', 'printer-breakdown': 'half', 'common-errors': 'full',
+    'activity-filters': 'full', 'activity-feed': 'full'
   };
 
   let _allErrors = [];
+  let _activityData = [];
+  let _activityFilter = 'all';
+  let _activityLoaded = false;
   let _activeSeverity = 'all';
   let _searchTerm = '';
   let _selectedErrorPrinter = null;
@@ -207,8 +264,101 @@
       }
       h += '</div>';
       return h;
+    },
+
+    'activity-filters': () => {
+      const types = ['all', 'print', 'error', 'maintenance', 'other'];
+      const labels = {
+        all: t('errors.filter_all'),
+        print: t('errors.filter_prints'),
+        error: t('errors.filter_errors'),
+        maintenance: t('errors.filter_maintenance'),
+        other: t('errors.filter_other')
+      };
+      const colors = {
+        all: 'var(--accent-blue)',
+        print: 'var(--accent-green)',
+        error: 'var(--accent-orange)',
+        maintenance: 'var(--accent-blue)',
+        other: 'var(--accent-purple, #a371f7)'
+      };
+      let h = '<div class="error-sidebar-filters" style="flex-wrap:wrap">';
+      for (const tp of types) {
+        h += `<button class="error-filter-btn ${_activityFilter === tp ? 'active' : ''}" data-ripple style="--filter-color:${colors[tp]}" onclick="filterActivityType('${tp}')">${labels[tp]}</button>`;
+      }
+      h += '</div>';
+      return h;
+    },
+
+    'activity-feed': () => {
+      return '<div id="activity-feed-container" style="max-height:600px;overflow-y:auto"></div>';
     }
   };
+
+  // ═══ Activity feed rendering ═══
+  function renderActivityFeed() {
+    const container = document.getElementById('activity-feed-container');
+    if (!container) return;
+
+    let filtered = _activityData;
+    if (_activityFilter !== 'all') {
+      if (_activityFilter === 'other') {
+        filtered = filtered.filter(e => !['print', 'error', 'maintenance'].includes(e.type));
+      } else {
+        filtered = filtered.filter(e => e.type === _activityFilter);
+      }
+    }
+
+    if (!filtered.length) {
+      container.innerHTML = emptyState({
+        icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+        title: t('errors.no_activity') || 'No activity found',
+        desc: ''
+      });
+      return;
+    }
+
+    // Group by date
+    const groups = {};
+    for (const e of filtered) {
+      const d = e.timestamp ? new Date(e.timestamp) : new Date();
+      const locale = (window.i18n?.getLocale() || 'nb').replace('_', '-');
+      const key = d.toLocaleDateString(locale, { day: '2-digit', month: 'long', year: 'numeric' });
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(e);
+    }
+
+    let html = '';
+    for (const [date, items] of Object.entries(groups)) {
+      html += `<div class="error-group">
+        <div class="error-group-header">
+          <span>${date}</span>
+          <span class="error-group-count">${items.length}</span>
+        </div>`;
+      for (const entry of items) {
+        const color = activityColor(entry);
+        const icon = activityIcon(entry);
+        html += `<div class="error-card" style="--error-color:${color}">
+          <div class="error-card-accent" style="background:${color}"></div>
+          <div class="error-card-icon" style="color:${color}">${icon}</div>
+          <div class="error-card-body">
+            <div class="error-card-top">
+              <span class="error-card-message">${esc(entry.message)}</span>
+              <span class="error-card-ago">${timeAgo(entry.timestamp)}</span>
+            </div>
+            <div class="error-card-meta">
+              ${entry.printer_id ? `<span class="printer-tag">${esc(printerName(entry.printer_id))}</span>` : ''}
+              <span class="error-card-time">${formatDate(entry.timestamp)}</span>
+              <span class="error-severity-pill" style="background:${color}">${esc(entry.type)}</span>
+            </div>
+          </div>
+        </div>`;
+      }
+      html += '</div>';
+    }
+
+    container.innerHTML = html;
+  }
 
   // ═══ Tab switching ═══
   function switchTab(tabId) {
@@ -225,6 +375,29 @@
     });
     const slug = tabId === 'log' ? 'errors' : `errors/${tabId}`;
     if (location.hash !== '#' + slug) history.replaceState(null, '', '#' + slug);
+
+    // Lazy-load activity data on first switch
+    if (tabId === 'activity' && !_activityLoaded) {
+      loadActivityData();
+    }
+  }
+
+  // ═══ Activity data loader ═══
+  async function loadActivityData() {
+    const printerId = _selectedErrorPrinter;
+    const params = printerId ? `?limit=200&printer_id=${printerId}` : '?limit=200';
+    try {
+      const res = await fetch(`/api/activity-log${params}`);
+      _activityData = await res.json();
+      _activityLoaded = true;
+      renderActivityFeed();
+    } catch (err) {
+      console.error('[error-log] loadActivityData failed:', err);
+      const container = document.getElementById('activity-feed-container');
+      if (container) {
+        container.innerHTML = `<p class="text-muted">${t('errors.load_failed')}</p>`;
+      }
+    }
   }
 
   // ═══ Main render ═══
@@ -250,24 +423,12 @@
       const res = await fetch(`/api/errors${params}`);
       _allErrors = await res.json();
 
-      if (!_allErrors.length) {
-        let html = buildPrinterSelector('changeErrorPrinter', _selectedErrorPrinter);
-        html += `<div class="error-empty-state">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="1.5" style="opacity:0.5">
-            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-          <p class="text-muted" style="margin-top:12px">${t('errors.no_errors')}</p>
-        </div>`;
-        panel.innerHTML = html;
-        return;
-      }
-
       let html = '';
 
       // Printer selector
       html += buildPrinterSelector('changeErrorPrinter', _selectedErrorPrinter);
 
-      // Tab bar
+      // Tab bar (always show — even when errors empty, user can view activity)
       html += '<div class="tabs">';
       for (const [id, cfg] of Object.entries(TAB_CONFIG)) {
         html += `<button class="tab-btn error-tab-btn ${id === _activeTab ? 'active' : ''}" data-tab="${id}" onclick="switchErrorTab('${id}')">${t(cfg.label)}</button>`;
@@ -278,24 +439,44 @@
       for (const [tabId, cfg] of Object.entries(TAB_CONFIG)) {
         const order = getOrder(tabId);
         html += `<div class="tab-panel error-tab-panel stats-tab-panel stagger-in ${tabId === _activeTab ? 'active' : ''}" id="error-tab-${tabId}" style="display:${tabId === _activeTab ? 'grid' : 'none'}">`;
-        let _si = 0;
-        for (const modId of order) {
-          const builder = BUILDERS[modId];
-          if (!builder) continue;
-          const content = builder(_allErrors);
-          if (!content) continue;
-          const isFull = (MODULE_SIZE[modId] || 'full') === 'full';
-          html += `<div class="stats-module${isFull ? ' stats-module-full' : ''}" data-module-id="${modId}" style="--i:${_si++}">`;
-          html += content;
-          html += '</div>';
+
+        // For log/stats tabs: show empty state if no errors
+        if (tabId !== 'activity' && !_allErrors.length) {
+          html += `<div class="stats-module stats-module-full" style="--i:0">
+            <div class="error-empty-state">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="1.5" style="opacity:0.5">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              <p class="text-muted" style="margin-top:12px">${t('errors.no_errors')}</p>
+            </div>
+          </div>`;
+        } else {
+          let _si = 0;
+          for (const modId of order) {
+            const builder = BUILDERS[modId];
+            if (!builder) continue;
+            const content = builder(_allErrors);
+            if (!content) continue;
+            const isFull = (MODULE_SIZE[modId] || 'full') === 'full';
+            html += `<div class="stats-module${isFull ? ' stats-module-full' : ''}" data-module-id="${modId}" style="--i:${_si++}">`;
+            html += content;
+            html += '</div>';
+          }
         }
         html += '</div>';
       }
 
       panel.innerHTML = html;
 
-      // Render error list
-      renderFilteredErrors();
+      // Render error list (if errors exist)
+      if (_allErrors.length) {
+        renderFilteredErrors();
+      }
+
+      // If activity tab is active, load data
+      if (_activeTab === 'activity') {
+        loadActivityData();
+      }
     } catch (e) {
       console.error('[error-log] loadErrors failed:', e);
       panel.innerHTML = `<p class="text-muted">${t('errors.load_failed')}</p><pre style="color:var(--accent-red);font-size:0.7rem;margin-top:8px">${e?.message || e}</pre>`;
@@ -432,8 +613,17 @@
 
   // ═══ Global API ═══
   window.loadErrorsPanel = loadErrors;
-  window.changeErrorPrinter = function(value) { _selectedErrorPrinter = value || null; loadErrors(); };
+  window.changeErrorPrinter = function(value) { _selectedErrorPrinter = value || null; _activityLoaded = false; loadErrors(); };
   window.switchErrorTab = switchTab;
+  window.filterActivityType = function(type) {
+    _activityFilter = type;
+    // Update active state on buttons
+    document.querySelectorAll('#error-tab-activity .error-filter-btn').forEach(btn => {
+      const match = btn.getAttribute('onclick')?.match(/filterActivityType\('(\w+)'\)/);
+      if (match) btn.classList.toggle('active', match[1] === type);
+    });
+    renderActivityFeed();
+  };
   window.filterErrorSeverity = function(severity) {
     _activeSeverity = severity;
     const slug = severity === 'all' ? 'errors' : `errors/${severity}`;

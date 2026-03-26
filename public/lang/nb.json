@@ -1551,7 +1551,22 @@
     "ctx_chamber": "Kammer",
     "ctx_fan": "Vifte",
     "ctx_occurrences": "Forekomster",
-    "search_code": "Søk etter denne feilkoden"
+    "search_code": "Søk etter denne feilkoden",
+    "tab_activity": "Aktivitet",
+    "no_activity": "Ingen aktivitet registrert.",
+    "activity_print_started": "Print startet: {{name}}",
+    "activity_print_completed": "Print fullført: {{name}} ({{filament}}g)",
+    "activity_print_failed": "Print feilet: {{name}}",
+    "activity_maintenance": "Vedlikehold: {{action}} {{component}}",
+    "activity_notification": "Varsel sendt: {{channel}}",
+    "activity_protection": "Print Guard: {{message}}",
+    "activity_spool": "Filament brukt: {{weight}}g",
+    "activity_xcam": "Kamera: {{event}}",
+    "filter_all": "Alle",
+    "filter_prints": "Prints",
+    "filter_errors": "Feil",
+    "filter_maintenance": "Vedlikehold",
+    "filter_other": "Annet"
   },
   "settings": {
     "printers_title": "Printere",

@@ -1165,7 +1165,22 @@
     "ctx_chamber": "Chamber",
     "ctx_fan": "Fan",
     "ctx_occurrences": "Occurrences",
-    "search_code": "Search for this error code"
+    "search_code": "Search for this error code",
+    "tab_activity": "Aktivita",
+    "no_activity": "Žádná zaznamenaná aktivita.",
+    "activity_print_started": "Tisk zahájen: {{name}}",
+    "activity_print_completed": "Tisk dokončen: {{name}} ({{filament}}g)",
+    "activity_print_failed": "Tisk selhal: {{name}}",
+    "activity_maintenance": "Údržba: {{action}} {{component}}",
+    "activity_notification": "Oznámení odesláno: {{channel}}",
+    "activity_protection": "Print Guard: {{message}}",
+    "activity_spool": "Spotřebovaný filament: {{weight}}g",
+    "activity_xcam": "Kamera: {{event}}",
+    "filter_all": "Vše",
+    "filter_prints": "Tisky",
+    "filter_errors": "Chyby",
+    "filter_maintenance": "Údržba",
+    "filter_other": "Ostatní"
   },
   "settings": {
     "printers_title": "Tiskárny",

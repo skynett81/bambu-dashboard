@@ -1166,7 +1166,22 @@
     "ctx_chamber": "Chamber",
     "ctx_fan": "Fan",
     "ctx_occurrences": "Occurrences",
-    "search_code": "Search for this error code"
+    "search_code": "Search for this error code",
+    "tab_activity": "Attività",
+    "no_activity": "Nessuna attività registrata.",
+    "activity_print_started": "Stampa avviata: {{name}}",
+    "activity_print_completed": "Stampa completata: {{name}} ({{filament}}g)",
+    "activity_print_failed": "Stampa fallita: {{name}}",
+    "activity_maintenance": "Manutenzione: {{action}} {{component}}",
+    "activity_notification": "Notifica inviata: {{channel}}",
+    "activity_protection": "Print Guard: {{message}}",
+    "activity_spool": "Filamento utilizzato: {{weight}}g",
+    "activity_xcam": "Fotocamera: {{event}}",
+    "filter_all": "Tutto",
+    "filter_prints": "Stampe",
+    "filter_errors": "Errori",
+    "filter_maintenance": "Manutenzione",
+    "filter_other": "Altro"
   },
   "settings": {
     "printers_title": "Stampanti",
