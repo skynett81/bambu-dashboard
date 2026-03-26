@@ -29,6 +29,7 @@
     "demo": "BAMBU_DEMO=true node --watch server/index.js",
     "setup": "node server/setup-wizard.js",
     "test": "node --test --test-force-exit tests/**/*.test.js",
+    "postinstall": "cd website && npm install --silent 2>/dev/null && npm run build 2>/dev/null || true",
     "docs:dev": "cd website && npm start",
     "docs:build": "cd website && npm run build",
     "docs:serve": "cd website && npm run serve"

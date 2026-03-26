@@ -988,3 +988,28 @@ if (httpsServer) {
     log.info(`HTTPS aktiv på port ${HTTPS_PORT}`);
   });
 }
+
+// Auto-build Docusaurus docs if build is missing or outdated
+{
+  const docsBuild = join(dirname(fileURLToPath(import.meta.url)), '..', 'website', 'build');
+  const docsSource = join(dirname(fileURLToPath(import.meta.url)), '..', 'website', 'docs');
+  const docsPkg = join(dirname(fileURLToPath(import.meta.url)), '..', 'website', 'package.json');
+  const hasBuild = existsSync(join(docsBuild, 'index.html'));
+  const hasSource = existsSync(docsSource) && existsSync(docsPkg);
+
+  if (!hasBuild && hasSource) {
+    log.info('[docs] Build mangler — bygger dokumentasjon i bakgrunnen...');
+    import('node:child_process').then(({ exec }) => {
+      exec('cd website && npm ci --silent 2>/dev/null; npm run build', {
+        cwd: join(dirname(fileURLToPath(import.meta.url)), '..'),
+        timeout: 600000
+      }, (err) => {
+        if (err) {
+          log.warn('[docs] Docs-build feilet: ' + (err.message || '').split('\n')[0]);
+        } else {
+          log.info('[docs] Dokumentasjon bygget — tilgjengelig på /docs/');
+        }
+      });
+    });
+  }
+}
