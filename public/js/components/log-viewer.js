@@ -121,24 +121,22 @@
   let _activityData = null;
   let _activityFilter = 'all';
 
-  async function _loadActivity(forceRefresh) {
+  function _loadActivity(forceRefresh) {
     const container = document.getElementById('activity-log-content');
     if (!container) return;
-    if (_activityData === null || forceRefresh) {
-      container.innerHTML = '<div class="text-muted" style="padding:1rem">' + (t('common.loading') || 'Loading...') + '</div>';
-      try {
-        const res = await fetch('/api/activity-log?limit=200');
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        const data = await res.json();
+    if (_activityData !== null && !forceRefresh) { _renderActivity(); return; }
+    container.innerHTML = '<div class="text-muted" style="padding:1rem">' + (t('common.loading') || 'Loading...') + '</div>';
+    fetch('/api/activity-log?limit=200')
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
         _activityData = Array.isArray(data) ? data : [];
         console.log('[activity-log] Loaded', _activityData.length, 'entries');
-      } catch (e) {
+        _renderActivity();
+      })
+      .catch(function(e) {
         console.error('[activity-log] fetch failed:', e);
         container.innerHTML = '<div class="text-muted" style="padding:1rem;color:var(--accent-red)">' + (t('errors.load_failed') || 'Failed to load') + ': ' + (e.message || '') + '</div>';
-        return;
-      }
-    }
-    _renderActivity();
+      });
   }
 
   function _renderActivity() {
@@ -178,14 +176,16 @@
         html += '<div style="display:flex;align-items:flex-start;gap:8px;padding:3px 0;font-size:0.8rem">';
         html += '<span style="color:' + color + ';flex-shrink:0;font-size:0.7rem;margin-top:2px">' + icon + '</span>';
         html += '<span style="color:var(--text-muted);flex-shrink:0;font-size:0.7rem;min-width:60px">' + time + '</span>';
-        html += '<span style="flex:1">' + _escapeHtml(e.message || '') + printer + '</span>';
-        if (e.details) html += '<span style="color:var(--text-muted);font-size:0.7rem;flex-shrink:0">' + _escapeHtml(e.details) + '</span>';
+        html += '<span style="flex:1">' + _escapeHtml(String(e.message || '')) + printer + '</span>';
+        if (e.details && typeof e.details === 'string') html += '<span style="color:var(--text-muted);font-size:0.7rem;flex-shrink:0">' + _escapeHtml(e.details) + '</span>';
         html += '</div>';
       }
       html += '</div>';
     }
     container.innerHTML = html;
   }
+
+  window._loadActivity = _loadActivity;
 
   window._logFilterActivity = function(type) {
     _activityFilter = type;

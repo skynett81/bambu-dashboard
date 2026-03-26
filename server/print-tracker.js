@@ -198,13 +198,14 @@ export class PrintTracker {
         // Skip benign codes and already-logged codes (survives restarts via seed)
         if (!PRINT_ERROR_IGNORE.has(hexCode) && this._lastPrintError !== hexCode) {
           this._lastPrintError = hexCode;
-          const errMsg = printData.print_error_msg || `Feilkode: ${hexCode}`;
+          const hmsDesc = lookupHmsCode ? lookupHmsCode(raw) : null;
+          const errMsg = printData.print_error_msg || hmsDesc || (HMS_CODES[hexCode]) || `Error: ${hexCode}`;
           addError({
             printer_id: this.printerId,
             code: hexCode,
             message: errMsg,
             severity: 'error',
-            context: errorContext
+            context: { ...errorContext, wiki_url: getHmsWikiUrl ? getHmsWikiUrl(raw) : null }
           });
           if (this.onError) {
             this.onError({ printerId: this.printerId, code: hexCode, errorMessage: errMsg, severity: 'error' });
