@@ -3169,7 +3169,10 @@
     "title": "Captures d'écran"
   },
   "logs": {
-    "title": "Journal serveur"
+    "title": "Journal serveur",
+    "realtime": "Temps réel",
+    "clear": "Effacer",
+    "filter_prefix": "Filtrer préfixe..."
   },
   "status": {
     "printing": "En cours",

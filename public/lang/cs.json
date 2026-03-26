@@ -3168,7 +3168,10 @@
     "title": "Snímky obrazovky"
   },
   "logs": {
-    "title": "Protokol serveru"
+    "title": "Protokol serveru",
+    "realtime": "Reálný čas",
+    "clear": "Vymazat",
+    "filter_prefix": "Filtrovat prefix..."
   },
   "status": {
     "printing": "Tiskne",

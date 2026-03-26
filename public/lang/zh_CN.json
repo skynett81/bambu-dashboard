@@ -3169,7 +3169,10 @@
     "title": "截图"
   },
   "logs": {
-    "title": "服务器日志"
+    "title": "服务器日志",
+    "realtime": "实时",
+    "clear": "清除",
+    "filter_prefix": "过滤前缀..."
   },
   "status": {
     "printing": "打印中",

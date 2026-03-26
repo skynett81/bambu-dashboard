@@ -121,15 +121,22 @@
   let _activityData = null;
   let _activityFilter = 'all';
 
-  async function _loadActivity() {
+  async function _loadActivity(forceRefresh) {
     const container = document.getElementById('activity-log-content');
     if (!container) return;
-    if (!_activityData) {
+    if (_activityData === null || forceRefresh) {
       container.innerHTML = '<div class="text-muted" style="padding:1rem">' + (t('common.loading') || 'Loading...') + '</div>';
       try {
         const res = await fetch('/api/activity-log?limit=200');
-        _activityData = await res.json();
-      } catch { _activityData = []; }
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        _activityData = Array.isArray(data) ? data : [];
+        console.log('[activity-log] Loaded', _activityData.length, 'entries');
+      } catch (e) {
+        console.error('[activity-log] fetch failed:', e);
+        container.innerHTML = '<div class="text-muted" style="padding:1rem;color:var(--accent-red)">' + (t('errors.load_failed') || 'Failed to load') + ': ' + (e.message || '') + '</div>';
+        return;
+      }
     }
     _renderActivity();
   }
@@ -222,7 +229,7 @@
           <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'errors' ? 'active' : ''}" data-filter="errors" onclick="_logFilterActivity('errors')">${t('errors.filter_errors') || 'Errors'}</button>
           <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'maintenance' ? 'active' : ''}" data-filter="maintenance" onclick="_logFilterActivity('maintenance')">${t('errors.filter_maintenance') || 'Maintenance'}</button>
           <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'other' ? 'active' : ''}" data-filter="other" onclick="_logFilterActivity('other')">${t('errors.filter_other') || 'Other'}</button>
-          <button class="form-btn form-btn-sm" style="margin-left:auto" onclick="_activityData=null;_loadActivity()">${t('common.refresh') || 'Refresh'}</button>
+          <button class="form-btn form-btn-sm" style="margin-left:auto" onclick="_loadActivity(true)">${t('common.refresh') || 'Refresh'}</button>
         </div>
         <div id="activity-log-content" style="max-height:calc(100vh - 250px);overflow-y:auto"></div>
       </div>

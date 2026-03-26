@@ -3169,7 +3169,10 @@
     "title": "Skärmbilder"
   },
   "logs": {
-    "title": "Serverlogg"
+    "title": "Serverlogg",
+    "realtime": "Realtid",
+    "clear": "Rensa",
+    "filter_prefix": "Filtrera prefix..."
   },
   "status": {
     "printing": "Skriver ut",

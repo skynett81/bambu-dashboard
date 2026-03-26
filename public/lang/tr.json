@@ -3169,7 +3169,10 @@
     "title": "Ekran Görüntüleri"
   },
   "logs": {
-    "title": "Sunucu Günlüğü"
+    "title": "Sunucu Günlüğü",
+    "realtime": "Canlı",
+    "clear": "Temizle",
+    "filter_prefix": "Ön ek filtrele..."
   },
   "status": {
     "printing": "Yazdırılıyor",

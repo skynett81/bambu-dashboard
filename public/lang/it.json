@@ -3169,7 +3169,10 @@
     "title": "Screenshot"
   },
   "logs": {
-    "title": "Registro server"
+    "title": "Registro server",
+    "realtime": "Tempo reale",
+    "clear": "Cancella",
+    "filter_prefix": "Filtra prefisso..."
   },
   "status": {
     "printing": "Stampa in corso",

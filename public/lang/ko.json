@@ -3169,7 +3169,10 @@
     "title": "스크린샷"
   },
   "logs": {
-    "title": "서버 로그"
+    "title": "서버 로그",
+    "realtime": "실시간",
+    "clear": "지우기",
+    "filter_prefix": "접두사 필터..."
   },
   "status": {
     "printing": "인쇄 중",

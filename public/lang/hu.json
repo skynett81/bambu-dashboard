@@ -3168,7 +3168,10 @@
     "title": "Képernyőfotók"
   },
   "logs": {
-    "title": "Szervernapló"
+    "title": "Szervernapló",
+    "realtime": "Valós idejű",
+    "clear": "Törlés",
+    "filter_prefix": "Prefix szűrés..."
   },
   "status": {
     "printing": "Nyomtat",

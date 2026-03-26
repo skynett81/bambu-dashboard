@@ -3169,7 +3169,10 @@
     "title": "Screenshots"
   },
   "logs": {
-    "title": "Serverprotokoll"
+    "title": "Serverprotokoll",
+    "realtime": "Echtzeit",
+    "clear": "Löschen",
+    "filter_prefix": "Prefix filtern..."
   },
   "status": {
     "printing": "Druckt",

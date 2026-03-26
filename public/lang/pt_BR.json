@@ -3169,7 +3169,10 @@
     "title": "Capturas de Tela"
   },
   "logs": {
-    "title": "Registro do Servidor"
+    "title": "Registro do Servidor",
+    "realtime": "Tempo real",
+    "clear": "Limpar",
+    "filter_prefix": "Filtrar prefixo..."
   },
   "status": {
     "printing": "Imprimindo",

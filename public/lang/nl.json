@@ -3169,7 +3169,10 @@
     "title": "Schermafbeeldingen"
   },
   "logs": {
-    "title": "Serverlogboek"
+    "title": "Serverlogboek",
+    "realtime": "Realtime",
+    "clear": "Wissen",
+    "filter_prefix": "Filter prefix..."
   },
   "status": {
     "printing": "Bezig met afdrukken",

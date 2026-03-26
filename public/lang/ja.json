@@ -3169,7 +3169,10 @@
     "title": "スクリーンショット"
   },
   "logs": {
-    "title": "サーバーログ"
+    "title": "サーバーログ",
+    "realtime": "リアルタイム",
+    "clear": "クリア",
+    "filter_prefix": "プレフィックスで絞り込み..."
   },
   "status": {
     "printing": "印刷中",
