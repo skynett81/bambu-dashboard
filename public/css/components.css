@@ -12803,22 +12803,29 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
 /* ═══ Filament Low-Stock Alerts ═══ */
 /* ═══ Global Alert Bar ═══ */
 .global-alert-bar {
-  position: sticky;
-  top: 0;
-  z-index: 9999;
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  z-index: 9998;
   display: none;
   flex-direction: column;
-  gap: 0;
+  gap: 4px;
+  max-width: 420px;
+  pointer-events: none;
 }
 .global-alert-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 16px;
+  padding: 10px 16px;
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: opacity 0.2s;
+  pointer-events: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  backdrop-filter: blur(12px);
 }
 .global-alert-item:hover { opacity: 0.85; }
 .global-alert-item svg { flex-shrink: 0; }
