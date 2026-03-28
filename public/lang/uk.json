@@ -122,7 +122,8 @@
     "external": "External",
     "low_filament": "{{slot}}: залишилось {{pct}}% філаменту",
     "critical_filament": "{{slot}}: {{pct}}% філаменту — замініть незабаром!",
-    "click_to_calibrate": "Натисніть для калібрування"
+    "click_to_calibrate": "Натисніть для калібрування",
+    "low_filament_alert": "Мало філаменту"
   },
   "filament": {
     "no_data": "Немає даних про філамент",

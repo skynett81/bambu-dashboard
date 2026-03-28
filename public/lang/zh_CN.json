@@ -122,7 +122,8 @@
     "external": "External",
     "low_filament": "{{slot}}: 耗材剩余{{pct}}%",
     "critical_filament": "{{slot}}: 耗材{{pct}}% — 请尽快更换！",
-    "click_to_calibrate": "点击校准"
+    "click_to_calibrate": "点击校准",
+    "low_filament_alert": "耗材不足"
   },
   "filament": {
     "no_data": "无耗材数据",

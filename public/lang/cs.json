@@ -121,7 +121,8 @@
     "external": "External",
     "low_filament": "{{slot}}: zbývá {{pct}}% filamentu",
     "critical_filament": "{{slot}}: {{pct}}% filamentu — brzy vyměňte!",
-    "click_to_calibrate": "Kliknutím kalibrujte"
+    "click_to_calibrate": "Kliknutím kalibrujte",
+    "low_filament_alert": "Málo filamentu"
   },
   "filament": {
     "no_data": "Žádná data o filamentu",

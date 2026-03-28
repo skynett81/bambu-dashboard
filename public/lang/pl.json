@@ -139,7 +139,8 @@
     "rfid_detected": "Wykryto RFID",
     "rfid_not_detected": "Nie wykryto RFID",
     "spool_weight": "Waga szpuli",
-    "k_value": "Wartość K"
+    "k_value": "Wartość K",
+    "low_filament_alert": "Mało filamentu"
   },
   "filament": {
     "no_data": "Brak danych o filamencie",

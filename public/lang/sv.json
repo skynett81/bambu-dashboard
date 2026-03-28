@@ -122,7 +122,8 @@
     "external": "External",
     "low_filament": "{{slot}}: {{pct}}% filament kvar",
     "critical_filament": "{{slot}}: {{pct}}% filament — byt snart!",
-    "click_to_calibrate": "Klicka för att kalibrera"
+    "click_to_calibrate": "Klicka för att kalibrera",
+    "low_filament_alert": "Lite filament"
   },
   "filament": {
     "no_data": "Ingen filamentdata",

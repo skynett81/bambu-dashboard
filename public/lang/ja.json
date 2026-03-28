@@ -122,7 +122,8 @@
     "external": "External",
     "low_filament": "{{slot}}: フィラメント残量{{pct}}%",
     "critical_filament": "{{slot}}: フィラメント{{pct}}% — 交換してください！",
-    "click_to_calibrate": "クリックしてキャリブレーション"
+    "click_to_calibrate": "クリックしてキャリブレーション",
+    "low_filament_alert": "フィラメント残量少"
   },
   "filament": {
     "no_data": "フィラメントデータなし",

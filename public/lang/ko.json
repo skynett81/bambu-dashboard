@@ -122,7 +122,8 @@
     "external": "External",
     "low_filament": "{{slot}}: 필라멘트 {{pct}}% 남음",
     "critical_filament": "{{slot}}: 필라멘트 {{pct}}% — 곧 교체하세요!",
-    "click_to_calibrate": "클릭하여 보정"
+    "click_to_calibrate": "클릭하여 보정",
+    "low_filament_alert": "필라멘트 부족"
   },
   "filament": {
     "no_data": "필라멘트 데이터 없음",

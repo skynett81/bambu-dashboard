@@ -122,7 +122,8 @@
     "external": "External",
     "low_filament": "{{slot}}: {{pct}}% de filament restant",
     "critical_filament": "{{slot}}: {{pct}}% de filament — changer bientôt !",
-    "click_to_calibrate": "Cliquer pour calibrer"
+    "click_to_calibrate": "Cliquer pour calibrer",
+    "low_filament_alert": "Filament faible"
   },
   "filament": {
     "no_data": "Aucune donnée filament",

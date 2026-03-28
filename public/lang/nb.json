@@ -125,7 +125,8 @@
     "external": "Ekstern",
     "low_filament": "{{slot}}: {{pct}}% filament igjen",
     "critical_filament": "{{slot}}: {{pct}}% filament — bytt snart!",
-    "click_to_calibrate": "Klikk for å kalibrere"
+    "click_to_calibrate": "Klikk for å kalibrere",
+    "low_filament_alert": "Lite filament"
   },
   "filament": {
     "no_data": "Ingen filamentdata",

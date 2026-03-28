@@ -122,7 +122,8 @@
     "external": "External",
     "low_filament": "{{slot}}: {{pct}}% filament kaldı",
     "critical_filament": "{{slot}}: {{pct}}% filament — yakında değiştirin!",
-    "click_to_calibrate": "Kalibre etmek için tıklayın"
+    "click_to_calibrate": "Kalibre etmek için tıklayın",
+    "low_filament_alert": "Düşük filament"
   },
   "filament": {
     "no_data": "Filament verisi yok",
