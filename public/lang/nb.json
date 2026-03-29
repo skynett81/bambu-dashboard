@@ -3241,7 +3241,25 @@
     "rarity": "Sjeldenhet",
     "category": "Kategori",
     "completed_msg": "Gratulerer! Achievement opplåst!",
-    "keep_going": "Fortsett! Du er nesten der."
+    "keep_going": "Fortsett! Du er nesten der.",
+    "desc_landmark_viking": "Bruk nok filament til å 3D-printe et vikingskip i 1:1 skala (3 000 kg)",
+    "desc_landmark_liberty": "Bruk nok filament til å 3D-printe Frihetsgudinnen i 1:1 skala (46 000 kg)",
+    "desc_landmark_eiffel": "Bruk nok filament til å 3D-printe Eiffeltårnet i 1:1 skala (180 000 kg)",
+    "desc_landmark_bigben": "Bruk nok filament til å 3D-printe Big Ben i 1:1 skala (120 000 kg)",
+    "desc_landmark_brandenburg": "Bruk nok filament til å 3D-printe Brandenburger Tor i 1:1 skala (800 kg)",
+    "desc_landmark_sagrada": "Bruk nok filament til å 3D-printe Sagrada Família-fasaden i 1:1 skala (8 000 kg)",
+    "desc_landmark_colosseum": "Bruk nok filament til å 3D-printe Colosseum ytterveggen i 1:1 skala (15 000 kg)",
+    "desc_landmark_tokyo": "Bruk nok filament til å 3D-printe Tokyo Tower i 1:1 skala (90 000 kg)",
+    "desc_landmark_gyeongbok": "Bruk nok filament til å 3D-printe Gyeongbokgung tronhall i 1:1 skala (400 kg)",
+    "desc_landmark_windmill": "Bruk nok filament til å 3D-printe en nederlandsk vindmølle i 1:1 skala (600 kg)",
+    "desc_landmark_wawel": "Bruk nok filament til å 3D-printe Wawel-dragen i 1:1 skala (200 kg)",
+    "desc_landmark_cristo": "Bruk nok filament til å 3D-printe Cristo Redentor i 1:1 skala (1 200 kg)",
+    "desc_landmark_torso": "Bruk nok filament til å 3D-printe Turning Torso-fasaden i 1:1 skala (2 500 kg)",
+    "desc_landmark_hagia": "Bruk nok filament til å 3D-printe Hagia Sophia-kupolen i 1:1 skala (5 000 kg)",
+    "desc_landmark_motherland": "Bruk nok filament til å 3D-printe Moderlandet-monumentet i 1:1 skala (1 500 kg)",
+    "desc_landmark_greatwall": "Bruk nok filament til å 3D-printe 1 km av Den kinesiske mur i 1:1 skala (50 000 kg)",
+    "desc_landmark_orloj": "Bruk nok filament til å 3D-printe Praha astronomiske klokke i 1:1 skala (150 kg)",
+    "desc_landmark_parliament": "Bruk nok filament til å 3D-printe Budapest parlamentskupol i 1:1 skala (6 000 kg)"
   },
   "screenshots": {
     "title": "Skjermbilder"

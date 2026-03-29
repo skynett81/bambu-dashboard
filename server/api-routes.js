@@ -7956,6 +7956,40 @@ function calculateAchievements() {
     { id: 'landmark_liberty', icon: '\u{1F5FD}', title: 'Lady Liberty', desc: 'Use enough filament to 3D print the Statue of Liberty at 1:1 scale (46,000 kg)', target: 46000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 50000 },
     // Eiffel Tower: 330m tall, 7,300 tonnes of iron. PLA equivalent at 15% infill ≈ 180,000 kg
     { id: 'landmark_eiffel', icon: '\u{1F5FC}', title: 'Tour Eiffel', desc: 'Use enough filament to 3D print the Eiffel Tower at 1:1 scale (180,000 kg)', target: 180000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 200000 },
+    // World landmarks — one per supported language/region
+    // 🇳🇴 Norway: Viking Ship (Oseberg) — 21.5m long, ~15 tonnes oak → PLA 15% infill ≈ 3,000 kg
+    { id: 'landmark_viking', icon: '\u{26F5}', title: 'Viking Longship', desc: 'Use enough filament to 3D print a Viking longship at 1:1 scale (3,000 kg)', target: 3000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 15000 },
+    // 🇬🇧 UK: Big Ben clock tower — 96m, ~8,600 tonnes → PLA ≈ 120,000 kg
+    { id: 'landmark_bigben', icon: '\u{1F514}', title: 'Big Ben', desc: 'Use enough filament to 3D print Big Ben at 1:1 scale (120,000 kg)', target: 120000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 150000 },
+    // 🇩🇪 Germany: Brandenburg Gate — 26m tall, ~2,000 tonnes sandstone → PLA ≈ 800 kg (hollow columns)
+    { id: 'landmark_brandenburg', icon: '\u{1F3DB}\uFE0F', title: 'Brandenburger Tor', desc: 'Use enough filament to 3D print the Brandenburg Gate at 1:1 scale (800 kg)', target: 800000, current: Math.round(totalFilamentG), category: 'milestones', xp: 8000 },
+    // 🇪🇸 Spain: Sagrada Família — 170m tall when complete, ~50,000 tonnes → PLA ≈ 8,000 kg (facade only)
+    { id: 'landmark_sagrada', icon: '\u26EA', title: 'Sagrada Família', desc: 'Use enough filament to 3D print the Sagrada Família facade at 1:1 scale (8,000 kg)', target: 8000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 30000 },
+    // 🇮🇹 Italy: Colosseum — 48m tall, ~100,000 tonnes → PLA ≈ 15,000 kg (outer wall)
+    { id: 'landmark_colosseum', icon: '\u{1F3DF}\uFE0F', title: 'Colosseo', desc: 'Use enough filament to 3D print the Colosseum outer wall at 1:1 scale (15,000 kg)', target: 15000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 40000 },
+    // 🇯🇵 Japan: Tokyo Tower — 333m, 4,000 tonnes steel → PLA ≈ 90,000 kg
+    { id: 'landmark_tokyo', icon: '\u{1F5FC}', title: 'Tokyo Tower', desc: 'Use enough filament to 3D print Tokyo Tower at 1:1 scale (90,000 kg)', target: 90000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 120000 },
+    // 🇰🇷 South Korea: Gyeongbokgung Throne Hall — 34m x 20m, ~500 tonnes wood → PLA ≈ 400 kg
+    { id: 'landmark_gyeongbok', icon: '\u{1F3EF}', title: 'Gyeongbokgung', desc: 'Use enough filament to 3D print the Gyeongbokgung throne hall at 1:1 scale (400 kg)', target: 400000, current: Math.round(totalFilamentG), category: 'milestones', xp: 5000 },
+    // 🇳🇱 Netherlands: Windmill (De Gooyer) — 26m tall → PLA ≈ 600 kg
+    { id: 'landmark_windmill', icon: '\u{1F3E1}', title: 'Dutch Windmill', desc: 'Use enough filament to 3D print a classic Dutch windmill at 1:1 scale (600 kg)', target: 600000, current: Math.round(totalFilamentG), category: 'milestones', xp: 6000 },
+    // 🇵🇱 Poland: Wawel Dragon statue — 6m → PLA ≈ 200 kg
+    { id: 'landmark_wawel', icon: '\u{1F432}', title: 'Wawel Dragon', desc: 'Use enough filament to 3D print the Wawel Dragon statue at 1:1 scale (200 kg)', target: 200000, current: Math.round(totalFilamentG), category: 'milestones', xp: 3000 },
+    // 🇧🇷 Brazil: Cristo Redentor — 30m tall, 635 tonnes → PLA ≈ 1,200 kg
+    { id: 'landmark_cristo', icon: '\u271D\uFE0F', title: 'Cristo Redentor', desc: 'Use enough filament to 3D print Cristo Redentor at 1:1 scale (1,200 kg)', target: 1200000, current: Math.round(totalFilamentG), category: 'milestones', xp: 10000 },
+    // 🇸🇪 Sweden: Turning Torso — 190m, 17,000 tonnes → PLA ≈ 2,500 kg (facade)
+    { id: 'landmark_torso', icon: '\u{1F3D7}\uFE0F', title: 'Turning Torso', desc: 'Use enough filament to 3D print the Turning Torso facade at 1:1 scale (2,500 kg)', target: 2500000, current: Math.round(totalFilamentG), category: 'milestones', xp: 12000 },
+    // 🇹🇷 Turkey: Hagia Sophia dome — 56m tall, ~4,000 tonnes → PLA ≈ 5,000 kg
+    { id: 'landmark_hagia', icon: '\u{1F54C}', title: 'Hagia Sophia', desc: 'Use enough filament to 3D print the Hagia Sophia dome at 1:1 scale (5,000 kg)', target: 5000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 20000 },
+    // 🇺🇦 Ukraine: Motherland Monument — 102m, 450 tonnes steel → PLA ≈ 1,500 kg
+    { id: 'landmark_motherland', icon: '\u{2694}\uFE0F', title: 'Motherland Monument', desc: 'Use enough filament to 3D print the Motherland Monument at 1:1 scale (1,500 kg)', target: 1500000, current: Math.round(totalFilamentG), category: 'milestones', xp: 12000 },
+    // 🇨🇳 China: Great Wall section (1km) — PLA ≈ 50,000 kg
+    { id: 'landmark_greatwall', icon: '\u{1F9F1}', title: 'Great Wall', desc: 'Use enough filament to 3D print 1 km of the Great Wall at 1:1 scale (50,000 kg)', target: 50000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 60000 },
+    // 🇨🇿 Czech Republic: Prague Astronomical Clock — 2.5m → PLA ≈ 150 kg
+    { id: 'landmark_orloj', icon: '\u{1F570}\uFE0F', title: 'Prague Orloj', desc: 'Use enough filament to 3D print the Prague Astronomical Clock at 1:1 scale (150 kg)', target: 150000, current: Math.round(totalFilamentG), category: 'milestones', xp: 2000 },
+    // 🇭🇺 Hungary: Parliament Building dome — 96m, ~40,000 tonnes → PLA ≈ 6,000 kg (dome only)
+    { id: 'landmark_parliament', icon: '\u{1F3DB}\uFE0F', title: 'Budapest Parliament', desc: 'Use enough filament to 3D print the Budapest Parliament dome at 1:1 scale (6,000 kg)', target: 6000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 25000 },
+
     // Bonus stepping stones
     { id: 'filament_500kg', icon: '\u{1F30B}', title: 'Half-Ton Club', desc: 'Use 500 kg of filament total', target: 500000, current: Math.round(totalFilamentG), category: 'filament', xp: 5000 },
     { id: 'filament_1000kg', icon: '\u2604\uFE0F', title: 'One Tonne', desc: 'Use 1,000 kg (1 metric tonne) of filament', target: 1000000, current: Math.round(totalFilamentG), category: 'filament', xp: 10000 },

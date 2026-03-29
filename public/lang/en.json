@@ -3241,7 +3241,25 @@
     "rarity": "Rarity",
     "category": "Category",
     "completed_msg": "Congratulations! Achievement unlocked!",
-    "keep_going": "Keep going! You are almost there."
+    "keep_going": "Keep going! You are almost there.",
+    "desc_landmark_viking": "Use enough filament to 3D print a Viking longship at 1:1 scale (3,000 kg)",
+    "desc_landmark_liberty": "Use enough filament to 3D print the Statue of Liberty at 1:1 scale (46,000 kg)",
+    "desc_landmark_eiffel": "Use enough filament to 3D print the Eiffel Tower at 1:1 scale (180,000 kg)",
+    "desc_landmark_bigben": "Use enough filament to 3D print Big Ben at 1:1 scale (120,000 kg)",
+    "desc_landmark_brandenburg": "Use enough filament to 3D print the Brandenburg Gate at 1:1 scale (800 kg)",
+    "desc_landmark_sagrada": "Use enough filament to 3D print the Sagrada Família facade at 1:1 scale (8,000 kg)",
+    "desc_landmark_colosseum": "Use enough filament to 3D print the Colosseum outer wall at 1:1 scale (15,000 kg)",
+    "desc_landmark_tokyo": "Use enough filament to 3D print Tokyo Tower at 1:1 scale (90,000 kg)",
+    "desc_landmark_gyeongbok": "Use enough filament to 3D print the Gyeongbokgung throne hall at 1:1 scale (400 kg)",
+    "desc_landmark_windmill": "Use enough filament to 3D print a classic Dutch windmill at 1:1 scale (600 kg)",
+    "desc_landmark_wawel": "Use enough filament to 3D print the Wawel Dragon statue at 1:1 scale (200 kg)",
+    "desc_landmark_cristo": "Use enough filament to 3D print Cristo Redentor at 1:1 scale (1,200 kg)",
+    "desc_landmark_torso": "Use enough filament to 3D print the Turning Torso facade at 1:1 scale (2,500 kg)",
+    "desc_landmark_hagia": "Use enough filament to 3D print the Hagia Sophia dome at 1:1 scale (5,000 kg)",
+    "desc_landmark_motherland": "Use enough filament to 3D print the Motherland Monument at 1:1 scale (1,500 kg)",
+    "desc_landmark_greatwall": "Use enough filament to 3D print 1 km of the Great Wall at 1:1 scale (50,000 kg)",
+    "desc_landmark_orloj": "Use enough filament to 3D print the Prague Astronomical Clock at 1:1 scale (150 kg)",
+    "desc_landmark_parliament": "Use enough filament to 3D print the Budapest Parliament dome at 1:1 scale (6,000 kg)"
   },
   "screenshots": {
     "title": "Screenshots"
