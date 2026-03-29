@@ -1075,7 +1075,7 @@
 #ams-card {
   padding: 0;
   overflow: hidden;
-  min-width: 340px;
+  min-width: 380px;
 }
 #ams-card > .card-title { display: none; }
 
@@ -1155,23 +1155,17 @@
 }
 
 .ams-cards-row {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  display: flex;
   gap: 10px;
-  justify-items: center;
+  justify-content: center;
   padding: 4px 0;
   min-width: 0;
 }
 
 .ams-card {
-  width: 100%;
-  min-width: 60px;
-}
-
-/* Ensure AMS spool SVGs have a consistent minimum size */
-.ams-spool {
-  min-width: 60px;
-  min-height: 60px;
+  flex: 1 1 0;
+  min-width: 70px;
+  max-width: 100px;
 }
 
 /* ── Spool visualization ── */
