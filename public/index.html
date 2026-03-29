@@ -13,244 +13,391 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- AdminLTE 4 -->
+  <link rel="stylesheet" href="/adminlte/css/adminlte.min.css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+  <!-- Theme engine (must run before body renders) -->
   <script src="/js/theme.js"></script>
+  <!-- Custom CSS (layers on top of AdminLTE) -->
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/components.css">
   <link rel="stylesheet" href="/css/responsive.css">
 </head>
-<body>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary" data-bs-theme="dark">
   <!-- Skip link for keyboard accessibility -->
   <a href="#main-content" class="skip-link">Skip to content</a>
 
-  <div class="app-layout">
+  <div class="app-wrapper">
 
-    <!-- Left Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <img src="/assets/favicon.svg" alt="Logo" class="sidebar-logo">
-        <div class="sidebar-title">Bambu Dashboard <span class="sidebar-by">by SkyNett81</span></div>
-        <button class="sidebar-collapse-btn" onclick="toggleSidebarCollapse()" data-tooltip="Collapse" data-tooltip-pos="right">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+    <!-- ===== APP HEADER (AdminLTE navbar) ===== -->
+    <nav class="app-header navbar navbar-expand bg-body">
+      <div class="container-fluid">
+        <!-- Sidebar toggle -->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a class="nav-link" id="hamburger-btn" href="#" role="button" onclick="toggleSidebar(); return false;" aria-label="Menu" data-tooltip="Menu" data-tooltip-pos="bottom">
+              <i class="bi bi-list"></i>
+            </a>
+          </li>
+        </ul>
+
+        <!-- Printer selector -->
+        <div class="printer-selector" id="printer-selector"></div>
+
+        <!-- Right-side navbar items -->
+        <ul class="navbar-nav ms-auto">
+          <!-- Notification bell -->
+          <li class="nav-item">
+            <a class="nav-link" href="#" role="button" id="notif-bell-btn" onclick="toggleNotificationCenter(); return false;" data-tooltip="Varsler" data-tooltip-pos="bottom">
+              <i class="bi bi-bell"></i>
+              <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+            </a>
+          </li>
+          <!-- Theme toggle -->
+          <li class="nav-item">
+            <a class="nav-link" href="#" role="button" id="theme-toggle-btn" onclick="theme.toggle(); return false;" data-tooltip="Toggle theme" data-tooltip-pos="bottom">
+              <i class="bi bi-sun theme-icon theme-icon-light"></i>
+              <i class="bi bi-moon theme-icon theme-icon-dark"></i>
+            </a>
+          </li>
+          <!-- Update badge -->
+          <li class="nav-item">
+            <span id="update-badge" class="badge badge-update" style="display:none" onclick="openPanel('settings')" title="Update available">!</span>
+          </li>
+        </ul>
+
+        <!-- Connection & system info badges -->
+        <span id="connection-badge" class="badge badge-disconnected" data-i18n-key="header.connecting">Kobler til...</span>
+        <span id="system-info-badge" class="system-info-badge" style="cursor:pointer;font-size:0.7rem;color:var(--text-muted);margin-left:8px" title="System info"></span>
+      </div>
+    </nav>
+
+    <!-- ===== SIDEBAR (AdminLTE aside) ===== -->
+    <aside class="app-sidebar bg-body-secondary shadow" id="sidebar" data-bs-theme="dark">
+      <!-- Brand / Logo -->
+      <div class="sidebar-brand">
+        <a href="#" class="brand-link" onclick="showDashboard(); return false;">
+          <img src="/assets/favicon.svg" alt="Logo" class="brand-image opacity-75 shadow-sm" style="height:28px">
+          <span class="brand-text fw-light">Bambu Dashboard <small class="sidebar-by">by SkyNett81</small></span>
+        </a>
+        <button class="sidebar-collapse-btn btn btn-sm" onclick="toggleSidebarCollapse()" data-tooltip="Collapse" data-tooltip-pos="right">
+          <i class="bi bi-chevron-double-left"></i>
         </button>
       </div>
-      <nav class="sidebar-nav" id="sidebar-nav" role="navigation" aria-label="Main navigation">
-        <button class="sidebar-btn active" data-panel="dashboard" onclick="showDashboard()" data-ripple>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-          <span data-i18n-key="nav.dashboard">Dashboard</span>
-        </button>
 
-        <!-- Utskrift (Printing) -->
-        <div class="sidebar-section" data-section="printing" style="--section-color: var(--accent-blue)">
-          <button class="sidebar-section-toggle" onclick="toggleSidebarSection('printing')" data-ripple>
-            <svg class="sidebar-section-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-            <span data-i18n-key="sidebar.section_printing">Utskrift</span>
-            <span class="sidebar-section-count">4</span>
-          </button>
-          <div class="sidebar-section-items">
-            <button class="sidebar-btn" data-panel="controls" onclick="openPanel('controls')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-              <span data-i18n-key="tabs.controls">Kontroller</span>
-            </button>
-            <button class="sidebar-btn" data-panel="queue" onclick="openPanel('queue')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 3h5v5"/><path d="M4 20L21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
-              <span data-i18n-key="queue.title">Utskriftskø</span>
-            </button>
-            <button class="sidebar-btn" data-panel="scheduler" onclick="openPanel('scheduler')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <span data-i18n-key="tabs.scheduler">Planlegger</span>
-            </button>
-            <button class="sidebar-btn" data-panel="fleet" onclick="openPanel('fleet')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-              <span data-i18n-key="tabs.fleet">Flåte</span>
-            </button>
-          </div>
-        </div>
+      <!-- Sidebar Menu -->
+      <nav class="mt-2" id="sidebar-nav" role="navigation" aria-label="Main navigation">
+        <ul class="nav sidebar-menu flex-column" data-lte-toggle="treeview" role="menu">
 
-        <!-- Historikk (History) -->
-        <div class="sidebar-section" data-section="history" style="--section-color: var(--accent-blue, #06b6d4)">
-          <button class="sidebar-section-toggle" onclick="toggleSidebarSection('history')" data-ripple>
-            <svg class="sidebar-section-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-            <span data-i18n-key="sidebar.section_history">Historikk</span>
-            <span class="sidebar-section-count">1</span>
-          </button>
-          <div class="sidebar-section-items">
-            <button class="sidebar-btn" data-panel="history" onclick="openPanel('history')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span data-i18n-key="tabs.history">Historikk</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Analyse (Analysis) -->
-        <div class="sidebar-section" data-section="analysis" style="--section-color: var(--accent-purple, #8b5cf6)">
-          <button class="sidebar-section-toggle" onclick="toggleSidebarSection('analysis')" data-ripple>
-            <svg class="sidebar-section-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-            <span data-i18n-key="tabs.analysis">Analyse</span>
-            <span class="sidebar-section-count">3</span>
-          </button>
-          <div class="sidebar-section-items">
-            <button class="sidebar-btn" data-panel="analysis" onclick="openPanel('analysis')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-              <span data-i18n-key="tabs.statistics">Statistikk</span>
-            </button>
-            <button class="sidebar-btn" data-panel="calendar" onclick="openPanel('calendar')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              <span data-i18n-key="nav.calendar">Printkalender</span>
-            </button>
-            <button class="sidebar-btn" data-panel="erroranalysis" onclick="openPanel('erroranalysis')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0022 16z"/><polyline points="7.5 4.21 12 6.81 16.5 4.21"/><polyline points="7.5 19.79 7.5 14.6 3 12"/><polyline points="21 12 16.5 14.6 16.5 19.79"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
-              <span data-i18n-key="error_analysis.title">Feilmønster AI</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Overvåking (Monitoring) -->
-        <div class="sidebar-section" data-section="monitoring" style="--section-color: var(--accent-orange)">
-          <button class="sidebar-section-toggle" onclick="toggleSidebarSection('monitoring')" data-ripple>
-            <svg class="sidebar-section-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-            <span data-i18n-key="sidebar.section_monitoring">Overvåking</span>
-            <span class="sidebar-section-count">4</span>
-          </button>
-          <div class="sidebar-section-items">
-            <button class="sidebar-btn" data-panel="diagnostics" onclick="openPanel('diagnostics')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-              <span data-i18n-key="tabs.diagnostics">Diagnostikk</span>
-            </button>
-            <button class="sidebar-btn" data-panel="protection" onclick="openPanel('protection')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              <span data-i18n-key="protection.title">Print Guard</span>
-              <span id="protection-badge" style="display:none;background:var(--accent-red);color:#fff;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:auto;"></span>
-            </button>
-            <button class="sidebar-btn" data-panel="errors" onclick="openPanel('errors')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-              <span data-i18n-key="tabs.errors">Feillogg</span>
-            </button>
-            <button class="sidebar-btn" data-panel="maintenance" onclick="openPanel('maintenance')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-              <span data-i18n-key="tabs.maintenance">Vedlikehold</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Materialer (Materials) -->
-        <div class="sidebar-section" data-section="materials" style="--section-color: var(--accent-green)">
-          <button class="sidebar-section-toggle" onclick="toggleSidebarSection('materials')" data-ripple>
-            <svg class="sidebar-section-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-            <span data-i18n-key="sidebar.section_materials">Materialer</span>
-            <span class="sidebar-section-count">3</span>
-          </button>
-          <div class="sidebar-section-items">
-            <button class="sidebar-btn" data-panel="filament" onclick="openPanel('filament')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
-              <span data-i18n-key="tabs.filament">Filament</span>
-            </button>
-            <button class="sidebar-btn" data-panel="materialrec" onclick="openPanel('materialrec')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-              <span data-i18n-key="material_rec.title">Anbefalinger</span>
-            </button>
-            <button class="sidebar-btn" data-panel="filamentanalytics" onclick="openPanel('filamentanalytics')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v9h-9"/></svg>
-              <span data-i18n-key="tabs.filament_analytics">Filament Analyse</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Bibliotek (Library) -->
-        <div class="sidebar-section" data-section="library" style="--section-color: var(--accent-purple)">
-          <button class="sidebar-section-toggle" onclick="toggleSidebarSection('library')" data-ripple>
-            <svg class="sidebar-section-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-            <span data-i18n-key="sidebar.section_library">Bibliotek</span>
-            <span class="sidebar-section-count">4</span>
-          </button>
-          <div class="sidebar-section-items">
-            <button class="sidebar-btn" data-panel="library" onclick="openPanel('library')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
-              <span data-i18n-key="tabs.library">Filbibliotek</span>
-            </button>
-            <button class="sidebar-btn" data-panel="knowledge" onclick="openPanel('knowledge')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-              <span data-i18n-key="nav.knowledge">Kunnskapsbase</span>
-            </button>
-            <button class="sidebar-btn" data-panel="screenshots" onclick="openPanel('screenshots')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><circle cx="12" cy="13" r="3"/><path d="M7 3V1"/><path d="M17 3V1"/></svg>
-              <span data-i18n-key="screenshots.title">Skjermbilder</span>
-            </button>
-            <button class="sidebar-btn" data-panel="profiles" onclick="openPanel('profiles')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-              <span data-i18n-key="nav.profiles">Utskriftsprofiler</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Verktøy (Tools) -->
-        <div class="sidebar-section" data-section="tools" style="--section-color: var(--accent-red)">
-          <button class="sidebar-section-toggle" onclick="toggleSidebarSection('tools')" data-ripple>
-            <svg class="sidebar-section-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-            <span data-i18n-key="sidebar.section_tools">Verktøy</span>
-            <span class="sidebar-section-count">5</span>
-          </button>
-          <div class="sidebar-section-items">
-            <button class="sidebar-btn" data-panel="costestimator" onclick="openPanel('costestimator')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="12" y2="14"/><circle cx="15" cy="17" r="2"/></svg>
-              <span data-i18n-key="tabs.costestimator">Kostnadskalkulator</span>
-            </button>
-            <button class="sidebar-btn" data-panel="labels" onclick="openPanel('labels')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 7h4v4H7z"/><path d="M7 13h10"/><path d="M7 17h10"/></svg>
-              <span data-i18n-key="tabs.labels">Etiketter</span>
-            </button>
-            <button class="sidebar-btn" data-panel="widgets" onclick="openPanel('widgets')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="4" rx="1"/><rect x="13" y="9" width="8" height="2" rx="1"/><rect x="3" y="13" width="8" height="4" rx="1"/><rect x="3" y="19" width="8" height="2" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>
-              <span data-i18n-key="tabs.widgets">Widgets</span>
-            </button>
-            <button class="sidebar-btn" data-panel="playground" onclick="openPanel('playground')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="14" y1="4" x2="10" y2="20"/></svg>
-              <span data-i18n-key="tabs.playground">API Lekeplass</span>
-            </button>
-            <button class="sidebar-btn" data-panel="achievements" onclick="openPanel('achievements')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0114 0v2"/><path d="M17 11l2 2 4-4"/></svg>
-              <span data-i18n-key="achievements.title">Prestasjoner</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- System -->
-        <div class="sidebar-section" data-section="system" style="--section-color: #64748b">
-          <button class="sidebar-section-toggle" onclick="toggleSidebarSection('system')" data-ripple>
-            <svg class="sidebar-section-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="6 9 12 15 18 9"/></svg>
-            <span>System</span>
-            <span class="sidebar-section-count">4</span>
-          </button>
-          <div class="sidebar-section-items">
-            <button class="sidebar-btn" data-panel="plugins" onclick="openPanel('plugins')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
-              <span data-i18n-key="tabs.plugins">Plugins</span>
-            </button>
-            <button class="sidebar-btn" data-panel="backup" onclick="openPanel('backup')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              <span data-i18n-key="tabs.backup">Sikkerhetskopi</span>
-            </button>
-            <button class="sidebar-btn" data-panel="logs" onclick="openPanel('logs')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
-              <span data-i18n-key="logs.title">Serverlogg</span>
-            </button>
-            <a class="sidebar-btn" href="/docs/" target="_blank" style="text-decoration:none;color:inherit" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              <span>Dokumentasjon</span>
+          <!-- Dashboard -->
+          <li class="nav-item">
+            <a href="#" class="nav-link sidebar-btn active" data-panel="dashboard" onclick="showDashboard(); return false;" data-ripple>
+              <i class="nav-icon bi bi-speedometer2"></i>
+              <p data-i18n-key="nav.dashboard">Dashboard</p>
             </a>
-            <button class="sidebar-btn" data-panel="settings" onclick="openPanel('settings')" data-ripple>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              <span data-i18n-key="tabs.settings">Innstillinger</span>
-            </button>
-          </div>
-        </div>
+          </li>
+
+          <!-- Utskrift (Printing) -->
+          <li class="nav-item sidebar-section" data-section="printing" style="--section-color: var(--accent-blue)">
+            <a href="#" class="nav-link" onclick="toggleSidebarSection('printing'); return false;" data-ripple>
+              <i class="nav-icon bi bi-printer"></i>
+              <p>
+                <span data-i18n-key="sidebar.section_printing">Utskrift</span>
+                <i class="nav-arrow bi bi-chevron-right"></i>
+                <span class="badge text-bg-secondary sidebar-section-count">4</span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview sidebar-section-items">
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="controls" onclick="openPanel('controls'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-sliders"></i>
+                  <p data-i18n-key="tabs.controls">Kontroller</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="queue" onclick="openPanel('queue'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-list-check"></i>
+                  <p data-i18n-key="queue.title">Utskriftskø</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="scheduler" onclick="openPanel('scheduler'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-calendar3"></i>
+                  <p data-i18n-key="tabs.scheduler">Planlegger</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="fleet" onclick="openPanel('fleet'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-display"></i>
+                  <p data-i18n-key="tabs.fleet">Flåte</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Historikk (History) -->
+          <li class="nav-item sidebar-section" data-section="history" style="--section-color: var(--accent-blue, #06b6d4)">
+            <a href="#" class="nav-link" onclick="toggleSidebarSection('history'); return false;" data-ripple>
+              <i class="nav-icon bi bi-clock-history"></i>
+              <p>
+                <span data-i18n-key="sidebar.section_history">Historikk</span>
+                <i class="nav-arrow bi bi-chevron-right"></i>
+                <span class="badge text-bg-secondary sidebar-section-count">1</span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview sidebar-section-items">
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="history" onclick="openPanel('history'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-clock-history"></i>
+                  <p data-i18n-key="tabs.history">Historikk</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Analyse (Analysis) -->
+          <li class="nav-item sidebar-section" data-section="analysis" style="--section-color: var(--accent-purple, #8b5cf6)">
+            <a href="#" class="nav-link" onclick="toggleSidebarSection('analysis'); return false;" data-ripple>
+              <i class="nav-icon bi bi-bar-chart-line"></i>
+              <p>
+                <span data-i18n-key="tabs.analysis">Analyse</span>
+                <i class="nav-arrow bi bi-chevron-right"></i>
+                <span class="badge text-bg-secondary sidebar-section-count">3</span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview sidebar-section-items">
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="analysis" onclick="openPanel('analysis'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-bar-chart-line"></i>
+                  <p data-i18n-key="tabs.statistics">Statistikk</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="calendar" onclick="openPanel('calendar'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-calendar-event"></i>
+                  <p data-i18n-key="nav.calendar">Printkalender</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="erroranalysis" onclick="openPanel('erroranalysis'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-cpu"></i>
+                  <p data-i18n-key="error_analysis.title">Feilmønster AI</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Overvåking (Monitoring) -->
+          <li class="nav-item sidebar-section" data-section="monitoring" style="--section-color: var(--accent-orange)">
+            <a href="#" class="nav-link" onclick="toggleSidebarSection('monitoring'); return false;" data-ripple>
+              <i class="nav-icon bi bi-activity"></i>
+              <p>
+                <span data-i18n-key="sidebar.section_monitoring">Overvåking</span>
+                <i class="nav-arrow bi bi-chevron-right"></i>
+                <span class="badge text-bg-secondary sidebar-section-count">4</span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview sidebar-section-items">
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="diagnostics" onclick="openPanel('diagnostics'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-activity"></i>
+                  <p data-i18n-key="tabs.diagnostics">Diagnostikk</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="protection" onclick="openPanel('protection'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-shield-check"></i>
+                  <p data-i18n-key="protection.title">Print Guard</p>
+                  <span id="protection-badge" style="display:none;background:var(--accent-red);color:#fff;font-size:0.6rem;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:auto;"></span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="errors" onclick="openPanel('errors'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-exclamation-triangle"></i>
+                  <p data-i18n-key="tabs.errors">Feillogg</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="maintenance" onclick="openPanel('maintenance'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-wrench"></i>
+                  <p data-i18n-key="tabs.maintenance">Vedlikehold</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Materialer (Materials) -->
+          <li class="nav-item sidebar-section" data-section="materials" style="--section-color: var(--accent-green)">
+            <a href="#" class="nav-link" onclick="toggleSidebarSection('materials'); return false;" data-ripple>
+              <i class="nav-icon bi bi-circle"></i>
+              <p>
+                <span data-i18n-key="sidebar.section_materials">Materialer</span>
+                <i class="nav-arrow bi bi-chevron-right"></i>
+                <span class="badge text-bg-secondary sidebar-section-count">3</span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview sidebar-section-items">
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="filament" onclick="openPanel('filament'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-circle"></i>
+                  <p data-i18n-key="tabs.filament">Filament</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="materialrec" onclick="openPanel('materialrec'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-lightbulb"></i>
+                  <p data-i18n-key="material_rec.title">Anbefalinger</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="filamentanalytics" onclick="openPanel('filamentanalytics'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-graph-up"></i>
+                  <p data-i18n-key="tabs.filament_analytics">Filament Analyse</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Bibliotek (Library) -->
+          <li class="nav-item sidebar-section" data-section="library" style="--section-color: var(--accent-purple)">
+            <a href="#" class="nav-link" onclick="toggleSidebarSection('library'); return false;" data-ripple>
+              <i class="nav-icon bi bi-archive"></i>
+              <p>
+                <span data-i18n-key="sidebar.section_library">Bibliotek</span>
+                <i class="nav-arrow bi bi-chevron-right"></i>
+                <span class="badge text-bg-secondary sidebar-section-count">4</span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview sidebar-section-items">
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="library" onclick="openPanel('library'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-folder"></i>
+                  <p data-i18n-key="tabs.library">Filbibliotek</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="knowledge" onclick="openPanel('knowledge'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-book"></i>
+                  <p data-i18n-key="nav.knowledge">Kunnskapsbase</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="screenshots" onclick="openPanel('screenshots'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-camera"></i>
+                  <p data-i18n-key="screenshots.title">Skjermbilder</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="profiles" onclick="openPanel('profiles'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-file-text"></i>
+                  <p data-i18n-key="nav.profiles">Utskriftsprofiler</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- Verktøy (Tools) -->
+          <li class="nav-item sidebar-section" data-section="tools" style="--section-color: var(--accent-red)">
+            <a href="#" class="nav-link" onclick="toggleSidebarSection('tools'); return false;" data-ripple>
+              <i class="nav-icon bi bi-tools"></i>
+              <p>
+                <span data-i18n-key="sidebar.section_tools">Verktøy</span>
+                <i class="nav-arrow bi bi-chevron-right"></i>
+                <span class="badge text-bg-secondary sidebar-section-count">5</span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview sidebar-section-items">
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="costestimator" onclick="openPanel('costestimator'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-calculator"></i>
+                  <p data-i18n-key="tabs.costestimator">Kostnadskalkulator</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="labels" onclick="openPanel('labels'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-tag"></i>
+                  <p data-i18n-key="tabs.labels">Etiketter</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="widgets" onclick="openPanel('widgets'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-grid-3x3-gap"></i>
+                  <p data-i18n-key="tabs.widgets">Widgets</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="playground" onclick="openPanel('playground'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-code-slash"></i>
+                  <p data-i18n-key="tabs.playground">API Lekeplass</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="achievements" onclick="openPanel('achievements'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-trophy"></i>
+                  <p data-i18n-key="achievements.title">Prestasjoner</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+          <!-- System -->
+          <li class="nav-item sidebar-section" data-section="system" style="--section-color: #64748b">
+            <a href="#" class="nav-link" onclick="toggleSidebarSection('system'); return false;" data-ripple>
+              <i class="nav-icon bi bi-gear"></i>
+              <p>
+                <span>System</span>
+                <i class="nav-arrow bi bi-chevron-right"></i>
+                <span class="badge text-bg-secondary sidebar-section-count">4</span>
+              </p>
+            </a>
+            <ul class="nav nav-treeview sidebar-section-items">
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="plugins" onclick="openPanel('plugins'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-puzzle"></i>
+                  <p data-i18n-key="tabs.plugins">Plugins</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="backup" onclick="openPanel('backup'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-cloud-upload"></i>
+                  <p data-i18n-key="tabs.backup">Sikkerhetskopi</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="logs" onclick="openPanel('logs'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-terminal"></i>
+                  <p data-i18n-key="logs.title">Serverlogg</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="/docs/" target="_blank" class="nav-link" style="text-decoration:none" data-ripple>
+                  <i class="nav-icon bi bi-file-text"></i>
+                  <p>Dokumentasjon</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="settings" onclick="openPanel('settings'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-gear"></i>
+                  <p data-i18n-key="tabs.settings">Innstillinger</p>
+                </a>
+              </li>
+            </ul>
+          </li>
+
+        </ul>
       </nav>
+
+      <!-- Sidebar status area -->
       <div class="sidebar-status" id="sidebar-status">
         <div class="sidebar-status-title" data-i18n-key="quick_status.title">Status</div>
         <div id="sidebar-status-content"></div>
       </div>
+
+      <!-- Sidebar footer -->
       <div class="sidebar-footer">
         <button id="pwa-install-btn" class="sidebar-btn sidebar-btn-install" style="display:none" onclick="installPwa()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <i class="bi bi-download"></i>
           <span>Install App</span>
         </button>
         <div class="sidebar-version" id="sidebar-version">v...</div>
@@ -263,10 +410,10 @@
         </a>
         <div class="sidebar-links">
           <a href="https://geektech.no" target="_blank" rel="noopener" title="GeekTech.no">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <i class="bi bi-globe"></i>
           </a>
           <a href="https://github.com/skynett81" target="_blank" rel="noopener" title="GitHub">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            <i class="bi bi-github"></i>
           </a>
         </div>
       </div>
@@ -275,29 +422,8 @@
     <!-- Sidebar backdrop (mobile) -->
     <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleSidebar()"></div>
 
-    <!-- Main Content Area -->
-    <div class="main-wrapper" id="main-content" role="main">
-
-      <!-- Header -->
-      <header class="header">
-        <button class="hamburger-btn" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu" data-tooltip="Menu" data-tooltip-pos="bottom">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
-          </svg>
-        </button>
-        <div class="printer-selector" id="printer-selector"></div>
-        <button class="notif-bell-btn" id="notif-bell-btn" onclick="toggleNotificationCenter()" data-tooltip="Varsler" data-tooltip-pos="bottom">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-          <span class="notif-badge" id="notif-badge" style="display:none">0</span>
-        </button>
-        <button class="theme-toggle-btn" id="theme-toggle-btn" onclick="theme.toggle()" data-tooltip="Toggle theme" data-tooltip-pos="bottom">
-          <svg class="theme-icon theme-icon-light" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-          <svg class="theme-icon theme-icon-dark" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
-        </button>
-        <span id="update-badge" class="badge badge-update" style="display:none" onclick="openPanel('settings')" title="Update available">!</span>
-        <span id="connection-badge" class="badge badge-disconnected" data-i18n-key="header.connecting">Kobler til...</span>
-        <span id="system-info-badge" class="system-info-badge" style="cursor:pointer;font-size:0.7rem;color:var(--text-muted);margin-left:8px" title="System info"></span>
-      </header>
+    <!-- ===== MAIN CONTENT (AdminLTE app-main) ===== -->
+    <main class="app-main" id="main-content" role="main">
 
       <!-- Grafana-style Live Stats Strip -->
       <section class="stats-strip" id="stats-strip">
@@ -346,11 +472,11 @@
         </div>
         <div class="strip-indicators">
           <div class="strip-ind">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><circle cx="12" cy="20" r="1"/></svg>
+            <i class="bi bi-wifi"></i>
             <span class="strip-ind-val" id="wifi-signal">--</span>
           </div>
           <div class="strip-ind">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+            <i class="bi bi-sun"></i>
             <span class="strip-ind-val" id="light-status">--</span>
           </div>
         </div>
@@ -360,7 +486,7 @@
       <div class="panel-content" id="panel-content">
         <div class="panel-content-header">
           <button class="panel-back-btn" onclick="showDashboard()" data-ripple>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            <i class="bi bi-chevron-left"></i>
             <span data-i18n-key="nav.dashboard">Dashboard</span>
           </button>
           <h2 class="panel-content-title" id="overlay-panel-title"></h2>
@@ -369,7 +495,7 @@
       </div>
 
       <!-- Dashboard Grid -->
-      <main class="dashboard" id="dashboard-grid">
+      <div class="app-content dashboard" id="dashboard-grid">
 
         <div class="card" id="progress-card">
           <!-- 3D viewport wrapper -->
@@ -421,7 +547,7 @@
             <div class="hud-center">
               <div class="hud-center-top">
                 <span class="hud-pct" id="hud-pct">0%</span>
-                <span class="hud-separator">·</span>
+                <span class="hud-separator">&middot;</span>
                 <span class="hud-layers" id="progress-layers">--</span>
               </div>
               <div style="display:none"><span id="progress-eta"></span></div>
@@ -436,40 +562,24 @@
           <div class="model-meta-bar" id="model-meta-bar" style="display:none"></div>
         </div>
 
-        <div class="card filament-ring-card" id="filament-ring"></div>
-
         <div class="card" id="camera-card">
-          <div class="card-title" data-i18n-key="camera.title">Kamera</div>
-          <div id="camera-container" class="camera-container">
-            <div class="camera-placeholder">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="2" y="6" width="15" height="12" rx="2"/>
-                <path d="M17 10l4-2v8l-4-2z"/>
-              </svg>
-              <span data-i18n-key="camera.not_available">Kamera ikke tilgjengelig</span>
+          <div class="card-header">
+            <h3 class="card-title" data-i18n-key="camera.title">Kamera</h3>
+          </div>
+          <div class="card-body">
+            <div id="camera-container" class="camera-container">
+              <div class="camera-placeholder">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="2" y="6" width="15" height="12" rx="2"/>
+                  <path d="M17 10l4-2v8l-4-2z"/>
+                </svg>
+                <span data-i18n-key="camera.not_available">Kamera ikke tilgjengelig</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="card countdown-card" id="countdown-timer"></div>
-
-        <div class="card" id="temp-card">
-          <div class="card-title" data-i18n-key="temperature.title">Temperaturer</div>
-          <div class="temp-gauges">
-            <div class="gauge-wrapper">
-              <svg class="gauge-svg" viewBox="0 0 120 120" id="gauge-nozzle"></svg>
-              <div class="gauge-label" data-i18n-key="temperature.nozzle">Dyse</div>
-            </div>
-            <div class="gauge-wrapper">
-              <svg class="gauge-svg" viewBox="0 0 120 120" id="gauge-bed"></svg>
-              <div class="gauge-label" data-i18n-key="temperature.bed">Seng</div>
-            </div>
-            <div class="gauge-wrapper">
-              <svg class="gauge-svg" viewBox="0 0 120 120" id="gauge-chamber"></svg>
-              <div class="gauge-label" data-i18n-key="temperature.chamber">Kammer</div>
-            </div>
-          </div>
-        </div>
+        <div class="card filament-ring-card" id="filament-ring"></div>
 
         <div class="card" id="ams-card">
           <div class="ams-top-bar" id="ams-top-bar">
@@ -499,20 +609,51 @@
           </div>
         </div>
 
-        <div class="card" id="fans-card">
-          <div class="card-title" data-i18n-key="quick_status.fans">Vifter</div>
-          <div id="fans-card-content"></div>
+        <div class="card countdown-card" id="countdown-timer"></div>
+
+        <div class="card" id="temp-card">
+          <div class="card-header">
+            <h3 class="card-title" data-i18n-key="temperature.title">Temperaturer</h3>
+          </div>
+          <div class="card-body">
+            <div class="temp-gauges">
+              <div class="gauge-wrapper">
+                <svg class="gauge-svg" viewBox="0 0 120 120" id="gauge-nozzle"></svg>
+                <div class="gauge-label" data-i18n-key="temperature.nozzle">Dyse</div>
+              </div>
+              <div class="gauge-wrapper">
+                <svg class="gauge-svg" viewBox="0 0 120 120" id="gauge-bed"></svg>
+                <div class="gauge-label" data-i18n-key="temperature.bed">Seng</div>
+              </div>
+              <div class="gauge-wrapper">
+                <svg class="gauge-svg" viewBox="0 0 120 120" id="gauge-chamber"></svg>
+                <div class="gauge-label" data-i18n-key="temperature.chamber">Kammer</div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- MakerWorld info — compact, under 3D preview, beside temperatures -->
+        <div class="card" id="fans-card">
+          <div class="card-header">
+            <h3 class="card-title" data-i18n-key="quick_status.fans">Vifter</h3>
+          </div>
+          <div class="card-body" id="fans-card-content"></div>
+        </div>
+
         <!-- Model Info strip (MakerWorld / Printables / Thingiverse) -->
         <div class="model-info-strip" id="model-info" style="display:none"></div>
 
-      </main>
+      </div><!-- /app-content (dashboard-grid) -->
 
-    </div><!-- /main-wrapper -->
+    </main><!-- /app-main -->
 
-  </div><!-- /app-layout -->
+    <!-- Footer -->
+    <footer class="app-footer">
+      <div class="float-end d-none d-sm-inline">Bambu Dashboard</div>
+      <strong>&copy; <a href="https://geektech.no" target="_blank" rel="noopener">SkyNett81</a></strong>
+    </footer>
+
+  </div><!-- /app-wrapper -->
 
   <!-- Camera Fullscreen Modal -->
   <div class="camera-modal" id="camera-modal">
@@ -565,6 +706,9 @@
       }
     });
   </script>
+
+  <!-- AdminLTE JS -->
+  <script src="/adminlte/js/adminlte.min.js"></script>
 
   <!-- Scripts -->
   <script src="/js/i18n.js"></script>

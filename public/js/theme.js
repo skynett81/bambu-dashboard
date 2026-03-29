@@ -231,6 +231,9 @@
     const themeFamily = (resolved === 'light') ? 'light' : 'dark';
     root.setAttribute('data-theme', themeFamily);
 
+    // AdminLTE / Bootstrap dark mode attribute
+    document.body.setAttribute('data-bs-theme', themeFamily);
+
     // Update toggle button icon if present
     updateToggleButton(themeFamily);
 
