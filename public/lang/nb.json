@@ -129,7 +129,21 @@
     "low_filament_alert": "Lite filament",
     "humidity_dry": "Tørt",
     "humidity_ok": "OK",
-    "humidity_wet": "Fuktig"
+    "humidity_wet": "Fuktig",
+    "humidity_best": "Best",
+    "humidity_good": "Bra",
+    "humidity_poor": "Dårlig",
+    "humidity_bad": "Kritisk",
+    "humidity_best_tip": "Ideelt for alle materialer inkludert PA og PVA",
+    "humidity_good_tip": "Bra for PLA, PETG, ABS. Overvåk for PA/PVA",
+    "humidity_ok_tip": "Akseptabelt for PLA/PETG. Tørk PA/Nylon før bruk",
+    "humidity_poor_tip": "Tørk alle hygroskopiske materialer. Bytt silikagel",
+    "humidity_bad_tip": "For fuktig! Bytt silikagel umiddelbart",
+    "temp_cold": "Kaldt — kan påvirke printing",
+    "temp_hot": "Varmt — filament kan mykne",
+    "temp_ideal": "Ideell temperatur",
+    "recommended": "Anbefalt",
+    "humidity_recommended": "Anbefalt: <15% for PA/PVA, <30% for PLA/PETG"
   },
   "filament": {
     "no_data": "Ingen filamentdata",

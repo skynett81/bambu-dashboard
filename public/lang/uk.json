@@ -126,7 +126,21 @@
     "low_filament_alert": "Мало філаменту",
     "humidity_dry": "Сухо",
     "humidity_ok": "OK",
-    "humidity_wet": "Волого"
+    "humidity_wet": "Волого",
+    "humidity_best": "Найкраще",
+    "humidity_good": "Добре",
+    "humidity_poor": "Погано",
+    "humidity_bad": "Критично",
+    "humidity_best_tip": "Ідеально для всіх матеріалів",
+    "humidity_good_tip": "Добре для PLA, PETG, ABS",
+    "humidity_ok_tip": "Прийнятно для PLA/PETG",
+    "humidity_poor_tip": "Замініть осушувач",
+    "humidity_bad_tip": "Занадто волого!",
+    "temp_cold": "Холодно",
+    "temp_hot": "Гаряче",
+    "temp_ideal": "Ідеально",
+    "recommended": "Рек",
+    "humidity_recommended": "Рекомендовано: <15% для PA/PVA, <30% для PLA/PETG"
   },
   "filament": {
     "no_data": "Немає даних про філамент",

@@ -126,7 +126,21 @@
     "low_filament_alert": "Weinig filament",
     "humidity_dry": "Droog",
     "humidity_ok": "OK",
-    "humidity_wet": "Vochtig"
+    "humidity_wet": "Vochtig",
+    "humidity_best": "Optimaal",
+    "humidity_good": "Goed",
+    "humidity_poor": "Slecht",
+    "humidity_bad": "Kritiek",
+    "humidity_best_tip": "Ideaal voor alle materialen",
+    "humidity_good_tip": "Goed voor PLA, PETG, ABS",
+    "humidity_ok_tip": "Acceptabel voor PLA/PETG",
+    "humidity_poor_tip": "Droogmiddel vervangen",
+    "humidity_bad_tip": "Te vochtig!",
+    "temp_cold": "Koud",
+    "temp_hot": "Heet",
+    "temp_ideal": "Ideaal",
+    "recommended": "Aanb",
+    "humidity_recommended": "Aanbevolen: <15% voor PA/PVA, <30% voor PLA/PETG"
   },
   "filament": {
     "no_data": "Geen filamentgegevens",

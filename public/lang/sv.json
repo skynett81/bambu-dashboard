@@ -126,7 +126,21 @@
     "low_filament_alert": "Lite filament",
     "humidity_dry": "Torrt",
     "humidity_ok": "OK",
-    "humidity_wet": "Fuktigt"
+    "humidity_wet": "Fuktigt",
+    "humidity_best": "Bäst",
+    "humidity_good": "Bra",
+    "humidity_poor": "Dålig",
+    "humidity_bad": "Kritisk",
+    "humidity_best_tip": "Idealt för alla material",
+    "humidity_good_tip": "Bra för PLA, PETG, ABS",
+    "humidity_ok_tip": "Acceptabelt för PLA/PETG",
+    "humidity_poor_tip": "Byt torkmedel",
+    "humidity_bad_tip": "För fuktigt!",
+    "temp_cold": "Kallt",
+    "temp_hot": "Varmt",
+    "temp_ideal": "Idealt",
+    "recommended": "Rek",
+    "humidity_recommended": "Rekommenderat: <15% för PA/PVA, <30% för PLA/PETG"
   },
   "filament": {
     "no_data": "Ingen filamentdata",

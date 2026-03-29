@@ -193,12 +193,57 @@
     // --- AMS info bar: humidity, temperature, label ---
     if (humidityEl) {
       const unit = amsUnits[_selectedUnit];
-      const humidityRaw = unit?.humidity_raw ?? '--';
+      const humidityRaw = parseInt(unit?.humidity_raw) || 0;
       const humidityLevel = parseInt(unit?.humidity) || 0;
-      const amsTemp = unit?.temp ? parseFloat(unit.temp).toFixed(1) : '--';
-      // Humidity level indicator (1-5: 1=dry, 5=wet)
-      const humidityColor = humidityLevel <= 2 ? 'var(--accent-green)' : humidityLevel <= 3 ? 'var(--accent-orange)' : 'var(--accent-red)';
-      const humidityLabel = humidityLevel <= 2 ? (t('ams.humidity_dry') || 'Dry') : humidityLevel <= 3 ? (t('ams.humidity_ok') || 'OK') : (t('ams.humidity_wet') || 'Wet');
+      const amsTemp = unit?.temp ? parseFloat(unit.temp) : null;
+
+      // Humidity rating based on raw % (relative humidity inside AMS)
+      // <15% = Best (ideal for all materials including PA/PVA)
+      // 15-25% = Good (fine for PLA, PETG, ABS)
+      // 25-40% = OK (acceptable for PLA/PETG, risky for PA)
+      // 40-60% = Poor (dry hygroscopic materials before use)
+      // >60% = Bad (will cause print issues, change desiccant)
+      let humidityRating, humidityColor, humidityTip;
+      if (humidityRaw <= 15) {
+        humidityRating = t('ams.humidity_best') || 'Best';
+        humidityColor = 'var(--accent-green)';
+        humidityTip = t('ams.humidity_best_tip') || 'Ideal for all materials including PA and PVA';
+      } else if (humidityRaw <= 25) {
+        humidityRating = t('ams.humidity_good') || 'Good';
+        humidityColor = 'var(--accent-green)';
+        humidityTip = t('ams.humidity_good_tip') || 'Good for PLA, PETG, ABS. Monitor for PA/PVA';
+      } else if (humidityRaw <= 40) {
+        humidityRating = t('ams.humidity_ok') || 'OK';
+        humidityColor = 'var(--accent-orange)';
+        humidityTip = t('ams.humidity_ok_tip') || 'Acceptable for PLA/PETG. Dry PA/Nylon before use';
+      } else if (humidityRaw <= 60) {
+        humidityRating = t('ams.humidity_poor') || 'Poor';
+        humidityColor = 'var(--accent-orange)';
+        humidityTip = t('ams.humidity_poor_tip') || 'Dry all hygroscopic materials. Replace desiccant';
+      } else {
+        humidityRating = t('ams.humidity_bad') || 'Bad';
+        humidityColor = 'var(--accent-red)';
+        humidityTip = t('ams.humidity_bad_tip') || 'Too humid! Replace desiccant immediately';
+      }
+
+      // Temperature rating (AMS internal)
+      // 18-28°C = Good (normal room temp)
+      // <18°C or >35°C = Warning
+      let tempColor = 'var(--text-secondary)';
+      let tempTip = '';
+      if (amsTemp !== null) {
+        if (amsTemp < 15) {
+          tempColor = 'var(--accent-blue)';
+          tempTip = t('ams.temp_cold') || 'Cold — printing may be affected';
+        } else if (amsTemp > 35) {
+          tempColor = 'var(--accent-red)';
+          tempTip = t('ams.temp_hot') || 'Hot — filament may soften';
+        } else if (amsTemp >= 20 && amsTemp <= 28) {
+          tempColor = 'var(--accent-green)';
+          tempTip = t('ams.temp_ideal') || 'Ideal temperature';
+        }
+      }
+
       // RFID status
       const bblBits = data.ams?.tray_is_bbl_bits || '0';
       const bblCount = parseInt(bblBits, 16).toString(2).split('').filter(b => b === '1').length;
@@ -208,12 +253,14 @@
         <span class="ams-info-label">${amsLabel}</span>
         <span class="ams-info-divider">·</span>
         <svg class="ams-humidity-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="color:${humidityColor}"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-        <span style="color:${humidityColor};font-weight:600">${humidityRaw}%</span>
-        <span class="ams-info-badge" style="background:${humidityColor}">${humidityLabel}</span>
+        <span style="color:${humidityColor};font-weight:600" title="${humidityTip}">${humidityRaw}% RH</span>
+        <span class="ams-info-badge" style="background:${humidityColor}" title="${humidityTip}">${humidityRating}</span>
         <span class="ams-info-divider">·</span>
-        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
-        <span>${amsTemp}°C</span>
-        ${bblCount > 0 ? `<span class="ams-info-divider">·</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6"><path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10"/><path d="M5 12c0-3.87 3.13-7 7-7s7 3.13 7 7"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg><span>RFID ${bblCount}/${totalTrays}</span>` : ''}`;
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="${tempColor}" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+        <span style="color:${tempColor}" title="${tempTip}">${amsTemp !== null ? amsTemp.toFixed(1) + '°C' : '--'}</span>
+        ${bblCount > 0 ? `<span class="ams-info-divider">·</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6"><path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10"/><path d="M5 12c0-3.87 3.13-7 7-7s7 3.13 7 7"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg><span>RFID ${bblCount}/${totalTrays}</span>` : ''}
+        <span class="ams-info-divider">·</span>
+        <span class="text-muted" style="font-size:0.65rem" title="${t('ams.humidity_recommended') || 'Recommended: <15% for PA/PVA, <30% for PLA/PETG'}">${t('ams.recommended') || 'Rec'}: &lt;15%</span>`;
     }
 
     // --- Filament cards for selected unit ---

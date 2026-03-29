@@ -126,7 +126,21 @@
     "low_filament_alert": "フィラメント残量少",
     "humidity_dry": "乾燥",
     "humidity_ok": "OK",
-    "humidity_wet": "湿気"
+    "humidity_wet": "湿気",
+    "humidity_best": "最適",
+    "humidity_good": "良好",
+    "humidity_poor": "不良",
+    "humidity_bad": "危険",
+    "humidity_best_tip": "全素材に最適",
+    "humidity_good_tip": "PLA, PETG, ABSに良好",
+    "humidity_ok_tip": "PLA/PETGに許容範囲",
+    "humidity_poor_tip": "乾燥剤を交換してください",
+    "humidity_bad_tip": "湿度過多！即交換",
+    "temp_cold": "低温",
+    "temp_hot": "高温",
+    "temp_ideal": "最適温度",
+    "recommended": "推奨",
+    "humidity_recommended": "推奨: PA/PVA <15%, PLA/PETG <30%"
   },
   "filament": {
     "no_data": "フィラメントデータなし",

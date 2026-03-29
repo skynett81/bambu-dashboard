@@ -125,7 +125,21 @@
     "low_filament_alert": "Málo filamentu",
     "humidity_dry": "Sucho",
     "humidity_ok": "OK",
-    "humidity_wet": "Vlhko"
+    "humidity_wet": "Vlhko",
+    "humidity_best": "Nejlepší",
+    "humidity_good": "Dobré",
+    "humidity_poor": "Špatné",
+    "humidity_bad": "Kritické",
+    "humidity_best_tip": "Ideální pro všechny materiály",
+    "humidity_good_tip": "Dobré pro PLA, PETG, ABS",
+    "humidity_ok_tip": "Přijatelné pro PLA/PETG",
+    "humidity_poor_tip": "Vyměňte vysoušedlo",
+    "humidity_bad_tip": "Příliš vlhko!",
+    "temp_cold": "Studeno",
+    "temp_hot": "Horko",
+    "temp_ideal": "Ideální",
+    "recommended": "Dop",
+    "humidity_recommended": "Doporučeno: <15% pro PA/PVA, <30% pro PLA/PETG"
   },
   "filament": {
     "no_data": "Žádná data o filamentu",

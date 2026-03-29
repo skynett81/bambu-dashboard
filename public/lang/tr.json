@@ -126,7 +126,21 @@
     "low_filament_alert": "Düşük filament",
     "humidity_dry": "Kuru",
     "humidity_ok": "OK",
-    "humidity_wet": "Nemli"
+    "humidity_wet": "Nemli",
+    "humidity_best": "En iyi",
+    "humidity_good": "İyi",
+    "humidity_poor": "Kötü",
+    "humidity_bad": "Kritik",
+    "humidity_best_tip": "Tüm malzemeler için ideal",
+    "humidity_good_tip": "PLA, PETG, ABS için iyi",
+    "humidity_ok_tip": "PLA/PETG için kabul edilebilir",
+    "humidity_poor_tip": "Kurutucu değiştirin",
+    "humidity_bad_tip": "Çok nemli!",
+    "temp_cold": "Soğuk",
+    "temp_hot": "Sıcak",
+    "temp_ideal": "İdeal",
+    "recommended": "Öne",
+    "humidity_recommended": "Önerilen: PA/PVA <%15, PLA/PETG <%30"
   },
   "filament": {
     "no_data": "Filament verisi yok",

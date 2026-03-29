@@ -125,7 +125,21 @@
     "low_filament_alert": "Kevés filament",
     "humidity_dry": "Száraz",
     "humidity_ok": "OK",
-    "humidity_wet": "Nedves"
+    "humidity_wet": "Nedves",
+    "humidity_best": "Legjobb",
+    "humidity_good": "Jó",
+    "humidity_poor": "Rossz",
+    "humidity_bad": "Kritikus",
+    "humidity_best_tip": "Ideális minden anyaghoz",
+    "humidity_good_tip": "Jó PLA, PETG, ABS-hez",
+    "humidity_ok_tip": "Elfogadható PLA/PETG-hez",
+    "humidity_poor_tip": "Cserélje a nedvszívót",
+    "humidity_bad_tip": "Túl nedves!",
+    "temp_cold": "Hideg",
+    "temp_hot": "Forró",
+    "temp_ideal": "Ideális",
+    "recommended": "Aj",
+    "humidity_recommended": "Ajánlott: <15% PA/PVA, <30% PLA/PETG"
   },
   "filament": {
     "no_data": "Nincs filament adat",

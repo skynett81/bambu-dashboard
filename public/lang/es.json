@@ -126,7 +126,21 @@
     "low_filament_alert": "Filamento bajo",
     "humidity_dry": "Seco",
     "humidity_ok": "OK",
-    "humidity_wet": "Húmedo"
+    "humidity_wet": "Húmedo",
+    "humidity_best": "Óptimo",
+    "humidity_good": "Bueno",
+    "humidity_poor": "Malo",
+    "humidity_bad": "Crítico",
+    "humidity_best_tip": "Ideal para todos los materiales",
+    "humidity_good_tip": "Bueno para PLA, PETG, ABS",
+    "humidity_ok_tip": "Aceptable para PLA/PETG. Secar PA",
+    "humidity_poor_tip": "Secar todos los materiales. Reemplazar desecante",
+    "humidity_bad_tip": "¡Muy húmedo! Reemplazar inmediatamente",
+    "temp_cold": "Frío",
+    "temp_hot": "Caliente",
+    "temp_ideal": "Ideal",
+    "recommended": "Rec",
+    "humidity_recommended": "Recomendado: <15% para PA/PVA, <30% para PLA/PETG"
   },
   "filament": {
     "no_data": "Sin datos de filamento",

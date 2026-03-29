@@ -129,7 +129,21 @@
     "low_filament_alert": "Low filament",
     "humidity_dry": "Dry",
     "humidity_ok": "OK",
-    "humidity_wet": "Wet"
+    "humidity_wet": "Wet",
+    "humidity_best": "Best",
+    "humidity_good": "Good",
+    "humidity_poor": "Poor",
+    "humidity_bad": "Bad",
+    "humidity_best_tip": "Ideal for all materials including PA and PVA",
+    "humidity_good_tip": "Good for PLA, PETG, ABS. Monitor for PA/PVA",
+    "humidity_ok_tip": "Acceptable for PLA/PETG. Dry PA/Nylon before use",
+    "humidity_poor_tip": "Dry all hygroscopic materials. Replace desiccant",
+    "humidity_bad_tip": "Too humid! Replace desiccant immediately",
+    "temp_cold": "Cold — printing may be affected",
+    "temp_hot": "Hot — filament may soften",
+    "temp_ideal": "Ideal temperature",
+    "recommended": "Rec",
+    "humidity_recommended": "Recommended: <15% for PA/PVA, <30% for PLA/PETG"
   },
   "filament": {
     "no_data": "No filament data",
