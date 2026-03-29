@@ -7950,6 +7950,16 @@ function calculateAchievements() {
     { id: 'spool_colors_25', icon: '\u{1F308}', title: 'Rainbow Stash', desc: 'Have 25+ unique colors in inventory', target: 25, current: spoolColors, category: 'collection' },
     { id: 'stock_5kg', icon: '\u{1F4E6}', title: '5 kg Reserve', desc: 'Have 5 kg of filament in stock', target: 5000, current: Math.round(totalSpoolWeight), category: 'collection' },
     { id: 'stock_25kg', icon: '\u{1F9F1}', title: 'Filament Fortress', desc: 'Have 25 kg of filament in stock', target: 25000, current: Math.round(totalSpoolWeight), category: 'collection' },
+
+    // ═══ Legendary Landmarks — Real-world 1:1 scale filament challenges ═══
+    // Statue of Liberty: 93m tall, ~225 tonnes total. 3D printed at 15% infill with PLA ≈ 46,000 kg
+    { id: 'landmark_liberty', icon: '\u{1F5FD}', title: 'Lady Liberty', desc: 'Use enough filament to 3D print the Statue of Liberty at 1:1 scale (46,000 kg)', target: 46000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 50000 },
+    // Eiffel Tower: 330m tall, 7,300 tonnes of iron. PLA equivalent at 15% infill ≈ 180,000 kg
+    { id: 'landmark_eiffel', icon: '\u{1F5FC}', title: 'Tour Eiffel', desc: 'Use enough filament to 3D print the Eiffel Tower at 1:1 scale (180,000 kg)', target: 180000000, current: Math.round(totalFilamentG), category: 'milestones', xp: 200000 },
+    // Bonus stepping stones
+    { id: 'filament_500kg', icon: '\u{1F30B}', title: 'Half-Ton Club', desc: 'Use 500 kg of filament total', target: 500000, current: Math.round(totalFilamentG), category: 'filament', xp: 5000 },
+    { id: 'filament_1000kg', icon: '\u2604\uFE0F', title: 'One Tonne', desc: 'Use 1,000 kg (1 metric tonne) of filament', target: 1000000, current: Math.round(totalFilamentG), category: 'filament', xp: 10000 },
+    { id: 'filament_10000kg', icon: '\u{1F30C}', title: '10 Tonnes', desc: 'Use 10,000 kg of filament — enough for a small car', target: 10000000, current: Math.round(totalFilamentG), category: 'filament', xp: 25000 },
   ];
 
   return all.map(a => ({
