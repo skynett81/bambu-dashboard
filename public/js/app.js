@@ -321,7 +321,8 @@ const PANEL_TITLES = {
   'crm-dashboard': 'crm.dashboard',
   'crm-customers': 'crm.customers',
   'crm-orders': 'crm.orders',
-  'crm-invoices': 'crm.invoices'
+  'crm-invoices': 'crm.invoices',
+  'crm-settings': 'crm.company_settings'
 };
 
 const PANEL_LOADERS = {
@@ -375,6 +376,7 @@ const PANEL_LOADERS = {
   'crm-customers': () => { if (typeof loadCrmCustomersPanel === 'function') loadCrmCustomersPanel(); },
   'crm-orders': () => { if (typeof loadCrmOrdersPanel === 'function') loadCrmOrdersPanel(); },
   'crm-invoices': () => { if (typeof loadCrmInvoicesPanel === 'function') loadCrmInvoicesPanel(); },
+  'crm-settings': () => { if (typeof loadCrmSettingsPanel === 'function') loadCrmSettingsPanel(); },
 };
 
 window._activePanel = null;

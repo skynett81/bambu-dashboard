@@ -122,6 +122,8 @@
     } else if (inv.status === 'sent') {
       actionBtns = `<button class="btn btn-sm btn-success" onclick="window._crmInvMarkPaid(${inv.id})"><i class="bi bi-check-circle"></i> ${_esc(_tl('crm.mark_paid', 'Marker betalt'))}</button>`;
     }
+    // Always show print/open invoice button
+    actionBtns += ` <button class="btn btn-sm btn-outline-info" onclick="window.open('/api/crm/invoices/${inv.id}/html', '_blank')"><i class="bi bi-printer"></i> ${_esc(_tl('crm.print_invoice', 'Skriv ut faktura'))}</button>`;
 
     body.innerHTML = `
       <div style="margin-bottom:1rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">

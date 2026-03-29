@@ -362,8 +362,12 @@
 
   window._crmOrdGenerateInvoice = async function(orderId) {
     try {
-      await apiGenerateInvoice(orderId);
+      const result = await apiGenerateInvoice(orderId);
       if (typeof showToast === 'function') showToast(_tl('crm.invoice_generated', 'Faktura generert'), 'success');
+      // Open the invoice HTML in a new tab for printing
+      if (result && result.id) {
+        window.open('/api/crm/invoices/' + result.id + '/html', '_blank');
+      }
     } catch (err) {
       if (typeof showToast === 'function') showToast(err.message, 'danger');
     }

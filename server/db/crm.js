@@ -452,12 +452,97 @@ export function getCrmDashboard() {
     "SELECT COUNT(*) as count FROM crm_invoices WHERE status IN ('draft', 'sent', 'overdue')"
   ).get();
 
+  // Revenue this month
+  const now = new Date();
+  const monthStart = now.toISOString().slice(0, 7) + '-01';
+  const revenueThisMonth = db.prepare(
+    "SELECT COALESCE(SUM(total_cost), 0) as total FROM crm_orders WHERE status NOT IN ('cancelled', 'draft') AND created_at >= ?"
+  ).get(monthStart);
+
+  // Revenue trend — last 6 months
+  const revenueChart = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const start = d.toISOString().slice(0, 7) + '-01';
+    const endD = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+    const end = endD.toISOString().slice(0, 10);
+    const label = d.toLocaleDateString('nb-NO', { month: 'short', year: '2-digit' });
+    const row = db.prepare(
+      "SELECT COALESCE(SUM(total_cost), 0) as revenue FROM crm_orders WHERE status NOT IN ('cancelled', 'draft') AND created_at >= ? AND created_at < ?"
+    ).get(start, end);
+    revenueChart.push({ month: label, revenue: row.revenue });
+  }
+
+  // Orders by status breakdown
+  const ordersByStatus = db.prepare(
+    'SELECT status, COUNT(*) as count FROM crm_orders GROUP BY status'
+  ).all();
+
+  // Top 5 customers by revenue
+  const topCustomers = db.prepare(
+    `SELECT c.id, c.name, c.company, COALESCE(SUM(o.total_cost), 0) as revenue, COUNT(o.id) as order_count
+     FROM crm_customers c
+     JOIN crm_orders o ON o.customer_id = c.id AND o.status NOT IN ('cancelled', 'draft')
+     WHERE c.archived = 0
+     GROUP BY c.id
+     ORDER BY revenue DESC
+     LIMIT 5`
+  ).all();
+
+  // Recent activity — last 10 orders + invoices combined
+  const recentActivity = db.prepare(
+    `SELECT 'order' as type, o.id, o.order_number as ref_number, o.status, o.total_cost as amount, o.created_at, c.name as customer_name
+     FROM crm_orders o LEFT JOIN crm_customers c ON o.customer_id = c.id
+     UNION ALL
+     SELECT 'invoice' as type, i.id, i.invoice_number as ref_number, i.status, i.total as amount, i.created_at, c.name as customer_name
+     FROM crm_invoices i LEFT JOIN crm_orders o ON i.order_id = o.id LEFT JOIN crm_customers c ON o.customer_id = c.id
+     ORDER BY created_at DESC LIMIT 10`
+  ).all();
+
   return {
     total_orders: totalOrders.count,
     total_revenue: totalRevenue.total,
+    revenue_this_month: revenueThisMonth.total,
     pending_orders: pendingOrders.count,
     total_customers: totalCustomers.count,
     unpaid_invoices: unpaidInvoices.count,
-    recent_orders: recentOrders
+    recent_orders: recentOrders,
+    revenue_chart: revenueChart,
+    orders_by_status: ordersByStatus,
+    top_customers: topCustomers,
+    recent_activity: recentActivity
   };
+}
+
+// ---- CRM Settings ----
+
+const CRM_SETTINGS_KEYS = [
+  'crm_company_name', 'crm_company_address', 'crm_company_city',
+  'crm_company_postal', 'crm_company_country', 'crm_org_number',
+  'crm_company_email', 'crm_company_phone', 'crm_bank_account',
+  'crm_payment_terms_days', 'crm_default_tax_pct', 'crm_invoice_footer',
+  'crm_logo_url'
+];
+
+export function getCrmSettings() {
+  const db = getDb();
+  const result = {};
+  for (const key of CRM_SETTINGS_KEYS) {
+    const row = db.prepare('SELECT value FROM inventory_settings WHERE key = ?').get(key);
+    result[key] = row ? row.value : '';
+  }
+  return result;
+}
+
+export function updateCrmSettings(settings) {
+  const db = getDb();
+  const stmt = db.prepare('INSERT OR REPLACE INTO inventory_settings (key, value) VALUES (?, ?)');
+  const runAll = db.transaction((entries) => {
+    for (const [key, value] of entries) {
+      if (CRM_SETTINGS_KEYS.includes(key)) {
+        stmt.run(key, String(value ?? ''));
+      }
+    }
+  });
+  runAll(Object.entries(settings));
 }
