@@ -3242,7 +3242,11 @@
     "cat_collection": "Колекція",
     "in_progress": "Виконується",
     "locked": "Заблоковано",
-    "almost_there": "Майже там!"
+    "almost_there": "Майже там!",
+    "rarity": "Рідкісність",
+    "category": "Категорія",
+    "completed_msg": "Вітаємо! Досягнення розблоковано!",
+    "keep_going": "Продовжуйте! Ви майже досягли."
   },
   "screenshots": {
     "title": "Знімки екрана"

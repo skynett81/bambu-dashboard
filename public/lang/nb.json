@@ -3185,7 +3185,11 @@
     "cat_collection": "Samling",
     "in_progress": "Pågår",
     "locked": "Låst",
-    "almost_there": "Nesten der!"
+    "almost_there": "Nesten der!",
+    "rarity": "Sjeldenhet",
+    "category": "Kategori",
+    "completed_msg": "Gratulerer! Achievement opplåst!",
+    "keep_going": "Fortsett! Du er nesten der."
   },
   "screenshots": {
     "title": "Skjermbilder"

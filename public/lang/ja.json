@@ -3242,7 +3242,11 @@
     "cat_collection": "コレクション",
     "in_progress": "進行中",
     "locked": "ロック済み",
-    "almost_there": "もうすぐ！"
+    "almost_there": "もうすぐ！",
+    "rarity": "レア度",
+    "category": "カテゴリ",
+    "completed_msg": "おめでとう！実績解除！",
+    "keep_going": "あと少し！頑張って！"
   },
   "screenshots": {
     "title": "スクリーンショット"

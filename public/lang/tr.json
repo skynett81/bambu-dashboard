@@ -3242,7 +3242,11 @@
     "cat_collection": "Koleksiyon",
     "in_progress": "Devam Ediyor",
     "locked": "Kilitli",
-    "almost_there": "Neredeyse başardınız!"
+    "almost_there": "Neredeyse başardınız!",
+    "rarity": "Nadirlik",
+    "category": "Kategori",
+    "completed_msg": "Tebrikler! Başarı açıldı!",
+    "keep_going": "Devam et! Neredeyse tamam."
   },
   "screenshots": {
     "title": "Ekran Görüntüleri"

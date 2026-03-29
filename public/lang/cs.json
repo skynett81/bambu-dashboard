@@ -3241,7 +3241,11 @@
     "cat_collection": "Kolekce",
     "in_progress": "Probíhá",
     "locked": "Zamčeno",
-    "almost_there": "Skoro tam!"
+    "almost_there": "Skoro tam!",
+    "rarity": "Vzácnost",
+    "category": "Kategorie",
+    "completed_msg": "Gratulujeme! Úspěch odemčen!",
+    "keep_going": "Pokračujte! Jste skoro tam."
   },
   "screenshots": {
     "title": "Snímky obrazovky"

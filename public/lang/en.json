@@ -3171,7 +3171,11 @@
     "cat_collection": "Collection",
     "in_progress": "In progress",
     "locked": "Locked",
-    "almost_there": "Almost there!"
+    "almost_there": "Almost there!",
+    "rarity": "Rarity",
+    "category": "Category",
+    "completed_msg": "Congratulations! Achievement unlocked!",
+    "keep_going": "Keep going! You are almost there."
   },
   "screenshots": {
     "title": "Screenshots"

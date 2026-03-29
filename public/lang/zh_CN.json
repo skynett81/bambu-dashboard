@@ -3242,7 +3242,11 @@
     "cat_collection": "收藏",
     "in_progress": "进行中",
     "locked": "已锁定",
-    "almost_there": "快达到了！"
+    "almost_there": "快达到了！",
+    "rarity": "稀有度",
+    "category": "类别",
+    "completed_msg": "恭喜！成就解锁！",
+    "keep_going": "继续加油！你快达成了。"
   },
   "screenshots": {
     "title": "截图"

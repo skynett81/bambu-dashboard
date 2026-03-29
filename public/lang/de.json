@@ -3242,7 +3242,11 @@
     "cat_collection": "Sammlung",
     "in_progress": "In Bearbeitung",
     "locked": "Gesperrt",
-    "almost_there": "Fast geschafft!"
+    "almost_there": "Fast geschafft!",
+    "rarity": "Seltenheit",
+    "category": "Kategorie",
+    "completed_msg": "Glückwunsch! Erfolg freigeschaltet!",
+    "keep_going": "Weiter so! Du bist fast da."
   },
   "screenshots": {
     "title": "Screenshots"

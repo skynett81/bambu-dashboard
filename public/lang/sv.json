@@ -3242,7 +3242,11 @@
     "cat_collection": "Samling",
     "in_progress": "Pågår",
     "locked": "Låst",
-    "almost_there": "Nästan framme!"
+    "almost_there": "Nästan framme!",
+    "rarity": "Sällsynthet",
+    "category": "Kategori",
+    "completed_msg": "Grattis! Prestation upplåst!",
+    "keep_going": "Fortsätt! Du är nästan där."
   },
   "screenshots": {
     "title": "Skärmbilder"

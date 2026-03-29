@@ -3553,7 +3553,11 @@
     "cat_milestones": "Kamienie milowe",
     "cat_collection": "Kolekcja",
     "in_progress": "W toku",
-    "almost_there": "Prawie!"
+    "almost_there": "Prawie!",
+    "rarity": "Rzadkość",
+    "category": "Kategoria",
+    "completed_msg": "Gratulacje! Osiągnięcie odblokowane!",
+    "keep_going": "Tak trzymaj! Prawie gotowe."
   },
   "status": {
     "online": "Online",

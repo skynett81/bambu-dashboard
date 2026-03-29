@@ -3242,7 +3242,11 @@
     "cat_collection": "컬렉션",
     "in_progress": "진행 중",
     "locked": "잠김",
-    "almost_there": "거의 다 왔어요!"
+    "almost_there": "거의 다 왔어요!",
+    "rarity": "희귀도",
+    "category": "카테고리",
+    "completed_msg": "축하합니다! 업적 달성!",
+    "keep_going": "거의 다 왔어요!"
   },
   "screenshots": {
     "title": "스크린샷"

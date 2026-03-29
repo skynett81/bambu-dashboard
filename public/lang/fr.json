@@ -3242,7 +3242,11 @@
     "cat_collection": "Collection",
     "in_progress": "En cours",
     "locked": "Verrouillé",
-    "almost_there": "Presque là !"
+    "almost_there": "Presque là !",
+    "rarity": "Rareté",
+    "category": "Catégorie",
+    "completed_msg": "Félicitations! Succès débloqué!",
+    "keep_going": "Continuez! Vous y êtes presque."
   },
   "screenshots": {
     "title": "Captures d'écran"

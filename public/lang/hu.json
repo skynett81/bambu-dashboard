@@ -3241,7 +3241,11 @@
     "cat_collection": "Gyűjtemény",
     "in_progress": "Folyamatban",
     "locked": "Zárolt",
-    "almost_there": "Majdnem ott!"
+    "almost_there": "Majdnem ott!",
+    "rarity": "Ritkaság",
+    "category": "Kategória",
+    "completed_msg": "Gratulálunk! Eredmény feloldva!",
+    "keep_going": "Folytasd! Már majdnem megvan."
   },
   "screenshots": {
     "title": "Képernyőfotók"

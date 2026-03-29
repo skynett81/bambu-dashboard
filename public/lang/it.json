@@ -3242,7 +3242,11 @@
     "cat_collection": "Collezione",
     "in_progress": "In corso",
     "locked": "Bloccato",
-    "almost_there": "Ci sei quasi!"
+    "almost_there": "Ci sei quasi!",
+    "rarity": "Rarità",
+    "category": "Categoria",
+    "completed_msg": "Congratulazioni! Obiettivo sbloccato!",
+    "keep_going": "Continua così! Ci sei quasi."
   },
   "screenshots": {
     "title": "Screenshot"

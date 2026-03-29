@@ -3242,7 +3242,11 @@
     "cat_collection": "Collectie",
     "in_progress": "Bezig",
     "locked": "Vergrendeld",
-    "almost_there": "Bijna!"
+    "almost_there": "Bijna!",
+    "rarity": "Zeldzaamheid",
+    "category": "Categorie",
+    "completed_msg": "Gefeliciteerd! Prestatie ontgrendeld!",
+    "keep_going": "Ga zo door! Je bent er bijna."
   },
   "screenshots": {
     "title": "Schermafbeeldingen"
