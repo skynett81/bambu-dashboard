@@ -13030,15 +13030,16 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
 
 /* ═══ Filament Low-Stock Alerts ═══ */
 /* ═══ Global Alert Bar ═══ */
+/* Global alert bar — below navbar, doesn't block content */
 .global-alert-bar {
   position: fixed;
-  top: 60px;
+  bottom: 16px;
   right: 16px;
   z-index: 1040;
   display: none;
   flex-direction: column;
   gap: 4px;
-  max-width: 380px;
+  max-width: 360px;
   pointer-events: none;
 }
 .global-alert-item {
@@ -13059,20 +13060,23 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
 .global-alert-item svg { flex-shrink: 0; }
 .global-alert-item-dismiss {
   margin-left: auto;
-  opacity: 0.5;
-  font-size: 1rem;
+  opacity: 0.7;
+  font-size: 1.2rem;
+  font-weight: 700;
   cursor: pointer;
-  padding: 0 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  line-height: 1;
 }
-.global-alert-item-dismiss:hover { opacity: 1; }
+.global-alert-item-dismiss:hover { opacity: 1; background: rgba(255,255,255,0.1); }
 .global-alert-warn {
-  background: linear-gradient(90deg, rgba(240,136,62,0.15), rgba(240,136,62,0.05));
-  border-bottom: 1px solid rgba(240,136,62,0.3);
-  color: #f0883e;
+  background: var(--bs-body-bg, #2b3035);
+  border: 1px solid rgba(255,193,7,0.4);
+  color: #ffc107;
 }
 .global-alert-error {
-  background: linear-gradient(90deg, rgba(239,68,68,0.15), rgba(239,68,68,0.05));
-  border-bottom: 1px solid rgba(239,68,68,0.3);
+  background: var(--bs-body-bg, #2b3035);
+  border: 1px solid rgba(220,53,69,0.4);
   color: #ef4444;
 }
 .global-alert-success {
