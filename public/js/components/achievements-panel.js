@@ -118,6 +118,24 @@
         .ach-close-info { flex:1; min-width:0; }
         .ach-close-title { font-size:0.7rem; font-weight:600; }
         .ach-close-pct { font-size:0.6rem; color:var(--accent-orange); font-weight:700; }
+        .ach-detail-popup { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:10000; width:380px; max-width:calc(100vw - 32px); background:var(--bs-body-bg, var(--bg-card)); border:1px solid var(--border-color); border-radius:12px; padding:20px; box-shadow:0 16px 64px rgba(0,0,0,0.5); animation:achPopIn 0.2s ease; }
+        @keyframes achPopIn { from { opacity:0; transform:translate(-50%,-50%) scale(0.95); } to { opacity:1; transform:translate(-50%,-50%) scale(1); } }
+        .ach-detail-header { display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+        .ach-detail-icon { font-size:2.5rem; }
+        .ach-detail-title { font-size:1.1rem; font-weight:800; color:var(--text-primary); }
+        .ach-detail-cat { font-size:0.75rem; color:var(--text-secondary); }
+        .ach-detail-close { margin-left:auto; background:none; border:none; color:var(--text-muted); font-size:1.5rem; cursor:pointer; padding:0 4px; line-height:1; }
+        .ach-detail-close:hover { color:var(--text-primary); }
+        .ach-detail-desc { font-size:0.85rem; color:var(--text-secondary); line-height:1.5; margin-bottom:12px; }
+        .ach-detail-progress-section { margin-bottom:12px; }
+        .ach-detail-bar { height:8px; background:var(--bg-tertiary, rgba(255,255,255,0.08)); border-radius:4px; overflow:hidden; }
+        .ach-detail-bar-fill { height:100%; border-radius:4px; transition:width 0.4s ease; }
+        .ach-detail-stats { display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-secondary); margin-top:4px; font-weight:600; }
+        .ach-detail-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; }
+        .ach-detail-stat { text-align:center; padding:10px 4px; background:rgba(255,255,255,0.03); border-radius:8px; }
+        .ach-detail-val { display:block; font-size:1rem; font-weight:800; color:var(--text-primary); }
+        .ach-detail-lbl { display:block; font-size:0.6rem; color:var(--text-muted); margin-top:2px; }
+        .ach-detail-hint { font-size:0.8rem; text-align:center; padding:8px; border-radius:6px; background:rgba(255,255,255,0.02); color:var(--text-secondary); font-style:italic; }
       `;
       h += '</style>';
 
@@ -185,7 +203,8 @@
       function renderCard(a) {
         const rarity = getRarity(a.progress);
         const cls = a.earned ? 'ach-card ach-earned' : a.progress > 0 ? 'ach-card ach-progress' : 'ach-card ach-locked';
-        let card = `<div class="${cls}" data-category="${a.category}">`;
+        const achData = JSON.stringify({ title: a.title, desc: a.desc, icon: a.icon, category: a.category, earned: a.earned, progress: a.progress, current: a.current, target: a.target, xp: a.xp || 0, rarity: rarity.label, rarityColor: rarity.color }).replace(/'/g, '&#39;');
+        let card = `<div class="${cls}" data-category="${a.category}" style="cursor:pointer" onclick='showAchievementDetail(${achData})'>`;
         card += `<div class="ach-icon">${a.icon}</div>`;
         card += `<div class="ach-info">`;
         card += `<div style="display:flex;align-items:center;gap:4px"><div class="ach-title">${esc(a.title)}</div>`;
@@ -232,6 +251,51 @@
         desc: e.message
       });
     }
+  };
+
+  window.showAchievementDetail = function(a) {
+    document.querySelectorAll('.ach-detail-popup').forEach(el => el.remove());
+
+    const pct = Math.round((a.progress || 0) * 100);
+    const catName = {
+      prints: t('achievements.cat_prints') || 'Prints',
+      filament: t('achievements.cat_filament') || 'Filament',
+      time: t('achievements.cat_time') || 'Time',
+      quality: t('achievements.cat_quality') || 'Quality',
+      exploration: t('achievements.cat_exploration') || 'Exploration',
+      dedication: t('achievements.cat_dedication') || 'Dedication',
+      milestones: t('achievements.cat_milestones') || 'Milestones',
+      collection: t('achievements.cat_collection') || 'Collection'
+    }[a.category] || a.category;
+
+    const popup = document.createElement('div');
+    popup.className = 'ach-detail-popup';
+    popup.innerHTML = `
+      <div class="ach-detail-header">
+        <div class="ach-detail-icon">${a.icon}</div>
+        <div>
+          <div class="ach-detail-title">${a.title}</div>
+          <div class="ach-detail-cat">${catName} · <span style="color:${a.rarityColor}">${a.rarity}</span></div>
+        </div>
+        <button class="ach-detail-close" onclick="this.closest('.ach-detail-popup').remove()">×</button>
+      </div>
+      <div class="ach-detail-desc">${a.desc}</div>
+      <div class="ach-detail-progress-section">
+        <div class="ach-detail-bar"><div class="ach-detail-bar-fill" style="width:${pct}%;background:${a.earned ? 'var(--accent-green)' : a.rarityColor}"></div></div>
+        <div class="ach-detail-stats">
+          <span>${a.earned ? '✓ ' + (t('achievements.earned') || 'Earned') : pct + '%'}</span>
+          <span>${a.current || 0} / ${a.target || '?'}</span>
+        </div>
+      </div>
+      <div class="ach-detail-grid">
+        <div class="ach-detail-stat"><span class="ach-detail-val">${a.xp || 0}</span><span class="ach-detail-lbl">XP</span></div>
+        <div class="ach-detail-stat"><span class="ach-detail-val" style="color:${a.rarityColor}">${a.rarity}</span><span class="ach-detail-lbl">${t('achievements.rarity') || 'Rarity'}</span></div>
+        <div class="ach-detail-stat"><span class="ach-detail-val">${catName}</span><span class="ach-detail-lbl">${t('achievements.category') || 'Category'}</span></div>
+      </div>
+      ${!a.earned ? `<div class="ach-detail-hint">${t('achievements.keep_going') || 'Keep going! You are ' + pct + '% there.'}</div>` : `<div class="ach-detail-hint" style="color:var(--accent-green)">${t('achievements.completed_msg') || 'Congratulations! Achievement unlocked!'}</div>`}
+    `;
+
+    document.body.appendChild(popup);
   };
 
   window.filterAchievements = function(category, btn) {
