@@ -278,6 +278,9 @@
 
           h += `<div class="ph-card" data-status="${row.status}" data-id="${row.id}" style="${display}" onclick="showHistoryDetail(${row.id})">
             <input type="checkbox" class="ph-compare-cb" value="${row.id}" onclick="event.stopPropagation();window._updateCompareBtn()" title="Select for compare">
+            <button class="ph-crm-order-btn" onclick="event.stopPropagation();window.createOrderFromHistory(${row.id})" title="${t('crm.create_from_history')}" style="display:none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            </button>
             <div class="ph-card-thumb">
               <img src="${thumbUrl}" alt="" loading="lazy" onerror="this.src='${fallbackThumb}'">
               <span class="ph-badge">Gcode</span>
@@ -320,6 +323,9 @@
 
           h += `<div class="ph-list-row" data-status="${row.status}" data-id="${row.id}" style="${display}" onclick="showHistoryDetail(${row.id})">
             <input type="checkbox" class="ph-compare-cb" value="${row.id}" onclick="event.stopPropagation();window._updateCompareBtn()" title="Select for compare">
+            <button class="ph-crm-order-btn ph-crm-order-btn-list" onclick="event.stopPropagation();window.createOrderFromHistory(${row.id})" title="${t('crm.create_from_history')}" style="display:none">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+            </button>
             <div class="ph-list-thumb" data-label="">
               <img src="${thumbUrl}" alt="" loading="lazy" onerror="this.src='${fallbackThumb}'">
             </div>
@@ -880,6 +886,13 @@
               <span class="ph-detail-value">${esc(row.notes)}</span>
             </div>` : ''}
           </div>
+          <div class="ph-detail-actions" id="ph-detail-actions-${row.id}" style="display:none">
+            <div class="ph-detail-divider"></div>
+            <button class="form-btn form-btn-sm form-btn-secondary" onclick="event.stopPropagation();window.createOrderFromHistory(${row.id})" title="${t('crm.create_from_history')}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+              ${t('crm.create_from_history')}
+            </button>
+          </div>
         </div>
       </div>
     </div>`;
@@ -935,6 +948,16 @@
         albumEl.innerHTML = ah;
       }).catch(() => { albumEl.style.display = 'none'; });
     }
+
+    // Show CRM action button if license is active
+    fetch('/api/ecommerce/license')
+      .then(r => r.ok ? r.json() : { active: false })
+      .then(lic => {
+        if (lic && lic.active) {
+          const actionsEl = overlay.querySelector(`#ph-detail-actions-${id}`);
+          if (actionsEl) actionsEl.style.display = '';
+        }
+      }).catch(() => {});
   }
 
   // ═══ Tab switching ═══
@@ -1022,6 +1045,17 @@
 
       html += '</div>';
       panel.innerHTML = html;
+
+      // Show CRM order buttons if license is active
+      fetch('/api/ecommerce/license')
+        .then(r => r.ok ? r.json() : { active: false })
+        .then(lic => {
+          if (lic && lic.active) {
+            panel.querySelectorAll('.ph-crm-order-btn').forEach(btn => {
+              btn.style.display = '';
+            });
+          }
+        }).catch(() => {});
 
     } catch (e) {
       panel.innerHTML = `<p class="text-muted">${t('history.load_failed')}</p>`;
@@ -1144,6 +1178,120 @@
     ta.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); ta.blur(); }
       if (e.key === 'Escape') { ta.value = currentText; ta.blur(); }
+    });
+  };
+
+  // ═══ Customer select dialog ═══
+  window.showCustomerSelectDialog = function(callback) {
+    const overlay = document.createElement('div');
+    overlay.className = 'ph-detail-overlay';
+    overlay.style.zIndex = '10001';
+    overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+
+    const _e = (s) => { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
+
+    overlay.innerHTML = `<div class="ph-detail-panel" style="max-width:480px;margin:auto">
+      <button class="ph-detail-close" onclick="this.closest('.ph-detail-overlay').remove()">&times;</button>
+      <h3 style="margin:0 0 1rem">${t('crm.select_customer')}</h3>
+      <input type="text" class="form-control" id="crm-cust-search" placeholder="${t('crm.search_customers')}" style="margin-bottom:0.75rem">
+      <div id="crm-cust-results" style="max-height:200px;overflow-y:auto;margin-bottom:1rem"></div>
+      <div class="ph-detail-divider"></div>
+      <h4 style="margin:0.75rem 0 0.5rem;font-size:0.9rem;color:var(--text-muted)">${t('crm.or_create_new')}</h4>
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem">
+        <input type="text" class="form-control" id="crm-new-name" placeholder="${t('crm.customer_name')}" style="flex:1">
+        <input type="email" class="form-control" id="crm-new-email" placeholder="${t('crm.email')}" style="flex:1">
+      </div>
+      <button class="form-btn form-btn-sm form-btn-primary" id="crm-quick-create-btn">${t('crm.quick_create')}</button>
+    </div>`;
+
+    document.body.appendChild(overlay);
+
+    const searchInput = overlay.querySelector('#crm-cust-search');
+    const resultsDiv = overlay.querySelector('#crm-cust-results');
+
+    async function loadCustomers(search) {
+      const q = search ? '?search=' + encodeURIComponent(search) : '?limit=10';
+      try {
+        const r = await fetch('/api/crm/customers' + q);
+        const customers = r.ok ? await r.json() : [];
+        if (!customers.length) {
+          resultsDiv.innerHTML = `<div style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem">${t('crm.no_customers')}</div>`;
+          return;
+        }
+        resultsDiv.innerHTML = customers.map(c =>
+          `<div class="crm-cust-row" data-id="${c.id}" style="padding:0.5rem;border-radius:4px;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onmouseenter="this.style.background='var(--bg-hover)'" onmouseleave="this.style.background=''">
+            <div>
+              <strong>${_e(c.name)}</strong>
+              ${c.company ? `<span style="color:var(--text-muted);font-size:0.8rem;margin-left:6px">${_e(c.company)}</span>` : ''}
+            </div>
+            <span style="color:var(--text-muted);font-size:0.8rem">${_e(c.email || '')}</span>
+          </div>`
+        ).join('');
+
+        resultsDiv.querySelectorAll('.crm-cust-row').forEach(row => {
+          row.addEventListener('click', () => {
+            overlay.remove();
+            callback(parseInt(row.dataset.id));
+          });
+        });
+      } catch {
+        resultsDiv.innerHTML = '';
+      }
+    }
+
+    loadCustomers('');
+
+    let _searchTimer = null;
+    searchInput.addEventListener('input', () => {
+      clearTimeout(_searchTimer);
+      _searchTimer = setTimeout(() => loadCustomers(searchInput.value.trim()), 300);
+    });
+
+    overlay.querySelector('#crm-quick-create-btn').addEventListener('click', async () => {
+      const name = overlay.querySelector('#crm-new-name').value.trim();
+      const email = overlay.querySelector('#crm-new-email').value.trim();
+      if (!name) {
+        if (typeof showToast === 'function') showToast(t('crm.customer_name_required'), 'warning');
+        return;
+      }
+      try {
+        const r = await fetch('/api/crm/customers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email: email || null })
+        });
+        const data = await r.json();
+        if (data.ok && data.id) {
+          overlay.remove();
+          callback(data.id);
+        } else {
+          if (typeof showToast === 'function') showToast(data.error || 'Failed', 'error');
+        }
+      } catch (e) {
+        if (typeof showToast === 'function') showToast('Failed to create customer', 'error');
+      }
+    });
+  };
+
+  // ═══ Create order from history ═══
+  window.createOrderFromHistory = function(printId) {
+    window.showCustomerSelectDialog(async (customerId) => {
+      try {
+        const r = await fetch(`/api/crm/orders/from-history/${printId}?customer_id=${customerId}`, { method: 'POST' });
+        const data = await r.json();
+        if (data.ok) {
+          if (typeof showToast === 'function') showToast(t('crm.order_created') + ': ' + data.order_number, 'success');
+          // Close the history detail overlay
+          const detailOverlay = document.querySelector('.ph-detail-overlay');
+          if (detailOverlay) detailOverlay.remove();
+          // Navigate to CRM orders panel
+          if (typeof openPanel === 'function') openPanel('crm-orders');
+        } else {
+          if (typeof showToast === 'function') showToast(data.error || 'Failed', 'error');
+        }
+      } catch (e) {
+        if (typeof showToast === 'function') showToast('Failed to create order', 'error');
+      }
     });
   };
 

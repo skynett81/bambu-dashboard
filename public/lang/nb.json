@@ -3367,6 +3367,12 @@
     "inv_status_overdue": "Forfalt",
     "inv_status_cancelled": "Kansellert",
     "sent_at": "Sendt",
-    "paid_at": "Betalt"
+    "paid_at": "Betalt",
+    "create_from_history": "Opprett ordre fra print",
+    "or_create_new": "Eller opprett ny",
+    "quick_create": "Hurtigopprett",
+    "order_created": "Ordre opprettet",
+    "customer_name_required": "Kundenavn er påkrevd",
+    "search_customers": "Søk kunder..."
   }
 }

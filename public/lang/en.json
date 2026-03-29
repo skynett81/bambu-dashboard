@@ -3367,6 +3367,12 @@
     "inv_status_overdue": "Overdue",
     "inv_status_cancelled": "Cancelled",
     "sent_at": "Sent",
-    "paid_at": "Paid"
+    "paid_at": "Paid",
+    "create_from_history": "Create order from print",
+    "or_create_new": "Or create new",
+    "quick_create": "Quick create",
+    "order_created": "Order created",
+    "customer_name_required": "Customer name is required",
+    "search_customers": "Search customers..."
   }
 }

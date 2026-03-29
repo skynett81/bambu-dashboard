@@ -199,11 +199,17 @@ export function createCrmOrderFromHistory(printHistoryId, customerId) {
   const print = db.prepare('SELECT * FROM print_history WHERE id = ?').get(printHistoryId);
   if (!print) throw new Error('Print history not found');
 
+  const costs = db.prepare('SELECT * FROM print_costs WHERE print_history_id = ?').get(printHistoryId);
+
   const order = createCrmOrder({
     customer_id: customerId,
     status: 'draft',
     notes: `Created from print history #${printHistoryId}`
   });
+
+  const durationMin = print.duration_seconds
+    ? Math.round(print.duration_seconds / 60)
+    : null;
 
   addCrmOrderItem(order.id, {
     description: print.filename || 'Print job',
@@ -211,8 +217,12 @@ export function createCrmOrderFromHistory(printHistoryId, customerId) {
     quantity: 1,
     filament_type: print.filament_type || null,
     filament_color: print.filament_color || null,
-    filament_weight_g: print.weight_g || null,
-    estimated_time_min: print.duration_min || null,
+    filament_weight_g: print.filament_used_g || null,
+    estimated_time_min: durationMin,
+    material_cost: costs?.filament_cost || 0,
+    electricity_cost: costs?.electricity_cost || 0,
+    wear_cost: costs?.depreciation_cost || 0,
+    labor_cost: costs?.labor_cost || 0,
     print_history_id: printHistoryId
   });
 

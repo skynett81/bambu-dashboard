@@ -5326,10 +5326,13 @@ export async function handleApiRequest(req, res) {
       }
 
       // Order from print history
-      const crmFromHistoryMatch = path.match(/^\/api\/crm\/orders\/(\d+)\/from-history\/(\d+)$/);
+      const crmFromHistoryMatch = path.match(/^\/api\/crm\/orders\/from-history\/(\d+)$/);
       if (crmFromHistoryMatch && method === 'POST') {
-        const customerId = parseInt(crmFromHistoryMatch[1]);
-        const printId = parseInt(crmFromHistoryMatch[2]);
+        const printId = parseInt(crmFromHistoryMatch[1]);
+        const customerId = parseInt(url.searchParams.get('customer_id'));
+        if (!customerId || isNaN(customerId)) {
+          return sendJson(res, { error: 'customer_id query parameter is required' }, 400);
+        }
         try {
           const result = createCrmOrderFromHistory(printId, customerId);
           return sendJson(res, { ok: true, ...result }, 201);
@@ -7782,7 +7785,7 @@ function _getApiDocs() {
       { method: 'PATCH', path: '/api/crm/orders/:id/status', tag: 'CRM', summary: 'Update order status', permission: 'admin' },
       { method: 'POST', path: '/api/crm/orders/:id/items', tag: 'CRM', summary: 'Add order item', permission: 'admin' },
       { method: 'DELETE', path: '/api/crm/orders/:id/items/:itemId', tag: 'CRM', summary: 'Remove order item', permission: 'admin' },
-      { method: 'POST', path: '/api/crm/orders/:id/from-history/:printId', tag: 'CRM', summary: 'Create order from print history', permission: 'admin' },
+      { method: 'POST', path: '/api/crm/orders/from-history/:printId?customer_id=', tag: 'CRM', summary: 'Create order from print history', permission: 'admin' },
       { method: 'POST', path: '/api/crm/orders/:id/invoice', tag: 'CRM', summary: 'Generate invoice from order', permission: 'admin' },
       { method: 'GET', path: '/api/crm/invoices', tag: 'CRM', summary: 'List invoices', permission: 'view' },
       { method: 'PATCH', path: '/api/crm/invoices/:id/status', tag: 'CRM', summary: 'Update invoice status', permission: 'admin' },

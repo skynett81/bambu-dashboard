@@ -3183,6 +3183,7 @@
 }
 
 .ph-card {
+  position: relative;
   background: var(--bg-tertiary);
   border-radius: var(--radius);
   overflow: hidden;
@@ -13015,6 +13016,23 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
 .compare-toolbar { display: flex; align-items: center; gap: 8px; margin-left: auto; }
 .compare-toolbar .form-btn { font-size: 0.75rem; }
 .ph-compare-cb { flex-shrink: 0; margin-right: 4px; cursor: pointer; }
+
+/* ═══ CRM Order Button on History Cards ═══ */
+.ph-crm-order-btn {
+  position: absolute; top: 6px; right: 6px; z-index: 2;
+  background: rgba(0,0,0,0.6); border: none; border-radius: 4px;
+  padding: 4px 6px; cursor: pointer; opacity: 0; transition: opacity 0.15s;
+  color: var(--accent-cyan); line-height: 0;
+}
+.ph-card:hover .ph-crm-order-btn,
+.ph-list-row:hover .ph-crm-order-btn { opacity: 1; }
+.ph-crm-order-btn:hover { background: rgba(0,0,0,0.8); color: #fff; }
+.ph-crm-order-btn-list {
+  position: static; opacity: 0; margin-left: auto; flex-shrink: 0;
+}
+.ph-list-row:hover .ph-crm-order-btn-list { opacity: 1; }
+.ph-detail-actions { margin-top: 0.5rem; }
+.ph-detail-actions .form-btn { gap: 6px; display: inline-flex; align-items: center; }
 
 /* ═══ Cost Badge ═══ */
 .cost-badge { display: inline-block; font-size: 0.65rem; font-weight: 600; background: rgba(0,212,255,0.1); color: var(--accent-cyan); padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
