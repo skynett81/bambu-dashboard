@@ -319,20 +319,20 @@
     try { localStorage.setItem('compact-mode', isCompact ? '1' : '0'); } catch (_) {}
   };
 
-  // Dashboard columns toggle (2 or 3)
+  // Dashboard columns toggle (2 or 3) — default is 2 for 24-27" monitors
   window.setDashboardColumns = function(cols) {
     const grid = document.getElementById('dashboard-grid');
     if (!grid) return;
-    grid.classList.remove('dashboard-cols-2');
-    if (cols === 2) grid.classList.add('dashboard-cols-2');
+    grid.classList.remove('dashboard-cols-2', 'dashboard-cols-3');
+    if (cols === 3) grid.classList.add('dashboard-cols-3');
     try { localStorage.setItem('dashboard-columns', String(cols)); } catch (_) {}
   };
 
   window.getDashboardColumns = function() {
     try {
       const v = localStorage.getItem('dashboard-columns');
-      return v === '2' ? 2 : 3;
-    } catch (_) { return 3; }
+      return v === '3' ? 3 : 2;  // Default: 2 columns
+    } catch (_) { return 2; }
   };
 
   // Init immediately
@@ -345,13 +345,13 @@
     if (localStorage.getItem('compact-mode') === '1') document.body.classList.add('compact-mode');
   } catch (_) {}
 
-  // Restore dashboard columns from localStorage
+  // Restore dashboard columns from localStorage (default: 2 columns)
   try {
     const cols = localStorage.getItem('dashboard-columns');
-    if (cols === '2') {
+    if (cols === '3') {
       const waitForGrid = () => {
         const grid = document.getElementById('dashboard-grid');
-        if (grid) { grid.classList.add('dashboard-cols-2'); }
+        if (grid) { grid.classList.add('dashboard-cols-3'); }
         else { requestAnimationFrame(waitForGrid); }
       };
       if (document.readyState === 'loading') {
@@ -360,5 +360,6 @@
         waitForGrid();
       }
     }
+    // 2 columns is default in CSS, no class needed
   } catch (_) {}
 })();
