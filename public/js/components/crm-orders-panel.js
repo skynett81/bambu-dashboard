@@ -205,7 +205,7 @@
   function renderForm(body) {
     if (_customers.length === 0) {
       fetchCustomers().then(c => { _customers = c; renderForm(body); });
-      body.innerHTML = '<div style="text-align:center;padding:2rem;opacity:0.6">Loading...</div>';
+      body.innerHTML = `<div style="text-align:center;padding:2rem;opacity:0.6">${_tl('common.loading')}</div>`;
       return;
     }
 
@@ -218,15 +218,15 @@
       return _formItems.map((it, i) => `<div class="card" style="margin-bottom:0.5rem;padding:0.75rem" data-item-idx="${i}">
         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.5rem;align-items:end">
           <div><label class="form-label">${_esc(_tl('crm.description', 'Beskrivelse'))} *</label><input class="form-control form-control-sm crm-item-field" data-field="description" value="${_esc(it.description || '')}"></div>
-          <div><label class="form-label">Fil</label><input class="form-control form-control-sm crm-item-field" data-field="filename" value="${_esc(it.filename || '')}"></div>
+          <div><label class="form-label">${_esc(_tl('crm.filename', 'Fil'))}</label><input class="form-control form-control-sm crm-item-field" data-field="filename" value="${_esc(it.filename || '')}"></div>
           <div><label class="form-label">${_esc(_tl('crm.quantity', 'Antall'))}</label><input class="form-control form-control-sm crm-item-field" data-field="quantity" type="number" min="1" value="${it.quantity || 1}"></div>
           <div><label class="form-label">Filament</label><input class="form-control form-control-sm crm-item-field" data-field="filament_type" value="${_esc(it.filament_type || '')}"></div>
-          <div><label class="form-label">Farge</label><input class="form-control form-control-sm crm-item-field" data-field="filament_color" value="${_esc(it.filament_color || '')}"></div>
-          <div><label class="form-label">Vekt (g)</label><input class="form-control form-control-sm crm-item-field" data-field="filament_weight_g" type="number" step="0.1" value="${it.filament_weight_g || ''}"></div>
-          <div><label class="form-label">Tid (min)</label><input class="form-control form-control-sm crm-item-field" data-field="estimated_time_min" type="number" step="1" value="${it.estimated_time_min || ''}"></div>
-          <div><label class="form-label">${_esc(_tl('crm.total', 'Pris'))}</label><input class="form-control form-control-sm crm-item-field" data-field="unit_price" type="number" step="0.01" value="${it.unit_price || ''}"></div>
+          <div><label class="form-label">${_esc(_tl('crm.filament_color', 'Farge'))}</label><input class="form-control form-control-sm crm-item-field" data-field="filament_color" value="${_esc(it.filament_color || '')}"></div>
+          <div><label class="form-label">${_esc(_tl('crm.filament_weight_g', 'Vekt (g)'))}</label><input class="form-control form-control-sm crm-item-field" data-field="filament_weight_g" type="number" step="0.1" value="${it.filament_weight_g || ''}"></div>
+          <div><label class="form-label">${_esc(_tl('crm.estimated_time_min', 'Tid (min)'))}</label><input class="form-control form-control-sm crm-item-field" data-field="estimated_time_min" type="number" step="1" value="${it.estimated_time_min || ''}"></div>
+          <div><label class="form-label">${_esc(_tl('crm.unit_price', 'Pris'))}</label><input class="form-control form-control-sm crm-item-field" data-field="unit_price" type="number" step="0.01" value="${it.unit_price || ''}"></div>
           <div style="display:flex;gap:0.25rem;align-items:end;padding-bottom:2px">
-            <button type="button" class="btn btn-sm btn-outline-info" onclick="window._crmOrdCalcItem(${i})" title="Kalkuler"><i class="bi bi-calculator"></i></button>
+            <button type="button" class="btn btn-sm btn-outline-info" onclick="window._crmOrdCalcItem(${i})" title="${_esc(_tl('crm.calculate', 'Kalkuler'))}"><i class="bi bi-calculator"></i></button>
             <button type="button" class="btn btn-sm btn-outline-danger" onclick="window._crmOrdRemoveItem(${i})" title="${_esc(_tl('crm.remove_item', 'Fjern'))}"><i class="bi bi-trash"></i></button>
           </div>
         </div>

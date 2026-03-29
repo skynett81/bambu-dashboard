@@ -172,7 +172,7 @@
     const body = document.getElementById('overlay-panel-body');
     if (!body) return;
 
-    body.innerHTML = '<div style="text-align:center;padding:2rem;opacity:0.6">Laster...</div>';
+    body.innerHTML = `<div style="text-align:center;padding:2rem;opacity:0.6">${_tl('common.loading')}</div>`;
 
     const data = await fetchDashboard();
 

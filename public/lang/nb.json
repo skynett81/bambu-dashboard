@@ -3397,6 +3397,12 @@
     "city": "By",
     "country": "Land",
     "contact": "Kontakt",
-    "logo_url": "Logo URL"
+    "logo_url": "Logo URL",
+    "filename": "Fil",
+    "filament_color": "Farge",
+    "filament_weight_g": "Vekt (g)",
+    "estimated_time_min": "Tid (min)",
+    "unit_price": "Pris",
+    "calculate": "Kalkuler"
   }
 }
