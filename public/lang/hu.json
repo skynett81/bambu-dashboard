@@ -3213,5 +3213,21 @@
     "idle": "Üresjárat",
     "layers": "Rétegek",
     "remaining": "Maradék"
+  },
+  "tour": {
+    "nav_title": "Navigáció",
+    "nav_text": "Használja az oldalsávot a Műszerfal, Vezérlés, Filament, Előzmények és más funkciók közötti navigáláshoz.",
+    "stats_title": "Valós idejű statisztikák",
+    "stats_text": "Valós idejű grafikonok a fúvóka, ágy és kamra hőmérsékletéhez, ventilátorsebességhez és nyomtatási előrehaladáshoz.",
+    "dashboard_title": "Műszerfal",
+    "dashboard_text": "Fő nézet nyomtatási előrehaladással, kamerával, AMS állapottal, hőmérőkkel és gyorsvezérléssel.",
+    "printer_selector_title": "Nyomtató választó",
+    "printer_selector_text": "Ha több nyomtatója van, itt válthat közöttük.",
+    "theme_title": "Téma és megjelenítés",
+    "theme_text": "Váltás világos és sötét téma között. T a gyors váltáshoz, ? a billentyűparancsokhoz.",
+    "skip": "Kihagyás",
+    "next": "Következő",
+    "back": "Vissza",
+    "finish": "Befejezés"
   }
 }

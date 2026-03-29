@@ -3213,5 +3213,21 @@
     "idle": "Nečinný",
     "layers": "Vrstvy",
     "remaining": "Zbývá"
+  },
+  "tour": {
+    "nav_title": "Navigace",
+    "nav_text": "Použijte postranní panel k navigaci mezi Panelem, Ovládáním, Filamentem, Historií a dalšími.",
+    "stats_title": "Statistiky v reálném čase",
+    "stats_text": "Grafy teplot trysky, podložky a komory, rychlosti ventilátoru a postupu tisku v reálném čase.",
+    "dashboard_title": "Panel",
+    "dashboard_text": "Hlavní přehled s postupem tisku, kamerou, stavem AMS, teploměry a rychlým ovládáním.",
+    "printer_selector_title": "Výběr tiskárny",
+    "printer_selector_text": "Pokud máte více tiskáren, přepínejte mezi nimi zde.",
+    "theme_title": "Téma a zobrazení",
+    "theme_text": "Přepínání mezi světlým a tmavým tématem. T pro rychlé přepnutí, ? pro zkratky.",
+    "skip": "Přeskočit",
+    "next": "Další",
+    "back": "Zpět",
+    "finish": "Dokončit"
   }
 }

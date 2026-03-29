@@ -4060,5 +4060,21 @@
     "thu": "Czw",
     "fri": "Pt",
     "sat": "Sob"
+  },
+  "tour": {
+    "nav_title": "Nawigacja",
+    "nav_text": "Użyj paska bocznego do nawigacji między Panelem, Sterowaniem, Filamentem, Historią i więcej.",
+    "stats_title": "Statystyki w czasie rzeczywistym",
+    "stats_text": "Wykresy w czasie rzeczywistym temperatur dyszy, stołu i komory, prędkości wentylatora i postępu druku.",
+    "dashboard_title": "Panel",
+    "dashboard_text": "Główny widok z postępem druku, kamerą, statusem AMS, wskaźnikami temperatury i szybkim sterowaniem.",
+    "printer_selector_title": "Wybór drukarki",
+    "printer_selector_text": "Jeśli masz kilka drukarek, przełączaj się między nimi tutaj.",
+    "theme_title": "Motyw i wyświetlanie",
+    "theme_text": "Przełączaj między jasnym a ciemnym motywem. T do szybkiego przełączania, ? dla skrótów.",
+    "skip": "Pomiń",
+    "next": "Dalej",
+    "back": "Wstecz",
+    "finish": "Zakończ"
   }
 }

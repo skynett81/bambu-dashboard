@@ -3214,5 +3214,21 @@
     "idle": "Inactif",
     "layers": "Couches",
     "remaining": "Restant"
+  },
+  "tour": {
+    "nav_title": "Navigation",
+    "nav_text": "Utilisez la barre latérale pour naviguer entre le tableau de bord, les contrôles, le filament, historique et plus.",
+    "stats_title": "Statistiques en temps réel",
+    "stats_text": "Graphiques en temps réel des températures de buse, lit et chambre, vitesse de ventilateur et progression.",
+    "dashboard_title": "Tableau de bord",
+    "dashboard_text": "Vue principale avec progression, caméra, statut AMS, jauges de température et contrôles rapides.",
+    "printer_selector_title": "Sélection imprimante",
+    "printer_selector_text": "Si vous avez plusieurs imprimantes, basculez entre elles ici.",
+    "theme_title": "Thème et affichage",
+    "theme_text": "Basculez entre thème clair et sombre. T pour basculer, ? pour les raccourcis clavier.",
+    "skip": "Passer",
+    "next": "Suivant",
+    "back": "Retour",
+    "finish": "Terminer"
   }
 }

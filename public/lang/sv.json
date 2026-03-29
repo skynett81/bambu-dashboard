@@ -3214,5 +3214,21 @@
     "idle": "Inaktiv",
     "layers": "Lager",
     "remaining": "Återstående"
+  },
+  "tour": {
+    "nav_title": "Navigering",
+    "nav_text": "Använd sidofältet för att navigera mellan Dashboard, Kontroller, Filament, Historik och mer.",
+    "stats_title": "Realtidsstatistik",
+    "stats_text": "Realtidsgrafer för munstycks-, bädd- och kammartemperaturer, fläkthastighet och utskriftsframsteg.",
+    "dashboard_title": "Dashboard",
+    "dashboard_text": "Huvudvy med utskriftsframsteg, kamera, AMS-status, temperaturmätare och snabbkontroller.",
+    "printer_selector_title": "Skrivarval",
+    "printer_selector_text": "Om du har flera skrivare kan du växla mellan dem här.",
+    "theme_title": "Tema och visning",
+    "theme_text": "Växla mellan ljust och mörkt tema. T för snabbväxling, ? för tangentbordsgenvägar.",
+    "skip": "Hoppa över",
+    "next": "Nästa",
+    "back": "Tillbaka",
+    "finish": "Slutför"
   }
 }

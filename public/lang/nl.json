@@ -3214,5 +3214,21 @@
     "idle": "Inactief",
     "layers": "Lagen",
     "remaining": "Resterend"
+  },
+  "tour": {
+    "nav_title": "Navigatie",
+    "nav_text": "Gebruik de zijbalk om te navigeren tussen Dashboard, Besturing, Filament, Geschiedenis en meer.",
+    "stats_title": "Realtime statistieken",
+    "stats_text": "Realtime grafieken van nozzle-, bed- en kamertemperaturen, ventilatorsnelheid en voortgang.",
+    "dashboard_title": "Dashboard",
+    "dashboard_text": "Hoofdoverzicht met printvoortgang, camera, AMS-status, temperatuurmeters en snelbesturing.",
+    "printer_selector_title": "Printerselectie",
+    "printer_selector_text": "Bij meerdere printers kunt u hier schakelen.",
+    "theme_title": "Thema en weergave",
+    "theme_text": "Wissel tussen licht en donker thema. T voor snel wisselen, ? voor sneltoetsen.",
+    "skip": "Overslaan",
+    "next": "Volgende",
+    "back": "Terug",
+    "finish": "Voltooien"
   }
 }

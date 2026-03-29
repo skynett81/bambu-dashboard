@@ -3152,5 +3152,21 @@
     "idle": "Inaktiv",
     "layers": "Lag",
     "remaining": "Gjenstående"
+  },
+  "tour": {
+    "nav_title": "Navigasjon",
+    "nav_text": "Bruk sidebaren til å navigere mellom Dashboard, Kontroller, Filament, Historikk og mer. Seksjoner kan minimeres.",
+    "stats_title": "Sanntidsstatistikk",
+    "stats_text": "Sanntidsgrafer som viser dyse-, seng- og kammertemperaturer, viftehastighet, utskriftshastighet og lagfremgang.",
+    "dashboard_title": "Dashboard",
+    "dashboard_text": "Din hovedoversikt med utskriftsfremgang, kamerafeed, AMS-status, temperaturmålere og hurtigkontroller.",
+    "printer_selector_title": "Printervalg",
+    "printer_selector_text": "Hvis du har flere printere, kan du bytte mellom dem her. Hver printer har sin egen status og data.",
+    "theme_title": "Tema og visning",
+    "theme_text": "Veksle mellom lyst og mørkt tema. Trykk T for rask veksling, eller ? for å se alle tastatursnarveier.",
+    "skip": "Hopp over",
+    "next": "Neste",
+    "back": "Tilbake",
+    "finish": "Fullfør"
   }
 }

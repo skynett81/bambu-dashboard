@@ -3214,5 +3214,21 @@
     "idle": "Boşta",
     "layers": "Katmanlar",
     "remaining": "Kalan"
+  },
+  "tour": {
+    "nav_title": "Gezinme",
+    "nav_text": "Kenar çubuğunu kullanarak Panel, Kontrol, Filament, Geçmiş ve daha fazlası arasında gezinin.",
+    "stats_title": "Gerçek zamanlı istatistikler",
+    "stats_text": "Nozul, yatak ve kabin sıcaklıkları, fan hızı ve baskı ilerlemesi için gerçek zamanlı grafikler.",
+    "dashboard_title": "Panel",
+    "dashboard_text": "Baskı ilerlemesi, kamera, AMS durumu, sıcaklık göstergeleri ve hızlı kontrollerle ana görünüm.",
+    "printer_selector_title": "Yazıcı seçici",
+    "printer_selector_text": "Birden fazla yazıcınız varsa burada aralarında geçiş yapın.",
+    "theme_title": "Tema ve görünüm",
+    "theme_text": "Açık ve koyu tema arasında geçiş yapın. T ile hızlı geçiş, ? ile kısayollar.",
+    "skip": "Atla",
+    "next": "İleri",
+    "back": "Geri",
+    "finish": "Bitir"
   }
 }

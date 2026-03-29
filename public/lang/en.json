@@ -3152,5 +3152,21 @@
     "idle": "Idle",
     "layers": "Layers",
     "remaining": "Remaining"
+  },
+  "tour": {
+    "nav_title": "Navigation",
+    "nav_text": "Use the sidebar to navigate between Dashboard, Controls, Filament, History and more. Sections can be collapsed.",
+    "stats_title": "Real-time Statistics",
+    "stats_text": "Real-time graphs showing nozzle, bed and chamber temperatures, fan speed, print speed and layer progress.",
+    "dashboard_title": "Dashboard",
+    "dashboard_text": "Your main overview with print progress, camera feed, AMS status, temperature gauges and quick controls.",
+    "printer_selector_title": "Printer Selector",
+    "printer_selector_text": "If you have multiple printers, switch between them here. Each printer has its own status and data.",
+    "theme_title": "Theme & Display",
+    "theme_text": "Toggle between light and dark theme. Press T for quick toggle, or ? to see all keyboard shortcuts.",
+    "skip": "Skip",
+    "next": "Next",
+    "back": "Back",
+    "finish": "Finish"
   }
 }

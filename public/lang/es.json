@@ -3214,5 +3214,21 @@
     "idle": "Inactivo",
     "layers": "Capas",
     "remaining": "Restante"
+  },
+  "tour": {
+    "nav_title": "Navegación",
+    "nav_text": "Use la barra lateral para navegar entre Panel, Controles, Filamento, Historial y más.",
+    "stats_title": "Estadísticas en tiempo real",
+    "stats_text": "Gráficos en tiempo real de temperaturas de boquilla, cama y cámara, velocidad de ventilador y progreso.",
+    "dashboard_title": "Panel",
+    "dashboard_text": "Vista principal con progreso de impresión, cámara, estado AMS, medidores de temperatura y controles rápidos.",
+    "printer_selector_title": "Selector de impresora",
+    "printer_selector_text": "Si tiene varias impresoras, cambie entre ellas aquí.",
+    "theme_title": "Tema y visualización",
+    "theme_text": "Cambie entre tema claro y oscuro. T para cambiar rápido, ? para atajos de teclado.",
+    "skip": "Saltar",
+    "next": "Siguiente",
+    "back": "Atrás",
+    "finish": "Finalizar"
   }
 }

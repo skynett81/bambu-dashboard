@@ -3214,5 +3214,21 @@
     "idle": "유휴",
     "layers": "레이어",
     "remaining": "남은 시간"
+  },
+  "tour": {
+    "nav_title": "탐색",
+    "nav_text": "사이드바를 사용하여 대시보드, 컨트롤, 필라멘트, 기록 등을 탐색합니다.",
+    "stats_title": "실시간 통계",
+    "stats_text": "노즐, 베드, 챔버 온도, 팬 속도, 인쇄 진행률의 실시간 그래프.",
+    "dashboard_title": "대시보드",
+    "dashboard_text": "인쇄 진행률, 카메라, AMS 상태, 온도 게이지, 빠른 컨트롤이 있는 메인 화면.",
+    "printer_selector_title": "프린터 선택",
+    "printer_selector_text": "여러 프린터가 있는 경우 여기서 전환합니다.",
+    "theme_title": "테마 및 표시",
+    "theme_text": "라이트/다크 테마 전환. T로 빠른 전환, ?로 단축키 목록.",
+    "skip": "건너뛰기",
+    "next": "다음",
+    "back": "이전",
+    "finish": "완료"
   }
 }

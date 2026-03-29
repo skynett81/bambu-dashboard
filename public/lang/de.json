@@ -3214,5 +3214,21 @@
     "idle": "Bereit",
     "layers": "Schichten",
     "remaining": "Verbleibend"
+  },
+  "tour": {
+    "nav_title": "Navigation",
+    "nav_text": "Verwenden Sie die Seitenleiste zur Navigation zwischen Dashboard, Steuerung, Filament, Verlauf und mehr.",
+    "stats_title": "Echtzeitstatistiken",
+    "stats_text": "Echtzeitgrafiken für Düsen-, Bett- und Kammertemperaturen, Lüftergeschwindigkeit und Druckfortschritt.",
+    "dashboard_title": "Dashboard",
+    "dashboard_text": "Ihre Hauptübersicht mit Druckfortschritt, Kamerabild, AMS-Status, Temperaturanzeigen und Schnellsteuerung.",
+    "printer_selector_title": "Druckerauswahl",
+    "printer_selector_text": "Bei mehreren Druckern können Sie hier zwischen ihnen wechseln.",
+    "theme_title": "Design & Anzeige",
+    "theme_text": "Wechseln Sie zwischen hellem und dunklem Design. T für schnellen Wechsel, ? für Tastaturkürzel.",
+    "skip": "Überspringen",
+    "next": "Weiter",
+    "back": "Zurück",
+    "finish": "Fertig"
   }
 }

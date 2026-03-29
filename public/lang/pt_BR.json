@@ -3214,5 +3214,21 @@
     "idle": "Inativo",
     "layers": "Camadas",
     "remaining": "Restante"
+  },
+  "tour": {
+    "nav_title": "Navegação",
+    "nav_text": "Use a barra lateral para navegar entre Painel, Controles, Filamento, Histórico e mais.",
+    "stats_title": "Estatísticas em tempo real",
+    "stats_text": "Gráficos em tempo real de temperaturas do bico, mesa e câmara, velocidade do ventilador e progresso.",
+    "dashboard_title": "Painel",
+    "dashboard_text": "Visão principal com progresso de impressão, câmera, status AMS, medidores de temperatura e controles rápidos.",
+    "printer_selector_title": "Seletor de impressora",
+    "printer_selector_text": "Se você tem várias impressoras, alterne entre elas aqui.",
+    "theme_title": "Tema e exibição",
+    "theme_text": "Alterne entre tema claro e escuro. T para alternar, ? para atalhos.",
+    "skip": "Pular",
+    "next": "Próximo",
+    "back": "Voltar",
+    "finish": "Concluir"
   }
 }

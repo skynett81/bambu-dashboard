@@ -3214,5 +3214,21 @@
     "idle": "Inattiva",
     "layers": "Strati",
     "remaining": "Rimanente"
+  },
+  "tour": {
+    "nav_title": "Navigazione",
+    "nav_text": "Usa la barra laterale per navigare tra Dashboard, Controlli, Filamento, Cronologia e altro.",
+    "stats_title": "Statistiche in tempo reale",
+    "stats_text": "Grafici in tempo reale per temperature ugello, letto e camera, velocità ventola e progresso.",
+    "dashboard_title": "Dashboard",
+    "dashboard_text": "Panoramica principale con progresso stampa, telecamera, stato AMS e controlli rapidi.",
+    "printer_selector_title": "Selettore stampante",
+    "printer_selector_text": "Se hai più stampanti, passa da una all altra qui.",
+    "theme_title": "Tema e visualizzazione",
+    "theme_text": "Alterna tra tema chiaro e scuro. T per cambio rapido, ? per scorciatoie.",
+    "skip": "Salta",
+    "next": "Avanti",
+    "back": "Indietro",
+    "finish": "Fine"
   }
 }
