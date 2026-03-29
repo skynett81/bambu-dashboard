@@ -1090,13 +1090,29 @@
 .ams-humidity-info {
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
+  gap: 5px;
+  font-size: 0.75rem;
   color: var(--text-secondary);
-  padding: 4px 14px;
-  border: 1px solid var(--border-color);
-  border-radius: 14px;
-  backdrop-filter: blur(8px);
+  padding: 5px 12px;
+  flex-wrap: wrap;
+}
+.ams-info-label {
+  font-weight: 700;
+  color: var(--text-primary);
+  font-size: 0.8rem;
+}
+.ams-info-divider {
+  opacity: 0.3;
+  font-size: 0.7rem;
+}
+.ams-info-badge {
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
 }
 
 .ams-humidity-icon {

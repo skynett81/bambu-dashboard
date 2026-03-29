@@ -122,7 +122,10 @@
     "low_filament": "{{slot}}: {{pct}}% szál maradt",
     "critical_filament": "{{slot}}: {{pct}}% szál — hamarosan cserélje!",
     "click_to_calibrate": "Kattintson a kalibráláshoz",
-    "low_filament_alert": "Kevés filament"
+    "low_filament_alert": "Kevés filament",
+    "humidity_dry": "Száraz",
+    "humidity_ok": "OK",
+    "humidity_wet": "Nedves"
   },
   "filament": {
     "no_data": "Nincs filament adat",

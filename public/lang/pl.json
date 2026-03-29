@@ -140,7 +140,10 @@
     "rfid_not_detected": "Nie wykryto RFID",
     "spool_weight": "Waga szpuli",
     "k_value": "Wartość K",
-    "low_filament_alert": "Mało filamentu"
+    "low_filament_alert": "Mało filamentu",
+    "humidity_dry": "Sucho",
+    "humidity_ok": "OK",
+    "humidity_wet": "Wilgotno"
   },
   "filament": {
     "no_data": "Brak danych o filamencie",

@@ -123,7 +123,10 @@
     "low_filament": "{{slot}}: {{pct}}% filament kaldı",
     "critical_filament": "{{slot}}: {{pct}}% filament — yakında değiştirin!",
     "click_to_calibrate": "Kalibre etmek için tıklayın",
-    "low_filament_alert": "Düşük filament"
+    "low_filament_alert": "Düşük filament",
+    "humidity_dry": "Kuru",
+    "humidity_ok": "OK",
+    "humidity_wet": "Nemli"
   },
   "filament": {
     "no_data": "Filament verisi yok",

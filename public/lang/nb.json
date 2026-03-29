@@ -126,7 +126,10 @@
     "low_filament": "{{slot}}: {{pct}}% filament igjen",
     "critical_filament": "{{slot}}: {{pct}}% filament — bytt snart!",
     "click_to_calibrate": "Klikk for å kalibrere",
-    "low_filament_alert": "Lite filament"
+    "low_filament_alert": "Lite filament",
+    "humidity_dry": "Tørt",
+    "humidity_ok": "OK",
+    "humidity_wet": "Fuktig"
   },
   "filament": {
     "no_data": "Ingen filamentdata",

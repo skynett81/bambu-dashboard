@@ -123,7 +123,10 @@
     "low_filament": "{{slot}}: フィラメント残量{{pct}}%",
     "critical_filament": "{{slot}}: フィラメント{{pct}}% — 交換してください！",
     "click_to_calibrate": "クリックしてキャリブレーション",
-    "low_filament_alert": "フィラメント残量少"
+    "low_filament_alert": "フィラメント残量少",
+    "humidity_dry": "乾燥",
+    "humidity_ok": "OK",
+    "humidity_wet": "湿気"
   },
   "filament": {
     "no_data": "フィラメントデータなし",

@@ -123,7 +123,10 @@
     "low_filament": "{{slot}}: {{pct}}% Filament verbleibend",
     "critical_filament": "{{slot}}: {{pct}}% Filament — bald wechseln!",
     "click_to_calibrate": "Zum Kalibrieren klicken",
-    "low_filament_alert": "Wenig Filament"
+    "low_filament_alert": "Wenig Filament",
+    "humidity_dry": "Trocken",
+    "humidity_ok": "OK",
+    "humidity_wet": "Feucht"
   },
   "filament": {
     "no_data": "Keine Filamentdaten",

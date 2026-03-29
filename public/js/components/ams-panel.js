@@ -170,16 +170,13 @@
     // Clamp selected unit
     if (_selectedUnit >= amsUnits.length) _selectedUnit = 0;
 
-    // --- Tabs: slot indicators (A1-A4) for each tray ---
+    // --- Tabs: only show for multiple AMS units ---
     if (tabsEl) {
-      const trays = amsUnits[_selectedUnit]?.tray || [];
-      let tabsHtml = '';
-
-      // If multiple AMS units, show unit selector tabs
       if (amsUnits.length > 1) {
+        let tabsHtml = '';
         for (let i = 0; i < amsUnits.length; i++) {
           const active = i === _selectedUnit ? ' ams-tab-active' : '';
-          tabsHtml += `<button class="ams-tab${active}" data-unit="${i}">A${i + 1}</button>`;
+          tabsHtml += `<button class="ams-tab${active}" data-unit="${i}">${amsLabel} ${i + 1}</button>`;
         }
         tabsEl.innerHTML = tabsHtml;
         tabsEl.querySelectorAll('.ams-tab').forEach(btn => {
@@ -189,25 +186,34 @@
           };
         });
       } else {
-        // Single AMS: show slot indicators like Bambu Studio
-        const reloadSvg = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>';
-        for (let i = 0; i < trays.length; i++) {
-          const globalSlot = _selectedUnit * 4 + i;
-          const isActive = String(globalSlot) === String(activeTray) && String(activeTray) !== '254' && String(activeTray) !== '255';
-          tabsHtml += `<span class="ams-tab${isActive ? ' ams-tab-active' : ''}">A${i + 1} ${reloadSvg}</span>`;
-        }
-        tabsEl.innerHTML = tabsHtml;
+        tabsEl.innerHTML = '';
       }
     }
 
-    // --- Humidity info ---
+    // --- AMS info bar: humidity, temperature, label ---
     if (humidityEl) {
       const unit = amsUnits[_selectedUnit];
-      const humidity = unit?.humidity_raw ?? unit?.humidity ?? '--';
+      const humidityRaw = unit?.humidity_raw ?? '--';
+      const humidityLevel = parseInt(unit?.humidity) || 0;
+      const amsTemp = unit?.temp ? parseFloat(unit.temp).toFixed(1) : '--';
+      // Humidity level indicator (1-5: 1=dry, 5=wet)
+      const humidityColor = humidityLevel <= 2 ? 'var(--accent-green)' : humidityLevel <= 3 ? 'var(--accent-orange)' : 'var(--accent-red)';
+      const humidityLabel = humidityLevel <= 2 ? (t('ams.humidity_dry') || 'Dry') : humidityLevel <= 3 ? (t('ams.humidity_ok') || 'OK') : (t('ams.humidity_wet') || 'Wet');
+      // RFID status
+      const bblBits = data.ams?.tray_is_bbl_bits || '0';
+      const bblCount = parseInt(bblBits, 16).toString(2).split('').filter(b => b === '1').length;
+      const totalTrays = (unit?.tray || []).filter(t => t && t.tray_type).length;
+
       humidityEl.innerHTML = `
-        <svg class="ams-humidity-icon" viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-        <span>${humidity}%</span>
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.5;margin-left:2px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`;
+        <span class="ams-info-label">${amsLabel}</span>
+        <span class="ams-info-divider">·</span>
+        <svg class="ams-humidity-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="color:${humidityColor}"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+        <span style="color:${humidityColor};font-weight:600">${humidityRaw}%</span>
+        <span class="ams-info-badge" style="background:${humidityColor}">${humidityLabel}</span>
+        <span class="ams-info-divider">·</span>
+        <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/></svg>
+        <span>${amsTemp}°C</span>
+        ${bblCount > 0 ? `<span class="ams-info-divider">·</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6"><path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10"/><path d="M5 12c0-3.87 3.13-7 7-7s7 3.13 7 7"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg><span>RFID ${bblCount}/${totalTrays}</span>` : ''}`;
     }
 
     // --- Filament cards for selected unit ---

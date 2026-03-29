@@ -123,7 +123,10 @@
     "low_filament": "{{slot}}: 耗材剩余{{pct}}%",
     "critical_filament": "{{slot}}: 耗材{{pct}}% — 请尽快更换！",
     "click_to_calibrate": "点击校准",
-    "low_filament_alert": "耗材不足"
+    "low_filament_alert": "耗材不足",
+    "humidity_dry": "干燥",
+    "humidity_ok": "正常",
+    "humidity_wet": "潮湿"
   },
   "filament": {
     "no_data": "无耗材数据",

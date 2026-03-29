@@ -123,7 +123,10 @@
     "low_filament": "{{slot}}: {{pct}}% filament resterend",
     "critical_filament": "{{slot}}: {{pct}}% filament — vervang binnenkort!",
     "click_to_calibrate": "Klik om te kalibreren",
-    "low_filament_alert": "Weinig filament"
+    "low_filament_alert": "Weinig filament",
+    "humidity_dry": "Droog",
+    "humidity_ok": "OK",
+    "humidity_wet": "Vochtig"
   },
   "filament": {
     "no_data": "Geen filamentgegevens",

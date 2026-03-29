@@ -122,7 +122,10 @@
     "low_filament": "{{slot}}: zbývá {{pct}}% filamentu",
     "critical_filament": "{{slot}}: {{pct}}% filamentu — brzy vyměňte!",
     "click_to_calibrate": "Kliknutím kalibrujte",
-    "low_filament_alert": "Málo filamentu"
+    "low_filament_alert": "Málo filamentu",
+    "humidity_dry": "Sucho",
+    "humidity_ok": "OK",
+    "humidity_wet": "Vlhko"
   },
   "filament": {
     "no_data": "Žádná data o filamentu",
