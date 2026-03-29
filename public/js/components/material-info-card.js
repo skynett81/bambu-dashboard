@@ -237,12 +237,12 @@
 
           ${mat.tips ? `<div class="mat-section mat-tips">
             <div class="mat-section-title">${_t('filament.tips', 'Tips')}</div>
-            <div class="mat-tip-text">${esc(mat.tips)}</div>
+            <div class="mat-tip-text">${esc(_t('filament.mat_tips_' + mat.id, '') || mat.tips)}</div>
           </div>` : ''}
 
           ${mat.warnings ? `<div class="mat-section mat-warnings">
             <div class="mat-section-title">${_t('filament.warnings', 'Warnings')}</div>
-            <div class="mat-warn-text">${esc(mat.warnings)}</div>
+            <div class="mat-warn-text">${esc(_t('filament.mat_warn_' + mat.id, '') || mat.warnings)}</div>
           </div>` : ''}
         </div>
       </div>`;
