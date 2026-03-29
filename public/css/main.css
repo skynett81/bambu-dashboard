@@ -63,10 +63,11 @@
 .dashboard {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  grid-template-rows: minmax(350px, 1.5fr) auto;
+  grid-template-rows: 1fr auto;
   gap: var(--gap);
   padding: var(--gap) 20px;
   align-items: stretch;
+  min-height: calc(100vh - 120px);
 }
 
 .dashboard > :is(#temp-card, #fans-card, .model-info-strip) {
@@ -74,8 +75,8 @@
 }
 
 /* -- Default: 2-column layout -- */
-#progress-card  { grid-column: 1; grid-row: 1; min-height: 350px; }
-#camera-card    { grid-column: 2; grid-row: 1; min-height: 350px; }
+#progress-card  { grid-column: 1; grid-row: 1; }
+#camera-card    { grid-column: 2; grid-row: 1; }
 #filament-ring  { grid-column: 1; grid-row: 2; align-self: start; }
 #ams-card       { grid-column: 2; grid-row: 2; align-self: start; }
 #temp-card      { display: none; }
