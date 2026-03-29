@@ -92,9 +92,17 @@
       const tw = 320;
       let top, left;
 
+      // Measure tooltip height first
+      tooltip.style.top = '-9999px';
+      tooltip.style.left = '-9999px';
+      tooltip.style.display = 'block';
+      tooltip.style.transform = '';
+      const th = tooltip.offsetHeight || 200;
+
+      let useTransform = false;
       switch (step.position) {
         case 'right':
-          top = rect.top + rect.height / 2;
+          top = rect.top + rect.height / 2 - th / 2;
           left = rect.right + 16;
           break;
         case 'bottom':
@@ -102,29 +110,21 @@
           left = rect.left + rect.width / 2 - tw / 2;
           break;
         case 'top':
-          top = rect.top - 16;
+          top = rect.top - th - 16;
           left = rect.left + rect.width / 2 - tw / 2;
-          tooltip.style.transform = 'translateY(-100%)';
           break;
         default:
           top = rect.bottom + 16;
           left = rect.left;
       }
 
-      // Keep within viewport — ensure tooltip doesn't go off-screen
+      // Keep within viewport
       left = Math.max(16, Math.min(left, window.innerWidth - tw - 16));
-      // Measure tooltip height (render off-screen first)
-      tooltip.style.top = '-9999px';
-      tooltip.style.left = '-9999px';
-      tooltip.style.display = 'block';
-      const th = tooltip.offsetHeight || 200;
-      // Clamp top so entire tooltip is visible
-      const maxTop = window.innerHeight - th - 16;
-      top = Math.max(16, Math.min(top, maxTop));
+      top = Math.max(16, Math.min(top, window.innerHeight - th - 16));
 
       tooltip.style.top = top + 'px';
       tooltip.style.left = left + 'px';
-      if (step.position !== 'top') tooltip.style.transform = '';
+      tooltip.style.transform = '';
     } else {
       // Center if target not found
       tooltip.style.top = '50%';
