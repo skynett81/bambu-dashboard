@@ -609,12 +609,5 @@
   top: 0;
 }
 
-/* AdminLTE sidebar section collapsed state */
-.sidebar-section.collapsed > .nav-treeview,
-.sidebar-section.collapsed > .sidebar-section-items {
-  display: none !important;
-}
-.sidebar-section:not(.collapsed) > .nav-treeview,
-.sidebar-section:not(.collapsed) > .sidebar-section-items {
-  display: block !important;
-}
+
+
