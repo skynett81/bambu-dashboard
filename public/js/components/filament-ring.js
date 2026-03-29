@@ -336,7 +336,8 @@
       const isCritical = info.current <= 5;
       let warnClass = isCritical ? ' fr-spool-critical' : isLow ? ' fr-spool-low' : '';
 
-      html += `<div class="fr-spool-item${isAct ? ' fr-spool-active' : ''}${warnClass}">`;
+      const spoolData = JSON.stringify({ unitIdx: entry.unitIdx, trayIdx: entry.trayIdx, isExt: !!entry.isExternal, type: tType, brand, color: tr.tray_color, remain: info.current, weightG: info.currentG, totalG: tr.tray_weight, nozzle: nozzleRange, rfid: hasRfid, idName, colorName, slot: slotLabel, dryingTemp: tr.drying_temp, dryingTime: tr.drying_time }).replace(/'/g, '&#39;');
+      html += `<div class="fr-spool-item${isAct ? ' fr-spool-active' : ''}${warnClass}" style="cursor:pointer" onclick='showSpoolDetail(${spoolData})'>`;
       html += `<div class="fr-spool-ring">${_spoolVisual(c, info.current, 'fr-' + entry.globalIdx)}<div class="fr-spool-overlay"><span class="fr-spool-pct">${info.current}%</span></div></div>`;
       html += `<div class="fr-spool-meta">`;
       html += `<span class="fr-spool-brand">${brand || tType}</span>`;
@@ -385,6 +386,58 @@
         const dot = filBtn.querySelector('.low-stock-dot');
         if (dot) dot.remove();
       }
+    }
+  };
+
+  // Spool detail popup — shows full info when clicking a spool
+  window.showSpoolDetail = function(d) {
+    // Remove existing popup
+    document.querySelectorAll('.fr-detail-popup').forEach(el => el.remove());
+
+    const color = d.color ? '#' + d.color.substring(0, 6) : '#888';
+    const remainPct = d.remain ?? 0;
+    const remainBar = `<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin:6px 0"><div style="height:100%;width:${remainPct}%;background:${color};border-radius:3px;transition:width 0.3s"></div></div>`;
+
+    let html = `
+      <div class="fr-detail-header">
+        <div class="fr-detail-dot" style="background:${color}"></div>
+        <div>
+          <div class="fr-detail-title">${d.brand || d.type}</div>
+          <div class="fr-detail-sub">${d.type}${d.colorName ? ' · ' + d.colorName : ''} · ${d.slot}</div>
+        </div>
+        <button class="fr-detail-close" onclick="this.closest('.fr-detail-popup').remove()">×</button>
+      </div>
+      ${remainBar}
+      <div class="fr-detail-grid">
+        <div class="fr-detail-stat"><span class="fr-detail-stat-val">${remainPct}%</span><span class="fr-detail-stat-lbl">${t('filament.remaining') || 'Remaining'}</span></div>
+        <div class="fr-detail-stat"><span class="fr-detail-stat-val">${d.weightG || '--'}g</span><span class="fr-detail-stat-lbl">${t('filament.weight') || 'Weight'}</span></div>
+        <div class="fr-detail-stat"><span class="fr-detail-stat-val">${d.totalG || '--'}g</span><span class="fr-detail-stat-lbl">${t('filament.total') || 'Total'}</span></div>
+      </div>`;
+
+    // Extra info rows
+    html += '<div class="fr-detail-rows">';
+    if (d.nozzle) html += `<div class="fr-detail-row"><span>${t('filament.nozzle_temp') || 'Nozzle'}</span><span>${d.nozzle}</span></div>`;
+    if (d.dryingTemp) html += `<div class="fr-detail-row"><span>${t('filament.drying') || 'Drying'}</span><span>${d.dryingTemp}°C / ${d.dryingTime || '?'}h</span></div>`;
+    if (d.rfid) html += `<div class="fr-detail-row"><span>RFID</span><span>${d.idName || 'Bambu Lab'} ✓</span></div>`;
+    html += `<div class="fr-detail-row"><span>${t('filament.diameter') || 'Diameter'}</span><span>1.75mm</span></div>`;
+    html += '</div>';
+
+    // Material info button
+    html += `<button class="form-btn form-btn-sm" style="width:100%;margin-top:8px" onclick="location.hash='#filament/inventory'">${t('filament.view_inventory') || 'View in Inventory'}</button>`;
+
+    // Render material info card if available
+    html += `<div id="fr-material-info-${d.slot}"></div>`;
+
+    const popup = document.createElement('div');
+    popup.className = 'fr-detail-popup';
+    popup.innerHTML = html;
+
+    // Position near the clicked spool
+    document.body.appendChild(popup);
+
+    // Load material info if available
+    if (typeof renderMaterialInfo === 'function') {
+      setTimeout(() => renderMaterialInfo(document.getElementById('fr-material-info-' + d.slot), d.type), 100);
     }
   };
 })();

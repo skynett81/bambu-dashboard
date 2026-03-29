@@ -12740,6 +12740,100 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
 }
 .fr-spool-low { outline: 1px solid var(--accent-orange); outline-offset: 2px; border-radius: 8px; }
 .fr-spool-critical { outline: 2px solid var(--accent-red); outline-offset: 2px; border-radius: 8px; animation: pulse-warn 2s infinite; }
+
+/* Spool detail popup */
+.fr-detail-popup {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  width: 340px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 64px);
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 16px;
+  box-shadow: 0 16px 64px rgba(0,0,0,0.5);
+  backdrop-filter: blur(20px);
+  animation: fr-popup-in 0.2s ease;
+}
+@keyframes fr-popup-in {
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.95); }
+  to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+.fr-detail-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.fr-detail-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.fr-detail-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.fr-detail-sub {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+.fr-detail-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+.fr-detail-close:hover { color: var(--text-primary); }
+.fr-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin: 8px 0;
+}
+.fr-detail-stat {
+  text-align: center;
+  padding: 8px 4px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+}
+.fr-detail-stat-val {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+.fr-detail-stat-lbl {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.fr-detail-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.fr-detail-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 0.8rem;
+}
+.fr-detail-row span:first-child { color: var(--text-secondary); }
+.fr-detail-row span:last-child { color: var(--text-primary); font-weight: 600; }
 .filament-ring-main {
   position: relative;
   width: clamp(80px, 35cqi, 130px);

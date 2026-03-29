@@ -168,7 +168,7 @@
     "type": "Type",
     "color": "Color",
     "color_hex": "Hex",
-    "weight": "Weight (g)",
+    "weight": "Weight",
     "price": "Price",
     "save": "Save",
     "type_required": "Type is required",
@@ -782,7 +782,12 @@
     "ease_of_print": "Ease of print",
     "recommended": "Recommended",
     "tips": "Tips",
-    "warnings": "Warnings"
+    "warnings": "Warnings",
+    "view_inventory": "View in Inventory",
+    "total": "Total",
+    "drying": "Drying",
+    "diameter": "Diameter",
+    "usage": "Usage"
   },
   "controls": {
     "title": "Controls",

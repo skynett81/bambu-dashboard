@@ -168,7 +168,7 @@
     "type": "Type",
     "color": "Farge",
     "color_hex": "Hex",
-    "weight": "Vekt (g)",
+    "weight": "Vekt",
     "price": "Pris (kr)",
     "save": "Lagre",
     "type_required": "Type er påkrevd",
@@ -782,7 +782,12 @@
     "ease_of_print": "Enkel å printe",
     "recommended": "Anbefalt",
     "tips": "Tips",
-    "warnings": "Advarsler"
+    "warnings": "Advarsler",
+    "view_inventory": "Se i filamentlager",
+    "total": "Totalt",
+    "drying": "Tørking",
+    "diameter": "Diameter",
+    "usage": "Forbruk"
   },
   "controls": {
     "title": "Kontroller",
