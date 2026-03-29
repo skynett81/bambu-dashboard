@@ -1205,7 +1205,7 @@
 
 .ams-card:hover .ams-spool {
   transform: scale(1.05);
-  filter: brightness(1.1);
+  filter: brightness(1.15) drop-shadow(0 0 8px rgba(16, 179, 164, 0.2));
 }
 
 .ams-spool-empty {
@@ -12650,6 +12650,7 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
 }
 .fr-spool-item:hover {
   transform: scale(1.05);
+  filter: drop-shadow(0 0 6px rgba(16, 179, 164, 0.15));
 }
 .fr-spool-active {
   filter: brightness(1.1);
