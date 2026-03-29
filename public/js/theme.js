@@ -232,7 +232,7 @@
     root.setAttribute('data-theme', themeFamily);
 
     // AdminLTE / Bootstrap dark mode attribute
-    document.body.setAttribute('data-bs-theme', themeFamily);
+    if (document.body) document.body.setAttribute('data-bs-theme', themeFamily);
 
     // Update toggle button icon if present
     updateToggleButton(themeFamily);
