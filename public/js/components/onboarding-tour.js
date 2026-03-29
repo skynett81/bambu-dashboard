@@ -111,9 +111,16 @@
           left = rect.left;
       }
 
-      // Keep within viewport
+      // Keep within viewport — ensure tooltip doesn't go off-screen
       left = Math.max(16, Math.min(left, window.innerWidth - tw - 16));
-      top = Math.max(16, top);
+      // Measure tooltip height (render off-screen first)
+      tooltip.style.top = '-9999px';
+      tooltip.style.left = '-9999px';
+      tooltip.style.display = 'block';
+      const th = tooltip.offsetHeight || 200;
+      // Clamp top so entire tooltip is visible
+      const maxTop = window.innerHeight - th - 16;
+      top = Math.max(16, Math.min(top, maxTop));
 
       tooltip.style.top = top + 'px';
       tooltip.style.left = left + 'px';
