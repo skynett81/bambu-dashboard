@@ -100,7 +100,8 @@
     "lan_liveview_hint": "LAN Live View must be enabled on the printer for the camera to work.",
     "step_printer_screen": "On the printer screen, go to Settings",
     "step_settings": "Select General or Network",
-    "step_lan_liveview": "Enable \"LAN Only Liveview\""
+    "step_lan_liveview": "Enable \"LAN Only Liveview\"",
+    "reconnecting": "Připojování..."
   },
   "temperature": {
     "title": "Teploty",
@@ -816,7 +817,13 @@
     "mat_tips_hips": "Rozpustný podpůrný materiál pro ABS (rozpouští se v limonenu). Lze používat i jako samostatný materiál.",
     "mat_warn_hips": "Vyžaduje uzavřenou tiskárnu. Rozpouštění v limonenu je pomalé (12–24 hodin).",
     "mat_tips_pet-cf": "Velmi tuhý a rozměrově stabilní. Vhodný pro technické díly bez krytu.",
-    "mat_warn_pet-cf": "Vyžaduje zakalenú trysku. Uhlíkové vlákno dělá materiál křehkým."
+    "mat_warn_pet-cf": "Vyžaduje zakalenú trysku. Uhlíkové vlákno dělá materiál křehkým.",
+    "view_inventory": "Zobrazit v inventáři",
+    "total": "Celkem",
+    "drying": "Sušení",
+    "diameter": "Průměr",
+    "usage": "Spotřeba",
+    "after_print": "Po tisku"
   },
   "controls": {
     "title": "Ovládání",
@@ -953,7 +960,8 @@
     "format_usb": "Formátovat USB",
     "format_confirm": "Opravdu chcete naformátovat {{storage}}? Všechny soubory budou trvale smazány.",
     "format_success": "{{storage}} naformátováno",
-    "sd_card_short": "SD karta"
+    "sd_card_short": "SD karta",
+    "send_gcode": "Odeslat G-kód..."
   },
   "speed": {
     "label": "Rychlost:",
@@ -1081,7 +1089,11 @@
     "sort_name": "Název",
     "sort_duration": "Trvání",
     "sort_filament": "Filament",
-    "sort_status": "Stav"
+    "sort_status": "Stav",
+    "compare_btn": "Porovnat",
+    "compare_load_failed": "Nepodařilo se načíst data tisku",
+    "compare_prints": "Porovnat tisky",
+    "compare_select_hint": "Vyberte přesně dva tisky a klikněte na Porovnat."
   },
   "stats": {
     "total_prints": "Celkem tisků",
@@ -1192,7 +1204,23 @@
     "peak_chamber": "Peak chamber temp",
     "avg_chamber": "Avg chamber temp",
     "print_timeline": "Časová osa tisků",
-    "tab_printstats": "Statistiky tisku"
+    "tab_printstats": "Statistiky tisku",
+    "active_days": "Aktivní dny tisku",
+    "bed_avg_max": "Podložka průměr / max",
+    "colors_used": "Použité barvy",
+    "days": "dní",
+    "hourly_activity": "Aktivita po hodinách",
+    "level": "Úroveň",
+    "most_printed": "Nejčastěji tisknuté modely",
+    "most_used": "Nejpoužívanější",
+    "nozzle_avg_max": "Tryska průměr / max",
+    "nozzle_speed": "Tryska a rychlost",
+    "of": "z",
+    "peak_hour": "Nejaktivnější hodina",
+    "per_brand": "Podle značky",
+    "per_type": "Podle typu",
+    "prints_per_day": "Tisků za den (průměr)",
+    "temperatures": "Teploty"
   },
   "errors": {
     "no_errors": "Žádné zaznamenané chyby.",
@@ -1258,7 +1286,8 @@
     "filter_prints": "Tisky",
     "filter_errors": "Chyby",
     "filter_maintenance": "Údržba",
-    "filter_other": "Ostatní"
+    "filter_other": "Ostatní",
+    "no_match_desc": "Nebyly nalezeny žádné chyby odpovídající vašim filtrům. To je skvělé!"
   },
   "settings": {
     "printers_title": "Tiskárny",
@@ -1779,7 +1808,10 @@
     "buzzer_title": "Reproduktor tiskárny",
     "buzzer_enable": "Přehrávat zvuky na reproduktoru tiskárny",
     "buzzer_desc": "Používá G-code M300 k přehrávání melodií na vestavěném bzučáku tiskárny",
-    "buzzer_test": "Otestovat bzučák"
+    "buzzer_test": "Otestovat bzučák",
+    "columns": "sloupce",
+    "dashboard_columns": "Sloupce přehledu",
+    "general": "Obecné"
   },
   "notify": {
     "print": "Tisk",
@@ -2106,7 +2138,11 @@
     "name": "Název",
     "none": "Žádný",
     "save_error": "Uložení selhalo",
-    "saved": "Uloženo"
+    "saved": "Uloženo",
+    "download": "Stáhnout",
+    "error": "Chyba",
+    "refresh": "Obnovit",
+    "unknown": "Neznámý"
   },
   "queue": {
     "title": "Print Queue",
@@ -2182,7 +2218,9 @@
     "no_queues_desc": "Vytvořte frontu pro zahájení dávkového tisku.",
     "no_items_desc": "Přidejte položky pro zahájení zpracování.",
     "no_history_desc": "Dokončené položky fronty se zde zobrazí.",
-    "delete_confirm": "Smazat tuto frontu?"
+    "delete_confirm": "Smazat tuto frontu?",
+    "pending": "Čekající",
+    "select_queue_hint": "Vyberte frontu pro zobrazení položek"
   },
   "tags": {
     "title": "Tags",
@@ -2510,7 +2548,10 @@
     "sort_by": "Seřadit podle",
     "sort_name": "Název",
     "sort_progress": "Průběh",
-    "sort_status": "Stav"
+    "sort_status": "Stav",
+    "maintenance": "Údržba",
+    "pause_all_tip": "Pozastavit všechny tiskárny",
+    "resume_all_tip": "Obnovit všechny pozastavené"
   },
   "scheduler": {
     "today": "Dnes",
@@ -2570,7 +2611,9 @@
     "started": "Spuštěno",
     "finished": "Dokončeno",
     "duration": "Trvání",
-    "close": "Zavřít"
+    "close": "Zavřít",
+    "paused": "Pozastaveno",
+    "progress": "Průběh"
   },
   "library": {
     "search_placeholder": "Hledat soubory...",
@@ -2601,7 +2644,17 @@
     "delete": "Smazat",
     "deleted": "Soubor smazán",
     "confirm_delete": "Smazat tento soubor z knihovny?",
-    "download": "Stáhnout"
+    "download": "Stáhnout",
+    "add_to_queue": "Přidat do fronty",
+    "clear": "Vymazat",
+    "delete_confirm_prefix": "Smazat",
+    "deleted_prefix": "Smazáno",
+    "file": "soubor",
+    "files": "soubory",
+    "open_queue": "Otevřít frontu",
+    "ready_to_queue": "připraveno k zařazení — vyberte frontu v panelu Fronta",
+    "select": "Vybrat",
+    "selected": "vybráno"
   },
   "bedmesh": {
     "heatmap": "Teplotní mapa",
@@ -2777,7 +2830,8 @@
     "quarterly_est": "Čtvrtl. odhad",
     "yearly_est": "Roční odhad",
     "stock_value": "Hodnota zásob",
-    "based_on_avg": "Na základě průměrné spotřeby"
+    "based_on_avg": "Na základě průměrné spotřeby",
+    "chart_title": "30denní prognóza"
   },
   "multicolor": {
     "intro": "Plánujte vícebarevné tisky přiřazením cívek ke slotům AMS. Zkontrolujte kompatibilitu materiálů a zobrazte náhled rozmístění barev.",
@@ -2830,7 +2884,10 @@
     "captured": "Snímek uložen!",
     "empty_title": "Žádné snímky",
     "empty_desc": "Pořizujte snímky z kamery. Budou uloženy zde pro snadný přístup.",
-    "no_camera": "Žádný kamerový obraz není dostupný"
+    "no_camera": "Žádný kamerový obraz není dostupný",
+    "deleted": "Snímek smazán",
+    "load_failed": "Nepodařilo se načíst snímek",
+    "save_failed": "Nepodařilo se uložit snímek"
   },
   "activity": {
     "total_prints": "Celkem tisků",

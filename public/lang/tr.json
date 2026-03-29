@@ -101,7 +101,8 @@
     "lan_liveview_hint": "LAN Live View must be enabled on the printer for the camera to work.",
     "step_printer_screen": "On the printer screen, go to Settings",
     "step_settings": "Select General or Network",
-    "step_lan_liveview": "Enable \"LAN Only Liveview\""
+    "step_lan_liveview": "Enable \"LAN Only Liveview\"",
+    "reconnecting": "Yeniden bağlanıyor..."
   },
   "temperature": {
     "title": "Sıcaklıklar",
@@ -817,7 +818,13 @@
     "mat_tips_hips": "ABS için çözünür destek malzemesi (limonende çözülür). Bağımsız malzeme olarak da kullanılabilir.",
     "mat_warn_hips": "Kapalı yazıcı gerektirir. Limonende çözünme yavaştır (12–24 saat).",
     "mat_tips_pet-cf": "Çok sert ve boyutsal olarak kararlı. Muhafazasız mühendislik parçaları için idealdir.",
-    "mat_warn_pet-cf": "Sertleştirilmiş nozul gerektirir. Karbon fiber malzemeyi kırılgan yapar."
+    "mat_warn_pet-cf": "Sertleştirilmiş nozul gerektirir. Karbon fiber malzemeyi kırılgan yapar.",
+    "view_inventory": "Envanterde görüntüle",
+    "total": "Toplam",
+    "drying": "Kurutma",
+    "diameter": "Çap",
+    "usage": "Tüketim",
+    "after_print": "Baskı sonrası"
   },
   "controls": {
     "title": "Kontroller",
@@ -954,7 +961,8 @@
     "format_usb": "USB'yi Biçimlendir",
     "format_confirm": "{{storage}} cihazını biçimlendirmek istediğinizden emin misiniz? Tüm dosyalar kalıcı olarak silinecek.",
     "format_success": "{{storage}} biçimlendirildi",
-    "sd_card_short": "SD Kart"
+    "sd_card_short": "SD Kart",
+    "send_gcode": "G-kodu gönder..."
   },
   "speed": {
     "label": "Hız:",
@@ -1082,7 +1090,11 @@
     "sort_name": "Ad",
     "sort_duration": "Süre",
     "sort_filament": "Filament",
-    "sort_status": "Durum"
+    "sort_status": "Durum",
+    "compare_btn": "Karşılaştır",
+    "compare_load_failed": "Baskı verileri yüklenemedi",
+    "compare_prints": "Baskıları karşılaştır",
+    "compare_select_hint": "Tam olarak iki baskı seçin, ardından Karşılaştır'a tıklayın."
   },
   "stats": {
     "total_prints": "Toplam baskı",
@@ -1193,7 +1205,23 @@
     "peak_chamber": "Peak chamber temp",
     "avg_chamber": "Avg chamber temp",
     "print_timeline": "Baskı Zaman Çizelgesi",
-    "tab_printstats": "Baskı İstatistikleri"
+    "tab_printstats": "Baskı İstatistikleri",
+    "active_days": "Aktif baskı günleri",
+    "bed_avg_max": "Yatak ort. / maks",
+    "colors_used": "Kullanılan renkler",
+    "days": "gün",
+    "hourly_activity": "Saatlik aktivite",
+    "level": "Seviye",
+    "most_printed": "En çok basılan modeller",
+    "most_used": "En çok kullanılan",
+    "nozzle_avg_max": "Nozül ort. / maks",
+    "nozzle_speed": "Nozül ve hız",
+    "of": "/",
+    "peak_hour": "Yoğun saat",
+    "per_brand": "Markaya göre",
+    "per_type": "Türe göre",
+    "prints_per_day": "Günlük baskı (ort.)",
+    "temperatures": "Sıcaklıklar"
   },
   "errors": {
     "no_errors": "Kayıtlı hata yok.",
@@ -1259,7 +1287,8 @@
     "filter_prints": "Baskılar",
     "filter_errors": "Hatalar",
     "filter_maintenance": "Bakım",
-    "filter_other": "Diğer"
+    "filter_other": "Diğer",
+    "no_match_desc": "Filtrelerinize uyan hata bulunamadı. Bu iyi bir şey!"
   },
   "settings": {
     "printers_title": "Yazıcılar",
@@ -1780,7 +1809,10 @@
     "buzzer_title": "Yazıcı Hoparlörü",
     "buzzer_enable": "Yazıcı hoparlöründe ses çal",
     "buzzer_desc": "Yazıcının dahili buzzer'ında melodi çalmak için M300 G-code kullanır",
-    "buzzer_test": "Buzzer'ı test et"
+    "buzzer_test": "Buzzer'ı test et",
+    "columns": "sütun",
+    "dashboard_columns": "Gösterge paneli sütunları",
+    "general": "Genel"
   },
   "notify": {
     "print": "Baskı",
@@ -2107,7 +2139,11 @@
     "name": "Ad",
     "none": "Hiçbiri",
     "save_error": "Kaydetme başarısız",
-    "saved": "Kaydedildi"
+    "saved": "Kaydedildi",
+    "download": "İndir",
+    "error": "Hata",
+    "refresh": "Yenile",
+    "unknown": "Bilinmiyor"
   },
   "queue": {
     "title": "Print Queue",
@@ -2183,7 +2219,9 @@
     "no_queues_desc": "Toplu yazdırmaya başlamak için bir kuyruk oluşturun.",
     "no_items_desc": "İşlemeye başlamak için öğeler ekleyin.",
     "no_history_desc": "Tamamlanan kuyruk öğeleri burada görünecek.",
-    "delete_confirm": "Bu kuyruğu silin?"
+    "delete_confirm": "Bu kuyruğu silin?",
+    "pending": "Bekliyor",
+    "select_queue_hint": "Öğeleri görmek için bir kuyruk seçin"
   },
   "tags": {
     "title": "Tags",
@@ -2511,7 +2549,10 @@
     "sort_by": "Sırala",
     "sort_name": "Ad",
     "sort_progress": "İlerleme",
-    "sort_status": "Durum"
+    "sort_status": "Durum",
+    "maintenance": "Bakım",
+    "pause_all_tip": "Tüm baskıları duraklat",
+    "resume_all_tip": "Tüm duraklatılmışları sürdür"
   },
   "scheduler": {
     "today": "Bugün",
@@ -2571,7 +2612,9 @@
     "started": "Başladı",
     "finished": "Tamamlandı",
     "duration": "Süre",
-    "close": "Kapat"
+    "close": "Kapat",
+    "paused": "Duraklatıldı",
+    "progress": "İlerleme"
   },
   "library": {
     "search_placeholder": "Dosya ara...",
@@ -2602,7 +2645,17 @@
     "delete": "Sil",
     "deleted": "Dosya silindi",
     "confirm_delete": "Bu dosyayı kütüphaneden silin?",
-    "download": "İndir"
+    "download": "İndir",
+    "add_to_queue": "Kuyruğa ekle",
+    "clear": "Temizle",
+    "delete_confirm_prefix": "Sil",
+    "deleted_prefix": "Silindi",
+    "file": "dosya",
+    "files": "dosya",
+    "open_queue": "Kuyruğu aç",
+    "ready_to_queue": "kuyruk için hazır — Kuyruk panelinden bir kuyruk seçin",
+    "select": "Seç",
+    "selected": "seçili"
   },
   "bedmesh": {
     "heatmap": "Isı Haritası",
@@ -2778,7 +2831,8 @@
     "quarterly_est": "Çeyreklik Tahmini",
     "yearly_est": "Yıllık Tahmini",
     "stock_value": "Stok Değeri",
-    "based_on_avg": "Ortalama kullanıma göre"
+    "based_on_avg": "Ortalama kullanıma göre",
+    "chart_title": "30 günlük tahmin"
   },
   "multicolor": {
     "intro": "AMS yuvalarına makara atayarak çok renkli baskılarınızı planlayın. Malzeme uyumluluğunu kontrol edin ve renk düzeninizi önizleyin.",
@@ -2831,7 +2885,10 @@
     "captured": "Ekran görüntüsü kaydedildi!",
     "empty_title": "Ekran Görüntüsü Yok",
     "empty_desc": "Kamera beslemesinden ekran görüntüsü alın. Kolay erişim için buraya kaydedilecekler.",
-    "no_camera": "Kamera beslemesi mevcut değil"
+    "no_camera": "Kamera beslemesi mevcut değil",
+    "deleted": "Ekran görüntüsü silindi",
+    "load_failed": "Ekran görüntüsü yüklenemedi",
+    "save_failed": "Ekran görüntüsü kaydedilemedi"
   },
   "activity": {
     "total_prints": "Toplam baskılar",

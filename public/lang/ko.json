@@ -101,7 +101,8 @@
     "lan_liveview_hint": "LAN Live View must be enabled on the printer for the camera to work.",
     "step_printer_screen": "On the printer screen, go to Settings",
     "step_settings": "Select General or Network",
-    "step_lan_liveview": "Enable \"LAN Only Liveview\""
+    "step_lan_liveview": "Enable \"LAN Only Liveview\"",
+    "reconnecting": "재연결 중..."
   },
   "temperature": {
     "title": "온도",
@@ -817,7 +818,13 @@
     "mat_tips_hips": "ABS용 용해성 지지체 (리모넨에 용해됨). 독립 재료로도 사용 가능합니다.",
     "mat_warn_hips": "밀폐형 프린터가 필요합니다. 리모넨에서 용해는 느립니다 (12~24시간).",
     "mat_tips_pet-cf": "매우 강성이 높고 치수 안정성이 있습니다. 인클로저 없이도 엔지니어링 부품에 적합합니다.",
-    "mat_warn_pet-cf": "경화 노즐이 필요합니다. 탄소 섬유로 인해 재료가 취성이 있습니다."
+    "mat_warn_pet-cf": "경화 노즐이 필요합니다. 탄소 섬유로 인해 재료가 취성이 있습니다.",
+    "view_inventory": "재고에서 보기",
+    "total": "합계",
+    "drying": "건조",
+    "diameter": "직경",
+    "usage": "사용량",
+    "after_print": "출력 후"
   },
   "controls": {
     "title": "제어",
@@ -954,7 +961,8 @@
     "format_usb": "USB 포맷",
     "format_confirm": "{{storage}}을(를) 포맷하시겠습니까? 모든 파일이 영구적으로 삭제됩니다.",
     "format_success": "{{storage}} 포맷 완료",
-    "sd_card_short": "SD 카드"
+    "sd_card_short": "SD 카드",
+    "send_gcode": "G-code 전송..."
   },
   "speed": {
     "label": "속도:",
@@ -1082,7 +1090,11 @@
     "sort_name": "이름",
     "sort_duration": "소요 시간",
     "sort_filament": "필라멘트",
-    "sort_status": "상태"
+    "sort_status": "상태",
+    "compare_btn": "비교",
+    "compare_load_failed": "출력 데이터를 불러올 수 없습니다",
+    "compare_prints": "출력물 비교",
+    "compare_select_hint": "정확히 두 개의 출력물을 선택한 다음 비교를 클릭하세요."
   },
   "stats": {
     "total_prints": "총 인쇄 수",
@@ -1193,7 +1205,23 @@
     "peak_chamber": "Peak chamber temp",
     "avg_chamber": "Avg chamber temp",
     "print_timeline": "인쇄 타임라인",
-    "tab_printstats": "인쇄 통계"
+    "tab_printstats": "인쇄 통계",
+    "active_days": "활성 출력 일수",
+    "bed_avg_max": "베드 평균/최대",
+    "colors_used": "사용된 색상",
+    "days": "일",
+    "hourly_activity": "시간대별 활동",
+    "level": "레벨",
+    "most_printed": "가장 많이 출력된 모델",
+    "most_used": "가장 많이 사용",
+    "nozzle_avg_max": "노즐 평균/최대",
+    "nozzle_speed": "노즐 및 속도",
+    "of": "/",
+    "peak_hour": "피크 시간",
+    "per_brand": "브랜드별",
+    "per_type": "유형별",
+    "prints_per_day": "일일 출력 수 (평균)",
+    "temperatures": "온도"
   },
   "errors": {
     "no_errors": "기록된 오류가 없습니다.",
@@ -1259,7 +1287,8 @@
     "filter_prints": "인쇄",
     "filter_errors": "오류",
     "filter_maintenance": "유지보수",
-    "filter_other": "기타"
+    "filter_other": "기타",
+    "no_match_desc": "필터와 일치하는 오류가 없습니다. 좋은 소식입니다!"
   },
   "settings": {
     "printers_title": "프린터",
@@ -1780,7 +1809,10 @@
     "buzzer_title": "프린터 스피커",
     "buzzer_enable": "프린터 스피커에서 소리 재생",
     "buzzer_desc": "M300 G코드를 사용하여 프린터 내장 버저에서 멜로디를 재생합니다",
-    "buzzer_test": "버저 테스트"
+    "buzzer_test": "버저 테스트",
+    "columns": "열",
+    "dashboard_columns": "대시보드 열",
+    "general": "일반"
   },
   "notify": {
     "print": "인쇄",
@@ -2107,7 +2139,11 @@
     "name": "이름",
     "none": "없음",
     "save_error": "저장 실패",
-    "saved": "저장됨"
+    "saved": "저장됨",
+    "download": "다운로드",
+    "error": "오류",
+    "refresh": "새로고침",
+    "unknown": "알 수 없음"
   },
   "queue": {
     "title": "Print Queue",
@@ -2183,7 +2219,9 @@
     "no_queues_desc": "일괄 인쇄를 시작하려면 큐를 만드세요.",
     "no_items_desc": "처리를 시작하려면 항목을 추가하세요.",
     "no_history_desc": "완료된 큐 항목이 여기에 표시됩니다.",
-    "delete_confirm": "이 큐를 삭제하시겠습니까?"
+    "delete_confirm": "이 큐를 삭제하시겠습니까?",
+    "pending": "대기 중",
+    "select_queue_hint": "항목을 보려면 대기열을 선택하세요"
   },
   "tags": {
     "title": "Tags",
@@ -2511,7 +2549,10 @@
     "sort_by": "정렬 기준",
     "sort_name": "이름",
     "sort_progress": "진행률",
-    "sort_status": "상태"
+    "sort_status": "상태",
+    "maintenance": "유지보수",
+    "pause_all_tip": "모든 출력 일시정지",
+    "resume_all_tip": "모든 일시정지 재개"
   },
   "scheduler": {
     "today": "오늘",
@@ -2571,7 +2612,9 @@
     "started": "시작됨",
     "finished": "완료",
     "duration": "소요 시간",
-    "close": "닫기"
+    "close": "닫기",
+    "paused": "일시정지",
+    "progress": "진행률"
   },
   "library": {
     "search_placeholder": "파일 검색...",
@@ -2602,7 +2645,17 @@
     "delete": "삭제",
     "deleted": "파일이 삭제되었습니다",
     "confirm_delete": "이 파일을 라이브러리에서 삭제하시겠습니까?",
-    "download": "다운로드"
+    "download": "다운로드",
+    "add_to_queue": "대기열에 추가",
+    "clear": "지우기",
+    "delete_confirm_prefix": "삭제",
+    "deleted_prefix": "삭제됨",
+    "file": "파일",
+    "files": "파일",
+    "open_queue": "대기열 열기",
+    "ready_to_queue": "대기열 준비 완료 — 대기열 패널에서 대기열을 선택하세요",
+    "select": "선택",
+    "selected": "선택됨"
   },
   "bedmesh": {
     "heatmap": "히트맵",
@@ -2778,7 +2831,8 @@
     "quarterly_est": "분기별 예측",
     "yearly_est": "연간 예측",
     "stock_value": "재고 가치",
-    "based_on_avg": "평균 사용량 기준"
+    "based_on_avg": "평균 사용량 기준",
+    "chart_title": "30일 예측"
   },
   "multicolor": {
     "intro": "AMS 슬롯에 스풀을 할당하여 멀티 컬러 인쇄를 계획하세요. 소재 호환성을 확인하고 색상 레이아웃을 미리 봅니다.",
@@ -2831,7 +2885,10 @@
     "captured": "스크린샷이 저장되었습니다!",
     "empty_title": "스크린샷 없음",
     "empty_desc": "카메라 피드에서 스크린샷을 캡처하세요. 쉽게 액세스할 수 있도록 여기에 저장됩니다.",
-    "no_camera": "카메라 피드를 사용할 수 없습니다"
+    "no_camera": "카메라 피드를 사용할 수 없습니다",
+    "deleted": "스크린샷 삭제됨",
+    "load_failed": "스크린샷을 불러올 수 없습니다",
+    "save_failed": "스크린샷을 저장할 수 없습니다"
   },
   "activity": {
     "total_prints": "총 인쇄 수",

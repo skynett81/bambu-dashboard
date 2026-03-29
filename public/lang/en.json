@@ -100,7 +100,8 @@
     "connecting": "Connecting to camera...",
     "screenshot": "Take screenshot",
     "screenshot_saved": "Screenshot saved",
-    "screenshot_failed": "No camera image available"
+    "screenshot_failed": "No camera image available",
+    "reconnecting": "Reconnecting..."
   },
   "model": {
     "preview": "3D Preview",
@@ -803,7 +804,22 @@
     "mat_tips_pc": "Extremely strong and heat-resistant. Transparent variants available.",
     "mat_warn_pc": "Very high temperatures. Significant warping without enclosure. X1C/X1E recommended.",
     "mat_tips_pva": "Water-soluble support material. Dissolves in warm water in 4-24 hours.",
-    "mat_warn_pva": "Extremely hygroscopic — store sealed with desiccant. Short shelf life once opened."
+    "mat_warn_pva": "Extremely hygroscopic — store sealed with desiccant. Short shelf life once opened.",
+    "mat_tips_petg-cf": "Very rigid and strong. Good for structural parts. Less warping than standard PETG.",
+    "mat_warn_petg-cf": "Requires hardened nozzle. More brittle than regular PETG.",
+    "mat_tips_asa": "UV-resistant alternative to ABS. Excellent for outdoor parts. Similar settings to ABS.",
+    "mat_warn_asa": "Emits fumes — requires enclosed printer. Warps without brim on large parts.",
+    "mat_tips_pa-cf": "Very strong and rigid. Excellent for functional parts. Matte surface finish.",
+    "mat_warn_pa-cf": "Requires hardened nozzle and enclosed printer. Extremely moisture-sensitive.",
+    "mat_tips_pa-gf": "Glass fiber for maximum rigidity. Better heat resistance than PA-CF. Good for jigs.",
+    "mat_warn_pa-gf": "Requires hardened nozzle and enclosed printer. Extremely moisture-sensitive.",
+    "mat_tips_pvb": "Can be smoothed with isopropyl alcohol for glass-like finish. Partially transparent.",
+    "mat_warn_pvb": "Less common material. IPA vapor during smoothing requires ventilation.",
+    "mat_tips_hips": "Soluble support for ABS (dissolves in limonene). Can also be used as standalone material.",
+    "mat_warn_hips": "Requires enclosed printer. Dissolution in limonene is slow (12-24 hours).",
+    "mat_tips_pet-cf": "Very rigid and dimensionally stable. Good for engineering parts without enclosure.",
+    "mat_warn_pet-cf": "Requires hardened nozzle. Carbon fiber makes the material brittle.",
+    "after_print": "After print"
   },
   "controls": {
     "title": "Controls",
@@ -940,7 +956,8 @@
     "qc_abs_preheat": "ABS preheat",
     "qc_report_temps": "Report temps",
     "qc_report_pos": "Report position",
-    "qc_info": "Info"
+    "qc_info": "Info",
+    "send_gcode": "Send G-code..."
   },
   "speed": {
     "label": "Speed:",
@@ -1089,7 +1106,10 @@
     "sort_by": "Sort by",
     "sort_name": "Name",
     "sort_progress": "Progress",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "maintenance": "Maintenance",
+    "pause_all_tip": "Pause all printing",
+    "resume_all_tip": "Resume all paused"
   },
   "scheduler": {
     "today": "Today",
@@ -1149,7 +1169,9 @@
     "started": "Started",
     "finished": "Finished",
     "duration": "Duration",
-    "close": "Close"
+    "close": "Close",
+    "paused": "Paused",
+    "progress": "Progress"
   },
   "library": {
     "search_placeholder": "Search files...",
@@ -1180,7 +1202,17 @@
     "delete": "Delete",
     "deleted": "File deleted",
     "confirm_delete": "Delete this file from the library?",
-    "download": "Download"
+    "download": "Download",
+    "add_to_queue": "Add to queue",
+    "clear": "Clear",
+    "delete_confirm_prefix": "Delete",
+    "deleted_prefix": "Deleted",
+    "file": "file",
+    "files": "files",
+    "open_queue": "Open queue",
+    "ready_to_queue": "ready for queue — select a queue in the Queue panel",
+    "select": "Select",
+    "selected": "selected"
   },
   "bedmesh": {
     "heatmap": "Heatmap",
@@ -1356,7 +1388,8 @@
     "quarterly_est": "Quarterly est.",
     "yearly_est": "Yearly est.",
     "stock_value": "Stock value",
-    "based_on_avg": "Based on average usage"
+    "based_on_avg": "Based on average usage",
+    "chart_title": "30-day forecast"
   },
   "multicolor": {
     "intro": "Plan multicolor prints by assigning spools to AMS slots. Check material compatibility and preview the color layout.",
@@ -1409,7 +1442,10 @@
     "captured": "Screenshot saved!",
     "empty_title": "No screenshots",
     "empty_desc": "Take screenshots from the camera feed. They are saved here for easy access.",
-    "no_camera": "No camera feed available"
+    "no_camera": "No camera feed available",
+    "deleted": "Screenshot deleted",
+    "load_failed": "Could not load screenshot",
+    "save_failed": "Could not save screenshot"
   },
   "activity": {
     "total_prints": "Total prints",
@@ -1467,7 +1503,11 @@
     "sort_name": "Name",
     "sort_duration": "Duration",
     "sort_filament": "Filament",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "compare_btn": "Compare",
+    "compare_load_failed": "Could not load print data",
+    "compare_prints": "Compare prints",
+    "compare_select_hint": "Select exactly two prints, then click Compare."
   },
   "stats": {
     "total_prints": "Total prints",
@@ -1578,7 +1618,23 @@
     "cost_hint_spool": "Spool prices",
     "cost_recalculate": "Recalculate Costs",
     "cost_recalculating": "Recalculating...",
-    "cost_recalculated": "Costs recalculated"
+    "cost_recalculated": "Costs recalculated",
+    "active_days": "Active print days",
+    "bed_avg_max": "Bed avg / max",
+    "colors_used": "Colors used",
+    "days": "days",
+    "hourly_activity": "Hourly activity",
+    "level": "Level",
+    "most_printed": "Most printed models",
+    "most_used": "Most used",
+    "nozzle_avg_max": "Nozzle avg / max",
+    "nozzle_speed": "Nozzle & speed",
+    "of": "of",
+    "peak_hour": "Peak hour",
+    "per_brand": "Per brand",
+    "per_type": "Per type",
+    "prints_per_day": "Prints per day (avg)",
+    "temperatures": "Temperatures"
   },
   "errors": {
     "no_errors": "No errors recorded.",
@@ -1636,7 +1692,8 @@
     "filter_prints": "Prints",
     "filter_errors": "Errors",
     "filter_maintenance": "Maintenance",
-    "filter_other": "Other"
+    "filter_other": "Other",
+    "no_match_desc": "No errors found matching your filters. That's a good thing!"
   },
   "settings": {
     "printers_title": "Printers",
@@ -2157,7 +2214,10 @@
     "buzzer_title": "Printer Speaker",
     "buzzer_enable": "Play sounds on printer speaker",
     "buzzer_desc": "Uses M300 G-code to play melodies on the printer's built-in buzzer",
-    "buzzer_test": "Test buzzer"
+    "buzzer_test": "Test buzzer",
+    "columns": "columns",
+    "dashboard_columns": "Dashboard Columns",
+    "general": "General"
   },
   "notify": {
     "print": "Print",
@@ -2379,7 +2439,11 @@
     "name": "Name",
     "none": "None",
     "save_error": "Could not save",
-    "saved": "Saved"
+    "saved": "Saved",
+    "download": "Download",
+    "error": "Error",
+    "refresh": "Refresh",
+    "unknown": "Unknown"
   },
   "update": {
     "title": "Updates",
@@ -2627,7 +2691,9 @@
     "material_mismatch": "Material mismatch",
     "required_tags": "Required Printer Tags",
     "stagger": "Stagger (s)",
-    "stagger_hint": "Delay in seconds between dispatching to different printers"
+    "stagger_hint": "Delay in seconds between dispatching to different printers",
+    "pending": "Pending",
+    "select_queue_hint": "Select a queue to view items"
   },
   "tags": {
     "title": "Tags",

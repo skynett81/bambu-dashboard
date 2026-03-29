@@ -101,7 +101,8 @@
     "lan_liveview_hint": "LAN Live View must be enabled on the printer for the camera to work.",
     "step_printer_screen": "On the printer screen, go to Settings",
     "step_settings": "Select General or Network",
-    "step_lan_liveview": "Enable \"LAN Only Liveview\""
+    "step_lan_liveview": "Enable \"LAN Only Liveview\"",
+    "reconnecting": "Återansluter..."
   },
   "temperature": {
     "title": "Temperaturer",
@@ -817,7 +818,13 @@
     "mat_tips_hips": "Lösligt stödmaterial för ABS (löses i limonen). Kan även användas som fristående material.",
     "mat_warn_hips": "Kräver sluten skrivare. Upplösning i limonen är långsam (12–24 timmar).",
     "mat_tips_pet-cf": "Mycket styvt och dimensionsstabilt. Bra för ingenjörsdelar utan hölje.",
-    "mat_warn_pet-cf": "Kräver härdat munstycke. Kolfibrer gör materialet sprött."
+    "mat_warn_pet-cf": "Kräver härdat munstycke. Kolfibrer gör materialet sprött.",
+    "view_inventory": "Visa i lager",
+    "total": "Totalt",
+    "drying": "Torkning",
+    "diameter": "Diameter",
+    "usage": "Förbrukning",
+    "after_print": "Efter utskrift"
   },
   "controls": {
     "title": "Kontroller",
@@ -954,7 +961,8 @@
     "format_usb": "Formatera USB",
     "format_confirm": "Är du säker på att du vill formatera {{storage}}? Alla filer tas bort permanent.",
     "format_success": "{{storage}} formaterat",
-    "sd_card_short": "SD-kort"
+    "sd_card_short": "SD-kort",
+    "send_gcode": "Skicka G-kod..."
   },
   "speed": {
     "label": "Hastighet:",
@@ -1082,7 +1090,11 @@
     "sort_name": "Namn",
     "sort_duration": "Varaktighet",
     "sort_filament": "Filament",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "compare_btn": "Jämför",
+    "compare_load_failed": "Kunde inte ladda utskriftsdata",
+    "compare_prints": "Jämför utskrifter",
+    "compare_select_hint": "Välj exakt två utskrifter och klicka på Jämför."
   },
   "stats": {
     "total_prints": "Totalt antal utskrifter",
@@ -1193,7 +1205,23 @@
     "peak_chamber": "Peak chamber temp",
     "avg_chamber": "Avg chamber temp",
     "print_timeline": "Utskriftstidslinje",
-    "tab_printstats": "Utskrifter"
+    "tab_printstats": "Utskrifter",
+    "active_days": "Aktiva utskriftsdagar",
+    "bed_avg_max": "Bädd snitt / max",
+    "colors_used": "Använda färger",
+    "days": "dagar",
+    "hourly_activity": "Aktivitet per timme",
+    "level": "Nivå",
+    "most_printed": "Mest utskrivna modeller",
+    "most_used": "Mest använd",
+    "nozzle_avg_max": "Munstycke snitt / max",
+    "nozzle_speed": "Munstycke & hastighet",
+    "of": "av",
+    "peak_hour": "Mest aktiva timme",
+    "per_brand": "Per märke",
+    "per_type": "Per typ",
+    "prints_per_day": "Utskrifter per dag (snitt)",
+    "temperatures": "Temperaturer"
   },
   "errors": {
     "no_errors": "Inga fel registrerade.",
@@ -1259,7 +1287,8 @@
     "filter_prints": "Utskrifter",
     "filter_errors": "Fel",
     "filter_maintenance": "Underhåll",
-    "filter_other": "Övrigt"
+    "filter_other": "Övrigt",
+    "no_match_desc": "Inga fel hittades som matchar dina filter. Det är bra!"
   },
   "settings": {
     "printers_title": "Skrivare",
@@ -1780,7 +1809,10 @@
     "buzzer_title": "Skrivarhögtalare",
     "buzzer_enable": "Spela ljud på skrivarens högtalare",
     "buzzer_desc": "Använder M300 G-kod för att spela melodier på skrivarens inbyggda summer",
-    "buzzer_test": "Testa summer"
+    "buzzer_test": "Testa summer",
+    "columns": "kolumner",
+    "dashboard_columns": "Instrumentpanel-kolumner",
+    "general": "Allmänt"
   },
   "notify": {
     "print": "Utskrift",
@@ -2107,7 +2139,11 @@
     "name": "Namn",
     "none": "Ingen",
     "save_error": "Kunde inte spara",
-    "saved": "Sparad"
+    "saved": "Sparad",
+    "download": "Ladda ner",
+    "error": "Fel",
+    "refresh": "Uppdatera",
+    "unknown": "Okänd"
   },
   "queue": {
     "title": "Print Queue",
@@ -2183,7 +2219,9 @@
     "no_queues_desc": "Skapa en kö för att starta batchutskrift.",
     "no_items_desc": "Lägg till objekt för att starta bearbetning.",
     "no_history_desc": "Klara köobjekt visas här.",
-    "delete_confirm": "Ta bort denna kö?"
+    "delete_confirm": "Ta bort denna kö?",
+    "pending": "Väntar",
+    "select_queue_hint": "Välj en kö för att visa objekt"
   },
   "tags": {
     "title": "Tags",
@@ -2511,7 +2549,10 @@
     "sort_by": "Sortera efter",
     "sort_name": "Namn",
     "sort_progress": "Framsteg",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "maintenance": "Underhåll",
+    "pause_all_tip": "Pausa alla utskrifter",
+    "resume_all_tip": "Återuppta alla pausade"
   },
   "scheduler": {
     "today": "Idag",
@@ -2571,7 +2612,9 @@
     "started": "Startad",
     "finished": "Klar",
     "duration": "Varaktighet",
-    "close": "Stäng"
+    "close": "Stäng",
+    "paused": "Pausad",
+    "progress": "Framsteg"
   },
   "library": {
     "search_placeholder": "Sök filer...",
@@ -2602,7 +2645,17 @@
     "delete": "Ta bort",
     "deleted": "Fil borttagen",
     "confirm_delete": "Ta bort denna fil från biblioteket?",
-    "download": "Ladda ned"
+    "download": "Ladda ned",
+    "add_to_queue": "Lägg i kö",
+    "clear": "Rensa",
+    "delete_confirm_prefix": "Radera",
+    "deleted_prefix": "Raderat",
+    "file": "fil",
+    "files": "filer",
+    "open_queue": "Öppna kö",
+    "ready_to_queue": "redo för kö — välj en kö i Kö-panelen",
+    "select": "Välj",
+    "selected": "valt"
   },
   "bedmesh": {
     "heatmap": "Värmekarta",
@@ -2778,7 +2831,8 @@
     "quarterly_est": "Kvartalsest.",
     "yearly_est": "Årsest.",
     "stock_value": "Lagervärde",
-    "based_on_avg": "Baserat på genomsnittlig förbrukning"
+    "based_on_avg": "Baserat på genomsnittlig förbrukning",
+    "chart_title": "30-dagars prognos"
   },
   "multicolor": {
     "intro": "Planera flerfärgade utskrifter genom att tilldela spolar till AMS-spår. Kontrollera materialkompatibilitet och förhandsgranska färgupplägget.",
@@ -2831,7 +2885,10 @@
     "captured": "Skärmbild sparad!",
     "empty_title": "Inga skärmbilder",
     "empty_desc": "Ta skärmbilder från kameraflödet. De sparas här för enkel åtkomst.",
-    "no_camera": "Inget kameraflöde tillgängligt"
+    "no_camera": "Inget kameraflöde tillgängligt",
+    "deleted": "Skärmbild raderad",
+    "load_failed": "Kunde inte ladda skärmbild",
+    "save_failed": "Kunde inte spara skärmbild"
   },
   "activity": {
     "total_prints": "Totala utskrifter",

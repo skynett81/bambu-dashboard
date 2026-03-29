@@ -101,7 +101,8 @@
     "lan_liveview_hint": "LAN Live View must be enabled on the printer for the camera to work.",
     "step_printer_screen": "On the printer screen, go to Settings",
     "step_settings": "Select General or Network",
-    "step_lan_liveview": "Enable \"LAN Only Liveview\""
+    "step_lan_liveview": "Enable \"LAN Only Liveview\"",
+    "reconnecting": "Ponowne łączenie..."
   },
   "temperature": {
     "title": "Temperatury",
@@ -834,7 +835,13 @@
     "mat_tips_hips": "Rozpuszczalny materiał podporowy dla ABS (rozpuszcza się w limonenie). Może być też używany jako samodzielny materiał.",
     "mat_warn_hips": "Wymaga zamkniętej drukarki. Rozpuszczanie w limonenie jest powolne (12–24 godziny).",
     "mat_tips_pet-cf": "Bardzo sztywny i stabilny wymiarowo. Dobry do części inżynieryjnych bez obudowy.",
-    "mat_warn_pet-cf": "Wymaga zahartowanej dyszy. Włókno węglowe czyni materiał kruchym."
+    "mat_warn_pet-cf": "Wymaga zahartowanej dyszy. Włókno węglowe czyni materiał kruchym.",
+    "view_inventory": "Zobacz w magazynie",
+    "total": "Łącznie",
+    "drying": "Suszenie",
+    "diameter": "Średnica",
+    "usage": "Zużycie",
+    "after_print": "Po druku"
   },
   "controls": {
     "title": "Sterowanie",
@@ -971,7 +978,8 @@
     "format_usb": "Formatuj USB",
     "format_confirm": "Czy na pewno chcesz sformatować {{storage}}? Wszystkie pliki zostaną trwale usunięte.",
     "format_success": "{{storage}} sformatowany",
-    "sd_card_short": "Karta SD"
+    "sd_card_short": "Karta SD",
+    "send_gcode": "Wyślij G-code..."
   },
   "speed": {
     "label": "Prędkość:",
@@ -1148,7 +1156,11 @@
     "sort_name": "Nazwa",
     "sort_duration": "Czas trwania",
     "sort_filament": "Filament",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "compare_btn": "Porównaj",
+    "compare_load_failed": "Nie można załadować danych wydruku",
+    "compare_prints": "Porównaj wydruki",
+    "compare_select_hint": "Wybierz dokładnie dwa wydruki, a następnie kliknij Porównaj."
   },
   "stats": {
     "total_prints": "Łącznie wydruków",
@@ -1280,7 +1292,23 @@
     "trend_down": "Spadek",
     "trend_stable": "Stabilny",
     "print_timeline": "Oś czasu wydruków",
-    "tab_printstats": "Wydruki"
+    "tab_printstats": "Wydruki",
+    "active_days": "Aktywne dni druku",
+    "bed_avg_max": "Stół śr. / maks",
+    "colors_used": "Użyte kolory",
+    "days": "dni",
+    "hourly_activity": "Aktywność godzinowa",
+    "level": "Poziom",
+    "most_printed": "Najczęściej drukowane modele",
+    "most_used": "Najczęściej używane",
+    "nozzle_avg_max": "Dysza śr. / maks",
+    "nozzle_speed": "Dysza i prędkość",
+    "of": "z",
+    "peak_hour": "Godzina szczytu",
+    "per_brand": "Według marki",
+    "per_type": "Według typu",
+    "prints_per_day": "Wydruki dziennie (śr.)",
+    "temperatures": "Temperatury"
   },
   "errors": {
     "no_errors": "Brak zapisanych błędów.",
@@ -1346,7 +1374,8 @@
     "filter_prints": "Wydruki",
     "filter_errors": "Błędy",
     "filter_maintenance": "Konserwacja",
-    "filter_other": "Inne"
+    "filter_other": "Inne",
+    "no_match_desc": "Nie znaleziono błędów pasujących do filtrów. To dobra wiadomość!"
   },
   "settings": {
     "printers_title": "Drukarki",
@@ -1925,7 +1954,9 @@
     "buzzer_title": "Głośnik drukarki",
     "buzzer_enable": "Odtwarzaj dźwięki przez głośnik drukarki",
     "buzzer_desc": "Używa G-code M300 do odtwarzania melodii na wbudowanym buzzerze drukarki",
-    "buzzer_test": "Testuj buzzer"
+    "buzzer_test": "Testuj buzzer",
+    "columns": "kolumny",
+    "general": "Ogólne"
   },
   "notify": {
     "print": "Druk",
@@ -2495,7 +2526,9 @@
     "no_queues_desc": "Utwórz kolejkę, aby rozpocząć druk wsadowy.",
     "no_items_desc": "Dodaj elementy, aby rozpocząć przetwarzanie.",
     "no_history_desc": "Ukończone elementy kolejki pojawią się tutaj.",
-    "delete_confirm": "Usunąć tę kolejkę?"
+    "delete_confirm": "Usunąć tę kolejkę?",
+    "pending": "Oczekujące",
+    "select_queue_hint": "Wybierz kolejkę, aby zobaczyć elementy"
   },
   "tags": {
     "title": "Tags",
@@ -2837,7 +2870,10 @@
     "sort_by": "Sortuj według",
     "sort_name": "Nazwa",
     "sort_progress": "Postęp",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "maintenance": "Konserwacja",
+    "pause_all_tip": "Wstrzymaj wszystkie drukujące",
+    "resume_all_tip": "Wznów wszystkie wstrzymane"
   },
   "scheduler": {
     "today": "Dziś",
@@ -2925,7 +2961,9 @@
     "untitled": "Bez tytułu",
     "started": "Uruchomiono",
     "finished": "Zakończono",
-    "close": "Zamknij"
+    "close": "Zamknij",
+    "paused": "Wstrzymano",
+    "progress": "Postęp"
   },
   "activity": {
     "loading": "Ładowanie aktywności...",
@@ -2997,7 +3035,10 @@
     "captured": "Zrzut ekranu zapisany!",
     "empty_title": "Brak zrzutów ekranu",
     "empty_desc": "Rób zrzuty ekranu z podglądu kamery. Są one zapisywane tutaj dla łatwego dostępu.",
-    "no_camera": "Brak dostępnego podglądu z kamery"
+    "no_camera": "Brak dostępnego podglądu z kamery",
+    "deleted": "Zrzut ekranu usunięty",
+    "load_failed": "Nie można załadować zrzutu ekranu",
+    "save_failed": "Nie można zapisać zrzutu ekranu"
   },
   "health": {
     "overall_score": "Ogólny wynik stanu",
@@ -3194,7 +3235,8 @@
     "quarterly_est": "Kwartalne szac.",
     "yearly_est": "Roczne szac.",
     "stock_value": "Wartość magazynu",
-    "based_on_avg": "Na podstawie średniego zużycia"
+    "based_on_avg": "Na podstawie średniego zużycia",
+    "chart_title": "Prognoza na 30 dni"
   },
   "multicolor": {
     "title": "Konfiguracja wielokolorowa",
@@ -3735,7 +3777,17 @@
     "save_error": "Nie można zapisać",
     "delete": "Usuń",
     "deleted": "Plik usunięty",
-    "confirm_delete": "Usunąć ten plik z biblioteki?"
+    "confirm_delete": "Usunąć ten plik z biblioteki?",
+    "add_to_queue": "Dodaj do kolejki",
+    "clear": "Wyczyść",
+    "delete_confirm_prefix": "Usuń",
+    "deleted_prefix": "Usunięto",
+    "file": "plik",
+    "files": "pliki",
+    "open_queue": "Otwórz kolejkę",
+    "ready_to_queue": "gotowe do kolejki — wybierz kolejkę w panelu Kolejka",
+    "select": "Wybierz",
+    "selected": "wybrano"
   },
   "logs": {
     "title": "Logi drukarki",

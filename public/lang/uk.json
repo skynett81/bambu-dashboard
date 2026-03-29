@@ -101,7 +101,8 @@
     "lan_liveview_hint": "LAN Live View must be enabled on the printer for the camera to work.",
     "step_printer_screen": "On the printer screen, go to Settings",
     "step_settings": "Select General or Network",
-    "step_lan_liveview": "Enable \"LAN Only Liveview\""
+    "step_lan_liveview": "Enable \"LAN Only Liveview\"",
+    "reconnecting": "Повторне підключення..."
   },
   "temperature": {
     "title": "Температури",
@@ -817,7 +818,13 @@
     "mat_tips_hips": "Розчинна підтримка для ABS (розчиняється в лімонені). Може використовуватись як самостійний матеріал.",
     "mat_warn_hips": "Потребує закритого принтера. Розчинення в лімонені повільне (12–24 години).",
     "mat_tips_pet-cf": "Дуже жорсткий і розмірно стабільний. Підходить для інженерних деталей без корпусу.",
-    "mat_warn_pet-cf": "Потребує загартованого сопла. Вуглецеве волокно робить матеріал крихким."
+    "mat_warn_pet-cf": "Потребує загартованого сопла. Вуглецеве волокно робить матеріал крихким.",
+    "view_inventory": "Переглянути в інвентарі",
+    "total": "Всього",
+    "drying": "Сушіння",
+    "diameter": "Діаметр",
+    "usage": "Витрата",
+    "after_print": "Після друку"
   },
   "controls": {
     "title": "Керування",
@@ -954,7 +961,8 @@
     "format_usb": "Форматувати USB",
     "format_confirm": "Ви впевнені, що хочете відформатувати {{storage}}? Усі файли будуть остаточно видалені.",
     "format_success": "{{storage}} відформатовано",
-    "sd_card_short": "SD-карта"
+    "sd_card_short": "SD-карта",
+    "send_gcode": "Надіслати G-код..."
   },
   "speed": {
     "label": "Швидкість:",
@@ -1082,7 +1090,11 @@
     "sort_name": "Ім'я",
     "sort_duration": "Тривалість",
     "sort_filament": "Філамент",
-    "sort_status": "Статус"
+    "sort_status": "Статус",
+    "compare_btn": "Порівняти",
+    "compare_load_failed": "Не вдалося завантажити дані друку",
+    "compare_prints": "Порівняти друки",
+    "compare_select_hint": "Виберіть рівно два друки, потім натисніть Порівняти."
   },
   "stats": {
     "total_prints": "Всього друків",
@@ -1193,7 +1205,23 @@
     "peak_chamber": "Peak chamber temp",
     "avg_chamber": "Avg chamber temp",
     "print_timeline": "Хронологія друків",
-    "tab_printstats": "Статистика друку"
+    "tab_printstats": "Статистика друку",
+    "active_days": "Активні дні друку",
+    "bed_avg_max": "Стіл сер. / макс",
+    "colors_used": "Використані кольори",
+    "days": "днів",
+    "hourly_activity": "Активність по годинах",
+    "level": "Рівень",
+    "most_printed": "Найчастіше друковані моделі",
+    "most_used": "Найчастіше використовуваний",
+    "nozzle_avg_max": "Сопло сер. / макс",
+    "nozzle_speed": "Сопло та швидкість",
+    "of": "з",
+    "peak_hour": "Найактивніша година",
+    "per_brand": "За брендом",
+    "per_type": "За типом",
+    "prints_per_day": "Друків на день (сер.)",
+    "temperatures": "Температури"
   },
   "errors": {
     "no_errors": "Помилок не зафіксовано.",
@@ -1259,7 +1287,8 @@
     "filter_prints": "Друки",
     "filter_errors": "Помилки",
     "filter_maintenance": "Обслуговування",
-    "filter_other": "Інше"
+    "filter_other": "Інше",
+    "no_match_desc": "Не знайдено помилок, що відповідають вашим фільтрам. Це добре!"
   },
   "settings": {
     "printers_title": "Принтери",
@@ -1780,7 +1809,10 @@
     "buzzer_title": "Динамік принтера",
     "buzzer_enable": "Відтворювати звуки через динамік принтера",
     "buzzer_desc": "Використовує G-code M300 для відтворення мелодій на вбудованому зумері принтера",
-    "buzzer_test": "Тестувати зумер"
+    "buzzer_test": "Тестувати зумер",
+    "columns": "стовпці",
+    "dashboard_columns": "Стовпці панелі",
+    "general": "Загальне"
   },
   "notify": {
     "print": "Друк",
@@ -2107,7 +2139,11 @@
     "name": "Ім'я",
     "none": "Немає",
     "save_error": "Помилка збереження",
-    "saved": "Збережено"
+    "saved": "Збережено",
+    "download": "Завантажити",
+    "error": "Помилка",
+    "refresh": "Оновити",
+    "unknown": "Невідомо"
   },
   "queue": {
     "title": "Print Queue",
@@ -2183,7 +2219,9 @@
     "no_queues_desc": "Створіть чергу для початку пакетного друку.",
     "no_items_desc": "Додайте елементи для початку обробки.",
     "no_history_desc": "Завершені елементи черги з'являться тут.",
-    "delete_confirm": "Видалити цю чергу?"
+    "delete_confirm": "Видалити цю чергу?",
+    "pending": "Очікує",
+    "select_queue_hint": "Виберіть чергу для перегляду елементів"
   },
   "tags": {
     "title": "Tags",
@@ -2511,7 +2549,10 @@
     "sort_by": "Сортувати за",
     "sort_name": "Ім'я",
     "sort_progress": "Прогрес",
-    "sort_status": "Статус"
+    "sort_status": "Статус",
+    "maintenance": "Обслуговування",
+    "pause_all_tip": "Призупинити всі друки",
+    "resume_all_tip": "Відновити всі призупинені"
   },
   "scheduler": {
     "today": "Сьогодні",
@@ -2571,7 +2612,9 @@
     "started": "Розпочато",
     "finished": "Завершено",
     "duration": "Тривалість",
-    "close": "Закрити"
+    "close": "Закрити",
+    "paused": "Призупинено",
+    "progress": "Прогрес"
   },
   "library": {
     "search_placeholder": "Пошук файлів...",
@@ -2602,7 +2645,17 @@
     "delete": "Видалити",
     "deleted": "Файл видалено",
     "confirm_delete": "Видалити цей файл з бібліотеки?",
-    "download": "Завантажити"
+    "download": "Завантажити",
+    "add_to_queue": "Додати до черги",
+    "clear": "Очистити",
+    "delete_confirm_prefix": "Видалити",
+    "deleted_prefix": "Видалено",
+    "file": "файл",
+    "files": "файли",
+    "open_queue": "Відкрити чергу",
+    "ready_to_queue": "готово до черги — виберіть чергу в панелі Черга",
+    "select": "Вибрати",
+    "selected": "вибрано"
   },
   "bedmesh": {
     "heatmap": "Теплова карта",
@@ -2778,7 +2831,8 @@
     "quarterly_est": "Квартальна оцінка",
     "yearly_est": "Річна оцінка",
     "stock_value": "Вартість запасу",
-    "based_on_avg": "На основі середнього використання"
+    "based_on_avg": "На основі середнього використання",
+    "chart_title": "30-денний прогноз"
   },
   "multicolor": {
     "intro": "Плануйте друк у кілька кольорів, призначаючи котушки слотам AMS. Перевіряйте сумісність матеріалів і переглядайте розташування кольорів.",
@@ -2831,7 +2885,10 @@
     "captured": "Знімок збережено!",
     "empty_title": "Немає знімків",
     "empty_desc": "Робіть знімки з відеопотоку камери. Вони будуть збережені тут для зручного доступу.",
-    "no_camera": "Відеопотік камери недоступний"
+    "no_camera": "Відеопотік камери недоступний",
+    "deleted": "Знімок видалено",
+    "load_failed": "Не вдалося завантажити знімок",
+    "save_failed": "Не вдалося зберегти знімок"
   },
   "activity": {
     "total_prints": "Всього друків",

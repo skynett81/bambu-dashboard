@@ -101,7 +101,8 @@
     "lan_liveview_hint": "LAN Live View must be enabled on the printer for the camera to work.",
     "step_printer_screen": "On the printer screen, go to Settings",
     "step_settings": "Select General or Network",
-    "step_lan_liveview": "Enable \"LAN Only Liveview\""
+    "step_lan_liveview": "Enable \"LAN Only Liveview\"",
+    "reconnecting": "再接続中..."
   },
   "temperature": {
     "title": "温度",
@@ -817,7 +818,13 @@
     "mat_tips_hips": "ABS用の可溶性サポート（リモネンで溶解）。単独素材としても使用可能。",
     "mat_warn_hips": "密閉型プリンターが必要です。リモネンでの溶解は遅い（12〜24時間）。",
     "mat_tips_pet-cf": "非常に剛性が高く寸法安定性があります。エンクロージャーなしでもエンジニアリング部品に最適。",
-    "mat_warn_pet-cf": "硬化ノズルが必要です。カーボンファイバーで素材が脆くなります。"
+    "mat_warn_pet-cf": "硬化ノズルが必要です。カーボンファイバーで素材が脆くなります。",
+    "view_inventory": "在庫で表示",
+    "total": "合計",
+    "drying": "乾燥",
+    "diameter": "直径",
+    "usage": "使用量",
+    "after_print": "印刷後"
   },
   "controls": {
     "title": "操作",
@@ -954,7 +961,8 @@
     "format_usb": "USBをフォーマット",
     "format_confirm": "{{storage}}をフォーマットしてもよいですか？すべてのファイルが完全に削除されます。",
     "format_success": "{{storage}}をフォーマットしました",
-    "sd_card_short": "SDカード"
+    "sd_card_short": "SDカード",
+    "send_gcode": "G-codeを送信..."
   },
   "speed": {
     "label": "速度:",
@@ -1082,7 +1090,11 @@
     "sort_name": "名前",
     "sort_duration": "所要時間",
     "sort_filament": "フィラメント",
-    "sort_status": "ステータス"
+    "sort_status": "ステータス",
+    "compare_btn": "比較",
+    "compare_load_failed": "印刷データを読み込めませんでした",
+    "compare_prints": "印刷を比較",
+    "compare_select_hint": "正確に2つの印刷を選択して、比較をクリックしてください。"
   },
   "stats": {
     "total_prints": "総印刷数",
@@ -1193,7 +1205,23 @@
     "peak_chamber": "Peak chamber temp",
     "avg_chamber": "Avg chamber temp",
     "print_timeline": "印刷タイムライン",
-    "tab_printstats": "印刷統計"
+    "tab_printstats": "印刷統計",
+    "active_days": "アクティブな印刷日数",
+    "bed_avg_max": "ベッド 平均/最大",
+    "colors_used": "使用色数",
+    "days": "日",
+    "hourly_activity": "時間別アクティビティ",
+    "level": "レベル",
+    "most_printed": "最も印刷されたモデル",
+    "most_used": "最も使用",
+    "nozzle_avg_max": "ノズル 平均/最大",
+    "nozzle_speed": "ノズルと速度",
+    "of": "/",
+    "peak_hour": "ピーク時間",
+    "per_brand": "ブランド別",
+    "per_type": "タイプ別",
+    "prints_per_day": "1日あたりの印刷数（平均）",
+    "temperatures": "温度"
   },
   "errors": {
     "no_errors": "エラーは記録されていません。",
@@ -1259,7 +1287,8 @@
     "filter_prints": "印刷",
     "filter_errors": "エラー",
     "filter_maintenance": "メンテナンス",
-    "filter_other": "その他"
+    "filter_other": "その他",
+    "no_match_desc": "フィルターに一致するエラーは見つかりませんでした。良いことです！"
   },
   "settings": {
     "printers_title": "プリンター",
@@ -1780,7 +1809,10 @@
     "buzzer_title": "プリンタースピーカー",
     "buzzer_enable": "プリンターのスピーカーで音を鳴らす",
     "buzzer_desc": "M300 Gコードを使用してプリンター内蔵ブザーでメロディーを再生します",
-    "buzzer_test": "ブザーテスト"
+    "buzzer_test": "ブザーテスト",
+    "columns": "列",
+    "dashboard_columns": "ダッシュボード列",
+    "general": "一般"
   },
   "notify": {
     "print": "印刷",
@@ -2107,7 +2139,11 @@
     "name": "名前",
     "none": "なし",
     "save_error": "保存に失敗しました",
-    "saved": "保存しました"
+    "saved": "保存しました",
+    "download": "ダウンロード",
+    "error": "エラー",
+    "refresh": "更新",
+    "unknown": "不明"
   },
   "queue": {
     "title": "Print Queue",
@@ -2183,7 +2219,9 @@
     "no_queues_desc": "バッチ印刷を開始するためにキューを作成してください。",
     "no_items_desc": "処理を開始するためにアイテムを追加してください。",
     "no_history_desc": "完了したキューアイテムがここに表示されます。",
-    "delete_confirm": "このキューを削除しますか？"
+    "delete_confirm": "このキューを削除しますか？",
+    "pending": "待機中",
+    "select_queue_hint": "キューを選択してアイテムを表示"
   },
   "tags": {
     "title": "Tags",
@@ -2511,7 +2549,10 @@
     "sort_by": "並び替え",
     "sort_name": "名前",
     "sort_progress": "進捗",
-    "sort_status": "ステータス"
+    "sort_status": "ステータス",
+    "maintenance": "メンテナンス",
+    "pause_all_tip": "すべての印刷を一時停止",
+    "resume_all_tip": "すべての一時停止を再開"
   },
   "scheduler": {
     "today": "今日",
@@ -2571,7 +2612,9 @@
     "started": "開始",
     "finished": "完了",
     "duration": "所要時間",
-    "close": "閉じる"
+    "close": "閉じる",
+    "paused": "一時停止",
+    "progress": "進捗"
   },
   "library": {
     "search_placeholder": "ファイルを検索...",
@@ -2602,7 +2645,17 @@
     "delete": "削除",
     "deleted": "ファイルを削除しました",
     "confirm_delete": "このファイルをライブラリから削除しますか？",
-    "download": "ダウンロード"
+    "download": "ダウンロード",
+    "add_to_queue": "キューに追加",
+    "clear": "クリア",
+    "delete_confirm_prefix": "削除",
+    "deleted_prefix": "削除済み",
+    "file": "ファイル",
+    "files": "ファイル",
+    "open_queue": "キューを開く",
+    "ready_to_queue": "キュー待ち — キューパネルでキューを選択してください",
+    "select": "選択",
+    "selected": "選択済み"
   },
   "bedmesh": {
     "heatmap": "ヒートマップ",
@@ -2778,7 +2831,8 @@
     "quarterly_est": "四半期予測",
     "yearly_est": "年次予測",
     "stock_value": "在庫価値",
-    "based_on_avg": "平均使用量に基づく"
+    "based_on_avg": "平均使用量に基づく",
+    "chart_title": "30日間の予測"
   },
   "multicolor": {
     "intro": "AMSスロットにスプールを割り当てて、マルチカラー印刷を計画します。素材の互換性を確認し、カラーレイアウトをプレビューしてください。",
@@ -2831,7 +2885,10 @@
     "captured": "スクリーンショットを保存しました！",
     "empty_title": "スクリーンショットなし",
     "empty_desc": "カメラフィードからスクリーンショットをキャプチャしてください。ここに保存されて簡単にアクセスできます。",
-    "no_camera": "カメラフィードが利用できません"
+    "no_camera": "カメラフィードが利用できません",
+    "deleted": "スクリーンショットを削除しました",
+    "load_failed": "スクリーンショットを読み込めませんでした",
+    "save_failed": "スクリーンショットを保存できませんでした"
   },
   "activity": {
     "total_prints": "総印刷数",

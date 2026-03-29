@@ -101,7 +101,8 @@
     "lan_liveview_hint": "LAN Live View must be enabled on the printer for the camera to work.",
     "step_printer_screen": "On the printer screen, go to Settings",
     "step_settings": "Select General or Network",
-    "step_lan_liveview": "Enable \"LAN Only Liveview\""
+    "step_lan_liveview": "Enable \"LAN Only Liveview\"",
+    "reconnecting": "Verbindung wird wiederhergestellt..."
   },
   "temperature": {
     "title": "Temperaturen",
@@ -817,7 +818,13 @@
     "mat_tips_hips": "Lösliches Stützmaterial für ABS (löst sich in Limonen). Kann auch als eigenständiges Material verwendet werden.",
     "mat_warn_hips": "Erfordert geschlossenen Drucker. Auflösung in Limonen ist langsam (12–24 Stunden).",
     "mat_tips_pet-cf": "Sehr steif und dimensional stabil. Gut für Ingenieurteile ohne Gehäuse.",
-    "mat_warn_pet-cf": "Erfordert gehärtete Düse. Karbonfasern machen das Material spröde."
+    "mat_warn_pet-cf": "Erfordert gehärtete Düse. Karbonfasern machen das Material spröde.",
+    "view_inventory": "Im Bestand anzeigen",
+    "total": "Gesamt",
+    "drying": "Trocknung",
+    "diameter": "Durchmesser",
+    "usage": "Verbrauch",
+    "after_print": "Nach dem Druck"
   },
   "controls": {
     "title": "Steuerung",
@@ -954,7 +961,8 @@
     "format_usb": "USB formatieren",
     "format_confirm": "Möchten Sie {{storage}} wirklich formatieren? Alle Dateien werden dauerhaft gelöscht.",
     "format_success": "{{storage}} formatiert",
-    "sd_card_short": "SD-Karte"
+    "sd_card_short": "SD-Karte",
+    "send_gcode": "G-Code senden..."
   },
   "speed": {
     "label": "Geschwindigkeit:",
@@ -1082,7 +1090,11 @@
     "sort_name": "Name",
     "sort_duration": "Dauer",
     "sort_filament": "Filament",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "compare_btn": "Vergleichen",
+    "compare_load_failed": "Druckdaten konnten nicht geladen werden",
+    "compare_prints": "Drucke vergleichen",
+    "compare_select_hint": "Wählen Sie genau zwei Drucke aus und klicken Sie auf Vergleichen."
   },
   "stats": {
     "total_prints": "Drucke gesamt",
@@ -1193,7 +1205,23 @@
     "peak_chamber": "Peak chamber temp",
     "avg_chamber": "Avg chamber temp",
     "print_timeline": "Druck-Zeitachse",
-    "tab_printstats": "Drucke"
+    "tab_printstats": "Drucke",
+    "active_days": "Aktive Drucktage",
+    "bed_avg_max": "Bett Durchschn. / Max",
+    "colors_used": "Verwendete Farben",
+    "days": "Tage",
+    "hourly_activity": "Stündliche Aktivität",
+    "level": "Stufe",
+    "most_printed": "Meistgedruckte Modelle",
+    "most_used": "Am häufigsten verwendet",
+    "nozzle_avg_max": "Düse Durchschn. / Max",
+    "nozzle_speed": "Düse & Geschwindigkeit",
+    "of": "von",
+    "peak_hour": "Aktivste Stunde",
+    "per_brand": "Nach Marke",
+    "per_type": "Nach Typ",
+    "prints_per_day": "Drucke pro Tag (Durchschn.)",
+    "temperatures": "Temperaturen"
   },
   "errors": {
     "no_errors": "Keine Fehler aufgezeichnet.",
@@ -1259,7 +1287,8 @@
     "filter_prints": "Drucke",
     "filter_errors": "Fehler",
     "filter_maintenance": "Wartung",
-    "filter_other": "Sonstiges"
+    "filter_other": "Sonstiges",
+    "no_match_desc": "Keine Fehler gefunden, die Ihren Filtern entsprechen. Das ist gut!"
   },
   "settings": {
     "printers_title": "Drucker",
@@ -1780,7 +1809,10 @@
     "buzzer_title": "Drucker-Lautsprecher",
     "buzzer_enable": "Töne über Drucker-Lautsprecher abspielen",
     "buzzer_desc": "Verwendet M300 G-Code, um Melodien über den eingebauten Buzzer des Druckers abzuspielen",
-    "buzzer_test": "Buzzer testen"
+    "buzzer_test": "Buzzer testen",
+    "columns": "Spalten",
+    "dashboard_columns": "Dashboard-Spalten",
+    "general": "Allgemein"
   },
   "notify": {
     "print": "Druck",
@@ -2107,7 +2139,11 @@
     "name": "Name",
     "none": "Keine",
     "save_error": "Speichern fehlgeschlagen",
-    "saved": "Gespeichert"
+    "saved": "Gespeichert",
+    "download": "Herunterladen",
+    "error": "Fehler",
+    "refresh": "Aktualisieren",
+    "unknown": "Unbekannt"
   },
   "queue": {
     "title": "Print Queue",
@@ -2183,7 +2219,9 @@
     "no_queues_desc": "Erstellen Sie eine Warteschlange, um den Stapeldruck zu starten.",
     "no_items_desc": "Elemente hinzufügen, um die Verarbeitung zu starten.",
     "no_history_desc": "Abgeschlossene Warteschlangenelemente erscheinen hier.",
-    "delete_confirm": "Diese Warteschlange löschen?"
+    "delete_confirm": "Diese Warteschlange löschen?",
+    "pending": "Ausstehend",
+    "select_queue_hint": "Wählen Sie eine Warteschlange zum Anzeigen"
   },
   "tags": {
     "title": "Tags",
@@ -2511,7 +2549,10 @@
     "sort_by": "Sortieren nach",
     "sort_name": "Name",
     "sort_progress": "Fortschritt",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "maintenance": "Wartung",
+    "pause_all_tip": "Alle druckenden pausieren",
+    "resume_all_tip": "Alle pausierten fortsetzen"
   },
   "scheduler": {
     "today": "Heute",
@@ -2571,7 +2612,9 @@
     "started": "Gestartet",
     "finished": "Abgeschlossen",
     "duration": "Dauer",
-    "close": "Schließen"
+    "close": "Schließen",
+    "paused": "Pausiert",
+    "progress": "Fortschritt"
   },
   "library": {
     "search_placeholder": "Dateien suchen...",
@@ -2602,7 +2645,17 @@
     "delete": "Löschen",
     "deleted": "Datei gelöscht",
     "confirm_delete": "Diese Datei aus der Bibliothek löschen?",
-    "download": "Herunterladen"
+    "download": "Herunterladen",
+    "add_to_queue": "Zur Warteschlange hinzufügen",
+    "clear": "Leeren",
+    "delete_confirm_prefix": "Löschen",
+    "deleted_prefix": "Gelöscht",
+    "file": "Datei",
+    "files": "Dateien",
+    "open_queue": "Warteschlange öffnen",
+    "ready_to_queue": "bereit für Warteschlange — wählen Sie eine Warteschlange im Warteschlangen-Panel",
+    "select": "Auswählen",
+    "selected": "ausgewählt"
   },
   "bedmesh": {
     "heatmap": "Heatmap",
@@ -2778,7 +2831,8 @@
     "quarterly_est": "Quartalsweise Schätz.",
     "yearly_est": "Jährliche Schätz.",
     "stock_value": "Lagerwert",
-    "based_on_avg": "Basierend auf Durchschnittsverbrauch"
+    "based_on_avg": "Basierend auf Durchschnittsverbrauch",
+    "chart_title": "30-Tage-Prognose"
   },
   "multicolor": {
     "intro": "Planen Sie mehrfarbige Drucke, indem Sie Spulen AMS-Slots zuweisen. Überprüfen Sie die Materialkompatibilität und sehen Sie sich das Farbschema in der Vorschau an.",
@@ -2831,7 +2885,10 @@
     "captured": "Screenshot gespeichert!",
     "empty_title": "Keine Screenshots",
     "empty_desc": "Nehmen Sie Screenshots vom Kamera-Feed auf. Sie werden hier für einfachen Zugriff gespeichert.",
-    "no_camera": "Kein Kamera-Feed verfügbar"
+    "no_camera": "Kein Kamera-Feed verfügbar",
+    "deleted": "Screenshot gelöscht",
+    "load_failed": "Screenshot konnte nicht geladen werden",
+    "save_failed": "Screenshot konnte nicht gespeichert werden"
   },
   "activity": {
     "total_prints": "Drucke gesamt",

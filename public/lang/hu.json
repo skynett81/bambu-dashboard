@@ -100,7 +100,8 @@
     "lan_liveview_hint": "LAN Live View must be enabled on the printer for the camera to work.",
     "step_printer_screen": "On the printer screen, go to Settings",
     "step_settings": "Select General or Network",
-    "step_lan_liveview": "Enable \"LAN Only Liveview\""
+    "step_lan_liveview": "Enable \"LAN Only Liveview\"",
+    "reconnecting": "Újracsatlakozás..."
   },
   "temperature": {
     "title": "Hőmérsékletek",
@@ -816,7 +817,13 @@
     "mat_tips_hips": "Oldható tartóanyag ABS-hez (limonénban oldódik). Önálló anyagként is használható.",
     "mat_warn_hips": "Zárt nyomtató szükséges. Limonénban való oldódás lassú (12–24 óra).",
     "mat_tips_pet-cf": "Nagyon merev és méretstabil. Jó mérnöki alkatrészekhez borítás nélkül.",
-    "mat_warn_pet-cf": "Edzett fúvóka szükséges. A szénszál törékennyé teszi az anyagot."
+    "mat_warn_pet-cf": "Edzett fúvóka szükséges. A szénszál törékennyé teszi az anyagot.",
+    "view_inventory": "Megtekintés a készletben",
+    "total": "Összesen",
+    "drying": "Szárítás",
+    "diameter": "Átmérő",
+    "usage": "Felhasználás",
+    "after_print": "Nyomtatás után"
   },
   "controls": {
     "title": "Vezérlés",
@@ -953,7 +960,8 @@
     "format_usb": "USB formázása",
     "format_confirm": "Biztosan formázza a(z) {{storage}} tárolót? Minden fájl véglegesen törlődik.",
     "format_success": "{{storage}} formázva",
-    "sd_card_short": "SD kártya"
+    "sd_card_short": "SD kártya",
+    "send_gcode": "G-kód küldése..."
   },
   "speed": {
     "label": "Sebesség:",
@@ -1081,7 +1089,11 @@
     "sort_name": "Név",
     "sort_duration": "Időtartam",
     "sort_filament": "Szál",
-    "sort_status": "Állapot"
+    "sort_status": "Állapot",
+    "compare_btn": "Összehasonlítás",
+    "compare_load_failed": "Nem sikerült betölteni a nyomtatási adatokat",
+    "compare_prints": "Nyomtatások összehasonlítása",
+    "compare_select_hint": "Válasszon ki pontosan két nyomtatást, majd kattintson az Összehasonlítás gombra."
   },
   "stats": {
     "total_prints": "Összes nyomtatás",
@@ -1192,7 +1204,23 @@
     "peak_chamber": "Peak chamber temp",
     "avg_chamber": "Avg chamber temp",
     "print_timeline": "Nyomtatási idősor",
-    "tab_printstats": "Nyomtatási statisztikák"
+    "tab_printstats": "Nyomtatási statisztikák",
+    "active_days": "Aktív nyomtatási napok",
+    "bed_avg_max": "Ágy átl. / max",
+    "colors_used": "Használt színek",
+    "days": "nap",
+    "hourly_activity": "Óránkénti aktivitás",
+    "level": "Szint",
+    "most_printed": "Legtöbbször nyomtatott modellek",
+    "most_used": "Leggyakrabban használt",
+    "nozzle_avg_max": "Fúvóka átl. / max",
+    "nozzle_speed": "Fúvóka és sebesség",
+    "of": "/",
+    "peak_hour": "Legaktívabb óra",
+    "per_brand": "Márka szerint",
+    "per_type": "Típus szerint",
+    "prints_per_day": "Nyomtatás naponta (átl.)",
+    "temperatures": "Hőmérsékletek"
   },
   "errors": {
     "no_errors": "Nincsenek rögzített hibák.",
@@ -1258,7 +1286,8 @@
     "filter_prints": "Nyomtatások",
     "filter_errors": "Hibák",
     "filter_maintenance": "Karbantartás",
-    "filter_other": "Egyéb"
+    "filter_other": "Egyéb",
+    "no_match_desc": "Nem találhatók a szűrőknek megfelelő hibák. Ez jó hír!"
   },
   "settings": {
     "printers_title": "Nyomtatók",
@@ -1779,7 +1808,10 @@
     "buzzer_title": "Nyomtató hangszóró",
     "buzzer_enable": "Hangok lejátszása a nyomtató hangszóróján",
     "buzzer_desc": "M300 G-kódot használ dallamok lejátszásához a nyomtató beépített csipogóján",
-    "buzzer_test": "Csipogó tesztelése"
+    "buzzer_test": "Csipogó tesztelése",
+    "columns": "oszlop",
+    "dashboard_columns": "Irányítópult oszlopok",
+    "general": "Általános"
   },
   "notify": {
     "print": "Nyomtatás",
@@ -2106,7 +2138,11 @@
     "name": "Név",
     "none": "Nincs",
     "save_error": "Mentés sikertelen",
-    "saved": "Mentve"
+    "saved": "Mentve",
+    "download": "Letöltés",
+    "error": "Hiba",
+    "refresh": "Frissítés",
+    "unknown": "Ismeretlen"
   },
   "queue": {
     "title": "Print Queue",
@@ -2182,7 +2218,9 @@
     "no_queues_desc": "Hozzon létre várólistát a kötegelt nyomtatás megkezdéséhez.",
     "no_items_desc": "Adjon hozzá elemeket a feldolgozás megkezdéséhez.",
     "no_history_desc": "A befejezett várólistaelemek itt jelennek meg.",
-    "delete_confirm": "Törli ezt a várólistát?"
+    "delete_confirm": "Törli ezt a várólistát?",
+    "pending": "Várakozó",
+    "select_queue_hint": "Válasszon sort az elemek megtekintéséhez"
   },
   "tags": {
     "title": "Tags",
@@ -2510,7 +2548,10 @@
     "sort_by": "Rendezés",
     "sort_name": "Név",
     "sort_progress": "Haladás",
-    "sort_status": "Állapot"
+    "sort_status": "Állapot",
+    "maintenance": "Karbantartás",
+    "pause_all_tip": "Összes nyomtatás szüneteltetése",
+    "resume_all_tip": "Összes szüneteltetett folytatása"
   },
   "scheduler": {
     "today": "Ma",
@@ -2570,7 +2611,9 @@
     "started": "Elindítva",
     "finished": "Befejezve",
     "duration": "Időtartam",
-    "close": "Bezárás"
+    "close": "Bezárás",
+    "paused": "Szüneteltetve",
+    "progress": "Haladás"
   },
   "library": {
     "search_placeholder": "Fájlok keresése...",
@@ -2601,7 +2644,17 @@
     "delete": "Törlés",
     "deleted": "Fájl törölve",
     "confirm_delete": "Törli ezt a fájlt a könyvtárból?",
-    "download": "Letöltés"
+    "download": "Letöltés",
+    "add_to_queue": "Hozzáadás a sorhoz",
+    "clear": "Törlés",
+    "delete_confirm_prefix": "Törlés",
+    "deleted_prefix": "Törölve",
+    "file": "fájl",
+    "files": "fájlok",
+    "open_queue": "Sor megnyitása",
+    "ready_to_queue": "sorba állításra kész — válasszon sort a Sor panelen",
+    "select": "Kiválasztás",
+    "selected": "kiválasztva"
   },
   "bedmesh": {
     "heatmap": "Hőtérkép",
@@ -2777,7 +2830,8 @@
     "quarterly_est": "Negyedéves becslés",
     "yearly_est": "Éves becslés",
     "stock_value": "Készlet értéke",
-    "based_on_avg": "Átlagos felhasználás alapján"
+    "based_on_avg": "Átlagos felhasználás alapján",
+    "chart_title": "30 napos előrejelzés"
   },
   "multicolor": {
     "intro": "Tervezze meg többszínű nyomtatásait az orsók AMS-tárolókhoz rendelésével. Ellenőrizze az anyagkompatibilitást, és tekintse meg a színelrendezést.",
@@ -2830,7 +2884,10 @@
     "captured": "Képernyőfotó mentve!",
     "empty_title": "Nincs képernyőfotó",
     "empty_desc": "Készítsen képernyőfotókat a kamera képéből. Ezek itt lesznek mentve a könnyű eléréshez.",
-    "no_camera": "Nincs elérhető kamerafolyam"
+    "no_camera": "Nincs elérhető kamerafolyam",
+    "deleted": "Képernyőkép törölve",
+    "load_failed": "Nem sikerült betölteni a képernyőképet",
+    "save_failed": "Nem sikerült menteni a képernyőképet"
   },
   "activity": {
     "total_prints": "Összes nyomtatás",

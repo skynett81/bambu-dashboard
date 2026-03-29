@@ -101,7 +101,8 @@
     "lan_liveview_hint": "LAN Live View must be enabled on the printer for the camera to work.",
     "step_printer_screen": "On the printer screen, go to Settings",
     "step_settings": "Select General or Network",
-    "step_lan_liveview": "Enable \"LAN Only Liveview\""
+    "step_lan_liveview": "Enable \"LAN Only Liveview\"",
+    "reconnecting": "重新连接中..."
   },
   "temperature": {
     "title": "温度",
@@ -817,7 +818,13 @@
     "mat_tips_hips": "ABS的可溶性支撑（溶于柠檬烯）。也可作为独立材料使用。",
     "mat_warn_hips": "需要封闭式打印机。在柠檬烯中溶解较慢（12–24小时）。",
     "mat_tips_pet-cf": "非常坚硬且尺寸稳定。无需外壳适合工程零件。",
-    "mat_warn_pet-cf": "需要硬化喷嘴。碳纤维使材料变脆。"
+    "mat_warn_pet-cf": "需要硬化喷嘴。碳纤维使材料变脆。",
+    "view_inventory": "在库存中查看",
+    "total": "总计",
+    "drying": "干燥",
+    "diameter": "直径",
+    "usage": "用量",
+    "after_print": "打印后"
   },
   "controls": {
     "title": "控制",
@@ -954,7 +961,8 @@
     "format_usb": "格式化USB",
     "format_confirm": "确定要格式化{{storage}}吗？所有文件将被永久删除。",
     "format_success": "{{storage}}已格式化",
-    "sd_card_short": "SD卡"
+    "sd_card_short": "SD卡",
+    "send_gcode": "发送G代码..."
   },
   "speed": {
     "label": "速度：",
@@ -1082,7 +1090,11 @@
     "sort_name": "名称",
     "sort_duration": "持续时间",
     "sort_filament": "耗材",
-    "sort_status": "状态"
+    "sort_status": "状态",
+    "compare_btn": "比较",
+    "compare_load_failed": "无法加载打印数据",
+    "compare_prints": "比较打印",
+    "compare_select_hint": "选择恰好两个打印件，然后点击比较。"
   },
   "stats": {
     "total_prints": "总打印次数",
@@ -1193,7 +1205,23 @@
     "peak_chamber": "Peak chamber temp",
     "avg_chamber": "Avg chamber temp",
     "print_timeline": "打印时间轴",
-    "tab_printstats": "打印统计"
+    "tab_printstats": "打印统计",
+    "active_days": "活跃打印天数",
+    "bed_avg_max": "热床 平均/最大",
+    "colors_used": "使用的颜色",
+    "days": "天",
+    "hourly_activity": "每小时活动",
+    "level": "级别",
+    "most_printed": "打印最多的模型",
+    "most_used": "最常用",
+    "nozzle_avg_max": "喷嘴 平均/最大",
+    "nozzle_speed": "喷嘴和速度",
+    "of": "/",
+    "peak_hour": "高峰时段",
+    "per_brand": "按品牌",
+    "per_type": "按类型",
+    "prints_per_day": "每日打印数（平均）",
+    "temperatures": "温度"
   },
   "errors": {
     "no_errors": "暂无错误记录。",
@@ -1259,7 +1287,8 @@
     "filter_prints": "打印",
     "filter_errors": "错误",
     "filter_maintenance": "维护",
-    "filter_other": "其他"
+    "filter_other": "其他",
+    "no_match_desc": "未找到与您的筛选条件匹配的错误。这是好事！"
   },
   "settings": {
     "printers_title": "打印机",
@@ -1780,7 +1809,10 @@
     "buzzer_title": "打印机扬声器",
     "buzzer_enable": "在打印机扬声器上播放声音",
     "buzzer_desc": "使用 M300 G代码在打印机内置蜂鸣器上播放旋律",
-    "buzzer_test": "测试蜂鸣器"
+    "buzzer_test": "测试蜂鸣器",
+    "columns": "列",
+    "dashboard_columns": "仪表盘列",
+    "general": "通用"
   },
   "notify": {
     "print": "打印",
@@ -2107,7 +2139,11 @@
     "name": "名称",
     "none": "无",
     "save_error": "保存失败",
-    "saved": "已保存"
+    "saved": "已保存",
+    "download": "下载",
+    "error": "错误",
+    "refresh": "刷新",
+    "unknown": "未知"
   },
   "queue": {
     "title": "Print Queue",
@@ -2183,7 +2219,9 @@
     "no_queues_desc": "创建队列以开始批量打印。",
     "no_items_desc": "添加项目以开始处理。",
     "no_history_desc": "已完成的队列项目将显示在此处。",
-    "delete_confirm": "删除此队列？"
+    "delete_confirm": "删除此队列？",
+    "pending": "等待中",
+    "select_queue_hint": "选择一个队列以查看项目"
   },
   "tags": {
     "title": "Tags",
@@ -2511,7 +2549,10 @@
     "sort_by": "排序方式",
     "sort_name": "名称",
     "sort_progress": "进度",
-    "sort_status": "状态"
+    "sort_status": "状态",
+    "maintenance": "维护",
+    "pause_all_tip": "暂停所有打印",
+    "resume_all_tip": "恢复所有已暂停的"
   },
   "scheduler": {
     "today": "今天",
@@ -2571,7 +2612,9 @@
     "started": "已开始",
     "finished": "已完成",
     "duration": "持续时间",
-    "close": "关闭"
+    "close": "关闭",
+    "paused": "已暂停",
+    "progress": "进度"
   },
   "library": {
     "search_placeholder": "搜索文件...",
@@ -2602,7 +2645,17 @@
     "delete": "删除",
     "deleted": "文件已删除",
     "confirm_delete": "从库中删除此文件？",
-    "download": "下载"
+    "download": "下载",
+    "add_to_queue": "添加到队列",
+    "clear": "清除",
+    "delete_confirm_prefix": "删除",
+    "deleted_prefix": "已删除",
+    "file": "文件",
+    "files": "文件",
+    "open_queue": "打开队列",
+    "ready_to_queue": "已准备入队 — 在队列面板中选择一个队列",
+    "select": "选择",
+    "selected": "已选择"
   },
   "bedmesh": {
     "heatmap": "热图",
@@ -2778,7 +2831,8 @@
     "quarterly_est": "季度预测",
     "yearly_est": "年度预测",
     "stock_value": "库存价值",
-    "based_on_avg": "基于平均使用量"
+    "based_on_avg": "基于平均使用量",
+    "chart_title": "30天预测"
   },
   "multicolor": {
     "intro": "通过将线轴分配到AMS插槽来规划多色打印。检查材料兼容性并预览您的颜色布局。",
@@ -2831,7 +2885,10 @@
     "captured": "截图已保存！",
     "empty_title": "无截图",
     "empty_desc": "从摄像头画面捕获截图。它们将保存在此处以便于访问。",
-    "no_camera": "无可用摄像头画面"
+    "no_camera": "无可用摄像头画面",
+    "deleted": "截图已删除",
+    "load_failed": "无法加载截图",
+    "save_failed": "无法保存截图"
   },
   "activity": {
     "total_prints": "总打印数",

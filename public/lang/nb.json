@@ -100,7 +100,8 @@
     "connecting": "Kobler til kamera...",
     "screenshot": "Ta skjermbilde",
     "screenshot_saved": "Skjermbilde lagret",
-    "screenshot_failed": "Ingen kamerabilde tilgjengelig"
+    "screenshot_failed": "Ingen kamerabilde tilgjengelig",
+    "reconnecting": "Kobler til igjen..."
   },
   "model": {
     "preview": "3D-visning",
@@ -817,7 +818,8 @@
     "mat_tips_hips": "Løselig støtte for ABS (løses i limonen). Kan også brukes som selvstendig materiale.",
     "mat_warn_hips": "Krever lukket printer. Oppløsning i limonen er langsom (12-24 timer).",
     "mat_tips_pet-cf": "Svært stiv og dimensjonsstabil. Bra for ingeniørdeler uten enclosure.",
-    "mat_warn_pet-cf": "Krever herdet dyse. Karbonfiber gjør materialet sprøtt."
+    "mat_warn_pet-cf": "Krever herdet dyse. Karbonfiber gjør materialet sprøtt.",
+    "after_print": "Etter print"
   },
   "controls": {
     "title": "Kontroller",
@@ -954,7 +956,8 @@
     "z_step_level": "Automatisk nivellering",
     "z_step_adjust": "Finjuster Z-offset",
     "z_homing": "Kjører hjem...",
-    "z_leveling": "Nivellerer..."
+    "z_leveling": "Nivellerer...",
+    "send_gcode": "Send G-kode..."
   },
   "speed": {
     "label": "Hastighet:",
@@ -1103,7 +1106,10 @@
     "sort_by": "Sorter etter",
     "sort_name": "Navn",
     "sort_progress": "Fremdrift",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "maintenance": "Vedlikehold",
+    "pause_all_tip": "Pause alle som printer",
+    "resume_all_tip": "Fortsett alle pausede"
   },
   "scheduler": {
     "today": "I dag",
@@ -1163,7 +1169,9 @@
     "started": "Startet",
     "finished": "Fullført",
     "duration": "Varighet",
-    "close": "Lukk"
+    "close": "Lukk",
+    "paused": "Pauset",
+    "progress": "Fremdrift"
   },
   "library": {
     "search_placeholder": "Søk i filer...",
@@ -1194,7 +1202,17 @@
     "delete": "Slett",
     "deleted": "Fil slettet",
     "confirm_delete": "Slette denne filen fra biblioteket?",
-    "download": "Last ned"
+    "download": "Last ned",
+    "add_to_queue": "Legg i kø",
+    "clear": "Tøm",
+    "delete_confirm_prefix": "Slette",
+    "deleted_prefix": "Slettet",
+    "file": "fil",
+    "files": "filer",
+    "open_queue": "Åpne kø",
+    "ready_to_queue": "klar for kø — velg en kø i Kø-panelet",
+    "select": "Velg",
+    "selected": "valgt"
   },
   "bedmesh": {
     "heatmap": "Varmekart",
@@ -1370,7 +1388,8 @@
     "quarterly_est": "Kvartalsvis est.",
     "yearly_est": "Årlig est.",
     "stock_value": "Lagerverdi",
-    "based_on_avg": "Basert på snittforbruk"
+    "based_on_avg": "Basert på snittforbruk",
+    "chart_title": "30-dagers prognose"
   },
   "multicolor": {
     "intro": "Planlegg flerfargede utskrifter ved å tilordne spoler til AMS-spor. Sjekk materialkompatibilitet og forhåndsvis fargeoppsettet.",
@@ -1423,7 +1442,10 @@
     "captured": "Skjermbilde lagret!",
     "empty_title": "Ingen skjermbilder",
     "empty_desc": "Ta skjermbilder fra kamerafeeden. De lagres her for enkel tilgang.",
-    "no_camera": "Ingen kamerafeed tilgjengelig"
+    "no_camera": "Ingen kamerafeed tilgjengelig",
+    "deleted": "Skjermbilde slettet",
+    "load_failed": "Kunne ikke laste skjermbilde",
+    "save_failed": "Kunne ikke lagre skjermbilde"
   },
   "activity": {
     "total_prints": "Totalt utskrifter",
@@ -1481,7 +1503,11 @@
     "sort_name": "Navn",
     "sort_duration": "Varighet",
     "sort_filament": "Filament",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "compare_btn": "Sammenlign",
+    "compare_load_failed": "Kunne ikke laste utskriftsdata",
+    "compare_prints": "Sammenlign utskrifter",
+    "compare_select_hint": "Velg nøyaktig to utskrifter, klikk deretter Sammenlign."
   },
   "stats": {
     "total_prints": "Totalt antall",
@@ -1592,7 +1618,23 @@
     "cost_hint_spool": "Spolepriser",
     "cost_recalculate": "Rekalkuler kostnader",
     "cost_recalculating": "Rekalkulerer...",
-    "cost_recalculated": "Kostnader rekalkulert"
+    "cost_recalculated": "Kostnader rekalkulert",
+    "active_days": "Aktive printdager",
+    "bed_avg_max": "Bed snitt / maks",
+    "colors_used": "Farger brukt",
+    "days": "dager",
+    "hourly_activity": "Aktivitet per time",
+    "level": "Nivå",
+    "most_printed": "Mest printede modeller",
+    "most_used": "Mest brukte",
+    "nozzle_avg_max": "Dyse snitt / maks",
+    "nozzle_speed": "Dyse & hastighet",
+    "of": "av",
+    "peak_hour": "Mest aktive time",
+    "per_brand": "Per merke",
+    "per_type": "Per type",
+    "prints_per_day": "Prints per dag (snitt)",
+    "temperatures": "Temperaturer"
   },
   "errors": {
     "no_errors": "Ingen feil registrert.",
@@ -1650,7 +1692,8 @@
     "filter_prints": "Prints",
     "filter_errors": "Feil",
     "filter_maintenance": "Vedlikehold",
-    "filter_other": "Annet"
+    "filter_other": "Annet",
+    "no_match_desc": "Ingen feil funnet som matcher filtrene dine. Det er bra!"
   },
   "settings": {
     "printers_title": "Printere",
@@ -2171,7 +2214,10 @@
     "buzzer_title": "Printerhøyttaler",
     "buzzer_enable": "Spill lyder på printerens høyttaler",
     "buzzer_desc": "Bruker M300 G-code for å spille melodier på printerens innebygde buzzer",
-    "buzzer_test": "Test buzzer"
+    "buzzer_test": "Test buzzer",
+    "columns": "kolonner",
+    "dashboard_columns": "Dashboard-kolonner",
+    "general": "Generelt"
   },
   "notify": {
     "print": "Utskrift",
@@ -2393,7 +2439,11 @@
     "name": "Navn",
     "none": "Ingen",
     "save_error": "Kunne ikke lagre",
-    "saved": "Lagret"
+    "saved": "Lagret",
+    "download": "Last ned",
+    "error": "Feil",
+    "refresh": "Oppdater",
+    "unknown": "Ukjent"
   },
   "update": {
     "title": "Oppdateringer",
@@ -2641,7 +2691,9 @@
     "material_mismatch": "Materialfeil",
     "required_tags": "Påkrevde printer-tagger",
     "stagger": "Forskyvning (s)",
-    "stagger_hint": "Forsinkelse i sekunder mellom utsending til forskjellige skrivere"
+    "stagger_hint": "Forsinkelse i sekunder mellom utsending til forskjellige skrivere",
+    "pending": "Venter",
+    "select_queue_hint": "Velg en kø for å se elementer"
   },
   "tags": {
     "title": "Merkelapper",

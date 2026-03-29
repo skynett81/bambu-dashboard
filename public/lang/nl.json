@@ -101,7 +101,8 @@
     "lan_liveview_hint": "LAN Live View must be enabled on the printer for the camera to work.",
     "step_printer_screen": "On the printer screen, go to Settings",
     "step_settings": "Select General or Network",
-    "step_lan_liveview": "Enable \"LAN Only Liveview\""
+    "step_lan_liveview": "Enable \"LAN Only Liveview\"",
+    "reconnecting": "Opnieuw verbinden..."
   },
   "temperature": {
     "title": "Temperaturen",
@@ -817,7 +818,13 @@
     "mat_tips_hips": "Oplosbaar ondersteuningsmateriaal voor ABS (lost op in limoneen). Kan ook als zelfstandig materiaal worden gebruikt.",
     "mat_warn_hips": "Vereist gesloten printer. Oplossen in limoneen is langzaam (12–24 uur).",
     "mat_tips_pet-cf": "Zeer stijf en dimensioneel stabiel. Goed voor technische onderdelen zonder behuizing.",
-    "mat_warn_pet-cf": "Vereist gehard nozzle. Koolstofvezel maakt het materiaal bros."
+    "mat_warn_pet-cf": "Vereist gehard nozzle. Koolstofvezel maakt het materiaal bros.",
+    "view_inventory": "Bekijken in voorraad",
+    "total": "Totaal",
+    "drying": "Drogen",
+    "diameter": "Diameter",
+    "usage": "Verbruik",
+    "after_print": "Na het printen"
   },
   "controls": {
     "title": "Bediening",
@@ -954,7 +961,8 @@
     "format_usb": "USB formatteren",
     "format_confirm": "Weet je zeker dat je {{storage}} wilt formatteren? Alle bestanden worden permanent verwijderd.",
     "format_success": "{{storage}} geformatteerd",
-    "sd_card_short": "SD-kaart"
+    "sd_card_short": "SD-kaart",
+    "send_gcode": "G-code versturen..."
   },
   "speed": {
     "label": "Snelheid:",
@@ -1082,7 +1090,11 @@
     "sort_name": "Naam",
     "sort_duration": "Duur",
     "sort_filament": "Filament",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "compare_btn": "Vergelijken",
+    "compare_load_failed": "Kon printgegevens niet laden",
+    "compare_prints": "Prints vergelijken",
+    "compare_select_hint": "Selecteer precies twee prints en klik op Vergelijken."
   },
   "stats": {
     "total_prints": "Totaal aantal prints",
@@ -1193,7 +1205,23 @@
     "peak_chamber": "Peak chamber temp",
     "avg_chamber": "Avg chamber temp",
     "print_timeline": "Afdruktijdlijn",
-    "tab_printstats": "Afdrukken"
+    "tab_printstats": "Afdrukken",
+    "active_days": "Actieve printdagen",
+    "bed_avg_max": "Bed gem. / max",
+    "colors_used": "Gebruikte kleuren",
+    "days": "dagen",
+    "hourly_activity": "Activiteit per uur",
+    "level": "Niveau",
+    "most_printed": "Meest geprinte modellen",
+    "most_used": "Meest gebruikt",
+    "nozzle_avg_max": "Nozzle gem. / max",
+    "nozzle_speed": "Nozzle & snelheid",
+    "of": "van",
+    "peak_hour": "Piekuur",
+    "per_brand": "Per merk",
+    "per_type": "Per type",
+    "prints_per_day": "Prints per dag (gem.)",
+    "temperatures": "Temperaturen"
   },
   "errors": {
     "no_errors": "Geen fouten geregistreerd.",
@@ -1259,7 +1287,8 @@
     "filter_prints": "Prints",
     "filter_errors": "Fouten",
     "filter_maintenance": "Onderhoud",
-    "filter_other": "Overig"
+    "filter_other": "Overig",
+    "no_match_desc": "Geen fouten gevonden die overeenkomen met uw filters. Dat is goed!"
   },
   "settings": {
     "printers_title": "Printers",
@@ -1780,7 +1809,10 @@
     "buzzer_title": "Printer-luidspreker",
     "buzzer_enable": "Geluiden afspelen op de printer-luidspreker",
     "buzzer_desc": "Gebruikt M300 G-code om melodieën af te spelen op de ingebouwde buzzer van de printer",
-    "buzzer_test": "Buzzer testen"
+    "buzzer_test": "Buzzer testen",
+    "columns": "kolommen",
+    "dashboard_columns": "Dashboard-kolommen",
+    "general": "Algemeen"
   },
   "notify": {
     "print": "Print",
@@ -2107,7 +2139,11 @@
     "name": "Naam",
     "none": "Geen",
     "save_error": "Kon niet opslaan",
-    "saved": "Opgeslagen"
+    "saved": "Opgeslagen",
+    "download": "Downloaden",
+    "error": "Fout",
+    "refresh": "Vernieuwen",
+    "unknown": "Onbekend"
   },
   "queue": {
     "title": "Print Queue",
@@ -2183,7 +2219,9 @@
     "no_queues_desc": "Maak een wachtrij aan om batchafdrukken te starten.",
     "no_items_desc": "Voeg items toe om te beginnen met verwerken.",
     "no_history_desc": "Voltooide wachtrij-items verschijnen hier.",
-    "delete_confirm": "Deze wachtrij verwijderen?"
+    "delete_confirm": "Deze wachtrij verwijderen?",
+    "pending": "Wachtend",
+    "select_queue_hint": "Selecteer een wachtrij om items te bekijken"
   },
   "tags": {
     "title": "Tags",
@@ -2511,7 +2549,10 @@
     "sort_by": "Sorteren op",
     "sort_name": "Naam",
     "sort_progress": "Voortgang",
-    "sort_status": "Status"
+    "sort_status": "Status",
+    "maintenance": "Onderhoud",
+    "pause_all_tip": "Alle prints pauzeren",
+    "resume_all_tip": "Alle gepauzeerde hervatten"
   },
   "scheduler": {
     "today": "Vandaag",
@@ -2571,7 +2612,9 @@
     "started": "Gestart",
     "finished": "Voltooid",
     "duration": "Duur",
-    "close": "Sluiten"
+    "close": "Sluiten",
+    "paused": "Gepauzeerd",
+    "progress": "Voortgang"
   },
   "library": {
     "search_placeholder": "Bestanden zoeken...",
@@ -2602,7 +2645,17 @@
     "delete": "Verwijderen",
     "deleted": "Bestand verwijderd",
     "confirm_delete": "Dit bestand uit de bibliotheek verwijderen?",
-    "download": "Downloaden"
+    "download": "Downloaden",
+    "add_to_queue": "Aan wachtrij toevoegen",
+    "clear": "Wissen",
+    "delete_confirm_prefix": "Verwijderen",
+    "deleted_prefix": "Verwijderd",
+    "file": "bestand",
+    "files": "bestanden",
+    "open_queue": "Wachtrij openen",
+    "ready_to_queue": "klaar voor wachtrij — selecteer een wachtrij in het Wachtrij-paneel",
+    "select": "Selecteren",
+    "selected": "geselecteerd"
   },
   "bedmesh": {
     "heatmap": "Heatmap",
@@ -2778,7 +2831,8 @@
     "quarterly_est": "Kwartaalschat.",
     "yearly_est": "Jaarlijkse schat.",
     "stock_value": "Voorraadwaarde",
-    "based_on_avg": "Gebaseerd op gemiddeld verbruik"
+    "based_on_avg": "Gebaseerd op gemiddeld verbruik",
+    "chart_title": "30-daagse prognose"
   },
   "multicolor": {
     "intro": "Plan meerkleurige afdrukken door spoelen toe te wijzen aan AMS-slots. Controleer materiaalcompatibiliteit en bekijk een voorbeeld van de kleuropstelling.",
@@ -2831,7 +2885,10 @@
     "captured": "Schermafbeelding opgeslagen!",
     "empty_title": "Geen schermafbeeldingen",
     "empty_desc": "Maak schermafbeeldingen van de camerafeed. Ze worden hier opgeslagen voor eenvoudige toegang.",
-    "no_camera": "Geen camerafeed beschikbaar"
+    "no_camera": "Geen camerafeed beschikbaar",
+    "deleted": "Screenshot verwijderd",
+    "load_failed": "Kon screenshot niet laden",
+    "save_failed": "Kon screenshot niet opslaan"
   },
   "activity": {
     "total_prints": "Totaal afdrukken",
