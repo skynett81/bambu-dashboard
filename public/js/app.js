@@ -317,7 +317,11 @@ const PANEL_TITLES = {
   profiles: 'profiles.title',
   calendar: 'calendar.title',
   screenshots: 'screenshots.title',
-  logs: 'logs.title'
+  logs: 'logs.title',
+  'crm-dashboard': 'crm.dashboard',
+  'crm-customers': 'crm.customers',
+  'crm-orders': 'crm.orders',
+  'crm-invoices': 'crm.invoices'
 };
 
 const PANEL_LOADERS = {
@@ -367,6 +371,10 @@ const PANEL_LOADERS = {
   modelinfo: () => { if (typeof loadKnowledgePanel === 'function') loadKnowledgePanel('modelinfo'); },
   screenshots: () => { if (typeof loadScreenshotGallery === 'function') loadScreenshotGallery(); },
   logs: () => { if (typeof loadLogViewer === 'function') loadLogViewer(); },
+  'crm-dashboard': () => { if (typeof loadCrmDashboardPanel === 'function') loadCrmDashboardPanel(); },
+  'crm-customers': () => { if (typeof loadCrmCustomersPanel === 'function') loadCrmCustomersPanel(); },
+  'crm-orders': () => { if (typeof loadCrmOrdersPanel === 'function') loadCrmOrdersPanel(); },
+  'crm-invoices': () => { if (typeof loadCrmInvoicesPanel === 'function') loadCrmInvoicesPanel(); },
 };
 
 window._activePanel = null;
@@ -627,6 +635,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   connect();
+
+  // Show business sidebar section only when ecom license is active
+  fetch('/api/ecommerce/license').then(r => r.ok ? r.json() : { active: false }).then(lic => {
+    const el = document.getElementById('sidebar-business');
+    if (el && lic && lic.active) el.style.display = '';
+  }).catch(() => {});
 
   // Restore sidebar collapse state
   if (window.innerWidth > 768 && localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === '1') {
