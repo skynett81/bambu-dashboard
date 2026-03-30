@@ -3304,7 +3304,25 @@
     "rarity": "Sällsynthet",
     "category": "Kategori",
     "completed_msg": "Grattis! Prestation upplåst!",
-    "keep_going": "Fortsätt! Du är nästan där."
+    "keep_going": "Fortsätt! Du är nästan där.",
+    "desc_landmark_viking": "Använd tillräckligt med filament för att 3D-skriva ett vikingaskepp i skala 1:1 (3 000 kg)",
+    "desc_landmark_liberty": "Använd tillräckligt med filament för att 3D-skriva Frihetsgudinnan i skala 1:1 (46 000 kg)",
+    "desc_landmark_eiffel": "Använd tillräckligt med filament för att 3D-skriva Eiffeltornet i skala 1:1 (180 000 kg)",
+    "desc_landmark_bigben": "Använd tillräckligt med filament för att 3D-skriva Big Ben i skala 1:1 (120 000 kg)",
+    "desc_landmark_brandenburg": "Använd tillräckligt med filament för att 3D-skriva Brandenburger Tor i skala 1:1 (800 kg)",
+    "desc_landmark_sagrada": "Använd tillräckligt med filament för att 3D-skriva Sagrada Famílias fasad i skala 1:1 (8 000 kg)",
+    "desc_landmark_colosseum": "Använd tillräckligt med filament för att 3D-skriva Colosseums yttervägg i skala 1:1 (15 000 kg)",
+    "desc_landmark_tokyo": "Använd tillräckligt med filament för att 3D-skriva Tokyo Tower i skala 1:1 (90 000 kg)",
+    "desc_landmark_gyeongbok": "Använd tillräckligt med filament för att 3D-skriva Gyeongbokgungs tronsal i skala 1:1 (400 kg)",
+    "desc_landmark_windmill": "Använd tillräckligt med filament för att 3D-skriva en nederländsk väderkvarn i skala 1:1 (600 kg)",
+    "desc_landmark_wawel": "Använd tillräckligt med filament för att 3D-skriva Waweldraken i skala 1:1 (200 kg)",
+    "desc_landmark_cristo": "Använd tillräckligt med filament för att 3D-skriva Cristo Redentor i skala 1:1 (1 200 kg)",
+    "desc_landmark_torso": "Använd tillräckligt med filament för att 3D-skriva Turning Torsos fasad i skala 1:1 (2 500 kg)",
+    "desc_landmark_hagia": "Använd tillräckligt med filament för att 3D-skriva Hagia Sophias kupol i skala 1:1 (5 000 kg)",
+    "desc_landmark_motherland": "Använd tillräckligt med filament för att 3D-skriva Moderlandet-monumentet i skala 1:1 (1 500 kg)",
+    "desc_landmark_greatwall": "Använd tillräckligt med filament för att 3D-skriva 1 km av Kinesiska muren i skala 1:1 (50 000 kg)",
+    "desc_landmark_orloj": "Använd tillräckligt med filament för att 3D-skriva Prags astronomiska klocka i skala 1:1 (150 kg)",
+    "desc_landmark_parliament": "Använd tillräckligt med filament för att 3D-skriva Budapests parlamentskupol i skala 1:1 (6 000 kg)"
   },
   "screenshots": {
     "title": "Skärmbilder"

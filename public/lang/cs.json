@@ -3303,7 +3303,25 @@
     "rarity": "Vzácnost",
     "category": "Kategorie",
     "completed_msg": "Gratulujeme! Úspěch odemčen!",
-    "keep_going": "Pokračujte! Jste skoro tam."
+    "keep_going": "Pokračujte! Jste skoro tam.",
+    "desc_landmark_viking": "Spotřebujte dostatek filamentu k 3D tisku vikingské lodi v měřítku 1:1 (3 000 kg)",
+    "desc_landmark_liberty": "Spotřebujte dostatek filamentu k 3D tisku Sochy svobody v měřítku 1:1 (46 000 kg)",
+    "desc_landmark_eiffel": "Spotřebujte dostatek filamentu k 3D tisku Eiffelovy věže v měřítku 1:1 (180 000 kg)",
+    "desc_landmark_bigben": "Spotřebujte dostatek filamentu k 3D tisku Big Benu v měřítku 1:1 (120 000 kg)",
+    "desc_landmark_brandenburg": "Spotřebujte dostatek filamentu k 3D tisku Braniborské brány v měřítku 1:1 (800 kg)",
+    "desc_landmark_sagrada": "Spotřebujte dostatek filamentu k 3D tisku fasády Sagrada Família v měřítku 1:1 (8 000 kg)",
+    "desc_landmark_colosseum": "Spotřebujte dostatek filamentu k 3D tisku vnější zdi Kolosea v měřítku 1:1 (15 000 kg)",
+    "desc_landmark_tokyo": "Spotřebujte dostatek filamentu k 3D tisku Tokijské věže v měřítku 1:1 (90 000 kg)",
+    "desc_landmark_gyeongbok": "Spotřebujte dostatek filamentu k 3D tisku trůnního sálu Gyeongbokgung v měřítku 1:1 (400 kg)",
+    "desc_landmark_windmill": "Spotřebujte dostatek filamentu k 3D tisku holandského větrného mlýna v měřítku 1:1 (600 kg)",
+    "desc_landmark_wawel": "Spotřebujte dostatek filamentu k 3D tisku Wawelského draka v měřítku 1:1 (200 kg)",
+    "desc_landmark_cristo": "Spotřebujte dostatek filamentu k 3D tisku sochy Krista Spasitele v měřítku 1:1 (1 200 kg)",
+    "desc_landmark_torso": "Spotřebujte dostatek filamentu k 3D tisku fasády Turning Torso v měřítku 1:1 (2 500 kg)",
+    "desc_landmark_hagia": "Spotřebujte dostatek filamentu k 3D tisku kopule Hagia Sophia v měřítku 1:1 (5 000 kg)",
+    "desc_landmark_motherland": "Spotřebujte dostatek filamentu k 3D tisku pomníku Matka vlast v měřítku 1:1 (1 500 kg)",
+    "desc_landmark_greatwall": "Spotřebujte dostatek filamentu k 3D tisku 1 km Velké čínské zdi v měřítku 1:1 (50 000 kg)",
+    "desc_landmark_orloj": "Spotřebujte dostatek filamentu k 3D tisku Pražského orloje v měřítku 1:1 (150 kg)",
+    "desc_landmark_parliament": "Spotřebujte dostatek filamentu k 3D tisku kopule Budapeštského parlamentu v měřítku 1:1 (6 000 kg)"
   },
   "screenshots": {
     "title": "Snímky obrazovky"

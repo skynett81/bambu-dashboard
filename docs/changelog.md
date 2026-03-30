@@ -4,6 +4,91 @@ All notable changes to Bambu Dashboard.
 
 ---
 
+## v1.1.14 — AdminLTE 4, CRM System & Achievement Landmarks (2026-03-30)
+
+### AdminLTE 4 Integration
+- Complete HTML restructuring migrated to AdminLTE 4 framework
+- Treeview sidebar with proper section toggling and menu-open support
+- CSS redesign with AdminLTE 4 Premium styling
+- CSP updated to allow cdn.jsdelivr.net for AdminLTE assets
+- Theme.js null-safe body check for dark/light mode
+
+### CRM System (5 Phases)
+- Phase 1: Database schema + full CRUD API for customers, orders, invoices
+- Phase 2: Complete frontend with 4 panels (customers, orders, invoices, business settings)
+- Phase 3: Print history integration with customer selection dialog
+- Phase 4: Invoice generation, business settings, improved CRM dashboard
+- Phase 5: Complete i18n — 107 CRM keys translated to all 17 languages
+
+### Achievement Landmarks (18 World Landmarks)
+- 18 landmark achievements from all supported language regions:
+  Viking Ship (NO), Statue of Liberty (EN), Eiffel Tower (FR), Big Ben (EN),
+  Brandenburg Gate (DE), Sagrada Família (ES), Colosseum (IT), Tokyo Tower (JA),
+  Gyeongbokgung (KO), Dutch Windmill (NL), Wawel Dragon (PL), Cristo Redentor (PT-BR),
+  Turning Torso (SV), Hagia Sophia (TR), Motherland Monument (UK), Great Wall (ZH),
+  Prague Orloj (CS), Budapest Parliament (HU)
+- Legendary achievements: Statue of Liberty and Eiffel Tower at 1:1 scale
+- Click on achievement shows detail popup with XP, rarity, and progress
+- Achievement i18n: rarity, category, completed_msg, keep_going translated to 17 languages
+
+### Modern UI & Dark Theme
+- Teal accent color, gradient titles, hover glow effects, floating orbs
+- Improved dark theme with better text contrast
+- Panel-active and view-hidden CSS fixes — all panels now work correctly
+- Toast notifications moved to bottom-right with clear dismiss button, no longer blocking navbar
+
+### Dashboard Layout
+- 2-column layout as default, optimized for 24–27" monitors
+- 3D/camera fills available space, filament/AMS compact below
+- Temperature/fans cards hidden from main dashboard (info already in stats strip)
+- Optimized dashboard layout with large 3D/camera and compact filament/AMS sections
+
+### AMS & Filament
+- AMS humidity 5-level rating + temperature assessment with storage recommendations
+- AMS info bar redesigned — removed A1-A4 tabs, expanded humidity + temperature display
+- EXT spool shown inline with AMS spools for better space utilization
+- Filament section redesigned with large spools matching AMS style
+- Filament spool horizontal layout — spool left, info right
+- Filament spools with full info: brand, weight, temperature, RFID, color
+- Click on spool in filament section opens detail popup
+- AMS spool consistent sizing with flex layout (min/max width)
+
+### Live Filament Tracking
+- Real-time filament tracking during printing via cloud estimate fallback
+- Filament ring live update — re-render on cloud estimate + fingerprint fix
+- EXT live filament tracking — startOfPrintG calculation for EXT without AMS sync
+
+### Alerts & Notifications
+- Global alert bar with improved toast visibility
+- Removed global alert bar blocking sidebar — moved to fixed top-right
+- Low-filament toasts removed — shown visually in spool rings and AMS panel instead
+
+### Cost Estimator
+- Filament change time added to cost estimator with visible change counter
+
+### Guided Tour
+- All 14 guided tour keys translated to 17 languages
+- Tour tooltip positioning fix — removed translateY, uses direct calculation
+- Tour tooltip stays within viewport — measures height and clamps top
+
+### Knowledge Base
+- 5 new KB pages + compatibility matrix, translated to 17 languages
+- Material tips/warnings translated to all 17 languages
+
+### Internationalization
+- Complete i18n audit: all 3,252 keys translated to 17 languages
+- 18 landmark achievement descriptions translated to all 15 non-English/non-Norwegian languages
+- CRM system: 107 keys translated to all 17 languages
+
+### Bug Fixes
+- Sidebar works with AdminLTE 4 treeview — thorough cleanup
+- Ctrl+Shift+R keeps you on current page
+- Camera fills card properly
+- Notifications no longer block UI and can be dismissed
+- EXT spool always visible + percentage centered in spool ring
+
+---
+
 ## v1.1.13 — Filament Tracking Accuracy & Complete i18n (2026-03-26)
 
 ### Filament Tracking

@@ -253,7 +253,7 @@ docker compose pull && docker compose up -d
 
 - **[Features](docs/features.md)** — complete feature list
 - **[Architecture](docs/architecture.md)** — stack, modules, components, project structure, systemd, Pterodactyl
-- **[Changelog](docs/changelog.md)** — version history from v1.0.0 to v1.1.13
+- **[Changelog](docs/changelog.md)** — version history from v1.0.0 to v1.1.14
 - **[Installation Guide](INSTALL.md)** — detailed step-by-step install instructions
 - **[Docusaurus Docs](website/)** — full documentation site in 17 languages, served at `/docs/` from the dashboard and deployed to [GitHub Pages](https://skynett81.github.io/bambu-dashboard/)
 

@@ -3304,7 +3304,25 @@
     "rarity": "稀有度",
     "category": "类别",
     "completed_msg": "恭喜！成就解锁！",
-    "keep_going": "继续加油！你快达成了。"
+    "keep_going": "继续加油！你快达成了。",
+    "desc_landmark_viking": "使用足够的耗材以1:1比例3D打印一艘维京船（3,000公斤）",
+    "desc_landmark_liberty": "使用足够的耗材以1:1比例3D打印自由女神像（46,000公斤）",
+    "desc_landmark_eiffel": "使用足够的耗材以1:1比例3D打印埃菲尔铁塔（180,000公斤）",
+    "desc_landmark_bigben": "使用足够的耗材以1:1比例3D打印大本钟（120,000公斤）",
+    "desc_landmark_brandenburg": "使用足够的耗材以1:1比例3D打印勃兰登堡门（800公斤）",
+    "desc_landmark_sagrada": "使用足够的耗材以1:1比例3D打印圣家堂外墙（8,000公斤）",
+    "desc_landmark_colosseum": "使用足够的耗材以1:1比例3D打印罗马斗兽场外墙（15,000公斤）",
+    "desc_landmark_tokyo": "使用足够的耗材以1:1比例3D打印东京塔（90,000公斤）",
+    "desc_landmark_gyeongbok": "使用足够的耗材以1:1比例3D打印景福宫大殿（400公斤）",
+    "desc_landmark_windmill": "使用足够的耗材以1:1比例3D打印荷兰风车（600公斤）",
+    "desc_landmark_wawel": "使用足够的耗材以1:1比例3D打印瓦维尔龙（200公斤）",
+    "desc_landmark_cristo": "使用足够的耗材以1:1比例3D打印救世基督像（1,200公斤）",
+    "desc_landmark_torso": "使用足够的耗材以1:1比例3D打印旋转大厦外墙（2,500公斤）",
+    "desc_landmark_hagia": "使用足够的耗材以1:1比例3D打印圣索菲亚大教堂穹顶（5,000公斤）",
+    "desc_landmark_motherland": "使用足够的耗材以1:1比例3D打印祖国母亲纪念碑（1,500公斤）",
+    "desc_landmark_greatwall": "使用足够的耗材以1:1比例3D打印1公里长城（50,000公斤）",
+    "desc_landmark_orloj": "使用足够的耗材以1:1比例3D打印布拉格天文钟（150公斤）",
+    "desc_landmark_parliament": "使用足够的耗材以1:1比例3D打印布达佩斯国会大厦穹顶（6,000公斤）"
   },
   "screenshots": {
     "title": "截图"

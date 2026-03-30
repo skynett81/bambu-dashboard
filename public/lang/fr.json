@@ -3304,7 +3304,25 @@
     "rarity": "Rareté",
     "category": "Catégorie",
     "completed_msg": "Félicitations! Succès débloqué!",
-    "keep_going": "Continuez! Vous y êtes presque."
+    "keep_going": "Continuez! Vous y êtes presque.",
+    "desc_landmark_viking": "Utilisez assez de filament pour imprimer un drakkar viking à l'échelle 1:1 (3 000 kg)",
+    "desc_landmark_liberty": "Utilisez assez de filament pour imprimer la Statue de la Liberté à l'échelle 1:1 (46 000 kg)",
+    "desc_landmark_eiffel": "Utilisez assez de filament pour imprimer la Tour Eiffel à l'échelle 1:1 (180 000 kg)",
+    "desc_landmark_bigben": "Utilisez assez de filament pour imprimer Big Ben à l'échelle 1:1 (120 000 kg)",
+    "desc_landmark_brandenburg": "Utilisez assez de filament pour imprimer la Porte de Brandebourg à l'échelle 1:1 (800 kg)",
+    "desc_landmark_sagrada": "Utilisez assez de filament pour imprimer la façade de la Sagrada Família à l'échelle 1:1 (8 000 kg)",
+    "desc_landmark_colosseum": "Utilisez assez de filament pour imprimer le mur extérieur du Colisée à l'échelle 1:1 (15 000 kg)",
+    "desc_landmark_tokyo": "Utilisez assez de filament pour imprimer la Tour de Tokyo à l'échelle 1:1 (90 000 kg)",
+    "desc_landmark_gyeongbok": "Utilisez assez de filament pour imprimer la salle du trône de Gyeongbokgung à l'échelle 1:1 (400 kg)",
+    "desc_landmark_windmill": "Utilisez assez de filament pour imprimer un moulin à vent néerlandais à l'échelle 1:1 (600 kg)",
+    "desc_landmark_wawel": "Utilisez assez de filament pour imprimer le dragon de Wawel à l'échelle 1:1 (200 kg)",
+    "desc_landmark_cristo": "Utilisez assez de filament pour imprimer le Christ Rédempteur à l'échelle 1:1 (1 200 kg)",
+    "desc_landmark_torso": "Utilisez assez de filament pour imprimer la façade du Turning Torso à l'échelle 1:1 (2 500 kg)",
+    "desc_landmark_hagia": "Utilisez assez de filament pour imprimer le dôme de Sainte-Sophie à l'échelle 1:1 (5 000 kg)",
+    "desc_landmark_motherland": "Utilisez assez de filament pour imprimer le monument de la Mère Patrie à l'échelle 1:1 (1 500 kg)",
+    "desc_landmark_greatwall": "Utilisez assez de filament pour imprimer 1 km de la Grande Muraille de Chine à l'échelle 1:1 (50 000 kg)",
+    "desc_landmark_orloj": "Utilisez assez de filament pour imprimer l'horloge astronomique de Prague à l'échelle 1:1 (150 kg)",
+    "desc_landmark_parliament": "Utilisez assez de filament pour imprimer le dôme du Parlement de Budapest à l'échelle 1:1 (6 000 kg)"
   },
   "screenshots": {
     "title": "Captures d'écran"

@@ -3304,7 +3304,25 @@
     "rarity": "Rareza",
     "category": "Categoría",
     "completed_msg": "¡Felicidades! ¡Logro desbloqueado!",
-    "keep_going": "¡Sigue así! Ya casi lo tienes."
+    "keep_going": "¡Sigue así! Ya casi lo tienes.",
+    "desc_landmark_viking": "Usa suficiente filamento para imprimir un barco vikingo a escala 1:1 (3.000 kg)",
+    "desc_landmark_liberty": "Usa suficiente filamento para imprimir la Estatua de la Libertad a escala 1:1 (46.000 kg)",
+    "desc_landmark_eiffel": "Usa suficiente filamento para imprimir la Torre Eiffel a escala 1:1 (180.000 kg)",
+    "desc_landmark_bigben": "Usa suficiente filamento para imprimir el Big Ben a escala 1:1 (120.000 kg)",
+    "desc_landmark_brandenburg": "Usa suficiente filamento para imprimir la Puerta de Brandeburgo a escala 1:1 (800 kg)",
+    "desc_landmark_sagrada": "Usa suficiente filamento para imprimir la fachada de la Sagrada Familia a escala 1:1 (8.000 kg)",
+    "desc_landmark_colosseum": "Usa suficiente filamento para imprimir la pared exterior del Coliseo a escala 1:1 (15.000 kg)",
+    "desc_landmark_tokyo": "Usa suficiente filamento para imprimir la Torre de Tokio a escala 1:1 (90.000 kg)",
+    "desc_landmark_gyeongbok": "Usa suficiente filamento para imprimir la sala del trono de Gyeongbokgung a escala 1:1 (400 kg)",
+    "desc_landmark_windmill": "Usa suficiente filamento para imprimir un molino de viento holandés a escala 1:1 (600 kg)",
+    "desc_landmark_wawel": "Usa suficiente filamento para imprimir el dragón de Wawel a escala 1:1 (200 kg)",
+    "desc_landmark_cristo": "Usa suficiente filamento para imprimir el Cristo Redentor a escala 1:1 (1.200 kg)",
+    "desc_landmark_torso": "Usa suficiente filamento para imprimir la fachada del Turning Torso a escala 1:1 (2.500 kg)",
+    "desc_landmark_hagia": "Usa suficiente filamento para imprimir la cúpula de Santa Sofía a escala 1:1 (5.000 kg)",
+    "desc_landmark_motherland": "Usa suficiente filamento para imprimir el monumento Madre Patria a escala 1:1 (1.500 kg)",
+    "desc_landmark_greatwall": "Usa suficiente filamento para imprimir 1 km de la Gran Muralla China a escala 1:1 (50.000 kg)",
+    "desc_landmark_orloj": "Usa suficiente filamento para imprimir el reloj astronómico de Praga a escala 1:1 (150 kg)",
+    "desc_landmark_parliament": "Usa suficiente filamento para imprimir la cúpula del Parlamento de Budapest a escala 1:1 (6.000 kg)"
   },
   "screenshots": {
     "title": "Capturas de pantalla"

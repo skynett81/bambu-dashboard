@@ -3304,7 +3304,25 @@
     "rarity": "Zeldzaamheid",
     "category": "Categorie",
     "completed_msg": "Gefeliciteerd! Prestatie ontgrendeld!",
-    "keep_going": "Ga zo door! Je bent er bijna."
+    "keep_going": "Ga zo door! Je bent er bijna.",
+    "desc_landmark_viking": "Gebruik genoeg filament om een Vikingschip op 1:1 schaal te printen (3.000 kg)",
+    "desc_landmark_liberty": "Gebruik genoeg filament om het Vrijheidsbeeld op 1:1 schaal te printen (46.000 kg)",
+    "desc_landmark_eiffel": "Gebruik genoeg filament om de Eiffeltoren op 1:1 schaal te printen (180.000 kg)",
+    "desc_landmark_bigben": "Gebruik genoeg filament om Big Ben op 1:1 schaal te printen (120.000 kg)",
+    "desc_landmark_brandenburg": "Gebruik genoeg filament om de Brandenburger Tor op 1:1 schaal te printen (800 kg)",
+    "desc_landmark_sagrada": "Gebruik genoeg filament om de Sagrada Família-gevel op 1:1 schaal te printen (8.000 kg)",
+    "desc_landmark_colosseum": "Gebruik genoeg filament om de buitenmuur van het Colosseum op 1:1 schaal te printen (15.000 kg)",
+    "desc_landmark_tokyo": "Gebruik genoeg filament om de Tokyo Tower op 1:1 schaal te printen (90.000 kg)",
+    "desc_landmark_gyeongbok": "Gebruik genoeg filament om de Gyeongbokgung troonzaal op 1:1 schaal te printen (400 kg)",
+    "desc_landmark_windmill": "Gebruik genoeg filament om een Nederlandse windmolen op 1:1 schaal te printen (600 kg)",
+    "desc_landmark_wawel": "Gebruik genoeg filament om de Wawel-draak op 1:1 schaal te printen (200 kg)",
+    "desc_landmark_cristo": "Gebruik genoeg filament om het Christus de Verlosser-beeld op 1:1 schaal te printen (1.200 kg)",
+    "desc_landmark_torso": "Gebruik genoeg filament om de Turning Torso-gevel op 1:1 schaal te printen (2.500 kg)",
+    "desc_landmark_hagia": "Gebruik genoeg filament om de Hagia Sophia-koepel op 1:1 schaal te printen (5.000 kg)",
+    "desc_landmark_motherland": "Gebruik genoeg filament om het Moederland-monument op 1:1 schaal te printen (1.500 kg)",
+    "desc_landmark_greatwall": "Gebruik genoeg filament om 1 km Chinese Muur op 1:1 schaal te printen (50.000 kg)",
+    "desc_landmark_orloj": "Gebruik genoeg filament om het Praagse astronomische uurwerk op 1:1 schaal te printen (150 kg)",
+    "desc_landmark_parliament": "Gebruik genoeg filament om de koepel van het Parlement van Boedapest op 1:1 schaal te printen (6.000 kg)"
   },
   "screenshots": {
     "title": "Schermafbeeldingen"

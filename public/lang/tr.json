@@ -3304,7 +3304,25 @@
     "rarity": "Nadirlik",
     "category": "Kategori",
     "completed_msg": "Tebrikler! Başarı açıldı!",
-    "keep_going": "Devam et! Neredeyse tamam."
+    "keep_going": "Devam et! Neredeyse tamam.",
+    "desc_landmark_viking": "1:1 ölçekli bir Viking gemisi yazdırmak için yeterli filament kullanın (3.000 kg)",
+    "desc_landmark_liberty": "1:1 ölçekli Özgürlük Heykeli yazdırmak için yeterli filament kullanın (46.000 kg)",
+    "desc_landmark_eiffel": "1:1 ölçekli Eyfel Kulesi yazdırmak için yeterli filament kullanın (180.000 kg)",
+    "desc_landmark_bigben": "1:1 ölçekli Big Ben yazdırmak için yeterli filament kullanın (120.000 kg)",
+    "desc_landmark_brandenburg": "1:1 ölçekli Brandenburg Kapısı yazdırmak için yeterli filament kullanın (800 kg)",
+    "desc_landmark_sagrada": "1:1 ölçekli Sagrada Família cephesi yazdırmak için yeterli filament kullanın (8.000 kg)",
+    "desc_landmark_colosseum": "1:1 ölçekli Kolezyum dış duvarı yazdırmak için yeterli filament kullanın (15.000 kg)",
+    "desc_landmark_tokyo": "1:1 ölçekli Tokyo Kulesi yazdırmak için yeterli filament kullanın (90.000 kg)",
+    "desc_landmark_gyeongbok": "1:1 ölçekli Gyeongbokgung taht salonu yazdırmak için yeterli filament kullanın (400 kg)",
+    "desc_landmark_windmill": "1:1 ölçekli Hollanda yel değirmeni yazdırmak için yeterli filament kullanın (600 kg)",
+    "desc_landmark_wawel": "1:1 ölçekli Wawel ejderhası yazdırmak için yeterli filament kullanın (200 kg)",
+    "desc_landmark_cristo": "1:1 ölçekli Kurtarıcı İsa heykeli yazdırmak için yeterli filament kullanın (1.200 kg)",
+    "desc_landmark_torso": "1:1 ölçekli Turning Torso cephesi yazdırmak için yeterli filament kullanın (2.500 kg)",
+    "desc_landmark_hagia": "1:1 ölçekli Ayasofya kubbesi yazdırmak için yeterli filament kullanın (5.000 kg)",
+    "desc_landmark_motherland": "1:1 ölçekli Anavatan Anıtı yazdırmak için yeterli filament kullanın (1.500 kg)",
+    "desc_landmark_greatwall": "1:1 ölçekli Çin Seddi'nin 1 km'sini yazdırmak için yeterli filament kullanın (50.000 kg)",
+    "desc_landmark_orloj": "1:1 ölçekli Prag Astronomik Saati yazdırmak için yeterli filament kullanın (150 kg)",
+    "desc_landmark_parliament": "1:1 ölçekli Budapeşte Parlamento kubbesi yazdırmak için yeterli filament kullanın (6.000 kg)"
   },
   "screenshots": {
     "title": "Ekran Görüntüleri"

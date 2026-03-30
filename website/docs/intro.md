@@ -17,32 +17,42 @@ Bambu Dashboard kobler seg direkte til printeren din via MQTT over LAN, uten avh
 ### Viktigste funksjoner
 
 - **Live dashboard** — sanntids temperatur, fremgang, kamera, AMS-status med LIVE-indikator
+- **AdminLTE 4** — moderne dashboard-rammeverk med treeview-sidebar og responsivt design
+- **CRM-system** — kunder, ordrer, fakturaer, bedriftsinnstillinger og printhistorikk-kobling
 - **Filamentlager** — spor alle spoler med AMS-synk, EXT-spool støtte, materialinfo, plate-kompatibilitet og tørkeguide
-- **Filament-tracking** — nøyaktig sporing med 4-nivå fallback (AMS-sensor → EXT-estimat → cloud → varighet)
+- **Filament-tracking** — live sporing under printing med 4-nivå fallback (AMS-sensor → EXT-estimat → cloud → varighet)
 - **Materialguide** — 15 materialer med temperaturer, plate-kompatibilitet, tørking, egenskaper og tips
 - **Printhistorikk** — komplett logg med modellnavn, MakerWorld-lenker, filamentforbruk og kostnader
 - **Planlegger** — kalendervisning, print-kø med lastbalansering og filamentsjekk
 - **Printerkontroll** — temperatur, hastighet, vifter, G-code konsoll
 - **Print Guard** — automatisk beskyttelse med xcam + 5 sensormonitorer
-- **Kostnadsestimator** — material, strøm, arbeid, slitasje, markup med salgsprisforslag
+- **Kostnadsestimator** — material, strøm, arbeid, slitasje, markup, filamentbytte-tid og salgsprisforslag
 - **Vedlikehold** — sporing med KB-baserte intervaller, dyselevetid, plate-levetid og guide
 - **Lydvarsler** — 9 konfigurerbare events med custom lyd-upload og printerhøyttaler (M300)
 - **Aktivitetslogg** — persistent tidslinje fra alle hendelser (prints, feil, vedlikehold, filament)
+- **AMS fuktighet/temperatur** — 5-nivå vurdering med anbefalinger for optimal oppbevaring
+- **Achievements** — 18 verdens landemerker som milepæler for filamentforbruk med XP-progresjon
 - **Varsler** — 7 kanaler (Telegram, Discord, e-post, ntfy, Pushover, SMS, webhook)
 - **Multi-printer** — støtter hele Bambu Lab-serien
 - **17 språk** — norsk, engelsk, tysk, fransk, spansk, italiensk, japansk, koreansk, nederlandsk, polsk, portugisisk, svensk, tyrkisk, ukrainsk, kinesisk, tsjekkisk, ungarsk
 - **Selvdriftet** — ingen sky-avhengighet, dine data på din maskin
 
-### Nytt i v1.1.13
+### Nytt i v1.1.14
 
-- **EXT spool-deteksjon** for P2S/A1 via MQTT mapping-felt — filamentforbruk trackes korrekt for ekstern spool
-- **Filament-materialdatabase** med 15 materialer, plate-kompatibilitet, tørkeguide og egenskaper
-- **Vedlikeholdspanel** med KB-baserte intervaller, 4 nye dysetyper, guide-fane med lenker til dokumentasjon
-- **Lydvarsler** med 9 events, custom upload (MP3/OGG/WAV, maks 10s), volumkontroll og printerhøyttaler
-- **Aktivitetslogg** — persistent tidslinje fra alle databaser, uavhengig av om siden var åpen
-- **HMS feilkoder** med lesbare beskrivelser fra 270+ koder
-- **Komplett i18n** — alle 2944 nøkler oversatt til 17 språk
-- **Auto-build docs** — dokumentasjon bygges automatisk ved installasjon og server-start
+- **AdminLTE 4-integrasjon** — komplett HTML-restrukturering med treeview-sidebar, moderne layout og CSP-støtte for CDN
+- **CRM-system** — full kundebehandling med 4 paneler: kunder, ordrer, fakturaer og bedriftsinnstillinger med historikk-integrasjon
+- **Moderne UI** — teal aksent, gradient titler, hover glow, floating orbs og forbedret mørkt tema
+- **Achievements: 18 landemerker** — vikingskip, Frihetsgudinnen, Eiffeltårnet, Big Ben, Brandenburger Tor, Sagrada Família, Colosseum, Tokyo Tower, Gyeongbokgung, nederlandsk vindmølle, Wawel-dragen, Cristo Redentor, Turning Torso, Hagia Sophia, Moderlandet, Den kinesiske mur, Praha orloj, Budapest parlament — med detalj-popup, XP og rarity
+- **AMS fuktighet/temperatur** — 5-nivå vurdering med anbefalinger for oppbevaring og tørking
+- **Live filament-tracking** — sanntids oppdatering under printing via cloud estimate fallback
+- **Filament-seksjon redesign** — store spoler med full info (brand, vekt, temp, RFID, farge), horisontal layout og klikk-for-detaljer
+- **EXT spool inline** — ekstern spool vist sammen med AMS-spoler med bedre plassbruk
+- **Dashboard-layout optimalisert** — 2-kolonne standard for 24–27" skjermer, stor 3D/kamera, kompakt filament/AMS
+- **Filamentbytte-tid** i kostnadsestimator med synlig bytte-teller
+- **Global varselsystem** — alert bar med toast-varsler i bottom-right, blokkerer ikke navbar
+- **Guided tour i18n** — alle 14 tour-nøkler oversatt til 17 språk
+- **5 nye KB-sider** — kompatibilitetsmatrise og nye filamentguider oversatt til 17 språk
+- **Komplett i18n** — alle 3252 nøkler oversatt til 17 språk inkludert CRM og landemerke-achievements
 
 ## Hurtigstart
 
@@ -114,7 +124,7 @@ Komplett vedlikeholdssystem med:
 Bambu Dashboard er bygget med Node.js 22 og vanilla HTML/CSS/JS — ingen tunge rammeverk, ingen build-steg. Databasen er SQLite, innebygd i Node.js 22.
 
 - **Backend**: Node.js 22 med kun 3 npm-pakker (mqtt, ws, basic-ftp)
-- **Frontend**: Vanilla HTML/CSS/JS, ingen build-steg
+- **Frontend**: AdminLTE 4 + vanilla HTML/CSS/JS, ingen build-steg
 - **Database**: SQLite via Node.js 22 built-in `--experimental-sqlite`
 - **Dokumentasjon**: Docusaurus med 17 språk, automatisk bygget ved installasjon
 - **API**: 177+ endepunkter, OpenAPI-dokumentasjon på `/api/docs`

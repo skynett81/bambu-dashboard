@@ -3304,7 +3304,25 @@
     "rarity": "Seltenheit",
     "category": "Kategorie",
     "completed_msg": "Glückwunsch! Erfolg freigeschaltet!",
-    "keep_going": "Weiter so! Du bist fast da."
+    "keep_going": "Weiter so! Du bist fast da.",
+    "desc_landmark_viking": "Verbrauche genug Filament, um ein Wikingerschiff im Maßstab 1:1 zu drucken (3.000 kg)",
+    "desc_landmark_liberty": "Verbrauche genug Filament, um die Freiheitsstatue im Maßstab 1:1 zu drucken (46.000 kg)",
+    "desc_landmark_eiffel": "Verbrauche genug Filament, um den Eiffelturm im Maßstab 1:1 zu drucken (180.000 kg)",
+    "desc_landmark_bigben": "Verbrauche genug Filament, um den Big Ben im Maßstab 1:1 zu drucken (120.000 kg)",
+    "desc_landmark_brandenburg": "Verbrauche genug Filament, um das Brandenburger Tor im Maßstab 1:1 zu drucken (800 kg)",
+    "desc_landmark_sagrada": "Verbrauche genug Filament, um die Sagrada Família-Fassade im Maßstab 1:1 zu drucken (8.000 kg)",
+    "desc_landmark_colosseum": "Verbrauche genug Filament, um die Kolosseum-Außenwand im Maßstab 1:1 zu drucken (15.000 kg)",
+    "desc_landmark_tokyo": "Verbrauche genug Filament, um den Tokyo Tower im Maßstab 1:1 zu drucken (90.000 kg)",
+    "desc_landmark_gyeongbok": "Verbrauche genug Filament, um die Gyeongbokgung-Thronhalle im Maßstab 1:1 zu drucken (400 kg)",
+    "desc_landmark_windmill": "Verbrauche genug Filament, um eine niederländische Windmühle im Maßstab 1:1 zu drucken (600 kg)",
+    "desc_landmark_wawel": "Verbrauche genug Filament, um den Wawel-Drachen im Maßstab 1:1 zu drucken (200 kg)",
+    "desc_landmark_cristo": "Verbrauche genug Filament, um die Christus-Erlöser-Statue im Maßstab 1:1 zu drucken (1.200 kg)",
+    "desc_landmark_torso": "Verbrauche genug Filament, um die Turning Torso-Fassade im Maßstab 1:1 zu drucken (2.500 kg)",
+    "desc_landmark_hagia": "Verbrauche genug Filament, um die Hagia Sophia-Kuppel im Maßstab 1:1 zu drucken (5.000 kg)",
+    "desc_landmark_motherland": "Verbrauche genug Filament, um das Mutter-Heimat-Denkmal im Maßstab 1:1 zu drucken (1.500 kg)",
+    "desc_landmark_greatwall": "Verbrauche genug Filament, um 1 km der Chinesischen Mauer im Maßstab 1:1 zu drucken (50.000 kg)",
+    "desc_landmark_orloj": "Verbrauche genug Filament, um die Prager astronomische Uhr im Maßstab 1:1 zu drucken (150 kg)",
+    "desc_landmark_parliament": "Verbrauche genug Filament, um die Budapester Parlamentskuppel im Maßstab 1:1 zu drucken (6.000 kg)"
   },
   "screenshots": {
     "title": "Screenshots"

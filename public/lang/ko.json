@@ -3304,7 +3304,25 @@
     "rarity": "희귀도",
     "category": "카테고리",
     "completed_msg": "축하합니다! 업적 달성!",
-    "keep_going": "거의 다 왔어요!"
+    "keep_going": "거의 다 왔어요!",
+    "desc_landmark_viking": "1:1 스케일 바이킹 선박을 3D 프린팅할 수 있는 필라멘트 사용 (3,000 kg)",
+    "desc_landmark_liberty": "1:1 스케일 자유의 여신상을 3D 프린팅할 수 있는 필라멘트 사용 (46,000 kg)",
+    "desc_landmark_eiffel": "1:1 스케일 에펠탑을 3D 프린팅할 수 있는 필라멘트 사용 (180,000 kg)",
+    "desc_landmark_bigben": "1:1 스케일 빅벤을 3D 프린팅할 수 있는 필라멘트 사용 (120,000 kg)",
+    "desc_landmark_brandenburg": "1:1 스케일 브란덴부르크 문을 3D 프린팅할 수 있는 필라멘트 사용 (800 kg)",
+    "desc_landmark_sagrada": "1:1 스케일 사그라다 파밀리아 정면을 3D 프린팅할 수 있는 필라멘트 사용 (8,000 kg)",
+    "desc_landmark_colosseum": "1:1 스케일 콜로세움 외벽을 3D 프린팅할 수 있는 필라멘트 사용 (15,000 kg)",
+    "desc_landmark_tokyo": "1:1 스케일 도쿄 타워를 3D 프린팅할 수 있는 필라멘트 사용 (90,000 kg)",
+    "desc_landmark_gyeongbok": "1:1 스케일 경복궁 근정전을 3D 프린팅할 수 있는 필라멘트 사용 (400 kg)",
+    "desc_landmark_windmill": "1:1 스케일 네덜란드 풍차를 3D 프린팅할 수 있는 필라멘트 사용 (600 kg)",
+    "desc_landmark_wawel": "1:1 스케일 바벨 용을 3D 프린팅할 수 있는 필라멘트 사용 (200 kg)",
+    "desc_landmark_cristo": "1:1 스케일 구세주 그리스도상을 3D 프린팅할 수 있는 필라멘트 사용 (1,200 kg)",
+    "desc_landmark_torso": "1:1 스케일 터닝 토르소 정면을 3D 프린팅할 수 있는 필라멘트 사용 (2,500 kg)",
+    "desc_landmark_hagia": "1:1 스케일 아야 소피아 돔을 3D 프린팅할 수 있는 필라멘트 사용 (5,000 kg)",
+    "desc_landmark_motherland": "1:1 스케일 조국 기념비를 3D 프린팅할 수 있는 필라멘트 사용 (1,500 kg)",
+    "desc_landmark_greatwall": "1:1 스케일 만리장성 1km를 3D 프린팅할 수 있는 필라멘트 사용 (50,000 kg)",
+    "desc_landmark_orloj": "1:1 스케일 프라하 천문 시계를 3D 프린팅할 수 있는 필라멘트 사용 (150 kg)",
+    "desc_landmark_parliament": "1:1 스케일 부다페스트 국회의사당 돔을 3D 프린팅할 수 있는 필라멘트 사용 (6,000 kg)"
   },
   "screenshots": {
     "title": "스크린샷"

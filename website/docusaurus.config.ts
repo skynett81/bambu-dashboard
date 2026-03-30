@@ -161,7 +161,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `Bambu Dashboard v1.1.13 — ${new Date().getFullYear()}`,
+      copyright: `Bambu Dashboard v1.1.14 — ${new Date().getFullYear()}`,
     },
     prism: {
       theme: prismThemes.github,

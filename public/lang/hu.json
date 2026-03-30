@@ -3303,7 +3303,25 @@
     "rarity": "Ritkaság",
     "category": "Kategória",
     "completed_msg": "Gratulálunk! Eredmény feloldva!",
-    "keep_going": "Folytasd! Már majdnem megvan."
+    "keep_going": "Folytasd! Már majdnem megvan.",
+    "desc_landmark_viking": "Használj el annyi filamentet, amennyiből 1:1 méretarányú viking hajó nyomtatható (3 000 kg)",
+    "desc_landmark_liberty": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Szabadság-szobor nyomtatható (46 000 kg)",
+    "desc_landmark_eiffel": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Eiffel-torony nyomtatható (180 000 kg)",
+    "desc_landmark_bigben": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Big Ben nyomtatható (120 000 kg)",
+    "desc_landmark_brandenburg": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Brandenburgi kapu nyomtatható (800 kg)",
+    "desc_landmark_sagrada": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Sagrada Família homlokzat nyomtatható (8 000 kg)",
+    "desc_landmark_colosseum": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Colosseum külső fal nyomtatható (15 000 kg)",
+    "desc_landmark_tokyo": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Tokiói torony nyomtatható (90 000 kg)",
+    "desc_landmark_gyeongbok": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Gyeongbokgung trónterem nyomtatható (400 kg)",
+    "desc_landmark_windmill": "Használj el annyi filamentet, amennyiből 1:1 méretarányú holland szélmalom nyomtatható (600 kg)",
+    "desc_landmark_wawel": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Waweli sárkány nyomtatható (200 kg)",
+    "desc_landmark_cristo": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Megváltó Krisztus szobor nyomtatható (1 200 kg)",
+    "desc_landmark_torso": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Turning Torso homlokzat nyomtatható (2 500 kg)",
+    "desc_landmark_hagia": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Hagia Sophia kupola nyomtatható (5 000 kg)",
+    "desc_landmark_motherland": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Anyaföld-emlékmű nyomtatható (1 500 kg)",
+    "desc_landmark_greatwall": "Használj el annyi filamentet, amennyiből 1 km-nyi 1:1 méretarányú Kínai nagy fal nyomtatható (50 000 kg)",
+    "desc_landmark_orloj": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Prágai csillagászati óra nyomtatható (150 kg)",
+    "desc_landmark_parliament": "Használj el annyi filamentet, amennyiből 1:1 méretarányú Budapesti Parlament kupola nyomtatható (6 000 kg)"
   },
   "screenshots": {
     "title": "Képernyőfotók"
