@@ -3466,5 +3466,18 @@
     "estimated_time_min": "Час (хв)",
     "unit_price": "Ціна",
     "calculate": "Розрахувати"
-  }
+  },
+  "insights.low_stock_title": "Низький запас",
+  "insights.low_stock_message": "{count} котушок закінчиться протягом 14 днів при поточному темпі використання.",
+  "insights.restock_title": "Рекомендації поповнення",
+  "insights.restock_message": "{count} філамент(ів) слід замовити на основі шаблонів використання.",
+  "insights.top_material_title": "Найбільш використовуваний матеріал",
+  "insights.top_material_message": "{material} — найбільш використовуваний матеріал ({total_g}г за 90 днів, сер. {avg_daily_g}г/день).",
+  "insights.cost_title": "Огляд витрат",
+  "insights.cost_message": "Середня вартість: {avg_cost_per_kg}/кг для {total_spools} активних котушок. Загальна вартість запасів: {total_value}.",
+  "insights.dormant_title": "Невикористані котушки",
+  "insights.dormant_message": "{count} котушок не використовувались 90+ днів, але ще мають значну кількість філаменту.",
+  "insights.days_remaining": "днів залишилось",
+  "insights.spools_needed": "котушок рекомендовано",
+  "insights.remaining": "залишилось"
 }

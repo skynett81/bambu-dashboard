@@ -3466,5 +3466,18 @@
     "estimated_time_min": "時間 (分)",
     "unit_price": "単価",
     "calculate": "計算"
-  }
+  },
+  "insights.low_stock_title": "在庫不足アラート",
+  "insights.low_stock_message": "現在の使用ペースで{count}本のスプールが14日以内になくなります。",
+  "insights.restock_title": "補充推奨",
+  "insights.restock_message": "使用パターンに基づき、{count}種のフィラメントを再注文すべきです。",
+  "insights.top_material_title": "最も使用された素材",
+  "insights.top_material_message": "{material}が最も使用されている素材です（90日間で{total_g}g、平均{avg_daily_g}g/日）。",
+  "insights.cost_title": "コスト概要",
+  "insights.cost_message": "平均コスト：{avg_cost_per_kg}/kg（{total_spools}本のアクティブスプール）。在庫総額：{total_value}。",
+  "insights.dormant_title": "休眠スプール",
+  "insights.dormant_message": "{count}本のスプールが90日以上未使用ですが、まだ十分なフィラメントが残っています。",
+  "insights.days_remaining": "日残り",
+  "insights.spools_needed": "本推奨",
+  "insights.remaining": "残り"
 }

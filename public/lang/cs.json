@@ -3465,5 +3465,18 @@
     "estimated_time_min": "Čas (min)",
     "unit_price": "Cena",
     "calculate": "Vypočítat"
-  }
+  },
+  "insights.low_stock_title": "Nízký stav zásob",
+  "insights.low_stock_message": "{count} cívek dojde do 14 dnů při současném tempu spotřeby.",
+  "insights.restock_title": "Doporučení k doplnění",
+  "insights.restock_message": "{count} filamentů by mělo být objednáno na základě vzorců spotřeby.",
+  "insights.top_material_title": "Nejpoužívanější materiál",
+  "insights.top_material_message": "{material} je váš nejpoužívanější materiál ({total_g}g za 90 dní, průměr {avg_daily_g}g/den).",
+  "insights.cost_title": "Přehled nákladů",
+  "insights.cost_message": "Průměrné náklady: {avg_cost_per_kg}/kg pro {total_spools} aktivních cívek. Celková hodnota skladu: {total_value}.",
+  "insights.dormant_title": "Nepoužívané cívky",
+  "insights.dormant_message": "{count} cívek nebylo použito 90+ dní, ale stále obsahují značné množství filamentu.",
+  "insights.days_remaining": "dní zbývá",
+  "insights.spools_needed": "cívek doporučeno",
+  "insights.remaining": "zbývá"
 }

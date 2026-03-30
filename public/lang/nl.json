@@ -3466,5 +3466,18 @@
     "estimated_time_min": "Tijd (min)",
     "unit_price": "Prijs",
     "calculate": "Berekenen"
-  }
+  },
+  "insights.low_stock_title": "Lage voorraad",
+  "insights.low_stock_message": "{count} spoel(en) raken op binnen 14 dagen bij huidig gebruik.",
+  "insights.restock_title": "Bijbestelaanbevelingen",
+  "insights.restock_message": "{count} filament(en) moeten worden nabesteld op basis van gebruikspatronen.",
+  "insights.top_material_title": "Meest gebruikt materiaal",
+  "insights.top_material_message": "{material} is je meest gebruikte materiaal ({total_g}g in 90 dagen, gem. {avg_daily_g}g/dag).",
+  "insights.cost_title": "Kostenoverzicht",
+  "insights.cost_message": "Gemiddelde kosten: {avg_cost_per_kg}/kg over {total_spools} actieve spoelen. Totale voorraadwaarde: {total_value}.",
+  "insights.dormant_title": "Ongebruikte spoelen",
+  "insights.dormant_message": "{count} spoel(en) zijn 90+ dagen niet gebruikt maar bevatten nog aanzienlijk filament.",
+  "insights.days_remaining": "dagen resterend",
+  "insights.spools_needed": "spoel(en) aanbevolen",
+  "insights.remaining": "resterend"
 }

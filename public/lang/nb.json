@@ -3404,5 +3404,18 @@
     "estimated_time_min": "Tid (min)",
     "unit_price": "Pris",
     "calculate": "Kalkuler"
-  }
+  },
+  "insights.low_stock_title": "Lavt lagerbeholdning",
+  "insights.low_stock_message": "{count} spole(r) vil gå tom innen 14 dager med nåværende brukstakt.",
+  "insights.restock_title": "Påfyllingsanbefalinger",
+  "insights.restock_message": "{count} filament(er) bør bestilles basert på bruksmønster.",
+  "insights.top_material_title": "Mest brukt materiale",
+  "insights.top_material_message": "{material} er ditt mest brukte materiale ({total_g}g på 90 dager, snitt {avg_daily_g}g/dag).",
+  "insights.cost_title": "Kostnadsoversikt",
+  "insights.cost_message": "Gjennomsnittskostnad: {avg_cost_per_kg}/kg fordelt på {total_spools} aktive spoler. Total lagerverdi: {total_value}.",
+  "insights.dormant_title": "Ubrukte spoler",
+  "insights.dormant_message": "{count} spole(r) har ikke blitt brukt på 90+ dager, men har fortsatt mye filament igjen.",
+  "insights.days_remaining": "dager igjen",
+  "insights.spools_needed": "spole(r) anbefalt",
+  "insights.remaining": "igjen"
 }

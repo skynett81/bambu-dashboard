@@ -3466,5 +3466,18 @@
     "estimated_time_min": "시간 (분)",
     "unit_price": "가격",
     "calculate": "계산"
-  }
+  },
+  "insights.low_stock_title": "재고 부족 알림",
+  "insights.low_stock_message": "현재 사용 속도로 {count}개 스풀이 14일 내에 소진됩니다.",
+  "insights.restock_title": "재입고 추천",
+  "insights.restock_message": "사용 패턴에 따라 {count}종의 필라멘트를 재주문해야 합니다.",
+  "insights.top_material_title": "가장 많이 사용된 소재",
+  "insights.top_material_message": "{material}이(가) 가장 많이 사용된 소재입니다 (90일간 {total_g}g, 평균 {avg_daily_g}g/일).",
+  "insights.cost_title": "비용 개요",
+  "insights.cost_message": "평균 비용: {avg_cost_per_kg}/kg ({total_spools}개 활성 스풀). 총 재고 가치: {total_value}.",
+  "insights.dormant_title": "미사용 스풀",
+  "insights.dormant_message": "{count}개 스풀이 90일 이상 미사용이지만 상당량의 필라멘트가 남아 있습니다.",
+  "insights.days_remaining": "일 남음",
+  "insights.spools_needed": "개 스풀 추천",
+  "insights.remaining": "남음"
 }

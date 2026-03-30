@@ -6251,14 +6251,28 @@ export async function handleApiRequest(req, res) {
         const stats = getInventoryStats();
         const insights = [];
 
+        // Helper: build descriptive spool name from available fields
+        const spoolLabel = (s) => {
+          const parts = [];
+          if (s.vendor_name) parts.push(s.vendor_name);
+          parts.push(s.profile_name || s.material || '?');
+          if (s.color_name) parts.push(s.color_name);
+          return parts.join(' ');
+        };
+
         // Low stock warnings
         const lowStock = predictions.per_spool.filter(s => s.needs_reorder);
         if (lowStock.length > 0) {
           insights.push({
             type: 'warning',
-            title: 'Low Stock Alert',
-            message: `${lowStock.length} spool(s) will run out within 14 days at current usage rate.`,
-            items: lowStock.slice(0, 5).map(s => `${s.profile_name || s.material} - ${s.days_until_empty} days remaining`)
+            title_key: 'insights.low_stock_title',
+            message_key: 'insights.low_stock_message',
+            message_args: { count: lowStock.length },
+            items: lowStock.slice(0, 5).map(s => ({
+              label: spoolLabel(s),
+              days: s.days_until_empty,
+              color_hex: s.color_hex
+            }))
           });
         }
 
@@ -6267,9 +6281,14 @@ export async function handleApiRequest(req, res) {
         if (urgentRestock.length > 0) {
           insights.push({
             type: 'restock',
-            title: 'Restock Recommendations',
-            message: `${urgentRestock.length} filament(s) should be reordered based on usage patterns.`,
-            items: urgentRestock.slice(0, 5).map(r => `${r.profile_name} (${r.vendor_name || '?'}) - ${r.recommended_spools || 1} spool(s)`)
+            title_key: 'insights.restock_title',
+            message_key: 'insights.restock_message',
+            message_args: { count: urgentRestock.length },
+            items: urgentRestock.slice(0, 5).map(r => ({
+              label: `${r.profile_name} (${r.vendor_name || '?'})`,
+              spools: r.recommended_spools || 1,
+              color_hex: r.color_hex
+            }))
           });
         }
 
@@ -6278,9 +6297,17 @@ export async function handleApiRequest(req, res) {
           const topMaterial = predictions.by_material[0];
           insights.push({
             type: 'info',
-            title: 'Top Material Usage',
-            message: `${topMaterial.material || 'Unknown'} is your most used material (${Math.round(topMaterial.total_used_g)}g in 90 days, avg ${topMaterial.avg_daily_g}g/day).`,
-            items: predictions.by_material.slice(0, 3).map(m => `${m.material}: ${Math.round(m.total_used_g)}g total`)
+            title_key: 'insights.top_material_title',
+            message_key: 'insights.top_material_message',
+            message_args: {
+              material: topMaterial.material || '?',
+              total_g: Math.round(topMaterial.total_used_g),
+              avg_daily_g: topMaterial.avg_daily_g
+            },
+            items: predictions.by_material.slice(0, 3).map(m => ({
+              label: m.material,
+              total_g: Math.round(m.total_used_g)
+            }))
           });
         }
 
@@ -6289,8 +6316,13 @@ export async function handleApiRequest(req, res) {
           const avgCostPerKg = (stats.total_cost / (stats.total_weight_g / 1000)).toFixed(2);
           insights.push({
             type: 'info',
-            title: 'Cost Overview',
-            message: `Average cost: ${avgCostPerKg}/kg across ${stats.total_spools} active spools. Total inventory value: ${stats.total_cost.toFixed(2)}.`
+            title_key: 'insights.cost_title',
+            message_key: 'insights.cost_message',
+            message_args: {
+              avg_cost_per_kg: avgCostPerKg,
+              total_spools: stats.total_spools,
+              total_value: stats.total_cost.toFixed(2)
+            }
           });
         }
 
@@ -6299,9 +6331,14 @@ export async function handleApiRequest(req, res) {
         if (dormant.length > 0) {
           insights.push({
             type: 'suggestion',
-            title: 'Dormant Spools',
-            message: `${dormant.length} spool(s) haven't been used in 90+ days but still have significant filament remaining.`,
-            items: dormant.slice(0, 5).map(s => `${s.profile_name || s.material} - ${Math.round(s.remaining_weight_g)}g remaining`)
+            title_key: 'insights.dormant_title',
+            message_key: 'insights.dormant_message',
+            message_args: { count: dormant.length },
+            items: dormant.slice(0, 5).map(s => ({
+              label: spoolLabel(s),
+              remaining_g: Math.round(s.remaining_weight_g),
+              color_hex: s.color_hex
+            }))
           });
         }
 

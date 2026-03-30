@@ -4307,5 +4307,18 @@
     "estimated_time_min": "Czas (min)",
     "unit_price": "Cena",
     "calculate": "Oblicz"
-  }
+  },
+  "insights.low_stock_title": "Niski stan magazynowy",
+  "insights.low_stock_message": "{count} szpula/szpul wyczerpie się w ciągu 14 dni przy obecnym tempie zużycia.",
+  "insights.restock_title": "Rekomendacje uzupełnienia",
+  "insights.restock_message": "{count} filament(ów) powinno zostać zamówionych na podstawie wzorców użytkowania.",
+  "insights.top_material_title": "Najczęściej używany materiał",
+  "insights.top_material_message": "{material} to najczęściej używany materiał ({total_g}g w 90 dni, śr. {avg_daily_g}g/dzień).",
+  "insights.cost_title": "Przegląd kosztów",
+  "insights.cost_message": "Średni koszt: {avg_cost_per_kg}/kg dla {total_spools} aktywnych szpul. Łączna wartość magazynu: {total_value}.",
+  "insights.dormant_title": "Nieużywane szpule",
+  "insights.dormant_message": "{count} szpula/szpul nie były używane przez 90+ dni, ale nadal mają znaczną ilość filamentu.",
+  "insights.days_remaining": "dni pozostało",
+  "insights.spools_needed": "szpul zalecanych",
+  "insights.remaining": "pozostało"
 }

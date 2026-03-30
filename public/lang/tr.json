@@ -3466,5 +3466,18 @@
     "estimated_time_min": "Süre (dak)",
     "unit_price": "Fiyat",
     "calculate": "Hesapla"
-  }
+  },
+  "insights.low_stock_title": "Düşük stok uyarısı",
+  "insights.low_stock_message": "Mevcut kullanım hızıyla {count} makara 14 gün içinde tükenecek.",
+  "insights.restock_title": "Yeniden stok önerileri",
+  "insights.restock_message": "Kullanım kalıplarına göre {count} filament yeniden sipariş edilmelidir.",
+  "insights.top_material_title": "En çok kullanılan malzeme",
+  "insights.top_material_message": "{material} en çok kullanılan malzemeniz (90 günde {total_g}g, ort. {avg_daily_g}g/gün).",
+  "insights.cost_title": "Maliyet özeti",
+  "insights.cost_message": "Ortalama maliyet: {avg_cost_per_kg}/kg, {total_spools} aktif makara. Toplam envanter değeri: {total_value}.",
+  "insights.dormant_title": "Kullanılmayan makaralar",
+  "insights.dormant_message": "{count} makara 90+ gündür kullanılmıyor ancak hâlâ önemli miktarda filament içeriyor.",
+  "insights.days_remaining": "gün kaldı",
+  "insights.spools_needed": "makara önerilen",
+  "insights.remaining": "kalan"
 }

@@ -3466,5 +3466,18 @@
     "estimated_time_min": "时间 (分)",
     "unit_price": "单价",
     "calculate": "计算"
-  }
+  },
+  "insights.low_stock_title": "库存不足警告",
+  "insights.low_stock_message": "按当前使用速度，{count}个线轴将在14天内用完。",
+  "insights.restock_title": "补货建议",
+  "insights.restock_message": "根据使用模式，{count}种耗材应重新订购。",
+  "insights.top_material_title": "最常用材料",
+  "insights.top_material_message": "{material}是您最常用的材料（90天内{total_g}g，平均{avg_daily_g}g/天）。",
+  "insights.cost_title": "成本概览",
+  "insights.cost_message": "平均成本：{avg_cost_per_kg}/kg，{total_spools}个活跃线轴。库存总价值：{total_value}。",
+  "insights.dormant_title": "闲置线轴",
+  "insights.dormant_message": "{count}个线轴已超过90天未使用，但仍有大量耗材剩余。",
+  "insights.days_remaining": "天剩余",
+  "insights.spools_needed": "个线轴推荐",
+  "insights.remaining": "剩余"
 }

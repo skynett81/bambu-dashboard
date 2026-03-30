@@ -3466,5 +3466,18 @@
     "estimated_time_min": "Zeit (min)",
     "unit_price": "Preis",
     "calculate": "Berechnen"
-  }
+  },
+  "insights.low_stock_title": "Niedriger Bestand",
+  "insights.low_stock_message": "{count} Spule(n) werden innerhalb von 14 Tagen bei aktuellem Verbrauch aufgebraucht.",
+  "insights.restock_title": "Nachbestellungsempfehlungen",
+  "insights.restock_message": "{count} Filament(e) sollten basierend auf Nutzungsmustern nachbestellt werden.",
+  "insights.top_material_title": "Meistverwendetes Material",
+  "insights.top_material_message": "{material} ist Ihr meistverwendetes Material ({total_g}g in 90 Tagen, Durchschnitt {avg_daily_g}g/Tag).",
+  "insights.cost_title": "Kostenübersicht",
+  "insights.cost_message": "Durchschnittskosten: {avg_cost_per_kg}/kg bei {total_spools} aktiven Spulen. Gesamtbestandswert: {total_value}.",
+  "insights.dormant_title": "Inaktive Spulen",
+  "insights.dormant_message": "{count} Spule(n) wurden seit 90+ Tagen nicht verwendet, haben aber noch erheblich Filament übrig.",
+  "insights.days_remaining": "Tage verbleibend",
+  "insights.spools_needed": "Spule(n) empfohlen",
+  "insights.remaining": "verbleibend"
 }

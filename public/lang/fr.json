@@ -3466,5 +3466,18 @@
     "estimated_time_min": "Durée (min)",
     "unit_price": "Prix",
     "calculate": "Calculer"
-  }
+  },
+  "insights.low_stock_title": "Stock faible",
+  "insights.low_stock_message": "{count} bobine(s) seront épuisées dans les 14 jours au rythme actuel.",
+  "insights.restock_title": "Recommandations de réapprovisionnement",
+  "insights.restock_message": "{count} filament(s) devraient être recommandés selon les habitudes d'utilisation.",
+  "insights.top_material_title": "Matériau le plus utilisé",
+  "insights.top_material_message": "{material} est votre matériau le plus utilisé ({total_g}g en 90 jours, moy. {avg_daily_g}g/jour).",
+  "insights.cost_title": "Aperçu des coûts",
+  "insights.cost_message": "Coût moyen : {avg_cost_per_kg}/kg sur {total_spools} bobines actives. Valeur totale du stock : {total_value}.",
+  "insights.dormant_title": "Bobines inactives",
+  "insights.dormant_message": "{count} bobine(s) n'ont pas été utilisées depuis 90+ jours mais contiennent encore du filament.",
+  "insights.days_remaining": "jours restants",
+  "insights.spools_needed": "bobine(s) recommandée(s)",
+  "insights.remaining": "restant"
 }

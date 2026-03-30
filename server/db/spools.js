@@ -1234,7 +1234,7 @@ export function getUsagePredictions() {
   `).all();
 
   const perSpool = db.prepare(`
-    SELECT s.id, s.remaining_weight_g, fp.material, fp.name AS profile_name, v.name AS vendor_name, fp.color_hex,
+    SELECT s.id, s.remaining_weight_g, fp.material, fp.name AS profile_name, v.name AS vendor_name, fp.color_hex, fp.color_name,
       COALESCE(
         (SELECT ROUND(SUM(sul2.used_weight_g) / MAX(1, COUNT(DISTINCT DATE(sul2.timestamp))), 2)
          FROM spool_usage_log sul2 WHERE sul2.spool_id = s.id AND sul2.timestamp >= datetime('now', '-90 days')),

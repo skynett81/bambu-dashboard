@@ -3465,5 +3465,18 @@
     "estimated_time_min": "Idő (perc)",
     "unit_price": "Ár",
     "calculate": "Számítás"
-  }
+  },
+  "insights.low_stock_title": "Alacsony készlet",
+  "insights.low_stock_message": "{count} orsó elfogy 14 napon belül a jelenlegi felhasználási ütemben.",
+  "insights.restock_title": "Utánrendelési javaslatok",
+  "insights.restock_message": "{count} filamentet érdemes újrarendelni a használati minták alapján.",
+  "insights.top_material_title": "Leggyakrabban használt anyag",
+  "insights.top_material_message": "A {material} a leggyakrabban használt anyag ({total_g}g 90 nap alatt, átlag {avg_daily_g}g/nap).",
+  "insights.cost_title": "Költségáttekintés",
+  "insights.cost_message": "Átlagos költség: {avg_cost_per_kg}/kg {total_spools} aktív orsón. Teljes készletérték: {total_value}.",
+  "insights.dormant_title": "Inaktív orsók",
+  "insights.dormant_message": "{count} orsó 90+ napja nem volt használva, de még jelentős mennyiségű filament van bennük.",
+  "insights.days_remaining": "nap hátra",
+  "insights.spools_needed": "orsó ajánlott",
+  "insights.remaining": "maradt"
 }

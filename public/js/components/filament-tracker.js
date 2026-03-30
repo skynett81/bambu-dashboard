@@ -917,7 +917,8 @@
     const lowClass = isEmpty ? 'filament-card-empty' : isLow ? 'filament-card-low' : '';
     const archivedClass = s.archived ? 'filament-card-archived' : '';
     const cleanName = _cleanProfileName(s);
-    const subtitle = [s.vendor_name, s.diameter && s.diameter !== 1.75 ? s.diameter + 'mm' : ''].filter(Boolean).join(' · ');
+    const colorLabel = s.color_name || '';
+    const subtitle = [s.vendor_name, colorLabel, s.material && s.material !== cleanName ? s.material : '', s.diameter && s.diameter !== 1.75 ? s.diameter + 'mm' : ''].filter(Boolean).join(' · ');
     // Drying status indicator
     const dryStatus = _dryingStatus.find(d => d.id === s.id);
     const dryIcon = dryStatus?.drying_status === 'overdue' ? `<span class="fil-dry-badge fil-dry-overdue" title="${t('filament.drying_status_overdue')}">&#x1F534;</span>`
@@ -1088,7 +1089,7 @@
       </div>
       <div class="spool-vcard-info">
         <div class="spool-vcard-name" title="${esc(cleanName)}">${esc(cleanName)}</div>
-        <div class="spool-vcard-meta">${esc(vendorName)} · ${remaining}</div>
+        <div class="spool-vcard-meta">${esc(vendorName)}${s.color_name ? ' · ' + esc(s.color_name) : ''} · ${remaining}</div>
         <div class="spool-vcard-bottom">
           <span class="spool-vcard-pct" style="color:${statusColor}">${statusText}</span>
           <div class="spool-vcard-bar"><div class="spool-vcard-bar-fill" style="width:${pct}%;background:${statusColor}"></div></div>
@@ -4172,14 +4173,32 @@
       }
       const icons = { warning: '&#9888;', restock: '&#128230;', info: '&#128161;', suggestion: '&#128300;' };
       const colors = { warning: 'var(--accent-orange, orange)', restock: 'var(--accent-red, red)', info: 'var(--accent-blue, #4a9eff)', suggestion: 'var(--accent-green, green)' };
+
+      // Resolve i18n title/message from structured data
+      const resolveTitle = (ins) => ins.title_key ? t(ins.title_key) : (ins.title || '');
+      const resolveMessage = (ins) => {
+        if (!ins.message_key) return ins.message || '';
+        const a = ins.message_args || {};
+        return t(ins.message_key, a);
+      };
+      // Render a single item line with color dot
+      const renderItem = (item) => {
+        const dot = item.color_hex ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#${item.color_hex};margin-right:4px;vertical-align:middle"></span>` : '';
+        if (item.days !== undefined) return `${dot}${esc(item.label)} — ${item.days} ${t('insights.days_remaining')}`;
+        if (item.spools !== undefined) return `${dot}${esc(item.label)} — ${item.spools} ${t('insights.spools_needed')}`;
+        if (item.remaining_g !== undefined) return `${dot}${esc(item.label)} — ${item.remaining_g}g ${t('insights.remaining')}`;
+        if (item.total_g !== undefined) return `${esc(item.label)}: ${item.total_g}g`;
+        return esc(typeof item === 'string' ? item : item.label || '');
+      };
+
       let h = '';
       for (const insight of data.insights) {
         h += `<div style="padding:10px;border:1px solid ${colors[insight.type] || 'var(--border-color)'};border-radius:8px;margin-bottom:8px;background:color-mix(in srgb, ${colors[insight.type] || 'var(--border-color)'} 5%, transparent)">
-          <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px">${icons[insight.type] || ''} ${esc(insight.title)}</div>
-          <div style="font-size:0.8rem;color:var(--text-muted)">${esc(insight.message)}</div>`;
+          <div style="font-weight:600;font-size:0.85rem;margin-bottom:4px">${icons[insight.type] || ''} ${esc(resolveTitle(insight))}</div>
+          <div style="font-size:0.8rem;color:var(--text-muted)">${esc(resolveMessage(insight))}</div>`;
         if (insight.items?.length) {
           h += '<ul style="margin:6px 0 0;padding-left:18px;font-size:0.75rem">';
-          for (const item of insight.items) h += `<li>${esc(item)}</li>`;
+          for (const item of insight.items) h += `<li>${renderItem(item)}</li>`;
           h += '</ul>';
         }
         h += '</div>';

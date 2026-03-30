@@ -3466,5 +3466,18 @@
     "estimated_time_min": "Tid (min)",
     "unit_price": "Pris",
     "calculate": "Beräkna"
-  }
+  },
+  "insights.low_stock_title": "Lågt lager",
+  "insights.low_stock_message": "{count} spole/spolar tar slut inom 14 dagar vid nuvarande förbrukning.",
+  "insights.restock_title": "Påfyllningsrekommendationer",
+  "insights.restock_message": "{count} filament bör beställas baserat på användningsmönster.",
+  "insights.top_material_title": "Mest använda material",
+  "insights.top_material_message": "{material} är ditt mest använda material ({total_g}g på 90 dagar, snitt {avg_daily_g}g/dag).",
+  "insights.cost_title": "Kostnadsöversikt",
+  "insights.cost_message": "Genomsnittskostnad: {avg_cost_per_kg}/kg för {total_spools} aktiva spolar. Totalt lagervärde: {total_value}.",
+  "insights.dormant_title": "Inaktiva spolar",
+  "insights.dormant_message": "{count} spole/spolar har inte använts på 90+ dagar men har fortfarande mycket filament kvar.",
+  "insights.days_remaining": "dagar kvar",
+  "insights.spools_needed": "spole/spolar rekommenderade",
+  "insights.remaining": "kvar"
 }

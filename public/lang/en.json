@@ -3404,5 +3404,18 @@
     "estimated_time_min": "Time (min)",
     "unit_price": "Price",
     "calculate": "Calculate"
-  }
+  },
+  "insights.low_stock_title": "Low Stock Alert",
+  "insights.low_stock_message": "{count} spool(s) will run out within 14 days at current usage rate.",
+  "insights.restock_title": "Restock Recommendations",
+  "insights.restock_message": "{count} filament(s) should be reordered based on usage patterns.",
+  "insights.top_material_title": "Top Material Usage",
+  "insights.top_material_message": "{material} is your most used material ({total_g}g in 90 days, avg {avg_daily_g}g/day).",
+  "insights.cost_title": "Cost Overview",
+  "insights.cost_message": "Average cost: {avg_cost_per_kg}/kg across {total_spools} active spools. Total inventory value: {total_value}.",
+  "insights.dormant_title": "Dormant Spools",
+  "insights.dormant_message": "{count} spool(s) haven't been used in 90+ days but still have significant filament remaining.",
+  "insights.days_remaining": "days remaining",
+  "insights.spools_needed": "spool(s) recommended",
+  "insights.remaining": "remaining"
 }

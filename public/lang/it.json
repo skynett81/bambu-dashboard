@@ -3466,5 +3466,18 @@
     "estimated_time_min": "Tempo (min)",
     "unit_price": "Prezzo",
     "calculate": "Calcola"
-  }
+  },
+  "insights.low_stock_title": "Scorte basse",
+  "insights.low_stock_message": "{count} bobina/e si esauriranno entro 14 giorni al ritmo attuale.",
+  "insights.restock_title": "Raccomandazioni di rifornimento",
+  "insights.restock_message": "{count} filamento/i dovrebbero essere riordinati in base ai pattern di utilizzo.",
+  "insights.top_material_title": "Materiale più utilizzato",
+  "insights.top_material_message": "{material} è il materiale più utilizzato ({total_g}g in 90 giorni, media {avg_daily_g}g/giorno).",
+  "insights.cost_title": "Panoramica costi",
+  "insights.cost_message": "Costo medio: {avg_cost_per_kg}/kg su {total_spools} bobine attive. Valore totale inventario: {total_value}.",
+  "insights.dormant_title": "Bobine inattive",
+  "insights.dormant_message": "{count} bobina/e non utilizzata/e da 90+ giorni ma con filamento rimanente significativo.",
+  "insights.days_remaining": "giorni rimanenti",
+  "insights.spools_needed": "bobina/e raccomandata/e",
+  "insights.remaining": "rimanente"
 }
