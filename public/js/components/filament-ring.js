@@ -284,13 +284,14 @@
     const activeInfo = _getTrayPercent(activeTray, activeEntry.unitIdx, activeEntry.trayIdx, true, data);
     const activeType = activeTray.tray_type || '??';
     const activeBrand = activeTray.tray_sub_brands || '';
-    const colorName = getColorName(activeColor);
+    const activeLinkedSpool = window.getLinkedSpool?.(window.printerState?.getActivePrinterId?.(), activeEntry.unitIdx, activeEntry.trayIdx);
+    const activeColorName = activeLinkedSpool?.bambu_color_name || getColorName(activeColor);
     const isActive = activeEntry.globalIdx === activeIdx || (activeIdx >= 254 && activeEntry.isExternal);
     const slotNum = activeEntry.isExternal ? 0 : activeEntry.trayIdx + 1;
     const amsNum = activeEntry.isExternal ? 0 : activeEntry.unitIdx + 1;
 
-    // Build display name: prefer brand (e.g. "PLA Basic"), fall back to type
-    const displayName = activeBrand || activeType;
+    // Build display name: prefer brand + color name
+    const displayName = (activeBrand || activeType) + (activeColorName ? ' — ' + activeColorName : '');
     const showType = activeBrand && activeBrand !== activeType;
 
     let html = '<div class="card-title">Filament <span class="ams-live-badge" title="Live data fra AMS via MQTT">LIVE</span></div>';
@@ -328,8 +329,10 @@
       const totalG = tr.tray_weight ? parseInt(tr.tray_weight) + 'g' : '';
       const nozzleRange = (tr.nozzle_temp_min && tr.nozzle_temp_max) ? tr.nozzle_temp_min + '-' + tr.nozzle_temp_max + '°C' : '';
       const hasRfid = !!(tr.tag_uid || tr.tray_uuid);
-      const colorName = getColorName(c);
-      const idName = tr.tray_id_name || '';
+      const linkedSpool = window.getLinkedSpool?.(window.printerState?.getActivePrinterId?.(), entry.unitIdx, entry.trayIdx);
+      const bambuColorName = linkedSpool?.bambu_color_name;
+      const colorName = bambuColorName || getColorName(c);
+      const idName = tr.tray_id_name || linkedSpool?.bambu_variant_id || '';
 
       // Warn if low
       const isLow = info.current <= 10;
@@ -340,10 +343,9 @@
       html += `<div class="fr-spool-item${isAct ? ' fr-spool-active' : ''}${warnClass}" style="cursor:pointer" onclick='showSpoolDetail(${spoolData})'>`;
       html += `<div class="fr-spool-ring">${_spoolVisual(c, info.current, 'fr-' + entry.globalIdx)}<div class="fr-spool-overlay"><span class="fr-spool-pct">${info.current}%</span></div></div>`;
       html += `<div class="fr-spool-meta">`;
-      html += `<span class="fr-spool-brand">${brand || tType}</span>`;
+      html += `<span class="fr-spool-brand">${brand || tType}${colorName ? ' — ' + colorName : ''}</span>`;
       html += `<span class="fr-spool-weight-row">${weightG}${totalG ? ' / ' + totalG : ''}</span>`;
-      html += `<span class="fr-spool-slot">${slotLabel}${colorName ? ' · ' + colorName : ''}</span>`;
-      if (nozzleRange) html += `<span class="fr-spool-temp">${nozzleRange}</span>`;
+      html += `<span class="fr-spool-slot">${slotLabel}${idName ? ' · ' + idName : ''}${nozzleRange ? ' · 🔥' + nozzleRange : ''}</span>`;
       if (hasRfid) html += `<span class="fr-spool-rfid" title="RFID${idName ? ': ' + idName : ''}">📡</span>`;
       html += `</div>`;
       if (isAct && info.isPrinting && info.afterPrint != null) {
