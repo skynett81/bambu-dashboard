@@ -12,7 +12,7 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 
 ## Hva er 3DPrintForge?
 
-3DPrintForge kobler seg direkte til printeren din via MQTT over LAN, uten avhengighet av Bambu Lab sine servere. Du kan også koble til Bambu Cloud for synkronisering av modeller og printhistorikk.
+3DPrintForge kobler seg til printerne dine via MQTT (Bambu Lab) eller Moonraker WebSocket (Snapmaker, Voron, Creality K1 og andre Klipper-printere) over LAN. Synkroniser modeller og printhistorikk via Bambu Cloud, Snapmaker Cloud, eller hent data direkte fra printeren.
 
 ### Viktigste funksjoner
 
@@ -33,7 +33,7 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 - **AMS fuktighet/temperatur** — 5-nivå vurdering med anbefalinger for optimal oppbevaring
 - **Achievements** — 18 verdens landemerker som milepæler for filamentforbruk med XP-progresjon
 - **Varsler** — 7 kanaler (Telegram, Discord, e-post, ntfy, Pushover, SMS, webhook)
-- **Multi-printer** — støtter hele Bambu Lab-serien
+- **Multi-printer, multi-brand** — Bambu Lab (MQTT) + Snapmaker, Voron, Creality og alle Klipper/Moonraker-printere
 - **2 språk** — norsk og engelsk
 - **Selvdriftet** — ingen sky-avhengighet, dine data på din maskin
 
@@ -72,13 +72,21 @@ Du kan prøve dashboardet uten en fysisk printer ved å kjøre `npm run demo`. D
 
 ## Støttede printere
 
-Alle Bambu Lab-printere med LAN-modus:
-
+### Bambu Lab (via MQTT)
 - **X1-serien**: X1C, X1C Combo, X1E
 - **P1-serien**: P1S, P1S Combo, P1P
 - **P2-serien**: P2S, P2S Combo
 - **A-serien**: A1, A1 Combo, A1 mini
 - **H2-serien**: H2S, H2D (dobbel dyse), H2C (verktøybytter, 6 hoder)
+
+### Klipper/Moonraker-printere (via WebSocket + REST API)
+- **Snapmaker**: U1 (opptil 4 verktøyhoder), J1, A350T, A250T
+- **Voron**: V0, Trident, V2.4
+- **Creality**: K1, K1 Max, K2 Plus (med Klipper-firmware)
+- **Sovol**: SV06, SV07, SV08
+- **QIDI**: X-Max 3, X-Plus 3, Q1 Pro
+- **Ratrig**: V-Core, V-Minion
+- **Alle andre** Klipper + Moonraker-baserte printere
 
 ## Funksjoner i detalj
 

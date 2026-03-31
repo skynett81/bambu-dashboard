@@ -12,7 +12,7 @@ description: A powerful, self-hosted dashboard for all your 3D printers
 
 ## What is 3DPrintForge?
 
-3DPrintForge connects directly to your printer via MQTT over LAN, with no dependency on Bambu Lab's servers. You can also connect to Bambu Cloud for synchronisation of models and print history.
+3DPrintForge connects to your printers via MQTT (Bambu Lab) or Moonraker WebSocket (Snapmaker, Voron, Creality K1, and other Klipper printers) over LAN. You can also connect to Bambu Cloud or sync data directly from your printer.
 
 ### Key features
 
@@ -29,8 +29,8 @@ description: A powerful, self-hosted dashboard for all your 3D printers
 - **Sound alerts** — 9 configurable events with custom sound upload and printer speaker (M300)
 - **Activity log** — persistent timeline from all events (prints, errors, maintenance, filament)
 - **Notifications** — 7 channels (Telegram, Discord, email, ntfy, Pushover, SMS, webhook)
-- **Multi-printer** — supports the entire Bambu Lab range
-- **2 languages** — Norwegian, English, German, French, Spanish, Italian, Japanese, Korean, Dutch, Polish, Portuguese, Swedish, Turkish, Ukrainian, Chinese, Czech, Hungarian
+- **Multi-printer, multi-brand** — Bambu Lab (MQTT) + Snapmaker, Voron, Creality and all Klipper/Moonraker printers
+- **2 languages** — Norwegian and English
 - **Self-hosted** — no cloud dependency, your data on your machine
 
 ### New in v1.1.14
@@ -68,13 +68,21 @@ You can try the dashboard without a physical printer by running `npm run demo`. 
 
 ## Supported printers
 
-All Bambu Lab printers with LAN mode:
-
+### Bambu Lab (via MQTT)
 - **X1 series**: X1C, X1C Combo, X1E
 - **P1 series**: P1S, P1S Combo, P1P
 - **P2 series**: P2S, P2S Combo
 - **A series**: A1, A1 Combo, A1 mini
 - **H2 series**: H2S, H2D (dual nozzle), H2C (tool changer, 6 heads)
+
+### Klipper/Moonraker printers (via WebSocket + REST API)
+- **Snapmaker**: U1 (up to 4 toolheads), J1, A350T, A250T
+- **Voron**: V0, Trident, V2.4
+- **Creality**: K1, K1 Max, K2 Plus (with Klipper firmware)
+- **Sovol**: SV06, SV07, SV08
+- **QIDI**: X-Max 3, X-Plus 3, Q1 Pro
+- **Ratrig**: V-Core, V-Minion
+- **Any other** Klipper + Moonraker-based printer
 
 ## Features in detail
 
