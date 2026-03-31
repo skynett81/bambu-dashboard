@@ -2,6 +2,7 @@ import { PrintTracker } from './print-tracker.js';
 import { TelemetrySampler } from './telemetry-sampler.js';
 import { CameraStream } from './camera-stream.js';
 import { MoonrakerCamera } from './moonraker-camera.js';
+import { startHistorySync } from './moonraker-history-sync.js';
 import { getPrinters, addFirmwareEntry, addXcamEvent } from './database.js';
 import { PrintGuardService } from './print-guard.js';
 import { createLogger } from './logger.js';
@@ -163,8 +164,14 @@ export class PrinterManager {
     }
 
     this._wireTrackerNotifications(id, printerConf.name, tracker);
+    // History sync for Moonraker printers
+    let historySync = null;
+    if (connectorType === 'moonraker') {
+      historySync = startHistorySync(id, printerConf.ip, printerConf.accessCode, printerConf.port || 80);
+    }
+
     this.setMeta(id, { name: printerConf.name, model: printerConf.model || '', cameraPort, type: connectorType });
-    this.printers.set(id, { config: printerConf, client, tracker, sampler, camera, moonCamera, cameraPort, live: true });
+    this.printers.set(id, { config: printerConf, client, tracker, sampler, camera, moonCamera, historySync, cameraPort, live: true });
 
     if (camera) camera.start();
     if (moonCamera) moonCamera.start();
@@ -225,6 +232,7 @@ export class PrinterManager {
     if (printer.sampler) printer.sampler.stop();
     if (printer.camera) printer.camera.stop();
     if (printer.moonCamera) printer.moonCamera.stop();
+    if (printer.historySync) printer.historySync.stop();
     this.printers.delete(id);
   }
 
