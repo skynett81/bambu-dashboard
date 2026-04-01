@@ -668,29 +668,11 @@
       _fsMwMode = false;
       _show3dFullscreen(container, printerId, pd);
     } else if (hasMoonThumb && printerId) {
-      // Moonraker printer: show large thumbnail + live info in fullscreen
+      // Moonraker printer: thumbnail fills fullscreen
       _fsMwMode = false;
       const thumbUrl = `/api/printers/${encodeURIComponent(printerId)}/print-thumb`;
-      const pct = pd?.mc_percent || 0;
-      const layer = pd?.layer_num || 0;
-      const total = pd?.total_layer_num || 0;
-      const fmtT = (s) => { if (!s || s <= 0) return '--'; const h = Math.floor(s/3600); const m = Math.floor((s%3600)/60); return h > 0 ? h+'h '+m+'m' : m+'m'; };
-      const elapsed = fmtT(pd?.print_duration_seconds);
-      const est = fmtT(pd?._slicer_estimated_time);
-      const remain = pd?.mc_remaining_time > 0 ? fmtT(pd.mc_remaining_time * 60) : '';
-      container.innerHTML = `<div style="width:100%;height:100%;display:flex;background:var(--bg-primary)">
-        <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(0,0,0,0.15)">
-          <img src="${thumbUrl}" alt="" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:12px" onerror="this.src='/api/printers/${encodeURIComponent(printerId)}/frame.jpeg'">
-        </div>
-        <div style="flex:0 0 320px;padding:24px;display:flex;flex-direction:column;gap:12px;justify-content:center;font-size:1rem">
-          <div style="font-size:2.5rem;font-weight:700;color:var(--text-primary)">${pct}%</div>
-          <div style="height:8px;background:rgba(255,255,255,0.08);border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--accent-green);border-radius:4px"></div></div>
-          ${total > 0 ? `<div style="color:var(--text-secondary);font-size:1.1rem">Layer ${layer} / ${total}</div>` : ''}
-          <div style="color:var(--text-secondary)">⏱ ${elapsed} / ${est}</div>
-          ${remain ? `<div style="color:var(--accent-green);font-weight:600;font-size:1.1rem">⏳ ${remain} remaining</div>` : ''}
-          ${pd?._object_height ? `<div style="color:var(--text-muted)">▲ ${pd._object_height}mm${pd._layer_height ? ' · layer ' + pd._layer_height + 'mm' : ''}</div>` : ''}
-          ${pd?._slicer ? `<div style="color:var(--text-muted);font-size:0.8rem;margin-top:auto">${pd._slicer} ${pd._slicer_version || ''}</div>` : ''}
-        </div>
+      container.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg-primary)">
+        <img src="${thumbUrl}" alt="" style="width:100%;height:100%;object-fit:contain;padding:12px" onerror="this.src='/api/printers/${encodeURIComponent(printerId)}/frame.jpeg'">
       </div>`;
     } else {
       container.innerHTML = `<div class="camera-placeholder"><span>${t('model.not_available')}</span></div>`;
