@@ -336,44 +336,37 @@
     if (!thumbEl) {
       thumbEl = document.createElement('div');
       thumbEl.className = 'moonraker-thumb-fallback';
-      thumbEl.style.cssText = 'width:100%;height:100%;display:flex;background:var(--bg-primary);border-radius:var(--radius);overflow:hidden';
+      thumbEl.style.cssText = 'width:100%;height:100%;display:flex;flex-direction:column;background:var(--bg-primary);border-radius:var(--radius);overflow:hidden';
       container.appendChild(thumbEl);
     }
 
-    // Build rich print info — updates live, fills entire space
+    // Build rich print info — thumbnail dominant, info compact below
     let html = '';
-    // Left: large thumbnail
-    html += `<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:12px;background:rgba(0,0,0,0.2);min-height:0">
-      <img src="${thumbUrl}" alt="" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px" onerror="this.src='/api/printers/${encodeURIComponent(pid)}/frame.jpeg'">
+    // Top: large thumbnail (takes most space)
+    html += `<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:8px;background:rgba(0,0,0,0.15);min-height:0">
+      <img src="${thumbUrl}" alt="" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:6px" onerror="this.src='/api/printers/${encodeURIComponent(pid)}/frame.jpeg'">
     </div>`;
 
-    // Right: print details — larger text, fills height
-    html += `<div style="flex:1;padding:14px 16px;display:flex;flex-direction:column;gap:6px;font-size:0.82rem;overflow:hidden;justify-content:center">`;
+    // Bottom: compact print info bar
+    html += `<div style="flex:0 0 auto;padding:6px 10px;display:flex;flex-direction:column;gap:3px;font-size:0.75rem;border-top:1px solid var(--border-color)">`;
 
     if (isPrinting) {
-      // Progress
-      html += `<div style="font-weight:700;font-size:1.4rem;color:var(--text-primary);line-height:1">${pct}%</div>`;
-      html += `<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;margin:2px 0"><div style="height:100%;width:${pct}%;background:var(--accent-green);border-radius:3px;transition:width 1s"></div></div>`;
-
-      // Layer
-      if (totalLayers > 0) {
-        html += `<div style="color:var(--text-secondary)">Layer <b>${layer}</b> / ${totalLayers}</div>`;
-      }
-
-      // Time
       const fmtT = (s) => { if (!s || s <= 0) return '--'; const h = Math.floor(s/3600); const m = Math.floor((s%3600)/60); return h > 0 ? h+'h '+m+'m' : m+'m'; };
-      html += `<div style="color:var(--text-secondary)">⏱ ${fmtT(elapsed)}${estTime ? ' / ' + fmtT(estTime) : ''}</div>`;
-      if (remaining > 0) html += `<div style="color:var(--accent-green);font-weight:600">⏳ ${fmtT(remaining * 60)} remaining</div>`;
-
-      // Filament + extruder
-      html += `<div style="color:var(--text-secondary)">📏 ${filUsed}m${filTotal ? ' / ' + filTotal + 'g' : ''}${activeExt ? ' · ' + activeExt : ''}</div>`;
-
-      // Position + object
-      const posStr = pos ? `X:${pos.x} Y:${pos.y} Z:${pos.z}` : '';
-      const objStr = data._object_height ? `▲ ${data._object_height}mm` : '';
-      if (posStr || objStr) html += `<div style="color:var(--text-muted);font-size:0.72rem">${[posStr, objStr].filter(Boolean).join(' · ')}</div>`;
+      // Progress bar + percentage inline
+      html += `<div style="display:flex;align-items:center;gap:8px">`;
+      html += `<span style="font-weight:700;font-size:0.9rem;color:var(--text-primary);min-width:36px">${pct}%</span>`;
+      html += `<div style="flex:1;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--accent-green);border-radius:3px;transition:width 1s"></div></div>`;
+      if (totalLayers > 0) html += `<span style="color:var(--text-muted);font-size:0.7rem">L${layer}/${totalLayers}</span>`;
+      html += `</div>`;
+      // Compact info row
+      const infoParts = [];
+      infoParts.push(`⏱ ${fmtT(elapsed)}${estTime ? '/' + fmtT(estTime) : ''}`);
+      if (remaining > 0) infoParts.push(`⏳ ${fmtT(remaining * 60)}`);
+      infoParts.push(`📏 ${filUsed}m`);
+      if (activeExt) infoParts.push(`🔧 ${activeExt}`);
+      html += `<div style="color:var(--text-muted);display:flex;flex-wrap:wrap;gap:6px">${infoParts.join(' · ')}</div>`;
     } else {
-      html += `<div style="color:var(--text-muted);font-size:1rem">Idle</div>`;
+      html += `<div style="color:var(--text-muted)">Idle</div>`;
     }
 
     // Layer color bar — shows filament color per layer (like P2S)
