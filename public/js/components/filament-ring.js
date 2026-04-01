@@ -70,6 +70,8 @@
 
     // ═══ Exactly mirror P2S filament-ring output ═══
 
+    const printerId = window.printerState?.getActivePrinterId?.();
+
     let html = '<div class="card-title">Filament <span class="ams-live-badge" title="Live via Moonraker">LIVE</span></div>';
 
     // Active spool info bar — identical to P2S fr-active-bar
@@ -106,7 +108,6 @@
     }
 
     // ═══ ALL extruders as spool grid — same classes as P2S ═══
-    const printerId = window.printerState?.getActivePrinterId?.();
     html += '<div class="fr-spools-grid">';
     for (const ext of extruders) {
       const isAct = ext.active;
