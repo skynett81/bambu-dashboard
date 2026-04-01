@@ -279,16 +279,26 @@ export class MoonrakerClient {
     if (ext.target !== undefined) this.state.nozzle_target_temper = Math.round(ext.target);
 
     // Multi-extruder support (Snapmaker U1 has up to 4)
+    // Build full extruder array including primary (T0)
+    const allExtruders = [ext, ext1, ext2, ext3].filter(Boolean);
     const extraExtruders = [];
-    for (const ex of [ext1, ext2, ext3]) {
+    for (let i = 1; i < allExtruders.length; i++) {
+      const ex = allExtruders[i];
       if (ex?.temperature !== undefined) {
         extraExtruders.push({
           temperature: Math.round(ex.temperature),
           target: Math.round(ex.target || 0),
+          state: ex.state || null,
+          switch_count: ex.switch_count || 0,
+          pressure_advance: ex.pressure_advance || null,
         });
       }
     }
     if (extraExtruders.length > 0) this.state._extra_extruders = extraExtruders;
+
+    // Primary extruder state
+    if (ext.state) this.state._extruder_state = ext.state;
+    if (ext.switch_count !== undefined) this.state._extruder_switch_count = ext.switch_count;
 
     // Bed
     if (bed.temperature !== undefined) this.state.bed_temper = Math.round(bed.temperature);

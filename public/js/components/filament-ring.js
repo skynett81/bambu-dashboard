@@ -3,6 +3,32 @@
 
   let _lastFp = '';
 
+  // ── Parse slicer filament data from Moonraker metadata ──
+  function _parseSlicerData(data) {
+    const colors = (data._slicer_filament_colours || '').split(';').map(function(c) { return c.trim(); });
+    const rawNames = (data._slicer_filament_names || '').split(';').map(function(n) { return n.trim(); });
+    const types = (data._slicer_filament_type || '').split(';').map(function(t) { return t.trim(); });
+    const weights = Array.isArray(data._slicer_filament_weights)
+      ? data._slicer_filament_weights
+      : [];
+
+    // Clean brand names: remove @U1, @BBL..., @Snapmaker..., etc.
+    const names = rawNames.map(function(n) {
+      return n.replace(/@[A-Za-z0-9_.-]+/g, '').replace(/\s{2,}/g, ' ').trim();
+    });
+
+    return { colors: colors, names: names, types: types, weights: weights };
+  }
+
+  // Format seconds to human-readable time string
+  function _fmtTime(secs) {
+    if (!secs || secs <= 0) return '--';
+    var h = Math.floor(secs / 3600);
+    var m = Math.floor((secs % 3600) / 60);
+    if (h > 0) return h + 'h ' + m + 'm';
+    return m + 'm';
+  }
+
   // ── Klipper/Moonraker extruder display (Snapmaker U1 etc.) ──
   function _renderKlipperExtruders(container, data) {
     const extruders = [];
@@ -33,57 +59,148 @@
       return;
     }
 
-    // Assign colors to each extruder slot
-    const slotColors = ['#4a9eff', '#ff6b6b', '#ffd93d', '#6bcb77', '#c084fc', '#f97316'];
+    // Parse slicer metadata for filament info
+    const slicer = _parseSlicerData(data);
+    const isPrinting = data.gcode_state === 'RUNNING' || data.gcode_state === 'PAUSE';
+
+    // Filter: only show extruders used in the current print (weight > 0) if printing and slicer data exists
+    const hasSlicerWeights = slicer.weights.length > 0;
+    const visibleExtruders = (isPrinting && hasSlicerWeights)
+      ? extruders.filter(function(ext) {
+        var w = slicer.weights[ext.index];
+        return w !== undefined && w > 0;
+      })
+      : extruders;
+
+    // Fall back to all extruders if filter resulted in empty set
+    const displayExtruders = visibleExtruders.length > 0 ? visibleExtruders : extruders;
+
+    // Assign fallback colors per slot
+    const fallbackColors = ['#4a9eff', '#ff6b6b', '#ffd93d', '#6bcb77', '#c084fc', '#f97316', '#38bdf8', '#fb923c'];
 
     let html = '<div class="card-title">Extruders <span class="ams-live-badge" title="Live data via Moonraker">LIVE</span></div>';
 
-    // State bar
+    // State bar with filename and progress
     const state = data.gcode_state || 'IDLE';
-    const stateLabel = { RUNNING: 'Printing', PAUSE: 'Paused', IDLE: 'Idle', FINISH: 'Done', FAILED: 'Error' }[state] || state;
     const progress = data.mc_percent || 0;
     const filename = data.subtask_name || '';
 
-    if (state === 'RUNNING' || state === 'PAUSE') {
+    if (isPrinting) {
       html += `<div class="fr-active-bar">
         <span class="fr-active-name">${_esc(filename)}</span>
         <span class="fr-active-slot">${progress}%</span>
       </div>`;
     }
 
+    // Time + filament usage stats bar (only during print)
+    if (isPrinting) {
+      html += '<div class="fr-klipper-stats">';
+
+      // Estimated vs actual time
+      var estTime = data._slicer_estimated_time || 0;
+      var actualTime = data.print_duration_seconds || 0;
+      if (estTime > 0) {
+        html += `<div class="fr-klipper-stat">
+          <span class="fr-klipper-stat-icon">&#9201;</span>
+          <span class="fr-klipper-stat-label">Elapsed</span>
+          <span class="fr-klipper-stat-val">${_fmtTime(actualTime)} / ${_fmtTime(estTime)}</span>
+        </div>`;
+      }
+
+      // Live filament used
+      if (data.filament_used_mm && data.filament_used_mm > 0) {
+        var usedM = (data.filament_used_mm / 1000).toFixed(2);
+        html += `<div class="fr-klipper-stat">
+          <span class="fr-klipper-stat-icon">&#128207;</span>
+          <span class="fr-klipper-stat-label">Filament</span>
+          <span class="fr-klipper-stat-val">${usedM}m</span>
+        </div>`;
+      }
+
+      // Object height / layer info
+      if (data._object_height) {
+        var layerInfo = data._object_height + 'mm';
+        if (data._layer_height) layerInfo += ' (layer ' + data._layer_height + 'mm)';
+        html += `<div class="fr-klipper-stat">
+          <span class="fr-klipper-stat-icon">&#9650;</span>
+          <span class="fr-klipper-stat-label">Height</span>
+          <span class="fr-klipper-stat-val">${layerInfo}</span>
+        </div>`;
+      }
+
+      html += '</div>';
+    }
+
     // Extruder grid
     html += '<div class="fr-spools-grid">';
-    for (const ext of extruders) {
-      const color = slotColors[ext.index % slotColors.length];
+    for (const ext of displayExtruders) {
+      // Resolve slicer data per slot
+      var slicerColor = slicer.colors[ext.index] || '';
+      var filColor = (slicerColor && slicerColor !== '' && slicerColor.startsWith('#'))
+        ? slicerColor
+        : fallbackColors[ext.index % fallbackColors.length];
+      var filName = slicer.names[ext.index] || '';
+      var filType = slicer.types[ext.index] || '';
+      var filWeight = (slicer.weights[ext.index] !== undefined && slicer.weights[ext.index] > 0)
+        ? slicer.weights[ext.index]
+        : 0;
+
       const isHeating = ext.target > 0;
       const tempColor = ext.temp > 50 ? (ext.temp > 180 ? 'var(--accent-red)' : 'var(--accent-orange)') : 'var(--text-muted)';
-      const activeCls = ext.active ? ' fr-spool-active' : '';
+      const isActive = ext.active;
+      const isParked = !isActive;
+      const activeCls = isActive ? ' fr-spool-active' : ' fr-klipper-parked';
 
-      // Simple nozzle visual
+      // Temperature ring progress
       const pct = isHeating && ext.target > 0 ? Math.min(100, Math.round(ext.temp / ext.target * 100)) : 0;
+
       html += `<div class="fr-spool-item${activeCls}">`;
       html += `<div class="fr-spool-ring">`;
       html += `<svg viewBox="0 0 100 100" width="80" height="80">
         <circle cx="50" cy="50" r="38" fill="none" stroke="var(--border-color)" stroke-width="6"/>
-        <circle cx="50" cy="50" r="38" fill="none" stroke="${color}" stroke-width="6"
+        <circle cx="50" cy="50" r="38" fill="none" stroke="${filColor}" stroke-width="6"
           stroke-dasharray="${pct * 2.39} 239" stroke-dashoffset="0" stroke-linecap="round"
           transform="rotate(-90 50 50)" opacity="${isHeating ? 1 : 0.3}"/>
+        <circle cx="50" cy="50" r="8" fill="${filColor}" opacity="${isParked ? 0.4 : 0.9}"/>
         <text x="50" y="46" text-anchor="middle" fill="${tempColor}" font-size="14" font-weight="600">${ext.temp}°</text>
         <text x="50" y="62" text-anchor="middle" fill="var(--text-muted)" font-size="10">${isHeating ? ext.target + '°' : 'OFF'}</text>
       </svg>`;
-      html += `</div>`;
+      html += `</div>`; // end fr-spool-ring
+
+      // Meta info below ring
       html += `<div class="fr-spool-meta">`;
-      html += `<span class="fr-spool-brand">T${ext.index}${ext.active ? ' ●' : ''}</span>`;
-      html += `<span class="fr-spool-slot">${isHeating ? 'Heating' : 'Standby'}</span>`;
-      html += `</div></div>`;
+      // Extruder label + active indicator
+      html += `<span class="fr-spool-brand">T${ext.index}${isActive ? ' <span class="fr-klipper-active-dot">&#9679;</span>' : ''}</span>`;
+
+      // Filament name (cleaned brand)
+      if (filName) {
+        html += `<span class="fr-spool-slot" title="${_esc(filName)}">${_esc(filName)}</span>`;
+      }
+
+      // Filament type badge
+      if (filType) {
+        html += `<span class="fr-klipper-type-badge">${_esc(filType)}</span>`;
+      }
+
+      // Weight per slot
+      if (filWeight > 0) {
+        html += `<span class="fr-spool-weight-row">${filWeight.toFixed(1)}g</span>`;
+      }
+
+      // Status label
+      var statusLabel = isActive ? 'Active' : 'Parked';
+      if (isHeating && !isActive) statusLabel = 'Standby';
+      html += `<span class="fr-klipper-status fr-klipper-status-${isActive ? 'active' : 'parked'}">${statusLabel}</span>`;
+
+      html += `</div></div>`; // end fr-spool-meta, fr-spool-item
     }
-    html += '</div>';
+    html += '</div>'; // end fr-spools-grid
 
     // Position info if available
     if (data._position) {
       const p = data._position;
-      html += `<div style="font-size:0.7rem;color:var(--text-muted);text-align:center;margin-top:6px">
-        X:${p.x} Y:${p.y} Z:${p.z}${data.spd_mag ? ' · Speed: ' + data.spd_mag + '%' : ''}${data.cooling_fan_speed ? ' · Fan: ' + data.cooling_fan_speed + '%' : ''}
+      html += `<div class="fr-klipper-position">
+        <span>X:${p.x}</span> <span>Y:${p.y}</span> <span>Z:${p.z}</span>${data.spd_mag ? ' <span>Speed: ' + data.spd_mag + '%</span>' : ''}${data.cooling_fan_speed ? ' <span>Fan: ' + data.cooling_fan_speed + '%</span>' : ''}
       </div>`;
     }
 

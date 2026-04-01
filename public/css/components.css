@@ -12725,6 +12725,93 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
 .fr-spool-low { outline: 1px solid var(--accent-orange); outline-offset: 2px; border-radius: 8px; }
 .fr-spool-critical { outline: 2px solid var(--accent-red); outline-offset: 2px; border-radius: 8px; animation: pulse-warn 2s infinite; }
 
+/* Klipper/Moonraker extruder enhancements */
+.fr-klipper-parked {
+  opacity: 0.5;
+  filter: grayscale(0.4);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+.fr-klipper-parked:hover {
+  opacity: 0.8;
+  filter: grayscale(0);
+}
+.fr-klipper-active-dot {
+  color: var(--accent-green, #6bcb77);
+  font-size: 0.6rem;
+  vertical-align: middle;
+  animation: pulse-active 1.5s infinite;
+}
+@keyframes pulse-active {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+.fr-klipper-type-badge {
+  display: inline-block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 3px;
+  padding: 0 4px;
+  line-height: 1.4;
+  letter-spacing: 0.03em;
+}
+.fr-klipper-status {
+  font-size: 0.6rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.fr-klipper-status-active {
+  color: var(--accent-green, #6bcb77);
+}
+.fr-klipper-status-parked {
+  color: var(--text-muted);
+}
+.fr-klipper-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 6px 8px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  margin-bottom: 4px;
+}
+.fr-klipper-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+.fr-klipper-stat-icon {
+  font-size: 0.75rem;
+  opacity: 0.7;
+}
+.fr-klipper-stat-label {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.fr-klipper-stat-val {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.fr-klipper-position {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-top: 6px;
+  font-family: var(--font-mono, monospace);
+}
+.fr-klipper-position span {
+  background: rgba(255,255,255,0.04);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
 /* Spool detail popup */
 .fr-detail-popup {
   position: fixed;
