@@ -227,6 +227,28 @@ export class MoonrakerClient {
 
   // ---- State mapping (Klipper → internal format) ----
 
+  async _fetchSlicerMetadata(filename) {
+    try {
+      const metaRes = await this._apiGet(`/server/files/metadata?filename=${encodeURIComponent(filename)}`);
+      if (!metaRes?.result) return;
+      const meta = metaRes.result;
+      if (meta.estimated_time) this.state._slicer_estimated_time = meta.estimated_time;
+      if (meta.object_height) this.state._object_height = meta.object_height;
+      if (meta.layer_height) this.state._layer_height = meta.layer_height;
+      if (meta.first_layer_height) this.state._first_layer_height = meta.first_layer_height;
+      if (meta.filament_type) this.state._slicer_filament_type = meta.filament_type;
+      if (meta.filament_colour) this.state._slicer_filament_colours = meta.filament_colour;
+      if (meta.filament_name) this.state._slicer_filament_names = meta.filament_name;
+      if (meta.filament_weight) this.state._slicer_filament_weights = meta.filament_weight;
+      if (meta.filament_weight_total) this.state._slicer_filament_total_g = meta.filament_weight_total;
+      if (meta.slicer) this.state._slicer = meta.slicer;
+      if (meta.slicer_version) this.state._slicer_version = meta.slicer_version;
+      const thumb = meta.thumbnails?.find(t => t.width >= 200)?.relative_path;
+      if (thumb) this.state._thumbnail_path = thumb;
+      log.info(`Slicer metadata hentet for ${filename}`);
+    } catch { /* not critical */ }
+  }
+
   _mergeKlipperState(status) {
     const ps = status.print_stats || {};
     const ds = status.display_status || {};
@@ -242,7 +264,21 @@ export class MoonrakerClient {
 
     // Print state
     if (ps.state !== undefined) {
-      this.state.gcode_state = STATE_MAP[ps.state] || 'IDLE';
+      const newState = STATE_MAP[ps.state] || 'IDLE';
+      // Fetch slicer metadata when print starts (state changes to RUNNING)
+      if (newState === 'RUNNING' && this.state.gcode_state !== 'RUNNING' && ps.filename) {
+        this._fetchSlicerMetadata(ps.filename);
+      }
+      // Clear slicer data when print finishes/cancels
+      if (newState === 'IDLE' && this.state.gcode_state === 'RUNNING') {
+        this.state._slicer_estimated_time = null;
+        this.state._thumbnail_path = null;
+        this.state._slicer_filament_weights = null;
+        this.state._slicer_filament_colours = null;
+        this.state._slicer_filament_names = null;
+        this.state._slicer_filament_type = null;
+      }
+      this.state.gcode_state = newState;
     }
 
     // Progress

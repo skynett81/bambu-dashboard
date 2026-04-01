@@ -90,6 +90,9 @@
     if (!isActive || !subtask) {
       canvas.style.display = 'none';
       if (mwContainer) mwContainer.style.display = 'none';
+      // Remove thumbnail fallback when idle
+      const thumbFallback = canvas.parentElement?.querySelector('.moonraker-thumb-fallback');
+      if (thumbFallback) thumbFallback.remove();
       _currentSubtask = '';
       _usingMwImage = false;
       if (_viewer) { _viewer.destroy(); _viewer = null; }
@@ -277,6 +280,26 @@
   }
 
   const _MODEL_NOT_FOUND = Symbol('not_found');
+
+  // Reset preview when switching printers
+  window.resetPrintPreview = function() {
+    _currentSubtask = '';
+    _cachedModel = null;
+    _lastModelFetch = 0;
+    _cachedTasks = null;
+    _lastTasksFetch = 0;
+    _cachedModelLink = null;
+    _lastModelLinkFetch = 0;
+    _usingMwImage = false;
+    _fetching = false;
+    if (_viewer) { _viewer.destroy(); _viewer = null; }
+    const canvas = document.getElementById('print-model-canvas');
+    if (canvas) canvas.style.display = 'none';
+    const thumb = canvas?.parentElement?.querySelector('.moonraker-thumb-fallback');
+    if (thumb) thumb.remove();
+    const mw = document.getElementById('print-mw-container');
+    if (mw) mw.style.display = 'none';
+  };
 
   function _showThumbnailFallback(canvas, data) {
     canvas.style.display = 'none';
