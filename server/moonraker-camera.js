@@ -25,7 +25,7 @@ export class MoonrakerCamera {
     this._pollTimer = null;
     this._sshPass = null;
     this._snapshotPath = '/tmp/printer_detection.jpg'; // Snapmaker unisrv writes here
-    this._pollInterval = 2000; // 2s between snapshots
+    this._pollInterval = 3000; // 3s between snapshots
   }
 
   /**
@@ -110,6 +110,10 @@ export class MoonrakerCamera {
   _startSshPoll() {
     this._pollTimer = setInterval(async () => {
       try {
+        // Trigger a fresh camera capture before fetching
+        await this._triggerMqttCapture();
+        // Small delay for unisrv to write the file
+        await new Promise(r => setTimeout(r, 500));
         const frame = await this._sshSnapshot();
         if (frame && frame.length > 500) {
           this._lastFrame = frame;
@@ -117,6 +121,21 @@ export class MoonrakerCamera {
         }
       } catch { /* skip */ }
     }, this._pollInterval);
+  }
+
+  // Trigger camera capture via local MQTT on printer
+  async _triggerMqttCapture() {
+    try {
+      const args = [
+        '-p', this._sshPass || 'snapmaker',
+        'ssh', '-o', 'StrictHostKeyChecking=no', '-o', 'ConnectTimeout=2',
+        `lava@${this.ip}`,
+        "python3 -c \"import paho.mqtt.client as m;c=m.Client();c.connect('127.0.0.1',1883);c.publish('camera/request','{\\\"jsonrpc\\\":\\\"2.0\\\",\\\"method\\\":\\\"camera.detect_capture\\\",\\\"id\\\":1}');c.disconnect()\""
+      ];
+      await new Promise((resolve) => {
+        execFile('sshpass', args, { timeout: 4000 }, () => resolve());
+      });
+    } catch { /* not critical */ }
   }
 
   _sshSnapshot() {
