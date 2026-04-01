@@ -29,8 +29,9 @@
     return m + 'm';
   }
 
-  // ── Klipper/Moonraker extruder display — matches Bambu AMS layout ──
+  // ── Klipper/Moonraker extruder display — pixel-identical to Bambu AMS ──
   function _renderKlipperExtruders(container, data) {
+    // Build extruder list (T0-T3)
     const extruders = [];
     if (data.nozzle_temper !== undefined) {
       extruders.push({ index: 0, temp: Math.round(data.nozzle_temper), target: Math.round(data.nozzle_target_temper || 0), active: data._active_extruder === 'extruder' || data._active_extruder === undefined });
@@ -49,77 +50,89 @@
     const slicer = _parseSlicerData(data);
     const isPrinting = data.gcode_state === 'RUNNING' || data.gcode_state === 'PAUSE';
     const fallbackColors = ['#4a9eff', '#ff6b6b', '#ffd93d', '#6bcb77', '#c084fc', '#f97316', '#38bdf8', '#fb923c'];
-    const activeIdx = extruders.findIndex(e => e.active);
+    const activeExtIdx = extruders.findIndex(e => e.active);
 
-    // ── FILAMENT RING CARD (top) — matches P2S's spool rings ──
+    // ═══ Exactly mirror P2S filament-ring output ═══
+
     let html = '<div class="card-title">Filament <span class="ams-live-badge" title="Live via Moonraker">LIVE</span></div>';
 
-    // Active spool info bar (like P2S)
-    if (isPrinting && activeIdx >= 0) {
-      const ae = extruders[activeIdx];
-      const aColor = slicer.colors[ae.index]?.startsWith('#') ? slicer.colors[ae.index] : fallbackColors[ae.index];
-      const aName = slicer.names[ae.index] || slicer.types[ae.index] || 'T' + ae.index;
-      const aType = slicer.types[ae.index] || '';
-      html += `<div class="fr-active-bar">
-        <div class="fr-active-dot" style="background:${aColor}"></div>
-        <span class="fr-active-name">${_esc(aName)}</span>
-        ${aType ? `<span class="filament-ring-type-badge">${aType}</span>` : ''}
-        <span class="fr-active-slot">T${ae.index}</span>
-        <span class="fr-active-weight">${ae.temp}°C</span>
-      </div>`;
+    // Active spool info bar — identical to P2S fr-active-bar
+    if (activeExtIdx >= 0) {
+      const ae = extruders[activeExtIdx];
+      const c = slicer.colors[ae.index]?.startsWith('#') ? slicer.colors[ae.index] : fallbackColors[ae.index];
+      const brand = slicer.names[ae.index] || slicer.types[ae.index] || '';
+      const tType = slicer.types[ae.index] || '';
+      const colorName = getColorName(c);
+      const displayName = brand || tType;
+      const showType = brand && brand !== tType;
+
+      html += '<div class="fr-active-bar">';
+      html += `<div class="fr-active-dot" style="background:${c}"></div>`;
+      html += `<span class="fr-active-name">${displayName}${colorName ? ' — ' + colorName : ''}</span>`;
+      if (showType) html += `<span class="filament-ring-type-badge">${tType}</span>`;
+      html += `<span class="fr-active-slot">T${ae.index}</span>`;
+      if (ae.temp > 0) html += `<span class="fr-active-weight">${ae.temp}°C</span>`;
+      html += '</div>';
+
+      // Print stats bar (when printing)
+      if (isPrinting) {
+        const estTime = data._slicer_estimated_time || 0;
+        const usedM = data.filament_used_mm ? (data.filament_used_mm / 1000).toFixed(1) + 'm' : '';
+        html += '<div class="fr-print-stats">';
+        html += `<span>⏱ ${_fmtTime(data.print_duration_seconds || 0)}${estTime ? ' / ' + _fmtTime(estTime) : ''}</span>`;
+        if (usedM) html += `<span>📏 ${usedM}</span>`;
+        if (data._object_height) html += `<span>▲ ${data._object_height}mm</span>`;
+        if (data.bed_temper) html += `<span>🛏 ${data.bed_temper}°C</span>`;
+        html += '</div>';
+      }
     }
 
-    // Spool grid — ALL 4 extruders always shown (like P2S shows all AMS slots)
+    // ═══ ALL extruders as spool grid — same classes as P2S ═══
     html += '<div class="fr-spools-grid">';
     for (const ext of extruders) {
       const slicerColor = slicer.colors[ext.index] || '';
-      const filColor = slicerColor.startsWith('#') ? slicerColor : fallbackColors[ext.index % fallbackColors.length];
-      const filName = slicer.names[ext.index] || '';
-      const filType = slicer.types[ext.index] || '';
-      const filWeight = (slicer.weights[ext.index] > 0) ? slicer.weights[ext.index] : 0;
-      const isActive = ext.active;
-      const isHeating = ext.target > 0;
-      const filPct = isHeating ? Math.max(20, 80) : (filWeight > 0 ? 70 : 30);
+      const c = slicerColor.startsWith('#') ? slicerColor : fallbackColors[ext.index % fallbackColors.length];
+      const isAct = ext.active;
+      const brand = slicer.names[ext.index] || '';
+      const tType = slicer.types[ext.index] || '';
+      const colorName = getColorName(c);
       const slotLabel = 'T' + ext.index;
-      const colorName = getColorName(filColor);
-      const weightStr = filWeight > 0 ? filWeight.toFixed(0) + 'g' : '';
-      const nozzleRange = isHeating ? ext.target + '°C' : '';
+      const filWeight = (slicer.weights[ext.index] > 0) ? slicer.weights[ext.index] : 0;
+      const weightG = filWeight > 0 ? Math.round(filWeight) + 'g' : '';
+      const isHeating = ext.target > 0;
+      const nozzleRange = isHeating ? ext.temp + '–' + ext.target + '°C' : '';
 
-      html += `<div class="fr-spool-item${isActive ? ' fr-spool-active' : ''}">`;
-      html += `<div class="fr-spool-ring">${_spoolVisual(filColor, filPct, 'kl-' + ext.index)}<div class="fr-spool-overlay"><span class="fr-spool-pct">${isHeating ? ext.temp + '°' : (filWeight > 0 ? filWeight.toFixed(0) + 'g' : 'OFF')}</span></div></div>`;
+      // Use 80% fill for active/heating, 60% for loaded, 25% for empty
+      const filPct = isHeating ? 80 : (filWeight > 0 ? 60 : 25);
+
+      // Spool data for popup on click — same structure as P2S
+      const spoolData = JSON.stringify({ unitIdx: 0, trayIdx: ext.index, isExt: false, type: tType, brand: brand || tType, color: c.replace('#',''), remain: filPct, weightG: weightG ? Math.round(filWeight) : null, totalG: null, nozzle: nozzleRange, rfid: false, idName: '', colorName, slot: slotLabel }).replace(/'/g, '&#39;');
+
+      html += `<div class="fr-spool-item${isAct ? ' fr-spool-active' : ''}" style="cursor:pointer" onclick='showSpoolDetail(${spoolData})'>`;
+      // Spool ring — SAME _spoolVisual as P2S with overlay
+      html += `<div class="fr-spool-ring">${_spoolVisual(c, filPct, 'kl-' + ext.index)}<div class="fr-spool-overlay"><span class="fr-spool-pct">${isHeating ? ext.temp + '°' : (filWeight > 0 ? Math.round(filWeight) + 'g' : '--')}</span></div></div>`;
+      // Meta — SAME layout as P2S
       html += `<div class="fr-spool-meta">`;
-      html += `<span class="fr-spool-brand">${filName || filType || slotLabel}${colorName ? ' — ' + colorName : ''}</span>`;
-      html += `<span class="fr-spool-weight-row">${weightStr}${isHeating ? (weightStr ? ' · ' : '') + ext.temp + '°/' + ext.target + '°C' : ''}</span>`;
-      html += `<span class="fr-spool-slot">${slotLabel}${nozzleRange ? ' · 🔥' + nozzleRange : ''}${isActive ? ' · ● Active' : ''}</span>`;
-      if (filType) html += `<span class="fr-spool-temp">${filType}</span>`;
-      html += `</div></div>`;
-    }
-    html += '</div>';
-
-    // Stats + position bar inside filament-ring card (below spool grid)
-    if (isPrinting) {
-      const estTime = data._slicer_estimated_time || 0;
-      const actualTime = data.print_duration_seconds || 0;
-      const usedM = data.filament_used_mm ? (data.filament_used_mm / 1000).toFixed(1) : '0';
-      const heightStr = data._object_height ? data._object_height + 'mm' : '';
-      const layerStr = data._layer_height ? ' (layer ' + data._layer_height + 'mm)' : '';
-
-      html += `<div style="display:flex;gap:10px;padding:6px 0;font-size:0.72rem;color:var(--text-muted);flex-wrap:wrap;border-top:1px solid var(--border-color);margin-top:4px">`;
-      if (estTime > 0) html += `<span>⏱ ${_fmtTime(actualTime)} / ${_fmtTime(estTime)}</span>`;
-      html += `<span>📏 ${usedM}m</span>`;
-      if (heightStr) html += `<span>▲ ${heightStr}${layerStr}</span>`;
-      if (data._slicer) html += `<span>🔧 ${data._slicer}</span>`;
+      html += `<span class="fr-spool-brand">${brand || tType || slotLabel}${colorName ? ' — ' + colorName : ''}</span>`;
+      html += `<span class="fr-spool-weight-row">${weightG}${isHeating ? (weightG ? ' · ' : '') + ext.temp + '°/' + ext.target + '°C' : ''}</span>`;
+      html += `<span class="fr-spool-slot">${slotLabel}${nozzleRange ? ' · 🔥' + nozzleRange : ''}</span>`;
+      if (tType) html += `<span class="fr-spool-temp">${tType}</span>`;
       html += `</div>`;
+      // After-print estimate (like P2S shows "→ 45% (120g)")
+      if (isAct && isPrinting && data._slicer_filament_total_g) {
+        html += `<div class="fr-spool-after">📏 ${(data._slicer_filament_total_g).toFixed(0)}g total</div>`;
+      }
+      html += '</div>';
     }
+    html += '</div>'; // end fr-spools-grid
 
-    // Position bar
-    const infoItems = [];
-    if (data._position) infoItems.push(`X:${data._position.x} Y:${data._position.y} Z:${data._position.z}`);
-    if (data.spd_mag) infoItems.push(`Speed: ${data.spd_mag}%`);
-    if (data.cooling_fan_speed) infoItems.push(`Fan: ${data.cooling_fan_speed}%`);
-    if (data.bed_temper) infoItems.push(`Bed: ${data.bed_temper}°C`);
-    if (infoItems.length > 0) {
-      html += `<div style="display:flex;gap:8px;font-size:0.68rem;color:var(--text-muted);flex-wrap:wrap">${infoItems.join(' · ')}</div>`;
+    // Position bar at bottom (like P2S low-stock warnings area)
+    const posItems = [];
+    if (data._position) posItems.push(`X:${data._position.x} Y:${data._position.y} Z:${data._position.z}`);
+    if (data.spd_mag) posItems.push(`Speed: ${data.spd_mag}%`);
+    if (data.cooling_fan_speed) posItems.push(`Fan: ${data.cooling_fan_speed}%`);
+    if (posItems.length > 0 && isPrinting) {
+      html += `<div class="fleet-temps" style="border-top:1px solid var(--border-color);margin-top:4px;padding-top:6px">${posItems.map(s => `<span class="fleet-temp-item"><span class="fleet-temp-value">${s}</span></span>`).join('')}</div>`;
     }
 
     container.innerHTML = html;
