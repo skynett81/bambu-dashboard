@@ -407,17 +407,19 @@
     }
 
     const ams = data.ams;
+    const hasAms = ams && ams.ams && ams.ams.length > 0;
 
-    // Moonraker/Klipper printers: show extruder temps instead of AMS trays
-    if ((!ams || !ams.ams || !ams.ams.length) && data._extra_extruders) {
-      _renderKlipperExtruders(container, data);
+    // Moonraker/Klipper printers: detect by meta type OR by having extra extruders
+    const meta = window.printerState?.getActivePrinterMeta?.();
+    if (!hasAms && meta?.type === 'moonraker') {
+      try { _renderKlipperExtruders(container, data); } catch(e) { console.error('[filament-ring] Klipper render error:', e); }
       return;
     }
-    if ((!ams || !ams.ams || !ams.ams.length) && data.nozzle_temper !== undefined && !data.ams) {
-      _renderKlipperExtruders(container, data);
+    if (!hasAms && (data._extra_extruders || data.nozzle_temper !== undefined) && !hasAms) {
+      try { _renderKlipperExtruders(container, data); } catch(e) { console.error('[filament-ring] Klipper render error:', e); }
       return;
     }
-    if (!ams || !ams.ams || !ams.ams.length) {
+    if (!hasAms) {
       container.innerHTML = '<div class="card-title">Filament</div><div class="countdown-idle">Ingen AMS-data</div>';
       return;
     }
