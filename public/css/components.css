@@ -12638,14 +12638,15 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
 /* Spool grid — matches AMS panel visual style */
 .fr-spools-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(80px, 140px));
+  gap: 8px;
   justify-items: center;
   justify-content: center;
   flex: 1;
 }
 .fr-spool-item {
   position: relative;
+  max-width: 140px;
   text-align: center;
   width: 100%;
   transition: transform 0.2s ease;
