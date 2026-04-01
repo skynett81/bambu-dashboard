@@ -83,8 +83,10 @@
 
     // Moonraker printers: use SSH snapshot image instead of WebSocket camera
     const meta = window.printerState?.getActivePrinterMeta?.();
-    if (meta?.type === 'moonraker') {
-      _startSnapshotPlayer(container, meta.id || window.printerState?.getActivePrinterId());
+    const pid = window.printerState?.getActivePrinterId?.();
+    // Detect moonraker: meta.type, or no cameraPort assigned (moonraker skips Bambu camera)
+    if (meta?.type === 'moonraker' || (pid && !meta?.cameraPort)) {
+      _startSnapshotPlayer(container, pid || meta?.id);
       return;
     }
 
@@ -577,6 +579,8 @@
   window.switchCamera = function(port) {
     // Close fullscreen if open when switching printer
     closeFullscreen();
+    // Clean up any existing camera connection before switching
+    _cleanup();
     initCamera(port);
   };
 

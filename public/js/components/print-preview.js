@@ -275,6 +275,26 @@
     }
   }
 
+  const _MODEL_NOT_FOUND = Symbol('not_found');
+
+  function _showThumbnailFallback(canvas, data) {
+    canvas.style.display = 'none';
+    // Use proxied thumbnail (frame.jpeg endpoint) to avoid CSP/mixed content
+    const pid = window.printerState?.getActivePrinterId();
+    const thumbUrl = pid ? `/api/printers/${encodeURIComponent(pid)}/frame.jpeg` : null;
+    if (!thumbUrl) return;
+    const container = canvas.parentElement;
+    if (!container) return;
+    let thumbEl = container.querySelector('.moonraker-thumb-fallback');
+    if (!thumbEl) {
+      thumbEl = document.createElement('div');
+      thumbEl.className = 'moonraker-thumb-fallback';
+      thumbEl.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);border-radius:var(--radius)';
+      thumbEl.innerHTML = `<img src="${thumbUrl}" alt="Print preview" style="max-width:90%;max-height:90%;object-fit:contain;border-radius:8px" onerror="this.style.display='none'">`;
+      container.appendChild(thumbEl);
+    }
+  }
+
   function _loadModel(printerId, canvas, data) {
     const mwContainer = document.getElementById('print-mw-container');
     if (mwContainer) mwContainer.style.display = 'none';
@@ -282,9 +302,14 @@
 
     const now = Date.now();
 
-    // Use cached model if fetched recently
-    if (_cachedModel && (now - _lastModelFetch) < MODEL_FETCH_INTERVAL) {
-      _applyModel(_cachedModel, canvas, data);
+    // Use cached result if fetched recently (including "not found")
+    if (_lastModelFetch && (now - _lastModelFetch) < MODEL_FETCH_INTERVAL) {
+      if (_cachedModel && _cachedModel !== _MODEL_NOT_FOUND) {
+        _applyModel(_cachedModel, canvas, data);
+      } else {
+        // Cached "not found" — show thumbnail fallback without re-fetching
+        _showThumbnailFallback(canvas, data);
+      }
       _fetching = false;
       updateModelLoadingState(false);
       return;
@@ -301,22 +326,10 @@
         _applyModel(model, canvas, data);
       })
       .catch(() => {
-        // No 3D model available — show slicer thumbnail if available (Moonraker)
-        const thumbUrl = data._thumbnail_url;
-        if (thumbUrl) {
-          canvas.style.display = 'none';
-          const container = canvas.parentElement;
-          let thumbEl = container?.querySelector('.moonraker-thumb-fallback');
-          if (!thumbEl && container) {
-            thumbEl = document.createElement('div');
-            thumbEl.className = 'moonraker-thumb-fallback';
-            thumbEl.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);border-radius:var(--radius)';
-            thumbEl.innerHTML = `<img src="${thumbUrl}" alt="Print preview" style="max-width:90%;max-height:90%;object-fit:contain;border-radius:8px">`;
-            container.appendChild(thumbEl);
-          }
-        } else {
-          canvas.style.display = 'none';
-        }
+        // Cache "not found" to prevent re-fetching every second
+        _lastModelFetch = Date.now();
+        _cachedModel = _MODEL_NOT_FOUND;
+        _showThumbnailFallback(canvas, data);
         renderModelMeta(null, null);
       })
       .finally(() => {
