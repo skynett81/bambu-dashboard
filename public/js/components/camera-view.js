@@ -58,15 +58,24 @@
   }
 
   function initCamera(port) {
-    if (!port) {
-      const meta = window.printerState.getActivePrinterMeta();
-      port = meta.cameraPort || null;
-    }
+    const meta = window.printerState?.getActivePrinterMeta?.() || {};
+    const pid = window.printerState?.getActivePrinterId?.();
+
+    if (!port) port = meta.cameraPort || null;
 
     const container = document.getElementById('camera-container');
     if (!container) return;
 
-    // No camera port configured — show placeholder, don't connect
+    // Moonraker printers: ALWAYS use snapshot, never WebSocket
+    if (meta.type === 'moonraker') {
+      if (_snapshotInterval) return; // already running
+      _cleanup();
+      currentPort = port;
+      _startSnapshotPlayer(container, pid || meta.id);
+      return;
+    }
+
+    // No camera port configured — show placeholder
     if (!port) {
       _cleanup();
       currentPort = null;
@@ -80,14 +89,6 @@
     currentPort = port;
     _streamMode = null;
     streamActive = false;
-
-    // Moonraker printers: use SSH snapshot image instead of WebSocket camera
-    const meta = window.printerState?.getActivePrinterMeta?.();
-    const pid = window.printerState?.getActivePrinterId?.();
-    if (meta?.type === 'moonraker') {
-      _startSnapshotPlayer(container, pid || meta?.id);
-      return;
-    }
 
     const wsUrl = `ws://${location.hostname}:${port}`;
 

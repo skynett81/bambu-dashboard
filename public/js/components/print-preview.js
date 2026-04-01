@@ -284,7 +284,9 @@
   // Reset preview when switching printers
   window.resetPrintPreview = function() {
     _currentSubtask = '';
-    _cachedModel = null;
+    // For Moonraker printers, pre-set NOT_FOUND to avoid 404 fetch
+    const meta = window.printerState?.getActivePrinterMeta?.();
+    _cachedModel = (meta?.type === 'moonraker') ? _MODEL_NOT_FOUND : null;
     _lastModelFetch = 0;
     _cachedTasks = null;
     _lastTasksFetch = 0;
