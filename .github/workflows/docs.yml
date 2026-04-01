@@ -40,7 +40,7 @@ jobs:
       - name: Build Docusaurus
         env:
           DOCUSAURUS_URL: https://skynett81.github.io
-          DOCUSAURUS_BASE_URL: /bambu-dashboard/
+          DOCUSAURUS_BASE_URL: /3dprintforge/
         run: npm run build
 
       - name: Upload artifact
