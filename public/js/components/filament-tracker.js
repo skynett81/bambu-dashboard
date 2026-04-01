@@ -1602,9 +1602,11 @@
     }
 
     try {
-      // Fetch all data in parallel
+      // Fetch all data in parallel — filter spools by active printer
+      const _activePid = window.printerState?.getActivePrinterId?.() || '';
+      const _spoolQuery = _activePid ? `?printer_id=${encodeURIComponent(_activePid)}` : '';
       const [spoolsRes, vendorsRes, profilesRes, locationsRes, dryingActiveRes, dryingPresetsRes, dryingStatusRes, tagsRes, alertsRes, settingsRes] = await Promise.all([
-        fetch('/api/inventory/spools'),
+        fetch(`/api/inventory/spools${_spoolQuery}`),
         fetch('/api/inventory/vendors'),
         fetch('/api/inventory/filaments'),
         fetch('/api/inventory/locations'),
