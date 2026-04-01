@@ -139,19 +139,16 @@ export async function syncMoonrakerHistory(printerId, printerIp, apiKey, port = 
           notes: [slicerInfo, ...colorDetails].filter(Boolean).join(' | '),
         });
 
-        // Save thumbnail to screenshots if available
+        // Save thumbnail to history-thumbnails directory
         if (thumbnailData && histId) {
           try {
-            const { addScreenshot } = await import('./database.js');
-            addScreenshot({
-              print_id: histId,
-              printer_id: printerId,
-              type: 'thumbnail',
-              data: thumbnailData,
-              mime_type: 'image/png',
-              filename: `${modelName.replace(/[^a-zA-Z0-9]/g, '_')}_thumb.png`,
-            });
-          } catch { /* screenshot table may not support this format */ }
+            const { writeFileSync, mkdirSync } = await import('node:fs');
+            const { join } = await import('node:path');
+            const thumbDir = join(process.cwd(), 'data', 'history-thumbnails');
+            try { mkdirSync(thumbDir, { recursive: true }); } catch {}
+            writeFileSync(join(thumbDir, `${histId}.png`), thumbnailData);
+            log.info(`Thumbnail saved for print #${histId}`);
+          } catch { /* not critical */ }
         }
         imported++;
       } catch (e) {
