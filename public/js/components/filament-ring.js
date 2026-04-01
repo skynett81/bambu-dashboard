@@ -75,10 +75,12 @@
     // Active spool info bar — identical to P2S fr-active-bar
     if (activeExtIdx >= 0) {
       const ae = extruders[activeExtIdx];
-      const c = slicer.colors[ae.index]?.startsWith('#') ? slicer.colors[ae.index] : fallbackColors[ae.index];
-      const brand = slicer.names[ae.index] || slicer.types[ae.index] || '';
-      const tType = slicer.types[ae.index] || '';
-      const colorName = getColorName(c);
+      const _aLinked = window.getLinkedSpool?.(printerId, 0, ae.index);
+      const _aInvColor = _aLinked?.color_hex ? '#' + _aLinked.color_hex : '';
+      const c = _aInvColor || (slicer.colors[ae.index]?.startsWith('#') ? slicer.colors[ae.index] : fallbackColors[ae.index]);
+      const brand = _aLinked?.profile_name || slicer.names[ae.index] || slicer.types[ae.index] || '';
+      const tType = _aLinked?.material || slicer.types[ae.index] || '';
+      const colorName = _aLinked?.color_name || getColorName(c);
       const displayName = brand || tType;
       const showType = brand && brand !== tType;
 
@@ -107,14 +109,16 @@
     const printerId = window.printerState?.getActivePrinterId?.();
     html += '<div class="fr-spools-grid">';
     for (const ext of extruders) {
-      const slicerColor = slicer.colors[ext.index] || '';
-      const c = slicerColor.startsWith('#') ? slicerColor : fallbackColors[ext.index % fallbackColors.length];
       const isAct = ext.active;
       const isHeating = ext.target > 0;
       const slotLabel = 'T' + ext.index;
 
       // Use linked spool from inventory (same as P2S uses getLinkedSpool)
       const linkedSpool = window.getLinkedSpool?.(printerId, 0, ext.index);
+      // Color: inventory spool first (physical truth), then slicer fallback
+      const invColor = linkedSpool?.color_hex ? '#' + linkedSpool.color_hex : '';
+      const slicerColor = slicer.colors[ext.index] || '';
+      const c = invColor || (slicerColor.startsWith('#') ? slicerColor : fallbackColors[ext.index % fallbackColors.length]);
       const brand = linkedSpool?.profile_name || linkedSpool?.bambu_color_name || slicer.names[ext.index] || '';
       const tType = linkedSpool?.material || slicer.types[ext.index] || '';
       const colorName = linkedSpool?.bambu_color_name || linkedSpool?.color_name || getColorName(c);
