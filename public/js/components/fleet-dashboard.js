@@ -5,6 +5,37 @@
   let _sortMode = 'name';
   let _gridLayout = localStorage.getItem('fleet-grid-layout') || 'auto';
 
+  // Printer model images — SVG icons for known brands
+  function _printerModelImage(model, type) {
+    const m = (model || '').toLowerCase();
+    // Color by brand
+    let brandColor = 'var(--text-muted)';
+    let brandName = model || 'Printer';
+    if (m.includes('snapmaker')) { brandColor = '#00A98F'; brandName = model; }
+    else if (m.includes('voron')) { brandColor = '#E74C3C'; brandName = model; }
+    else if (m.includes('creality') || m.includes('k1')) { brandColor = '#1E88E5'; brandName = model; }
+    else if (m.includes('p1') || m.includes('p2') || m.includes('x1') || m.includes('a1') || m.includes('h2')) { brandColor = '#00AE42'; brandName = model; }
+    else if (m.includes('sovol')) { brandColor = '#FF6F00'; }
+    else if (m.includes('qidi')) { brandColor = '#7B1FA2'; }
+    else if (m.includes('ratrig')) { brandColor = '#F44336'; }
+    // Toolhead count icon
+    const isMultiHead = m.includes('u1') || m.includes('h2d') || m.includes('h2c') || m.includes('tool');
+    const headsSvg = isMultiHead
+      ? '<rect x="14" y="6" width="4" height="6" rx="1" fill="currentColor" opacity="0.6"/><rect x="22" y="6" width="4" height="6" rx="1" fill="currentColor" opacity="0.6"/><rect x="30" y="6" width="4" height="6" rx="1" fill="currentColor" opacity="0.6"/><rect x="38" y="6" width="4" height="6" rx="1" fill="currentColor" opacity="0.6"/>'
+      : '<rect x="24" y="6" width="8" height="8" rx="2" fill="currentColor" opacity="0.6"/>';
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:12px 0">
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none" style="color:${brandColor}">
+        <rect x="4" y="16" width="48" height="36" rx="4" stroke="currentColor" stroke-width="2" fill="currentColor" opacity="0.08"/>
+        <rect x="8" y="20" width="40" height="28" rx="2" fill="currentColor" opacity="0.12"/>
+        ${headsSvg}
+        <line x1="8" y1="38" x2="48" y2="38" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+        <rect x="12" y="40" width="32" height="4" rx="1" fill="currentColor" opacity="0.15"/>
+      </svg>
+      <span style="font-size:0.7rem;font-weight:600;color:${brandColor};text-align:center">${brandName}</span>
+      ${type === 'moonraker' ? '<span style="font-size:0.55rem;color:var(--text-muted)">Moonraker</span>' : ''}
+    </div>`;
+  }
+
   window._setFleetLayout = function(layout) {
     _gridLayout = layout;
     localStorage.setItem('fleet-grid-layout', layout);
@@ -265,12 +296,15 @@
       <span class="fleet-badge ${badgeCls}">${badgeLabel}</span>
     </div>`;
 
-    // Camera area
+    // Camera area — try live snapshot, fall back to printer model image
     const cameraPort = meta.cameraPort;
+    const snapshotUrl = `/api/printers/${encodeURIComponent(id)}/frame.jpeg?t=${Date.now()}`;
+    const modelImg = _printerModelImage(meta.model || '', meta.type || '');
     if (cameraPort && !meta.remote) {
-      html += `<div class="fleet-camera" id="fleet-cam-${id}"><img id="fleet-cam-img-${id}" src="" alt="" style="display:none"><div class="fleet-camera-placeholder" id="fleet-cam-ph-${id}">${t('fleet.camera')}</div></div>`;
+      html += `<div class="fleet-camera" id="fleet-cam-${id}"><img id="fleet-cam-img-${id}" src="" alt="" style="display:none"><div class="fleet-camera-placeholder" id="fleet-cam-ph-${id}">${modelImg}</div></div>`;
     } else {
-      html += `<div class="fleet-camera"><div class="fleet-camera-placeholder">${meta.remote ? t('fleet.remote_camera') : t('fleet.no_camera')}</div></div>`;
+      // Try snapshot API for Moonraker printers (SSH snapshot)
+      html += `<div class="fleet-camera"><img src="${snapshotUrl}" alt="${meta.model || ''}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="fleet-camera-placeholder" style="display:none;width:100%;height:100%;align-items:center;justify-content:center">${modelImg}</div></div>`;
     }
 
     // Progress (if printing)
