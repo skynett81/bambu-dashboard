@@ -132,77 +132,49 @@
       html += '</div>';
     }
 
-    // Extruder grid
+    // Extruder grid — uses same spool SVG visual as Bambu AMS for consistent look
     html += '<div class="fr-spools-grid">';
     for (const ext of displayExtruders) {
-      // Resolve slicer data per slot
       var slicerColor = slicer.colors[ext.index] || '';
-      var filColor = (slicerColor && slicerColor !== '' && slicerColor.startsWith('#'))
-        ? slicerColor
-        : fallbackColors[ext.index % fallbackColors.length];
+      var filColor = (slicerColor && slicerColor.startsWith('#'))
+        ? slicerColor : fallbackColors[ext.index % fallbackColors.length];
       var filName = slicer.names[ext.index] || '';
       var filType = slicer.types[ext.index] || '';
-      var filWeight = (slicer.weights[ext.index] !== undefined && slicer.weights[ext.index] > 0)
-        ? slicer.weights[ext.index]
-        : 0;
+      var filWeight = (slicer.weights[ext.index] > 0) ? slicer.weights[ext.index] : 0;
 
-      const isHeating = ext.target > 0;
-      const tempColor = ext.temp > 50 ? (ext.temp > 180 ? 'var(--accent-red)' : 'var(--accent-orange)') : 'var(--text-muted)';
       const isActive = ext.active;
-      const isParked = !isActive;
-      const activeCls = isActive ? ' fr-spool-active' : ' fr-klipper-parked';
+      const isHeating = ext.target > 0;
+      const activeCls = isActive ? ' fr-spool-active' : '';
+      const warnCls = ext.temp > 200 ? '' : '';
 
-      // Temperature ring progress
-      const pct = isHeating && ext.target > 0 ? Math.min(100, Math.round(ext.temp / ext.target * 100)) : 0;
+      // Use filament color for spool visual — percentage based on weight used if available
+      const filPct = filWeight > 0 ? Math.max(10, 80) : (isHeating ? 60 : 30);
+      const tempLabel = ext.temp > 0 ? ext.temp + '°C' : '';
+      const slotLabel = 'T' + ext.index;
 
-      html += `<div class="fr-spool-item${activeCls}">`;
-      html += `<div class="fr-spool-ring">`;
-      html += `<svg viewBox="0 0 100 100" width="80" height="80">
-        <circle cx="50" cy="50" r="38" fill="none" stroke="var(--border-color)" stroke-width="6"/>
-        <circle cx="50" cy="50" r="38" fill="none" stroke="${filColor}" stroke-width="6"
-          stroke-dasharray="${pct * 2.39} 239" stroke-dashoffset="0" stroke-linecap="round"
-          transform="rotate(-90 50 50)" opacity="${isHeating ? 1 : 0.3}"/>
-        <circle cx="50" cy="50" r="8" fill="${filColor}" opacity="${isParked ? 0.4 : 0.9}"/>
-        <text x="50" y="46" text-anchor="middle" fill="${tempColor}" font-size="14" font-weight="600">${ext.temp}°</text>
-        <text x="50" y="62" text-anchor="middle" fill="var(--text-muted)" font-size="10">${isHeating ? ext.target + '°' : 'OFF'}</text>
-      </svg>`;
-      html += `</div>`; // end fr-spool-ring
+      html += `<div class="fr-spool-item${activeCls}${warnCls}" style="cursor:default">`;
+      // Reuse the same spool SVG as Bambu — with filament color and percentage
+      html += `<div class="fr-spool-ring">${_spoolVisual(filColor, filPct, 'kl-' + ext.index)}<div class="fr-spool-overlay"><span class="fr-spool-pct">${tempLabel}</span></div></div>`;
 
-      // Meta info below ring
+      // Meta: same layout as Bambu AMS spools
       html += `<div class="fr-spool-meta">`;
-      // Extruder label + active indicator
-      html += `<span class="fr-spool-brand">T${ext.index}${isActive ? ' <span class="fr-klipper-active-dot">&#9679;</span>' : ''}</span>`;
-
-      // Filament name (cleaned brand)
-      if (filName) {
-        html += `<span class="fr-spool-slot" title="${_esc(filName)}">${_esc(filName)}</span>`;
-      }
-
-      // Filament type badge
-      if (filType) {
-        html += `<span class="fr-klipper-type-badge">${_esc(filType)}</span>`;
-      }
-
-      // Weight per slot
+      html += `<span class="fr-spool-brand">${filName ? _esc(filName) : filType || slotLabel}</span>`;
       if (filWeight > 0) {
-        html += `<span class="fr-spool-weight-row">${filWeight.toFixed(1)}g</span>`;
+        html += `<span class="fr-spool-weight-row">${filWeight.toFixed(0)}g</span>`;
       }
-
-      // Status label
-      var statusLabel = isActive ? 'Active' : 'Parked';
-      if (isHeating && !isActive) statusLabel = 'Standby';
-      html += `<span class="fr-klipper-status fr-klipper-status-${isActive ? 'active' : 'parked'}">${statusLabel}</span>`;
-
-      html += `</div></div>`; // end fr-spool-meta, fr-spool-item
+      html += `<span class="fr-spool-slot">${slotLabel}${isActive ? ' · Active' : ' · Parked'}${isHeating ? ' · 🔥' + ext.target + '°C' : ''}</span>`;
+      if (filType) html += `<span class="fr-spool-temp">${filType}</span>`;
+      html += `</div></div>`;
     }
-    html += '</div>'; // end fr-spools-grid
+    html += '</div>';
 
-    // Position info if available
-    if (data._position) {
-      const p = data._position;
-      html += `<div class="fr-klipper-position">
-        <span>X:${p.x}</span> <span>Y:${p.y}</span> <span>Z:${p.z}</span>${data.spd_mag ? ' <span>Speed: ' + data.spd_mag + '%</span>' : ''}${data.cooling_fan_speed ? ' <span>Fan: ' + data.cooling_fan_speed + '%</span>' : ''}
-      </div>`;
+    // Position + speed bar (compact, like Bambu's AMS info)
+    const infoItems = [];
+    if (data._position) infoItems.push(`X:${data._position.x} Y:${data._position.y} Z:${data._position.z}`);
+    if (data.spd_mag) infoItems.push(`Speed: ${data.spd_mag}%`);
+    if (data.cooling_fan_speed) infoItems.push(`Fan: ${data.cooling_fan_speed}%`);
+    if (infoItems.length > 0) {
+      html += `<div class="fr-klipper-position">${infoItems.join(' · ')}</div>`;
     }
 
     container.innerHTML = html;
