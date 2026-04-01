@@ -197,28 +197,9 @@ export class MoonrakerClient {
         }
       }
 
-      // Fetch file metadata for slicer estimates and thumbnail
+      // Fetch slicer metadata with physical slot color override
       if (this.state.subtask_name && this.state.gcode_state === 'RUNNING') {
-        try {
-          const metaRes = await this._apiGet(`/server/files/metadata?filename=${encodeURIComponent(this.state.subtask_name)}`);
-          if (metaRes?.result) {
-            const meta = metaRes.result;
-            if (meta.estimated_time) this.state._slicer_estimated_time = meta.estimated_time;
-            if (meta.object_height) this.state._object_height = meta.object_height;
-            if (meta.layer_height) this.state._layer_height = meta.layer_height;
-            if (meta.first_layer_height) this.state._first_layer_height = meta.first_layer_height;
-            if (meta.filament_type) this.state._slicer_filament_type = meta.filament_type;
-            if (meta.filament_colour) this.state._slicer_filament_colours = meta.filament_colour;
-            if (meta.filament_name) this.state._slicer_filament_names = meta.filament_name;
-            if (meta.filament_weight) this.state._slicer_filament_weights = meta.filament_weight;
-            if (meta.filament_weight_total) this.state._slicer_filament_total_g = meta.filament_weight_total;
-            if (meta.slicer) this.state._slicer = meta.slicer;
-            if (meta.slicer_version) this.state._slicer_version = meta.slicer_version;
-            // Thumbnail: store relative path — proxied through /api/printers/:id/print-thumb
-            const thumb = meta.thumbnails?.find(t => t.width >= 200)?.relative_path;
-            if (thumb) this.state._thumbnail_path = thumb;
-          }
-        } catch { /* metadata not critical */ }
+        await this._fetchSlicerMetadata(this.state.subtask_name);
       }
 
       this.hub.broadcast('status', { print: this.state });
