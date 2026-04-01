@@ -58,9 +58,10 @@
   }
 
   // API
-  async function fetchPredictions() { try { const r = await fetch('/api/wear/predictions'); return r.ok ? r.json() : []; } catch { return []; } }
-  async function fetchAlerts() { try { const r = await fetch('/api/wear/alerts'); return r.ok ? r.json() : []; } catch { return []; } }
-  async function fetchCosts() { try { const r = await fetch('/api/wear/costs'); return r.ok ? r.json() : []; } catch { return []; } }
+  function _wpPid() { return window.printerState?.getActivePrinterId?.() || ''; }
+  async function fetchPredictions() { try { const r = await fetch(`/api/wear/predictions?printer_id=${_wpPid()}`); return r.ok ? r.json() : []; } catch { return []; } }
+  async function fetchAlerts() { try { const r = await fetch(`/api/wear/alerts?printer_id=${_wpPid()}`); return r.ok ? r.json() : []; } catch { return []; } }
+  async function fetchCosts() { try { const r = await fetch(`/api/wear/costs?printer_id=${_wpPid()}`); return r.ok ? r.json() : []; } catch { return []; } }
   async function recalculate() { await fetch('/api/wear/predictions/recalculate', { method: 'POST' }); }
   async function acknowledgeAlert(id) { await fetch(`/api/wear/alerts/${id}/acknowledge`, { method: 'POST' }); }
 

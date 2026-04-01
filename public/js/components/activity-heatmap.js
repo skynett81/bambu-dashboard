@@ -33,9 +33,11 @@
     el.insertAdjacentHTML('beforeend', '<div class="matrec-empty"><div class="matrec-spinner"></div></div>');
 
     try {
+      const _ahPid = window.printerState?.getActivePrinterId?.() || '';
+      const _ahQ = _ahPid ? `&printer_id=${_ahPid}` : '';
       const [daily, streakDays] = await Promise.all([
-        fetch('/api/activity/daily?days=365').then(r => r.json()),
-        fetch('/api/activity/streaks').then(r => r.json())
+        fetch(`/api/activity/daily?days=365${_ahQ}`).then(r => r.json()),
+        fetch(`/api/activity/streaks?${_ahQ.substring(1)}`).then(r => r.json())
       ]);
 
       const dayMap = {};

@@ -51,7 +51,7 @@
     'ps-filament-breakdown': 'full', 'ps-nozzle-models': 'full', 'ps-print-timeline': 'full'
   };
 
-  let _printer = null;
+  let _printer = window.printerState?.getActivePrinterId?.() || null;
   let _activeTab = 'overview';
   let _data = null;
   let _xcam = null;
