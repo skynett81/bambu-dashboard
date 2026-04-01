@@ -655,6 +655,9 @@
     const isMwActive = mwContainer && mwContainer.style.display !== 'none' && mwImage && mwImage.src && mwImage.src !== location.href;
     const is3dActive = smallCanvas && smallCanvas.style.display !== 'none';
 
+    // Check for Moonraker thumbnail fallback
+    const hasMoonThumb = smallCanvas?.parentElement?.querySelector('.moonraker-thumb-fallback');
+
     if (isMwActive) {
       // Mirror the MakerWorld image view with progress reveal
       _fsMwMode = true;
@@ -663,6 +666,13 @@
       // Mirror the 3D model view
       _fsMwMode = false;
       _show3dFullscreen(container, printerId, pd);
+    } else if (hasMoonThumb && printerId) {
+      // Moonraker printer: show slicer thumbnail in fullscreen
+      _fsMwMode = false;
+      const thumbUrl = `/api/printers/${encodeURIComponent(printerId)}/print-thumb`;
+      container.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg-primary)">
+        <img src="${thumbUrl}" alt="Print preview" style="max-width:90%;max-height:80%;object-fit:contain;border-radius:12px" onerror="this.src='/api/printers/${encodeURIComponent(printerId)}/frame.jpeg'">
+      </div>`;
     } else {
       container.innerHTML = `<div class="camera-placeholder"><span>${t('model.not_available')}</span></div>`;
       return;
