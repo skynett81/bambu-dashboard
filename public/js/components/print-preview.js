@@ -307,21 +307,76 @@
     canvas.style.display = 'none';
     const pid = window.printerState?.getActivePrinterId();
     if (!pid) return;
-    // Use slicer thumbnail proxy (not camera frame!)
     const thumbUrl = `/api/printers/${encodeURIComponent(pid)}/print-thumb`;
     const container = canvas.parentElement;
     if (!container) return;
+
     let thumbEl = container.querySelector('.moonraker-thumb-fallback');
+    const isPrinting = data.gcode_state === 'RUNNING' || data.gcode_state === 'PAUSE';
+    const pct = data.mc_percent || 0;
+    const layer = data.layer_num || 0;
+    const totalLayers = data.total_layer_num || 0;
+    const estTime = data._slicer_estimated_time || 0;
+    const elapsed = data.print_duration_seconds || 0;
+    const remaining = data.mc_remaining_time || 0;
+    const filUsed = data.filament_used_mm ? (data.filament_used_mm / 1000).toFixed(1) : '0';
+    const filTotal = data._slicer_filament_total_g ? data._slicer_filament_total_g.toFixed(0) : '';
+    const activeExt = data._active_extruder ? data._active_extruder.replace('extruder', 'T') : '';
+    const pos = data._position;
+
+    // Create once, update every tick
     if (!thumbEl) {
       thumbEl = document.createElement('div');
       thumbEl.className = 'moonraker-thumb-fallback';
-      thumbEl.style.cssText = 'width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg-tertiary);border-radius:var(--radius);gap:8px';
-      const slicerInfo = data._slicer ? `<div style="font-size:0.7rem;color:var(--text-muted)">${data._slicer} ${data._slicer_version || ''}</div>` : '';
-      const heightInfo = data._object_height ? `<div style="font-size:0.7rem;color:var(--text-muted)">H: ${data._object_height}mm · Layer: ${data._layer_height || '?'}mm</div>` : '';
-      const filamentInfo = data._slicer_filament_total_g ? `<div style="font-size:0.7rem;color:var(--text-muted)">Filament: ${data._slicer_filament_total_g.toFixed(1)}g</div>` : '';
-      thumbEl.innerHTML = `<img src="${thumbUrl}" alt="Print preview" style="max-width:80%;max-height:70%;object-fit:contain;border-radius:8px" onerror="this.src='/api/printers/${encodeURIComponent(pid)}/frame.jpeg'">${slicerInfo}${heightInfo}${filamentInfo}`;
+      thumbEl.style.cssText = 'width:100%;height:100%;display:flex;background:var(--bg-tertiary);border-radius:var(--radius);overflow:hidden';
       container.appendChild(thumbEl);
     }
+
+    // Build rich print info — updates live
+    let html = '';
+    // Left: thumbnail
+    html += `<div style="flex:0 0 45%;display:flex;align-items:center;justify-content:center;padding:8px;background:rgba(0,0,0,0.15)">
+      <img src="${thumbUrl}" alt="" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:6px" onerror="this.src='/api/printers/${encodeURIComponent(pid)}/frame.jpeg'">
+    </div>`;
+
+    // Right: print details
+    html += `<div style="flex:1;padding:10px 12px;display:flex;flex-direction:column;gap:4px;font-size:0.72rem;overflow:hidden">`;
+
+    if (isPrinting) {
+      // Progress bar
+      html += `<div style="font-weight:700;font-size:0.85rem;color:var(--text-primary)">${pct}%</div>`;
+      html += `<div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden"><div style="height:100%;width:${pct}%;background:var(--accent-green);border-radius:2px;transition:width 1s"></div></div>`;
+
+      // Layer info
+      if (totalLayers > 0) {
+        html += `<div style="color:var(--text-muted)">Layer ${layer} / ${totalLayers}</div>`;
+      }
+
+      // Time
+      const fmtT = (s) => { if (!s || s <= 0) return '--'; const h = Math.floor(s/3600); const m = Math.floor((s%3600)/60); return h > 0 ? h+'h '+m+'m' : m+'m'; };
+      html += `<div style="color:var(--text-muted)">⏱ ${fmtT(elapsed)} elapsed${estTime ? ' / ' + fmtT(estTime) + ' est' : ''}</div>`;
+      if (remaining > 0) html += `<div style="color:var(--text-muted)">⏳ ${fmtT(remaining * 60)} remaining</div>`;
+
+      // Filament
+      html += `<div style="color:var(--text-muted)">📏 ${filUsed}m used${filTotal ? ' / ' + filTotal + 'g total' : ''}</div>`;
+
+      // Active extruder
+      if (activeExt) html += `<div style="color:var(--text-muted)">🔧 ${activeExt} active</div>`;
+
+      // Position
+      if (pos) html += `<div style="color:var(--text-muted);font-size:0.65rem">X:${pos.x} Y:${pos.y} Z:${pos.z}</div>`;
+
+      // Object info
+      if (data._object_height) html += `<div style="color:var(--text-muted);font-size:0.65rem">▲ ${data._object_height}mm${data._layer_height ? ' · layer ' + data._layer_height + 'mm' : ''}</div>`;
+    } else {
+      html += `<div style="color:var(--text-muted)">Idle</div>`;
+    }
+
+    // Slicer
+    if (data._slicer) html += `<div style="color:var(--text-muted);font-size:0.6rem;margin-top:auto">${data._slicer} ${data._slicer_version || ''}</div>`;
+
+    html += `</div>`;
+    thumbEl.innerHTML = html;
   }
 
   function _loadModel(printerId, canvas, data) {
