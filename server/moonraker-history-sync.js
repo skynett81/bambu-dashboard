@@ -96,17 +96,22 @@ export async function syncMoonrakerHistory(printerId, printerIp, apiKey, port = 
         } catch { /* skip thumbnail */ }
       }
 
-      // All filament colors as semicolon-separated hex (for multi-color display)
+      // Colors: semicolon-separated hex for multi-color display
       const allColors = filamentColors.map(c => c.replace('#', '')).join(';');
-      const allTypes = filamentTypes.join(';');
+      // Type: use unique primary type (not "PLA;PLA;PLA;PLA")
+      const uniqueTypes = [...new Set(filamentTypes)];
+      const primaryType = uniqueTypes.join(' + ') || null; // "PLA" or "PLA + PETG"
+      // Brand: from filament_name metadata
+      const filamentNames = (meta.filament_name || '').split(';').map(s => s.replace(/"/g, '').trim()).filter(Boolean);
+      const primaryBrand = filamentNames[0] || null;
 
-      // Build descriptive notes
-      const colorNames = filamentColors.map((c, i) => {
+      // Build descriptive notes with per-color details
+      const colorDetails = filamentColors.map((c, i) => {
         const w = filamentWeights[i] ? `${filamentWeights[i].toFixed(1)}g` : '';
-        return `${filamentTypes[i] || 'PLA'} #${c.replace('#','')} ${w}`.trim();
+        const name = filamentNames[i] || filamentTypes[i] || 'PLA';
+        return `T${i}: ${name} #${c.replace('#','')} ${w}`.trim();
       });
       const slicerInfo = meta.slicer ? `Slicer: ${meta.slicer} ${meta.slicer_version || ''}` : '';
-      const colorInfo = filamentTypes.length > 1 ? `Colors: ${colorNames.join(' | ')}` : '';
 
       try {
         const histId = addHistory({
@@ -117,8 +122,9 @@ export async function syncMoonrakerHistory(printerId, printerIp, apiKey, port = 
           started_at: startTime,
           finished_at: endTime,
           duration_seconds: durationSeconds,
-          filament_type: allTypes || null,
+          filament_type: primaryType,
           filament_color: allColors || null,
+          filament_brand: primaryBrand,
           filament_used_g: totalWeightG,
           color_changes: filamentTypes.length > 1 ? filamentTypes.length - 1 : 0,
           layer_count: meta.layer_count || null,
@@ -126,7 +132,7 @@ export async function syncMoonrakerHistory(printerId, printerIp, apiKey, port = 
           bed_target: meta.first_layer_bed_temp || null,
           nozzle_target: meta.first_layer_extr_temp || null,
           gcode_file: job.filename || null,
-          notes: [slicerInfo, colorInfo].filter(Boolean).join(' | '),
+          notes: [slicerInfo, ...colorDetails].filter(Boolean).join(' | '),
         });
 
         // Save thumbnail to screenshots if available

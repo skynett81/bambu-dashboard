@@ -104,7 +104,7 @@
         // Most used material from history
         const matCount = {};
         for (const h of history) {
-          const mat = h.filament_type || 'Unknown';
+          const mat = [...new Set((h.filament_type || 'Unknown').split(';').filter(Boolean))].join(' + ') || 'Unknown';
           matCount[mat] = (matCount[mat] || 0) + 1;
         }
         let topMaterial = '--';

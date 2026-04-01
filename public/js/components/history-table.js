@@ -577,14 +577,15 @@
       const byColor = {};
       const byBrand = {};
       for (const r of data) {
-        const tp = r.filament_type || 'Unknown';
+        const rawType = r.filament_type || 'Unknown';
+        const tp = [...new Set(rawType.split(';').map(s => s.trim()).filter(Boolean))].join(' + ') || 'Unknown';
         const color = r.filament_color || '';
         const brand = r.filament_brand || 'Unknown';
         if (!byType[tp]) byType[tp] = { count: 0, weight: 0, colors: new Set() };
         byType[tp].count++;
         byType[tp].weight += r.filament_used_g || 0;
-        if (color) byType[tp].colors.add(color.substring(0, 6));
-        const colorKey = color ? color.substring(0, 6) : 'none';
+        for (const c of color.split(';')) { if (c && c.length >= 6) byType[tp].colors.add(c.substring(0, 6)); }
+        const colorKey = color.includes(';') ? color.split(';')[0]?.substring(0, 6) || 'none' : (color ? color.substring(0, 6) : 'none');
         if (!byColor[colorKey]) byColor[colorKey] = { count: 0, weight: 0, type: tp };
         byColor[colorKey].count++;
         byColor[colorKey].weight += r.filament_used_g || 0;

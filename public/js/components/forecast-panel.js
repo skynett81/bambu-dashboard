@@ -149,7 +149,7 @@
       totalPrints++;
       if (p.status === 'failed') totalFailed++;
 
-      const type = p.filament_type || 'Unknown';
+      const type = [...new Set((p.filament_type || 'Unknown').split(';').filter(Boolean))].join(' + ') || 'Unknown';
       if (!byType[type]) byType[type] = { total: 0, count: 0, months: new Set(), cost: 0 };
       byType[type].total += p.filament_used_g;
       byType[type].count++;

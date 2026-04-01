@@ -4458,7 +4458,7 @@
           totalElectricity += cost.electricity_cost;
           totalDepreciation += cost.depreciation_cost;
           totalCost += cost.total_cost;
-          const mat = r.filament_type || 'Unknown';
+          const mat = [...new Set((r.filament_type || 'Unknown').split(';').filter(Boolean))].join(' + ') || 'Unknown';
           if (!byMaterial[mat]) byMaterial[mat] = { count: 0, cost: 0 };
           byMaterial[mat].count++;
           byMaterial[mat].cost += cost.total_cost;
