@@ -187,12 +187,36 @@ export class MoonrakerClient {
         this._mergeKlipperState(status.result.status);
       }
 
-      // Last print info
+      // Last print info + slicer metadata
       if (history?.result?.jobs?.[0]) {
         const job = history.result.jobs[0];
         if (!this.state.subtask_name && job.filename) {
           this.state.subtask_name = job.filename;
         }
+      }
+
+      // Fetch file metadata for slicer estimates and thumbnail
+      if (this.state.subtask_name && this.state.gcode_state === 'RUNNING') {
+        try {
+          const metaRes = await this._apiGet(`/server/files/metadata?filename=${encodeURIComponent(this.state.subtask_name)}`);
+          if (metaRes?.result) {
+            const meta = metaRes.result;
+            if (meta.estimated_time) this.state._slicer_estimated_time = meta.estimated_time;
+            if (meta.object_height) this.state._object_height = meta.object_height;
+            if (meta.layer_height) this.state._layer_height = meta.layer_height;
+            if (meta.first_layer_height) this.state._first_layer_height = meta.first_layer_height;
+            if (meta.filament_type) this.state._slicer_filament_type = meta.filament_type;
+            if (meta.filament_colour) this.state._slicer_filament_colours = meta.filament_colour;
+            if (meta.filament_name) this.state._slicer_filament_names = meta.filament_name;
+            if (meta.filament_weight) this.state._slicer_filament_weights = meta.filament_weight;
+            if (meta.filament_weight_total) this.state._slicer_filament_total_g = meta.filament_weight_total;
+            if (meta.slicer) this.state._slicer = meta.slicer;
+            if (meta.slicer_version) this.state._slicer_version = meta.slicer_version;
+            // Thumbnail URL for dashboard
+            const thumb = meta.thumbnails?.find(t => t.width >= 200)?.relative_path;
+            if (thumb) this.state._thumbnail_url = `http://${this.ip}:${this.port}/server/files/gcodes/${encodeURIComponent(thumb)}`;
+          }
+        } catch { /* metadata not critical */ }
       }
 
       this.hub.broadcast('status', { print: this.state });
@@ -235,8 +259,13 @@ export class MoonrakerClient {
     if (ps.total_duration !== undefined) {
       this.state.total_duration_seconds = Math.round(ps.total_duration || 0);
     }
-    // Estimate remaining time from progress + elapsed
-    if (this.state.mc_percent > 0 && this.state.print_duration_seconds > 0) {
+    // Remaining time: use slicer estimate if available, else calculate from progress
+    if (this.state._slicer_estimated_time && this.state.print_duration_seconds !== undefined) {
+      // Slicer estimate is most accurate
+      const remaining = Math.max(0, this.state._slicer_estimated_time - this.state.print_duration_seconds);
+      this.state.mc_remaining_time = Math.round(remaining / 60);
+    } else if (this.state.mc_percent > 2 && this.state.print_duration_seconds > 60) {
+      // Only estimate from progress when >2% and >1min (avoids wild early estimates)
       const totalEstimate = this.state.print_duration_seconds / (this.state.mc_percent / 100);
       this.state.mc_remaining_time = Math.round((totalEstimate - this.state.print_duration_seconds) / 60);
     }

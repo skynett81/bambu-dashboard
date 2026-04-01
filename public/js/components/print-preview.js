@@ -301,7 +301,22 @@
         _applyModel(model, canvas, data);
       })
       .catch(() => {
-        canvas.style.display = 'none';
+        // No 3D model available — show slicer thumbnail if available (Moonraker)
+        const thumbUrl = data._thumbnail_url;
+        if (thumbUrl) {
+          canvas.style.display = 'none';
+          const container = canvas.parentElement;
+          let thumbEl = container?.querySelector('.moonraker-thumb-fallback');
+          if (!thumbEl && container) {
+            thumbEl = document.createElement('div');
+            thumbEl.className = 'moonraker-thumb-fallback';
+            thumbEl.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);border-radius:var(--radius)';
+            thumbEl.innerHTML = `<img src="${thumbUrl}" alt="Print preview" style="max-width:90%;max-height:90%;object-fit:contain;border-radius:8px">`;
+            container.appendChild(thumbEl);
+          }
+        } else {
+          canvas.style.display = 'none';
+        }
         renderModelMeta(null, null);
       })
       .finally(() => {
