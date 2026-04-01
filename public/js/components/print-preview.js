@@ -279,18 +279,21 @@
 
   function _showThumbnailFallback(canvas, data) {
     canvas.style.display = 'none';
-    // Use proxied thumbnail (frame.jpeg endpoint) to avoid CSP/mixed content
     const pid = window.printerState?.getActivePrinterId();
-    const thumbUrl = pid ? `/api/printers/${encodeURIComponent(pid)}/frame.jpeg` : null;
-    if (!thumbUrl) return;
+    if (!pid) return;
+    // Use slicer thumbnail proxy (not camera frame!)
+    const thumbUrl = `/api/printers/${encodeURIComponent(pid)}/print-thumb`;
     const container = canvas.parentElement;
     if (!container) return;
     let thumbEl = container.querySelector('.moonraker-thumb-fallback');
     if (!thumbEl) {
       thumbEl = document.createElement('div');
       thumbEl.className = 'moonraker-thumb-fallback';
-      thumbEl.style.cssText = 'width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:var(--bg-tertiary);border-radius:var(--radius)';
-      thumbEl.innerHTML = `<img src="${thumbUrl}" alt="Print preview" style="max-width:90%;max-height:90%;object-fit:contain;border-radius:8px" onerror="this.style.display='none'">`;
+      thumbEl.style.cssText = 'width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg-tertiary);border-radius:var(--radius);gap:8px';
+      const slicerInfo = data._slicer ? `<div style="font-size:0.7rem;color:var(--text-muted)">${data._slicer} ${data._slicer_version || ''}</div>` : '';
+      const heightInfo = data._object_height ? `<div style="font-size:0.7rem;color:var(--text-muted)">H: ${data._object_height}mm · Layer: ${data._layer_height || '?'}mm</div>` : '';
+      const filamentInfo = data._slicer_filament_total_g ? `<div style="font-size:0.7rem;color:var(--text-muted)">Filament: ${data._slicer_filament_total_g.toFixed(1)}g</div>` : '';
+      thumbEl.innerHTML = `<img src="${thumbUrl}" alt="Print preview" style="max-width:80%;max-height:70%;object-fit:contain;border-radius:8px" onerror="this.src='/api/printers/${encodeURIComponent(pid)}/frame.jpeg'">${slicerInfo}${heightInfo}${filamentInfo}`;
       container.appendChild(thumbEl);
     }
   }

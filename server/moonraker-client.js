@@ -212,9 +212,9 @@ export class MoonrakerClient {
             if (meta.filament_weight_total) this.state._slicer_filament_total_g = meta.filament_weight_total;
             if (meta.slicer) this.state._slicer = meta.slicer;
             if (meta.slicer_version) this.state._slicer_version = meta.slicer_version;
-            // Thumbnail URL for dashboard
+            // Thumbnail: store relative path — proxied through /api/printers/:id/print-thumb
             const thumb = meta.thumbnails?.find(t => t.width >= 200)?.relative_path;
-            if (thumb) this.state._thumbnail_url = `http://${this.ip}:${this.port}/server/files/gcodes/${encodeURIComponent(thumb)}`;
+            if (thumb) this.state._thumbnail_path = thumb;
           }
         } catch { /* metadata not critical */ }
       }

@@ -1497,6 +1497,25 @@ export async function handleApiRequest(req, res) {
       return;
     }
 
+    // ---- Moonraker print thumbnail proxy ----
+    const printThumbMatch = path.match(/^\/api\/printers\/([^/]+)\/print-thumb$/);
+    if (printThumbMatch && method === 'GET') {
+      const pid = decodeURIComponent(printThumbMatch[1]);
+      const entry = _printerManager?.printers?.get(pid);
+      const thumbPath = entry?.client?.state?._thumbnail_path;
+      const printerIp = entry?.config?.ip;
+      const printerPort = entry?.config?.port || 80;
+      if (!thumbPath || !printerIp) return sendJson(res, { error: 'No thumbnail' }, 404);
+      try {
+        const thumbRes = await fetch(`http://${printerIp}:${printerPort}/server/files/gcodes/${encodeURIComponent(thumbPath)}`, { signal: AbortSignal.timeout(5000) });
+        if (!thumbRes.ok) return sendJson(res, { error: 'Thumbnail fetch failed' }, 502);
+        const buf = Buffer.from(await thumbRes.arrayBuffer());
+        res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=300' });
+        res.end(buf);
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+      return;
+    }
+
     if (method === 'GET' && path === '/api/printers') {
       const printers = getPrinters().map(p => ({
         ...p,
