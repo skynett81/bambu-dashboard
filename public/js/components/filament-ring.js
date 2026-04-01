@@ -63,10 +63,11 @@
     const slicer = _parseSlicerData(data);
     const isPrinting = data.gcode_state === 'RUNNING' || data.gcode_state === 'PAUSE';
 
-    // Filter: only show extruders used in the current print (weight > 0) if printing and slicer data exists
+    // Filter: show used extruders (weight > 0) + always include active extruder
     const hasSlicerWeights = slicer.weights.length > 0;
     const visibleExtruders = (isPrinting && hasSlicerWeights)
       ? extruders.filter(function(ext) {
+        if (ext.active) return true; // Always show active extruder
         var w = slicer.weights[ext.index];
         return w !== undefined && w > 0;
       })

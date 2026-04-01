@@ -146,8 +146,9 @@
       if (rgb) _viewer.setColor(rgb);
     }
 
-    // Already showing this model/image — only need progress update above
-    if (subtask === _currentSubtask && (canvas.style.display !== 'none' || _usingMwImage)) return;
+    // Already showing this model/image/thumbnail — only need progress update above
+    const hasThumbnailFallback = canvas.parentElement?.querySelector('.moonraker-thumb-fallback');
+    if (subtask === _currentSubtask && (canvas.style.display !== 'none' || _usingMwImage || hasThumbnailFallback)) return;
 
     // New subtask: reset
     if (subtask !== _currentSubtask) {

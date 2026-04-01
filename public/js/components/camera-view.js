@@ -84,8 +84,7 @@
     // Moonraker printers: use SSH snapshot image instead of WebSocket camera
     const meta = window.printerState?.getActivePrinterMeta?.();
     const pid = window.printerState?.getActivePrinterId?.();
-    // Detect moonraker: meta.type, or no cameraPort assigned (moonraker skips Bambu camera)
-    if (meta?.type === 'moonraker' || (pid && !meta?.cameraPort)) {
+    if (meta?.type === 'moonraker') {
       _startSnapshotPlayer(container, pid || meta?.id);
       return;
     }
