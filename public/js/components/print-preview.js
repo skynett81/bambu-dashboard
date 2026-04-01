@@ -43,16 +43,24 @@
     return [r, g, b];
   }
 
-  // Get active filament color from AMS data
+  // Get active filament color from AMS data or Moonraker extruder colors
   function getActiveFilamentColor(data) {
-    if (!data.ams || !data.ams.ams) return null;
-    const activeTrayId = data.ams.tray_now;
-    if (activeTrayId == null) return null;
-    for (const unit of data.ams.ams) {
-      const tray = (unit.tray || []).find(t => String(t.id) === String(activeTrayId));
-      if (tray && tray.tray_color) {
-        return trayColorToRgb(tray.tray_color);
+    // Bambu AMS
+    if (data.ams && data.ams.ams) {
+      const activeTrayId = data.ams.tray_now;
+      if (activeTrayId != null) {
+        for (const unit of data.ams.ams) {
+          const tray = (unit.tray || []).find(t => String(t.id) === String(activeTrayId));
+          if (tray && tray.tray_color) return trayColorToRgb(tray.tray_color);
+        }
       }
+    }
+    // Moonraker/Klipper — get color from slicer data for active extruder
+    if (data._active_extruder && data._slicer_filament_colours) {
+      const idx = data._active_extruder === 'extruder' ? 0 : parseInt(data._active_extruder.replace('extruder', '')) || 0;
+      const colors = data._slicer_filament_colours.split(';');
+      const hex = colors[idx];
+      if (hex && hex.startsWith('#')) return trayColorToRgb(hex.substring(1));
     }
     return null;
   }
@@ -368,8 +376,23 @@
       html += `<div style="color:var(--text-muted);font-size:1rem">Idle</div>`;
     }
 
+    // Layer color bar — shows filament color per layer (like P2S)
+    if (_layerColors.length > 1 && totalLayers > 0) {
+      html += `<div style="margin-top:auto;padding-top:4px">`;
+      html += `<div style="display:flex;height:8px;border-radius:4px;overflow:hidden;gap:0">`;
+      const step = Math.max(1, Math.floor(totalLayers / 100));
+      for (let i = 0; i < totalLayers; i += step) {
+        const c = _layerColors[i];
+        const bg = c ? `rgb(${Math.round(c[0]*255)},${Math.round(c[1]*255)},${Math.round(c[2]*255)})` : 'var(--border-color)';
+        const w = (step / totalLayers * 100).toFixed(2);
+        const done = i <= layer;
+        html += `<div style="flex:${w};background:${bg};opacity:${done ? 1 : 0.2}"></div>`;
+      }
+      html += `</div></div>`;
+    }
+
     // Slicer at bottom
-    if (data._slicer) html += `<div style="color:var(--text-muted);font-size:0.68rem;margin-top:auto;opacity:0.7">${data._slicer} ${data._slicer_version || ''}</div>`;
+    if (data._slicer) html += `<div style="color:var(--text-muted);font-size:0.68rem;margin-top:${_layerColors.length > 1 ? '4px' : 'auto'};opacity:0.7">${data._slicer} ${data._slicer_version || ''}</div>`;
 
     html += `</div>`;
     thumbEl.innerHTML = html;
