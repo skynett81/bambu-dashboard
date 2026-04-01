@@ -297,8 +297,10 @@
 
     if (_printerSubTab === 'list') {
       let h = '';
-      // Bambu Lab Cloud section
+      // Cloud services section
       h += `<div id="cloud-section" class="settings-card" style="margin-bottom:0.75rem"><div class="card-title" style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> ${t('settings.bambu_cloud')}</div><div id="cloud-content"><span class="text-muted" style="font-size:0.8rem">...</span></div></div>`;
+      // Moonraker history sync info
+      h += `<div class="settings-card" style="margin-bottom:0.75rem"><div class="card-title" style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"/></svg> Moonraker / Klipper</div><div style="font-size:0.8rem;color:var(--text-muted);padding:6px 0">Klipper/Moonraker-printere (Snapmaker, Voron, Creality K1, etc.) synkroniserer printhistorikk automatisk direkte fra printeren hvert 5. minutt. Ingen cloud-konto nødvendig.</div><div id="moonraker-sync-status"></div></div>`;
       // Discovery + Add buttons
       h += `<div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap">
         <button class="form-btn" data-ripple onclick="discoverPrinters()" id="discover-btn" style="display:flex;align-items:center;gap:6px">
@@ -313,7 +315,10 @@
       h += '<div id="discovery-results"></div>';
       h += '<div class="printer-list-grid">';
       for (const pr of p) {
-        h += `<div class="printer-config-card"><div class="printer-config-header"><div><strong>${pr.name}</strong><div class="text-muted" style="font-size:0.75rem">${pr.model || ''} ${pr.ip && pr.serial && pr.accessCode ? '| ' + pr.ip + ' | ' + t('settings.auto_connect') : '| ' + t('settings.add_details')}</div></div><div class="printer-config-actions"><button class="form-btn form-btn-sm" data-ripple data-tooltip="${t('settings.edit')}" onclick="editPrinter('${pr.id}')">${t('settings.edit')}</button><button class="form-btn form-btn-sm form-btn-danger" data-ripple data-tooltip="${t('settings.delete')}" onclick="removePrinter('${pr.id}')">${t('settings.delete')}</button></div></div></div>`;
+        const prType = pr.type || (pr.serial ? 'bambu' : 'moonraker');
+        const prTypeBadge = prType === 'moonraker' ? '<span class="pill pill-info" style="font-size:0.6rem;margin-left:4px">Moonraker</span>' : '<span class="pill pill-completed" style="font-size:0.6rem;margin-left:4px">Bambu MQTT</span>';
+        const prConnInfo = prType === 'moonraker' ? (pr.ip ? pr.ip + ' | Moonraker' : t('settings.add_details')) : (pr.ip && pr.serial && pr.accessCode ? pr.ip + ' | ' + t('settings.auto_connect') : t('settings.add_details'));
+        h += `<div class="printer-config-card"><div class="printer-config-header"><div><strong>${pr.name}</strong>${prTypeBadge}<div class="text-muted" style="font-size:0.75rem">${pr.model || ''} | ${prConnInfo}</div></div><div class="printer-config-actions"><button class="form-btn form-btn-sm" data-ripple data-tooltip="${t('settings.edit')}" onclick="editPrinter('${pr.id}')">${t('settings.edit')}</button><button class="form-btn form-btn-sm form-btn-danger" data-ripple data-tooltip="${t('settings.delete')}" onclick="removePrinter('${pr.id}')">${t('settings.delete')}</button></div></div></div>`;
       }
       h += '</div>';
       h += '<div id="printer-form-area"></div>';
@@ -996,31 +1001,34 @@
     const isEdit = !!printer;
     const title = isEdit ? t('settings.edit_printer') : t('settings.add_printer_title');
 
+    const curType = printer?.type || 'bambu';
     target.innerHTML = `
       <div class="settings-form mt-md">
         <div class="card-title">${title}</div>
+        <div class="form-group">
+          <label class="form-label">Connection type</label>
+          <select class="form-input" id="pf-type" onchange="window._togglePrinterTypeFields()">
+            <option value="bambu" ${curType === 'bambu' ? 'selected' : ''}>Bambu Lab (MQTT)</option>
+            <option value="moonraker" ${curType === 'moonraker' ? 'selected' : ''}>Moonraker / Klipper (Snapmaker, Voron, Creality, etc.)</option>
+          </select>
+        </div>
         <div class="form-group">
           <label class="form-label">${t('settings.name')}</label>
           <input class="form-input" id="pf-name" value="${printer?.name || ''}" placeholder="${t('settings.name_placeholder')}">
         </div>
         <div class="form-group">
           <label class="form-label">${t('settings.model')}</label>
-          <select class="form-input" id="pf-model">
-            <option value="">${t('settings.model_placeholder')}</option>
-            ${(typeof getKnownModels === 'function' ? getKnownModels() : []).map(m =>
-              `<option value="${m}" ${printer?.model === m ? 'selected' : ''}>${m}</option>`
-            ).join('')}
-          </select>
+          <input class="form-input" id="pf-model" value="${printer?.model || ''}" placeholder="e.g. P2S Combo, Snapmaker U1, Voron 2.4">
         </div>
         <div class="form-group">
           <label class="form-label">${t('settings.ip')}</label>
           <input class="form-input" id="pf-ip" value="${printer?.ip || ''}" placeholder="${t('settings.ip_placeholder')}">
         </div>
-        <div class="form-group">
+        <div class="form-group pf-bambu-field" ${curType === 'moonraker' ? 'style="display:none"' : ''}>
           <label class="form-label">${t('settings.serial')}</label>
           <input class="form-input" id="pf-serial" value="${printer?.serial || ''}" placeholder="${t('settings.serial_placeholder')}">
         </div>
-        <div class="form-group">
+        <div class="form-group pf-bambu-field" ${curType === 'moonraker' ? 'style="display:none"' : ''}>
           <label class="form-label">${t('settings.access_code')}</label>
           <input class="form-input" id="pf-access" value="" placeholder="${t('settings.access_code_hint')}">
         </div>
@@ -1061,6 +1069,13 @@
     if (area) renderPrinterForm(area);
   };
 
+  window._togglePrinterTypeFields = function() {
+    const type = document.getElementById('pf-type')?.value || 'bambu';
+    document.querySelectorAll('.pf-bambu-field').forEach(el => {
+      el.style.display = type === 'moonraker' ? 'none' : '';
+    });
+  };
+
   window.editPrinter = async function(id) {
     try {
       const res = await fetch('/api/printers');
@@ -1085,7 +1100,8 @@
     const elecRate = document.getElementById('pf-elec-rate')?.value;
     const machCost = document.getElementById('pf-machine-cost')?.value;
     const machLife = document.getElementById('pf-machine-lifetime')?.value;
-    const body = { name, model, ip, serial, accessCode,
+    const type = document.getElementById('pf-type')?.value || 'bambu';
+    const body = { name, model, ip, serial, accessCode, type,
       printer_wattage: wattage ? parseFloat(wattage) : null,
       electricity_rate_kwh: elecRate ? parseFloat(elecRate) : null,
       machine_cost: machCost ? parseFloat(machCost) : null,
