@@ -19,9 +19,9 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 - **Filament Inventory** — favorites, color filters, bulk add, HueForge TD, CSV import, Spoolman sync
 - **Cloud Slicer** — upload files, auto-slice with OrcaSlicer/PrusaSlicer, FTPS to printer
 - **7 notification channels** — Telegram, Discord, Email, Webhook, ntfy, Pushover, SMS
-- **2 languages** — Norwegian, English, German, French, Spanish, Italian, Japanese, Korean, Dutch, Polish, Portuguese (BR), Swedish, Turkish, Ukrainian, Chinese, Czech, Hungarian
+- **2 languages** — Norwegian, English
 - **Docusaurus documentation** — 82 pages in 2 languages, available at `/docs/` and on GitHub Pages
-- **Zero frameworks** — pure HTML/CSS/JS frontend, Node.js 22 backend with 3 npm packages
+- **Zero frameworks** — pure HTML/CSS/JS frontend, Node.js 22 backend with 4 npm packages
 
 ---
 
@@ -29,7 +29,7 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 
 | Requirement | Version | Required | Notes |
 |-------------|---------|----------|-------|
-| **Node.js** | 22.0+ | Yes | Uses built-in SQLite via `--experimental-sqlite` |
+| **Node.js** | 22.0+ | Yes | Uses built-in SQLite |
 | **npm** | Included with Node.js | Yes | Package manager |
 | **ffmpeg** | Any recent version | No | Only needed for camera livestream |
 | **git** | Any recent version | No | For cloning, auto-updates, and version control |
@@ -179,27 +179,7 @@ Edit `config.json` (created from `config.example.json`):
 |-------|--------------|
 | `ip` | Your printer's network IP address |
 | `port` | Moonraker port (default 80) |
-| `model` | Your printer model (e.g., `P1S`, `P2S Combo`, `X1 Carbon`, `A1 Mini`, `H2D`) |
-
 > **Tip:** Printers can also be added, edited, and deleted from the Settings tab in the dashboard — no restart required.
-
-### Moonraker / Klipper Printers
-
-```json
-{
-  "printers": [
-    {
-      "id": "my-klipper",
-      "name": "Snapmaker U1",
-      "ip": "192.168.1.200",
-      "type": "moonraker",
-      "port": 80
-    }
-  ]
-}
-```
-
-Set `"type": "moonraker"` for any Klipper/Moonraker-based printer. The dashboard connects via Moonraker's WebSocket API.
 
 ### Multiple Printers
 
