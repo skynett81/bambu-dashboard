@@ -32,7 +32,104 @@ import { MaterialRecommenderService } from './material-recommender.js';
 import { createLogger } from './logger.js';
 const log = createLogger('server');
 
-const IS_DEMO = process.env.BAMBU_DEMO === 'true';
+let IS_DEMO = process.env.BAMBU_DEMO === 'true';
+
+// First-run experience: no printers configured and not explicitly demo mode
+if (!IS_DEMO && config.printers.length === 0 && process.stdin.isTTY) {
+  const { createInterface } = await import('node:readline');
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  const ask = (q) => new Promise(resolve => rl.question(q, resolve));
+
+  console.log('');
+  console.log('  ┌──────────────────────────────────────────┐');
+  console.log('  │  Velkommen til 3DPrintForge!             │');
+  console.log('  │  Ingen printere er konfigurert ennå.     │');
+  console.log('  └──────────────────────────────────────────┘');
+  console.log('');
+  console.log('  1) Søk etter printere på nettverket');
+  console.log('  2) Legg til printer manuelt');
+  console.log('  3) Start uten printere (konfigurer via web-UI)');
+  console.log('');
+  console.log('  Tips: Bruk "npm run demo" for å teste med simulerte printere.');
+  console.log('');
+
+  const choice = (await ask('  Velg (1-3): ')).trim();
+
+  if (choice === '1') {
+    // Network scan for Bambu printers via SSDP
+    console.log('');
+    console.log('  Søker etter Bambu Lab-printere på nettverket...');
+    const { PrinterDiscovery } = await import('./printer-discovery.js');
+    const scanner = new PrinterDiscovery();
+    const found = await scanner.scan(6000);
+    scanner.shutdown();
+
+    if (found.length === 0) {
+      console.log('  Fant ingen printere. Sørg for at printeren er på og koblet til samme nettverk.');
+      console.log('  Du kan legge til printere manuelt via web-UI etter oppstart.');
+    } else {
+      console.log(`  Fant ${found.length} printer${found.length > 1 ? 'e' : ''}:`);
+      console.log('');
+      for (let i = 0; i < found.length; i++) {
+        const p = found[i];
+        console.log(`  ${i + 1}) ${p.name || p.serial} — ${p.model} (${p.ip})`);
+      }
+      console.log('');
+
+      const sel = (await ask(`  Legg til alle? (j/n): `)).trim().toLowerCase();
+      if (sel === 'j' || sel === 'y') {
+        const { saveConfig } = await import('./config.js');
+        const printers = found.map(p => ({
+          id: p.name?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || p.serial,
+          name: p.name || p.serial,
+          ip: p.ip,
+          serial: p.serial,
+          accessCode: '',
+          model: p.model,
+          type: 'bambu'
+        }));
+
+        // Ask for access codes
+        for (const printer of printers) {
+          const code = (await ask(`  Access code for ${printer.name} (${printer.ip}): `)).trim();
+          printer.accessCode = code;
+        }
+
+        saveConfig({ printers });
+        // Reload config with new printers
+        config.printers = printers;
+        console.log(`  ${printers.length} printer${printers.length > 1 ? 'e' : ''} lagt til i config.json`);
+      }
+    }
+  } else if (choice === '2') {
+    // Manual printer setup
+    const { saveConfig } = await import('./config.js');
+    console.log('');
+    console.log('  Støttede typer: bambu, moonraker');
+    const type = (await ask('  Type (bambu/moonraker): ')).trim().toLowerCase() || 'bambu';
+    const name = (await ask('  Navn: ')).trim();
+    const ip = (await ask('  IP-adresse: ')).trim();
+    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-') || 'printer-1';
+
+    const printer = { id, name, ip, type };
+
+    if (type === 'bambu') {
+      printer.serial = (await ask('  Serienummer: ')).trim();
+      printer.accessCode = (await ask('  Access code: ')).trim();
+      printer.model = (await ask('  Modell (f.eks. P2S, X1C, A1): ')).trim();
+    } else {
+      printer.port = parseInt((await ask('  Port (standard 80): ')).trim()) || 80;
+    }
+
+    saveConfig({ printers: [printer] });
+    config.printers = [printer];
+    console.log(`  ${name} lagt til i config.json`);
+  }
+  // choice === '3' or anything else: start normally without printers
+
+  rl.close();
+  console.log('');
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
@@ -431,6 +528,11 @@ setApiBroadcast((type, data) => {
 // Printer Manager
 const manager = new PrinterManager(config, broadcastAll, setMetaAll);
 await manager.init();
+
+// Wire printer manager ref to PrintTracker for Moonraker thumbnail fetching
+import('./print-tracker.js').then(({ PrintTracker }) => {
+  PrintTracker._printerManagerRef = manager;
+}).catch(() => {});
 
 // Notification Manager
 const notifier = new NotificationManager(config.notifications);

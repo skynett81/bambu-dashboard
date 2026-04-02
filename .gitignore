@@ -20,6 +20,9 @@ Thumbs.db
 .env
 .env.*
 
+# Claude Code
+CLAUDE.md
+
 # IDE
 .vscode/
 .idea/

@@ -125,27 +125,15 @@
       percentText.textContent = `${percent}%`;
     }
 
-    // Completion celebration — glow burst on ring (only on real RUNNING→FINISH transition)
+    // Completion celebration — state detection (glow burst animation removed)
     if (state === 'FINISH' && prevState === 'RUNNING' && _initialized && !_completionFired) {
       _completionFired = true;
-      if (ring) {
-        ring.classList.remove('ring-complete');
-        void ring.offsetWidth;
-        ring.classList.add('ring-complete');
-      }
       if (typeof showToast === 'function') {
         showToast(t('progress.print_complete'), 'success', 5000);
       }
     }
     if (state !== 'FINISH') _completionFired = false;
     _initialized = true;
-
-    // Error shake on FAILED (only on real transition, not on page load)
-    if (state === 'FAILED' && prevState === 'RUNNING' && ring) {
-      ring.style.animation = 'none';
-      void ring.offsetWidth;
-      ring.style.animation = 'badgeDisconnect 0.5s ease';
-    }
 
     _lastPercent = percent;
 

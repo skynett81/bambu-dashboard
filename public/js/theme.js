@@ -235,7 +235,19 @@
     root.setAttribute('data-theme', themeFamily);
 
     // AdminLTE / Bootstrap dark mode attribute
-    if (document.body) document.body.setAttribute('data-bs-theme', themeFamily);
+    if (document.body) {
+      document.body.setAttribute('data-bs-theme', themeFamily);
+    } else {
+      // theme.js runs in <head> before <body> exists — defer until body is available
+      const applyToBody = () => {
+        if (document.body) {
+          document.body.setAttribute('data-bs-theme', themeFamily);
+        } else {
+          requestAnimationFrame(applyToBody);
+        }
+      };
+      requestAnimationFrame(applyToBody);
+    }
 
     // Update toggle button icon if present
     updateToggleButton(themeFamily);

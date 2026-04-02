@@ -450,13 +450,7 @@
   };
 
   // ---- Value Pulse Helper ----
-  window.pulseElement = function(el) {
-    if (!el) return;
-    el.classList.remove('ix-pulse');
-    void el.offsetWidth;
-    el.classList.add('ix-pulse');
-    el.addEventListener('animationend', () => el.classList.remove('ix-pulse'), { once: true });
-  };
+  window.pulseElement = function(el) {};
 
   // ---- Modal Helpers ----
   window.openModal = function(html, options) {

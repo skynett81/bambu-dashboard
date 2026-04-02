@@ -19,6 +19,13 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
   <!-- Theme engine (must run before body renders) -->
   <script src="/js/theme.js"></script>
+  <!-- Set data-bs-theme on <body> as soon as it opens, using the preset resolved by theme.js -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var resolved = document.documentElement.getAttribute('data-theme') || 'dark';
+      document.body.setAttribute('data-bs-theme', resolved);
+    });
+  </script>
   <!-- Custom CSS (layers on top of AdminLTE) -->
   <link rel="stylesheet" href="/css/main.css">
   <link rel="stylesheet" href="/css/components.css">

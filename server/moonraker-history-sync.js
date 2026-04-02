@@ -50,9 +50,12 @@ export async function syncMoonrakerHistory(printerId, printerIp, apiKey, port = 
     if (jobs.length === 0) return { imported: 0, skipped: 0, error: null };
 
     // Get existing history to avoid duplicates
-    // Match by started_at timestamp (within 5 min window) to handle filename variations
+    // Match by: normalized filename OR gcode_file match OR start time within 30 min window
     const existing = getHistory(200, 0, printerId);
     const existingTimes = existing.map(h => h.started_at ? new Date(h.started_at).getTime() : 0).filter(t => t > 0);
+    const existingGcodeFiles = new Set(existing.map(h => h.gcode_file).filter(Boolean));
+    const normalizeName = (s) => (s || '').replace(/\.(gcode|3mf|g)$/i, '').replace(/_/g, ' ').trim().toLowerCase();
+    const existingNormNames = new Set(existing.map(h => normalizeName(h.filename)));
     const existingKeys = new Set(existing.map(h => `${h.started_at}_${h.filename}`));
 
     let imported = 0;
@@ -69,11 +72,13 @@ export async function syncMoonrakerHistory(printerId, printerIp, apiKey, port = 
       const filename = job.filename || 'Unknown';
       const modelName = filename.replace(/\.(gcode|3mf|g)$/i, '').replace(/_/g, ' ');
 
-      // Dedup check — match by key OR by start time within 5 min window
+      // Dedup check — match by exact key, gcode filename, normalized name, or start time within 30 min
       const dedupKey = `${startTime}_${modelName}`;
       const startMs = startTime ? new Date(startTime).getTime() : 0;
-      const timeMatch = startMs > 0 && existingTimes.some(t => Math.abs(t - startMs) < 300000);
-      if (existingKeys.has(dedupKey) || timeMatch) {
+      const timeMatch = startMs > 0 && existingTimes.some(t => Math.abs(t - startMs) < 1800000);
+      const gcodeMatch = filename && existingGcodeFiles.has(filename);
+      const nameMatch = existingNormNames.has(normalizeName(filename)) || existingNormNames.has(normalizeName(modelName));
+      if (existingKeys.has(dedupKey) || timeMatch || gcodeMatch || nameMatch) {
         skipped++;
         continue;
       }

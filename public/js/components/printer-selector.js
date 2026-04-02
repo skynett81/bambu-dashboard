@@ -110,14 +110,8 @@
     if (typeof updateFilamentRing === 'function') updateFilamentRing(printData);
     if (typeof updatePrintPreview === 'function') updatePrintPreview(printData);
 
-    // Update selector appearance with selection pop
+    // Update selector appearance — no animations, instant switch
     window.updatePrinterSelector();
-    // Add selection pop animation to newly active tab
-    const activeTab = document.querySelector(`.printer-tab[data-printer-id="${id}"]`);
-    if (activeTab) {
-      activeTab.classList.add('printer-selected');
-      activeTab.addEventListener('animationend', () => activeTab.classList.remove('printer-selected'), { once: true });
-    }
 
     // Update camera to new printer's port
     if (typeof switchCamera === 'function') {

@@ -160,7 +160,7 @@ export class PrintTracker {
       const now = Date.now();
       for (const unit of printData.ams.ams) {
         for (const tray of (unit.tray || [])) {
-          if (tray.remain == null || tray.remain < 0) continue;
+          if (!tray || tray.remain == null || tray.remain < 0) continue;
           const key = `${unit.id}_${tray.id}`;
           if (this._amsSyncTs[key] && now - this._amsSyncTs[key] < 60000) continue;
           const result = syncAmsToSpool(this.printerId, parseInt(unit.id) || 0, parseInt(tray.id) || 0, tray.remain);
@@ -1083,19 +1083,46 @@ export class PrintTracker {
 
   _saveHistoryThumbnail(historyId) {
     try {
-      // Import thumbnail cache from thumbnail-service
+      // Import thumbnail cache from thumbnail-service (Bambu printers)
       const thumbCache = PrintTracker._thumbCacheRef;
-      if (!thumbCache) return;
-      const cached = thumbCache.get(this.printerId);
-      if (!cached || !cached.buffer) return;
+      const cached = thumbCache?.get(this.printerId);
 
       const thumbDir = join(__dirname, '..', 'data', 'history-thumbnails');
       if (!existsSync(thumbDir)) mkdirSync(thumbDir, { recursive: true });
-      const ext = cached.contentType === 'image/svg+xml' ? 'svg' : 'png';
-      writeFileSync(join(thumbDir, `${historyId}.${ext}`), cached.buffer);
-      log.info('Thumbnail lagret for history #' + historyId);
+
+      if (cached?.buffer) {
+        const ext = cached.contentType === 'image/svg+xml' ? 'svg' : 'png';
+        writeFileSync(join(thumbDir, `${historyId}.${ext}`), cached.buffer);
+        log.info('Thumbnail lagret for history #' + historyId);
+        return;
+      }
+
+      // Moonraker printers: fetch thumbnail from Moonraker API via printer manager
+      if (PrintTracker._printerManagerRef) {
+        this._fetchMoonrakerThumbnail(historyId, thumbDir).catch(() => {});
+      }
     } catch (e) {
       log.warn('Thumbnail-lagring feilet: ' + e.message);
+    }
+  }
+
+  async _fetchMoonrakerThumbnail(historyId, thumbDir) {
+    try {
+      const pm = PrintTracker._printerManagerRef;
+      const entry = pm?.printers?.get(this.printerId);
+      if (!entry?.client?.state?._thumbnail_path) return;
+      const ip = entry.config?.ip;
+      const port = entry.config?.port || 80;
+      const thumbPath = entry.client.state._thumbnail_path;
+      const res = await fetch(`http://${ip}:${port}/server/files/gcodes/${encodeURIComponent(thumbPath)}`, {
+        signal: AbortSignal.timeout(5000)
+      });
+      if (!res.ok) return;
+      const buf = Buffer.from(await res.arrayBuffer());
+      writeFileSync(join(thumbDir, `${historyId}.png`), buf);
+      log.info('Moonraker thumbnail lagret for history #' + historyId);
+    } catch (e) {
+      log.warn('Moonraker thumbnail-henting feilet: ' + e.message);
     }
   }
 
