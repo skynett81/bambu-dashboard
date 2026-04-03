@@ -342,7 +342,7 @@
 
     // Thumbnail fills entire card — no separate info panel (info is in top bar already)
     let html = '';
-    html += `<img src="${thumbUrl}" alt="" style="width:100%;height:100%;object-fit:contain;padding:4px" onerror="this.src='/api/printers/${encodeURIComponent(pid)}/frame.jpeg'">`;
+    html += `<img src="${thumbUrl}" alt="" style="width:100%;height:100%;object-fit:contain;padding:4px" onerror="this.style.display='none'">`;
 
     // Layer color bar overlay at bottom
     if (_layerColors.length > 1 && totalLayers > 0) {
