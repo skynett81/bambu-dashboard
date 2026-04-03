@@ -10,9 +10,29 @@
  * No external dependencies required (no sshpass, no ffmpeg).
  */
 
+import { execFile } from 'node:child_process';
+import { readFileSync, existsSync } from 'node:fs';
 import { createLogger } from './logger.js';
 
 const log = createLogger('moon-cam');
+
+// Check if sshpass is available (for SSH-based camera fallback)
+let _hasSshpass = null;
+function hasSshpass() {
+  if (_hasSshpass !== null) return _hasSshpass;
+  try {
+    const { execSync } = require('node:child_process');
+    execSync('which sshpass', { stdio: 'ignore' });
+    _hasSshpass = true;
+  } catch {
+    _hasSshpass = false;
+  }
+  return _hasSshpass;
+}
+// Async check on module load
+import('node:child_process').then(({ execSync }) => {
+  try { execSync('which sshpass', { stdio: 'ignore' }); _hasSshpass = true; } catch { _hasSshpass = false; }
+});
 
 const SNAPSHOT_CANDIDATES = [
   { path: '/webcam/?action=snapshot', port: null },
@@ -81,7 +101,17 @@ export class MoonrakerCamera {
       return;
     }
 
-    // 3. No camera found — schedule periodic retry
+    // 3. SSH fallback (Snapmaker U1 — /tmp/printer_detection.jpg via sshpass)
+    if (_hasSshpass) {
+      const sshOk = await this._testSshSnapshot();
+      if (sshOk) {
+        log.info(`SSH kamera OK: ${this.ip} — starter SSH polling`);
+        this._startSshPolling();
+        return;
+      }
+    }
+
+    // 4. No camera found — schedule periodic retry
     log.info(`Ingen kamerakilde funnet for ${this.ip} — prøver igjen hvert ${this._retryInterval / 1000}s`);
     if (!this._retryTimer) {
       this._retryTimer = setInterval(() => this._retryFind(), this._retryInterval);
@@ -104,6 +134,17 @@ export class MoonrakerCamera {
       if (this._retryTimer) { clearInterval(this._retryTimer); this._retryTimer = null; }
       log.info(`Kamera funnet etter retry: ${probeUrl}`);
       this._startPolling(probeUrl);
+      return;
+    }
+
+    // Try SSH fallback
+    if (_hasSshpass) {
+      const sshOk = await this._testSshSnapshot();
+      if (sshOk) {
+        if (this._retryTimer) { clearInterval(this._retryTimer); this._retryTimer = null; }
+        log.info(`SSH kamera funnet etter retry: ${this.ip}`);
+        this._startSshPolling();
+      }
     }
   }
 
@@ -219,6 +260,41 @@ export class MoonrakerCamera {
         this._retryTimer = setInterval(() => this._retryFind(), this._retryInterval);
       }
     }
+  }
+
+  // ---- SSH-based snapshot (Snapmaker U1 fallback) ----
+
+  _testSshSnapshot() {
+    return new Promise((resolve) => {
+      const tmpFile = `/tmp/.moonraker-snap-${this.ip.replace(/\./g, '-')}.jpg`;
+      const args = [
+        '-p', this._sshPass || 'snapmaker',
+        'scp', '-o', 'StrictHostKeyChecking=no', '-o', 'ConnectTimeout=3',
+        `lava@${this.ip}:/tmp/printer_detection.jpg`, tmpFile
+      ];
+      execFile('sshpass', args, { timeout: 8000 }, (err) => {
+        if (err) return resolve(false);
+        try {
+          const buf = readFileSync(tmpFile);
+          if (buf.length > 500) {
+            this._lastFrame = buf;
+            this._lastFrameTime = Date.now();
+            return resolve(true);
+          }
+        } catch { /* ignore */ }
+        resolve(false);
+      });
+    });
+  }
+
+  _startSshPolling() {
+    this._activeUrl = 'ssh';
+    this._pollTimer = setInterval(async () => {
+      try {
+        const ok = await this._testSshSnapshot();
+        if (!ok) this._handleCameraLost();
+      } catch { this._handleCameraLost(); }
+    }, this._pollInterval);
   }
 
   /** Trigger a camera capture via Moonraker gcode (for printers that support it). */
