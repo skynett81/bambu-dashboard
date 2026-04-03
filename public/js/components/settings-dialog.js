@@ -32,6 +32,7 @@
     { key: 'settings.server_title', kw: 'server port', tab: 'general', sub: 'preferences' },
     { key: 'settings.auth_title', kw: 'authentication login password user auth', tab: 'general', sub: 'auth' },
     { key: 'settings.obs_title', kw: 'obs overlay streaming browser source', tab: 'general', sub: 'obs' },
+    { key: 'settings.network_title', kw: 'network subnet scan discover ssdp moonraker ip', tab: 'general', sub: 'network' },
     // Appearance tab
     { key: 'settings.theme_title', kw: 'theme dark light auto mode', tab: 'appearance', sub: 'theme' },
     { key: 'settings.theme_accent', kw: 'accent color swatch', tab: 'appearance', sub: 'customize' },
@@ -138,7 +139,7 @@
     if (hashSub && ['printers','general','appearance','notifications','system'].includes(hashSub)) _activeTab = hashSub;
     if (hashParts[2]) {
       if (_activeTab === 'printers' && ['list','status'].includes(hashParts[2])) _printerSubTab = hashParts[2];
-      if (_activeTab === 'general' && ['preferences','auth','obs'].includes(hashParts[2])) _generalSubTab = hashParts[2];
+      if (_activeTab === 'general' && ['preferences','auth','obs','network'].includes(hashParts[2])) _generalSubTab = hashParts[2];
       if (_activeTab === 'appearance' && ['theme','customize'].includes(hashParts[2])) _appearanceSubTab = hashParts[2];
       if (_activeTab === 'system' && ['updates','security','printers','automation','energy','integrations','nodes','data'].includes(hashParts[2])) _systemSubTab = hashParts[2];
       if (_activeTab === 'notifications' && ['channels','log','webhooks'].includes(hashParts[2])) _notifSubTab = hashParts[2];
@@ -183,7 +184,8 @@
         const gtabs = [
           { id: 'preferences', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>', label: t('settings.settings_sub_preferences') },
           { id: 'auth', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', label: t('settings.settings_sub_auth') },
-          { id: 'obs', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', label: t('settings.settings_sub_obs') }
+          { id: 'obs', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', label: t('settings.settings_sub_obs') },
+          { id: 'network', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>', label: t('settings.settings_sub_network') || 'Nettverk' }
         ];
         html += '<div class="drying-sub-tabs">';
         for (const tab of gtabs) html += `<button class="drying-sub-tab${_generalSubTab === tab.id ? ' active' : ''}" data-general-tab="${tab.id}" onclick="window._switchGeneralSubTab('${tab.id}')" style="display:flex;align-items:center;gap:4px">${tab.icon} ${tab.label}</button>`;
@@ -602,6 +604,10 @@
         const colorPicker = document.getElementById('obs-cfg-bg-color');
         if (colorPicker) colorPicker.style.display = this.value === 'custom' ? '' : 'none';
       });
+
+    } else if (_generalSubTab === 'network') {
+      el.innerHTML = '<div id="network-settings-section"><div class="settings-card"><div class="text-muted" style="font-size:0.8rem">' + (t('common.loading') || 'Laster') + '...</div></div></div>';
+      loadNetworkSettings();
     }
   }
 
