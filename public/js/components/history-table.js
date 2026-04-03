@@ -1081,9 +1081,12 @@
 
     try {
       const activePid = window.printerState?.getActivePrinterId?.();
-      const histQuery = activePid ? `/api/history?limit=100&printer_id=${encodeURIComponent(activePid)}` : '/api/history?limit=100';
-      const unreviewedQuery = activePid ? `/api/history/unreviewed?printer_id=${encodeURIComponent(activePid)}` : '/api/history/unreviewed';
-      const [histRes, unreviewedRes] = await Promise.all([fetch(histQuery), fetch(unreviewedQuery), _loadCloudTasks()]);
+      // Sync _activePrinter with sidebar selection unless explicitly set to 'all' via printer tabs
+      if (_activePrinter !== 'all') {
+        _activePrinter = activePid || 'all';
+      }
+      // Always fetch all history (allow client-side printer filtering via tabs)
+      const [histRes, unreviewedRes] = await Promise.all([fetch('/api/history?limit=200'), fetch('/api/history/unreviewed'), _loadCloudTasks()]);
       _data = await histRes.json();
       try {
         const unreviewedData = await unreviewedRes.json();
