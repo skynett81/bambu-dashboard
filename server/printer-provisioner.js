@@ -203,14 +203,35 @@ async function _configureNginx(ip, creds) {
   // 4. Serves single snapshot at /?action=snapshot or any other path
   // 5. Works as drop-in replacement for mjpgstreamer on port 8080
   const script = `#!/usr/bin/env python3
-"""3DPrintForge camera server — live MJPEG stream + snapshots from /tmp/.monitor.jpg"""
-import http.server, os, signal, sys, time, threading, glob
+"""3DPrintForge camera server — live MJPEG stream + snapshots with MQTT trigger"""
+import http.server, os, signal, sys, time, threading, glob, json
 
-FPS = int(os.environ.get("CAMERA_FPS", "10"))
+FPS = int(os.environ.get("CAMERA_FPS", "5"))
 CAMERA_FILES = ["/tmp/.monitor.jpg", "/tmp/printer_detection.jpg"]
 frame_lock = threading.Lock()
 current_frame = b""
 frame_time = 0
+mqtt_available = False
+
+# Try to import paho MQTT for triggering camera captures
+try:
+    import paho.mqtt.client as mqtt_lib
+    mqtt_available = True
+except ImportError:
+    pass
+
+def trigger_capture():
+    """Ask unisrv to take a fresh camera image via local MQTT."""
+    if not mqtt_available:
+        return
+    try:
+        c = mqtt_lib.Client()
+        c.connect("127.0.0.1", 1883, keepalive=2)
+        payload = json.dumps({"jsonrpc": "2.0", "method": "camera.detect_capture", "id": 1})
+        c.publish("camera/request", payload)
+        c.disconnect()
+    except Exception:
+        pass
 
 def find_camera_file():
     """Find the most recently modified camera file."""
@@ -224,7 +245,6 @@ def find_camera_file():
                 best = path
         except OSError:
             pass
-    # Also check any .jpg in /tmp that's recent
     for f in glob.glob("/tmp/*.jpg") + glob.glob("/tmp/.*.jpg"):
         try:
             mt = os.path.getmtime(f)
@@ -236,11 +256,18 @@ def find_camera_file():
     return best
 
 def frame_reader():
-    """Background thread that reads camera file at target FPS."""
+    """Background thread: triggers capture + reads file at target FPS."""
     global current_frame, frame_time
     interval = 1.0 / max(1, FPS)
     cam_file = None
+    capture_interval = max(interval, 0.5)  # Don't trigger faster than 2 fps
+    last_trigger = 0
     while True:
+        now = time.time()
+        # Trigger new capture periodically
+        if now - last_trigger >= capture_interval:
+            trigger_capture()
+            last_trigger = now
         # Re-detect camera file periodically
         if cam_file is None or not os.path.exists(cam_file):
             cam_file = find_camera_file()
@@ -319,7 +346,8 @@ for _ in range(50):
         break
     time.sleep(0.1)
 
-print(f"Camera server started on port 8080 @ {FPS} fps")
+mqtt_status = "with MQTT trigger" if mqtt_available else "without MQTT (install paho-mqtt for live capture)"
+print(f"Camera server started on port 8080 @ {FPS} fps {mqtt_status}")
 http.server.HTTPServer(("0.0.0.0", 8080), Handler).serve_forever()
 `;
 
