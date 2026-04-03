@@ -154,8 +154,8 @@ export class PrinterManager {
     let camera = null;
     let moonCamera = null;
     if (connectorType === 'moonraker') {
-      // Auto-provision camera if needed (configures nginx on printer)
-      provisionCamera(printerConf.ip, printerConf.port || 80).catch(() => {});
+      // Auto-provision camera first, then start MoonrakerCamera
+      await provisionCamera(printerConf.ip, printerConf.port || 80).catch(() => {});
       moonCamera = new MoonrakerCamera({
         ...this.config,
         printer: printerConf

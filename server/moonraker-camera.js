@@ -16,9 +16,9 @@ import { createLogger } from './logger.js';
 const log = createLogger('moon-cam');
 
 const SNAPSHOT_CANDIDATES = [
-  { path: '/webcam/?action=snapshot', port: null },
-  { path: '/?action=snapshot', port: 8080 },
+  { path: '/?action=snapshot', port: 8080 },   // 3DPrintForge camera server / mjpgstreamer
   { path: '/?action=snapshot', port: 8081 },
+  { path: '/webcam/?action=snapshot', port: null },
   { path: '/webcam/?action=snapshot', port: 4408 },
   { path: '/webcam/snapshot', port: null },
   { path: '/snapshot', port: null },
@@ -94,13 +94,13 @@ export class MoonrakerCamera {
   // ---- Discovery ----
 
   async _findAndStart() {
-    // 1. Moonraker webcam API
-    const apiUrl = await this._findFromMoonrakerApi();
-    if (apiUrl) { this._startHttpPolling(apiUrl); return; }
-
-    // 2. Probe common HTTP snapshot paths
+    // 1. Probe common HTTP snapshot paths directly (port 8080 first — camera server)
     const probeUrl = await this._probeSnapshotUrls();
     if (probeUrl) { this._startHttpPolling(probeUrl); return; }
+
+    // 2. Moonraker webcam API (may return nginx-proxied URL)
+    const apiUrl = await this._findFromMoonrakerApi();
+    if (apiUrl) { this._startHttpPolling(apiUrl); return; }
 
     // 3. SSH snapshot (Snapmaker, MKS, Raspberry Pi)
     const sshResult = await this._findSshSource();
@@ -122,11 +122,11 @@ export class MoonrakerCamera {
   }
 
   async _retryFind() {
-    const apiUrl = await this._findFromMoonrakerApi();
-    if (apiUrl) { this._clearRetry(); this._startHttpPolling(apiUrl); return; }
-
     const probeUrl = await this._probeSnapshotUrls();
     if (probeUrl) { this._clearRetry(); this._startHttpPolling(probeUrl); return; }
+
+    const apiUrl = await this._findFromMoonrakerApi();
+    if (apiUrl) { this._clearRetry(); this._startHttpPolling(apiUrl); return; }
 
     const sshResult = await this._findSshSource();
     if (sshResult) {

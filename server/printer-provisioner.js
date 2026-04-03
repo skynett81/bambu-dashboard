@@ -221,17 +221,20 @@ except ImportError:
     pass
 
 def trigger_capture():
-    """Ask unisrv to take a fresh camera image via local MQTT."""
+    """Ask unisrv to take a fresh camera image via local MQTT (non-blocking)."""
     if not mqtt_available:
         return
-    try:
-        c = mqtt_lib.Client()
-        c.connect("127.0.0.1", 1883, keepalive=2)
-        payload = json.dumps({"jsonrpc": "2.0", "method": "camera.detect_capture", "id": 1})
-        c.publish("camera/request", payload)
-        c.disconnect()
-    except Exception:
-        pass
+    def _do_trigger():
+        try:
+            c = mqtt_lib.Client()
+            c.connect("127.0.0.1", 1883, keepalive=2)
+            payload = json.dumps({"jsonrpc": "2.0", "method": "camera.detect_capture", "id": 1})
+            c.publish("camera/request", payload)
+            c.disconnect()
+        except Exception:
+            pass
+    t = threading.Thread(target=_do_trigger, daemon=True)
+    t.start()
 
 def find_camera_file():
     """Find the most recently modified camera file."""
