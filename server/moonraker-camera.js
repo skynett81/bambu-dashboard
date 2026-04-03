@@ -32,9 +32,10 @@ const SSH_CREDENTIALS = [
   { username: 'mks', password: 'makerbase' },      // MKS Klipper
 ];
 
-// Common camera image paths on printers
+// Common camera image paths on printers (ordered by preference — live first)
 const SSH_CAMERA_PATHS = [
-  '/tmp/printer_detection.jpg',    // Snapmaker unisrv
+  '/tmp/.monitor.jpg',             // Snapmaker unisrv live monitor (updates every ~1s)
+  '/tmp/printer_detection.jpg',    // Snapmaker unisrv detection snapshot
   '/tmp/snapshot.jpg',             // Common crowsnest path
   '/tmp/camera.jpg',               // Generic
 ];
