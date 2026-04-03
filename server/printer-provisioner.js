@@ -179,63 +179,74 @@ async function _checkMonitorFile(ip, creds) {
 }
 
 async function _configureNginx(ip, creds) {
-  // Use a separate config file in conf.d — never modify the main site config
-  const confPath = '/etc/nginx/conf.d/3dprintforge-camera.conf';
+  // Start a lightweight Python HTTP server on port 8080 that serves /tmp/.monitor.jpg
+  // This replaces the missing mjpgstreamer that nginx expects on that port
+  // Works with Fluidd/Mainsail AND 3DPrintForge without modifying any nginx config
 
-  // Check if already configured
-  const existing = await _sshExec(ip, creds, `test -f ${confPath} && echo EXISTS`);
-  if (existing && existing.trim() === 'EXISTS') {
-    log.info(`${ip}: nginx allerede konfigurert — laster på nytt`);
-    await _sshExec(ip, creds, 'nginx -s reload 2>/dev/null');
+  const scriptPath = '/home/lava/camera_server.py';
+  const pidFile = '/tmp/camera_server.pid';
+
+  // Check if already running
+  const running = await _sshExec(ip, creds,
+    `test -f ${pidFile} && kill -0 $(cat ${pidFile}) 2>/dev/null && echo RUNNING || echo STOPPED`
+  );
+
+  if (running && running.trim() === 'RUNNING') {
+    log.info(`${ip}: kameraserver allerede aktiv`);
     return true;
   }
 
-  // Find the server port from existing site config
-  const siteConfig = await _sshExec(ip, creds, 'ls /etc/nginx/sites-enabled/fluidd /etc/nginx/sites-enabled/mainsail 2>/dev/null');
-  if (!siteConfig || !siteConfig.trim()) {
-    log.info(`${ip}: ingen fluidd/mainsail nginx-config funnet`);
-    return false;
-  }
+  // Create a simple Python HTTP server that serves the live camera image
+  // Responds to any request with /tmp/.monitor.jpg (mimics mjpgstreamer snapshot)
+  const script = `#!/usr/bin/env python3
+"""3DPrintForge camera server — serves /tmp/.monitor.jpg on port 8080"""
+import http.server, os, signal, sys
 
-  // Create a separate server block on port 8080 that serves the camera image
-  // Every request returns /tmp/.monitor.jpg regardless of path/query
-  const serverConf = `# 3DPrintForge camera proxy — auto-generated
-# Serves unisrv live monitor image for 3DPrintForge dashboard
-server {
-    listen 8080;
-    listen [::]:8080;
+class Handler(http.server.BaseHTTPRequestHandler):
+    def do_GET(self):
+        try:
+            with open("/tmp/.monitor.jpg", "rb") as f:
+                data = f.read()
+            self.send_response(200)
+            self.send_header("Content-Type", "image/jpeg")
+            self.send_header("Content-Length", str(len(data)))
+            self.send_header("Cache-Control", "no-cache, no-store")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(data)
+        except FileNotFoundError:
+            self.send_error(404, "No camera image available")
+        except Exception:
+            self.send_error(500, "Internal error")
+    def log_message(self, *args): pass
 
-    types { }
-    default_type image/jpeg;
-
-    add_header Cache-Control "no-cache, no-store, must-revalidate" always;
-    add_header Pragma "no-cache" always;
-    add_header Access-Control-Allow-Origin "*" always;
-    etag off;
-    if_modified_since off;
-
-    location / {
-        root /tmp;
-        try_files /.monitor.jpg =404;
-    }
-}
+with open("${pidFile}", "w") as f:
+    f.write(str(os.getpid()))
+signal.signal(signal.SIGTERM, lambda *a: sys.exit(0))
+http.server.HTTPServer(("0.0.0.0", 8080), Handler).serve_forever()
 `;
 
-  // Write config, test, and reload
-  const writeCmd = `cat > /tmp/_3dpf_cam.conf << 'NGINX_EOF'
-${serverConf}
-NGINX_EOF
-mv /tmp/_3dpf_cam.conf ${confPath} && nginx -t 2>&1 && nginx -s reload 2>&1`;
+  // Write script and start it
+  const escaped = script.replace(/"/g, '\\"');
+  const deployCmd = `cat > ${scriptPath} << 'PYEOF'
+${script}
+PYEOF
+chmod +x ${scriptPath}
+# Kill any old instance
+test -f ${pidFile} && kill $(cat ${pidFile}) 2>/dev/null; sleep 0.5
+# Start in background
+nohup python3 ${scriptPath} > /dev/null 2>&1 &
+sleep 1
+# Verify
+test -f ${pidFile} && kill -0 $(cat ${pidFile}) 2>/dev/null && echo OK || echo FAILED`;
 
-  const result = await _sshExec(ip, creds, writeCmd);
+  const result = await _sshExec(ip, creds, deployCmd);
 
-  if (result && result.includes('successful')) {
-    log.info(`${ip}: nginx kamera-server konfigurert på port 8080`);
+  if (result && result.trim().endsWith('OK')) {
+    log.info(`${ip}: kameraserver startet på port 8080`);
     return true;
   }
 
-  // Rollback on failure
-  await _sshExec(ip, creds, `rm -f ${confPath} && nginx -s reload 2>/dev/null`);
-  log.error(`${ip}: nginx-config feilet: ${result?.slice(0, 200)}`);
+  log.error(`${ip}: kunne ikke starte kameraserver: ${result?.slice(0, 200)}`);
   return false;
 }
