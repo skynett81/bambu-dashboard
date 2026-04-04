@@ -12,7 +12,8 @@ import { createLogger } from './logger.js';
 
 const log = createLogger('ecom');
 
-const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days — grace period for offline use
+const DEACTIVATE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 days — auto-deactivate if no check-in
 const FEE_PCT = 5.0;
 
 function _httpPost(urlStr, body) {
@@ -89,8 +90,15 @@ export class EcomLicenseManager {
         console.log('[ecom-license] Validation error during init:', e.message);
       }
     }
-    // Start daily fee reporting
-    this._reportInterval = setInterval(() => this.reportFees().catch(e => log.warn('Fee reporting failed', e.message)), 24 * 60 * 60 * 1000);
+    // Start daily fee reporting + license revalidation
+    this._reportInterval = setInterval(() => {
+      this.reportFees().catch(e => log.warn('Fee reporting failed: ' + e.message));
+      this._revalidate().catch(e => log.warn('License revalidation failed: ' + e.message));
+    }, 24 * 60 * 60 * 1000);
+
+    // Also revalidate on startup after a delay (non-blocking)
+    setTimeout(() => this._revalidate().catch(() => {}), 30000);
+
     console.log('[ecom-license] Initialized (status: ' + (this._license.status || 'inactive') + ')');
   }
 
@@ -98,14 +106,50 @@ export class EcomLicenseManager {
     if (this._reportInterval) clearInterval(this._reportInterval);
   }
 
+  // Periodic revalidation — ensures license checks in with geektech.no
+  async _revalidate() {
+    if (!this._license?.license_key) return;
+    try {
+      const result = await this.validate(true); // force online
+      if (result.valid) {
+        log.info('License revalidated successfully (verify #' + (this._license.verify_count || 0) + ')');
+      } else {
+        log.warn('License revalidation failed: ' + (result.error || 'unknown'));
+      }
+    } catch (e) {
+      log.warn('License revalidation error: ' + e.message);
+    }
+  }
+
   isActive() {
     if (!this._license) return false;
     if (this._license.status !== 'active') return false;
+
+    // Check expiry date
     if (this._license.expires_at && new Date(this._license.expires_at) < new Date()) {
+      log.warn('License expired at ' + this._license.expires_at);
       setEcomLicense({ status: 'expired' });
       this._license.status = 'expired';
       return false;
     }
+
+    // Auto-deactivate if no check-in with geektech.no for 30 days
+    if (this._license.last_validated) {
+      const lastCheck = new Date(this._license.last_validated).getTime();
+      const elapsed = Date.now() - lastCheck;
+      if (elapsed > DEACTIVATE_TTL_MS) {
+        log.warn('License auto-deactivated — no check-in with geektech.no for ' + Math.round(elapsed / 86400000) + ' days. Contact geektech.no to reactivate.');
+        setEcomLicense({ status: 'deactivated' });
+        this._license.status = 'deactivated';
+        return false;
+      }
+      // Warn at 7+ days without check-in
+      if (elapsed > CACHE_TTL_MS) {
+        const daysLeft = Math.round((DEACTIVATE_TTL_MS - elapsed) / 86400000);
+        log.warn('License warning — last check-in ' + Math.round(elapsed / 86400000) + ' days ago. ' + daysLeft + ' days until auto-deactivation. Ensure internet access to geektech.no.');
+      }
+    }
+
     return true;
   }
 
@@ -132,6 +176,8 @@ export class EcomLicenseManager {
       is_pinned: this._license?.is_pinned || 0,
       expires_at: this._license?.expires_at || null,
       last_validated: this._license?.last_validated || null,
+      days_since_checkin: this._license?.last_validated ? Math.round((Date.now() - new Date(this._license.last_validated).getTime()) / 86400000) : null,
+      days_until_deactivation: this._license?.last_validated ? Math.max(0, Math.round((DEACTIVATE_TTL_MS - (Date.now() - new Date(this._license.last_validated).getTime())) / 86400000)) : null,
       instance_id: this._license?.instance_id || null,
       provider: 'geektech.no',
       fees_pending: fees?.pending_count || 0,
