@@ -13304,11 +13304,11 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
 .stip { position:relative; display:inline-flex; align-items:center; margin-left:6px; vertical-align:middle; }
 .stip-icon { display:inline-flex; align-items:center; justify-content:center; width:18px; height:18px; border-radius:50%; background:var(--accent-blue); color:#fff; font-size:0.65rem; font-weight:700; cursor:pointer; transition:transform 0.15s; border:none; }
 .stip-icon:hover { transform:scale(1.15); }
-.stip-bubble { display:none; position:absolute; bottom:calc(100% + 8px); left:50%; transform:translateX(-50%); background:var(--bg-secondary); color:var(--text-primary); font-size:0.78rem; font-weight:400; line-height:1.4; padding:10px 14px; border-radius:8px; border:1px solid var(--border-color); box-shadow:0 4px 16px rgba(0,0,0,0.3); min-width:220px; max-width:340px; width:max-content; z-index:100; white-space:normal; pointer-events:auto; }
-.stip-bubble::after { content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:var(--border-color); }
+.stip-bubble { display:none; position:absolute; top:calc(100% + 8px); left:0; background:var(--bg-secondary); color:var(--text-primary); font-size:0.78rem; font-weight:400; line-height:1.5; padding:10px 14px; border-radius:8px; border:1px solid var(--border-color); box-shadow:0 4px 20px rgba(0,0,0,0.4); min-width:240px; max-width:360px; width:max-content; z-index:200; white-space:normal; }
+.stip-bubble::before { content:''; position:absolute; bottom:100%; left:8px; border:6px solid transparent; border-bottom-color:var(--border-color); }
 .stip-open .stip-bubble { display:block; animation:stip-in 0.15s ease; }
-@keyframes stip-in { from { opacity:0; transform:translateX(-50%) translateY(4px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
-@media (max-width:600px) { .stip-bubble { left:auto; right:0; transform:none; } .stip-bubble::after { left:auto; right:12px; transform:none; } }
+.stip-open .stip-icon { background:var(--accent-green); }
+@keyframes stip-in { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
 
 /* Fix card-title + tooltip alignment globally */
 .settings-card .card-title { display:flex; align-items:center; flex-wrap:wrap; gap:4px; }
