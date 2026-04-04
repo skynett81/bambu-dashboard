@@ -614,7 +614,10 @@ function navigateFromHash() {
   if (hash && PANEL_TITLES[hash]) {
     openPanel(hash, true);
   } else if (base && PANEL_TITLES[base]) {
+    // Keep the full hash so sub-panels (e.g. settings/general/obs) can read it
     openPanel(base, true);
+    // Don't overwrite hash — let the sub-panel read the full path
+    if (hash !== base) history.replaceState(null, '', '#' + hash);
   } else if (window._activePanel) {
     showDashboard(true);
   }
