@@ -2,6 +2,10 @@
 (function() {
   window.loadSettingsPanel = loadSettings;
 
+  // Global tooltip helper — used across all settings sections
+  function _escTip(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+  const tip = (text) => `<span class="stip" onclick="this.classList.toggle('stip-open')" tabindex="0"><span class="stip-icon">?</span><span class="stip-bubble">${_escTip(text)}</span></span>`;
+
   // Ensure modal CSS exists (guards against stale SW cache)
   if (!document.getElementById('modal-css-inject')) {
     const style = document.createElement('style');
@@ -463,7 +467,6 @@
     const p = _cachedPrinters;
     const el = document.getElementById('general-sub-content');
     if (!el) return;
-    const tip = (text) => `<span class="stip" onclick="this.classList.toggle('stip-open')" tabindex="0"><span class="stip-icon">?</span><span class="stip-bubble">${_esc(text)}</span></span>`;
 
     if (_generalSubTab === 'preferences') {
       const locales = window.i18n.getSupportedLocales();
@@ -702,7 +705,6 @@
   function _renderSystemSubContent() {
     const el = document.getElementById('system-sub-content');
     if (!el) return;
-    const tip = (text) => `<span class="stip" onclick="this.classList.toggle('stip-open')" tabindex="0"><span class="stip-icon">?</span><span class="stip-bubble">${_esc(text)}</span></span>`;
 
     if (_systemSubTab === 'updates') {
       let h = '<div style="display:flex;flex-direction:column;gap:14px">';
@@ -1638,7 +1640,7 @@
       const envManaged = ac.envManaged;
       _authUsers = (ac.users || []).map(u => ({ ...u }));
 
-      const tip = (text) => `<span class="stip" onclick="this.classList.toggle('stip-open')" tabindex="0"><span class="stip-icon">?</span><span class="stip-bubble">${_esc(text)}</span></span>`;
+      // tip() defined at top of IIFE
       let html = `
         <div class="settings-card">
           <div class="card-title" style="display:flex;align-items:center;gap:4px">${t('settings.auth_title')} ${tip('Protect your dashboard with username/password login. Supports multiple users with different permission levels')}</div>`;

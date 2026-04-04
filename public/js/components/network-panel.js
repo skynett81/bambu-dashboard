@@ -28,7 +28,8 @@
   function _renderNetworkPanel(el) {
     const s = _networkSettings;
     if (!s) return;
-    const tip = (text) => `<span class="stip" onclick="this.classList.toggle('stip-open')" tabindex="0"><span class="stip-icon">?</span><span class="stip-bubble">${_esc(text)}</span></span>`;
+    const _escT = (s) => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    const tip = (text) => `<span class="stip" onclick="this.classList.toggle('stip-open')" tabindex="0"><span class="stip-icon">?</span><span class="stip-bubble">${_escT(text)}</span></span>`;
 
     let h = '';
 
