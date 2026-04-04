@@ -78,7 +78,10 @@
       h += _field('SSID (network name)', 'sm-ssid', 'text', localStorage.getItem('wifi-qr-ssid') || '');
       h += _field('Password', 'sm-pass', 'password', localStorage.getItem('wifi-qr-pass') || '');
       h += _select('Security', 'sm-enc', [['WPA', 'WPA/WPA2/WPA3'], ['WEP', 'WEP'], ['nopass', 'Open (no password)']]);
+      h += _field('Welcome text', 'sm-welcome', 'text', 'Welcome');
+      h += _field('Bottom text', 'sm-bottom', 'text', 'Enjoy WiFi');
       h += _checkbox('Hidden network', 'sm-hidden');
+      h += _checkbox('Show password on sign', 'sm-show-pass');
     } else if (id === 'url') {
       h += _field('URL', 'sm-url', 'url', location.origin);
       h += _field('Title (optional)', 'sm-title', 'text', '');
@@ -197,16 +200,30 @@
       const pass = _val('sm-pass');
       const enc = _val('sm-enc');
       const hidden = document.getElementById('sm-hidden')?.checked;
+      const welcome = _val('sm-welcome') || 'Welcome';
+      const bottom = _val('sm-bottom') || 'Enjoy WiFi';
+      const showPass = document.getElementById('sm-show-pass')?.checked;
       if (!ssid) return;
       try { localStorage.setItem('wifi-qr-ssid', ssid); localStorage.setItem('wifi-qr-pass', pass); } catch {}
       const esc = (s) => s.replace(/[\\;,:""]/g, c => '\\' + c);
       qrData = `WIFI:T:${enc};S:${esc(ssid)};P:${esc(pass)};H:${hidden ? 'true' : 'false'};;`;
       signHtml = `
-        <div style="font-size:1.6rem;font-weight:800;letter-spacing:1px">📶 WiFi</div>
-        <div style="margin:16px auto">${_makeQR(qrData, 5)}</div>
-        <div style="font-size:1.1rem;font-weight:700">${_esc(ssid)}</div>
-        ${pass && enc !== 'nopass' ? '<div style="font-size:0.85rem;color:#666;margin-top:4px">Password: <strong>' + _esc(pass) + '</strong></div>' : '<div style="color:#666;font-size:0.85rem">Open network</div>'}
-        <div style="font-size:0.6rem;color:#aaa;margin-top:10px">Scan with your phone camera to connect</div>`;
+        <div style="padding:8px 20px;font-family:'Georgia',serif">
+          <div style="font-size:2rem;font-weight:700;font-style:italic;margin-bottom:6px">${_esc(welcome)}</div>
+          <hr style="border:none;border-top:2px solid #000;margin:0 0 14px">
+          <div style="position:relative;display:inline-block;margin:0 auto">
+            ${_makeQR(qrData, 5)}
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1" fill="#000"/></svg>
+            </div>
+          </div>
+          <hr style="border:none;border-top:2px solid #000;margin:14px 0 8px">
+          <div style="font-size:1.5rem;font-weight:700;font-style:italic;margin-bottom:10px">${_esc(bottom)}</div>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 12px;text-align:left;font-size:0.9rem">
+            <strong>Name</strong><span>${_esc(ssid)}</span>
+            ${pass && enc !== 'nopass' ? '<strong>Password</strong><span>' + (showPass ? _esc(pass) : '••••••••') + '</span>' : ''}
+          </div>
+        </div>`;
 
     } else if (id === 'url') {
       const url = _val('sm-url') || location.origin;
