@@ -132,22 +132,53 @@ export class EcomLicenseManager {
     if (this._interval) clearInterval(this._interval);
   }
 
-  // ── Integrity check — detect if license-critical files have been modified ──
+  // ── Integrity check — detect modified files and report to geektech.no ──
 
   async _checkIntegrity() {
-    if (!this._integrity || !this._rootDir) return;
+    if (!this._integrity || !this._rootDir || !this._license?.license_key) return;
+
     const current = await _computeIntegrity(this._rootDir);
-    if (current.fingerprint !== this._integrity.fingerprint) {
+    const changed = current.fingerprint !== this._integrity.fingerprint;
+
+    if (changed) {
       log.warn('Integrity change detected — files modified since startup');
-      log.warn('  Startup: ' + this._integrity.fingerprint + ' Current: ' + current.fingerprint);
       for (const f of INTEGRITY_FILES) {
         if (this._integrity.files[f] !== current.files[f]) {
           log.warn('  Changed: ' + f);
         }
       }
-      // Report to geektech.no on next check-in
-      this._integrityChanged = true;
-      this._integrity = current; // update baseline so we don't report every cycle
+      this._integrity = current;
+    }
+
+    // Report to geektech.no via dedicated integrity endpoint
+    const apiUrl = this._license.geektech_api_url || GEEKTECH_API;
+    try {
+      const { readFileSync } = await import('node:fs');
+      const { join } = await import('node:path');
+      let appVersion = null;
+      try { appVersion = JSON.parse(readFileSync(join(this._rootDir, 'package.json'), 'utf8')).version; } catch {}
+
+      const { status, data } = await _httpPost(`${apiUrl}/license/integrity`, {
+        license_key: this._license.license_key,
+        instance_id: this._license.instance_id || null,
+        app_version: appVersion,
+        integrity: {
+          fingerprint: current.fingerprint,
+          files: current.files,
+          tampered: changed
+        }
+      });
+
+      if (status >= 200 && status < 300 && data.ok) {
+        // Server may respond with action to take
+        if (data.action === 'deactivate' || data.tampered === true) {
+          log.error('License deactivated by geektech.no — integrity violation');
+          setEcomLicense({ status: 'deactivated' });
+          this._license = getEcomLicense();
+        }
+      }
+    } catch (e) {
+      log.debug('Integrity report failed: ' + e.message);
     }
   }
 
@@ -265,33 +296,13 @@ export class EcomLicenseManager {
     const net = await _getNetworkInfo();
 
     try {
-      // Build payload — includes integrity data for call-home
-      const payload = {
+      const { status, data } = await _httpPost(`${apiUrl}/license/verify`, {
         license_key: this._license.license_key,
         domain: this._license.domain || null,
         ip_address: net.ip,
         mac_address: net.mac,
-        instance_id: this._license.instance_id || null,
-        app_version: null,
-        integrity: this._integrity ? {
-          fingerprint: this._integrity.fingerprint,
-          files: this._integrity.files,
-          tampered: !!this._integrityChanged
-        } : null
-      };
-
-      // Add app version
-      try {
-        const { readFileSync } = await import('node:fs');
-        const { join } = await import('node:path');
-        const pkg = JSON.parse(readFileSync(join(this._rootDir || '.', 'package.json'), 'utf8'));
-        payload.app_version = pkg.version;
-      } catch {}
-
-      // Clear tamper flag after reporting
-      if (this._integrityChanged) this._integrityChanged = false;
-
-      const { status, data } = await _httpPost(`${apiUrl}/license/verify`, payload);
+        instance_id: this._license.instance_id || null
+      });
 
       if (status >= 200 && status < 300 && data.valid) {
         // Check if server flagged integrity issue
