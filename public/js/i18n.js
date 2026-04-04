@@ -1,15 +1,15 @@
 // i18n - Lightweight internationalization module
 (function() {
   const DEFAULT_LOCALE = 'en';
-  const SUPPORTED_LOCALES = ['en', 'nb'];
+  const SUPPORTED_LOCALES = ['en'];
 
   const LOCALE_NAMES = {
-    nb: 'Norsk Bokmål', en: 'English'
+    en: 'English'
   };
 
-  const LOCALE_CURRENCY = { nb: 'NOK', en: 'USD' };
-  const LOCALE_TAG = { nb: 'nb-NO', en: 'en-US' };
-  const FALLBACK_RATES = { NOK: 9.6 };
+  const LOCALE_CURRENCY = { en: 'USD' };
+  const LOCALE_TAG = { en: 'en-US' };
+  const FALLBACK_RATES = {};
 
   let _locale = localStorage.getItem('bambu-lang') || DEFAULT_LOCALE;
   let _translations = {};

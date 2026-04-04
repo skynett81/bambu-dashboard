@@ -196,22 +196,6 @@
         <label class="form-label">Dashboard Language</label>
         <select id="cfg-language" onchange="onLanguageChange(this.value)">
           <option value="en">English</option>
-          <option value="nb">Norsk Bokm&#229;l</option>
-          <option value="de">Deutsch</option>
-          <option value="fr">Fran&#231;ais</option>
-          <option value="es">Espa&#241;ol</option>
-          <option value="it">Italiano</option>
-          <option value="ja">&#26085;&#26412;&#35486;</option>
-          <option value="ko">&#54620;&#44397;&#50612;</option>
-          <option value="nl">Nederlands</option>
-          <option value="pl">Polski</option>
-          <option value="pt_BR">Portugu&#234;s (Brasil)</option>
-          <option value="sv">Svenska</option>
-          <option value="tr">T&#252;rk&#231;e</option>
-          <option value="uk">&#1059;&#1082;&#1088;&#1072;&#1111;&#1085;&#1089;&#1100;&#1082;&#1072;</option>
-          <option value="zh_CN">&#31616;&#20307;&#20013;&#25991;</option>
-          <option value="cs">&#268;e&#353;tina</option>
-          <option value="hu">Magyar</option>
         </select>
       </div>
       <hr style="border:none; border-top:1px solid var(--border-color); margin:16px 0;">
@@ -638,48 +622,6 @@ async function launchDashboard() {
 // ── Language selection ──
 // Wizard i18n strings per language (subset for the wizard UI)
 const WIZARD_I18N = {
-  nb: {
-    title: '3DPrintForge Oppsett',
-    subtitle: 'Konfigurer 3D-printer dashboardet ditt i noen få steg',
-    authenticated: 'Autentisert',
-    step1_title: 'Systemsjekk',
-    step2_title: 'Printere',
-    step2_desc: 'Legg til dine Bambu Lab printere. Du finner IP, serienummer og LAN-tilgangskode i printerens nettverksinnstillinger.',
-    step3_title: 'Serverinnstillinger',
-    step4_title: 'Ferdig!',
-    next: 'Neste',
-    back: 'Tilbake',
-    save_finish: 'Lagre og fullfør',
-    launch: 'Start Dashboard',
-    add_printer: '+ Legg til printer',
-    printer: 'Printer',
-    name: 'Navn',
-    model: 'Modell',
-    model_placeholder: 'Velg modell...',
-    ip: 'IP-adresse',
-    serial: 'Serienummer',
-    access_code: 'LAN-tilgangskode',
-    access_code_placeholder: 'Fra printermenyen',
-    language: 'Dashboardspråk',
-    http_port: 'HTTP-port',
-    https_port: 'HTTPS-port',
-    cam_ws_port: 'Kamera WS-port start',
-    cam_res: 'Kameraoppløsning',
-    cam_fps: 'Kamera bilderate',
-    cam_bitrate: 'Kamera bitrate',
-    force_https: 'Tving HTTPS-omdirigering (krever SSL-sertifikater i /certs)',
-    cam_enabled: 'Aktiver kamerastrømming',
-    systemd: 'Opprett systemd-tjeneste for automatisk oppstart',
-    setup_complete: 'Oppsettet er fullført!',
-    setup_complete_desc: '3DPrintForge er konfigurert og klart til bruk.',
-    checking: 'Sjekker system...',
-    recheck: 'Sjekk på nytt',
-    compatible: 'Systemet er kompatibelt. Du kan fortsette oppsettet.',
-    not_compatible: 'Systemet oppfyller ikke minimumskravene. Løs problemene merket ovenfor før du fortsetter.',
-    deps_warning: 'npm-avhengigheter mangler. Installer dem ovenfor før du fortsetter.',
-    name_placeholder: 'F.eks. P2S Stua',
-    remove: 'Fjern'
-  },
   en: {
     title: '3DPrintForge Setup',
     subtitle: 'Configure your 3D printer dashboard in a few steps',
@@ -733,7 +675,7 @@ function wt(key) {
 }
 
 function onLanguageChange(lang) {
-  currentLang = (lang === 'nb' || lang === 'en') ? lang : 'en';
+  currentLang = 'en';
   localStorage.setItem('bambu-lang', lang);
   applyWizardTranslations();
 }
