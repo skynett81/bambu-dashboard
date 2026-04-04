@@ -1011,9 +1011,66 @@
       _loadPowerSettings();
 
     } else if (_systemSubTab === 'integrations') {
-      let h = '<div class="settings-grid">';
-      h += `<div class="settings-card" id="ecom-premium-card"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem"><span class="premium-badge" id="ecom-premium-badge">${t('settings.ecom_premium')}</span><div class="card-title">${t('settings.ecom_title')}</div></div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.ecom_desc')}</p><div id="ecom-license-area"><div class="text-muted" style="font-size:0.8rem">${t('settings.ecom_license_checking')}</div></div><div id="ecom-section" style="display:none"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div><button class="form-btn form-btn-primary mt-sm" id="ecom-add-btn" style="display:none" data-ripple onclick="showEcomEditor()">${t('settings.ecom_add')}</button></div>`;
-      h += `<div class="settings-card" id="orders-premium-card"><div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem"><span class="premium-badge" id="orders-premium-badge">${t('settings.ecom_premium')}</span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg><div class="card-title">${t('orders.title')}</div></div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.orders_desc') || 'Order management, kanban board, invoicing and project management.'}</p><div id="orders-license-area"><div class="text-muted" style="font-size:0.8rem">${t('settings.ecom_license_checking')}</div></div><button class="form-btn form-btn-primary mt-sm" id="orders-open-btn" style="display:none" data-ripple onclick="openPanel('orders')">${t('orders.title')} \u2192</button></div>`;
+      const iCheck = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="3" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>';
+      const iSoon = '<span style="font-size:0.65rem;padding:2px 6px;border-radius:8px;background:var(--bg-tertiary);color:var(--text-muted);font-weight:600">PLANNED</span>';
+      const brand = (name, icon, status, desc) => `<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border-color)"><div style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:var(--bg-tertiary);flex-shrink:0">${icon}</div><div style="flex:1;min-width:0"><div style="font-size:0.85rem;font-weight:600">${name}</div><div style="font-size:0.72rem;color:var(--text-muted)">${desc}</div></div>${status}</div>`;
+
+      let h = '<div style="display:flex;flex-direction:column;gap:14px">';
+
+      // Printer Connections
+      h += `<div class="settings-card">
+        <div class="card-title" style="gap:8px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6"><rect x="6" y="2" width="12" height="10" rx="2"/><path d="M6 12h12v6a2 2 0 01-2 2H8a2 2 0 01-2-2v-6z"/><line x1="6" y1="18" x2="4" y2="20"/><line x1="18" y1="18" x2="20" y2="20"/></svg>
+          Printer Connections
+        </div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">Supported printer protocols and brands</p>
+        ${brand('Bambu Lab', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 8h8v8H8z"/></svg>', iCheck, 'MQTT over TLS (port 8883) — X1C, P1S, P2S, A1, H2 series')}
+        ${brand('Moonraker / Klipper', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>', iCheck, 'WebSocket + REST API — Snapmaker, Voron, Creality, Sovol, QIDI, Ratrig')}
+        ${brand('OctoPrint', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4m-9-9h4m14 0h4"/></svg>', iSoon, 'REST API — Prusa, Ender, any OctoPrint-compatible printer')}
+        ${brand('Prusa Connect', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', iSoon, 'Prusa Connect API — MK4, MK3.9, Mini, XL')}
+        ${brand('Creality Cloud', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg>', iSoon, 'Cloud API — K1, K1 Max, Ender-3 V3, CR-10 SE')}
+        <div style="padding:10px 0 0;font-size:0.72rem;color:var(--text-muted)">More printer brands can be added via the plugin system or by request.</div>
+      </div>`;
+
+      // 3D Model Integrations
+      h += `<div class="settings-card">
+        <div class="card-title" style="gap:8px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0022 16z"/></svg>
+          3D Model & File Access
+        </div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">How 3DPrintForge accesses model files for 3D preview and toolpath rendering</p>
+        ${brand('3MF Consortium', '<span style="font-size:0.7rem;font-weight:800;color:var(--accent-blue)">3MF</span>', iCheck, 'lib3mf WASM + 3mfViewer — spec-compliant 3MF parsing and 3D viewer')}
+        ${brand('Bambu FTPS', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>', iCheck, 'Download gcode.3mf from printer via FTPS (port 990)')}
+        ${brand('Moonraker Files', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>', iCheck, 'Download gcode via HTTP API (/server/files/gcodes/)')}
+        ${brand('Gcode Toolpath', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>', iCheck, 'Server-side G0/G1 parser with per-layer colour visualisation')}
+        ${brand('Three.js Viewer', '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>', iCheck, 'r183 — smooth shading, orbit controls, clipping planes')}
+      </div>`;
+
+      // Licenses (E-Commerce / Orders)
+      h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px">';
+
+      h += `<div class="settings-card" id="ecom-premium-card">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:8px">
+          <span class="premium-badge" id="ecom-premium-badge">${t('settings.ecom_premium')}</span>
+          <div class="card-title" style="margin:0">${t('settings.ecom_title')}</div>
+        </div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.ecom_desc')}</p>
+        <div id="ecom-license-area"><div class="text-muted" style="font-size:0.8rem">${t('settings.ecom_license_checking')}</div></div>
+        <div id="ecom-section" style="display:none"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div>
+        <button class="form-btn form-btn-primary mt-sm" id="ecom-add-btn" style="display:none" data-ripple onclick="showEcomEditor()">${t('settings.ecom_add')}</button>
+      </div>`;
+
+      h += `<div class="settings-card" id="orders-premium-card">
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:8px">
+          <span class="premium-badge" id="orders-premium-badge">${t('settings.ecom_premium')}</span>
+          <div class="card-title" style="margin:0">${t('orders.title')}</div>
+        </div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.orders_desc') || 'Order management, kanban board, invoicing and project management.'}</p>
+        <div id="orders-license-area"><div class="text-muted" style="font-size:0.8rem">${t('settings.ecom_license_checking')}</div></div>
+        <button class="form-btn form-btn-primary mt-sm" id="orders-open-btn" style="display:none" data-ripple onclick="openPanel('orders')">${t('orders.title')} →</button>
+      </div>`;
+
+      h += '</div>';
       h += '</div>';
       el.innerHTML = h;
       loadEcomLicenseStatus();
