@@ -334,7 +334,7 @@
       } else {
         let h = '<div style="display:flex;flex-direction:column;gap:14px">';
         for (const pr of printers) {
-          const state = window.printerState?._printerStates?.[pr.id];
+          const state = window.printerState?._printers?.[pr.id];
           const isOnline = !!state;
           const dotColor = isOnline ? 'var(--accent-green)' : 'var(--accent-red)';
           h += `<div class="settings-card">
@@ -353,7 +353,7 @@
         for (const pr of printers) {
           const infoEl = document.getElementById('settings-printer-info-' + pr.id);
           if (!infoEl) continue;
-          const pState = window.printerState?._printerStates?.[pr.id];
+          const pState = window.printerState?._printers?.[pr.id];
           const data = pState?.print || pState || {};
           const isOnline = !!pState;
           const row = (label, value) => `<tr><td style="padding:3px 12px 3px 0;font-size:0.8rem;color:var(--text-muted);white-space:nowrap">${label}</td><td style="padding:3px 0;font-size:0.8rem;font-weight:600">${value}</td></tr>`;
