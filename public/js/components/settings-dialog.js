@@ -2,9 +2,9 @@
 (function() {
   window.loadSettingsPanel = loadSettings;
 
-  // Global tooltip helper — used across all settings sections
+  // Global tooltip helper — simple title-based tooltip on a blue info icon
   function _escTip(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
-  const tip = (text) => `<span class="stip" onclick="this.classList.toggle('stip-open')" tabindex="0"><span class="stip-icon">?</span><span class="stip-bubble">${_escTip(text)}</span></span>`;
+  const tip = (text) => `<span title="${_escTip(text)}" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--accent-blue);color:#fff;font-size:0.6rem;font-weight:700;cursor:help;margin-left:6px;flex-shrink:0;vertical-align:middle" onclick="const p=this.nextElementSibling;if(p&&p.classList.contains('tip-text')){p.remove();return;}const d=document.createElement('div');d.className='tip-text';d.style.cssText='font-size:0.78rem;font-weight:400;color:var(--text-secondary);padding:8px 12px;margin-top:8px;background:var(--bg-tertiary);border-radius:6px;border-left:3px solid var(--accent-blue);line-height:1.5';d.textContent=this.getAttribute('title');this.parentElement.appendChild(d)">?</span>`;
 
   // Ensure modal CSS exists (guards against stale SW cache)
   if (!document.getElementById('modal-css-inject')) {
