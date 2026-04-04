@@ -33,46 +33,46 @@
 
     // ── Detected Subnets (read-only) ──
     h += '<div class="settings-card">';
-    h += '<div class="card-title" style="margin-bottom:10px">Oppdagede subnett</div>';
-    h += '<div class="text-muted" style="font-size:0.8rem;margin-bottom:8px">Automatisk oppdaget fra nettverksgrensesnittene.</div>';
+    h += '<div class="card-title" style="margin-bottom:10px">' + (typeof t === 'function' ? t('network.detected_subnets') : 'Oppdagede subnett') + '</div>';
+    h += '<div class="text-muted" style="font-size:0.8rem;margin-bottom:8px">' + (typeof t === 'function' ? t('network.detected_subnets_hint') : 'Automatisk oppdaget fra nettverksgrensesnittene.') + '</div>';
     h += '<div class="net-chip-list" id="net-detected-subnets">';
     if (s.detectedSubnets && s.detectedSubnets.length) {
       for (const subnet of s.detectedSubnets) {
         h += '<span class="net-chip net-chip-readonly">' + _esc(subnet) + '</span>';
       }
     } else {
-      h += '<span class="text-muted" style="font-size:0.8rem">Ingen subnett oppdaget</span>';
+      h += '<span class="text-muted" style="font-size:0.8rem">' + (typeof t === 'function' ? t('network.no_subnets_detected') : 'Ingen subnett oppdaget') + '</span>';
     }
     h += '</div></div>';
 
     // ── Extra Subnets ──
     h += '<div class="settings-card mt-sm">';
-    h += '<div class="card-title" style="margin-bottom:10px">Ekstra subnett</div>';
-    h += '<div class="text-muted" style="font-size:0.8rem;margin-bottom:8px">Legg til subnett som skal skannes i tillegg til de automatisk oppdagede.</div>';
+    h += '<div class="card-title" style="margin-bottom:10px">' + (typeof t === 'function' ? t('network.extra_subnets') : 'Ekstra subnett') + '</div>';
+    h += '<div class="text-muted" style="font-size:0.8rem;margin-bottom:8px">' + (typeof t === 'function' ? t('network.extra_subnets_hint') : 'Legg til subnett som skal skannes i tillegg til de automatisk oppdagede.') + '</div>';
     h += '<div class="net-chip-list" id="net-extra-subnets">';
     if (s.extraSubnets && s.extraSubnets.length) {
       for (const subnet of s.extraSubnets) {
         h += '<span class="net-chip net-chip-removable">' + _esc(subnet);
-        h += '<button class="net-chip-remove" onclick="window._removeExtraSubnet(\'' + _esc(subnet) + '\')" title="Fjern">&times;</button>';
+        h += '<button class="net-chip-remove" onclick="window._removeExtraSubnet(\'' + _esc(subnet) + '\')" title="' + (typeof t === 'function' ? t('network.remove') : 'Fjern') + '">&times;</button>';
         h += '</span>';
       }
     }
     h += '</div>';
     h += '<div style="display:flex;gap:8px;margin-top:8px;align-items:center">';
     h += '<input type="text" class="form-input" id="net-new-subnet" placeholder="f.eks. 10.0.0.0" style="max-width:200px;font-size:0.85rem" onkeydown="if(event.key===\'Enter\')window._addExtraSubnet()">';
-    h += '<button class="form-btn form-btn-sm form-btn-primary" data-ripple onclick="window._addExtraSubnet()">Legg til</button>';
+    h += '<button class="form-btn form-btn-sm form-btn-primary" data-ripple onclick="window._addExtraSubnet()">' + (typeof t === 'function' ? t('network.add') : 'Legg til') + '</button>';
     h += '</div>';
     h += '</div>';
 
     // ── Scan Settings ──
     h += '<div class="settings-card mt-sm">';
-    h += '<div class="card-title" style="margin-bottom:10px">Skanneinnstillinger</div>';
+    h += '<div class="card-title" style="margin-bottom:10px">' + (typeof t === 'function' ? t('network.scan_settings') : 'Skanneinnstillinger') + '</div>';
     h += '<div class="prefs-compact-grid">';
 
     // Rediscovery interval
     const interval = s.rediscoveryIntervalSeconds || 60;
     h += '<div class="prefs-row">';
-    h += '<span class="prefs-label">Gjenoppdagelsesintervall</span>';
+    h += '<span class="prefs-label">' + (typeof t === 'function' ? t('network.rediscovery_interval') : 'Gjenoppdagelsesintervall') + '</span>';
     h += '<div style="display:flex;align-items:center;gap:8px">';
     h += '<input type="range" id="net-rediscovery-interval" min="10" max="600" step="10" value="' + interval + '" style="width:140px;accent-color:var(--accent-green)" oninput="document.getElementById(\'net-interval-val\').textContent=this.value+\'s\'">';
     h += '<span id="net-interval-val" style="font-size:0.8rem;min-width:35px;opacity:0.7">' + interval + 's</span>';
@@ -81,7 +81,7 @@
     // Scan timeout
     const timeout = s.scanTimeoutMs || 5000;
     h += '<div class="prefs-row">';
-    h += '<span class="prefs-label">Skanne-timeout</span>';
+    h += '<span class="prefs-label">' + (typeof t === 'function' ? t('network.scan_timeout') : 'Skanne-timeout') + '</span>';
     h += '<div style="display:flex;align-items:center;gap:8px">';
     h += '<input type="range" id="net-scan-timeout" min="1000" max="30000" step="500" value="' + timeout + '" style="width:140px;accent-color:var(--accent-green)" oninput="document.getElementById(\'net-timeout-val\').textContent=(this.value/1000)+\'s\'">';
     h += '<span id="net-timeout-val" style="font-size:0.8rem;min-width:35px;opacity:0.7">' + (timeout / 1000) + 's</span>';
@@ -90,21 +90,21 @@
     h += '</div>'; // end prefs-compact-grid
 
     h += '<div style="margin-top:12px;display:flex;gap:8px">';
-    h += '<button class="form-btn form-btn-primary" data-ripple onclick="window._saveNetworkSettings()">Lagre innstillinger</button>';
+    h += '<button class="form-btn form-btn-primary" data-ripple onclick="window._saveNetworkSettings()">' + (typeof t === 'function' ? t('network.save_settings') : 'Lagre innstillinger') + '</button>';
     h += '</div>';
     h += '</div>';
 
     // ── Network Scan ──
     h += '<div class="settings-card mt-sm">';
     h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
-    h += '<div class="card-title" style="margin:0">Nettverksskanning</div>';
+    h += '<div class="card-title" style="margin:0">' + (typeof t === 'function' ? t('network.network_scan') : 'Nettverksskanning') + '</div>';
     h += '<button class="form-btn form-btn-sm form-btn-accent" id="net-scan-btn" data-ripple onclick="window._runNetworkScan()" ' + (_scanning ? 'disabled' : '') + '>';
     h += _scanning
-      ? '<span class="spinner-sm"></span> Skanner...'
-      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> Sak etter printere';
+      ? '<span class="spinner-sm"></span> ' + (typeof t === 'function' ? t('network.scanning') : 'Skanner...')
+      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg> ' + (typeof t === 'function' ? t('network.scan_for_printers') : 'Søk etter printere');
     h += '</button>';
     h += '</div>';
-    h += '<div class="text-muted" style="font-size:0.8rem;margin-bottom:8px">Utfor en full nettverksskanning (Bambu SSDP + Moonraker) for a finne printere.</div>';
+    h += '<div class="text-muted" style="font-size:0.8rem;margin-bottom:8px">' + (typeof t === 'function' ? t('network.scan_hint') : 'Utfør en full nettverksskanning (Bambu SSDP + Moonraker) for å finne printere.') + '</div>';
     h += '<div id="net-scan-results">';
     if (_scanResults) {
       h += _renderScanResults(_scanResults);
@@ -119,7 +119,7 @@
     const bambu = results.bambu || [];
     const moonraker = results.moonraker || [];
     if (!bambu.length && !moonraker.length) {
-      return '<div class="text-muted" style="font-size:0.85rem;padding:12px 0">Ingen printere funnet.</div>';
+      return '<div class="text-muted" style="font-size:0.85rem;padding:12px 0">' + (typeof t === 'function' ? t('network.no_printers_found') : 'Ingen printere funnet.') + '</div>';
     }
 
     let h = '';
@@ -137,9 +137,9 @@
         h += '<span>' + _esc(p.model || '-') + '</span>';
         h += '<span class="net-cell-mono" style="font-size:0.75rem">' + _esc(p.serial || '-') + '</span>';
         if (added) {
-          h += '<span class="pill pill-completed" style="font-size:0.7rem">Lagt til</span>';
+          h += '<span class="pill pill-completed" style="font-size:0.7rem">' + (typeof t === 'function' ? t('network.already_added') : 'Lagt til') + '</span>';
         } else {
-          h += '<button class="form-btn form-btn-sm form-btn-primary" data-ripple onclick="window._addDiscoveredPrinter(\'bambu\', \'' + _esc(p.ip) + '\', \'' + _esc(p.serial || '') + '\', \'' + _esc(p.name || '') + '\', \'' + _esc(p.model || '') + '\')">Legg til</button>';
+          h += '<button class="form-btn form-btn-sm form-btn-primary" data-ripple onclick="window._addDiscoveredPrinter(\'bambu\', \'' + _esc(p.ip) + '\', \'' + _esc(p.serial || '') + '\', \'' + _esc(p.name || '') + '\', \'' + _esc(p.model || '') + '\')">' + (typeof t === 'function' ? t('network.add_printer') : 'Legg til') + '</button>';
         }
         h += '</div>';
       }
@@ -159,9 +159,9 @@
         h += '<span>' + _esc(p.software || '-') + '</span>';
         h += '<span>' + _esc(p.state || '-') + '</span>';
         if (added) {
-          h += '<span class="pill pill-completed" style="font-size:0.7rem">Lagt til</span>';
+          h += '<span class="pill pill-completed" style="font-size:0.7rem">' + (typeof t === 'function' ? t('network.already_added') : 'Lagt til') + '</span>';
         } else {
-          h += '<button class="form-btn form-btn-sm form-btn-primary" data-ripple onclick="window._addDiscoveredPrinter(\'moonraker\', \'' + _esc(p.ip) + '\', \'\', \'' + _esc(p.hostname || '') + '\', \'\')">Legg til</button>';
+          h += '<button class="form-btn form-btn-sm form-btn-primary" data-ripple onclick="window._addDiscoveredPrinter(\'moonraker\', \'' + _esc(p.ip) + '\', \'\', \'' + _esc(p.hostname || '') + '\', \'\')">' + (typeof t === 'function' ? t('network.add_printer') : 'Legg til') + '</button>';
         }
         h += '</div>';
       }

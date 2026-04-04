@@ -4882,25 +4882,25 @@
       const ratingColors = { excellent: '#00c864', good: '#4aa3df', fair: '#f0883e', poor: '#e53935', not_recommended: '#666' };
       const ratingLabels = { excellent: 'Utmerket', good: 'Bra', fair: 'Greit', poor: 'Dårlig', not_recommended: 'Nei' };
       const glueIcons = { required: '⚠️', recommended: '📌', optional: 'ℹ️', not_needed: '✅' };
-      const glueLabels = { required: 'Påkrevd', recommended: 'Anbefalt', optional: 'Valgfritt', not_needed: 'Nei' };
+      const glueLabels = { required: t('filament.plate_glue_required'), recommended: t('filament.plate_glue_recommended'), optional: t('filament.plate_glue_optional'), not_needed: t('filament.plate_glue_not_needed') };
       const glueColors = { required: '#e53935', recommended: '#f0883e', optional: '#4aa3df', not_needed: '#00c864' };
 
       // Info box
       let h = `<div style="background:var(--bg-tertiary);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;font-size:0.8rem;color:var(--text-secondary);line-height:1.5">
-        <b>Plate-kompatibilitet</b> viser hvilken byggplate som gir best heft for hvert filamentmateriale.
-        Feil plate kan føre til at deler løsner under print, eller at PETG permanent binder seg til platen.
-        <b>Limstift</b>-kolonnen viser om du trenger limstift for å unngå problemer.
+        <b>${t('filament.plate_compat_title')}</b> ${t('filament.plate_compat_desc')}
+        ${t('filament.plate_wrong_warning')}
+        <b>${t('filament.plate_glue_label')}</b>${t('filament.plate_glue_desc')}
       </div>`;
 
       // Legend
       h += `<div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:0.75rem">
-        <span><span style="color:${ratingColors.excellent}">★★★</span> Utmerket</span>
-        <span><span style="color:${ratingColors.good}">★★</span> Bra</span>
-        <span><span style="color:${ratingColors.fair}">★</span> Greit</span>
-        <span><span style="color:${ratingColors.not_recommended}">⊘</span> Ikke anbefalt</span>
-        <span style="margin-left:12px">⚠️ Limstift påkrevd</span>
-        <span>📌 Anbefalt</span>
-        <span>✅ Ikke nødvendig</span>
+        <span><span style="color:${ratingColors.excellent}">★★★</span> ${t('filament.plate_rating_excellent')}</span>
+        <span><span style="color:${ratingColors.good}">★★</span> ${t('filament.plate_rating_good')}</span>
+        <span><span style="color:${ratingColors.fair}">★</span> ${t('filament.plate_rating_fair')}</span>
+        <span><span style="color:${ratingColors.not_recommended}">⊘</span> ${t('filament.plate_rating_not_recommended')}</span>
+        <span style="margin-left:12px">⚠️ ${t('filament.plate_glue_required_legend')}</span>
+        <span>📌 ${t('filament.plate_glue_recommended_legend')}</span>
+        <span>✅ ${t('filament.plate_glue_not_needed_legend')}</span>
       </div>`;
 
       // Table

@@ -19,7 +19,8 @@
   function _estimateFinishTime(remainingSec) {
     if (remainingSec <= 0) return '';
     const finish = new Date(Date.now() + remainingSec * 1000);
-    return 'Ferdig kl. ' + String(finish.getHours()).padStart(2, '0') + ':' + String(finish.getMinutes()).padStart(2, '0');
+    const timeStr = String(finish.getHours()).padStart(2, '0') + ':' + String(finish.getMinutes()).padStart(2, '0');
+    return (typeof t === 'function' ? t('countdown.finish_at', { time: timeStr }) : null) || ('Ferdig kl. ' + timeStr);
   }
 
   function _truncateFilename(name, maxLen) {
@@ -63,7 +64,7 @@
 
   function _showIdle(container) {
     if (!container.querySelector('.countdown-idle')) {
-      container.innerHTML = '<div class="countdown-idle">Ingen aktiv utskrift</div>';
+      container.innerHTML = '<div class="countdown-idle">' + (typeof t === 'function' ? t('countdown.no_active_print') : 'Ingen aktiv utskrift') + '</div>';
       _built = false;
     }
   }

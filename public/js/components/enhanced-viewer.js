@@ -672,13 +672,13 @@
         <div class="lib-3d-toolbar"><h4>${_escText(title || '3D')}</h4><div style="flex:1"></div><button class="lib-3d-btn" onclick="close3DPreview()" style="font-size:1.1rem;padding:4px 10px">&times;</button></div>
         <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:20px" id="_g3d-upload-area" data-history-id="${(apiUrl.match(/source=history&id=(\d+)/) || [])[1] || ''}"
           <div style="color:var(--accent-red);font-size:0.9rem">${_escText(e.message)}</div>
-          <div style="color:var(--text-muted);font-size:0.8rem;text-align:center;max-width:400px">Dra en .3mf-fil hit for å lagre den til denne printen</div>
+          <div style="color:var(--text-muted);font-size:0.8rem;text-align:center;max-width:400px">${typeof t === 'function' ? t('viewer.drag_3mf_hint') : 'Dra en .3mf-fil hit for å lagre den til denne printen'}</div>
           <div id="_g3d-dropzone" style="border:2px dashed var(--border-color);border-radius:12px;padding:30px 50px;cursor:pointer;transition:border-color 0.2s;text-align:center;color:var(--text-muted)" onclick="document.getElementById('_g3d-file-input').click()">
             <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            <div style="margin-top:8px;font-size:0.85rem">Slipp .3mf-fil her</div>
+            <div style="margin-top:8px;font-size:0.85rem">${typeof t === 'function' ? t('viewer.drop_3mf_here') : 'Slipp .3mf-fil her'}</div>
             <input type="file" id="_g3d-file-input" accept=".3mf" style="display:none" onchange="_g3dHandleFile(this.files[0])">
           </div>
-          <button class="lib-3d-btn" onclick="close3DPreview()" style="padding:8px 20px">Lukk</button>
+          <button class="lib-3d-btn" onclick="close3DPreview()" style="padding:8px 20px">${typeof t === 'function' ? t('viewer.close') : 'Lukk'}</button>
         </div>
       </div>`;
       document.body.appendChild(overlay);
@@ -711,7 +711,7 @@
         <button class="lib-3d-btn" id="_g3d-wireframe" onclick="_g3dToggleWireframe()">Wireframe</button>
         <button class="lib-3d-btn" id="_g3d-shading" onclick="_g3dToggleShading()">Flat</button>
         <button class="lib-3d-btn" onclick="_g3dResetView()">Reset</button>
-        ${_histId ? `<div style="flex:1"></div><button class="lib-3d-btn" onclick="_g3dUpload3mf(${_histId})" title="Last opp / erstatt 3MF">&#x21E7; 3MF</button><button class="lib-3d-btn" id="_g3d-del-btn" style="color:var(--accent-red);display:${_hasLinked ? '' : 'none'}" onclick="_g3dDelete3mf(${_histId})" title="Slett lagret 3MF">&#x2715;</button>` : ''}
+        ${_histId ? `<div style="flex:1"></div><button class="lib-3d-btn" onclick="_g3dUpload3mf(${_histId})" title="${typeof t === 'function' ? t('viewer.upload_replace_3mf') : 'Last opp / erstatt 3MF'}">&#x21E7; 3MF</button><button class="lib-3d-btn" id="_g3d-del-btn" style="color:var(--accent-red);display:${_hasLinked ? '' : 'none'}" onclick="_g3dDelete3mf(${_histId})" title="${typeof t === 'function' ? t('viewer.delete_saved_3mf') : 'Slett lagret 3MF'}">&#x2715;</button>` : ''}
         <button class="lib-3d-btn" onclick="close3DPreview()" style="font-size:1.1rem;padding:4px 10px">&times;</button>
       </div>
       <div class="lib-3d-content">
@@ -793,7 +793,7 @@
       const loading = document.getElementById('_g3d-loading');
       if (loading) {
         loading.style.color = 'var(--accent-red)';
-        loading.innerHTML = `<div style="text-align:center"><div style="margin-bottom:12px">${_escText(e.message)}</div><button class="lib-3d-btn" onclick="close3DPreview()" style="padding:8px 20px">Lukk</button></div>`;
+        loading.innerHTML = `<div style="text-align:center"><div style="margin-bottom:12px">${_escText(e.message)}</div><button class="lib-3d-btn" onclick="close3DPreview()" style="padding:8px 20px">${typeof t === 'function' ? t('viewer.close') : 'Lukk'}</button></div>`;
       }
     }
   };
@@ -856,9 +856,9 @@
 
   // Delete 3MF from inside the viewer modal
   window._g3dDelete3mf = async function(historyId) {
-    if (!confirm('Slett lagret 3MF?')) return;
+    if (!confirm(typeof t === 'function' ? t('viewer.confirm_delete_3mf') : 'Slett lagret 3MF?')) return;
     await fetch(`/api/history/${historyId}/model-3mf`, { method: 'DELETE' });
-    if (typeof showToast === 'function') showToast('3MF slettet', 'success');
+    if (typeof showToast === 'function') showToast(typeof t === 'function' ? t('viewer.3mf_deleted') : '3MF slettet', 'success');
     const delBtn = document.getElementById('_g3d-del-btn');
     if (delBtn) delBtn.style.display = 'none';
     close3DPreview();
@@ -867,7 +867,7 @@
   // Handle user-uploaded 3MF file for preview — saves it to history entry
   window._g3dHandleFile = async function(file) {
     if (!file || !file.name.endsWith('.3mf')) {
-      if (typeof showToast === 'function') showToast('Bare .3mf-filer støttes', 'error');
+      if (typeof showToast === 'function') showToast(typeof t === 'function' ? t('viewer.only_3mf_supported') : 'Bare .3mf-filer støttes', 'error');
       return;
     }
 
@@ -962,7 +962,7 @@
         <h4>${_escText(title || '3MF Viewer')}</h4>
         <span style="font-size:0.65rem;color:var(--text-muted);margin-left:8px">Powered by 3MF Consortium</span>
         <div style="flex:1"></div>
-        ${hid ? `<button class="lib-3d-btn" onclick="_g3dUpload3mf(${hid})" title="Erstatt 3MF">&#x21E7; Erstatt</button><button class="lib-3d-btn" id="_g3d-del-btn" style="color:var(--accent-red)" onclick="_g3dDelete3mf(${hid})" title="Slett 3MF">&#x2715;</button>` : ''}
+        ${hid ? `<button class="lib-3d-btn" onclick="_g3dUpload3mf(${hid})" title="${typeof t === 'function' ? t('viewer.replace_3mf') : 'Erstatt 3MF'}">&#x21E7; ${typeof t === 'function' ? t('viewer.replace') : 'Erstatt'}</button><button class="lib-3d-btn" id="_g3d-del-btn" style="color:var(--accent-red)" onclick="_g3dDelete3mf(${hid})" title="${typeof t === 'function' ? t('viewer.delete_3mf') : 'Slett 3MF'}">&#x2715;</button>` : ''}
         <button class="lib-3d-btn" onclick="close3DPreview()" style="font-size:1.1rem;padding:4px 10px">&times;</button>
       </div>
       <div id="_3mf-embed-container" style="flex:1;min-height:0"></div>

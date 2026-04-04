@@ -118,7 +118,7 @@
 
   function renderConsumption() {
     const items = _data.consumption || [];
-    if (!items.length) return emptyState('📊', 'Ingen forbruksdata ennå', 'Data samles automatisk etter hver printavslutning.');
+    if (!items.length) return emptyState('📊', t('filament_analytics.no_consumption_data'), t('filament_analytics.consumption_data_hint'));
 
     // Hero summary
     const totUsed = items.reduce((a, r) => a + (r.total_used_g || 0), 0);
@@ -127,15 +127,15 @@
     const totSuccess = items.reduce((a, r) => a + (r.total_success || 0), 0);
 
     let html = '<div class="fa-heroes">';
-    html += hero('green', 'Totalt forbrukt', fmtW(totUsed), `${items.length} materialer`);
-    html += hero('amber', 'Total waste', fmtW(totWaste), fmtPct(totWaste * 100 / (totUsed + totWaste || 1)) + ' waste-andel');
-    html += hero('blue', 'Antall prints', fmtNum(totPrints), `${fmtPct(totSuccess * 100 / (totPrints || 1))} fullført`);
-    html += hero('purple', 'Snitt per dag', fmtW(items.reduce((a, r) => a + (r.avg_daily_g || 0), 0)), 'på tvers av alle materialer');
+    html += hero('green', t('filament_analytics.total_consumed'), fmtW(totUsed), `${items.length} ${t('filament_analytics.materials')}`);
+    html += hero('amber', t('filament_analytics.total_waste'), fmtW(totWaste), fmtPct(totWaste * 100 / (totUsed + totWaste || 1)) + ' ' + t('filament_analytics.waste_share'));
+    html += hero('blue', t('filament_analytics.print_count'), fmtNum(totPrints), `${fmtPct(totSuccess * 100 / (totPrints || 1))} ${t('filament_analytics.completed_pct')}`);
+    html += hero('purple', t('filament_analytics.avg_per_day'), fmtW(items.reduce((a, r) => a + (r.avg_daily_g || 0), 0)), t('filament_analytics.across_all_materials'));
     html += '</div>';
 
-    html += '<div class="fa-section"><div class="fa-section-title">Forbruk per materiale <span class="fa-section-badge">Siste 30 dager</span></div>';
+    html += '<div class="fa-section"><div class="fa-section-title">' + t('filament_analytics.consumption_per_material') + ' <span class="fa-section-badge">' + t('filament_analytics.last_30_days') + '</span></div>';
     html += '<div class="fa-table-wrap"><table class="fa-table"><thead><tr>';
-    html += '<th>Materiale</th><th>Merke</th><th class="num">Forbrukt</th><th class="num">Waste</th><th class="num">Waste %</th><th class="num">Prints</th><th class="num">Suksessrate</th><th class="num">Snitt/dag</th><th class="num">Aktive dager</th>';
+    html += '<th>' + t('filament_analytics.material') + '</th><th>' + t('filament_analytics.brand') + '</th><th class="num">' + t('filament_analytics.consumed') + '</th><th class="num">Waste</th><th class="num">' + t('filament_analytics.waste_pct') + '</th><th class="num">' + t('filament_analytics.prints') + '</th><th class="num">' + t('filament_analytics.success_rate') + '</th><th class="num">' + t('filament_analytics.avg_day') + '</th><th class="num">' + t('filament_analytics.active_days') + '</th>';
     html += '</tr></thead><tbody>';
     for (const r of items) {
       html += `<tr>
@@ -179,7 +179,7 @@
 
   function renderWaste() {
     const items = _data.waste || [];
-    if (!items.length) return emptyState('🗑️', 'Ingen svinndata ennå', 'Svinndata samles automatisk fra printhistorikken.');
+    if (!items.length) return emptyState('🗑️', t('filament_analytics.no_waste_data'), t('filament_analytics.waste_data_hint'));
 
     const totWaste = items.reduce((a, r) => a + (r.total_waste_g || 0), 0);
     const totUsed = items.reduce((a, r) => a + (r.total_used_g || 0), 0);
@@ -214,23 +214,23 @@
 
   function renderEfficiency() {
     const items = _data.efficiency || [];
-    if (!items.length) return emptyState('⚡', 'Ingen effektivitetsdata ennå', 'Data beregnes fra printhistorikken din.');
+    if (!items.length) return emptyState('⚡', t('filament_analytics.no_efficiency_data'), t('filament_analytics.efficiency_data_hint'));
 
-    let html = '<div class="fa-section"><div class="fa-section-title">Materialeffektivitet <span class="fa-section-badge">Siste 30 dager</span></div>';
+    let html = '<div class="fa-section"><div class="fa-section-title">' + t('filament_analytics.material_efficiency') + ' <span class="fa-section-badge">' + t('filament_analytics.last_30_days') + '</span></div>';
     html += '<div class="fa-cards">';
     for (const r of items) {
       html += `<div class="fa-card">
         <div class="fa-card-header">
           <div class="fa-card-name">${r.material || '–'} ${r.brand ? '(' + r.brand + ')' : ''}</div>
-          <span class="fc-mat-badge ${(r.success_rate || 0) > 90 ? 'ok' : (r.success_rate || 0) > 70 ? 'low' : 'critical'}">${fmtPct(r.success_rate)} suksess</span>
+          <span class="fc-mat-badge ${(r.success_rate || 0) > 90 ? 'ok' : (r.success_rate || 0) > 70 ? 'low' : 'critical'}">${fmtPct(r.success_rate)} ${t('filament_analytics.success')}</span>
         </div>
         <div class="fa-rows">
-          <div class="fa-row"><span>Prints</span><span>${fmtNum(r.print_count)}</span></div>
-          <div class="fa-row"><span>Snitt gram/print</span><span>${fmtW(r.avg_g_per_print)}</span></div>
-          <div class="fa-row"><span>Gram/time</span><span>${r.g_per_hour ? fmtNum(r.g_per_hour, 1) + ' g/t' : '–'}</span></div>
-          <div class="fa-row"><span>Snitt printtid</span><span>${r.avg_print_minutes ? fmtNum(r.avg_print_minutes, 0) + ' min' : '–'}</span></div>
-          <div class="fa-row"><span>Snitt dysediameter</span><span>${r.avg_nozzle_mm ? fmtNum(r.avg_nozzle_mm, 2) + ' mm' : '–'}</span></div>
-          <div class="fa-row"><span>Snitt fartsnivå</span><span>${r.avg_speed_level ? fmtNum(r.avg_speed_level, 1) : '–'}</span></div>
+          <div class="fa-row"><span>${t('filament_analytics.prints')}</span><span>${fmtNum(r.print_count)}</span></div>
+          <div class="fa-row"><span>${t('filament_analytics.avg_g_per_print')}</span><span>${fmtW(r.avg_g_per_print)}</span></div>
+          <div class="fa-row"><span>${t('filament_analytics.g_per_hour')}</span><span>${r.g_per_hour ? fmtNum(r.g_per_hour, 1) + ' g/t' : '–'}</span></div>
+          <div class="fa-row"><span>${t('filament_analytics.avg_print_time')}</span><span>${r.avg_print_minutes ? fmtNum(r.avg_print_minutes, 0) + ' min' : '–'}</span></div>
+          <div class="fa-row"><span>${t('filament_analytics.avg_nozzle_diameter')}</span><span>${r.avg_nozzle_mm ? fmtNum(r.avg_nozzle_mm, 2) + ' mm' : '–'}</span></div>
+          <div class="fa-row"><span>${t('filament_analytics.avg_speed_level')}</span><span>${r.avg_speed_level ? fmtNum(r.avg_speed_level, 1) : '–'}</span></div>
         </div>
       </div>`;
     }
@@ -242,21 +242,21 @@
 
   function renderCost() {
     const items = _data.cost || [];
-    if (!items.length) return emptyState('💰', 'Ingen kostnadsdata', 'Legg til innkjøpskostnad på spolene i filament-inventaret.');
+    if (!items.length) return emptyState('💰', t('filament_analytics.no_cost_data'), t('filament_analytics.cost_data_hint'));
 
     const totSpent = items.reduce((a, r) => a + (r.total_spent || 0), 0);
     const totRemain = items.reduce((a, r) => a + (r.total_remaining_g || 0), 0);
     const totConsumed = items.reduce((a, r) => a + (r.total_consumed_g || 0), 0);
 
     let html = '<div class="fa-heroes">';
-    html += hero('green', 'Total investert', fmtKr(totSpent), `${items.reduce((a, r) => a + (r.spool_count || 0), 0)} spoler`);
-    html += hero('blue', 'Forbrukt', fmtW(totConsumed), fmtPct(totConsumed * 100 / (totConsumed + totRemain || 1)) + ' utnyttet');
-    html += hero('purple', 'Gjenstående lager', fmtW(totRemain), 'på lager');
+    html += hero('green', t('filament_analytics.total_invested'), fmtKr(totSpent), `${items.reduce((a, r) => a + (r.spool_count || 0), 0)} ${t('filament_analytics.spools')}`);
+    html += hero('blue', t('filament_analytics.consumed'), fmtW(totConsumed), fmtPct(totConsumed * 100 / (totConsumed + totRemain || 1)) + ' ' + t('filament_analytics.utilized'));
+    html += hero('purple', t('filament_analytics.remaining_stock'), fmtW(totRemain), t('filament_analytics.in_stock'));
     html += '</div>';
 
-    html += '<div class="fa-section"><div class="fa-section-title">Kostnad per materiale og leverandør</div>';
+    html += '<div class="fa-section"><div class="fa-section-title">' + t('filament_analytics.cost_per_material') + '</div>';
     html += '<div class="fa-table-wrap"><table class="fa-table"><thead><tr>';
-    html += '<th>Materiale</th><th>Leverandør</th><th class="num">Spoler</th><th class="num">Snitt kr/g</th><th class="num">Min kr/g</th><th class="num">Maks kr/g</th><th class="num">Investert</th><th class="num">Forbrukt</th><th class="num">Gjenstår</th><th class="num">Utnyttelse</th>';
+    html += '<th>' + t('filament_analytics.material') + '</th><th>' + t('filament_analytics.vendor') + '</th><th class="num">' + t('filament_analytics.spools') + '</th><th class="num">' + t('filament_analytics.avg_cost_per_g') + '</th><th class="num">' + t('filament_analytics.min_cost_per_g') + '</th><th class="num">' + t('filament_analytics.max_cost_per_g') + '</th><th class="num">' + t('filament_analytics.invested') + '</th><th class="num">' + t('filament_analytics.consumed') + '</th><th class="num">' + t('filament_analytics.remaining') + '</th><th class="num">' + t('filament_analytics.utilization') + '</th>';
     html += '</tr></thead><tbody>';
     for (const r of items) {
       const utilPct = r.utilization_pct || 0;
@@ -285,11 +285,11 @@
     let html = '<div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">';
     html += `<button class="btn btn-sm" onclick="window._recalcFilamentAnalytics()" style="background:var(--accent-blue);color:#fff;border:none;cursor:pointer">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v9h-9"/></svg>
-      Rekalkulér data (90 dager)
+      ${t('filament_analytics.recalculate_data')}
     </button>`;
     html += '</div>';
 
-    if (!items.length) return html + emptyState('📈', 'Ingen forbruksrater beregnet', 'Klikk «Rekalkulér» for å generere forbruksrater fra printhistorikken.');
+    if (!items.length) return html + emptyState('📈', t('filament_analytics.no_consumption_rates'), t('filament_analytics.consumption_rates_hint'));
 
     html += '<div class="fa-cards">';
     for (const r of items) {
@@ -335,11 +335,11 @@
 
   function renderSubstitutions() {
     const items = _data.substitutions || [];
-    if (!items.length) return emptyState('🔄', 'Ingen erstatningsregler', 'Systemet har forhåndsdefinerte materialerstatninger.');
+    if (!items.length) return emptyState('🔄', t('filament_analytics.no_substitution_rules'), t('filament_analytics.substitution_rules_hint'));
 
-    let html = '<div class="fa-section"><div class="fa-section-title">Materialerstatninger <span class="fa-section-badge">' + items.length + ' regler</span></div>';
+    let html = '<div class="fa-section"><div class="fa-section-title">' + t('filament_analytics.material_substitutions') + ' <span class="fa-section-badge">' + items.length + ' ' + t('filament_analytics.rules') + '</span></div>';
     html += '<div class="fa-table-wrap"><table class="fa-table"><thead><tr>';
-    html += '<th>Materiale</th><th>Erstatning</th><th class="num">Kompatibilitet</th><th>Merknad</th><th>Betingelse</th>';
+    html += '<th>' + t('filament_analytics.material') + '</th><th>' + t('filament_analytics.substitute') + '</th><th class="num">' + t('filament_analytics.compatibility') + '</th><th>' + t('filament_analytics.note') + '</th><th>' + t('filament_analytics.condition') + '</th>';
     html += '</tr></thead><tbody>';
     for (const r of items) {
       const pct = r.compatibility_pct || 0;
@@ -364,9 +364,9 @@
     const expired = _data.expired || [];
 
     let html = '<div class="fa-heroes">';
-    html += hero('red', 'Utløpte spoler', fmtNum(expired.length), 'bør byttes ut');
-    html += hero('amber', 'Utløper snart', fmtNum(expiring.length), 'innen 30 dager');
-    html += hero(alerts.length > 0 ? 'red' : 'green', 'Lagringsalarmer', fmtNum(alerts.length), alerts.length > 0 ? 'krever oppmerksomhet' : 'alt OK');
+    html += hero('red', t('filament_analytics.expired_spools'), fmtNum(expired.length), t('filament_analytics.should_replace'));
+    html += hero('amber', t('filament_analytics.expiring_soon'), fmtNum(expiring.length), t('filament_analytics.within_30_days'));
+    html += hero(alerts.length > 0 ? 'red' : 'green', t('filament_analytics.storage_alerts'), fmtNum(alerts.length), alerts.length > 0 ? t('filament_analytics.needs_attention') : t('filament_analytics.all_ok'));
     html += '</div>';
 
     if (alerts.length > 0) {
@@ -407,7 +407,7 @@
     }
 
     if (!alerts.length && !expired.length && !expiring.length) {
-      html += emptyState('✅', 'Alt i orden', 'Ingen lagringsalarmer eller utløpte spoler. Sett utløpsdato på spoler for å spore holdbarhet.');
+      html += emptyState('✅', t('filament_analytics.all_good'), t('filament_analytics.no_storage_alerts'));
     }
 
     return html;
@@ -416,14 +416,14 @@
   // ---- Tab system ----
 
   const TABS = [
-    { id: 'consumption', label: 'Forbruk', render: renderConsumption },
-    { id: 'forecast', label: 'Prognose', render: renderForecast },
-    { id: 'waste', label: 'Svinn', render: renderWaste },
-    { id: 'efficiency', label: 'Effektivitet', render: renderEfficiency },
-    { id: 'cost', label: 'Kostnad', render: renderCost },
-    { id: 'rates', label: 'Forbruksrater', render: renderRates },
-    { id: 'substitutions', label: 'Erstatninger', render: renderSubstitutions },
-    { id: 'storage', label: 'Lagring', render: renderStorage },
+    { id: 'consumption', label: t('filament_analytics.tab_consumption'), render: renderConsumption },
+    { id: 'forecast', label: t('filament_analytics.tab_forecast'), render: renderForecast },
+    { id: 'waste', label: t('filament_analytics.tab_waste'), render: renderWaste },
+    { id: 'efficiency', label: t('filament_analytics.tab_efficiency'), render: renderEfficiency },
+    { id: 'cost', label: t('filament_analytics.tab_cost'), render: renderCost },
+    { id: 'rates', label: t('filament_analytics.tab_rates'), render: renderRates },
+    { id: 'substitutions', label: t('filament_analytics.tab_substitutions'), render: renderSubstitutions },
+    { id: 'storage', label: t('filament_analytics.tab_storage'), render: renderStorage },
   ];
 
   function renderPanel() {

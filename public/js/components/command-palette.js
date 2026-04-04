@@ -48,7 +48,7 @@
     orders: 'Ordrer',
     printermatrix: 'Printermatrise',
     timetracker: 'Tidsanalyse',
-    activity: 'Aktivitet',
+    activity: t('tabs.activity') || 'Aktivitet',
     gallery: 'Galleri'
   };
 
@@ -184,8 +184,8 @@
 
     items.push({
       id: 'act-shortcuts',
-      label: 'Vis hurtigtaster',
-      category: 'Handlinger',
+      label: t('command_palette.show_shortcuts') || 'Vis hurtigtaster',
+      category: t('command_palette.actions') || 'Handlinger',
       icon: ICONS.shortcuts,
       action: function() {
         if (typeof showShortcutsHelp === 'function') showShortcutsHelp();
@@ -201,7 +201,7 @@
       items.push({
         id: 'printer-' + pid,
         label: name,
-        category: 'Skrivere',
+        category: t('command_palette.printers') || 'Skrivere',
         icon: ICONS.printer,
         action: (function(id) {
           return function() {
@@ -261,7 +261,7 @@
     if (!list) return;
 
     if (_filteredItems.length === 0) {
-      list.innerHTML = '<div class="cmd-palette-empty">Ingen resultater</div>';
+      list.innerHTML = '<div class="cmd-palette-empty">' + (t('command_palette.no_results') || 'Ingen resultater') + '</div>';
       return;
     }
 
@@ -306,14 +306,14 @@
       '<div class="cmd-palette">' +
         '<div class="cmd-palette-header">' +
           '<span class="cmd-palette-search-icon">' + ICONS.search + '</span>' +
-          '<input class="cmd-palette-input" type="text" placeholder="Søk paneler, handlinger, skrivere..." autocomplete="off" spellcheck="false">' +
+          '<input class="cmd-palette-input" type="text" placeholder="' + (t('command_palette.search_placeholder') || 'Søk paneler, handlinger, skrivere...') + '" autocomplete="off" spellcheck="false">' +
           '<kbd class="cmd-palette-esc">Esc</kbd>' +
         '</div>' +
         '<div class="cmd-palette-results"></div>' +
         '<div class="cmd-palette-footer">' +
-          '<span><kbd>&uarr;</kbd><kbd>&darr;</kbd> naviger</span>' +
-          '<span><kbd>Enter</kbd> velg</span>' +
-          '<span><kbd>Esc</kbd> lukk</span>' +
+          '<span><kbd>&uarr;</kbd><kbd>&darr;</kbd> ' + (t('command_palette.navigate') || 'naviger') + '</span>' +
+          '<span><kbd>Enter</kbd> ' + (t('command_palette.select') || 'velg') + '</span>' +
+          '<span><kbd>Esc</kbd> ' + (t('command_palette.close') || 'lukk') + '</span>' +
         '</div>' +
       '</div>';
 

@@ -66,14 +66,14 @@
   function _renderPanel() {
     if (!_panelEl) return;
 
-    var html = '<div class="notif-header"><h3>Varsler</h3><div class="notif-header-actions">';
-    html += '<button class="notif-action-btn" onclick="markAllNotificationsRead()" data-tooltip="Merk alle som lest" data-tooltip-pos="bottom">Merk alle lest</button>';
-    html += '<button class="notif-action-btn notif-action-clear" onclick="clearAllNotifications()" data-tooltip="Fjern alle varsler" data-tooltip-pos="bottom">Tøm</button>';
+    var html = '<div class="notif-header"><h3>' + (typeof t === 'function' ? t('notification.title') : 'Varsler') + '</h3><div class="notif-header-actions">';
+    html += '<button class="notif-action-btn" onclick="markAllNotificationsRead()" data-tooltip="' + (typeof t === 'function' ? t('notification.mark_all_read') : 'Merk alle lest') + '" data-tooltip-pos="bottom">' + (typeof t === 'function' ? t('notification.mark_all_read') : 'Merk alle lest') + '</button>';
+    html += '<button class="notif-action-btn notif-action-clear" onclick="clearAllNotifications()" data-tooltip="' + (typeof t === 'function' ? t('notification.clear_all_tooltip') : 'Fjern alle varsler') + '" data-tooltip-pos="bottom">' + (typeof t === 'function' ? t('notification.clear_all') : 'Tøm') + '</button>';
     html += '</div></div>';
 
     html += '<div class="notif-list">';
     if (_notifications.length === 0) {
-      html += '<div class="notif-empty">Ingen varsler ennå</div>';
+      html += '<div class="notif-empty">' + (typeof t === 'function' ? t('notification.no_notifications') : 'Ingen varsler ennå') + '</div>';
     } else {
       for (var i = 0; i < _notifications.length; i++) {
         var n = _notifications[i];

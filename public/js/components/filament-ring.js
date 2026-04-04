@@ -60,7 +60,7 @@
       }
     }
     if (extruders.length === 0) {
-      container.innerHTML = '<div class="card-title">Filament</div><div class="countdown-idle">Ingen data</div>';
+      container.innerHTML = '<div class="card-title">Filament</div><div class="countdown-idle">' + (typeof t === 'function' ? t('filament_ring.no_data') : 'Ingen data') + '</div>';
       return;
     }
 
@@ -414,7 +414,7 @@
       return;
     }
     if (!ams || !ams.ams || !ams.ams.length) {
-      container.innerHTML = '<div class="card-title">Filament</div><div class="countdown-idle">Ingen AMS-data</div>';
+      container.innerHTML = '<div class="card-title">Filament</div><div class="countdown-idle">' + (typeof t === 'function' ? t('filament_ring.no_ams_data') : 'Ingen AMS-data') + '</div>';
       return;
     }
 
@@ -451,7 +451,7 @@
     }
 
     if (!trays.length) {
-      container.innerHTML = '<div class="card-title">Filament</div><div class="countdown-idle">Ingen filament lastet</div>';
+      container.innerHTML = '<div class="card-title">Filament</div><div class="countdown-idle">' + (typeof t === 'function' ? t('filament_ring.no_filament_loaded') : 'Ingen filament lastet') + '</div>';
       return;
     }
 

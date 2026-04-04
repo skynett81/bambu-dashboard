@@ -302,7 +302,7 @@
       // Cloud services section
       h += `<div id="cloud-section" class="settings-card" style="margin-bottom:0.75rem"><div class="card-title" style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"/></svg> ${t('settings.bambu_cloud')}</div><div id="cloud-content"><span class="text-muted" style="font-size:0.8rem">...</span></div></div>`;
       // Moonraker history sync info
-      h += `<div class="settings-card" style="margin-bottom:0.75rem"><div class="card-title" style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"/></svg> Moonraker / Klipper</div><div style="font-size:0.8rem;color:var(--text-muted);padding:6px 0">Klipper/Moonraker-printere (Snapmaker, Voron, Creality K1, etc.) synkroniserer printhistorikk automatisk direkte fra printeren hvert 5. minutt. Ingen cloud-konto nødvendig.</div><div id="moonraker-sync-status"></div></div>`;
+      h += `<div class="settings-card" style="margin-bottom:0.75rem"><div class="card-title" style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"/></svg> Moonraker / Klipper</div><div style="font-size:0.8rem;color:var(--text-muted);padding:6px 0">${t('settings.moonraker_sync_hint')}</div><div id="moonraker-sync-status"></div></div>`;
       // Discovery + Add buttons
       h += `<div style="display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap">
         <button class="form-btn" data-ripple onclick="discoverPrinters()" id="discover-btn" style="display:flex;align-items:center;gap:6px">
@@ -503,40 +503,40 @@
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
           <div>
-            <label class="form-label">Printer</label>
+            <label class="form-label">${t('settings.obs_printer_label')}</label>
             <select id="obs-cfg-printer" class="form-input" onchange="window._obsUpdateUrl()">
-              <option value="">Alle / første printer</option>
+              <option value="">${t('settings.obs_printer_all')}</option>
               ${printerOpts}
             </select>
           </div>
           <div>
-            <label class="form-label">Bakgrunn</label>
+            <label class="form-label">${t('settings.obs_bg_label')}</label>
             <select id="obs-cfg-bg" class="form-input" onchange="window._obsUpdateUrl()">
-              <option value="transparent">Transparent (anbefalt)</option>
-              <option value="">Standard (mørk)</option>
-              <option value="custom">Egendefinert farge</option>
+              <option value="transparent">${t('settings.obs_bg_transparent')}</option>
+              <option value="">${t('settings.obs_bg_default')}</option>
+              <option value="custom">${t('settings.obs_bg_custom')}</option>
             </select>
             <input type="color" id="obs-cfg-bg-color" class="form-input" value="#000000" style="display:none;margin-top:4px;height:32px;padding:2px" onchange="window._obsUpdateUrl()">
           </div>
           <div>
-            <label class="form-label">Posisjon</label>
+            <label class="form-label">${t('settings.obs_position_label')}</label>
             <select id="obs-cfg-pos" class="form-input" onchange="window._obsUpdateUrl()">
-              <option value="right">Høyre side</option>
-              <option value="left">Venstre side</option>
+              <option value="right">${t('settings.obs_position_right')}</option>
+              <option value="left">${t('settings.obs_position_left')}</option>
             </select>
           </div>
         </div>
 
         <div style="display:flex;flex-wrap:wrap;gap:16px;margin-bottom:16px">
           <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer">
-            <input type="checkbox" id="obs-cfg-compact" onchange="window._obsUpdateUrl()"> Kompakt modus
+            <input type="checkbox" id="obs-cfg-compact" onchange="window._obsUpdateUrl()"> ${t('settings.obs_compact')}
           </label>
           <label style="display:flex;align-items:center;gap:6px;font-size:0.85rem;cursor:pointer">
-            <input type="checkbox" id="obs-cfg-hide-idle" onchange="window._obsUpdateUrl()"> Skjul ved inaktiv
+            <input type="checkbox" id="obs-cfg-hide-idle" onchange="window._obsUpdateUrl()"> ${t('settings.obs_hide_idle')}
           </label>
         </div>
 
-        <label class="form-label">Generert URL</label>
+        <label class="form-label">${t('settings.obs_generated_url')}</label>
         <div style="display:flex;gap:8px;align-items:center">
           <input class="form-input" id="obs-url-display" readonly style="flex:1;font-size:0.8rem;font-family:monospace">
           <button class="form-btn form-btn-sm form-btn-primary" data-ripple onclick="window.copyObsUrl()">
@@ -548,35 +548,35 @@
 
       // OBS Setup Guide card
       h += `<div class="settings-card">
-        <div class="card-title">OBS Oppsett</div>
+        <div class="card-title">${t('settings.obs_setup_title')}</div>
         <ol style="font-size:0.85rem;line-height:1.8;padding-left:20px;color:var(--text-secondary)">
-          <li>Kopier URLen ovenfor</li>
-          <li>I OBS: <strong>Kilder → + → Nettleser</strong></li>
-          <li>Lim inn URL i feltet</li>
-          <li>Sett bredde: <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px">320</code> høyde: <code style="background:var(--bg-tertiary);padding:1px 5px;border-radius:4px">900</code> (sidepanel)</li>
-          <li>Huk av <strong>Shutdown source when not visible</strong></li>
-          <li>Klikk OK</li>
+          <li>${t('settings.obs_setup_step1')}</li>
+          <li>${t('settings.obs_setup_step2')}</li>
+          <li>${t('settings.obs_setup_step3')}</li>
+          <li>${t('settings.obs_setup_step4')}</li>
+          <li>${t('settings.obs_setup_step5')}</li>
+          <li>${t('settings.obs_setup_step6')}</li>
         </ol>
         <div style="margin-top:12px;padding:10px;border-radius:8px;background:color-mix(in srgb, var(--accent-cyan) 8%, transparent);border:1px solid color-mix(in srgb, var(--accent-cyan) 20%, transparent);font-size:0.8rem;color:var(--text-secondary)">
-          <strong style="color:var(--accent-cyan)">Tips:</strong> Bruk «Transparent» bakgrunn for å legge sidepanelet over kamerakilden. Panelet viser print-status med progress-ring, temperaturer, AMS-spoler med SVG-visualisering og print-stage.
+          <strong style="color:var(--accent-cyan)">Tips:</strong> ${t('settings.obs_setup_tip')}
         </div>
       </div>`;
 
       // Direct URL cards
       h += `<div class="settings-card">
-        <div class="card-title">Direkte kamera-URLer</div>
-        <p class="text-muted" style="font-size:0.8rem;margin-bottom:10px">Bruk disse for Home Assistant, VLC, eller andre integrasjoner.</p>
+        <div class="card-title">${t('settings.obs_camera_urls_title')}</div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:10px">${t('settings.obs_camera_urls_desc')}</p>
         <div style="display:flex;flex-direction:column;gap:8px">`;
       for (const pr of (p || [])) {
         h += `<div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:0.8rem;font-weight:600;min-width:80px">${_esc(pr.name || pr.id)}</span>
           <code style="font-size:0.72rem;background:var(--bg-tertiary);padding:3px 8px;border-radius:4px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${location.origin}/api/printers/${encodeURIComponent(pr.id)}/stream.mjpeg</code>
-          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.65rem;padding:2px 6px" onclick="navigator.clipboard.writeText('${location.origin}/api/printers/${encodeURIComponent(pr.id)}/stream.mjpeg');showToast('Kopiert!','success')">Kopier</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.65rem;padding:2px 6px" onclick="navigator.clipboard.writeText('${location.origin}/api/printers/${encodeURIComponent(pr.id)}/stream.mjpeg');showToast(t('settings.obs_copied'),'success')">${t('settings.obs_copy')}</button>
         </div>
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:0.8rem;min-width:80px"></span>
           <code style="font-size:0.72rem;background:var(--bg-tertiary);padding:3px 8px;border-radius:4px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${location.origin}/api/printers/${encodeURIComponent(pr.id)}/frame.jpeg</code>
-          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.65rem;padding:2px 6px" onclick="navigator.clipboard.writeText('${location.origin}/api/printers/${encodeURIComponent(pr.id)}/frame.jpeg');showToast('Kopiert!','success')">Kopier</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.65rem;padding:2px 6px" onclick="navigator.clipboard.writeText('${location.origin}/api/printers/${encodeURIComponent(pr.id)}/frame.jpeg');showToast(t('settings.obs_copied'),'success')">${t('settings.obs_copy')}</button>
         </div>`;
       }
       h += `</div>
@@ -584,13 +584,13 @@
 
       // Live Preview card
       h += `<div class="settings-card">
-        <div class="card-title">Forhåndsvisning</div>
+        <div class="card-title">${t('settings.obs_preview_title')}</div>
         <div style="position:relative;border-radius:8px;overflow:hidden;background:#000;aspect-ratio:16/9">
           <iframe id="obs-preview-frame" style="width:100%;height:100%;border:none;pointer-events:none" src=""></iframe>
         </div>
         <button class="form-btn form-btn-sm form-btn-secondary mt-sm" data-ripple onclick="window._obsRefreshPreview()">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
-          Oppdater forhåndsvisning
+          ${t('settings.obs_refresh_preview')}
         </button>
       </div>`;
 
@@ -1979,7 +1979,7 @@
       const btn = input.parentElement.querySelector('button');
       if (btn) {
         const orig = btn.innerHTML;
-        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> Kopiert!';
+        btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg> ' + t('settings.obs_copied');
         setTimeout(() => { btn.innerHTML = orig; }, 1500);
       }
     });

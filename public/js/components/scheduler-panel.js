@@ -546,7 +546,7 @@
           <div>${reviewBadge}</div>
           ${ev.review_notes ? `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:4px">${_esc(ev.review_notes)}</div>` : ''}
           ${ev.review_waste_g ? `<div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px">Waste: ${ev.review_waste_g}g</div>` : ''}
-          <button class="form-btn form-btn-sm" style="margin-top:8px" onclick="_schedReview(${ev._historyId}, this)">Endre vurdering</button>
+          <button class="form-btn form-btn-sm" style="margin-top:8px" onclick="_schedReview(${ev._historyId}, this)">${typeof t === 'function' ? t('scheduler.change_review') : 'Endre vurdering'}</button>
         </div>`;
       } else {
         // Not reviewed — show review form

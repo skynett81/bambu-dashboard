@@ -339,9 +339,9 @@
 
       // Recalculate button
       h += `<button class="form-btn" data-ripple onclick="recalcWaste()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:6px">
-        ${ICONS.refresh} Rekalkuler waste
+        ${ICONS.refresh} ${typeof t === 'function' ? t('waste.recalculate_waste') : 'Rekalkuler waste'}
       </button>
-      <p class="text-muted" style="font-size:0.6rem;text-align:center;margin:0">Oppdaterer all historikk med nåværende innstillinger</p>`;
+      <p class="text-muted" style="font-size:0.6rem;text-align:center;margin:0">${typeof t === 'function' ? t('waste.recalculate_hint') : 'Oppdaterer all historikk med nåværende innstillinger'}</p>`;
 
       h += `</div>`;
       return h;
@@ -716,11 +716,11 @@
         body: JSON.stringify({ startup_purge_g: purgeG, waste_per_change_g: changeG })
       });
       const data = await res.json();
-      if (window.showToast) window.showToast(`Oppdaterte ${data.updated} prints`, 'success');
+      if (window.showToast) window.showToast(typeof t === 'function' ? t('waste.updated_prints', { count: data.updated }) : `Oppdaterte ${data.updated} prints`, 'success');
       loadWaste();
     } catch (e) {
       console.error('[waste] Recalc failed:', e);
-      if (window.showToast) window.showToast('Rekalkulering feilet', 'error');
+      if (window.showToast) window.showToast(typeof t === 'function' ? t('waste.recalculate_failed') : 'Rekalkulering feilet', 'error');
     }
   };
 

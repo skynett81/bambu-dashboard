@@ -229,14 +229,14 @@
         </button>
       </div>
       <div class="history-review-filters">
-        <span class="history-review-filters-label">Vurdering:</span>
-        <button class="history-review-filter-btn ${_activeReviewFilter === 'all' ? 'active' : ''}" onclick="filterHistoryReview('all', this)">Alle</button>
+        <span class="history-review-filters-label">${t('history.review_label')}:</span>
+        <button class="history-review-filter-btn ${_activeReviewFilter === 'all' ? 'active' : ''}" onclick="filterHistoryReview('all', this)">${t('history.review_all')}</button>
         <button class="history-review-filter-btn ${_activeReviewFilter === 'unreviewed' ? 'active' : ''}" onclick="filterHistoryReview('unreviewed', this)">
-          Ikke vurdert${_unreviewedCount > 0 ? ` <span class="ph-review-count-badge">${_unreviewedCount}</span>` : ''}
+          ${t('history.review_unreviewed')}${_unreviewedCount > 0 ? ` <span class="ph-review-count-badge">${_unreviewedCount}</span>` : ''}
         </button>
-        <button class="history-review-filter-btn ${_activeReviewFilter === 'approved' ? 'active' : ''}" onclick="filterHistoryReview('approved', this)">Godkjent</button>
-        <button class="history-review-filter-btn ${_activeReviewFilter === 'rejected' ? 'active' : ''}" onclick="filterHistoryReview('rejected', this)">Avvist</button>
-        <button class="history-review-filter-btn ${_activeReviewFilter === 'partial' ? 'active' : ''}" onclick="filterHistoryReview('partial', this)">Delvis</button>
+        <button class="history-review-filter-btn ${_activeReviewFilter === 'approved' ? 'active' : ''}" onclick="filterHistoryReview('approved', this)">${t('history.review_approved')}</button>
+        <button class="history-review-filter-btn ${_activeReviewFilter === 'rejected' ? 'active' : ''}" onclick="filterHistoryReview('rejected', this)">${t('history.review_rejected')}</button>
+        <button class="history-review-filter-btn ${_activeReviewFilter === 'partial' ? 'active' : ''}" onclick="filterHistoryReview('partial', this)">${t('history.review_partial')}</button>
       </div>`;
     },
 
@@ -381,9 +381,9 @@
               </span>
             </div>
             <div class="ph-list-status" data-label="Status" style="color:${statusColor(row.status)}">${statusIcon(row.status)}</div>
-            <div class="ph-list-review" data-label="Vurdering">
+            <div class="ph-list-review" data-label="${t('history.review_label')}">
               ${reviewBadgeCompact(row.review_status)}
-              <button class="ph-review-btn" onclick="event.stopPropagation();window.openReviewDialog(${row.id})" title="Vurder print">
+              <button class="ph-review-btn" onclick="event.stopPropagation();window.openReviewDialog(${row.id})" title="${t('history.review_print')}">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
               </button>
             </div>
@@ -759,13 +759,13 @@
       h += `<div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">`;
       // Left: activity stats
       h += `<div style="flex:1;min-width:180px"><div class="stats-detail-list">`;
-      h += sRow('Aktive printdager', `${totalDays} av ${span} dager (${activePct}%)`);
+      h += sRow(t('history.active_print_days'), `${totalDays} ${t('history.of_days', { span, pct: activePct })}`);
       h += sRow('Prints per dag (snitt)', (data.length / totalDays).toFixed(1));
       h += sRow('Mest aktive time', `${String(peakHour).padStart(2,'0')}:00 – ${String(peakHour+1).padStart(2,'0')}:00 (${byHour[peakHour]} prints)`);
       h += `</div></div>`;
       // Right: hourly mini heatmap
       h += `<div style="flex:1;min-width:200px">`;
-      h += `<div class="waste-compact-heading">Aktivitet per time</div>`;
+      h += `<div class="waste-compact-heading">${t('history.activity_per_hour')}</div>`;
       h += `<div style="display:flex;gap:2px;align-items:flex-end;height:36px">`;
       for (let i = 0; i < 24; i++) {
         const v = byHour[i];
@@ -867,7 +867,7 @@
           <div style="display:flex;gap:6px;margin-bottom:8px" id="ph-3d-actions-${row.id}">
             <button class="lib-3d-btn" style="flex:1;justify-content:center" onclick="event.stopPropagation();_historyOpen3D(${row.id},this)">&#x25B6; 3D</button>
             <button class="lib-3d-btn" style="padding:3px 7px" onclick="event.stopPropagation();_historyUpload3mf(${row.id})" title="${t('library.upload') || 'Last opp'} / ${t('common.replace') || 'Erstatt'} 3MF">&#x21E7;</button>
-            <button class="lib-3d-btn" style="padding:3px 7px;color:var(--accent-red);display:${row.linked_3mf ? '' : 'none'}" id="ph-del3mf-${row.id}" onclick="event.stopPropagation();_historyDelete3mf(${row.id})" title="Slett lagret 3MF">&#x2715;</button>
+            <button class="lib-3d-btn" style="padding:3px 7px;color:var(--accent-red);display:${row.linked_3mf ? '' : 'none'}" id="ph-del3mf-${row.id}" onclick="event.stopPropagation();_historyDelete3mf(${row.id})" title="${t('history.delete_saved_3mf')}">&#x2715;</button>
           </div>
           <div class="ph-detail-status-banner" style="background:${statusColor(row.status)}">
             ${statusIcon(row.status)}
@@ -962,12 +962,12 @@
           </div>
           <div class="ph-detail-divider"></div>
           <div class="ph-detail-review-section">
-            <span class="ph-detail-label">Vurdering</span>
+            <span class="ph-detail-label">${t('history.review_label')}</span>
             <div style="display:flex;align-items:center;gap:8px;margin-top:4px">
               ${reviewBadge(row.review_status)}
               <button class="form-btn form-btn-sm form-btn-secondary" onclick="this.closest('.ph-detail-overlay').remove();window.openReviewDialog(${row.id})">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>
-                ${row.review_status ? 'Endre' : 'Vurder'}
+                ${row.review_status ? t('history.change_review') : t('history.review_action')}
               </button>
             </div>
             ${row.review_notes ? `<div style="margin-top:4px;font-size:0.72rem;color:var(--text-muted)">${esc(row.review_notes)}</div>` : ''}
@@ -1338,7 +1338,7 @@
       });
       if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));
-        throw new Error(err.error || 'Feil ved lagring');
+        throw new Error(err.error || t('history.save_error'));
       }
       const updated = await resp.json();
 
@@ -1371,10 +1371,10 @@
       }
 
       overlay.remove();
-      if (typeof showToast === 'function') showToast('Vurdering lagret', 'success', 2000);
+      if (typeof showToast === 'function') showToast(t('history.review_saved'), 'success', 2000);
     } catch (e) {
-      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Lagre vurdering'; }
-      if (typeof showToast === 'function') showToast(e.message || 'Feil ved lagring', 'error', 3000);
+      if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = t('history.save_review'); }
+      if (typeof showToast === 'function') showToast(e.message || t('history.save_error'), 'error', 3000);
     }
   };
 
@@ -1580,7 +1580,7 @@
           if (row) row.linked_3mf = 'hist_' + historyId + '.3mf';
         } else {
           const err = await r.json().catch(() => ({}));
-          if (typeof showToast === 'function') showToast(err.error || 'Feil ved opplasting', 'error');
+          if (typeof showToast === 'function') showToast(err.error || t('history.upload_error'), 'error');
         }
       } catch (e) {
         if (typeof showToast === 'function') showToast(e.message, 'error');
@@ -1591,10 +1591,10 @@
 
   // Delete linked 3MF from history entry
   window._historyDelete3mf = async function(historyId) {
-    if (!confirm('Slett lagret 3MF-fil?')) return;
+    if (!confirm(t('history.confirm_delete_3mf'))) return;
     try {
       await fetch(`/api/history/${historyId}/model-3mf`, { method: 'DELETE' });
-      if (typeof showToast === 'function') showToast('3MF slettet', 'success');
+      if (typeof showToast === 'function') showToast(t('history.3mf_deleted'), 'success');
       // Hide delete button
       const delBtn = document.getElementById('ph-del3mf-' + historyId);
       if (delBtn) delBtn.style.display = 'none';
