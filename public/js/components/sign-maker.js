@@ -243,10 +243,21 @@
 
     h += `<div class="sm-actions" style="margin-top:14px">
       <button class="form-btn form-btn-primary" data-ripple onclick="window._smGenerate('${id}')">Preview Sign</button>
-      <button class="form-btn form-btn-primary" data-ripple onclick="window._smDownload3MF('${id}')" style="background:var(--accent-green)">🧊 Download 3MF</button>
+      <button class="form-btn form-btn-primary" data-ripple onclick="window._smPreview3D('${id}')" style="background:var(--accent-cyan)">🧊 3D Preview</button>
+      <button class="form-btn form-btn-primary" data-ripple onclick="window._smDownload3MF('${id}')" style="background:var(--accent-green)">📥 Download 3MF</button>
     </div></div>`;
 
     editor.innerHTML = h;
+
+    // Auto-update preview when any field changes
+    const form = document.querySelector('.sm-form');
+    if (form) {
+      form.addEventListener('input', () => { clearTimeout(window._smDebounce); window._smDebounce = setTimeout(() => window._smGenerate(id), 300); });
+      form.addEventListener('change', () => window._smGenerate(id));
+    }
+
+    // Auto-generate initial preview
+    setTimeout(() => window._smGenerate(id), 100);
   };
 
   window._smGenerate = function(id) {
@@ -433,54 +444,67 @@
     img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
   };
 
-  // ── Download as 3MF (3D printable model) ──
+  // ── 3D Preview — generate 3MF and show in 3mfViewer ──
 
-  window._smDownload3MF = async function(templateId) {
+  window._smPreview3D = async function(templateId) {
+    const body = _buildBody(templateId);
+    if (!body) return;
+
+    const result = document.getElementById('sm-result');
+    if (result) {
+      result.style.display = '';
+      result.innerHTML = '<div style="padding:20px;color:var(--text-muted)">Generating 3D preview...</div>';
+    }
+
+    try {
+      const res = await fetch('/api/sign-maker/generate-3mf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error('Generation failed');
+      const blob = await res.blob();
+      const file = new File([blob], (body.title || 'sign') + '.3mf', { type: 'application/octet-stream' });
+
+      // Open in 3mfViewer
+      if (typeof window._g3dHandleFile === 'function') {
+        window._g3dHandleFile(file);
+      } else if (typeof window.open3mfViewer === 'function') {
+        const url = URL.createObjectURL(blob);
+        window.open3mfViewer(url, (body.title || 'Sign') + ' — 3D Preview');
+      } else {
+        // Fallback: show in an inline container
+        if (result) {
+          result.innerHTML = `<div style="width:100%;height:400px;background:#1a1a2e;border-radius:10px;overflow:hidden;position:relative" id="sm-3d-container">
+            <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted)">3mfViewer not available — use Download 3MF instead</div>
+          </div>`;
+        }
+      }
+    } catch (e) {
+      if (result) result.innerHTML = '<div style="padding:20px;color:var(--accent-red)">' + e.message + '</div>';
+    }
+  };
+
+  // ── Build request body from all form fields ──
+
+  function _buildBody(templateId) {
     const _n = (id, fallback) => parseFloat(_val(id)) || fallback;
     const _c = (id) => !!document.getElementById(id)?.checked;
 
     const body = {
-      // Sign plate
-      plate_width: _n('sm-3d-w', 80),
-      plate_height: _n('sm-3d-h', 55),
-      plate_depth: _n('sm-3d-depth', 2),
-      corner_radius: _n('sm-3d-radius', 3),
-      // QR code
-      qr_size: _n('sm-3d-qrsize', 35),
-      pixel_size: _n('sm-3d-pixel', 1.2),
-      qr_height: _n('sm-3d-qrh', 0.8),
-      ecc: _val('sm-3d-ecc') || 'M',
-      // Text
-      text_height: _n('sm-3d-texth', 0.8),
-      text_size: _n('sm-3d-textsize', 8),
-      // Frame
-      include_border: _c('sm-3d-border'),
-      frame_width: _n('sm-3d-framew', 5),
-      lip_width: _n('sm-3d-lip', 2),
-      lip_depth: _n('sm-3d-lipd', 1.5),
-      frame_chamfer: _n('sm-3d-chamfer', 1.5),
-      frame_tolerance: _n('sm-3d-frametol', 0.3),
-      // Stand
-      include_stand: _c('sm-3d-stand'),
-      stand_slot_depth: _n('sm-3d-slotd', 15),
-      stand_slot_tolerance: _n('sm-3d-slottol', 0.3),
-      stand_base_height: _n('sm-3d-baseh', 8),
-      stand_base_depth: _n('sm-3d-based', 40),
-      // Magnets
-      include_magnets: _c('sm-3d-magnets'),
-      magnet_diameter: _n('sm-3d-magdia', 6),
-      magnet_thickness: _n('sm-3d-magth', 2),
-      magnet_tolerance: _n('sm-3d-magtol', 0.2),
-      // NFC
-      include_nfc: _c('sm-3d-nfc'),
-      nfc_shape: _val('sm-3d-nfcshape') || 'circle',
-      nfc_diameter: _n('sm-3d-nfcdia', 25),
-      nfc_thickness: _n('sm-3d-nfcth', 0.85),
-      nfc_tolerance: _n('sm-3d-nfctol', 0.3),
-      // Wall mount
-      include_holes: _c('sm-3d-holes'),
-      hole_diameter: _n('sm-3d-holedia', 4),
-      hole_margin: _n('sm-3d-holemarg', 5),
+      plate_width: _n('sm-3d-w', 80), plate_height: _n('sm-3d-h', 55), plate_depth: _n('sm-3d-depth', 2),
+      corner_radius: _n('sm-3d-radius', 3), qr_size: _n('sm-3d-qrsize', 35), pixel_size: _n('sm-3d-pixel', 1.2),
+      qr_height: _n('sm-3d-qrh', 0.8), ecc: _val('sm-3d-ecc') || 'M', text_height: _n('sm-3d-texth', 0.8),
+      text_size: _n('sm-3d-textsize', 8), include_border: _c('sm-3d-border'), frame_width: _n('sm-3d-framew', 5),
+      lip_width: _n('sm-3d-lip', 2), lip_depth: _n('sm-3d-lipd', 1.5), frame_chamfer: _n('sm-3d-chamfer', 1.5),
+      frame_tolerance: _n('sm-3d-frametol', 0.3), include_stand: _c('sm-3d-stand'),
+      stand_slot_depth: _n('sm-3d-slotd', 15), stand_slot_tolerance: _n('sm-3d-slottol', 0.3),
+      stand_base_height: _n('sm-3d-baseh', 8), stand_base_depth: _n('sm-3d-based', 40),
+      include_magnets: _c('sm-3d-magnets'), magnet_diameter: _n('sm-3d-magdia', 6),
+      magnet_thickness: _n('sm-3d-magth', 2), magnet_tolerance: _n('sm-3d-magtol', 0.2),
+      include_nfc: _c('sm-3d-nfc'), nfc_shape: _val('sm-3d-nfcshape') || 'circle',
+      nfc_diameter: _n('sm-3d-nfcdia', 25), nfc_thickness: _n('sm-3d-nfcth', 0.85), nfc_tolerance: _n('sm-3d-nfctol', 0.3),
+      include_holes: _c('sm-3d-holes'), hole_diameter: _n('sm-3d-holedia', 4), hole_margin: _n('sm-3d-holemarg', 5),
     };
 
     if (templateId === 'wifi') {
@@ -526,7 +550,15 @@
       body.qr_data = `ASSET:${_val('sm-inv-id')}|${_val('sm-inv-desc')}|${_val('sm-inv-loc')}`;
     }
 
-    if (!body.title && !body.qr_data) {
+    if (!body.title && !body.qr_data) return null;
+    return body;
+  }
+
+  // ── Download as 3MF ──
+
+  window._smDownload3MF = async function(templateId) {
+    const body = _buildBody(templateId);
+    if (!body) {
       if (typeof showToast === 'function') showToast('Fill in the form first', 'error');
       return;
     }
