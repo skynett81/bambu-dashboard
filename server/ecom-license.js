@@ -60,20 +60,55 @@ async function _getNetworkInfo() {
   } catch { return { ip: null, mac: null }; }
 }
 
+// ── Integrity check — hash critical files to detect tampering ──
+
+const INTEGRITY_FILES = [
+  'server/ecom-license.js',
+  'server/api-routes.js',
+  'server/index.js'
+];
+
+async function _computeIntegrity(rootDir) {
+  try {
+    const { createHash } = await import('node:crypto');
+    const { readFileSync } = await import('node:fs');
+    const { join } = await import('node:path');
+    const hashes = {};
+    for (const f of INTEGRITY_FILES) {
+      try {
+        const content = readFileSync(join(rootDir, f), 'utf8');
+        hashes[f] = createHash('sha256').update(content).digest('hex').substring(0, 16);
+      } catch { hashes[f] = 'missing'; }
+    }
+    // Combined fingerprint
+    const combined = createHash('sha256').update(Object.values(hashes).join(':')).digest('hex').substring(0, 24);
+    return { files: hashes, fingerprint: combined };
+  } catch { return { files: {}, fingerprint: 'error' }; }
+}
+
 // ── License Manager ──
 
 export class EcomLicenseManager {
   constructor() {
     this._license = null;
     this._interval = null;
+    this._integrity = null;
+    this._rootDir = null;
   }
 
   async init() {
     this._license = getEcomLicense();
+    const { join } = await import('node:path');
+    this._rootDir = join(import.meta.dirname, '..');
+
     if (!this._license) {
       log.info('No license configured');
       return;
     }
+
+    // Compute file integrity hashes on startup
+    this._integrity = await _computeIntegrity(this._rootDir);
+    log.info('Integrity fingerprint: ' + this._integrity.fingerprint);
 
     // Validate on startup if we have a key
     if (this._license.license_key) {
@@ -81,9 +116,10 @@ export class EcomLicenseManager {
       catch (e) { log.warn('Startup validation failed: ' + e.message); }
     }
 
-    // Daily: revalidate license with geektech.no
+    // Daily: revalidate license + integrity check
     this._interval = setInterval(() => {
       this._revalidate().catch(e => log.warn('Revalidation failed: ' + e.message));
+      this._checkIntegrity().catch(() => {});
     }, REVALIDATE_INTERVAL_MS);
 
     // Also revalidate 30s after startup (non-blocking)
@@ -94,6 +130,25 @@ export class EcomLicenseManager {
 
   shutdown() {
     if (this._interval) clearInterval(this._interval);
+  }
+
+  // ── Integrity check — detect if license-critical files have been modified ──
+
+  async _checkIntegrity() {
+    if (!this._integrity || !this._rootDir) return;
+    const current = await _computeIntegrity(this._rootDir);
+    if (current.fingerprint !== this._integrity.fingerprint) {
+      log.warn('Integrity change detected — files modified since startup');
+      log.warn('  Startup: ' + this._integrity.fingerprint + ' Current: ' + current.fingerprint);
+      for (const f of INTEGRITY_FILES) {
+        if (this._integrity.files[f] !== current.files[f]) {
+          log.warn('  Changed: ' + f);
+        }
+      }
+      // Report to geektech.no on next check-in
+      this._integrityChanged = true;
+      this._integrity = current; // update baseline so we don't report every cycle
+    }
   }
 
   // ── Check-in with geektech.no ──
@@ -210,14 +265,43 @@ export class EcomLicenseManager {
     const net = await _getNetworkInfo();
 
     try {
-      const { status, data } = await _httpPost(`${apiUrl}/license/verify`, {
+      // Build payload — includes integrity data for call-home
+      const payload = {
         license_key: this._license.license_key,
         domain: this._license.domain || null,
         ip_address: net.ip,
-        mac_address: net.mac
-      });
+        mac_address: net.mac,
+        instance_id: this._license.instance_id || null,
+        app_version: null,
+        integrity: this._integrity ? {
+          fingerprint: this._integrity.fingerprint,
+          files: this._integrity.files,
+          tampered: !!this._integrityChanged
+        } : null
+      };
+
+      // Add app version
+      try {
+        const { readFileSync } = await import('node:fs');
+        const { join } = await import('node:path');
+        const pkg = JSON.parse(readFileSync(join(this._rootDir || '.', 'package.json'), 'utf8'));
+        payload.app_version = pkg.version;
+      } catch {}
+
+      // Clear tamper flag after reporting
+      if (this._integrityChanged) this._integrityChanged = false;
+
+      const { status, data } = await _httpPost(`${apiUrl}/license/verify`, payload);
 
       if (status >= 200 && status < 300 && data.valid) {
+        // Check if server flagged integrity issue
+        if (data.integrity_action === 'deactivate') {
+          log.error('License deactivated by geektech.no — code tampering detected');
+          setEcomLicense({ status: 'deactivated', cached_response: JSON.stringify(data) });
+          this._license = getEcomLicense();
+          return { valid: false, error: 'License deactivated by server — contact geektech.no', code: 'integrity_violation' };
+        }
+
         // Success — update local state from geektech.no response
         const lic = data.license || {};
         const count = (this._license.verify_count || 0) + 1;
