@@ -335,10 +335,11 @@
         let h = '<div style="display:flex;flex-direction:column;gap:14px">';
         for (const pr of printers) {
           h += `<div class="settings-card">
-            <div class="card-title" style="display:flex;align-items:center;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
               <span style="width:10px;height:10px;border-radius:50%;background:${pr.online !== false ? 'var(--accent-green)' : 'var(--text-muted)'};flex-shrink:0"></span>
-              ${_esc(pr.name || pr.id)}
-              <span style="font-size:0.72rem;color:var(--text-muted);font-weight:400">${_esc(pr.model || pr.type || '')}</span>
+              <span style="font-size:1rem;font-weight:700">${_esc(pr.name || pr.id)}</span>
+              ${pr.model ? `<span style="font-size:0.7rem;padding:2px 8px;border-radius:10px;background:var(--bg-tertiary);color:var(--text-muted)">${_esc(pr.model)}</span>` : ''}
+              ${pr.type ? `<span style="font-size:0.7rem;padding:2px 8px;border-radius:10px;background:var(--bg-tertiary);color:var(--text-muted)">${_esc(pr.type)}</span>` : ''}
             </div>
             <div id="settings-printer-info-${pr.id}"><span class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</span></div>
           </div>`;
@@ -352,19 +353,28 @@
           const state = window.printerState?._printerStates?.[pr.id];
           const meta = window.printerState?._printerMeta?.[pr.id];
           const data = state?.print || state || {};
-          let info = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;font-size:0.8rem">';
-          info += `<div><span class="text-muted">IP:</span> <strong>${_esc(pr.ip || '-')}</strong></div>`;
-          info += `<div><span class="text-muted">Type:</span> ${_esc(meta?.type || pr.type || 'bambu')}</div>`;
-          info += `<div><span class="text-muted">Model:</span> ${_esc(pr.model || '-')}</div>`;
-          if (data.gcode_state) info += `<div><span class="text-muted">State:</span> <strong style="color:${data.gcode_state === 'RUNNING' ? 'var(--accent-green)' : data.gcode_state === 'FAILED' ? 'var(--accent-red)' : 'var(--text-primary)'}">${_esc(data.gcode_state)}</strong></div>`;
-          else info += `<div><span class="text-muted">State:</span> ${state ? 'Idle' : 'Offline'}</div>`;
-          if (data.nozzle_temper != null) info += `<div><span class="text-muted">Nozzle:</span> ${Math.round(data.nozzle_temper)}°C${data.nozzle_target_temper ? ' / ' + data.nozzle_target_temper + '°C' : ''}</div>`;
-          if (data.bed_temper != null) info += `<div><span class="text-muted">Bed:</span> ${Math.round(data.bed_temper)}°C${data.bed_target_temper ? ' / ' + data.bed_target_temper + '°C' : ''}</div>`;
-          if (data.wifi_signal != null) info += `<div><span class="text-muted">WiFi:</span> ${data.wifi_signal}dBm</div>`;
-          if (data.chamber_temper != null) info += `<div><span class="text-muted">Chamber:</span> ${Math.round(data.chamber_temper)}°C</div>`;
-          if (data.subtask_name) info += `<div style="grid-column:1/-1"><span class="text-muted">Print:</span> ${_esc(data.subtask_name)} ${data.mc_percent != null ? '<strong>(' + data.mc_percent + '%)</strong>' : ''}</div>`;
-          if (data.total_layer_num) info += `<div><span class="text-muted">Layer:</span> ${data.layer_num || 0} / ${data.total_layer_num}</div>`;
-          if (pr.serial) info += `<div><span class="text-muted">Serial:</span> <span style="font-family:monospace;font-size:0.72rem">${_esc(pr.serial)}</span></div>`;
+          const row = (label, value) => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border-color)"><span class="text-muted" style="font-size:0.8rem">${label}</span><span style="font-size:0.8rem;font-weight:600">${value}</span></div>`;
+
+          let info = '';
+
+          // Status badge
+          const stateText = data.gcode_state || (state ? 'IDLE' : 'OFFLINE');
+          const stateColor = stateText === 'RUNNING' ? 'var(--accent-green)' : stateText === 'FAILED' ? 'var(--accent-red)' : stateText === 'PAUSE' ? 'var(--accent-orange)' : 'var(--text-muted)';
+          info += `<div style="display:inline-block;padding:4px 12px;border-radius:12px;font-size:0.75rem;font-weight:700;background:color-mix(in srgb, ${stateColor} 15%, transparent);color:${stateColor};margin-bottom:10px">${stateText}</div>`;
+
+          // Print progress bar if printing
+          if (data.mc_percent > 0 && data.gcode_state === 'RUNNING') {
+            info += `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:3px"><span>${_esc(data.subtask_name || '')}</span><strong>${data.mc_percent}%</strong></div><div style="height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden"><div style="height:100%;width:${data.mc_percent}%;background:var(--accent-green);border-radius:3px;transition:width 0.3s"></div></div>${data.total_layer_num ? `<div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">Layer ${data.layer_num || 0} / ${data.total_layer_num}</div>` : ''}</div>`;
+          }
+
+          // Info grid
+          info += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px">';
+          info += row('IP', `<span style="font-family:monospace">${_esc(pr.ip || '-')}</span>`);
+          if (pr.serial) info += row('Serial', `<span style="font-family:monospace;font-size:0.72rem">${_esc(pr.serial)}</span>`);
+          if (data.nozzle_temper != null) info += row('Nozzle', `${Math.round(data.nozzle_temper)}°C${data.nozzle_target_temper ? ' → ' + data.nozzle_target_temper + '°C' : ''}`);
+          if (data.bed_temper != null) info += row('Bed', `${Math.round(data.bed_temper)}°C${data.bed_target_temper ? ' → ' + data.bed_target_temper + '°C' : ''}`);
+          if (data.chamber_temper != null) info += row('Chamber', `${Math.round(data.chamber_temper)}°C`);
+          if (data.wifi_signal != null) info += row('WiFi', `${data.wifi_signal} dBm`);
           info += '</div>';
           infoEl.innerHTML = info;
         }
