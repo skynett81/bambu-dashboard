@@ -116,10 +116,11 @@ export class EcomLicenseManager {
       catch (e) { log.warn('Startup validation failed: ' + e.message); }
     }
 
-    // Daily: revalidate license + integrity check
+    // Daily: revalidate license + integrity check + fee reporting
     this._interval = setInterval(() => {
       this._revalidate().catch(e => log.warn('Revalidation failed: ' + e.message));
       this._checkIntegrity().catch(() => {});
+      this.reportFees().catch(e => log.debug('Fee reporting: ' + e.message));
     }, REVALIDATE_INTERVAL_MS);
 
     // Also revalidate 30s after startup (non-blocking)
@@ -425,37 +426,35 @@ export class EcomLicenseManager {
     });
   }
 
-  // Fee reporting — included in the daily verify call payload
-  // GeekTech.no may not have a separate reporting endpoint,
-  // so fees are tracked locally and can be reported when available
+  // Fee reporting via POST /api/ecommerce/report
   async reportFees() {
     if (!this.isActive()) return { ok: false, error: 'License not active' };
     const unreported = getUnreportedFees();
     if (!unreported.length) return { ok: true, accepted: 0 };
 
-    // Try to report via verify call with fees attached
     const apiUrl = this._license.geektech_api_url || GEEKTECH_API;
-    const net = await _getNetworkInfo();
 
     try {
-      const { status, data } = await _httpPost(`${apiUrl}/license/verify`, {
+      const { status, data } = await _httpPost(`${apiUrl}/ecommerce/report`, {
         license_key: this._license.license_key,
-        domain: this._license.domain || null,
-        ip_address: net.ip,
-        mac_address: net.mac,
-        report_fees: unreported.map(f => ({
+        instance_id: this._license.instance_id || null,
+        orders: unreported.map(f => ({
           order_id: f.platform_order_id || String(f.order_id),
-          total: f.order_total,
-          fee: f.fee_amount,
+          platform: f.platform || 'custom',
+          total_amount: f.order_total,
           currency: f.currency,
-          date: f.created_at
+          fee_amount: f.fee_amount,
+          items_count: 1,
+          fulfilled_at: f.created_at
         }))
       });
 
-      if (status >= 200 && status < 300 && (data.valid || data.fees_accepted)) {
+      if (status >= 200 && status < 300 && data.ok) {
         markFeesReported(unreported.map(f => f.id));
-        log.info('Reported ' + unreported.length + ' fees to geektech.no');
-        return { ok: true, accepted: unreported.length };
+        log.info('Reported ' + (data.accepted || unreported.length) + ' fees to geektech.no (balance: ' + (data.balance_due || 0) + ')');
+        setEcomLicense({ last_report_at: new Date().toISOString() });
+        this._license = getEcomLicense();
+        return { ok: true, accepted: data.accepted || unreported.length, balance_due: data.balance_due || 0 };
       }
       return { ok: false, error: data.error || 'Report not accepted' };
     } catch (e) {
