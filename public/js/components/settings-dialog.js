@@ -334,9 +334,12 @@
       } else {
         let h = '<div style="display:flex;flex-direction:column;gap:14px">';
         for (const pr of printers) {
+          const state = window.printerState?._printerStates?.[pr.id];
+          const isOnline = !!state;
+          const dotColor = isOnline ? 'var(--accent-green)' : 'var(--accent-red)';
           h += `<div class="settings-card">
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-              <span style="width:10px;height:10px;border-radius:50%;background:${pr.online !== false ? 'var(--accent-green)' : 'var(--text-muted)'};flex-shrink:0"></span>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+              <span style="width:10px;height:10px;border-radius:50%;background:${dotColor};flex-shrink:0"></span>
               <span style="font-size:1rem;font-weight:700">${_esc(pr.name || pr.id)}</span>
               ${pr.model ? `<span style="font-size:0.7rem;padding:2px 8px;border-radius:10px;background:var(--bg-tertiary);color:var(--text-muted)">${_esc(pr.model)}</span>` : ''}
               ${pr.type ? `<span style="font-size:0.7rem;padding:2px 8px;border-radius:10px;background:var(--bg-tertiary);color:var(--text-muted)">${_esc(pr.type)}</span>` : ''}
@@ -350,32 +353,37 @@
         for (const pr of printers) {
           const infoEl = document.getElementById('settings-printer-info-' + pr.id);
           if (!infoEl) continue;
-          const state = window.printerState?._printerStates?.[pr.id];
-          const meta = window.printerState?._printerMeta?.[pr.id];
-          const data = state?.print || state || {};
-          const row = (label, value) => `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border-color)"><span class="text-muted" style="font-size:0.8rem">${label}</span><span style="font-size:0.8rem;font-weight:600">${value}</span></div>`;
+          const pState = window.printerState?._printerStates?.[pr.id];
+          const data = pState?.print || pState || {};
+          const isOnline = !!pState;
+          const row = (label, value) => `<tr><td style="padding:3px 12px 3px 0;font-size:0.8rem;color:var(--text-muted);white-space:nowrap">${label}</td><td style="padding:3px 0;font-size:0.8rem;font-weight:600">${value}</td></tr>`;
 
           let info = '';
 
           // Status badge
-          const stateText = data.gcode_state || (state ? 'IDLE' : 'OFFLINE');
-          const stateColor = stateText === 'RUNNING' ? 'var(--accent-green)' : stateText === 'FAILED' ? 'var(--accent-red)' : stateText === 'PAUSE' ? 'var(--accent-orange)' : 'var(--text-muted)';
-          info += `<div style="display:inline-block;padding:4px 12px;border-radius:12px;font-size:0.75rem;font-weight:700;background:color-mix(in srgb, ${stateColor} 15%, transparent);color:${stateColor};margin-bottom:10px">${stateText}</div>`;
+          const stateText = data.gcode_state || (isOnline ? 'IDLE' : 'OFFLINE');
+          const stateColor = { RUNNING: 'var(--accent-green)', FAILED: 'var(--accent-red)', PAUSE: 'var(--accent-orange)', IDLE: 'var(--accent-blue)', FINISH: 'var(--accent-blue)' }[stateText] || 'var(--text-muted)';
+          info += `<div style="display:inline-block;padding:3px 12px;border-radius:12px;font-size:0.72rem;font-weight:700;background:color-mix(in srgb, ${stateColor} 15%, transparent);color:${stateColor};margin-bottom:10px">${stateText}</div>`;
 
           // Print progress bar if printing
-          if (data.mc_percent > 0 && data.gcode_state === 'RUNNING') {
-            info += `<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-bottom:3px"><span>${_esc(data.subtask_name || '')}</span><strong>${data.mc_percent}%</strong></div><div style="height:6px;background:var(--bg-tertiary);border-radius:3px;overflow:hidden"><div style="height:100%;width:${data.mc_percent}%;background:var(--accent-green);border-radius:3px;transition:width 0.3s"></div></div>${data.total_layer_num ? `<div style="font-size:0.7rem;color:var(--text-muted);margin-top:2px">Layer ${data.layer_num || 0} / ${data.total_layer_num}</div>` : ''}</div>`;
+          if (data.mc_percent > 0 && (data.gcode_state === 'RUNNING' || data.gcode_state === 'PAUSE')) {
+            info += `<div style="margin-bottom:10px;padding:8px;background:var(--bg-tertiary);border-radius:8px">
+              <div style="display:flex;justify-content:space-between;font-size:0.78rem;margin-bottom:4px"><span>${_esc(data.subtask_name || 'Unknown')}</span><strong>${data.mc_percent}%</strong></div>
+              <div style="height:6px;background:var(--bg-primary);border-radius:3px;overflow:hidden"><div style="height:100%;width:${data.mc_percent}%;background:var(--accent-green);border-radius:3px"></div></div>
+              ${data.total_layer_num ? `<div style="font-size:0.7rem;color:var(--text-muted);margin-top:3px">Layer ${data.layer_num || 0} / ${data.total_layer_num}</div>` : ''}
+            </div>`;
           }
 
-          // Info grid
-          info += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0 16px">';
-          info += row('IP', `<span style="font-family:monospace">${_esc(pr.ip || '-')}</span>`);
-          if (pr.serial) info += row('Serial', `<span style="font-family:monospace;font-size:0.72rem">${_esc(pr.serial)}</span>`);
-          if (data.nozzle_temper != null) info += row('Nozzle', `${Math.round(data.nozzle_temper)}°C${data.nozzle_target_temper ? ' → ' + data.nozzle_target_temper + '°C' : ''}`);
-          if (data.bed_temper != null) info += row('Bed', `${Math.round(data.bed_temper)}°C${data.bed_target_temper ? ' → ' + data.bed_target_temper + '°C' : ''}`);
+          // Info table (compact, clean)
+          info += '<table style="width:100%;max-width:500px;border-collapse:collapse">';
+          info += row('IP', `<code style="font-size:0.78rem;background:var(--bg-tertiary);padding:1px 6px;border-radius:4px">${_esc(pr.ip || '-')}</code>`);
+          if (pr.serial) info += row('Serial', `<code style="font-size:0.72rem;background:var(--bg-tertiary);padding:1px 6px;border-radius:4px">${_esc(pr.serial)}</code>`);
+          if (data.nozzle_temper != null) info += row('Nozzle', `${Math.round(data.nozzle_temper)}°C${data.nozzle_target_temper ? ' <span style="color:var(--text-muted)">→</span> ' + data.nozzle_target_temper + '°C' : ''}`);
+          if (data.bed_temper != null) info += row('Bed', `${Math.round(data.bed_temper)}°C${data.bed_target_temper ? ' <span style="color:var(--text-muted)">→</span> ' + data.bed_target_temper + '°C' : ''}`);
           if (data.chamber_temper != null) info += row('Chamber', `${Math.round(data.chamber_temper)}°C`);
           if (data.wifi_signal != null) info += row('WiFi', `${data.wifi_signal} dBm`);
-          info += '</div>';
+          if (!isOnline) info += row('Status', '<span style="color:var(--accent-red)">Not connected — check printer is powered on and on the same network</span>');
+          info += '</table>';
           infoEl.innerHTML = info;
         }
       }
