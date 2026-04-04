@@ -4851,17 +4851,20 @@ export async function handleApiRequest(req, res) {
         try {
           const { generateSign3MF } = await import('./sign-3mf-generator.js');
           const buf = await generateSign3MF({
-            title: body.title || '',
-            subtitle: body.subtitle || '',
-            qrData: body.qr_data || '',
-            plateWidth: body.plate_width || 80,
-            plateHeight: body.plate_height || 50,
-            plateDepth: body.plate_depth || 2,
-            textHeight: body.text_height || 0.8,
-            pixelSize: body.pixel_size || 1.2,
-            includeStand: body.include_stand || false,
-            includeHoles: body.include_holes || false,
-            includeBorder: body.include_border || false,
+            title: body.title || '', subtitle: body.subtitle || '', qrData: body.qr_data || '',
+            plateWidth: body.plate_width, plateHeight: body.plate_height, plateDepth: body.plate_depth,
+            cornerRadius: body.corner_radius, qrSize: body.qr_size, pixelSize: body.pixel_size,
+            qrHeight: body.qr_height, textHeight: body.text_height, textSize: body.text_size,
+            includeBorder: body.include_border, frameWidth: body.frame_width, lipWidth: body.lip_width,
+            lipDepth: body.lip_depth, frameChamfer: body.frame_chamfer, frameTolerance: body.frame_tolerance,
+            includeStand: body.include_stand, standSlotDepth: body.stand_slot_depth,
+            standSlotTolerance: body.stand_slot_tolerance, standBaseHeight: body.stand_base_height,
+            standBaseDepth: body.stand_base_depth,
+            includeMagnets: body.include_magnets, magnetDiameter: body.magnet_diameter,
+            magnetThickness: body.magnet_thickness, magnetTolerance: body.magnet_tolerance,
+            includeNfc: body.include_nfc, nfcShape: body.nfc_shape, nfcDiameter: body.nfc_diameter,
+            nfcThickness: body.nfc_thickness, nfcTolerance: body.nfc_tolerance,
+            includeHoles: body.include_holes, holeDiameter: body.hole_diameter, holeMargin: body.hole_margin,
           });
           const filename = (body.title || 'sign').replace(/[^a-zA-Z0-9_-]/g, '_') + '.3mf';
           res.writeHead(200, {

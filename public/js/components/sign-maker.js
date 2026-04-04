@@ -436,23 +436,51 @@
   // ── Download as 3MF (3D printable model) ──
 
   window._smDownload3MF = async function(templateId) {
-    // Read 3D print options
-    const sizes = { small: [60,40], medium: [80,50], large: [100,70], xl: [120,80] };
-    const sizeKey = _val('sm-3d-size') || 'medium';
-    const [sw, sh] = sizes[sizeKey] || sizes.medium;
-    const orient = _val('sm-3d-orient') || 'landscape';
-    const pw = orient === 'portrait' ? sh : sw;
-    const ph = orient === 'portrait' ? sw : sh;
+    const _n = (id, fallback) => parseFloat(_val(id)) || fallback;
+    const _c = (id) => !!document.getElementById(id)?.checked;
 
     const body = {
-      plate_width: pw,
-      plate_height: ph,
-      plate_depth: parseFloat(_val('sm-3d-depth')) || 2,
-      text_height: parseFloat(_val('sm-3d-texth')) || 0.8,
-      pixel_size: parseFloat(_val('sm-3d-pixel')) || 1.2,
-      include_stand: document.getElementById('sm-3d-stand')?.checked || false,
-      include_holes: document.getElementById('sm-3d-holes')?.checked || false,
-      include_border: document.getElementById('sm-3d-border')?.checked || false,
+      // Sign plate
+      plate_width: _n('sm-3d-w', 80),
+      plate_height: _n('sm-3d-h', 55),
+      plate_depth: _n('sm-3d-depth', 2),
+      corner_radius: _n('sm-3d-radius', 3),
+      // QR code
+      qr_size: _n('sm-3d-qrsize', 35),
+      pixel_size: _n('sm-3d-pixel', 1.2),
+      qr_height: _n('sm-3d-qrh', 0.8),
+      ecc: _val('sm-3d-ecc') || 'M',
+      // Text
+      text_height: _n('sm-3d-texth', 0.8),
+      text_size: _n('sm-3d-textsize', 8),
+      // Frame
+      include_border: _c('sm-3d-border'),
+      frame_width: _n('sm-3d-framew', 5),
+      lip_width: _n('sm-3d-lip', 2),
+      lip_depth: _n('sm-3d-lipd', 1.5),
+      frame_chamfer: _n('sm-3d-chamfer', 1.5),
+      frame_tolerance: _n('sm-3d-frametol', 0.3),
+      // Stand
+      include_stand: _c('sm-3d-stand'),
+      stand_slot_depth: _n('sm-3d-slotd', 15),
+      stand_slot_tolerance: _n('sm-3d-slottol', 0.3),
+      stand_base_height: _n('sm-3d-baseh', 8),
+      stand_base_depth: _n('sm-3d-based', 40),
+      // Magnets
+      include_magnets: _c('sm-3d-magnets'),
+      magnet_diameter: _n('sm-3d-magdia', 6),
+      magnet_thickness: _n('sm-3d-magth', 2),
+      magnet_tolerance: _n('sm-3d-magtol', 0.2),
+      // NFC
+      include_nfc: _c('sm-3d-nfc'),
+      nfc_shape: _val('sm-3d-nfcshape') || 'circle',
+      nfc_diameter: _n('sm-3d-nfcdia', 25),
+      nfc_thickness: _n('sm-3d-nfcth', 0.85),
+      nfc_tolerance: _n('sm-3d-nfctol', 0.3),
+      // Wall mount
+      include_holes: _c('sm-3d-holes'),
+      hole_diameter: _n('sm-3d-holedia', 4),
+      hole_margin: _n('sm-3d-holemarg', 5),
     };
 
     if (templateId === 'wifi') {
