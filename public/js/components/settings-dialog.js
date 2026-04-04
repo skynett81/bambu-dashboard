@@ -649,15 +649,50 @@
     const tip = (text) => `<span class="settings-tooltip" title="${_esc(text)}" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--bg-tertiary);color:var(--text-muted);font-size:0.65rem;cursor:help;margin-left:6px;vertical-align:middle;border:1px solid var(--border-color)">?</span>`;
 
     if (_systemSubTab === 'updates') {
-      let h = '<div class="settings-grid">';
-      // Updates card
-      h += `<div class="settings-card"><div class="card-title">${t('update.title')} ${tip('Check for new versions on GitHub. Updates can be applied automatically or manually')}</div><div id="update-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div></div>`;
-      // System info card
-      h += `<div class="settings-card"><div class="card-title" style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg> ${t('settings.system_info_title')}</div><div id="system-info-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div></div>`;
-      // Scheduled tasks card
-      h += `<div class="settings-card"><div class="card-title" style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ${t('settings.scheduled_tasks_title')}</div><div id="scheduled-tasks-section"></div></div>`;
+      let h = '<div style="display:flex;flex-direction:column;gap:14px">';
+
+      // Updates card (full width)
+      h += `<div class="settings-card">
+        <div class="card-title">${t('update.title')} ${tip('Check for new versions on GitHub. Updates can be applied automatically or manually')}</div>
+        <div id="update-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div>
+      </div>`;
+
+      // System info + Scheduled tasks side by side
+      h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">';
+      h += `<div class="settings-card">
+        <div class="card-title" style="display:flex;align-items:center;gap:6px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          ${t('settings.system_info_title')} ${tip('Server version, Node.js version, platform, uptime, memory usage and database size')}
+        </div>
+        <div id="system-info-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div>
+      </div>`;
+      h += `<div class="settings-card">
+        <div class="card-title" style="display:flex;align-items:center;gap:6px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          ${t('settings.scheduled_tasks_title')} ${tip('Background tasks running on a schedule: nightly backups, update checks, cache cleanup')}
+        </div>
+        <div id="scheduled-tasks-section"></div>
+      </div>`;
+      h += '</div>';
+
       // Backups card (full width)
-      h += `<div class="settings-card" style="grid-column:1/-1"><div class="card-title" style="display:flex;align-items:center;justify-content:space-between"><span style="display:flex;align-items:center;gap:6px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> ${t('settings.backup_title')} ${tip('Export your database, settings, and print history as a downloadable backup file')}</span><div style="display:flex;gap:6px"><label class="form-btn form-btn-sm" data-ripple style="cursor:pointer"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg> ${t('settings.backup_upload')}<input type="file" accept=".db" style="display:none" onchange="window._uploadBackup(this)"></label><button class="form-btn form-btn-primary form-btn-sm" data-ripple id="backup-create-btn" onclick="window._createBackup()">${t('settings.backup_create')}</button></div></div><p class="text-muted" style="font-size:0.8rem;margin:4px 0 8px">${t('settings.backup_desc')}</p><div id="backup-list-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div></div>`;
+      h += `<div class="settings-card">
+        <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
+          <span style="display:flex;align-items:center;gap:6px">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            ${t('settings.backup_title')} ${tip('Export your database, settings, and print history. Nightly automatic backups are kept for 7 days.')}
+          </span>
+          <div style="display:flex;gap:6px">
+            <label class="form-btn form-btn-sm" data-ripple style="cursor:pointer">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              ${t('settings.backup_upload')}<input type="file" accept=".db" style="display:none" onchange="window._uploadBackup(this)">
+            </label>
+            <button class="form-btn form-btn-primary form-btn-sm" data-ripple id="backup-create-btn" onclick="window._createBackup()">${t('settings.backup_create')}</button>
+          </div>
+        </div>
+        <p class="text-muted" style="font-size:0.8rem;margin:4px 0 8px">${t('settings.backup_desc')}</p>
+        <div id="backup-list-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div>
+      </div>`;
       // Demo data
       h += '<div id="demo-data-section" style="display:none"></div>';
       h += '</div>';
