@@ -227,11 +227,12 @@ export async function generateSign3MF(opts = {}) {
       plate.addCylinder(pw / 2, ph / 2, pd, nr, th * 0.3, 24);
     }
 
-    // Add both sign objects as build items
+    // ── PLATE 1: Sign (plate + text on same position) ──
+    // Plate centered at origin
     model.AddBuildItem(plateMesh, wrapper.GetIdentityTransform());
     model.AddBuildItem(textMesh, wrapper.GetIdentityTransform());
 
-    // ── Frame (separate object) ──
+    // ── PLATE 2: Frame (offset to the right, own print area) ──
     if (opts.includeBorder) {
       const frameMesh = model.AddMeshObject();
       frameMesh.SetName('Frame');
@@ -244,23 +245,27 @@ export async function generateSign3MF(opts = {}) {
       const totalH = ph + fw * 2 + tol * 2;
       const frameDepth = pd + lipD + 1;
 
-      // Outer shell
-      frame.addBox(0, 0, 0, totalW, totalH, frameDepth);
-      // Inner cutout (slightly larger than sign for tolerance)
-      frame.addBox(fw, fw, lipD, pw + tol * 2, ph + tol * 2, frameDepth);
-      // Front lip (thin plate that holds sign in)
-      frame.addBox(fw - lip, fw - lip, 0, pw + tol * 2 + lip * 2, lip, lipD);
-      frame.addBox(fw - lip, fw + ph + tol * 2, 0, pw + tol * 2 + lip * 2, lip, lipD);
-      frame.addBox(fw - lip, fw, 0, lip, ph + tol * 2, lipD);
-      frame.addBox(fw + pw + tol * 2, fw, 0, lip, ph + tol * 2, lipD);
+      // Back plate of frame
+      frame.addBox(0, 0, 0, totalW, totalH, lipD);
+      // Walls (top, bottom, left, right)
+      frame.addBox(0, 0, lipD, totalW, fw, frameDepth - lipD);           // bottom wall
+      frame.addBox(0, totalH - fw, lipD, totalW, fw, frameDepth - lipD); // top wall
+      frame.addBox(0, fw, lipD, fw, totalH - fw * 2, frameDepth - lipD); // left wall
+      frame.addBox(totalW - fw, fw, lipD, fw, totalH - fw * 2, frameDepth - lipD); // right wall
+      // Front lip strips (hold sign from falling out)
+      frame.addBox(fw - lip, fw - lip, 0, totalW - (fw - lip) * 2, lip, lipD * 0.5);
+      frame.addBox(fw - lip, totalH - fw, 0, totalW - (fw - lip) * 2, lip, lipD * 0.5);
+      frame.addBox(fw - lip, fw, 0, lip, totalH - fw * 2, lipD * 0.5);
+      frame.addBox(totalW - fw, fw, 0, lip, totalH - fw * 2, lipD * 0.5);
 
-      const st = new lib.sTransform();
-      st.set_Fields_0_0(1); st.set_Fields_1_1(1); st.set_Fields_2_2(1);
-      st.set_Fields_3_0(pw + 15);
-      model.AddBuildItem(frameMesh, st);
+      // Position frame on plate 2 (offset right)
+      const frameSt = new lib.sTransform();
+      frameSt.set_Fields_0_0(1); frameSt.set_Fields_1_1(1); frameSt.set_Fields_2_2(1);
+      frameSt.set_Fields_3_0(pw + 20); // X offset for plate 2
+      model.AddBuildItem(frameMesh, frameSt);
     }
 
-    // ── Desk stand (separate object) ──
+    // ── PLATE 3: Stand (offset further right, own print area) ──
     if (opts.includeStand) {
       const standMesh = model.AddMeshObject();
       standMesh.SetName('Stand');
@@ -272,19 +277,26 @@ export async function generateSign3MF(opts = {}) {
       const standW = pw * 0.85;
       const slotW = pd + slotTol * 2;
 
-      // Base
+      // Solid base
       stand.addBox(0, 0, 0, standW, baseD, baseH);
-      // Back wall (holds the sign)
-      stand.addBox(0, baseD - 4, 0, standW, 4, baseH + slotD);
-      // Front lip of slot
-      stand.addBox(0, baseD - 4 - slotW - 2, 0, standW, 2, baseH + slotD * 0.5);
-      // Angle support (triangle approximated as boxes)
-      stand.addBox(0, baseD * 0.3, 0, standW, 3, baseH * 0.5);
+      // Back wall (vertical, holds the sign upright)
+      stand.addBox(0, baseD - 4, baseH, standW, 4, slotD);
+      // Slot front wall (thinner, creates the slot for the sign to slide in)
+      stand.addBox(0, baseD - 4 - slotW - 2.5, baseH, standW, 2.5, slotD * 0.6);
+      // Reinforcement ribs (left + right)
+      stand.addBox(0, baseD * 0.4, 0, 3, baseD * 0.55, baseH);
+      stand.addBox(standW - 3, baseD * 0.4, 0, 3, baseD * 0.55, baseH);
+      // Anti-slip feet
+      stand.addBox(3, 2, 0, 6, 6, 0.6);
+      stand.addBox(standW - 9, 2, 0, 6, 6, 0.6);
+      stand.addBox(3, baseD - 8, 0, 6, 6, 0.6);
+      stand.addBox(standW - 9, baseD - 8, 0, 6, 6, 0.6);
 
-      const st = new lib.sTransform();
-      st.set_Fields_0_0(1); st.set_Fields_1_1(1); st.set_Fields_2_2(1);
-      st.set_Fields_3_0(opts.includeBorder ? pw * 2 + 30 : pw + 15);
-      model.AddBuildItem(standMesh, st);
+      // Position stand on plate 3 (offset further right)
+      const standSt = new lib.sTransform();
+      standSt.set_Fields_0_0(1); standSt.set_Fields_1_1(1); standSt.set_Fields_2_2(1);
+      standSt.set_Fields_3_0((opts.includeBorder ? pw * 2 + 50 : pw + 20)); // X offset for plate 3
+      model.AddBuildItem(standMesh, standSt);
     }
 
     // ── Metadata ──
