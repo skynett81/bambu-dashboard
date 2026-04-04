@@ -2,9 +2,6 @@
 (function() {
   window.loadSettingsPanel = loadSettings;
 
-  // Global tooltip helper — simple title-based tooltip on a blue info icon
-  function _escTip(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
-  const tip = (text) => `<span title="${_escTip(text)}" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:50%;background:var(--accent-blue);color:#fff;font-size:0.6rem;font-weight:700;cursor:help;margin-left:6px;flex-shrink:0;vertical-align:middle" onclick="const p=this.nextElementSibling;if(p&&p.classList.contains('tip-text')){p.remove();return;}const d=document.createElement('div');d.className='tip-text';d.style.cssText='font-size:0.78rem;font-weight:400;color:var(--text-secondary);padding:8px 12px;margin-top:8px;background:var(--bg-tertiary);border-radius:6px;border-left:3px solid var(--accent-blue);line-height:1.5';d.textContent=this.getAttribute('title');this.parentElement.appendChild(d)">?</span>`;
 
   // Ensure modal CSS exists (guards against stale SW cache)
   if (!document.getElementById('modal-css-inject')) {
@@ -486,9 +483,9 @@
       h += '<div class="card-title">' + (t('settings.general') || 'General') + '</div>';
       h += '<div class="prefs-compact-grid">';
       // Browser notifications
-      h += '<div class="prefs-row"><span class="prefs-label">' + t('settings.notifications_title') + tip('Get browser popup alerts for print events even when not looking at the dashboard') + '</span><label class="settings-checkbox"><input type="checkbox" id="notify-toggle" ' + (_notifGranted ? 'checked' : '') + ' onchange="toggleNotificationsPerm(this.checked)"><span>' + t('settings.notifications_browser') + '</span></label></div>';
+      h += '<div class="prefs-row"><span class="prefs-label">' + t('settings.notifications_title') + '</span><label class="settings-checkbox"><input type="checkbox" id="notify-toggle" ' + (_notifGranted ? 'checked' : '') + ' onchange="toggleNotificationsPerm(this.checked)"><span>' + t('settings.notifications_browser') + '</span></label></div>';
       // Auto-refresh
-      h += '<div class="prefs-row"><span class="prefs-label">Auto-refresh' + tip('Automatically reload printer data at regular intervals. Useful for multi-monitor setups') + '</span><select class="form-input prefs-input" id="auto-refresh-select" onchange="if(typeof window.setAutoRefresh===\'function\')window.setAutoRefresh(this.value)">';
+      h += '<div class="prefs-row"><span class="prefs-label">Auto-refresh' + '</span><select class="form-input prefs-input" id="auto-refresh-select" onchange="if(typeof window.setAutoRefresh===\'function\')window.setAutoRefresh(this.value)">';
       h += '<option value="0"' + (_arVal === 0 ? ' selected' : '') + '>Off</option><option value="10000"' + (_arVal === 10000 ? ' selected' : '') + '>10s</option><option value="30000"' + (_arVal === 30000 ? ' selected' : '') + '>30s</option><option value="60000"' + (_arVal === 60000 ? ' selected' : '') + '>60s</option><option value="300000"' + (_arVal === 300000 ? ' selected' : '') + '>5min</option></select></div>';
       // Server info
       h += '<div class="prefs-row"><span class="prefs-label">' + t('settings.server_title') + '</span><span class="text-muted">Port ' + (location.port || '3000') + ' · ' + p.length + ' ' + t('settings.printers_title') + '</span></div>';
@@ -499,7 +496,7 @@
       // ── Sound Notifications + Buzzer — 2-column card ──
       h += '<div class="settings-card mt-sm">';
       h += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
-      h += '<div class="card-title" style="margin:0">' + (t('settings.sound_title') || 'Sound Notifications') + tip('Play audio alerts when prints finish, fail, or need attention. Supports custom MP3/OGG uploads') + '</div>';
+      h += '<div class="card-title" style="margin:0">' + (t('settings.sound_title') || 'Sound Notifications') + '</div>';
       if (_hasSound) {
         h += '<div style="display:flex;align-items:center;gap:8px">';
         h += '<label class="settings-checkbox"><input type="checkbox" id="sound-toggle" ' + (ns.isEnabled() ? 'checked' : '') + ' onchange="notificationSound.setEnabled(this.checked);if(this.checked)notificationSound.play(\'print_started\')"><span>' + (t('settings.sound_enable') || 'On') + '</span></label>';
@@ -556,7 +553,7 @@
 
       // URL Generator card
       h += `<div class="settings-card" style="grid-column:1/-1">
-        <div class="card-title">${t('settings.obs_title')} ${tip('Use this URL as a Browser Source in OBS Studio to show live print status on your stream')}</div>
+        <div class="card-title">${t('settings.obs_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:12px">${t('settings.obs_description')}</p>
 
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:16px">
@@ -606,7 +603,7 @@
 
       // OBS Setup Guide card
       h += `<div class="settings-card">
-        <div class="card-title">${t('settings.obs_setup_title')} ${tip('Step-by-step guide to add the overlay to your OBS scene')}</div>
+        <div class="card-title">${t('settings.obs_setup_title')}</div>
         <ol style="font-size:0.85rem;line-height:1.8;padding-left:20px;color:var(--text-secondary)">
           <li>${t('settings.obs_setup_step1')}</li>
           <li>${t('settings.obs_setup_step2')}</li>
@@ -622,7 +619,7 @@
 
       // Direct URL cards
       h += `<div class="settings-card">
-        <div class="card-title">${t('settings.obs_camera_urls_title')} ${tip('Use these URLs in Home Assistant, VLC, or any tool that supports MJPEG/JPEG streams')}</div>
+        <div class="card-title">${t('settings.obs_camera_urls_title')}</div>
         <p class="text-muted" style="font-size:0.8rem;margin-bottom:10px">${t('settings.obs_camera_urls_desc')}</p>
         <div style="display:flex;flex-direction:column;gap:8px">`;
       for (const pr of (p || [])) {
@@ -711,7 +708,7 @@
 
       // Updates card (full width)
       h += `<div class="settings-card">
-        <div class="card-title">${t('update.title')} ${tip('Check for new versions on GitHub. Updates can be applied automatically or manually')}</div>
+        <div class="card-title">${t('update.title')}</div>
         <div id="update-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div>
       </div>`;
 
@@ -720,14 +717,14 @@
       h += `<div class="settings-card">
         <div class="card-title" style="display:flex;align-items:center;gap:6px">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-          ${t('settings.system_info_title')} ${tip('Server version, Node.js version, platform, uptime, memory usage and database size')}
+          ${t('settings.system_info_title')}
         </div>
         <div id="system-info-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div>
       </div>`;
       h += `<div class="settings-card">
         <div class="card-title" style="display:flex;align-items:center;gap:6px">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          ${t('settings.scheduled_tasks_title')} ${tip('Background tasks running on a schedule: nightly backups, update checks, cache cleanup')}
+          ${t('settings.scheduled_tasks_title')}
         </div>
         <div id="scheduled-tasks-section"></div>
       </div>`;
@@ -738,7 +735,7 @@
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
           <span style="display:flex;align-items:center;gap:6px">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            ${t('settings.backup_title')} ${tip('Export your database, settings, and print history. Nightly automatic backups are kept for 7 days.')}
+            ${t('settings.backup_title')}
           </span>
           <div style="display:flex;gap:6px">
             <label class="form-btn form-btn-sm" data-ripple style="cursor:pointer">
@@ -767,7 +764,7 @@
 
       // Users
       h += `<div class="settings-card">
-        <div class="card-title">${t('settings.users_title')} ${tip('Create user accounts with role-based permissions. Roles: admin (full access), controls (printer control), print (start prints), queue (manage queue), view (read-only).')}</div>
+        <div class="card-title">${t('settings.users_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.users_desc')}</p>
         <div id="users-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div>
         <button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showUserEditor()">${t('settings.user_add')}</button>
@@ -775,7 +772,7 @@
 
       // API Keys
       h += `<div class="settings-card">
-        <div class="card-title">${t('settings.api_keys_title')} ${tip('API keys allow external tools (Home Assistant, scripts, mobile apps) to access the API without a username/password. Use the Bearer token or X-API-Key header.')}</div>
+        <div class="card-title">${t('settings.api_keys_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.api_keys_desc')}</p>
         <div id="api-keys-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div>
         <button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showApiKeyEditor()">${t('settings.api_key_add')}</button>
@@ -783,7 +780,7 @@
 
       // Push Notifications
       h += `<div class="settings-card">
-        <div class="card-title">${t('settings.push_title')} ${tip('Browser push notifications let you receive alerts even when the dashboard tab is closed. Requires HTTPS and a modern browser. Each device must be subscribed individually.')}</div>
+        <div class="card-title">${t('settings.push_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.push_desc')}</p>
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
           <button class="form-btn form-btn-primary" data-ripple onclick="subscribePush()">${t('settings.push_enable')}</button>
@@ -797,8 +794,8 @@
 
     } else if (_systemSubTab === 'printers') {
       let h = '<div class="settings-grid">';
-      h += `<div class="settings-card"><div class="card-title">${t('settings.printer_groups_title')} ${tip('Organize printers into groups for fleet management and batch operations')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.printer_groups_desc')}</p><div id="printer-groups-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showPrinterGroupEditor()">${t('settings.printer_groups_add')}</button></div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.hub_title')} ${tip('Hub mode optimizes the UI for wall-mounted displays. Kiosk mode hides the sidebar')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.hub_desc')}</p><div id="hub-settings-section"><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="hub-mode" onchange="toggleHubMode(this.checked)"><span>${t('settings.hub_enable')}</span></label><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="kiosk-mode" onchange="toggleKioskMode(this.checked)"><span>${t('settings.kiosk_enable')}</span></label></div></div>`;
+      h += `<div class="settings-card"><div class="card-title">${t('settings.printer_groups_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.printer_groups_desc')}</p><div id="printer-groups-section"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div><button class="form-btn form-btn-primary mt-sm" data-ripple onclick="showPrinterGroupEditor()">${t('settings.printer_groups_add')}</button></div>`;
+      h += `<div class="settings-card"><div class="card-title">${t('settings.hub_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.hub_desc')}</p><div id="hub-settings-section"><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="hub-mode" onchange="toggleHubMode(this.checked)"><span>${t('settings.hub_enable')}</span></label><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="kiosk-mode" onchange="toggleKioskMode(this.checked)"><span>${t('settings.kiosk_enable')}</span></label></div></div>`;
       h += '</div>';
       el.innerHTML = h;
       loadPrinterGroupsSettings();
@@ -806,10 +803,10 @@
 
     } else if (_systemSubTab === 'automation') {
       let h = '<div class="settings-grid">';
-      h += `<div class="settings-card"><div class="card-title">${t('settings.ai_detection_title')} ${tip('Use the printer\'s built-in AI camera (xcam) to detect spaghetti, first layer issues, and foreign objects')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.ai_detection_desc')}</p><div id="ai-detection-section"><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="ai-detection-enabled" onchange="toggleAiDetection(this.checked)"><span>${t('settings.ai_detection_enable')}</span></label><div style="margin-top:0.5rem;display:flex;align-items:center;gap:0.5rem"><label style="font-size:0.85rem">${t('settings.ai_detection_sensitivity')}</label><select class="form-input" id="ai-detection-sensitivity" onchange="updateAiSensitivity(this.value)" style="width:auto"><option value="low">${t('settings.sensitivity_low')}</option><option value="medium">${t('settings.sensitivity_medium')}</option><option value="high">${t('settings.sensitivity_high')}</option></select></div><div id="ai-detection-list" style="margin-top:0.5rem"></div></div></div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.timelapse_title')} ${tip('Automatically capture timelapse videos of your prints using camera snapshots')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.timelapse_desc')}</p><div id="timelapse-settings-section"><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="timelapse-enabled" onchange="toggleTimelapse(this.checked)"><span>${t('settings.timelapse_enable')}</span></label><div id="timelapse-list" style="margin-top:0.5rem"></div></div></div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.milestone_title')} ${tip('Capture screenshots at 25%, 50%, and 75% progress for print documentation')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.milestone_desc')}</p><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem"><input type="checkbox" id="milestones-enabled" onchange="window._toggleMilestones(this.checked)"><span>${t('settings.milestone_enable')}</span></label></div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.report_title')} ${tip('Receive automated email summaries of your printing activity (weekly or monthly)')}</div>
+      h += `<div class="settings-card"><div class="card-title">${t('settings.ai_detection_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.ai_detection_desc')}</p><div id="ai-detection-section"><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="ai-detection-enabled" onchange="toggleAiDetection(this.checked)"><span>${t('settings.ai_detection_enable')}</span></label><div style="margin-top:0.5rem;display:flex;align-items:center;gap:0.5rem"><label style="font-size:0.85rem">${t('settings.ai_detection_sensitivity')}</label><select class="form-input" id="ai-detection-sensitivity" onchange="updateAiSensitivity(this.value)" style="width:auto"><option value="low">${t('settings.sensitivity_low')}</option><option value="medium">${t('settings.sensitivity_medium')}</option><option value="high">${t('settings.sensitivity_high')}</option></select></div><div id="ai-detection-list" style="margin-top:0.5rem"></div></div></div>`;
+      h += `<div class="settings-card"><div class="card-title">${t('settings.timelapse_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.timelapse_desc')}</p><div id="timelapse-settings-section"><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="timelapse-enabled" onchange="toggleTimelapse(this.checked)"><span>${t('settings.timelapse_enable')}</span></label><div id="timelapse-list" style="margin-top:0.5rem"></div></div></div>`;
+      h += `<div class="settings-card"><div class="card-title">${t('settings.milestone_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.milestone_desc')}</p><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem"><input type="checkbox" id="milestones-enabled" onchange="window._toggleMilestones(this.checked)"><span>${t('settings.milestone_enable')}</span></label></div>`;
+      h += `<div class="settings-card"><div class="card-title">${t('settings.report_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.report_desc')}</p>
         <label class="form-label">${t('settings.report_frequency')}</label>
         <select id="report-frequency" class="form-input">
@@ -826,12 +823,12 @@
           <button class="form-btn form-btn-sm form-btn-secondary" data-ripple onclick="window._sendTestReport()">${t('settings.report_send_test')}</button>
         </div>
       </div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.public_status_title')} ${tip('Share a read-only status page at /status.html showing which printers are active')}</div>
+      h += `<div class="settings-card"><div class="card-title">${t('settings.public_status_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.public_status_desc')}</p>
         <label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem"><input type="checkbox" id="public-status-enabled" onchange="window._togglePublicStatus(this.checked)"><span>${t('settings.public_status_enable')}</span></label>
         <p class="text-muted" style="font-size:0.75rem;margin-top:6px">${t('settings.public_status_url')}: <a href="/status.html" target="_blank" style="color:var(--accent-blue)">/status.html</a></p>
       </div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.ha_mqtt_title')} ${tip('Publish printer data to an MQTT broker for Home Assistant auto-discovery')}</div>
+      h += `<div class="settings-card"><div class="card-title">${t('settings.ha_mqtt_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.ha_mqtt_desc')}</p>
         <label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:8px"><input type="checkbox" id="ha-mqtt-enabled" onchange="window._toggleHaMqtt(this.checked)"><span>${t('settings.ha_mqtt_enable')}</span></label>
         <div id="ha-mqtt-fields" style="display:none">
@@ -859,7 +856,7 @@
     } else if (_systemSubTab === 'energy') {
       let h = '<div class="settings-grid">';
       // Provider selection
-      h += `<div class="settings-card"><div class="card-title">${t('settings.energy_provider_title')} ${tip('Connect to Tibber or Nordpool for real-time electricity pricing to optimize print scheduling')}</div>
+      h += `<div class="settings-card"><div class="card-title">${t('settings.energy_provider_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.energy_provider_desc')}</p>
         <select id="energy-provider" class="form-input" onchange="window._energyProviderChanged()">
           <option value="none">${t('settings.energy_none')}</option>
@@ -891,18 +888,18 @@
         <button class="form-btn form-btn-primary mt-sm" data-ripple onclick="window._saveEnergySettings()">${t('common.save')}</button>
       </div>`;
       // Live prices
-      h += `<div class="settings-card"><div class="card-title">${t('settings.energy_prices_title')} ${tip('Current electricity prices from your provider, updated hourly')}</div>
+      h += `<div class="settings-card"><div class="card-title">${t('settings.energy_prices_title')}</div>
         <div id="energy-live-prices"><div class="text-muted" style="font-size:0.8rem">${t('settings.energy_loading')}</div></div>
         <button class="form-btn form-btn-sm form-btn-secondary mt-sm" data-ripple onclick="window._refreshEnergyPrices()">${t('settings.energy_refresh')}</button>
       </div>`;
       // Smart scheduling info
-      h += `<div class="settings-card" style="grid-column:1/-1"><div class="card-title">${t('settings.energy_smart_title')} ${tip('Shows the cheapest time window to start your next print based on electricity prices')}</div>
+      h += `<div class="settings-card" style="grid-column:1/-1"><div class="card-title">${t('settings.energy_smart_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.energy_smart_desc')}</p>
         <div id="energy-cheapest-window"></div>
       </div>`;
 
       // Power Monitor (Shelly/Tasmota)
-      h += `<div class="settings-card"><div class="card-title">${t('settings.power_plug_title')} ${tip('Connect a Shelly or Tasmota smart plug to track actual power consumption per print')}</div>
+      h += `<div class="settings-card"><div class="card-title">${t('settings.power_plug_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.power_plug_desc')}</p>
         <label class="form-label">${t('settings.power_plug_type')}</label>
         <select id="power-plug-type" class="form-input" onchange="window._powerPlugTypeChanged()">
@@ -943,7 +940,7 @@
 
     } else if (_systemSubTab === 'nodes') {
       let h = '<div class="settings-grid">';
-      h += `<div class="settings-card"><div class="card-title">${t('settings.nodes_title')} ${tip('Connect multiple 3DPrintForge instances together to manage printers across locations')}</div>
+      h += `<div class="settings-card"><div class="card-title">${t('settings.nodes_title')}</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.nodes_desc')}</p>
         <div id="remote-nodes-list"><div class="text-muted" style="font-size:0.8rem">${t('common.loading')}...</div></div>
         <button class="form-btn form-btn-primary mt-sm" data-ripple onclick="window._showAddNodeDialog()">${t('settings.nodes_add')}</button>
@@ -959,7 +956,7 @@
       h += `<div class="settings-card" style="cursor:pointer" onclick="openPanel('learning')"><div class="card-title">${t('settings.courses_title')}</div><p class="text-muted" style="font-size:0.85rem">${t('settings.courses_desc')}</p><button class="form-btn form-btn-sm mt-sm" data-ripple onclick="openPanel('learning')">${t('learning.go_to')} \u2192</button></div>`;
       // Export & Import card
       h += `<div class="settings-card">
-        <div class="card-title">Eksporter & Importer ${tip('Transfer settings between instances or restore from a previous backup')}</div>
+        <div class="card-title">Eksporter & Importer</div>
         <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.75rem">Eksporter alle innstillinger som JSON-fil, eller importer fra en tidligere eksport.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="form-btn form-btn-primary" data-ripple onclick="window._exportDashboardSettings()">
@@ -1640,10 +1637,9 @@
       const envManaged = ac.envManaged;
       _authUsers = (ac.users || []).map(u => ({ ...u }));
 
-      // tip() defined at top of IIFE
       let html = `
         <div class="settings-card">
-          <div class="card-title" style="display:flex;align-items:center;gap:4px">${t('settings.auth_title')} ${tip('Protect your dashboard with username/password login. Supports multiple users with different permission levels')}</div>`;
+          <div class="card-title" style="display:flex;align-items:center;gap:4px">${t('settings.auth_title')}</div>`;
 
       if (envManaged) {
         html += `<p class="text-muted" style="font-size:0.8rem">${t('settings.auth_env_notice')}</p>`;
