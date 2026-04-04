@@ -43,6 +43,10 @@ Du trenger tre ting for å koble til printeren:
 Sett en fast IP-adresse på printeren i ruteren din (DHCP-reservasjon). Da slipper du å oppdatere dashboardet hver gang printeren får ny IP.
 :::
 
+:::tip Automatisk konfigurering
+3DPrintForge oppdager automatisk printerens type og konfigurerer filtilgang (FTPS/HTTP), kameramodus og andre funksjoner basert på merke og modell.
+:::
+
 ## AMS-konfigurasjon
 
 Etter at printeren er koblet til, oppdateres AMS-statusen automatisk. Du kan:

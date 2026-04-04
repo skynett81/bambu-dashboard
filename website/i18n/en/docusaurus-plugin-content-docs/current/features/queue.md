@@ -32,6 +32,7 @@ You can drag files directly from the file explorer onto the queue page to add th
 1. Click **Upload** or drag a file to the upload field
 2. Supported formats: `.3mf`, `.gcode`, `.bgcode`
 3. The file is saved in the file library and linked to the queue job
+- **3D preview** — click the 3D button to view the model before printing
 
 ### From the file library
 

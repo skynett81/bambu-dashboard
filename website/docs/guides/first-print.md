@@ -82,6 +82,9 @@ Klikk på kameraikonet på printerkortet for å se live-feed direkte i dashboard
 De første 3–5 lagene er kritiske. Dårlig heft nå betyr mislykket print senere. Se kameraet og verifiser at filamentet legger seg pent og jevnt.
 :::
 
+### 3D-modellvisning
+- **3D-modellvisning** — se en interaktiv 3D-forhåndsvisning av modellen under printing
+
 ### Print Guard
 3DPrintForge har en AI-drevet **Print Guard** som automatisk oppdager spaghetti-feil og kan pause printen. Aktiver dette under **Overvåking → Print Guard**.
 

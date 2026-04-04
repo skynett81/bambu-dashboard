@@ -74,6 +74,9 @@ Real-time temperature curves are displayed in the detail panel:
 - Plate temperature — important for good adhesion
 - Chamber temperature — rises gradually, particularly relevant for ABS/ASA
 
+### 3D model viewer
+- **3D model viewer** — interactive 3D preview with Three.js, per-layer colours and gcode toolpath
+
 ### Print Guard
 If **Print Guard** is enabled, the dashboard automatically monitors for spaghetti and volumetric deviations. If something is detected:
 1. The print is paused

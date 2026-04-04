@@ -25,6 +25,10 @@ Har du mer enn én printer? 3DPrintForge er bygget for flåtehåndtering — du 
 4. Klikk **Test tilkobling** — du bør se grønn status
 5. Klikk **Lagre**
 
+:::info Printer-capabilities
+3DPrintForge bruker automatisk riktig konfigurasjon per printermerke og modell. Bambu Lab-printere bruker FTPS for filtilgang, mens Moonraker/Klipper-printere bruker HTTP API. Se [Arkitektur](../advanced/architecture) for detaljer.
+:::
+
 :::tip Gi printerene beskrivende navn
 "Bambu 1" og "Bambu 2" er forvirrende. Bruk navn som "X1C - Produksjon" og "P1S - Prototyper" for å holde oversikten.
 :::

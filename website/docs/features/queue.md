@@ -32,6 +32,7 @@ Du kan dra filer direkte fra filutforskeren til køsiden for å legge dem til ra
 1. Klikk **Last opp** eller dra en fil til opplastingsfeltet
 2. Støttede formater: `.3mf`, `.gcode`, `.bgcode`
 3. Filen lagres i filbiblioteket og kobles til køjobben
+- **3D-forhåndsvisning** — klikk 3D-knappen for å se modellen før printing
 
 ### Fra filbiblioteket
 

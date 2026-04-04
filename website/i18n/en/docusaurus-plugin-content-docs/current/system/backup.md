@@ -25,6 +25,9 @@ Go to: **https://localhost:3443/#settings** → **System → Backup**
 | File library (files) | Optional | Can be large |
 | Timelapse videos | Optional | Can be very large |
 | Gallery images | Optional | |
+| `data/model-cache/` | Cached 3MF models | Optional |
+| `data/history-models/` | 3MF linked to history | Recommended |
+| `data/toolpath-cache/` | Cached gcode toolpath | Optional |
 
 ## Creating a manual backup
 

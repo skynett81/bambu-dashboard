@@ -89,3 +89,4 @@ At the top of the fleet overview, a summary row shows:
 - Number of active prints
 - Total filament consumption today
 - Estimated completion time for the longest ongoing print
+- **Per-brand capabilities** — automatic configuration per printer type via printer-capabilities.js (Bambu Lab FTPS, Moonraker HTTP, camera modes, etc.)

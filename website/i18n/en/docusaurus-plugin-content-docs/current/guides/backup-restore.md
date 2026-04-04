@@ -20,6 +20,9 @@ description: Automatic and manual backup of 3DPrintForge, restoration, and migra
 | Notification configuration | Yes | Telegram tokens, etc. |
 | Camera images | Optional | Can become large files |
 | Timelapse videos | Optional | Excluded by default |
+| `data/model-cache/` | Cached 3MF models | Optional |
+| `data/history-models/` | 3MF linked to history | Recommended |
+| `data/toolpath-cache/` | Cached gcode toolpath | Optional |
 
 ## Automatic nightly backup
 

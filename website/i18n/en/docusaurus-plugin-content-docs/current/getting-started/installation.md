@@ -96,3 +96,15 @@ npm start
 ```
 
 The script removes the service, configuration, and data (you choose what gets deleted).
+
+### Data directories
+
+3DPrintForge automatically creates these directories in `data/`:
+
+| Directory | Contents | Backup |
+|-----------|----------|--------|
+| `uploads/` | Slicer uploads | Recommended |
+| `library/` | File library (3MF/STL/gcode) | Recommended |
+| `model-cache/` | Cached 3MF from printers | Optional (regenerated) |
+| `history-models/` | 3MF files linked to history | Recommended |
+| `toolpath-cache/` | Cached gcode toolpath | Optional (regenerated) |

@@ -96,3 +96,15 @@ npm start
 ```
 
 Skripten fjerner tjeneste, konfigurasjon og data (du velger hva som slettes).
+
+### Datamapper
+
+3DPrintForge oppretter automatisk disse mappene i `data/`:
+
+| Mappe | Innhold | Backup |
+|-------|---------|--------|
+| `uploads/` | Slicer-opplastinger | Anbefalt |
+| `library/` | Filbibliotek (3MF/STL/gcode) | Anbefalt |
+| `model-cache/` | Cached 3MF fra printere | Valgfritt (regenereres) |
+| `history-models/` | 3MF-filer knyttet til historikk | Anbefalt |
+| `toolpath-cache/` | Cached gcode toolpath | Valgfritt (regenereres) |

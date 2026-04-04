@@ -24,18 +24,17 @@ Når en printer er aktiv, oppdateres alle verdier kontinuerlig via MQTT:
 Alle verdier oppdateres direkte fra printeren via MQTT uten å laste siden på nytt. Forsinkelsen er typisk under 1 sekund.
 :::
 
-## 3D-modellvisning
+### 3D-modellvisning
 
-Hvis printeren sender en `.3mf`-fil med modellen, vises en interaktiv 3D-forhåndsvisning:
+Under aktiv printing vises en interaktiv 3D-forhåndsvisning av modellen:
 
-1. Modellen lastes automatisk når en print starter
-2. Roter modellen ved å dra med musen
-3. Scroll for å zoome inn/ut
-4. Klikk **Tilbakestill** for å gå tilbake til standardvisning
-
-:::info Støtte
-3D-visning krever at printeren sender modelldata. Ikke alle printjobber inkluderer dette.
-:::
+- **EnhancedViewer** — Three.js-basert renderer med smooth shading, 3-punkt belysning og build plate grid
+- **Per-lag farger** — multi-farge prints viser riktig filamentfarge per lag
+- **Print-progress** — modellen klippes ved nåværende lag med grønn kant-glow
+- **Gcode toolpath** — for Moonraker/Klipper-printere vises gcode som farget toolpath (blå bunn → rød topp)
+- **3MFConsortium 3mfViewer** — for 3MF-filer fra library vises full 3D-viewer med scene tree og materialer
+- **Orbit controls** — roter, zoom og panorer med mus, auto-rotasjon under printing
+- **Universell** — fungerer for alle printertyper (Bambu Lab FTPS, Moonraker HTTP, lokale filer)
 
 ## AMS-status
 

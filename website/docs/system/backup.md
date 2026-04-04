@@ -25,6 +25,9 @@ Gå til: **https://localhost:3443/#settings** → **System → Sikkerhetskopi**
 | Filbibliotek (filer) | Valgfritt | Kan bli stor |
 | Timelapse-videoer | Valgfritt | Kan bli svært stor |
 | Galleribilder | Valgfritt | |
+| `data/model-cache/` | Cached 3MF-modeller | Valgfritt |
+| `data/history-models/` | 3MF knyttet til historikk | Anbefalt |
+| `data/toolpath-cache/` | Cached gcode toolpath | Valgfritt |
 
 ## Opprette en manuell sikkerhetskopi
 

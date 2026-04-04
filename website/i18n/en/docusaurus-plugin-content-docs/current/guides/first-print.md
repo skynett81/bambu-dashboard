@@ -82,6 +82,9 @@ Click the camera icon on the printer card to see a live feed directly in the das
 The first 3–5 layers are critical. Poor adhesion now means a failed print later. Watch the camera and verify that the filament is laying down neatly and evenly.
 :::
 
+### 3D model viewer
+- **3D model viewer** — see an interactive 3D preview of the model during printing
+
 ### Print Guard
 3DPrintForge has an AI-powered **Print Guard** that automatically detects spaghetti failures and can pause the print. Enable it under **Monitoring → Print Guard**.
 

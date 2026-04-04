@@ -24,18 +24,17 @@ When a printer is active, all values update continuously via MQTT:
 All values are updated directly from the printer via MQTT without reloading the page. Latency is typically under 1 second.
 :::
 
-## 3D model view
+### 3D Model Viewer
 
-If the printer sends a `.3mf` file with the model, an interactive 3D preview is displayed:
+During active printing, an interactive 3D preview of the model is displayed:
 
-1. The model loads automatically when a print starts
-2. Rotate the model by dragging with the mouse
-3. Scroll to zoom in/out
-4. Click **Reset** to return to the default view
-
-:::info Support
-3D viewing requires that the printer sends model data. Not all print jobs include this.
-:::
+- **EnhancedViewer** — Three.js-based renderer with smooth shading, 3-point lighting and build plate grid
+- **Per-layer colours** — multi-colour prints show correct filament colour per layer
+- **Print progress** — model is clipped at current layer with green edge glow
+- **Gcode toolpath** — for Moonraker/Klipper printers, gcode is shown as coloured toolpath (blue bottom → red top)
+- **3MFConsortium 3mfViewer** — for 3MF files from library, full 3D viewer with scene tree and materials
+- **Orbit controls** — rotate, zoom and pan with mouse, auto-rotation during printing
+- **Universal** — works for all printer types (Bambu Lab FTPS, Moonraker HTTP, local files)
 
 ## AMS status
 

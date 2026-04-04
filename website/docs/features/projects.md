@@ -37,6 +37,8 @@ Gå til: **https://localhost:3443/#projects**
 3. Klikk på printen → **Koble til prosjekt**
 4. Velg prosjekt fra nedtrekkslisten
 
+Printhistorikk-poster kan nå ha 3MF-filer knyttet til seg for 3D-forhåndsvisning — se [Printhistorikk](./history#3d-forhåndsvisning).
+
 ### Massekobling
 
 1. Velg flere prints i historikken med avkryssingsbokser

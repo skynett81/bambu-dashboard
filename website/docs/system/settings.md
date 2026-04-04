@@ -114,3 +114,9 @@ Globale webhook-innstillinger:
 | Loggnivå | Error / Warn / Info / Debug |
 | Database-opprydding | Automatisk sletting av gammel historikk |
 | Oppdateringer | Sjekk for nye versjoner |
+
+## 3D-visning
+
+| Innstilling | Beskrivelse |
+|---|---|
+| 3D-visning | Three.js renderer, toolpath-farger, modell-cache |

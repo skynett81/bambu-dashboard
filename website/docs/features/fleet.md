@@ -89,3 +89,4 @@ Høyreklikk på et kort (eller klikk de tre prikkene) for hurtighandlinger:
 - Antall aktive prints
 - Totalt filamentforbruk i dag
 - Estimert ferdigtid for lengste pågående print
+- **Per-merke capabilities** — automatisk konfigurasjon per printertype via printer-capabilities.js (Bambu Lab FTPS, Moonraker HTTP, kamera-modus, etc.)

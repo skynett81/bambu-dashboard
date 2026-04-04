@@ -1,12 +1,12 @@
 ---
 sidebar_position: 4
 title: API-lekeplass
-description: Test alle 177 API-endepunkter direkte i nettleseren med innebygd OpenAPI-dokumentasjon og autentisering
+description: Test alle 590+ API-endepunkter direkte i nettleseren med innebygd OpenAPI-dokumentasjon og autentisering
 ---
 
 # API-lekeplass
 
-API-lekeplassen lar deg utforske og teste alle 177 API-endepunkter i 3DPrintForge direkte i nettleseren — uten å skrive kode.
+API-lekeplassen lar deg utforske og teste alle 590+ API-endepunkter i 3DPrintForge direkte i nettleseren — uten å skrive kode.
 
 Gå til: **https://localhost:3443/api/docs**
 

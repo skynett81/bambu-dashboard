@@ -111,6 +111,7 @@ Tilgjengelige widgets:
 | Filament-meter | Totalt forbruk siste 30 dager |
 | Historikk-snarvei | Siste 5 prints |
 | Kamera-feed | Live kamerabilde |
+| 3D-modellvisning | Interaktiv 3D-forhåndsvisning med Three.js og gcode toolpath |
 
 5. Klikk **Lagre layout**
 

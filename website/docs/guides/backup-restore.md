@@ -20,6 +20,9 @@ description: Automatisk og manuell backup av 3DPrintForge, gjenoppretting og fly
 | Varslingskonfigurasjon | Ja | Telegram-tokens osv. |
 | Kamerabilder | Valgfritt | Kan bli store filer |
 | Timelapse-videoer | Valgfritt | Ekskludert som standard |
+| `data/model-cache/` | Cached 3MF-modeller | Valgfritt |
+| `data/history-models/` | 3MF knyttet til historikk | Anbefalt |
+| `data/toolpath-cache/` | Cached gcode toolpath | Valgfritt |
 
 ## Automatisk nattlig backup
 

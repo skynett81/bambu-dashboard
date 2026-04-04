@@ -17,6 +17,8 @@ Gå til: **https://localhost:3443/#cost-estimator**
 3. Støttede formater: `.3mf`, `.gcode`, `.bgcode`
 4. Klikk **Analyser**
 
+For 3MF-filer er det også tilgjengelig en 3D-forhåndsvisning via 3MFConsortium sin 3mfViewer.
+
 :::info Analyse
 Systemet analyserer G-koden for å trekke ut filamentforbruk, estimert printtid og materialprofil. Dette tar vanligvis 2–10 sekunder.
 :::

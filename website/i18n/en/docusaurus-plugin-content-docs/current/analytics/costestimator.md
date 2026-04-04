@@ -17,6 +17,8 @@ Go to: **https://localhost:3443/#cost-estimator**
 3. Supported formats: `.3mf`, `.gcode`, `.bgcode`
 4. Click **Analyze**
 
+For 3MF files, a 3D preview is also available via the 3MFConsortium 3mfViewer.
+
 :::info Analysis
 The system analyzes the G-code to extract filament consumption, estimated print time, and material profile. This typically takes 2–10 seconds.
 :::

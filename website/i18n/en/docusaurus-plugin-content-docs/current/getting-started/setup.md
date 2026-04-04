@@ -43,6 +43,10 @@ You need three things to connect to your printer:
 Set a static IP address for your printer in your router (DHCP reservation). This way you won't need to update the dashboard every time the printer gets a new IP.
 :::
 
+:::tip Automatic configuration
+3DPrintForge automatically detects the printer type and configures file access (FTPS/HTTP), camera mode and other features based on brand and model.
+:::
+
 ## AMS configuration
 
 After the printer is connected, AMS status updates automatically. You can:

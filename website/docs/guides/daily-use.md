@@ -74,6 +74,9 @@ Sanntids temperaturkurver vises i detaljpanelet:
 - Platetemperatur — viktig for god heft
 - Kammertemperatur — stiger gradvis, særlig relevant for ABS/ASA
 
+### 3D-modellvisning
+- **3D-modellvisning** — interaktiv 3D-forhåndsvisning med Three.js, per-lag farger og gcode toolpath
+
 ### Print Guard
 Er **Print Guard** aktivert, overvåker dashboardet automatisk for spaghetti og volumetriske avvik. Hvis noe oppdages:
 1. Printen settes på pause

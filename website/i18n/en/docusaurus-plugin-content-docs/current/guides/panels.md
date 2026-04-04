@@ -111,6 +111,7 @@ Available widgets:
 | Filament meter | Total consumption last 30 days |
 | History shortcut | Last 5 prints |
 | Camera feed | Live camera image |
+| 3D model viewer | Interactive 3D preview with Three.js and gcode toolpath |
 
 5. Click **Save layout**
 

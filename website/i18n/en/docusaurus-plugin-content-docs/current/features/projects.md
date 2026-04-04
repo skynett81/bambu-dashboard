@@ -37,6 +37,8 @@ Go to: **https://localhost:3443/#projects**
 3. Click on the print → **Link to project**
 4. Select project from the dropdown
 
+Print history entries can now have 3MF files linked for 3D preview — see [Print History](./history#3d-preview).
+
 ### Bulk linking
 
 1. Select multiple prints in history using checkboxes

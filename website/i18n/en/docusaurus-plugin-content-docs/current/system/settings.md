@@ -114,3 +114,9 @@ Global webhook settings:
 | Log level | Error / Warn / Info / Debug |
 | Database cleanup | Automatic deletion of old history |
 | Updates | Check for new versions |
+
+## 3D Viewing
+
+| Setting | Description |
+|---|---|
+| 3D Viewing | Three.js renderer, toolpath colours, model cache |

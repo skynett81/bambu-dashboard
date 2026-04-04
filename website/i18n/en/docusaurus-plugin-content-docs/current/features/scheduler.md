@@ -52,6 +52,7 @@ Set up prints to start at a specific time:
 3. Set start time
 4. Configure notification (optional)
 5. Save
+- **3D preview** — view the 3D model directly from scheduled prints
 
 :::warning Printer must be idle
 Scheduled prints only start if the printer is in standby mode at the specified time. If the printer is busy, the start is deferred to the next available time (configurable).
