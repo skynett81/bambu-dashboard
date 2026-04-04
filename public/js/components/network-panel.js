@@ -28,12 +28,13 @@
   function _renderNetworkPanel(el) {
     const s = _networkSettings;
     if (!s) return;
+    const tip = (text) => `<span class="settings-tooltip" title="${_esc(text)}" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:var(--bg-tertiary);color:var(--text-muted);font-size:0.65rem;cursor:help;margin-left:6px;vertical-align:middle;border:1px solid var(--border-color)">?</span>`;
 
     let h = '';
 
     // ── Detected Subnets (read-only) ──
     h += '<div class="settings-card">';
-    h += '<div class="card-title" style="margin-bottom:10px">' + t('network.detected_subnets') + '</div>';
+    h += '<div class="card-title" style="margin-bottom:10px">' + t('network.detected_subnets') + tip('Automatically discovered from your network interfaces. Used for printer discovery scans') + '</div>';
     h += '<div class="text-muted" style="font-size:0.8rem;margin-bottom:8px">' + t('network.detected_subnets_hint') + '</div>';
     h += '<div class="net-chip-list" id="net-detected-subnets">';
     if (s.detectedSubnets && s.detectedSubnets.length) {
@@ -47,7 +48,7 @@
 
     // ── Extra Subnets ──
     h += '<div class="settings-card mt-sm">';
-    h += '<div class="card-title" style="margin-bottom:10px">' + t('network.extra_subnets') + '</div>';
+    h += '<div class="card-title" style="margin-bottom:10px">' + t('network.extra_subnets') + tip('Add additional subnets if your printers are on a different network segment (e.g. VLAN)') + '</div>';
     h += '<div class="text-muted" style="font-size:0.8rem;margin-bottom:8px">' + t('network.extra_subnets_hint') + '</div>';
     h += '<div class="net-chip-list" id="net-extra-subnets">';
     if (s.extraSubnets && s.extraSubnets.length) {
@@ -66,7 +67,7 @@
 
     // ── Scan Settings ──
     h += '<div class="settings-card mt-sm">';
-    h += '<div class="card-title" style="margin-bottom:10px">' + t('network.scan_settings') + '</div>';
+    h += '<div class="card-title" style="margin-bottom:10px">' + t('network.scan_settings') + tip('Control how often 3DPrintForge checks for disconnected printers and how long to wait for responses') + '</div>';
     h += '<div class="prefs-compact-grid">';
 
     // Rediscovery interval
@@ -97,7 +98,7 @@
     // ── Network Scan ──
     h += '<div class="settings-card mt-sm">';
     h += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
-    h += '<div class="card-title" style="margin:0">' + t('network.network_scan') + '</div>';
+    h += '<div class="card-title" style="margin:0">' + t('network.network_scan') + tip('Scan your network for Bambu Lab (SSDP) and Moonraker/Klipper (HTTP) printers') + '</div>';
     h += '<button class="form-btn form-btn-sm form-btn-accent" id="net-scan-btn" data-ripple onclick="window._runNetworkScan()" ' + (_scanning ? 'disabled' : '') + '>';
     h += _scanning
       ? '<span class="spinner-sm"></span> ' + t('network.scanning')
