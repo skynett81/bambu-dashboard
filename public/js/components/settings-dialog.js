@@ -802,48 +802,129 @@
       loadHubSettings();
 
     } else if (_systemSubTab === 'automation') {
-      let h = '<div class="settings-grid">';
-      h += `<div class="settings-card"><div class="card-title">${t('settings.ai_detection_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.ai_detection_desc')}</p><div id="ai-detection-section"><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="ai-detection-enabled" onchange="toggleAiDetection(this.checked)"><span>${t('settings.ai_detection_enable')}</span></label><div style="margin-top:0.5rem;display:flex;align-items:center;gap:0.5rem"><label style="font-size:0.85rem">${t('settings.ai_detection_sensitivity')}</label><select class="form-input" id="ai-detection-sensitivity" onchange="updateAiSensitivity(this.value)" style="width:auto"><option value="low">${t('settings.sensitivity_low')}</option><option value="medium">${t('settings.sensitivity_medium')}</option><option value="high">${t('settings.sensitivity_high')}</option></select></div><div id="ai-detection-list" style="margin-top:0.5rem"></div></div></div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.timelapse_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.timelapse_desc')}</p><div id="timelapse-settings-section"><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem"><input type="checkbox" id="timelapse-enabled" onchange="toggleTimelapse(this.checked)"><span>${t('settings.timelapse_enable')}</span></label><div id="timelapse-list" style="margin-top:0.5rem"></div></div></div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.milestone_title')}</div><p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.milestone_desc')}</p><label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem"><input type="checkbox" id="milestones-enabled" onchange="window._toggleMilestones(this.checked)"><span>${t('settings.milestone_enable')}</span></label></div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.report_title')}</div>
-        <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.report_desc')}</p>
+      const icon = (svg) => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.6">${svg}</svg>`;
+      const iAi = icon('<path d="M12 2a10 10 0 100 20 10 10 0 000-20z"/><path d="M12 16v-4m0-4h.01"/>');
+      const iCam = icon('<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>');
+      const iMile = icon('<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>');
+      const iMail = icon('<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>');
+      const iGlobe = icon('<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/>');
+      const iHA = icon('<path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>');
+
+      let h = '<div style="display:flex;flex-direction:column;gap:14px">';
+
+      // Row 1: AI Detection + Timelapse + Milestones
+      h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">';
+
+      // AI Detection
+      h += `<div class="settings-card">
+        <div class="card-title" style="gap:8px">${iAi} ${t('settings.ai_detection_title')}</div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.ai_detection_desc')}</p>
+        <div id="ai-detection-section">
+          <label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:8px">
+            <input type="checkbox" id="ai-detection-enabled" onchange="toggleAiDetection(this.checked)">
+            <span>${t('settings.ai_detection_enable')}</span>
+          </label>
+          <div style="display:flex;align-items:center;gap:8px">
+            <label style="font-size:0.8rem;white-space:nowrap">${t('settings.ai_detection_sensitivity')}</label>
+            <select class="form-input" id="ai-detection-sensitivity" onchange="updateAiSensitivity(this.value)" style="width:auto;font-size:0.8rem">
+              <option value="low">${t('settings.sensitivity_low')}</option>
+              <option value="medium">${t('settings.sensitivity_medium')}</option>
+              <option value="high">${t('settings.sensitivity_high')}</option>
+            </select>
+          </div>
+          <div id="ai-detection-list" style="margin-top:8px"></div>
+        </div>
+      </div>`;
+
+      // Timelapse
+      h += `<div class="settings-card">
+        <div class="card-title" style="gap:8px">${iCam} ${t('settings.timelapse_title')}</div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.timelapse_desc')}</p>
+        <div id="timelapse-settings-section">
+          <label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem">
+            <input type="checkbox" id="timelapse-enabled" onchange="toggleTimelapse(this.checked)">
+            <span>${t('settings.timelapse_enable')}</span>
+          </label>
+          <div id="timelapse-list" style="margin-top:8px"></div>
+        </div>
+      </div>`;
+
+      // Milestones
+      h += `<div class="settings-card">
+        <div class="card-title" style="gap:8px">${iMile} ${t('settings.milestone_title')}</div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.milestone_desc')}</p>
+        <label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem">
+          <input type="checkbox" id="milestones-enabled" onchange="window._toggleMilestones(this.checked)">
+          <span>${t('settings.milestone_enable')}</span>
+        </label>
+      </div>`;
+      h += '</div>';
+
+      // Row 2: Reports + Public Status
+      h += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px">';
+
+      // Reports
+      h += `<div class="settings-card">
+        <div class="card-title" style="gap:8px">${iMail} ${t('settings.report_title')}</div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.report_desc')}</p>
         <label class="form-label">${t('settings.report_frequency')}</label>
-        <select id="report-frequency" class="form-input">
+        <select id="report-frequency" class="form-input" style="max-width:200px">
           <option value="none">${t('settings.report_none')}</option>
           <option value="weekly">${t('settings.report_weekly')}</option>
           <option value="monthly">${t('settings.report_monthly')}</option>
         </select>
         <label class="form-label mt-sm">${t('settings.report_email')}</label>
-        <input type="email" id="report-email" class="form-input" placeholder="user@example.com">
-        <p class="text-muted" style="font-size:0.75rem;margin-top:4px">${t('settings.report_email_hint')}</p>
-        <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="email" id="report-email" class="form-input" placeholder="user@example.com" style="max-width:300px">
+        <p class="text-muted" style="font-size:0.72rem;margin-top:4px">${t('settings.report_email_hint')}</p>
+        <div style="display:flex;gap:6px;margin-top:10px">
           <button class="form-btn form-btn-primary" data-ripple onclick="window._saveReportSettings()">${t('common.save')}</button>
           <button class="form-btn form-btn-sm form-btn-secondary" data-ripple onclick="window._previewReport()">${t('settings.report_preview')}</button>
           <button class="form-btn form-btn-sm form-btn-secondary" data-ripple onclick="window._sendTestReport()">${t('settings.report_send_test')}</button>
         </div>
       </div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.public_status_title')}</div>
-        <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.public_status_desc')}</p>
-        <label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem"><input type="checkbox" id="public-status-enabled" onchange="window._togglePublicStatus(this.checked)"><span>${t('settings.public_status_enable')}</span></label>
-        <p class="text-muted" style="font-size:0.75rem;margin-top:6px">${t('settings.public_status_url')}: <a href="/status.html" target="_blank" style="color:var(--accent-blue)">/status.html</a></p>
+
+      // Public Status
+      h += `<div class="settings-card">
+        <div class="card-title" style="gap:8px">${iGlobe} ${t('settings.public_status_title')}</div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.public_status_desc')}</p>
+        <label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem">
+          <input type="checkbox" id="public-status-enabled" onchange="window._togglePublicStatus(this.checked)">
+          <span>${t('settings.public_status_enable')}</span>
+        </label>
+        <p class="text-muted" style="font-size:0.75rem;margin-top:8px">${t('settings.public_status_url')}: <a href="/status.html" target="_blank" style="color:var(--accent-blue)">/status.html</a></p>
       </div>`;
-      h += `<div class="settings-card"><div class="card-title">${t('settings.ha_mqtt_title')}</div>
-        <p class="text-muted" style="font-size:0.85rem;margin-bottom:0.5rem">${t('settings.ha_mqtt_desc')}</p>
-        <label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:8px"><input type="checkbox" id="ha-mqtt-enabled" onchange="window._toggleHaMqtt(this.checked)"><span>${t('settings.ha_mqtt_enable')}</span></label>
+      h += '</div>';
+
+      // Row 3: Home Assistant (full width)
+      h += `<div class="settings-card">
+        <div class="card-title" style="gap:8px">${iHA} ${t('settings.ha_mqtt_title')}</div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.ha_mqtt_desc')}</p>
+        <label class="form-checkbox-label" style="display:flex;align-items:center;gap:0.5rem;margin-bottom:8px">
+          <input type="checkbox" id="ha-mqtt-enabled" onchange="window._toggleHaMqtt(this.checked)">
+          <span>${t('settings.ha_mqtt_enable')}</span>
+        </label>
         <div id="ha-mqtt-fields" style="display:none">
-          <label class="form-label">${t('settings.ha_mqtt_broker')}</label>
-          <input type="text" id="ha-mqtt-broker" class="form-input" placeholder="mqtt://homeassistant.local:1883">
-          <label class="form-label mt-sm">${t('settings.ha_mqtt_username')}</label>
-          <input type="text" id="ha-mqtt-username" class="form-input" placeholder="${t('settings.ha_mqtt_optional')}">
-          <label class="form-label mt-sm">${t('settings.ha_mqtt_password')}</label>
-          <input type="password" id="ha-mqtt-password" class="form-input" placeholder="${t('settings.ha_mqtt_optional')}">
-          <div style="display:flex;gap:6px;margin-top:8px;align-items:center">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;max-width:700px">
+            <div>
+              <label class="form-label">${t('settings.ha_mqtt_broker')}</label>
+              <input type="text" id="ha-mqtt-broker" class="form-input" placeholder="mqtt://homeassistant.local:1883">
+            </div>
+            <div>
+              <label class="form-label">${t('settings.ha_mqtt_username')}</label>
+              <input type="text" id="ha-mqtt-username" class="form-input" placeholder="${t('settings.ha_mqtt_optional')}">
+            </div>
+            <div>
+              <label class="form-label">${t('settings.ha_mqtt_password')}</label>
+              <input type="password" id="ha-mqtt-password" class="form-input" placeholder="${t('settings.ha_mqtt_optional')}">
+            </div>
+          </div>
+          <div style="display:flex;gap:6px;margin-top:10px;align-items:center">
             <button class="form-btn form-btn-primary" data-ripple onclick="window._saveHaMqttSettings()">${t('common.save')}</button>
             <span id="ha-mqtt-status" style="font-size:0.78rem;color:var(--text-muted)"></span>
           </div>
         </div>
       </div>`;
+
       h += '</div>';
       el.innerHTML = h;
       loadAiDetectionSettings();
