@@ -1,7 +1,7 @@
 // i18n - Lightweight internationalization module
 (function() {
-  const DEFAULT_LOCALE = 'nb';
-  const SUPPORTED_LOCALES = ['nb', 'en'];
+  const DEFAULT_LOCALE = 'en';
+  const SUPPORTED_LOCALES = ['en', 'nb'];
 
   const LOCALE_NAMES = {
     nb: 'Norsk Bokmål', en: 'English'
@@ -150,7 +150,7 @@
         const res = await fetch(`/lang/${locale}.json`);
         _translations = await res.json();
       } catch (e) {
-        console.warn(`[i18n] Kunne ikke laste ${locale}, bruker ${DEFAULT_LOCALE}`);
+        console.warn(`[i18n] Could not load ${locale}, using ${DEFAULT_LOCALE}`);
         _locale = DEFAULT_LOCALE;
         _translations = _fallback;
       }
@@ -169,7 +169,7 @@
         const res = await fetch(`/lang/${DEFAULT_LOCALE}.json`);
         _fallback = await res.json();
       } catch (e) {
-        console.error('[i18n] Kunne ikke laste fallback-oversettelser');
+        console.error('[i18n] Could not load fallback translations');
       }
 
       // Load selected locale

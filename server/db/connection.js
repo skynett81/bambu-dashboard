@@ -20,7 +20,7 @@ export function initConnection() {
   db.exec('PRAGMA journal_mode=WAL');
   db.exec('PRAGMA busy_timeout=5000');
   db.exec('PRAGMA foreign_keys=ON');
-  log.info('Database klar: ' + DB_PATH);
+  log.info('Database ready: ' + DB_PATH);
   return db;
 }
 

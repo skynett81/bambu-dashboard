@@ -28,7 +28,7 @@ export class WebSocketHub {
       }
 
       this.clients.add(ws);
-      log.info(`Klient tilkoblet (${this.clients.size} totalt)`);
+      log.info(`Client connected (${this.clients.size} total)`);
 
       // Send all printer states + meta on connect
       ws.send(JSON.stringify({
@@ -66,17 +66,17 @@ export class WebSocketHub {
             this.onCommand(msg);
           }
         } catch (e) {
-          log.warn('Ugyldig melding: ' + e.message);
+          log.warn('Invalid message: ' + e.message);
         }
       });
 
       ws.on('close', () => {
         this.clients.delete(ws);
-        log.info(`Klient frakoblet (${this.clients.size} totalt)`);
+        log.info(`Client disconnected (${this.clients.size} total)`);
       });
 
       ws.on('error', (err) => {
-        log.warn('Feil: ' + err.message);
+        log.warn('Error: ' + err.message);
         this.clients.delete(ws);
       });
     });

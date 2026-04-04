@@ -75,10 +75,10 @@ export function startNightlyBackup() {
   const schedule = () => {
     _nightlyTimer = setTimeout(() => {
       try { createBackup('nightly'); }
-      catch (e) { log.error('Nattlig backup feilet: ' + e.message); }
+      catch (e) { log.error('Nightly backup failed: ' + e.message); }
       schedule();
     }, msUntil3AM());
   };
   schedule();
-  log.info('Nattlig backup aktivert (kl 03:00)');
+  log.info('Nightly backup enabled (03:00)');
 }

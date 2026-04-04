@@ -41,7 +41,7 @@ export async function syncMoonrakerHistory(printerId, printerIp, apiKey, port = 
       signal: AbortSignal.timeout(10000)
     });
     if (!res.ok) {
-      log.warn(`History-henting feilet for ${printerId}: HTTP ${res.status}`);
+      log.warn(`History fetch failed for ${printerId}: HTTP ${res.status}`);
       return { imported: 0, skipped: 0, error: null };
     }
 
@@ -158,16 +158,16 @@ export async function syncMoonrakerHistory(printerId, printerIp, apiKey, port = 
         imported++;
       } catch (e) {
         // Duplicate or schema mismatch — skip
-        log.warn(`Kunne ikke importere jobb ${job.job_id}: ${e.message}`);
+        log.warn(`Could not import job ${job.job_id}: ${e.message}`);
       }
     }
 
     if (imported > 0) {
-      log.info(`${printerId}: importerte ${imported} print(s) fra Moonraker (${skipped} allerede importert)`);
+      log.info(`${printerId}: imported ${imported} print(s) from Moonraker (${skipped} already imported)`);
     }
     return { imported, skipped, error: null };
   } catch (e) {
-    log.error(`History-sync feilet for ${printerId}: ${e.message}`);
+    log.error(`History sync failed for ${printerId}: ${e.message}`);
     return { imported: 0, skipped: 0, error: e.message };
   }
 }

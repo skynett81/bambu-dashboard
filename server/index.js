@@ -151,9 +151,9 @@ function ensureSSLCerts() {
     );
     chmodSync(keyPath, 0o600);
     chmodSync(certPath, 0o644);
-    log.info('Auto-genererte SSL-sertifikater (gyldige i 365 dager)');
+    log.info('Auto-generated SSL certificates (valid for 365 days)');
   } catch {
-    log.warn('Kunne ikke generere SSL-sertifikater (openssl ikke tilgjengelig?)');
+    log.warn('Could not generate SSL certificates (openssl not available?)');
   }
 }
 ensureSSLCerts();
@@ -629,8 +629,8 @@ setBambuCloud(bambuCloud);
 const materialRecommender = new MaterialRecommenderService(broadcastAll);
 setMaterialRecommender(materialRecommender);
 // Initial calculation after a short delay, then every 12 hours
-setTimeout(() => { try { materialRecommender.recalculate(); log.info('Material-rec: initial beregning fullført'); } catch (e) { log.error('Material-rec feil: ' + e.message); } }, 5000);
-const _materialRecInterval = setInterval(() => { try { materialRecommender.recalculate(); } catch (e) { log.error('Material-rec periodisk feil: ' + e.message); } }, 12 * 60 * 60 * 1000);
+setTimeout(() => { try { materialRecommender.recalculate(); log.info('Material-rec: initial calculation completed'); } catch (e) { log.error('Material-rec error: ' + e.message); } }, 5000);
+const _materialRecInterval = setInterval(() => { try { materialRecommender.recalculate(); } catch (e) { log.error('Material-rec periodic error: ' + e.message); } }, 12 * 60 * 60 * 1000);
 
 // Wear Prediction Service
 import { WearPredictionService } from './wear-prediction.js';
@@ -643,8 +643,8 @@ import { ErrorPatternAnalyzer } from './error-pattern-analyzer.js';
 const errorPatternAnalyzer = new ErrorPatternAnalyzer(broadcastAll);
 setErrorPatternAnalyzer(errorPatternAnalyzer);
 // Initial analysis after 10s delay, then daily recalculation
-setTimeout(() => { try { errorPatternAnalyzer.analyze(); log.info('Error-analysis: initial analyse fullført'); } catch (e) { log.error('Error-analysis feil: ' + e.message); } }, 10000);
-const _errorPatternInterval = setInterval(() => { try { errorPatternAnalyzer.analyze(); } catch (e) { log.error('Error-analysis periodisk feil: ' + e.message); } }, 24 * 60 * 60 * 1000);
+setTimeout(() => { try { errorPatternAnalyzer.analyze(); log.info('Error-analysis: initial analysis completed'); } catch (e) { log.error('Error-analysis error: ' + e.message); } }, 10000);
+const _errorPatternInterval = setInterval(() => { try { errorPatternAnalyzer.analyze(); } catch (e) { log.error('Error-analysis periodic error: ' + e.message); } }, 24 * 60 * 60 * 1000);
 
 // Plugin Manager
 const pluginManager = new PluginManager({ broadcast: broadcastAll, dataDir: DATA_DIR, notifier });
@@ -1040,7 +1040,7 @@ if (IS_DEMO) {
     demoMockPrinters.push(mock);
   }
 
-  log.info(`[demo] ${MOCK_PRINTERS.length} mock-printere startet`);
+  log.info(`[demo] ${MOCK_PRINTERS.length} mock printers started`);
 }
 
 // When a printer is added via API, auto-connect via MQTT
@@ -1139,7 +1139,7 @@ httpServer.listen(PORT, () => {
 
 if (httpsServer) {
   httpsServer.listen(HTTPS_PORT, () => {
-    log.info(`HTTPS aktiv på port ${HTTPS_PORT}`);
+    log.info(`HTTPS active on port ${HTTPS_PORT}`);
   });
 }
 
@@ -1152,16 +1152,16 @@ if (httpsServer) {
   const hasSource = existsSync(docsSource) && existsSync(docsPkg);
 
   if (!hasBuild && hasSource) {
-    log.info('[docs] Build mangler — bygger dokumentasjon i bakgrunnen...');
+    log.info('[docs] Build missing — building documentation in background...');
     import('node:child_process').then(({ exec }) => {
       exec('cd website && npm ci --silent 2>/dev/null; npm run build', {
         cwd: join(dirname(fileURLToPath(import.meta.url)), '..'),
         timeout: 600000
       }, (err) => {
         if (err) {
-          log.warn('[docs] Docs-build feilet: ' + (err.message || '').split('\n')[0]);
+          log.warn('[docs] Docs build failed: ' + (err.message || '').split('\n')[0]);
         } else {
-          log.info('[docs] Dokumentasjon bygget — tilgjengelig på /docs/');
+          log.info('[docs] Documentation built — available at /docs/');
         }
       });
     });

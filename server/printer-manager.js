@@ -63,7 +63,7 @@ export class PrinterManager {
     }
 
     if (dbPrinters.length === 0) {
-      log.info('Ingen printere konfigurert. Legg til via Innstillinger.');
+      log.info('No printers configured. Add via Settings.');
     }
   }
 
@@ -113,13 +113,13 @@ export class PrinterManager {
       const { MoonrakerClient, buildMoonrakerCommand } = await import('./moonraker-client.js');
       client = new MoonrakerClient({ printer: printerConf }, connectorHub);
       client._buildCommand = buildMoonrakerCommand;
-      log.info(`Bruker Moonraker-connector for ${printerConf.name}`);
+      log.info(`Using Moonraker connector for ${printerConf.name}`);
     } else {
       const { BambuMqttClient } = await import('./mqtt-client.js');
       const { buildCommandFromClientMessage } = await import('./mqtt-commands.js');
       client = new BambuMqttClient({ printer: printerConf }, connectorHub);
       client._buildCommand = buildCommandFromClientMessage;
-      log.info(`Bruker Bambu MQTT-connector for ${printerConf.name}`);
+      log.info(`Using Bambu MQTT connector for ${printerConf.name}`);
     }
 
     // Firmware change detection
@@ -181,7 +181,7 @@ export class PrinterManager {
     if (camera) camera.start();
     if (moonCamera) moonCamera.start();
     client.connect();
-    log.info('Printer tilkoblet: ' + printerConf.name + ' (' + printerConf.ip + ')');
+    log.info('Printer connected: ' + printerConf.name + ' (' + printerConf.ip + ')');
   }
 
   _addOfflinePrinter(printerConf, reusePort) {
@@ -190,7 +190,7 @@ export class PrinterManager {
 
     this.setMeta(id, { name: printerConf.name, model: printerConf.model || '', cameraPort });
     this.printers.set(id, { config: printerConf, client: null, tracker: null, camera: null, cameraPort, live: false });
-    log.info('Printer registrert (ikke konfigurert): ' + printerConf.name);
+    log.info('Printer registered (not configured): ' + printerConf.name);
   }
 
   // Called when a new printer is added via API - auto-connects if configured
@@ -269,7 +269,7 @@ export class PrinterManager {
     if (printer.client?.stop) printer.client.stop();
     if (printer.camera) printer.camera.stop();
     this.printers.delete(id);
-    log.info('Printer fjernet: ' + id);
+    log.info('Printer removed: ' + id);
   }
 
   getPrinterIds() {
@@ -286,9 +286,9 @@ export class PrinterManager {
     this._rediscoveryInitial = setTimeout(() => this._checkDisconnected(), 30000);
     const extras = this.config.network?.extraSubnets || [];
     if (extras.length > 0) {
-      log.info(`[rediscovery] Ekstra subnett: ${extras.join(', ')}`);
+      log.info(`[rediscovery] Extra subnets: ${extras.join(', ')}`);
     }
-    log.info(`[rediscovery] Aktiv — sjekker frakoblede printere hvert ${Math.round(intervalMs / 1000)}s`);
+    log.info(`[rediscovery] Active — checking disconnected printers every ${Math.round(intervalMs / 1000)}s`);
   }
 
   async _checkDisconnected() {
@@ -303,12 +303,12 @@ export class PrinterManager {
 
     if (disconnected.length === 0) return;
 
-    log.info(`[rediscovery] ${disconnected.length} printer(e) frakoblet — søker...`);
+    log.info(`[rediscovery] ${disconnected.length} printer(s) disconnected — searching...`);
 
     for (const printerConf of disconnected) {
       const newIp = await this._rediscover(printerConf);
       if (newIp && newIp !== printerConf.ip) {
-        log.info(`[rediscovery] ${printerConf.name}: ny IP funnet ${printerConf.ip} → ${newIp}`);
+        log.info(`[rediscovery] ${printerConf.name}: new IP found ${printerConf.ip} → ${newIp}`);
         printerConf.ip = newIp;
         updatePrinterIp(printerConf.id, newIp);
         this.broadcast('printer_ip_changed', { printer_id: printerConf.id, name: printerConf.name, old_ip: printerConf.ip, new_ip: newIp });

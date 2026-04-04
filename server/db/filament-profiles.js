@@ -146,7 +146,7 @@ export function importFilamentProfiles(profiles) {
     try {
       addFilamentProfile(p);
       count++;
-    } catch (e) { log.warn('Kunne ikke importere filamentprofil "' + (p.name || p.id || '?') + '": ' + e.message); }
+    } catch (e) { log.warn('Could not import filament profile "' + (p.name || p.id || '?') + '": ' + e.message); }
   }
   return count;
 }
@@ -157,7 +157,7 @@ export function importVendors(vendors) {
     try {
       addVendor(v);
       count++;
-    } catch (e) { log.warn('Kunne ikke importere leverandør "' + (v.name || v.id || '?') + '": ' + e.message); }
+    } catch (e) { log.warn('Could not import vendor "' + (v.name || v.id || '?') + '": ' + e.message); }
   }
   return count;
 }

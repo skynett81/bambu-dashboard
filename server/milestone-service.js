@@ -73,7 +73,7 @@ export async function captureMilestone(printerId, printerIp, accessCode, milesto
     return _buildResult(printerId, milestone, filename, filepath, meta);
 
   } catch (e) {
-    log.warn('Capture feilet for ' + printerId + ' ved ' + milestone + '%: ' + e.message);
+    log.warn('Capture failed for ' + printerId + ' at ' + milestone + '%: ' + e.message);
     _capturing.delete(captureKey);
     return null;
   }
@@ -312,7 +312,7 @@ export function archivePrintMilestones(printerId, printHistoryId) {
     log.info('Arkivert ' + files.length + ' screenshots for print #' + printHistoryId);
     return files.length;
   } catch (e) {
-    log.error('Arkivering feilet: ' + e.message);
+    log.error('Archiving failed: ' + e.message);
     return 0;
   }
 }

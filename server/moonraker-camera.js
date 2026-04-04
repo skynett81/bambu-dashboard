@@ -112,7 +112,7 @@ export class MoonrakerCamera {
     }
 
     // 4. Nothing found — retry periodically
-    log.info(`Ingen kamerakilde funnet for ${this.ip} — prøver igjen hvert ${this._retryInterval / 1000}s`);
+    log.info(`No camera source found for ${this.ip} — retrying every ${this._retryInterval / 1000}s`);
     this._scheduleRetry();
   }
 
@@ -346,7 +346,7 @@ export class MoonrakerCamera {
   _handleFailure() {
     this._failCount++;
     if (this._failCount >= 5) {
-      log.info(`Kamera mistet kontakt (${this._activeSource}) — starter ny søk`);
+      log.info(`Camera lost contact (${this._activeSource}) — starting new search`);
       if (this._pollTimer) { clearInterval(this._pollTimer); this._pollTimer = null; }
       this._activeSource = null;
       this._activeUrl = null;

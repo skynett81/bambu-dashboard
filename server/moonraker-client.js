@@ -59,7 +59,7 @@ export class MoonrakerClient {
   // ---- Connection ----
 
   connect() {
-    log.info(`Kobler til Moonraker ${this._baseUrl}...`);
+    log.info(`Connecting to Moonraker ${this._baseUrl}...`);
     this._connectWebSocket();
   }
 
@@ -87,7 +87,7 @@ export class MoonrakerClient {
 
     this.ws.on('open', () => {
       this.connected = true;
-      log.info(`Moonraker WebSocket tilkoblet: ${this.ip}`);
+      log.info(`Moonraker WebSocket connected: ${this.ip}`);
       this.hub.broadcast('connection', { status: 'connected' });
       this._subscribe();
       this._requestFullState();
@@ -101,13 +101,13 @@ export class MoonrakerClient {
     });
 
     this.ws.on('error', (err) => {
-      log.error(`Moonraker WS-feil: ${err.message}`);
+      log.error(`Moonraker WS error: ${err.message}`);
     });
 
     this.ws.on('close', () => {
       if (this.connected) {
         this.connected = false;
-        log.info('Moonraker frakoblet — gjenkobler om 5s...');
+        log.info('Moonraker disconnected — reconnecting in 5s...');
         this.hub.broadcast('connection', { status: 'disconnected' });
       }
       this._scheduleReconnect();
@@ -204,7 +204,7 @@ export class MoonrakerClient {
 
       this.hub.broadcast('status', { print: this.state });
     } catch (e) {
-      log.error(`Henting av state feilet: ${e.message}`);
+      log.error(`State fetch failed: ${e.message}`);
     }
   }
 
@@ -468,7 +468,7 @@ export class MoonrakerClient {
         this._requestFullState();
         break;
       default:
-        log.warn(`Ukjent kommando: ${action}`);
+        log.warn(`Unknown command: ${action}`);
     }
   }
 

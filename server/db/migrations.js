@@ -139,9 +139,9 @@ export function runMigrations() {
       try {
         m.up(db);
         db.prepare('INSERT INTO schema_version (version) VALUES (?)').run(m.version);
-        log.info('Migrering v' + m.version + ' fullført');
+        log.info('Migration v' + m.version + ' completed');
       } catch (e) {
-        log.error('Migrering v' + m.version + ' feilet: ' + e.message);
+        log.error('Migration v' + m.version + ' failed: ' + e.message);
       }
     }
   }
@@ -611,7 +611,7 @@ function _mig018_external_id_fields_diameters(db) {
         const weights = opts.map(w => ({ weight: w, spool_weight: p.spool_weight_g || null, spool_type: 'plastic' }));
         db.prepare('UPDATE filament_profiles SET weights = ? WHERE id = ?').run(JSON.stringify(weights), p.id);
       }
-    } catch (e) { log.warn('Ugyldig weight_options JSON for profil id=' + p.id + ': ' + e.message); }
+    } catch (e) { log.warn('Invalid weight_options JSON for profile id=' + p.id + ': ' + e.message); }
   }
 }
 

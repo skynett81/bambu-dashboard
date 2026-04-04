@@ -44,22 +44,22 @@ export class CameraStream {
 
   start() {
     if (!this.enabled) {
-      log.info('Kamera deaktivert i konfig');
+      log.info('Camera disabled in config');
       return;
     }
 
     this.wss = new WebSocketServer({ port: this.port });
 
     this.wss.on('error', (err) => {
-      log.warn('WebSocket-feil på port ' + this.port + ': ' + err.message);
+      log.warn('WebSocket error on port ' + this.port + ': ' + err.message);
       this.wss = null;
     });
 
-    log.info('WebSocket server på port ' + this.port);
+    log.info('WebSocket server on port ' + this.port);
 
     this.wss.on('connection', (ws) => {
       this.clients.add(ws);
-      log.info('Klient tilkoblet (' + this.clients.size + ' totalt), modus: ' + (this.mode || 'detecting'));
+      log.info('Client connected (' + this.clients.size + ' total), mode: ' + (this.mode || 'detecting'));
 
       if (this.stopTimer) {
         clearTimeout(this.stopTimer);
@@ -79,7 +79,7 @@ export class CameraStream {
 
       ws.on('close', () => {
         this.clients.delete(ws);
-        log.info('Klient frakoblet (' + this.clients.size + ' totalt)');
+        log.info('Client disconnected (' + this.clients.size + ' total)');
 
         if (this.clients.size === 0 && !this.stopTimer) {
           this.stopTimer = setTimeout(() => {
@@ -108,18 +108,18 @@ export class CameraStream {
    */
   _startStream() {
     if (!this.ip) {
-      log.warn('Ingen IP-adresse konfigurert');
+      log.warn('No IP address configured');
       return;
     }
 
     // TLS probe port 6000 — test actual TLS+auth, not just TCP
-    log.info('Prober TLS port 6000 på ' + this.ip + '...');
+    log.info('Probing TLS port 6000 on ' + this.ip + '...');
 
     let probeTimedOut = false;
     const probeTimeout = setTimeout(() => {
       probeTimedOut = true;
       if (probeSock) { try { probeSock.destroy(); } catch (e) { log.debug('Feil ved lukking av probe-socket: ' + e.message); } }
-      log.info('TLS-probe timeout — prøver RTSP (port 322)');
+      log.info('TLS probe timeout — trying RTSP (port 322)');
       this.mode = 'rtsp';
       this._startFfmpeg();
     }, 3000);
@@ -133,7 +133,7 @@ export class CameraStream {
       });
     } catch {
       clearTimeout(probeTimeout);
-      log.info('TLS-probe feilet — prøver RTSP (port 322)');
+      log.info('TLS probe failed — trying RTSP (port 322)');
       this.mode = 'rtsp';
       this._startFfmpeg();
       return;
@@ -143,7 +143,7 @@ export class CameraStream {
       clearTimeout(probeTimeout);
       probeSock.destroy();
       if (probeTimedOut) return;
-      log.info('TLS port 6000 ok — bruker JPEG-stream');
+      log.info('TLS port 6000 ok — using JPEG stream');
       this.mode = 'jpeg';
       this._startJpegStream();
     });
@@ -152,7 +152,7 @@ export class CameraStream {
       clearTimeout(probeTimeout);
       probeSock.destroy();
       if (probeTimedOut) return;
-      log.info('TLS-probe feil — prøver RTSP (port 322)');
+      log.info('TLS probe error — trying RTSP (port 322)');
       this.mode = 'rtsp';
       this._startFfmpeg();
     });
@@ -163,7 +163,7 @@ export class CameraStream {
    * Protocol: 80-byte auth packet → auth response → repeating [16-byte header + JPEG data].
    */
   _startJpegStream() {
-    log.info('Kobler til JPEG-stream ' + this.ip + ':6000...');
+    log.info('Connecting to JPEG stream ' + this.ip + ':6000...');
 
     try {
       this.tlsSocket = tlsConnect({
@@ -172,13 +172,13 @@ export class CameraStream {
         rejectUnauthorized: false, // Printer uses self-signed cert
       });
     } catch (e) {
-      log.error('TLS tilkobling feilet: ' + e.message);
+      log.error('TLS connection failed: ' + e.message);
       this._fallbackToRtsp();
       return;
     }
 
     this.tlsSocket.on('secureConnect', () => {
-      log.info('TLS tilkoblet — sender autentisering');
+      log.info('TLS connected — sending authentication');
 
       // Build 80-byte auth packet
       const authPacket = Buffer.alloc(80);
@@ -208,7 +208,7 @@ export class CameraStream {
     });
 
     this.tlsSocket.on('error', (err) => {
-      log.warn('JPEG-stream feil: ' + err.message);
+      log.warn('JPEG stream error: ' + err.message);
       this._cleanupJpeg();
       if (!this._authDenied) {
         this._scheduleRestart();
@@ -216,7 +216,7 @@ export class CameraStream {
     });
 
     this.tlsSocket.on('close', () => {
-      log.info('JPEG-stream lukket');
+      log.info('JPEG stream closed');
       this.tlsSocket = null;
       if (this.clients.size > 0 && !this._authDenied) {
         this._scheduleRestart();
@@ -250,7 +250,7 @@ export class CameraStream {
 
         // Check for error code 0xFFFFFFFF in payload
         if (payloadSize >= 4 && payload.readUInt32LE(0) === 0xFFFFFFFF) {
-          log.warn('Autentisering avvist — LAN Live View er trolig deaktivert på printeren');
+          log.warn('Authentication rejected — LAN Live View is likely disabled on the printer');
           this._authDenied = true;
           this._broadcastError('auth_denied');
           this._cleanupJpeg();
@@ -258,7 +258,7 @@ export class CameraStream {
           // Auto-reset auth denied etter 60s — tillater ny tilkobling
           if (this._authDeniedTimer) clearTimeout(this._authDeniedTimer);
           this._authDeniedTimer = setTimeout(() => {
-            log.info('Nullstiller auth-denied — prøver på nytt');
+            log.info('Resetting auth-denied — retrying');
             this._authDenied = false;
             if (this.clients.size > 0) {
               this._startStream();
@@ -267,7 +267,7 @@ export class CameraStream {
           return;
         }
 
-        log.info('Autentisering godkjent — starter JPEG-stream');
+        log.info('Authentication accepted — starting JPEG stream');
         this._readState = 'header';
         this._lastFrameTime = Date.now();
         this._startWatchdog();
@@ -282,7 +282,7 @@ export class CameraStream {
 
         if (this._payloadSize <= 0 || this._payloadSize > 10 * 1024 * 1024) {
           // Invalid payload — try to resync by finding next valid header
-          log.warn('Ugyldig payload-størrelse: ' + this._payloadSize + ' — resynkroniserer');
+          log.warn('Invalid payload size: ' + this._payloadSize + ' — resyncing');
           this._resyncBuffer();
           return;
         }
@@ -387,7 +387,7 @@ export class CameraStream {
   }
 
   _fallbackToRtsp() {
-    log.info('JPEG feilet — fallback til RTSP');
+    log.info('JPEG failed — falling back to RTSP');
     this._cleanupJpeg();
     this.mode = 'rtsp';
     this._startFfmpeg();
@@ -413,14 +413,14 @@ export class CameraStream {
       'pipe:1'
     ];
 
-    log.info('Starter ffmpeg (RTSP)...');
+    log.info('Starting ffmpeg (RTSP)...');
 
     try {
       this.ffmpeg = spawn('ffmpeg', args, {
         stdio: ['ignore', 'pipe', 'ignore']
       });
     } catch (e) {
-      log.error('Kunne ikke starte ffmpeg: ' + e.message);
+      log.error('Could not start ffmpeg: ' + e.message);
       return;
     }
 
@@ -433,7 +433,7 @@ export class CameraStream {
     });
 
     this.ffmpeg.on('close', (code) => {
-      log.info('ffmpeg avsluttet (kode: ' + code + ')');
+      log.info('ffmpeg exited (code: ' + code + ')');
       this.ffmpeg = null;
       if (this.clients.size > 0) {
         this._scheduleRestart();
@@ -441,7 +441,7 @@ export class CameraStream {
     });
 
     this.ffmpeg.on('error', (err) => {
-      log.error('ffmpeg feil: ' + err.message);
+      log.error('ffmpeg error: ' + err.message);
       this.ffmpeg = null;
     });
 
@@ -462,7 +462,7 @@ export class CameraStream {
         // Looks like a valid payload size — resync here
         this._headerBuf = this._headerBuf.subarray(i);
         this._readState = 'header';
-        log.info('Buffer resynkronisert etter ' + i + ' bytes');
+        log.info('Buffer resynced after ' + i + ' bytes');
         return;
       }
     }
@@ -478,7 +478,7 @@ export class CameraStream {
     this._stopWatchdog();
     this._watchdogTimer = setInterval(() => {
       if (this._lastFrameTime && Date.now() - this._lastFrameTime > 15000) {
-        log.warn('Watchdog: ingen frames på 15s — restarter stream');
+        log.warn('Watchdog: no frames for 15s — restarting stream');
         this._stopWatchdog();
         this._cleanupJpeg();
         if (this.clients.size > 0) {
@@ -497,13 +497,13 @@ export class CameraStream {
 
   _scheduleRestart() {
     if (this.restartCount >= 12) {
-      log.warn('Maks restart-forsøk nådd (12) — gir opp');
+      log.warn('Max restart attempts reached (12) — giving up');
       this._broadcastError('stream_unavailable');
       return;
     }
     this.restartCount++;
     const delay = Math.min(1000 * this.restartCount, 30000);
-    log.info('Restarter om ' + (delay / 1000) + 's (forsøk ' + this.restartCount + '/12)...');
+    log.info('Restarting in ' + (delay / 1000) + 's (attempt ' + this.restartCount + '/12)...');
     this.restartTimer = setTimeout(() => {
       this._startStream();
     }, delay);

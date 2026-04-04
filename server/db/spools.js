@@ -1138,7 +1138,7 @@ export function importSpools(spools) {
     try {
       addSpool(s);
       count++;
-    } catch (e) { log.warn('Kunne ikke importere spole "' + (s.id || s.short_id || '?') + '": ' + e.message); }
+    } catch (e) { log.warn('Could not import spool "' + (s.id || s.short_id || '?') + '": ' + e.message); }
   }
   return count;
 }

@@ -58,28 +58,28 @@ export async function provisionCamera(printerIp, port = 80) {
   // 1. Check if webcam already works
   const webcamOk = await _testWebcam(printerIp, port);
   if (webcamOk) {
-    log.info(`${printerIp}: webcam allerede OK via HTTP`);
+    log.info(`${printerIp}: webcam already OK via HTTP`);
     return true;
   }
 
   // 2. Check if this is a printer we can configure (has SSH + unisrv)
   const creds = await _findSshCredentials(printerIp);
   if (!creds) {
-    log.info(`${printerIp}: ingen SSH-tilgang — kan ikke konfigurere kamera automatisk`);
+    log.info(`${printerIp}: no SSH access — cannot configure camera automatically`);
     return false;
   }
 
   // 3. Check if unisrv is running and monitor.jpg exists
   const hasMonitor = await _checkMonitorFile(printerIp, creds);
   if (!hasMonitor) {
-    log.info(`${printerIp}: ingen live kamerafil funnet`);
+    log.info(`${printerIp}: no live camera file found`);
     return false;
   }
 
   // 4. Configure nginx to serve the monitor image
   const configured = await _configureNginx(printerIp, creds);
   if (!configured) {
-    log.info(`${printerIp}: kunne ikke konfigurere nginx`);
+    log.info(`${printerIp}: could not configure nginx`);
     return false;
   }
 
@@ -88,9 +88,9 @@ export async function provisionCamera(printerIp, port = 80) {
   await new Promise(r => setTimeout(r, 1500));
   const works = await _testWebcam(printerIp, port);
   if (works) {
-    log.info(`${printerIp}: kamera konfigurert og verifisert via HTTP`);
+    log.info(`${printerIp}: camera configured and verified via HTTP`);
   } else {
-    log.info(`${printerIp}: nginx konfigurert men webcam svarer ikke ennå`);
+    log.info(`${printerIp}: nginx configured but webcam not responding yet`);
   }
   return works;
 }
@@ -192,7 +192,7 @@ async function _configureNginx(ip, creds) {
   );
 
   if (running && running.trim() === 'RUNNING') {
-    log.info(`${ip}: kameraserver allerede aktiv`);
+    log.info(`${ip}: camera server already active`);
     return true;
   }
 
@@ -371,10 +371,10 @@ test -f ${pidFile} && kill -0 $(cat ${pidFile}) 2>/dev/null && echo OK || echo F
   const result = await _sshExec(ip, creds, deployCmd);
 
   if (result && result.trim().endsWith('OK')) {
-    log.info(`${ip}: kameraserver startet på port 8080`);
+    log.info(`${ip}: camera server started on port 8080`);
     return true;
   }
 
-  log.error(`${ip}: kunne ikke starte kameraserver: ${result?.slice(0, 200)}`);
+  log.error(`${ip}: could not start camera server: ${result?.slice(0, 200)}`);
   return false;
 }

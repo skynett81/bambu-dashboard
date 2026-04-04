@@ -72,7 +72,7 @@ export class FailureDetectionService {
       // Load baseline stats
       const baselineJson = getInventorySetting(`bed_check_baseline_${printerId}`);
       let baseline = null;
-      try { baseline = baselineJson ? JSON.parse(baselineJson) : null; } catch (e) { log.warn('Ugyldig baseline JSON for ' + printerId + ': ' + e.message); }
+      try { baseline = baselineJson ? JSON.parse(baselineJson) : null; } catch (e) { log.warn('Invalid baseline JSON for ' + printerId + ': ' + e.message); }
 
       if (!baseline) {
         const isClear = stats.entropy < 5.5 && stats.variance < 3000;

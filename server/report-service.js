@@ -39,7 +39,7 @@ export function generateReport(period = 'week') {
   const daily = getDailyActivity(period === 'month' ? 30 : 7);
   const recent = getHistory(10, 0, null);
   let waste = null;
-  try { waste = getWasteStats(); } catch (e) { log.warn('Kunne ikke hente avfallsstatistikk: ' + e.message); }
+  try { waste = getWasteStats(); } catch (e) { log.warn('Could not fetch waste statistics: ' + e.message); }
 
   const periodLabel = period === 'month' ? 'Monthly' : 'Weekly';
   const periodLabelNb = period === 'month' ? 'Månedlig' : 'Ukentlig';

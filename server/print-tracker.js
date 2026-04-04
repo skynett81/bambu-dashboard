@@ -316,9 +316,9 @@ export class PrintTracker {
         const totalMinutes = remainMin / (1 - pct / 100);
         const elapsedMs = (totalMinutes * 60 * 1000) * (pct / 100);
         startedAt = new Date(Date.now() - elapsedMs).toISOString();
-        log.info('Gjenopptatt print etter server-restart: ' + (data.subtask_name || 'ukjent') + ' (' + pct + '% ferdig, estimert start: ' + startedAt + ')');
+        log.info('Resumed print after server restart: ' + (data.subtask_name || 'unknown') + ' (' + pct + '% done, estimated start: ' + startedAt + ')');
       } else {
-        log.info('Gjenopptatt print etter server-restart: ' + (data.subtask_name || 'ukjent') + ' (' + pct + '% ferdig)');
+        log.info('Resumed print after server restart: ' + (data.subtask_name || 'unknown') + ' (' + pct + '% done)');
       }
       // Mark milestones already passed
       for (const m of [25, 50, 75]) {
@@ -367,7 +367,7 @@ export class PrintTracker {
       const trayNow = data.ams?.tray_now;
       const isExt = isExtFromMapping || (trayNow != null && parseInt(trayNow) >= 254);
       const effectiveTrayId = isExt ? '254' : (trayNow != null ? String(trayNow) : null);
-      log.info('Print startet: ' + (data.subtask_name || 'ukjent') + ' (tray: ' + (isExt ? 'EXT' : trayNow) + (isExtFromMapping ? ' [mapping]' : '') + ')');
+      log.info('Print started: ' + (data.subtask_name || 'unknown') + ' (tray: ' + (isExt ? 'EXT' : trayNow) + (isExtFromMapping ? ' [mapping]' : '') + ')');
       this.amsSnapshot = this._getAmsRemaining(data);
     }
 
@@ -383,7 +383,7 @@ export class PrintTracker {
 
     this.currentPrint = {
       started_at: startedAt,
-      filename: data.subtask_name || data.gcode_file || 'Ukjent',
+      filename: data.subtask_name || data.gcode_file || 'Unknown',
       gcode_file: data.gcode_file || null,
       filament_type: filamentInfo.type,
       filament_color: filamentInfo.color,
@@ -475,7 +475,7 @@ export class PrintTracker {
       const pctDone = completionPct || (status === 'completed' ? 100 : 0);
       if (pctDone > 0) {
         filamentUsedG = cloudWeight * (pctDone / 100);
-        log.info('Bruker cloud-estimat for filament: ' + filamentUsedG.toFixed(1) + 'g ved ' + pctDone + '% (' + status + ', AMS-diff var 0)');
+        log.info('Using cloud estimate for filament: ' + filamentUsedG.toFixed(1) + 'g at ' + pctDone + '% (' + status + ', AMS diff was 0)');
       }
     }
 
@@ -484,7 +484,7 @@ export class PrintTracker {
     if (filamentUsedG < 1 && duration > 60 && status === 'completed') {
       const hours = duration / 3600;
       filamentUsedG = Math.round(hours * 30);  // ~30g/hour conservative estimate
-      log.warn('Ingen filamentdata — estimerer fra varighet: ' + filamentUsedG + 'g (' + hours.toFixed(1) + 'h × 30g/h)');
+      log.warn('No filament data — estimating from duration: ' + filamentUsedG + 'g (' + hours.toFixed(1) + 'h x 30g/h)');
     }
 
     // Waste = startup purge + color change waste (mechanical waste, always present)
@@ -500,7 +500,7 @@ export class PrintTracker {
     // filament_used_g = total consumed from spool
     // Cost calculation uses status to determine if filament_used_g is productive or waste
     if (status === 'failed' || status === 'cancelled') {
-      log.info('Feilet/kansellert ved ' + completionPct + '% — ' + filamentUsedG.toFixed(1) + 'g brukt (alt er waste)');
+      log.info('Failed/cancelled at ' + completionPct + '% — ' + filamentUsedG.toFixed(1) + 'g used (all is waste)');
     }
 
     const record = {
@@ -616,7 +616,7 @@ export class PrintTracker {
         }
       }
     } catch (e) {
-      log.error('Kunne ikke lagre print: ' + e.message);
+      log.error('Could not save print: ' + e.message);
     }
 
     // Deactivate any layer pauses for this printer
@@ -1164,7 +1164,7 @@ export class PrintTracker {
         this._fetchMoonrakerThumbnail(historyId, thumbDir).catch(() => {});
       }
     } catch (e) {
-      log.warn('Thumbnail-lagring feilet: ' + e.message);
+      log.warn('Thumbnail save failed: ' + e.message);
     }
   }
 
@@ -1182,9 +1182,9 @@ export class PrintTracker {
       if (!res.ok) return;
       const buf = Buffer.from(await res.arrayBuffer());
       writeFileSync(join(thumbDir, `${historyId}.png`), buf);
-      log.info('Moonraker thumbnail lagret for history #' + historyId);
+      log.info('Moonraker thumbnail saved for history #' + historyId);
     } catch (e) {
-      log.warn('Moonraker thumbnail-henting feilet: ' + e.message);
+      log.warn('Moonraker thumbnail fetch failed: ' + e.message);
     }
   }
 
@@ -1207,7 +1207,7 @@ export class PrintTracker {
       if (parseInt(data?.heatbreak_fan_speed) > 0)
         upsertComponentWear(this.printerId, 'fan_heatbreak', hours, 0);
     } catch (e) {
-      log.error('Component wear update feilet: ' + e.message);
+      log.error('Component wear update failed: ' + e.message);
     }
   }
 
@@ -1225,10 +1225,10 @@ export class PrintTracker {
           log.info('EXT Spool #' + spool.id + ' usage: ' + filamentUsedG.toFixed(1) + 'g (cloud/duration estimate)');
           spoolUpdated = true;
         } else {
-          log.warn('EXT print men ingen spool koblet til EXT (unit=255, tray=0)');
+          log.warn('EXT print but no spool linked to EXT (unit=255, tray=0)');
         }
       } catch (e) {
-        log.error('EXT spool usage feilet: ' + e.message);
+        log.error('EXT spool usage failed: ' + e.message);
       }
     }
 
@@ -1253,7 +1253,7 @@ export class PrintTracker {
           }
         }
       } catch (e) {
-        log.error('Spool usage update feilet: ' + e.message);
+        log.error('Spool usage update failed: ' + e.message);
       }
     }
 
@@ -1273,10 +1273,10 @@ export class PrintTracker {
         if (spool) {
           useSpoolWeight(spool.id, filamentUsedG, 'estimate', printHistoryId, this.printerId);
           trackConsumedSinceWeight(spool.id, filamentUsedG);
-          log.info('Spool #' + spool.id + ' usage (cloud-estimat): ' + filamentUsedG.toFixed(1) + 'g (aktiv tray ' + activeTray + (activeTray >= 254 ? ' EXT' : '') + ')');
+          log.info('Spool #' + spool.id + ' usage (cloud estimate): ' + filamentUsedG.toFixed(1) + 'g (active tray ' + activeTray + (activeTray >= 254 ? ' EXT' : '') + ')');
         }
       } catch (e) {
-        log.error('Spool fallback usage update feilet: ' + e.message);
+        log.error('Spool fallback usage update failed: ' + e.message);
       }
     }
   }
@@ -1307,7 +1307,7 @@ export class PrintTracker {
         savePrintCost(printHistoryId, costs);
       }
     } catch (e) {
-      log.error('Cost save feilet: ' + e.message);
+      log.error('Cost save failed: ' + e.message);
     }
   }
 
