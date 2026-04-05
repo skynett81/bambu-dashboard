@@ -403,11 +403,11 @@
     const locale = (window.i18n?.getLocale() || 'nb').replace('_', '-');
     const dateLabel = new Date(dateStr + 'T12:00:00').toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     const statusLabels = {
-      completed: t('scheduler.completed') || 'Fullfort',
+      completed: t('scheduler.completed') || 'Completed',
       failed: t('scheduler.failed') || 'Failed',
-      running: t('scheduler.in_progress') || 'Pagar',
+      running: t('scheduler.in_progress') || 'Running',
       paused: t('scheduler.paused') || 'Paused',
-      pending: t('scheduler.pending') || 'Ventende'
+      pending: t('scheduler.pending') || 'Pending'
     };
 
     let listHtml = dayEvents.map(ev => {
@@ -479,11 +479,11 @@
     overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
     const statusMap = {
-      completed: { label: t('scheduler.completed') || 'Fullfort', color: '#00ae42' },
+      completed: { label: t('scheduler.completed') || 'Completed', color: '#00ae42' },
       failed: { label: t('scheduler.failed') || 'Failed', color: '#e53935' },
-      running: { label: t('scheduler.in_progress') || 'Pagar', color: '#f59e0b' },
+      running: { label: t('scheduler.in_progress') || 'Running', color: '#f59e0b' },
       paused: { label: t('scheduler.paused') || 'Paused', color: '#f59e0b' },
-      pending: { label: t('scheduler.pending') || 'Ventende', color: '#1279ff' }
+      pending: { label: t('scheduler.pending') || 'Pending', color: '#1279ff' }
     };
     const st = statusMap[ev.status] || { label: ev.status, color: 'var(--text-muted)' };
     const dur = ev.duration_seconds ? _fmtDuration(ev.duration_seconds) : null;

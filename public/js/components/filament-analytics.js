@@ -10,27 +10,29 @@
     return res.json();
   }
 
-  // ---- Formatting helpers (Norwegian conventions) ----
+  // ---- Formatting helpers ----
+
+  function _locale() { return (window.i18n?.getLocale() || 'en').replace('_', '-'); }
 
   function fmtW(g) {
     if (g == null || isNaN(g)) return '–';
-    if (g >= 1000) return (g / 1000).toLocaleString('nb-NO', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' kg';
-    return Math.round(g).toLocaleString('nb-NO') + ' g';
+    if (g >= 1000) return (g / 1000).toLocaleString(_locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' kg';
+    return Math.round(g).toLocaleString(_locale()) + ' g';
   }
 
   function fmtPct(val) {
     if (val == null || isNaN(val)) return '–';
-    return parseFloat(val).toLocaleString('nb-NO', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' %';
+    return parseFloat(val).toLocaleString(_locale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
   }
 
   function fmtKr(val) {
     if (val == null || isNaN(val)) return '–';
-    return Math.round(val).toLocaleString('nb-NO') + ' kr';
+    return Math.round(val).toLocaleString(_locale()) + ' kr';
   }
 
   function fmtKrG(val) {
     if (val == null || isNaN(val) || val === 0) return '–';
-    return val.toLocaleString('nb-NO', { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + ' kr/g';
+    return val.toLocaleString(_locale(), { minimumFractionDigits: 3, maximumFractionDigits: 3 }) + ' kr/g';
   }
 
   function fmtDays(d) {
@@ -42,13 +44,13 @@
   function fmtDate(dateStr) {
     if (!dateStr) return '–';
     try {
-      return new Date(dateStr).toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' });
+      return new Date(dateStr).toLocaleDateString(_locale(), { day: 'numeric', month: 'short', year: 'numeric' });
     } catch { return dateStr; }
   }
 
   function fmtNum(val, dec) {
     if (val == null || isNaN(val)) return '–';
-    return parseFloat(val).toLocaleString('nb-NO', { minimumFractionDigits: dec || 0, maximumFractionDigits: dec || 0 });
+    return parseFloat(val).toLocaleString(_locale(), { minimumFractionDigits: dec || 0, maximumFractionDigits: dec || 0 });
   }
 
   function colorDot(hex) {
@@ -416,21 +418,22 @@
   // ---- Tab system ----
 
   const TABS = [
-    { id: 'consumption', label: t('filament_analytics.tab_consumption'), render: renderConsumption },
-    { id: 'forecast', label: t('filament_analytics.tab_forecast'), render: renderForecast },
-    { id: 'waste', label: t('filament_analytics.tab_waste'), render: renderWaste },
-    { id: 'efficiency', label: t('filament_analytics.tab_efficiency'), render: renderEfficiency },
-    { id: 'cost', label: t('filament_analytics.tab_cost'), render: renderCost },
-    { id: 'rates', label: t('filament_analytics.tab_rates'), render: renderRates },
-    { id: 'substitutions', label: t('filament_analytics.tab_substitutions'), render: renderSubstitutions },
-    { id: 'storage', label: t('filament_analytics.tab_storage'), render: renderStorage },
+    { id: 'consumption', labelKey: 'filament_analytics.tab_consumption', fallback: 'Consumption', render: renderConsumption },
+    { id: 'forecast', labelKey: 'filament_analytics.tab_forecast', fallback: 'Forecast', render: renderForecast },
+    { id: 'waste', labelKey: 'filament_analytics.tab_waste', fallback: 'Waste', render: renderWaste },
+    { id: 'efficiency', labelKey: 'filament_analytics.tab_efficiency', fallback: 'Efficiency', render: renderEfficiency },
+    { id: 'cost', labelKey: 'filament_analytics.tab_cost', fallback: 'Cost', render: renderCost },
+    { id: 'rates', labelKey: 'filament_analytics.tab_rates', fallback: 'Rates', render: renderRates },
+    { id: 'substitutions', labelKey: 'filament_analytics.tab_substitutions', fallback: 'Substitutions', render: renderSubstitutions },
+    { id: 'storage', labelKey: 'filament_analytics.tab_storage', fallback: 'Storage', render: renderStorage },
   ];
 
   function renderPanel() {
     let html = STYLE + '<div class="fa-container">';
     html += '<div class="panel-tabs" style="margin-bottom:16px">';
     for (const tab of TABS) {
-      html += `<button class="tab-btn${tab.id === _activeTab ? ' active' : ''}" onclick="window._switchFilamentAnalyticsTab('${tab.id}')">${tab.label}</button>`;
+      const label = (typeof t === 'function' ? t(tab.labelKey) : '') || tab.fallback;
+      html += `<button class="tab-btn${tab.id === _activeTab ? ' active' : ''}" onclick="window._switchFilamentAnalyticsTab('${tab.id}')">${label}</button>`;
     }
     html += '</div>';
     html += '<div id="fa-tab-content"></div></div>';
@@ -449,10 +452,9 @@
 
   window._switchFilamentAnalyticsTab = function(tabId) {
     _activeTab = tabId;
-    // Update tab buttons
-    document.querySelectorAll('.fa-container .tab-btn').forEach(btn => {
-      btn.classList.toggle('active', btn.textContent === TABS.find(t => t.id === tabId)?.label);
-    });
+    // Update tab buttons by re-rendering the full panel
+    const container = document.getElementById('overlay-panel-body');
+    if (container) container.innerHTML = renderPanel();
     renderTabContent();
   };
 
@@ -461,7 +463,7 @@
       const res = await fetch('/api/filament-analytics/recalculate', { method: 'POST' });
       const data = await res.json();
       if (data.error) throw new Error(data.error);
-      if (typeof showToast === 'function') showToast(`Rekalkulert: ${data.daily_rows} daglige rader, ${data.rate_rows} materialrater`, 'success');
+      if (typeof showToast === 'function') showToast(`Recalculated: ${data.daily_rows} daily rows, ${data.rate_rows} material rates`, 'success');
       window.loadFilamentAnalyticsPanel(_activeTab);
     } catch (e) {
       if (typeof showToast === 'function') showToast('Rekalkulering feilet: ' + e.message, 'error');
