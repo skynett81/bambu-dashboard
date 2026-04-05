@@ -5542,6 +5542,34 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ── Model Forge: Calibration & Utility Generators ──
+    const calGenMatch = path.match(/^\/api\/model-forge\/(tolerance-test|bed-level|temp-tower|retraction-test|vase|qr-block|custom-shape|thread)\/generate-3mf$/);
+    if (calGenMatch && method === 'POST') {
+      return readBody(req, res, async (body) => {
+        try {
+          const tool = calGenMatch[1];
+          const { generateToleranceTest, generateBedLevelTest, generateTempTower, generateRetractionTest,
+                  generateVase, generateQRBlock, generateCustomShape, generateThread } = await import('./generators/calibration-generators.js');
+          const generators = {
+            'tolerance-test': generateToleranceTest,
+            'bed-level': generateBedLevelTest,
+            'temp-tower': generateTempTower,
+            'retraction-test': generateRetractionTest,
+            'vase': generateVase,
+            'qr-block': generateQRBlock,
+            'custom-shape': generateCustomShape,
+            'thread': generateThread,
+          };
+          const gen = generators[tool];
+          if (!gen) return sendJson(res, { error: 'Unknown tool' }, 404);
+          const buf = await gen(body);
+          const filename = tool.replace(/-/g, '_') + '.3mf';
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': `attachment; filename="${filename}"`, 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Generation failed: ' + e.message }, 500); }
+      });
+    }
+
     // ── Model Forge: 3MF Converter (Bambu → Snapmaker U1) ──
     if (method === 'POST' && path === '/api/model-forge/3mf-converter/analyze') {
       return readBinaryBody(req, async (buffer) => {
