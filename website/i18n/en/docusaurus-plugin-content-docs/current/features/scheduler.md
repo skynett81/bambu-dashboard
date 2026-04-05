@@ -76,4 +76,4 @@ The scheduler integrates with notification channels:
 - Notification when a job is done
 - Notification on error or delay
 
-See [Features Overview](./overview#varsler) to configure notification channels.
+See [Features Overview](./overview#notifications) to configure notification channels.

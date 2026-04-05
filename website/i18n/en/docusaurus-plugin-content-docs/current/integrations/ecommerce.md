@@ -184,7 +184,7 @@ Update status by clicking the order → **Change status**.
 
 ## Invoicing
 
-See [Projects → Invoicing](../features/projects#fakturering) for detailed invoicing documentation.
+See [Projects → Invoicing](../features/projects#invoicing) for detailed invoicing documentation.
 
 An invoice can be generated directly from an order:
 
