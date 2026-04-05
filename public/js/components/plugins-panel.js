@@ -120,41 +120,149 @@
       </details>
     </div>`;
 
-    // Plugin creation guide
+    // Plugin state viewer
+    if (_plugins.some(p => p.enabled)) {
+      html += `<div class="card plg-info-section">
+        <details>
+          <summary class="plg-details-summary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+            Plugin State
+          </summary>
+          <div class="plg-guide" id="plg-state-viewer">
+            <p style="font-size:0.75rem;color:var(--text-muted)">Click a plugin to view its stored state:</p>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">
+              ${_plugins.filter(p => p.enabled).map(p => '<button class="ce-secondary-btn" style="font-size:0.7rem" onclick="window._pluginViewState(\'' + _esc(p.name) + '\')">' + _esc(p.name) + '</button>').join('')}
+            </div>
+            <pre class="plg-code" id="plg-state-output" style="min-height:60px"><code>Select a plugin above...</code></pre>
+          </div>
+        </details>
+      </div>`;
+    }
+
+    // Plugin logs
+    html += `<div class="card plg-info-section">
+      <details>
+        <summary class="plg-details-summary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Plugin Logs
+        </summary>
+        <div class="plg-guide">
+          <p style="font-size:0.75rem;color:var(--text-muted)">Server logs filtered by plugin activity:</p>
+          <button class="ce-secondary-btn" style="font-size:0.7rem;margin-bottom:8px" onclick="window._pluginLoadLogs()">Load Logs</button>
+          <pre class="plg-code" id="plg-logs-output" style="min-height:60px;max-height:200px;overflow-y:auto"><code>Click "Load Logs" to fetch...</code></pre>
+        </div>
+      </details>
+    </div>`;
+
+    // Plugin API documentation
+    html += `<div class="card plg-info-section">
+      <details>
+        <summary class="plg-details-summary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+          Plugin API Reference
+        </summary>
+        <div class="plg-guide">
+          <p style="font-size:0.78rem;font-weight:600;margin-bottom:8px">Context object passed to init(api):</p>
+          <table style="width:100%;font-size:0.72rem;border-collapse:collapse">
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-blue)">api.log(msg)</td><td style="padding:4px 8px">Log an info message</td></tr>
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-blue)">api.warn(msg)</td><td style="padding:4px 8px">Log a warning</td></tr>
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-blue)">api.error(msg)</td><td style="padding:4px 8px">Log an error</td></tr>
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-blue)">api.state.get(key)</td><td style="padding:4px 8px">Get plugin state value</td></tr>
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-blue)">api.state.set(key, val)</td><td style="padding:4px 8px">Set plugin state value (persists across restarts)</td></tr>
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-green)">api.broadcast(type, data)</td><td style="padding:4px 8px">Send data to all WebSocket clients</td></tr>
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-green)">api.notify(title, msg)</td><td style="padding:4px 8px">Send notification via all channels</td></tr>
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-cyan)">api.registerRoute(method, path, handler)</td><td style="padding:4px 8px">Register custom API route at /api/plugins/{name}/{path}</td></tr>
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-cyan)">api.registerPanel(id, title, fn)</td><td style="padding:4px 8px">Register a UI panel in the dashboard</td></tr>
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-cyan)">api.setInterval(fn, ms)</td><td style="padding:4px 8px">Run a function periodically (min 5s)</td></tr>
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-orange)">api.db.getPrinters()</td><td style="padding:4px 8px">Get all printers (read-only)</td></tr>
+            <tr style="border-bottom:1px solid var(--border-color)"><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--accent-orange)">api.db.getHistory(limit)</td><td style="padding:4px 8px">Get print history (read-only)</td></tr>
+            <tr><td style="padding:4px 8px;font-weight:600;font-family:monospace;color:var(--text-muted)">api.http.get(url)</td><td style="padding:4px 8px">Fetch JSON from external URL</td></tr>
+          </table>
+        </div>
+      </details>
+    </div>`;
+
+    // Plugin template generator
+    html += `<div class="card plg-info-section">
+      <details>
+        <summary class="plg-details-summary">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+          Create New Plugin
+        </summary>
+        <div class="plg-guide">
+          <p style="font-size:0.75rem;color:var(--text-muted);margin-bottom:8px">Generate a plugin skeleton with one click:</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:10px">
+            <div><label style="font-size:0.7rem;color:var(--text-muted)">Plugin name</label><input type="text" class="pg-field-input" id="plg-gen-name" value="my-plugin" style="font-size:0.78rem"></div>
+            <div><label style="font-size:0.7rem;color:var(--text-muted)">Author</label><input type="text" class="pg-field-input" id="plg-gen-author" value="" style="font-size:0.78rem"></div>
+          </div>
+          <div style="margin-bottom:8px"><label style="font-size:0.7rem;color:var(--text-muted)">Description</label><input type="text" class="pg-field-input" id="plg-gen-desc" value="My custom plugin" style="font-size:0.78rem"></div>
+          <div style="margin-bottom:10px">
+            <label style="font-size:0.7rem;color:var(--text-muted)">Hooks</label>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">
+              ${Object.keys(HOOK_DESCS).map(h => '<label style="font-size:0.68rem;cursor:pointer;display:flex;align-items:center;gap:3px"><input type="checkbox" class="plg-gen-hook" value="' + h + '"' + (h === 'onPrintStart' || h === 'onPrintEnd' ? ' checked' : '') + '> ' + h + '</label>').join('')}
+            </div>
+          </div>
+          <button class="matrec-recalc-btn" style="margin-left:0" onclick="window._pluginGenerate()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Generate Plugin Files
+          </button>
+          <div id="plg-gen-output" style="margin-top:8px"></div>
+        </div>
+      </details>
+    </div>`;
+
+    // Updated creation guide with new API
     html += `<div class="card plg-info-section">
       <details>
         <summary class="plg-details-summary">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-          ${_tl('plugins.how_to_create', 'How to create a plugin')}
+          Full Plugin Example
         </summary>
         <div class="plg-guide">
-          <p>${_tl('plugins.guide_intro', 'Create a folder in')} <code>data/plugins/your-plugin/</code> ${_tl('plugins.guide_with', 'with these files:')}</p>
           <div class="plg-guide-file">manifest.json</div>
           <pre class="plg-code"><code>{
   "name": "my-plugin",
   "version": "1.0.0",
-  "description": "What my plugin does",
+  "description": "Example plugin with all features",
   "author": "Your Name",
   "entry": "index.js",
-  "hooks": ["onPrintStart", "onPrintEnd"],
-  "panels": [],
+  "hooks": ["onPrintStart", "onPrintEnd", "onServerStart"],
   "settings": {
-    "apiKey": { "type": "string", "label": "API Key" }
+    "webhookUrl": { "type": "string", "label": "Webhook URL" },
+    "enabled": { "type": "boolean", "label": "Enable notifications", "default": true }
   }
 }</code></pre>
           <div class="plg-guide-file">index.js</div>
           <pre class="plg-code"><code>export function init(api) {
   api.log('Plugin loaded!');
+
+  // Register custom API route
+  api.registerRoute('GET', 'status', () => {
+    return { ok: true, prints: api.db.getHistory(5) };
+  });
+
+  // Background task every 60s
+  api.setInterval(() => {
+    const printers = api.db.getPrinters();
+    api.log('Monitoring ' + printers.length + ' printers');
+  }, 60000);
 }
 
 export function onPrintStart(data) {
-  // data.printerId, etc.
+  const { api, printerId, printerName } = data;
+  api.state.set('lastPrint', printerName);
+  api.notify('Print Started', printerName + ' started printing');
 }
 
-export function destroy() {
-  // Cleanup when disabled
+export function onPrintEnd(data) {
+  const { api } = data;
+  api.log('Print finished on ' + data.printerName);
+}
+
+export function destroy(api) {
+  api.log('Plugin unloaded');
 }</code></pre>
-          <p class="plg-guide-note">${_tl('plugins.guide_restart', 'Restart the server to load changes.')}</p>
+          <p class="plg-guide-note">Place files in <code>data/plugins/my-plugin/</code> and restart the server.</p>
         </div>
       </details>
     </div>`;
@@ -240,6 +348,81 @@ export function destroy() {
         _render();
       } catch {}
     };
+  };
+
+  // View plugin state (key-value pairs)
+  window._pluginViewState = async function(name) {
+    const out = document.getElementById('plg-state-output');
+    if (!out) return;
+    try {
+      const res = await fetch(`/api/plugins/${encodeURIComponent(name)}/state`);
+      const data = await res.json();
+      out.innerHTML = '<code>' + (Object.keys(data).length > 0 ? JSON.stringify(data, null, 2) : '(no state stored)') + '</code>';
+    } catch (e) {
+      out.innerHTML = '<code style="color:var(--accent-red)">Error: ' + e.message + '</code>';
+    }
+  };
+
+  // Load plugin logs from server
+  window._pluginLoadLogs = async function() {
+    const out = document.getElementById('plg-logs-output');
+    if (!out) return;
+    try {
+      const res = await fetch('/api/logs?filter=plugin&limit=30');
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        out.innerHTML = '<code>' + data.map(l => l.message || l).join('\n') + '</code>';
+      } else {
+        out.innerHTML = '<code>No plugin logs found. Plugins log with api.log(), api.warn(), api.error()</code>';
+      }
+    } catch {
+      out.innerHTML = '<code>Log endpoint not available — check server logs for plugin output</code>';
+    }
+  };
+
+  // Generate plugin skeleton files
+  window._pluginGenerate = function() {
+    const name = (document.getElementById('plg-gen-name')?.value || 'my-plugin').replace(/[^a-z0-9-]/gi, '-');
+    const author = document.getElementById('plg-gen-author')?.value || '';
+    const desc = document.getElementById('plg-gen-desc')?.value || '';
+    const hooks = [];
+    document.querySelectorAll('.plg-gen-hook:checked').forEach(el => hooks.push(el.value));
+
+    const manifest = JSON.stringify({
+      name, version: '1.0.0', description: desc, author,
+      entry: 'index.js', hooks,
+      settings: { enabled: { type: 'boolean', label: 'Enabled', default: true } }
+    }, null, 2);
+
+    let indexJs = `// ${name} — ${desc}\n\nexport function init(api) {\n  api.log('${name} loaded!');\n\n  // Register a custom API endpoint\n  api.registerRoute('GET', 'status', () => ({\n    name: '${name}',\n    uptime: process.uptime(),\n    printers: api.db.getPrinters().length\n  }));\n}\n`;
+
+    for (const h of hooks) {
+      indexJs += `\nexport function ${h}(data) {\n  const { api } = data;\n  api.log('${h}: ' + JSON.stringify(data).slice(0, 100));\n}\n`;
+    }
+
+    indexJs += `\nexport function destroy(api) {\n  api.log('${name} unloaded');\n}\n`;
+
+    // Download as ZIP-like (two separate file downloads)
+    const out = document.getElementById('plg-gen-output');
+    if (out) {
+      out.innerHTML = `
+        <div style="font-size:0.75rem;color:var(--accent-green);margin-bottom:6px">✓ Files generated for "${name}"</div>
+        <div style="display:flex;gap:6px">
+          <button class="ce-secondary-btn" style="font-size:0.68rem" onclick="window._downloadText('manifest.json', ${JSON.stringify(manifest)})">📄 manifest.json</button>
+          <button class="ce-secondary-btn" style="font-size:0.68rem" onclick="window._downloadText('index.js', ${JSON.stringify(indexJs)})">📄 index.js</button>
+        </div>
+        <p style="font-size:0.68rem;color:var(--text-muted);margin-top:6px">Save both files to <code>data/plugins/${name}/</code> and restart the server.</p>
+      `;
+    }
+  };
+
+  window._downloadText = function(filename, content) {
+    const blob = new Blob([content], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
   };
 
   window.loadPluginsPanel = async function() {
