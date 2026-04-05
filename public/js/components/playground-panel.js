@@ -315,7 +315,20 @@
     html += '<div class="pg-send-row">';
     html += '<button class="pg-send-btn" id="pg-send-btn">' + _esc(t('playground.send')) + '</button>';
     html += '<button class="pg-clear-btn" id="pg-clear-btn">' + _esc(t('playground.clear')) + '</button>';
+    html += '<button class="pg-clear-btn" id="pg-curl-btn" title="Copy as cURL">📋 cURL</button>';
+    html += '<button class="pg-clear-btn" id="pg-fav-btn" title="Save to favorites">⭐ Favorite</button>';
     html += '</div>';
+
+    // Example requests (pre-filled)
+    if (_getExamples(ep).length > 0) {
+      html += '<div style="margin-top:8px"><span style="font-size:0.7rem;color:var(--text-muted)">Examples:</span>';
+      html += '<div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:4px">';
+      for (const ex of _getExamples(ep)) {
+        html += '<button class="pg-clear-btn pg-example-btn" style="font-size:0.65rem;padding:2px 8px" data-body=\'' + _esc(JSON.stringify(ex.body || {})) + '\' data-query="' + _esc(ex.query || '') + '">' + _esc(ex.name) + '</button>';
+      }
+      html += '</div></div>';
+    }
+
     html += '</div>';
 
     html += '<div class="pg-response-box" id="pg-response-box">';
@@ -334,6 +347,45 @@
     main.innerHTML = html;
 
     document.getElementById('pg-send-btn').addEventListener('click', _sendRequest);
+
+    // cURL export
+    document.getElementById('pg-curl-btn').addEventListener('click', function() {
+      const ep = _selectedEndpoint;
+      if (!ep) return;
+      const method = (ep.method || 'GET').toUpperCase();
+      const paramValues = {};
+      document.querySelectorAll('.pg-param-input').forEach(input => { paramValues[input.getAttribute('data-param')] = input.value; });
+      const queryStr = (document.getElementById('pg-query') || {}).value || '';
+      const bodyText = (document.getElementById('pg-body') || {}).value || '';
+      const url = location.origin + _buildUrl(ep, paramValues, queryStr);
+      let curl = `curl -X ${method} '${url}'`;
+      if (bodyText.trim()) curl += ` -H 'Content-Type: application/json' -d '${bodyText.replace(/'/g, "'\\''")}'`;
+      navigator.clipboard.writeText(curl);
+      if (typeof showToast === 'function') showToast('cURL copied!', 'success');
+    });
+
+    // Favorites
+    document.getElementById('pg-fav-btn').addEventListener('click', function() {
+      const ep = _selectedEndpoint;
+      if (!ep) return;
+      const favs = JSON.parse(localStorage.getItem('pg-favorites') || '[]');
+      const key = ep.method + ':' + ep.path;
+      if (favs.includes(key)) { favs.splice(favs.indexOf(key), 1); }
+      else { favs.push(key); }
+      localStorage.setItem('pg-favorites', JSON.stringify(favs));
+      if (typeof showToast === 'function') showToast(favs.includes(key) ? 'Added to favorites' : 'Removed from favorites', 'info');
+    });
+
+    // Example buttons
+    main.querySelectorAll('.pg-example-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const body = this.getAttribute('data-body');
+        const query = this.getAttribute('data-query');
+        if (body && body !== '{}') { const el = document.getElementById('pg-body'); if (el) el.value = JSON.stringify(JSON.parse(body), null, 2); }
+        if (query) { const el = document.getElementById('pg-query'); if (el) el.value = query; }
+      });
+    });
+
     document.getElementById('pg-clear-btn').addEventListener('click', function() {
       const body = document.getElementById('pg-resp-body');
       const status = document.getElementById('pg-resp-status');
@@ -519,5 +571,28 @@
     }
 
     _sendRequest();
+  }
+
+  // Pre-defined examples for common endpoints
+  function _getExamples(ep) {
+    const key = ep.method + ':' + ep.path;
+    const examples = {
+      'GET:/api/health': [{ name: 'Health check', query: '' }],
+      'GET:/api/printers': [{ name: 'List all', query: '' }],
+      'GET:/api/kb/stats': [{ name: 'KB stats', query: '' }],
+      'GET:/api/system/info': [{ name: 'System info', query: '' }],
+      'GET:/api/history': [{ name: 'Last 10', query: 'limit=10' }, { name: 'Last 50', query: 'limit=50' }],
+      'GET:/api/inventory/spools': [{ name: 'All spools', query: '' }],
+      'GET:/api/courses': [{ name: 'All courses', query: '' }],
+      'POST:/api/slicer/upload': [{ name: 'Upload STL', body: {} }],
+      'POST:/api/gcode/analyze': [{ name: 'Analyze G-code', body: {} }],
+      'GET:/api/eula': [{ name: 'Get EULA', query: '' }],
+      'GET:/api/bambu/printer-db': [{ name: 'All Bambu printers', query: '' }],
+      'GET:/api/tunnel/status': [{ name: 'Tunnel status', query: '' }],
+      'POST:/api/sign-maker/generate-3mf': [{ name: 'WiFi sign', body: { title: 'WiFi', qr_data: 'WIFI:T:WPA;S:MyNetwork;P:password;;', plate_width: 80, plate_height: 55 } }],
+      'POST:/api/model-forge/storage-box/generate-3mf': [{ name: 'Simple box', body: { width: 80, depth: 60, height: 40 } }, { name: 'Gridfinity 2x2', body: { gridfinity: true, gridUnitsX: 2, gridUnitsY: 2, height: 30 } }],
+      'POST:/api/model-forge/keychain/generate-3mf': [{ name: 'Test keychain', body: { text: 'HELLO', width: 50, height: 20 } }],
+    };
+    return examples[key] || [];
   }
 })();
