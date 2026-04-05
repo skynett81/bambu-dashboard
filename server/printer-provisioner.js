@@ -207,7 +207,7 @@ async function _configureNginx(ip, creds) {
 import http.server, os, signal, sys, time, threading, glob, json
 
 FPS = int(os.environ.get("CAMERA_FPS", "5"))
-CAMERA_FILES = ["/tmp/.monitor.jpg", "/tmp/printer_detection.jpg"]
+CAMERA_FILES = ["/tmp/printer_detection.jpg", "/tmp/.monitor.jpg"]
 frame_lock = threading.Lock()
 current_frame = b""
 frame_time = 0
