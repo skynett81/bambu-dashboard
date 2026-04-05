@@ -39,7 +39,7 @@
       .sm-sidebar { overflow-y:auto; max-height:calc(100vh - 180px); padding-right:4px; }
       .sm-form { background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:10px; padding:12px; }
       .sm-preview-area { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:10px; padding:16px; min-height:400px; }
-      .sm-preview { background:#fff; color:#000; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 24px rgba(0,0,0,0.3); }
+      .sm-preview { background:#fff; color:#000; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 4px 24px rgba(0,0,0,0.3); overflow:hidden; }
       .sm-actions { display:flex; gap:6px; flex-wrap:wrap; }
       @media (max-width:900px) { .sm-layout { grid-template-columns:1fr; } .sm-sidebar { max-height:none; } }
     </style>`;
@@ -270,11 +270,14 @@
     const hasStand = !!document.getElementById('sm-3d-stand')?.checked;
     const frameW = parseFloat(_val('sm-3d-framew')) || 5;
     const qrSizeMm = parseFloat(_val('sm-3d-qrsize')) || 35;
-    // Scale to fit preview area (larger = better visibility)
-    const scale = Math.min(5, 450 / Math.max(plateW, plateH));
+    // Scale plate to fit preview area — use the available container width
+    const previewContainer = document.getElementById('sm-result');
+    const maxAvail = previewContainer ? Math.min(previewContainer.clientWidth - 40, 500) : 450;
+    const scale = Math.min(5, maxAvail / plateW, (maxAvail * 0.8) / plateH);
     const previewW = Math.round(plateW * scale);
     const previewH = Math.round(plateH * scale);
-    const qrPx = Math.round(qrSizeMm * scale / 5); // QR cell size in preview
+    // QR size relative to plate — qrSizeMm is mm, convert to px at same scale
+    const qrPx = Math.round(qrSizeMm * scale);
 
     let signHtml = '';
     let qrData = '';
@@ -291,20 +294,24 @@
       try { localStorage.setItem('wifi-qr-ssid', ssid); localStorage.setItem('wifi-qr-pass', pass); } catch {}
       const esc = (s) => s.replace(/[\\;,:""]/g, c => '\\' + c);
       qrData = `WIFI:T:${enc};S:${esc(ssid)};P:${esc(pass)};H:${hidden ? 'true' : 'false'};;`;
-      const titleScale = Math.max(0.8, Math.min(2, previewW / 150));
+      // All sizes proportional to plate preview dimensions
+      const baseFontPx = Math.round(previewW * 0.065);
+      const qrCellPx = Math.max(1, Math.round(qrPx / 29)); // ~29 modules for WiFi QR
+      const iconSize = Math.round(qrPx * 0.18);
+      const iconBoxSize = Math.round(qrPx * 0.22);
       signHtml = `
-        <div style="padding:0;font-family:'Georgia',serif;width:100%">
-          <div style="font-size:${1.4*titleScale}rem;font-weight:700;font-style:italic;margin-bottom:4px">${_esc(welcome)}</div>
-          <hr style="border:none;border-top:2px solid #000;margin:0 0 8px">
-          <div style="position:relative;display:inline-block;margin:0 auto">
-            ${_makeQR(qrData, Math.max(2, qrPx))}
-            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:50%;width:40px;height:40px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 3px #fff">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1" fill="#000"/></svg>
+        <div style="padding:0;font-family:'Georgia',serif;width:100%;display:flex;flex-direction:column;align-items:center;gap:${Math.round(previewH*0.02)}px">
+          <div style="font-size:${Math.round(baseFontPx * 1.3)}px;font-weight:700;font-style:italic">${_esc(welcome)}</div>
+          <hr style="border:none;border-top:1.5px solid #000;margin:0;width:100%">
+          <div style="position:relative;display:inline-block;line-height:0">
+            ${_makeQR(qrData, qrCellPx)}
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:50%;width:${iconBoxSize}px;height:${iconBoxSize}px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 0 2px #fff">
+              <svg width="${iconSize}" height="${iconSize}" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2"><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M8.53 16.11a6 6 0 016.95 0"/><circle cx="12" cy="20" r="1" fill="#000"/></svg>
             </div>
           </div>
-          <hr style="border:none;border-top:2px solid #000;margin:8px 0 4px">
-          <div style="font-size:${1.1*titleScale}rem;font-weight:700;font-style:italic;margin-bottom:6px">${_esc(bottom)}</div>
-          <div style="display:grid;grid-template-columns:auto 1fr;gap:2px 8px;text-align:left;font-size:${0.65*titleScale}rem">
+          <hr style="border:none;border-top:2px solid #000;margin:0;width:100%">
+          <div style="font-size:${Math.round(baseFontPx * 1.1)}px;font-weight:700;font-style:italic">${_esc(bottom)}</div>
+          <div style="display:grid;grid-template-columns:auto 1fr;gap:1px ${Math.round(baseFontPx*0.4)}px;text-align:left;font-size:${Math.round(baseFontPx * 0.65)}px">
             <strong>Name</strong><span>${_esc(ssid)}</span>
             ${pass && enc !== 'nopass' ? '<strong>Password</strong><span>' + (showPass ? _esc(pass) : '••••••••') + '</span>' : ''}
           </div>
@@ -314,19 +321,23 @@
       const url = _val('sm-url') || location.origin;
       const title = _val('sm-title');
       qrData = url;
+      const bfp = Math.round(previewW * 0.065);
+      const qcP = Math.max(1, Math.round(qrPx / 29));
       signHtml = `
-        ${title ? '<div style="font-size:1.3rem;font-weight:800">' + _esc(title) + '</div>' : ''}
-        <div style="margin:16px auto">${_makeQR(url, 5)}</div>
-        <div style="font-size:0.8rem;color:#666;word-break:break-all">${_esc(url)}</div>
-        <div style="font-size:0.6rem;color:#aaa;margin-top:8px">Scan to open</div>`;
+        ${title ? '<div style="font-size:' + Math.round(bfp*1.3) + 'px;font-weight:800">' + _esc(title) + '</div>' : ''}
+        <div style="margin:${Math.round(bfp*0.5)}px auto;line-height:0">${_makeQR(url, qcP)}</div>
+        <div style="font-size:${Math.round(bfp*0.7)}px;color:#666;word-break:break-all">${_esc(url)}</div>
+        <div style="font-size:${Math.round(bfp*0.5)}px;color:#aaa;margin-top:4px">Scan to open</div>`;
 
     } else if (id === 'dashboard') {
       qrData = location.origin;
+      const bfp = Math.round(previewW * 0.065);
+      const qcP = Math.max(1, Math.round(qrPx / 29));
       signHtml = `
-        <div style="font-size:1.3rem;font-weight:800">🖥️ 3DPrintForge</div>
-        <div style="margin:16px auto">${_makeQR(location.origin, 5)}</div>
-        <div style="font-size:0.85rem;color:#666">${_esc(location.origin)}</div>
-        <div style="font-size:0.6rem;color:#aaa;margin-top:8px">Scan to open dashboard</div>`;
+        <div style="font-size:${Math.round(bfp*1.3)}px;font-weight:800">🖥️ 3DPrintForge</div>
+        <div style="margin:${Math.round(bfp*0.5)}px auto;line-height:0">${_makeQR(location.origin, qcP)}</div>
+        <div style="font-size:${Math.round(bfp*0.75)}px;color:#666">${_esc(location.origin)}</div>
+        <div style="font-size:${Math.round(bfp*0.5)}px;color:#aaa;margin-top:4px">Scan to open dashboard</div>`;
 
     } else if (id === 'printer') {
       const pid = _val('sm-printer');
@@ -335,15 +346,17 @@
       const data = state?.print || state || {};
       const url = location.origin;
       qrData = url;
+      const bfp = Math.round(previewW * 0.065);
+      const qcP = Math.max(1, Math.round(qrPx / 29));
       signHtml = `
-        <div style="font-size:1.2rem;font-weight:800">🖨️ ${_esc(meta.name || pid)}</div>
-        ${meta.model ? '<div style="font-size:0.85rem;color:#666">' + _esc(meta.model) + '</div>' : ''}
-        <div style="margin:14px auto">${_makeQR(url, 4)}</div>
-        <div style="font-size:0.8rem;text-align:left;display:inline-block;margin-top:8px">
+        <div style="font-size:${Math.round(bfp*1.2)}px;font-weight:800">🖨️ ${_esc(meta.name || pid)}</div>
+        ${meta.model ? '<div style="font-size:' + Math.round(bfp*0.75) + 'px;color:#666">' + _esc(meta.model) + '</div>' : ''}
+        <div style="margin:${Math.round(bfp*0.5)}px auto;line-height:0">${_makeQR(url, qcP)}</div>
+        <div style="font-size:${Math.round(bfp*0.7)}px;text-align:left;display:inline-block;margin-top:4px">
           ${meta.ip ? '<div><strong>IP:</strong> ' + _esc(meta.ip) + '</div>' : ''}
           ${data.gcode_state ? '<div><strong>Status:</strong> ' + _esc(data.gcode_state) + '</div>' : ''}
         </div>
-        <div style="font-size:0.6rem;color:#aaa;margin-top:8px">Scan to open dashboard</div>`;
+        <div style="font-size:${Math.round(bfp*0.5)}px;color:#aaa;margin-top:4px">Scan to open dashboard</div>`;
 
     } else if (id === 'filament') {
       const material = _val('sm-material');
@@ -351,11 +364,12 @@
       const brand = _val('sm-brand');
       const temp = _val('sm-temp');
       const bed = _val('sm-bed');
+      const bfp = Math.round(previewW * 0.065);
       signHtml = `
-        <div style="font-size:1.3rem;font-weight:800">🧵 ${_esc(material)}</div>
-        ${colour ? '<div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:4px"><span style="width:16px;height:16px;border-radius:50%;background:' + _esc(colour) + ';border:2px solid #ccc;display:inline-block"></span><span style="font-size:0.9rem">' + _esc(colour) + '</span></div>' : ''}
-        ${brand ? '<div style="font-size:0.85rem;color:#666;margin-top:4px">' + _esc(brand) + '</div>' : ''}
-        <div style="margin-top:12px;font-size:0.9rem;text-align:left;display:inline-block;border-top:1px solid #ddd;padding-top:8px">
+        <div style="font-size:${Math.round(bfp*1.3)}px;font-weight:800">🧵 ${_esc(material)}</div>
+        ${colour ? '<div style="display:flex;align-items:center;justify-content:center;gap:4px;margin-top:2px"><span style="width:' + Math.round(bfp*0.9) + 'px;height:' + Math.round(bfp*0.9) + 'px;border-radius:50%;background:' + _esc(colour) + ';border:2px solid #ccc;display:inline-block"></span><span style="font-size:' + Math.round(bfp*0.8) + 'px">' + _esc(colour) + '</span></div>' : ''}
+        ${brand ? '<div style="font-size:' + Math.round(bfp*0.75) + 'px;color:#666;margin-top:2px">' + _esc(brand) + '</div>' : ''}
+        <div style="margin-top:${Math.round(bfp*0.5)}px;font-size:${Math.round(bfp*0.8)}px;text-align:left;display:inline-block;border-top:1px solid #ddd;padding-top:4px">
           ${temp ? '<div>🔥 Nozzle: <strong>' + _esc(temp) + '°C</strong></div>' : ''}
           ${bed ? '<div>🛏️ Bed: <strong>' + _esc(bed) + '°C</strong></div>' : ''}
         </div>`;
@@ -365,10 +379,11 @@
       const msgs = { hot: '🔥 HOT SURFACE\nDo Not Touch', moving: '⚙️ MOVING PARTS\nKeep Clear', fumes: '💨 VENTILATION\nRequired', electric: '⚡ HIGH VOLTAGE\nDanger', custom: _val('sm-warn-msg') || 'WARNING' };
       const msg = msgs[type] || msgs.custom;
       const lines = msg.split('\n');
+      const bfp = Math.round(previewW * 0.065);
       signHtml = `
-        <div style="background:#FFD700;color:#000;padding:20px 30px;border-radius:8px;border:4px solid #000">
-          <div style="font-size:1.6rem;font-weight:900;letter-spacing:2px">${_esc(lines[0])}</div>
-          ${lines[1] ? '<div style="font-size:1rem;font-weight:600;margin-top:4px">' + _esc(lines[1]) + '</div>' : ''}
+        <div style="background:#FFD700;color:#000;padding:${Math.round(bfp*0.8)}px ${Math.round(bfp*1.2)}px;border-radius:${Math.round(bfp*0.3)}px;border:3px solid #000">
+          <div style="font-size:${Math.round(bfp*1.6)}px;font-weight:900;letter-spacing:2px">${_esc(lines[0])}</div>
+          ${lines[1] ? '<div style="font-size:' + Math.round(bfp) + 'px;font-weight:600;margin-top:2px">' + _esc(lines[1]) + '</div>' : ''}
         </div>`;
 
     } else if (id === 'custom') {
@@ -376,10 +391,12 @@
       const msg = _val('sm-c-msg');
       const qr = _val('sm-c-qr');
       if (qr) qrData = qr;
+      const bfp = Math.round(previewW * 0.065);
+      const qcP = Math.max(1, Math.round(qrPx / 29));
       signHtml = `
-        ${title ? '<div style="font-size:1.4rem;font-weight:800">' + _esc(title) + '</div>' : ''}
-        ${qr ? '<div style="margin:14px auto">' + _makeQR(qr, 5) + '</div>' : ''}
-        ${msg ? '<div style="font-size:0.9rem;color:#444;margin-top:8px">' + _esc(msg) + '</div>' : ''}`;
+        ${title ? '<div style="font-size:' + Math.round(bfp*1.4) + 'px;font-weight:800">' + _esc(title) + '</div>' : ''}
+        ${qr ? '<div style="margin:' + Math.round(bfp*0.5) + 'px auto;line-height:0">' + _makeQR(qr, qcP) + '</div>' : ''}
+        ${msg ? '<div style="font-size:' + Math.round(bfp*0.8) + 'px;color:#444;margin-top:4px">' + _esc(msg) + '</div>' : ''}`;
 
     } else if (id === 'contact') {
       const name = _val('sm-v-name');
@@ -388,27 +405,31 @@
       const company = _val('sm-v-company');
       const vcard = `BEGIN:VCARD\nVERSION:3.0\nFN:${name}\n${phone ? 'TEL:' + phone + '\n' : ''}${email ? 'EMAIL:' + email + '\n' : ''}${company ? 'ORG:' + company + '\n' : ''}END:VCARD`;
       qrData = vcard;
+      const bfp = Math.round(previewW * 0.065);
+      const qcP = Math.max(1, Math.round(qrPx / 33));
       signHtml = `
-        <div style="font-size:1.2rem;font-weight:800">📇 ${_esc(name)}</div>
-        ${company ? '<div style="font-size:0.85rem;color:#666">' + _esc(company) + '</div>' : ''}
-        <div style="margin:14px auto">${_makeQR(vcard, 4)}</div>
-        <div style="font-size:0.8rem;text-align:left;display:inline-block">
+        <div style="font-size:${Math.round(bfp*1.2)}px;font-weight:800">📇 ${_esc(name)}</div>
+        ${company ? '<div style="font-size:' + Math.round(bfp*0.75) + 'px;color:#666">' + _esc(company) + '</div>' : ''}
+        <div style="margin:${Math.round(bfp*0.5)}px auto;line-height:0">${_makeQR(vcard, qcP)}</div>
+        <div style="font-size:${Math.round(bfp*0.7)}px;text-align:left;display:inline-block">
           ${phone ? '<div>📞 ' + _esc(phone) + '</div>' : ''}
           ${email ? '<div>✉️ ' + _esc(email) + '</div>' : ''}
         </div>
-        <div style="font-size:0.6rem;color:#aaa;margin-top:8px">Scan to add contact</div>`;
+        <div style="font-size:${Math.round(bfp*0.5)}px;color:#aaa;margin-top:4px">Scan to add contact</div>`;
 
     } else if (id === 'inventory') {
       const assetId = _val('sm-inv-id');
       const desc = _val('sm-inv-desc');
       const loc = _val('sm-inv-loc');
       qrData = `ASSET:${assetId}|${desc}|${loc}`;
+      const bfp = Math.round(previewW * 0.065);
+      const qcP = Math.max(1, Math.round(qrPx / 29));
       signHtml = `
-        <div style="font-size:0.7rem;color:#999;text-transform:uppercase;letter-spacing:2px">Inventory</div>
-        <div style="font-size:1.4rem;font-weight:900;font-family:monospace;margin:4px 0">${_esc(assetId)}</div>
-        <div style="margin:12px auto">${_makeQR(qrData, 4)}</div>
-        ${desc ? '<div style="font-size:0.85rem;margin-top:6px">' + _esc(desc) + '</div>' : ''}
-        ${loc ? '<div style="font-size:0.78rem;color:#666">📍 ' + _esc(loc) + '</div>' : ''}`;
+        <div style="font-size:${Math.round(bfp*0.6)}px;color:#999;text-transform:uppercase;letter-spacing:2px">Inventory</div>
+        <div style="font-size:${Math.round(bfp*1.4)}px;font-weight:900;font-family:monospace;margin:2px 0">${_esc(assetId)}</div>
+        <div style="margin:${Math.round(bfp*0.4)}px auto;line-height:0">${_makeQR(qrData, qcP)}</div>
+        ${desc ? '<div style="font-size:' + Math.round(bfp*0.75) + 'px;margin-top:4px">' + _esc(desc) + '</div>' : ''}
+        ${loc ? '<div style="font-size:' + Math.round(bfp*0.65) + 'px;color:#666">📍 ' + _esc(loc) + '</div>' : ''}`;
     }
 
     // Size info
@@ -423,7 +444,7 @@
       </div>
       <div style="font-size:0.7rem;color:var(--text-muted);margin-bottom:4px">${sizeInfo}${hasBorder ? ' + frame' : ''}${hasStand ? ' + stand' : ''}</div>
       ${hasBorder ? '<div style="background:var(--bg-tertiary);padding:' + Math.round(frameW * scale) + 'px;border-radius:' + Math.round((cornerR + 2) * scale) + 'px;display:inline-block">' : ''}
-      <div class="sm-preview" id="sm-sign" style="width:${previewW}px;min-width:${previewW}px;height:${previewH}px;padding:${Math.round(4*scale)}px;border-radius:${Math.round(cornerR*scale)}px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden">${signHtml}</div>
+      <div class="sm-preview" id="sm-sign" style="width:${previewW}px;min-height:${previewH}px;padding:${Math.round(3*scale)}px;border-radius:${Math.round(cornerR*scale)}px;box-sizing:border-box">${signHtml}</div>
       ${hasBorder ? '</div>' : ''}
       ${hasStand ? '<div style="width:' + Math.round(plateW * 0.7 * scale) + 'px;height:' + Math.round(10 * scale) + 'px;background:var(--bg-tertiary);border-radius:0 0 ' + Math.round(3*scale) + 'px ' + Math.round(3*scale) + 'px;margin:-2px auto 0"></div>' : ''}`;
   };
@@ -476,6 +497,9 @@
       result.innerHTML = '<div style="padding:20px;color:var(--text-muted)">Generating 3D preview...</div>';
     }
 
+    // Restore sign preview when 3D viewer closes
+    const restorePreview = () => window._smGenerate(templateId);
+
     try {
       const res = await fetch('/api/sign-maker/generate-3mf', {
         method: 'POST',
@@ -486,14 +510,29 @@
       const blob = await res.blob();
       const file = new File([blob], (body.title || 'sign') + '.3mf', { type: 'application/octet-stream' });
 
-      // Open in 3mfViewer
+      // Open in 3mfViewer — restore preview on close
       if (typeof window._g3dHandleFile === 'function') {
         window._g3dHandleFile(file);
+        // Watch for viewer close (overlay removal)
+        const obs = new MutationObserver(() => {
+          if (!document.getElementById('_global-3d-overlay')) {
+            obs.disconnect();
+            restorePreview();
+          }
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
       } else if (typeof window.open3mfViewer === 'function') {
         const url = URL.createObjectURL(blob);
         window.open3mfViewer(url, (body.title || 'Sign') + ' — 3D Preview');
+        const obs = new MutationObserver(() => {
+          if (!document.getElementById('_global-3d-overlay')) {
+            obs.disconnect();
+            URL.revokeObjectURL(url);
+            restorePreview();
+          }
+        });
+        obs.observe(document.body, { childList: true, subtree: true });
       } else {
-        // Fallback: show in an inline container
         if (result) {
           result.innerHTML = `<div style="width:100%;height:400px;background:#1a1a2e;border-radius:10px;overflow:hidden;position:relative" id="sm-3d-container">
             <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted)">3mfViewer not available — use Download 3MF instead</div>
@@ -502,6 +541,7 @@
       }
     } catch (e) {
       if (result) result.innerHTML = '<div style="padding:20px;color:var(--accent-red)">' + e.message + '</div>';
+      restorePreview();
     }
   };
 

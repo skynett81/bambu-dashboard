@@ -3715,6 +3715,21 @@ export async function handleApiRequest(req, res) {
       const dbSize = existsSync(dbPath) ? statSync(dbPath).size : 0;
       const uptime = process.uptime();
       const mem = process.memoryUsage();
+
+      // Collect network addresses
+      const { networkInterfaces: getIfaces, hostname: getHostname } = await import('node:os');
+      const ifaces = getIfaces();
+      const addresses = [];
+      for (const [name, list] of Object.entries(ifaces)) {
+        for (const iface of list) {
+          if (iface.internal) continue;
+          addresses.push({ interface: name, address: iface.address, family: iface.family, mac: iface.mac });
+        }
+      }
+      const hn = getHostname();
+      const httpPort = config.server?.port || parseInt(process.env.SERVER_PORT) || 3000;
+      const httpsPort = config.server?.httpsPort || parseInt(process.env.SERVER_HTTPS_PORT) || 3443;
+
       return sendJson(res, {
         uptime: uptime,
         uptime_seconds: Math.floor(uptime),
@@ -3729,7 +3744,10 @@ export async function handleApiRequest(req, res) {
         db_version: 76,
         startedAt: _serverStartTime,
         pid: process.pid,
-        memory_mb: Math.round(mem.rss / 1024 / 1024)
+        memory_mb: Math.round(mem.rss / 1024 / 1024),
+        hostname: hn,
+        network: addresses,
+        ports: { http: httpPort, https: httpsPort, camera_base: 9001 }
       });
     }
 

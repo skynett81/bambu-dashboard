@@ -44,6 +44,8 @@ export class MoonrakerClient {
     this._pollTimer = null;
     this._lastPrintState = null;
     this._subscriptionId = 0;
+    this._ledName = null;       // Detected Klipper LED object name
+    this._lightPin = null;      // Detected output_pin for light
   }
 
   get _baseUrl() {
@@ -91,6 +93,7 @@ export class MoonrakerClient {
       this.hub.broadcast('connection', { status: 'connected' });
       this._subscribe();
       this._requestFullState();
+      this._detectLightObjects();
     });
 
     this.ws.on('message', (raw) => {
@@ -143,6 +146,10 @@ export class MoonrakerClient {
       'webhooks': null,
       'idle_timeout': null,
       'virtual_sdcard': null,
+      'fan_generic cavity_fan': null,
+      'temperature_sensor cavity': null,
+      'purifier': null,
+      'exclude_object': null,
     };
 
     this._wsSend({
@@ -159,7 +166,7 @@ export class MoonrakerClient {
     try {
       const [info, status, history] = await Promise.all([
         this._apiGet('/printer/info'),
-        this._apiGet('/printer/objects/query?print_stats&display_status&heater_bed&extruder&extruder1&extruder2&extruder3&fan&toolhead&gcode_move&virtual_sdcard&idle_timeout&system_stats'),
+        this._apiGet('/printer/objects/query?print_stats&display_status&heater_bed&extruder&extruder1&extruder2&extruder3&fan&toolhead&gcode_move&virtual_sdcard&idle_timeout&system_stats&fan_generic%20cavity_fan&temperature_sensor%20cavity&purifier&exclude_object'),
         this._apiGet('/server/history/list?limit=1&order=desc'),
       ]);
 
@@ -377,6 +384,38 @@ export class MoonrakerClient {
 
     // Message (display)
     if (ds.message) this.state._display_message = ds.message;
+
+    // Cavity fan (enclosure fan)
+    const cavFan = status['fan_generic cavity_fan'];
+    if (cavFan?.speed !== undefined) {
+      this.state._cavity_fan_speed = Math.round((cavFan.speed || 0) * 100);
+    }
+
+    // Cavity temperature sensor
+    const cavTemp = status['temperature_sensor cavity'];
+    if (cavTemp?.temperature !== undefined) {
+      this.state.chamber_temper = Math.round(cavTemp.temperature);
+    }
+
+    // Purifier
+    const pur = status.purifier;
+    if (pur) {
+      this.state._purifier = {
+        fan_speed: Math.round((pur.fan_speed || 0) * 100),
+        fan_state: pur.fan_state,
+        power_detected: pur.power_detected,
+      };
+    }
+
+    // Exclude objects (for skip object during print)
+    const excl = status.exclude_object;
+    if (excl?.objects) {
+      this.state.obj_list = excl.objects.map((o, i) => ({
+        obj_id: i,
+        name: o.name || `Object ${i}`,
+        skipped: excl.excluded_objects?.includes(o.name) || false,
+      }));
+    }
   }
 
   // ---- WebSocket message handler ----
@@ -409,6 +448,30 @@ export class MoonrakerClient {
       this._mergeKlipperState(msg.result.status);
       this.hub.broadcast('status', { print: this.state });
     }
+  }
+
+  // ---- Light detection ----
+
+  async _detectLightObjects() {
+    try {
+      const data = await this._apiGet('/printer/objects/list');
+      if (!data?.result?.objects) return;
+      const objects = data.result.objects;
+      // Find LED objects (led <name>)
+      const ledObj = objects.find(o => o.startsWith('led '));
+      if (ledObj) {
+        this._ledName = ledObj.replace('led ', '');
+        log.info(`Detected Klipper LED: ${this._ledName}`);
+      }
+      // Find light-related output pins
+      const lightPin = objects.find(o =>
+        o.startsWith('output_pin ') && /light|case|lamp|led/i.test(o)
+      );
+      if (lightPin) {
+        this._lightPin = lightPin.replace('output_pin ', '');
+        log.info(`Detected light pin: ${this._lightPin}`);
+      }
+    } catch { /* ignore */ }
   }
 
   // ---- Commands ----
@@ -460,6 +523,25 @@ export class MoonrakerClient {
           script: `SET_HEATER_TEMPERATURE HEATER=heater_bed TARGET=${commandObj.target || 0}`
         });
         break;
+      case 'light': {
+        const mode = commandObj.mode || 'on';
+        const on = mode === 'on';
+        if (this._ledName) {
+          // Use detected LED object (e.g. cavity_led, neopixel, etc.)
+          const script = on
+            ? `SET_LED LED=${this._ledName} RED=1 GREEN=1 BLUE=1 WHITE=1`
+            : `SET_LED LED=${this._ledName} RED=0 GREEN=0 BLUE=0 WHITE=0`;
+          this._apiPost('/printer/gcode/script', { script });
+        } else if (this._lightPin) {
+          // Use detected output_pin
+          this._apiPost('/printer/gcode/script', { script: `SET_PIN PIN=${this._lightPin} VALUE=${on ? 1 : 0}` });
+        } else {
+          // No detected light — try common names
+          this._apiPost('/printer/gcode/script', { script: `SET_PIN PIN=caselight VALUE=${on ? 1 : 0}` })
+            .catch(() => {});
+        }
+        break;
+      }
       case 'home':
         this._apiPost('/printer/gcode/script', { script: 'G28' });
         break;
@@ -525,6 +607,7 @@ export function buildMoonrakerCommand(msg) {
     case 'pushall': return { _moonraker_action: 'pushall' };
     case 'home': return { _moonraker_action: 'home' };
     case 'emergency_stop': return { _moonraker_action: 'emergency_stop' };
+    case 'light': return { _moonraker_action: 'light', mode: msg.mode };
     default: return { _moonraker_action: action, ...msg };
   }
 }

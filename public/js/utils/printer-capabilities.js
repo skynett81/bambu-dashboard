@@ -16,7 +16,14 @@
 
   const DEFAULT_CAPS = { auxFan: true, chamberFan: true, chamberHeat: true, light: true, ai: true, enclosure: true, dualNozzle: false, toolchanger: false, amsType: 'full', maxAmsUnits: 4, maxNozzleTemp: 300, maxBedTemp: 120, maxChamberTemp: 60, buildVolume: [256,256,256], maxSpeed: 500 };
 
-  window.getCapabilities = function(model) {
+  // Moonraker/Klipper printers — no Bambu-specific fans (uses cavity_fan via gcode), no AI
+  const MOONRAKER_CAPS = { auxFan: false, chamberFan: false, chamberHeat: false, light: true, ai: false, enclosure: true, dualNozzle: false, toolchanger: false, amsType: null, maxAmsUnits: 0, maxNozzleTemp: 300, maxBedTemp: 120, maxChamberTemp: null, buildVolume: [300,300,300], maxSpeed: 500 };
+
+  window.getCapabilities = function(model, meta) {
+    // If meta has connector type info, use it
+    if (meta?.type === 'moonraker' || meta?.type === 'klipper') {
+      return MOONRAKER_CAPS;
+    }
     if (!model) return DEFAULT_CAPS;
     return MODELS[model] || DEFAULT_CAPS;
   };

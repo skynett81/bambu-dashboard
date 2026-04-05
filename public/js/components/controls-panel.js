@@ -18,7 +18,7 @@
   // Full render — only called once when panel opens
   function renderControls(container, data) {
     const meta = window.printerState.getActivePrinterMeta();
-    const caps = typeof getCapabilities === 'function' ? getCapabilities(meta?.model) : {};
+    const caps = typeof getCapabilities === 'function' ? getCapabilities(meta?.model, meta) : {};
     const state = data.gcode_state || 'IDLE';
     const isPrinting = state === 'RUNNING' || state === 'PAUSE';
 
@@ -140,11 +140,31 @@
     const maxBed = caps.maxBedTemp || 120;
     html += tempRow('bed', t('controls.temp_bed'), bedTemp, bedTarget, 'M140', maxBed);
 
-    if (caps.chamberHeat) {
+    // Extra extruders (Moonraker multi-extruder e.g. Snapmaker U1)
+    if (data._extra_extruders && data._extra_extruders.length > 0) {
+      for (let i = 0; i < data._extra_extruders.length; i++) {
+        const ex = data._extra_extruders[i];
+        if (!ex) continue;
+        const label = `Nozzle ${i + 2}`;
+        const gcode = `M104 T${i + 1}`;
+        html += tempRow(`nozzle${i+2}`, label, ex.temperature || 0, ex.target || 0, gcode, maxNozzle);
+      }
+    }
+
+    if (caps.chamberHeat || data.chamber_temper > 0) {
       const chamberTemp = Math.round(data.chamber_temper || 0);
       const chamberTarget = Math.round(data.chamber_target_temper || 0);
       const maxChamber = caps.maxChamberTemp || 60;
-      html += tempRow('chamber', t('controls.temp_chamber'), chamberTemp, chamberTarget, 'M141', maxChamber);
+      // Cavity temp sensor (read-only for Moonraker)
+      if (meta?.type === 'moonraker') {
+        html += `<div class="ctrl-temp-row">
+          <span class="ctrl-temp-label">Cavity</span>
+          <span class="ctrl-temp-current">${chamberTemp}°C</span>
+          <span class="ctrl-temp-target" style="opacity:0.5">sensor</span>
+        </div>`;
+      } else {
+        html += tempRow('chamber', t('controls.temp_chamber'), chamberTemp, chamberTarget, 'M141', maxChamber);
+      }
     }
 
     html += `</div>
@@ -181,6 +201,16 @@
     if (caps.chamberFan) {
       const chamberPct = fanPercent(data.big_fan2_speed);
       html += fanSlider('chamber', t('controls.fan_chamber'), chamberPct, 'P3');
+    }
+
+    // Moonraker-specific: cavity fan
+    if (data._cavity_fan_speed !== undefined) {
+      html += fanSlider('cavity', 'Cavity Fan', data._cavity_fan_speed, 'cavity_fan');
+    }
+
+    // Moonraker-specific: purifier
+    if (data._purifier) {
+      html += fanSlider('purifier', 'Air Purifier', data._purifier.fan_speed, 'purifier');
     }
 
     html += `</div></div>`;
@@ -279,6 +309,37 @@
       </button>`;
     }
 
+    // Moonraker-specific tools
+    if (meta?.type === 'moonraker') {
+      html += `<button class="ctrl-tool-btn" data-ripple onclick="sendGcode('BED_MESH_CALIBRATE')">
+        <div class="ctrl-tool-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
+        </div>
+        <span class="ctrl-tool-label">Bed Mesh</span>
+      </button>`;
+
+      html += `<button class="ctrl-tool-btn" data-ripple onclick="sendGcode('SHAPER_CALIBRATE')">
+        <div class="ctrl-tool-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12c0 0 2-4 5-4s3 8 6 8 5-4 5-4"/><path d="M22 12c0 0-2 4-5 4"/></svg>
+        </div>
+        <span class="ctrl-tool-label">Input Shaper</span>
+      </button>`;
+
+      html += `<button class="ctrl-tool-btn" data-ripple onclick="sendCommand('firmware_restart')">
+        <div class="ctrl-tool-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 105.64-12.36L1 10"/></svg>
+        </div>
+        <span class="ctrl-tool-label">FW Restart</span>
+      </button>`;
+
+      html += `<button class="ctrl-tool-btn" data-ripple style="color:var(--accent-red)" onclick="confirmAction('Emergency stop?', () => sendCommand('emergency_stop'), {danger:true})">
+        <div class="ctrl-tool-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-red)" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        </div>
+        <span class="ctrl-tool-label">E-Stop</span>
+      </button>`;
+    }
+
     html += `</div></div>`;
 
     // ===== CARD: Z-Offset Calibration Wizard (only when idle) =====
@@ -338,23 +399,23 @@
 
     // ===== CARD: Quick Commands =====
     const quickCmds = [
-      { label: t('controls.qc_home_all') || 'Home alle', gcode: 'G28', group: 'motion' },
+      { label: t('controls.qc_home_all') || 'Home All', gcode: 'G28', group: 'motion' },
       { label: t('controls.qc_home_x') || 'Home X', gcode: 'G28 X', group: 'motion' },
       { label: t('controls.qc_home_y') || 'Home Y', gcode: 'G28 Y', group: 'motion' },
       { label: t('controls.qc_home_z') || 'Home Z', gcode: 'G28 Z', group: 'motion' },
-      { label: t('controls.qc_auto_level') || 'Auto-nivellering', gcode: 'G29', group: 'motion' },
-      { label: t('controls.qc_motors_off') || 'Motorer av', gcode: 'M18', group: 'motion' },
-      { label: t('controls.qc_fan_100') || 'Vifte 100%', gcode: 'M106 S255', group: 'cooling' },
-      { label: t('controls.qc_fan_50') || 'Vifte 50%', gcode: 'M106 S127', group: 'cooling' },
-      { label: t('controls.qc_fan_off') || 'Vifte av', gcode: 'M107', group: 'cooling' },
-      { label: t('controls.qc_pla_preheat') || 'PLA forvarming', gcode: 'M104 S200\\nM140 S60', group: 'temp' },
-      { label: t('controls.qc_petg_preheat') || 'PETG preheat', gcode: 'M104 S240\\nM140 S80', group: 'temp' },
-      { label: t('controls.qc_abs_preheat') || 'ABS preheat', gcode: 'M104 S250\\nM140 S100', group: 'temp' },
+      { label: t('controls.qc_auto_level') || 'Auto Level', gcode: 'G29', group: 'motion' },
+      { label: t('controls.qc_motors_off') || 'Motors Off', gcode: 'M18', group: 'motion' },
+      { label: t('controls.qc_fan_100') || 'Fan 100%', gcode: 'M106 S255', group: 'cooling' },
+      { label: t('controls.qc_fan_50') || 'Fan 50%', gcode: 'M106 S127', group: 'cooling' },
+      { label: t('controls.qc_fan_off') || 'Fan Off', gcode: 'M107', group: 'cooling' },
+      { label: t('controls.qc_pla_preheat') || 'PLA Preheat', gcode: 'M104 S200\\nM140 S60', group: 'temp' },
+      { label: t('controls.qc_petg_preheat') || 'PETG Preheat', gcode: 'M104 S240\\nM140 S80', group: 'temp' },
+      { label: t('controls.qc_abs_preheat') || 'ABS Preheat', gcode: 'M104 S250\\nM140 S100', group: 'temp' },
       { label: t('controls.cooldown') || 'Cooldown', gcode: 'M104 S0\\nM140 S0', group: 'temp' },
       { label: t('controls.extrude') + ' 10mm', gcode: 'G91\\nG1 E10 F300\\nG90', group: 'filament' },
       { label: t('controls.retract') + ' 10mm', gcode: 'G91\\nG1 E-10 F300\\nG90', group: 'filament' },
-      { label: t('controls.qc_report_temps') || 'Rapporter temp.', gcode: 'M105', group: 'info' },
-      { label: t('controls.qc_report_pos') || 'Rapporter posisjon', gcode: 'M114', group: 'info' },
+      { label: t('controls.qc_report_temps') || 'Report Temps', gcode: 'M105', group: 'info' },
+      { label: t('controls.qc_report_pos') || 'Report Position', gcode: 'M114', group: 'info' },
     ];
 
     const cmdGroups = {};
@@ -422,6 +483,48 @@
         </div>
         <div id="ctrl-filament-change">
           <button class="form-btn form-btn-sm" data-ripple onclick="window._startFilamentChange('${esc(meta.id)}')">${t('controls.start_filament_change')}</button>
+        </div>
+      </div>`;
+    }
+
+    // ===== CARD: AMS Drying (Bambu only) =====
+    if (caps.amsType && meta?.type !== 'moonraker') {
+      const amsData = data.ams;
+      const isDrying = amsData?.ams?.[0]?.drying?.status === 1;
+      html += `<div class="ctrl-card ctrl-area-amsdry">
+        <div class="ctrl-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
+          AMS Drying
+          ${isDrying ? '<span class="ctrl-card-badge" style="background:var(--accent-green)">Active</span>' : ''}
+        </div>
+        <div style="display:flex;gap:8px;align-items:end;flex-wrap:wrap">
+          <div style="flex:1;min-width:80px">
+            <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:2px">AMS</label>
+            <select class="form-input" id="ams-dry-id" style="font-size:0.82rem">
+              <option value="0">AMS 1</option>
+              <option value="1">AMS 2</option>
+              <option value="2">AMS 3</option>
+              <option value="3">AMS 4</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:80px">
+            <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:2px">Temp (°C)</label>
+            <input type="number" class="form-input" id="ams-dry-temp" value="55" min="35" max="70" step="5" style="font-size:0.82rem">
+          </div>
+          <div style="flex:1;min-width:80px">
+            <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:2px">Duration (h)</label>
+            <input type="number" class="form-input" id="ams-dry-dur" value="4" min="1" max="24" step="1" style="font-size:0.82rem">
+          </div>
+          <div style="display:flex;gap:4px">
+            <button class="form-btn form-btn-sm" data-ripple style="background:var(--accent-green);color:#fff" onclick="window._startAmsDry()">Start</button>
+            <button class="form-btn form-btn-sm" data-ripple style="background:var(--accent-red);color:#fff" onclick="window._stopAmsDry()">Stop</button>
+          </div>
+        </div>
+        <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+          <button class="ctrl-preset-btn" data-ripple onclick="document.getElementById('ams-dry-temp').value=45;document.getElementById('ams-dry-dur').value=4">PLA (45°C/4h)</button>
+          <button class="ctrl-preset-btn" data-ripple onclick="document.getElementById('ams-dry-temp').value=55;document.getElementById('ams-dry-dur').value=6">PETG (55°C/6h)</button>
+          <button class="ctrl-preset-btn" data-ripple onclick="document.getElementById('ams-dry-temp').value=65;document.getElementById('ams-dry-dur').value=8">ABS (65°C/8h)</button>
+          <button class="ctrl-preset-btn" data-ripple onclick="document.getElementById('ams-dry-temp').value=50;document.getElementById('ams-dry-dur').value=6">TPU (50°C/6h)</button>
         </div>
       </div>`;
     }
@@ -595,14 +698,30 @@
   }
 
   window.setFanSpeed = function(fanParam, pct) {
-    const sVal = Math.round((parseInt(pct) / 100) * 255);
-    sendCommand('gcode', { gcode: `M106 ${fanParam} S${sVal}` });
+    const speed = parseInt(pct) / 100;
+    // Klipper fan_generic objects use SET_FAN_SPEED
+    if (fanParam === 'cavity_fan' || fanParam === 'purifier') {
+      sendCommand('gcode', { gcode: `SET_FAN_SPEED FAN=${fanParam} SPEED=${speed.toFixed(2)}` });
+    } else {
+      const sVal = Math.round(speed * 255);
+      sendCommand('gcode', { gcode: `M106 ${fanParam} S${sVal}` });
+    }
   };
 
   window.setTemp = function(gcode, temp) {
     const val = parseInt(temp);
     if (isNaN(val) || val < 0) return;
-    sendCommand('gcode', { gcode: `${gcode} S${val}` });
+    const meta = window.printerState?.getActivePrinterMeta();
+    if (meta?.type === 'moonraker' && gcode.startsWith('M104')) {
+      // Klipper: use SET_HEATER_TEMPERATURE for proper multi-extruder support
+      const tMatch = gcode.match(/T(\d+)/);
+      const heater = tMatch ? `extruder${tMatch[1]}` : 'extruder';
+      sendCommand('gcode', { gcode: `SET_HEATER_TEMPERATURE HEATER=${heater} TARGET=${val}` });
+    } else if (meta?.type === 'moonraker' && gcode === 'M140') {
+      sendCommand('gcode', { gcode: `SET_HEATER_TEMPERATURE HEATER=heater_bed TARGET=${val}` });
+    } else {
+      sendCommand('gcode', { gcode: `${gcode} S${val}` });
+    }
   };
 
   window.applyTempPreset = function(nozzle, bed) {
@@ -654,9 +773,27 @@
     }, { danger: true });
   };
 
+  window._startAmsDry = function() {
+    const amsId = parseInt(document.getElementById('ams-dry-id')?.value) || 0;
+    const temp = parseInt(document.getElementById('ams-dry-temp')?.value) || 55;
+    const dur = parseInt(document.getElementById('ams-dry-dur')?.value) || 4;
+    sendCommand('ams_dry', { ams_id: amsId, temp, duration: dur * 60 });
+    if (typeof showToast === 'function') showToast(`AMS ${amsId + 1} drying started: ${temp}°C for ${dur}h`, 'success');
+  };
+
+  window._stopAmsDry = function() {
+    const amsId = parseInt(document.getElementById('ams-dry-id')?.value) || 0;
+    sendCommand('ams_stop_dry', { ams_id: amsId });
+    if (typeof showToast === 'function') showToast(`AMS ${amsId + 1} drying stopped`, 'info');
+  };
+
   window.toggleLight = function() {
     const newMode = lightState === 'on' ? 'off' : 'on';
     sendCommand('light', { mode: newMode, node: 'chamber_light' });
+    // Update UI immediately (Moonraker printers don't report light state back)
+    lightState = newMode;
+    const lightBtn = document.getElementById('ctrl-light-btn');
+    if (lightBtn) lightBtn.classList.toggle('ctrl-tool-active', newMode === 'on');
   };
 
   window.skipObject = function(objId) {

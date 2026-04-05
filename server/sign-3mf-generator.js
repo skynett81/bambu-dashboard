@@ -159,7 +159,7 @@ export async function generateSign3MF(opts = {}) {
     textMesh.SetObjectLevelProperty(mgId, colBlack);
     const sign = new MeshBuilder(lib, textMesh);
 
-    // ── QR code blocks ──
+    // ── QR code blocks (mirrored X so text reads correctly from +Z view) ──
     if (opts.qrData) {
       const qrGrid = generateQRGrid(opts.qrData);
       const qrCells = qrGrid.length;
@@ -170,13 +170,13 @@ export async function generateSign3MF(opts = {}) {
       for (let row = 0; row < qrCells; row++) {
         for (let col = 0; col < qrCells; col++) {
           if (qrGrid[row][col]) {
-            sign.addBox(qrX + col * cellSize, qrY + row * cellSize, pd, cellSize * 0.95, cellSize * 0.95, qrH);
+            sign.addBox(qrX + (qrCells - 1 - col) * cellSize, qrY + row * cellSize, pd, cellSize * 0.95, cellSize * 0.95, qrH);
           }
         }
       }
     }
 
-    // ── Title text ──
+    // ── Title text (mirrored X so text reads correctly) ──
     if (opts.title) {
       const tg = textToGrid(opts.title);
       const ts = opts.textSize || 8;
@@ -185,17 +185,17 @@ export async function generateSign3MF(opts = {}) {
       const ty = ph - 2 - tg.height * scale;
       for (let r = 0; r < tg.height; r++)
         for (let c = 0; c < tg.width; c++)
-          if (tg.grid[r][c]) sign.addBox(tx + c * scale, ty + r * scale, pd, scale * 0.9, scale * 0.9, th);
+          if (tg.grid[r][c]) sign.addBox(tx + (tg.width - 1 - c) * scale, ty + r * scale, pd, scale * 0.9, scale * 0.9, th);
     }
 
-    // ── Subtitle text ──
+    // ── Subtitle text (mirrored X so text reads correctly) ──
     if (opts.subtitle) {
       const sg = textToGrid(opts.subtitle);
       const scale = Math.min((opts.textSize || 8) * 0.6 / 7, (pw - 6) / sg.width);
       const sx = (pw - sg.width * scale) / 2;
       for (let r = 0; r < sg.height; r++)
         for (let c = 0; c < sg.width; c++)
-          if (sg.grid[r][c]) sign.addBox(sx + c * scale, 2 + r * scale, pd, scale * 0.9, scale * 0.9, th * 0.8);
+          if (sg.grid[r][c]) sign.addBox(sx + (sg.width - 1 - c) * scale, 2 + r * scale, pd, scale * 0.9, scale * 0.9, th * 0.8);
     }
 
     // ── Divider lines ──

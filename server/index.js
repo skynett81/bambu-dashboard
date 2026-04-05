@@ -4,6 +4,7 @@ import { readFileSync, existsSync, mkdirSync, writeFileSync, chmodSync, createRe
 import { join, extname, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
+import { networkInterfaces, hostname } from 'node:os';
 import { config, PUBLIC_DIR, DATA_DIR } from './config.js';
 import { WebSocketHub } from './websocket-hub.js';
 import { initDatabase, getPrinters, addPrinter as dbAddPrinter, getSpoolsDryingStatus, getLowStockSpools, getInventorySetting, setInventorySetting, getPushSubscriptions, deletePushSubscriptionById, autoTrashEmptySpools } from './database.js';
@@ -135,23 +136,52 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 const CERTS_DIR = join(ROOT, 'certs');
 
-// Auto-generate self-signed SSL certificates if none exist
+// Collect all local IP addresses for SSL SAN and display
+function getLocalAddresses() {
+  const ips = new Set(['127.0.0.1']);
+  const names = new Set(['localhost']);
+  try { names.add(hostname()); } catch {}
+  const ifaces = networkInterfaces();
+  for (const list of Object.values(ifaces)) {
+    for (const iface of list) {
+      if (iface.internal) continue;
+      ips.add(iface.address);
+    }
+  }
+  return { ips: [...ips], names: [...names] };
+}
+
+// Auto-generate self-signed SSL certificates if none exist or SANs are incomplete
 function ensureSSLCerts() {
   const certPath = join(CERTS_DIR, 'cert.pem');
   const keyPath = join(CERTS_DIR, 'key.pem');
-  if (existsSync(certPath) && existsSync(keyPath)) return;
+
+  // Check if existing cert covers all current IPs
+  if (existsSync(certPath) && existsSync(keyPath)) {
+    try {
+      const san = execSync(`openssl x509 -in "${certPath}" -noout -ext subjectAltName 2>/dev/null`, { encoding: 'utf8' });
+      const { ips } = getLocalAddresses();
+      const allCovered = ips.every(ip => san.includes(`IP:${ip}`) || san.includes(`IP Address:${ip}`));
+      if (allCovered && san.includes('DNS:')) return; // cert is good
+      log.info('SSL certificate missing SANs for current network — regenerating');
+    } catch {
+      log.info('SSL certificate SANs could not be verified — regenerating');
+    }
+  }
 
   try {
     if (!existsSync(CERTS_DIR)) mkdirSync(CERTS_DIR, { recursive: true });
+    const { ips, names } = getLocalAddresses();
+    const sanParts = names.map(n => `DNS:${n}`).concat(ips.map(ip => `IP:${ip}`));
     execSync(
       `openssl req -x509 -newkey rsa:2048 -keyout "${keyPath}" -out "${certPath}" ` +
       `-days 365 -nodes -subj "/CN=3DPrintForge/O=Local" ` +
-      `-addext "subjectAltName=DNS:localhost,IP:127.0.0.1"`,
+      `-addext "subjectAltName=${sanParts.join(',')}"`,
       { stdio: 'pipe' }
     );
     chmodSync(keyPath, 0o600);
     chmodSync(certPath, 0o644);
-    log.info('Auto-generated SSL certificates (valid for 365 days)');
+    log.info(`Auto-generated SSL certificates (SAN: ${sanParts.join(', ')})`);
   } catch {
     log.warn('Could not generate SSL certificates (openssl not available?)');
   }
@@ -473,7 +503,8 @@ const forceHttps = hasSSL && config.server.forceHttps !== false;
 
 const httpServer = createHttpServer((req, res) => {
   if (forceHttps) {
-    const host = req.headers.host?.replace(`:${PORT}`, `:${HTTPS_PORT}`) || `localhost:${HTTPS_PORT}`;
+    const reqHost = req.headers.host || req.socket.localAddress || 'localhost';
+    const host = reqHost.replace(`:${PORT}`, '') .replace(/:\d+$/, '') + `:${HTTPS_PORT}`;
     res.writeHead(301, { Location: `https://${host}${req.url}` });
     res.end();
     return;
@@ -1112,22 +1143,36 @@ process.on('SIGTERM', shutdown);
 // Start servers
 httpServer.listen(PORT, () => {
   const printerCount = manager.getPrinterIds().length + (IS_DEMO ? demoMockPrinters.length : 0);
+  const { ips, names } = getLocalAddresses();
+  // Filter out IPv6 for display (too long for banner), keep IPv4 + hostnames
+  const allHosts = [...new Set([...names, ...ips.filter(ip => !ip.includes(':'))])];
   console.log('');
-  console.log('  ╔══════════════════════════════════════════════╗');
-  console.log(`  ║   3DPrintForge v${updater.currentVersion.padEnd(26)}║`);
+  console.log('  ╔══════════════════════════════════════════════════╗');
+  console.log(`  ║   3DPrintForge v${updater.currentVersion.padEnd(30)}║`);
   if (forceHttps) {
-    console.log(`  ║   HTTPS: https://localhost:${HTTPS_PORT}                ║`);
-    console.log(`  ║   HTTP → HTTPS redirect aktiv               ║`);
+    console.log(`  ║   HTTPS (HTTP redirects automatically):         ║`);
+    for (const h of allHosts) {
+      const url = `https://${h}:${HTTPS_PORT}`;
+      console.log(`  ║     ${url.padEnd(43)}║`);
+    }
   } else {
-    console.log(`  ║   HTTP:  http://localhost:${PORT}                  ║`);
+    console.log('  ║   Available on:                                  ║');
+    for (const h of allHosts) {
+      const url = `http://${h}:${PORT}`;
+      console.log(`  ║     ${url.padEnd(43)}║`);
+    }
     if (hasSSL) {
-      console.log(`  ║   HTTPS: https://localhost:${HTTPS_PORT}                ║`);
+      console.log('  ║   HTTPS also available:                          ║');
+      for (const h of allHosts) {
+        const url = `https://${h}:${HTTPS_PORT}`;
+        console.log(`  ║     ${url.padEnd(43)}║`);
+      }
     } else {
-      console.log('  ║   ⚠ No SSL certificates found                ║');
+      console.log('  ║   ⚠ No SSL certificates found                    ║');
     }
   }
-  console.log(`  ║   Printers: ${printerCount}                              ║`);
-  console.log('  ╚══════════════════════════════════════════════╝');
+  console.log(`  ║   Printers: ${String(printerCount).padEnd(36)}║`);
+  console.log('  ╚══════════════════════════════════════════════════╝');
   console.log('');
 
   // Send anonymous telemetry ping (fire-and-forget)

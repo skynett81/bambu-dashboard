@@ -1140,15 +1140,59 @@
         [t('settings.system_uptime'), _fmtUptime(info.uptime_seconds)],
         [t('settings.system_node'), info.node_version],
         [t('settings.system_platform'), info.platform],
+        ['Hostname', info.hostname || '-'],
         [t('settings.system_db_version'), 'v' + info.db_version],
         [t('settings.system_db_size'), _fmtBytes(info.db_size)],
         [t('settings.system_printers'), info.printer_count],
         ['PID', info.pid],
         ['Memory', info.memory_mb + ' MB'],
       ];
+
+      // Build network/ports section
+      let netHtml = '';
+      if (info.ports) {
+        netHtml += '<div style="margin-top:12px"><div style="font-size:0.85rem;font-weight:600;margin-bottom:6px">Ports</div>';
+        netHtml += '<div class="stats-detail-list">';
+        netHtml += `<div class="stats-detail-row"><span class="stats-detail-label">HTTP</span><span class="stats-detail-value">${info.ports.http}</span></div>`;
+        netHtml += `<div class="stats-detail-row"><span class="stats-detail-label">HTTPS</span><span class="stats-detail-value">${info.ports.https}</span></div>`;
+        netHtml += `<div class="stats-detail-row"><span class="stats-detail-label">Camera (base)</span><span class="stats-detail-value">${info.ports.camera_base}</span></div>`;
+        netHtml += '</div></div>';
+      }
+      if (info.network && info.network.length) {
+        netHtml += '<div style="margin-top:12px"><div style="font-size:0.85rem;font-weight:600;margin-bottom:6px">Network Interfaces</div>';
+        netHtml += '<div style="display:flex;flex-direction:column;gap:4px">';
+        for (const iface of info.network) {
+          if (iface.family === 'IPv6' && iface.address.startsWith('fe80')) continue; // skip link-local
+          const proto = location.protocol;
+          const port = proto === 'https:' ? info.ports.https : info.ports.http;
+          const url = `${proto}//${iface.family === 'IPv6' ? '[' + iface.address + ']' : iface.address}:${port}`;
+          netHtml += `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg-secondary);border-radius:6px;gap:8px">
+            <div style="min-width:0;flex:1">
+              <div style="font-size:0.82rem;font-weight:500">${iface.interface}</div>
+              <div style="font-size:0.78rem;color:var(--text-muted)">${iface.address} <span style="opacity:0.6">(${iface.family})</span></div>
+            </div>
+            <a href="${url}" style="font-size:0.72rem;padding:2px 8px;border-radius:8px;background:var(--accent-blue);color:#fff;text-decoration:none;white-space:nowrap" target="_blank">Open</a>
+          </div>`;
+        }
+        // Also show hostname access
+        if (info.hostname) {
+          const proto = location.protocol;
+          const port = proto === 'https:' ? info.ports.https : info.ports.http;
+          const url = `${proto}//${info.hostname}:${port}`;
+          netHtml += `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg-secondary);border-radius:6px;gap:8px">
+            <div style="min-width:0;flex:1">
+              <div style="font-size:0.82rem;font-weight:500">Hostname</div>
+              <div style="font-size:0.78rem;color:var(--text-muted)">${info.hostname}</div>
+            </div>
+            <a href="${url}" style="font-size:0.72rem;padding:2px 8px;border-radius:8px;background:var(--accent-blue);color:#fff;text-decoration:none;white-space:nowrap" target="_blank">Open</a>
+          </div>`;
+        }
+        netHtml += '</div></div>';
+      }
+
       el.innerHTML = '<div class="stats-detail-list">' + rows.map(([k, v]) =>
         `<div class="stats-detail-row"><span class="stats-detail-label">${k}</span><span class="stats-detail-value">${v}</span></div>`
-      ).join('') + '</div>';
+      ).join('') + '</div>' + netHtml;
     } catch { el.innerHTML = `<span class="text-muted">${t('common.error')}</span>`; }
   }
 
