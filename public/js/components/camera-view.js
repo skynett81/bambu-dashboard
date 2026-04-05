@@ -90,10 +90,42 @@
     _streamMode = null;
     streamActive = false;
 
-    const wsUrl = `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.hostname}:${port}`;
+    // On HTTPS: use snapshot polling via main server (avoids separate cert on camera port)
+    // On HTTP: use direct WebSocket to camera port
+    if (location.protocol === 'https:') {
+      const printerId = window.printerState?.getActivePrinterId();
+      if (printerId) {
+        _startSnapshotPolling(container, printerId);
+        return;
+      }
+    }
+
+    const wsUrl = `ws://${location.hostname}:${port}`;
 
     // Single connection — detect mode from first message and keep playing
     startPlayer(container, wsUrl);
+  }
+
+  function _startSnapshotPolling(container, printerId) {
+    const url = `/api/printers/${encodeURIComponent(printerId)}/frame.jpeg`;
+    let img = container.querySelector('img.cam-snapshot');
+    if (!img) {
+      img = document.createElement('img');
+      img.className = 'cam-snapshot';
+      img.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000';
+      container.innerHTML = '';
+      container.appendChild(img);
+    }
+    streamActive = true;
+    _streamMode = 'snapshot';
+    log.info('Snapshot polling via HTTPS proxy');
+
+    const refresh = () => {
+      if (!streamActive) return;
+      img.src = url + '?t=' + Date.now();
+    };
+    refresh();
+    _snapshotInterval = setInterval(refresh, 1000);
   }
 
   function _cleanup() {

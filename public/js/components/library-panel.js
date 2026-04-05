@@ -312,12 +312,14 @@
         <label>${t('library.notes')}</label>
         <textarea id="lib-edit-notes">${_esc(f.notes || '')}</textarea>
       </div>
-      <div class="lib-dialog-actions">
-        <button class="lib-btn-delete" onclick="_libDelete(${f.id})">${t('library.delete')}</button>
-        <a href="/api/library/${f.id}/download" class="lib-btn-cancel" style="text-decoration:none;text-align:center">${t('library.download')}</a>
-        ${f.file_type === '3mf' ? `<button class="lib-3d-btn" onclick="event.stopPropagation();_lib3DPreview(${f.id},'${_esc(f.original_name).replace(/'/g, "\\'")}')">&#x25B6; 3D</button>` : ''}
+      <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
         <button class="lib-btn-save" style="background:var(--accent-cyan)" onclick="_libSendToPrinter(${f.id},'${_esc(f.original_name).replace(/'/g, "\\'")}')">🖨️ Send to Printer</button>
-        <button class="lib-btn-save" style="background:var(--accent-blue)" onclick="_libAddToQueue(${f.id},'${_esc(f.original_name).replace(/'/g, "\\'")}')">📋 Add to Queue</button>
+        <button class="lib-btn-save" style="background:var(--accent-blue)" onclick="_libAddToQueue(${f.id},'${_esc(f.original_name).replace(/'/g, "\\'")}')">📋 Queue</button>
+        <a href="/api/library/${f.id}/download" class="lib-btn-cancel" style="text-decoration:none;text-align:center">📥 Download</a>
+        ${f.file_type === '3mf' ? `<button class="lib-3d-btn" onclick="event.stopPropagation();_lib3DPreview(${f.id},'${_esc(f.original_name).replace(/'/g, "\\'")}')">🧊 3D</button>` : ''}
+      </div>
+      <div class="lib-dialog-actions" style="margin-top:8px">
+        <button class="lib-btn-delete" onclick="_libDelete(${f.id})">${t('library.delete')}</button>
         <div style="flex:1"></div>
         <button class="lib-btn-cancel" onclick="this.closest('.lib-dialog-overlay').remove()">${t('library.close')}</button>
         <button class="lib-btn-save" onclick="_libSave(${f.id})">${t('library.save')}</button>
