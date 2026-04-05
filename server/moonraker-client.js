@@ -715,27 +715,29 @@ export class MoonrakerClient {
 
   async _detectExtendedFirmware() {
     // Check if v4l2-mpp camera streamer is available (extended firmware feature)
+    // v4l2-mpp has a /status endpoint that our Python camera_server does NOT have
     const ports = [8080, 8081];
     for (const port of ports) {
       try {
-        const res = await fetch(`http://${this.ip}:${port}/snapshot`, { signal: AbortSignal.timeout(2000) });
+        const res = await fetch(`http://${this.ip}:${port}/status`, { signal: AbortSignal.timeout(2000) });
         if (res.ok) {
-          const ct = res.headers.get('content-type') || '';
-          if (ct.includes('image')) {
+          const text = await res.text();
+          // v4l2-mpp /status returns JSON with encoder/capture info
+          if (text.includes('encoder') || text.includes('capture') || text.includes('v4l2')) {
             this._extendedFirmware = true;
             this._v4l2MppPort = port;
             this.state._extended_firmware = true;
             this.state._v4l2_mpp_port = port;
-            log.info(`Detected extended firmware (v4l2-mpp camera on port ${port})`);
+            log.info(`Detected extended firmware (v4l2-mpp on port ${port})`);
             return;
           }
         }
       } catch { /* not available */ }
     }
-    // Check for WebRTC endpoint (v4l2-mpp stream-webrtc)
+    // Check for WebRTC endpoint (v4l2-mpp stream-webrtc on port 8081)
     try {
-      const res = await fetch(`http://${this.ip}:8081/`, { signal: AbortSignal.timeout(2000) });
-      if (res.ok) {
+      const res = await fetch(`http://${this.ip}:8081/whep`, { signal: AbortSignal.timeout(2000) });
+      if (res.status === 405 || res.ok) { // WebRTC WHEP endpoint exists
         this._extendedFirmware = true;
         this.state._extended_firmware = true;
         log.info('Detected extended firmware (WebRTC available)');

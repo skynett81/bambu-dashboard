@@ -67,9 +67,10 @@
     if (!container) return;
 
     // Check for extended firmware v4l2-mpp stream (paxx12)
+    // Only use direct stream on HTTP pages (CSP blocks http:// images on HTTPS)
     const printData = window.printerState?.getActivePrinterState?.() || {};
     const pd = printData.print || printData;
-    if (pd._v4l2_mpp_port) {
+    if (pd._v4l2_mpp_port && location.protocol !== 'https:') {
       const streamUrl = `http://${meta.ip || location.hostname}:${pd._v4l2_mpp_port}/?action=stream`;
       if (!container.querySelector('img.cam-v4l2')) {
         _cleanup();
@@ -84,6 +85,11 @@
         console.log('[camera] Using v4l2-mpp MJPEG stream: ' + streamUrl);
       }
       return;
+    }
+    // On HTTPS with v4l2-mpp: use snapshot polling through our HTTPS proxy
+    if (pd._v4l2_mpp_port && location.protocol === 'https:') {
+      const pid = window.printerState?.getActivePrinterId();
+      if (pid) { _cleanup(); _startSnapshotPlayer(container, pid); return; }
     }
 
     // Moonraker printers: ALWAYS use snapshot, never WebSocket
