@@ -88,17 +88,32 @@ The link shows the designer name and original URL on the file card.
 2. Paste your Printables API key
 3. Link files to Printables models in the same way as MakerWorld
 
-## Send to printer
+## Send to Printer
 
-From the file library you can send directly to a printer:
+The **Send to Printer** button is available on every file card and in the detail view. It sends the file directly to a printer and starts the print:
 
-1. Click on the file → **Send to printer**
-2. Select target printer
-3. Select AMS slot (for multicolor prints)
-4. Click **Start print** or **Add to queue**
+1. Click **Send to Printer** on the file card (or open the file and click the button)
+2. Select the target printer from the dropdown
+3. Select AMS/filament slot for multicolour prints
+4. Confirm and the print starts immediately
 
 :::warning Direct send
-Direct send starts the print immediately without confirmation in Bambu Studio. Make sure the printer is ready.
+Send to Printer starts the print immediately without confirmation in your slicer. Make sure the printer is ready (bed clear, filament loaded, nozzle clean).
+:::
+
+## Add to Queue
+
+The **Add to Queue** button lets you schedule a file for later printing without starting it immediately:
+
+1. Click **Add to Queue** on the file card
+2. Select the target printer (or let the queue assign automatically)
+3. Optionally set priority (low, normal, high)
+4. The file is added to the print queue
+
+The queue respects printer availability and filament compatibility. When a printer finishes its current job, the next queued item starts automatically if auto-dispatch is enabled.
+
+:::tip Batch operations
+Select multiple files in the library (hold Shift or Ctrl) and use **Add to Queue** to queue them all at once. The queue handles ordering based on priority and filament compatibility.
 :::
 
 ## 3D Preview

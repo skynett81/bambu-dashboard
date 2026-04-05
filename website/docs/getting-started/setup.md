@@ -19,7 +19,11 @@ Veiviseren er tilgjengelig på `https://din-server:3443/setup`. Den guider deg g
 
 ## Legge til en printer
 
-Du trenger tre ting for å koble til printeren:
+Velg printertype i oppsettveiviseren. 3DPrintForge støtter følgende tilkoblingsmetoder:
+
+### Bambu Lab (MQTT)
+
+Du trenger tre ting for å koble til en Bambu Lab-printer:
 
 | Felt | Beskrivelse | Eksempel |
 |------|-------------|---------|
@@ -27,17 +31,42 @@ Du trenger tre ting for å koble til printeren:
 | Serienummer | 15 tegn, står under printeren | `01P09C123456789` |
 | Access Code | 8 tegn, finnes i printerens nettverksinnstillinger | `12345678` |
 
-### Finn Access Code på printeren
+**Finn Access Code:**
 
-**X1C / P1S / P1P:**
-1. Gå til **Innstillinger** på skjermen
-2. Velg **WLAN** eller **LAN**
-3. Se etter **Access Code**
+- **X1C / P1S / P1P:** Innstillinger → WLAN/LAN → Access Code
+- **A1 / A1 Mini:** Innstillinger → WLAN → Access Code
+- **P2S / H2-serien:** Innstillinger → Nettverk → Access Code
 
-**A1 / A1 Mini:**
-1. Trykk på skjermen og velg **Innstillinger**
-2. Gå til **WLAN**
-3. Se etter **Access Code**
+### PrusaLink (HTTP API)
+
+For Prusa MK4, MK4S, MK3.9, MK3.5, Mini, Mini+ og XL:
+
+| Felt | Beskrivelse | Eksempel |
+|------|-------------|---------|
+| IP-adresse | Printerens lokale IP | `192.168.1.101` |
+| API-nøkkel | Generert i PrusaLink-webgrensesnittet | `AbCdEf123456` |
+
+**Finn API-nøkkel:**
+
+1. Åpne PrusaLink i nettleseren (`http://printer-ip`)
+2. Gå til **Settings → API Key**
+3. Generer eller kopier nøkkelen
+
+### Klipper/Moonraker (WebSocket + REST API)
+
+For Snapmaker, Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig, Sovol og alle andre Klipper-printere:
+
+| Felt | Beskrivelse | Eksempel |
+|------|-------------|---------|
+| IP-adresse | Printerens lokale IP | `192.168.1.102` |
+| Port | Moonraker-port (standard 7125) | `7125` |
+| API-nøkkel | Valgfritt, hvis Moonraker krever autentisering | `abc123...` |
+
+:::info Snapmaker U1
+Snapmaker U1 har ekstra funksjoner som NFC-filament, AI-defektdeteksjon, timelapse, luftrenser og strømmåler. Disse aktiveres automatisk når en U1 detekteres. For eldre Snapmaker-modeller (A350T, A250T) støttes også SACP-protokollen.
+:::
+
+### Generelle tips
 
 :::tip Fast IP-adresse
 Sett en fast IP-adresse på printeren i ruteren din (DHCP-reservasjon). Da slipper du å oppdatere dashboardet hver gang printeren får ny IP.

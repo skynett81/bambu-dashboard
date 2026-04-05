@@ -55,9 +55,23 @@ module.exports = {
     logger.info('My plugin is loaded');
 
     // Register a new API route
-    api.get('/plugins/my-plugin/status', (req, res) => {
+    context.registerRoute('GET', '/plugins/my-plugin/status', (req, res) => {
       res.json({ status: 'active' });
     });
+
+    // Register a frontend panel (appears in the sidebar)
+    context.registerPanel({
+      id: 'my-plugin-panel',
+      title: 'My Plugin',
+      icon: 'fas fa-plug',
+      html: '<div id="my-plugin-container"></div>',
+      js: '/plugins/my-plugin/panel.js'
+    });
+
+    // Schedule a recurring task (runs every 5 minutes)
+    context.setInterval(() => {
+      logger.info('Running periodic check');
+    }, 5 * 60 * 1000);
   },
 
   // Called when a print starts
@@ -70,8 +84,8 @@ module.exports = {
   async onPrintEnd(context, printJob) {
     const { logger, db } = context;
     logger.info(`Print done: ${printJob.name}`);
-    // Save data to the database
-    await db.run(
+    // Save data to the database using db access
+    db.run(
       'INSERT INTO plugin_data (plugin, key, value) VALUES (?, ?, ?)',
       ['my-plugin', 'last-print', printJob.name]
     );
@@ -99,12 +113,58 @@ All hooks receive a `context` object:
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `api` | Express Router | Add custom API routes |
-| `db` | SQLite | Access to the database |
-| `logger` | Logger | Logging |
-| `events` | EventEmitter | Listen to events |
-| `config` | Object | Dashboard configuration |
-| `printers` | Map | All connected printers |
+| `db` | SQLite DatabaseSync | Direct access to the SQLite database (synchronous API) |
+| `logger` | Logger | Structured logging with plugin name prefix |
+| `events` | EventEmitter | Listen to and emit events |
+| `config` | Object | Dashboard configuration (read-only) |
+| `printers` | Map | All connected printers with live status |
+
+## Plugin API methods
+
+The context also provides these methods for extending the dashboard:
+
+| Method | Description |
+|--------|-------------|
+| `registerRoute(method, path, handler)` | Register a custom HTTP endpoint (GET, POST, PUT, DELETE) |
+| `registerPanel(options)` | Add a new panel to the dashboard sidebar with custom HTML and JS |
+| `setInterval(callback, ms)` | Schedule a recurring task (automatically cleared on plugin unload) |
+| `db.run(sql, params)` | Execute a write query on the database |
+| `db.all(sql, params)` | Execute a read query and return all rows |
+| `db.get(sql, params)` | Execute a read query and return the first row |
+
+### registerRoute
+
+```javascript
+context.registerRoute('POST', '/plugins/my-plugin/action', (req, res) => {
+  const body = req.body;
+  // Process the request
+  res.json({ success: true });
+});
+```
+
+Routes are automatically prefixed and protected by the authentication system. API key and session auth both work.
+
+### registerPanel
+
+```javascript
+context.registerPanel({
+  id: 'my-panel',           // Unique panel identifier
+  title: 'My Panel',        // Sidebar label
+  icon: 'fas fa-chart-bar', // FontAwesome icon class
+  html: '<div>...</div>',   // HTML content or path to HTML file
+  js: '/plugins/my-plugin/panel.js'  // Optional JS to load
+});
+```
+
+### setInterval
+
+```javascript
+const interval = context.setInterval(() => {
+  // Periodic work (e.g. poll external API, clean up old data)
+}, 60000);
+```
+
+Intervals registered via `context.setInterval` are automatically cleared when the plugin is unloaded, preventing memory leaks.
 
 ## Installing a plugin
 

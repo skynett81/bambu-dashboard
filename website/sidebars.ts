@@ -60,6 +60,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Verktøy',
       items: [
+        'tools/model-forge',
         'tools/labels',
         'tools/library',
         'tools/profiles',

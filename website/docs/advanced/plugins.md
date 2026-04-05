@@ -14,9 +14,11 @@ Plugin-systemet er under aktiv utvikling. API-et kan endre seg mellom versjoner.
 
 ## Hva kan plugins gjøre?
 
-- Legge til nye API-endepunkter
+- Legge til nye API-endepunkter via `registerRoute()`
+- Registrere egne frontend-paneler via `registerPanel()`
+- Kjøre periodiske oppgaver med `setInterval()`
+- Tilgang til SQLite-databasen via `db`-konteksten
 - Lytte på printer-hendelser og reagere på dem
-- Legge til nye frontend-paneler
 - Integrere med tredjeparts tjenester
 - Utvide varslingskanaler
 
@@ -51,13 +53,47 @@ plugins/
 module.exports = {
   // Kalles når pluginen lastes
   async onLoad(context) {
-    const { api, db, logger, events } = context;
+    const { api, db, logger, events, registerRoute, registerPanel } = context;
     logger.info('Mitt plugin er lastet');
 
-    // Registrer en ny API-rute
-    api.get('/plugins/mitt-plugin/status', (req, res) => {
+    // Registrer en ny API-rute med registerRoute()
+    registerRoute('GET', '/plugins/mitt-plugin/status', (req, res) => {
       res.json({ status: 'aktiv' });
     });
+
+    registerRoute('POST', '/plugins/mitt-plugin/action', (req, res) => {
+      // Håndter POST-forespørsler
+      res.json({ result: 'ok' });
+    });
+
+    // Registrer et frontend-panel
+    registerPanel({
+      id: 'mitt-plugin-panel',
+      title: 'Mitt Plugin',
+      position: 'sidebar',   // 'sidebar', 'dashboard', 'settings'
+      icon: 'fas fa-puzzle-piece',
+      html: '<div id="mitt-plugin-content">Loading...</div>',
+      js: '/plugins/mitt-plugin/public/panel.js'
+    });
+
+    // Kjør periodisk oppgave med setInterval
+    this.intervalId = setInterval(async () => {
+      const printers = context.printers;
+      for (const [id, printer] of printers) {
+        logger.debug(`Printer ${id}: ${printer.status}`);
+      }
+    }, 60000); // Hvert minutt
+
+    // Direkte databasetilgang
+    const rows = db.prepare('SELECT COUNT(*) as count FROM print_history').all();
+    logger.info(`Totalt ${rows[0].count} prints i historikken`);
+  },
+
+  // Kalles når pluginen lastes ut
+  async onUnload(context) {
+    if (this.intervalId) {
+      clearInterval(this.intervalId);
+    }
   },
 
   // Kalles når en print starter
@@ -71,10 +107,9 @@ module.exports = {
     const { logger, db } = context;
     logger.info(`Print ferdig: ${printJob.name}`);
     // Lagre data i databasen
-    await db.run(
-      'INSERT INTO plugin_data (plugin, key, value) VALUES (?, ?, ?)',
-      ['mitt-plugin', 'siste-print', printJob.name]
-    );
+    db.prepare(
+      'INSERT INTO plugin_data (plugin, key, value) VALUES (?, ?, ?)'
+    ).run('mitt-plugin', 'siste-print', printJob.name);
   }
 };
 ```
@@ -99,12 +134,14 @@ Alle hooks mottar et `context`-objekt:
 
 | Egenskap | Type | Beskrivelse |
 |----------|------|-------------|
-| `api` | Express Router | Legg til egne API-ruter |
-| `db` | SQLite | Tilgang til databasen |
-| `logger` | Logger | Logging |
-| `events` | EventEmitter | Lytt på hendelser |
-| `config` | Object | Dashboardets konfigurasjon |
-| `printers` | Map | Alle tilkoblede printere |
+| `registerRoute` | Function | Registrer nye API-ruter: `registerRoute(method, path, handler)` |
+| `registerPanel` | Function | Registrer frontend-paneler: `registerPanel({ id, title, position, html, js })` |
+| `db` | DatabaseSync | Direkte tilgang til SQLite-databasen (Node.js 22 innebygd) |
+| `logger` | Logger | Logging med nivåer (debug, info, warn, error) |
+| `events` | EventEmitter | Lytt på og emit hendelser |
+| `config` | Object | Dashboardets konfigurasjon (les-only) |
+| `printers` | Map | Alle tilkoblede printere med status |
+| `api` | Router | Bakoverkompatibel API-registrering (bruk `registerRoute` i stedet) |
 
 ## Installere en plugin
 

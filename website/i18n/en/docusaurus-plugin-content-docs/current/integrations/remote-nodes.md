@@ -92,3 +92,40 @@ Status for each remote node is shown in **Settings → Remote Nodes**:
 - **Disconnected** — cannot reach the remote node
 - **Authentication error** — API key invalid or expired
 - **Last sync** — timestamp of last successful data synchronization
+
+## Cloudflare Tunnel
+
+As an alternative to remote nodes and port forwarding, 3DPrintForge has built-in support for **Cloudflare Tunnel** to expose your dashboard securely over the internet.
+
+Go to: **Settings > System > Remote Access**
+
+### What is Cloudflare Tunnel?
+
+Cloudflare Tunnel creates an encrypted outbound connection from your server to Cloudflare's network. No inbound ports need to be opened on your firewall or router. Traffic is routed through Cloudflare's global network, providing DDoS protection and TLS termination.
+
+### Setup
+
+1. Go to **Settings > System > Remote Access**
+2. Click **Enable Cloudflare Tunnel**
+3. Enter your Cloudflare Tunnel token (from the [Cloudflare Zero Trust dashboard](https://one.dash.cloudflare.com/))
+4. Configure the public hostname (e.g. `forge.yourdomain.com`)
+5. Click **Save and connect**
+
+The tunnel status indicator shows whether the connection is active.
+
+### Requirements
+
+- A Cloudflare account (free tier works)
+- A domain managed by Cloudflare DNS
+- The `cloudflared` binary (installed automatically if not present)
+
+### Security
+
+- All traffic is encrypted end-to-end
+- Cloudflare Access policies can restrict who can reach the dashboard
+- No ports exposed on your local network
+- Works behind CGNAT and strict firewalls
+
+:::tip Cloudflare Access
+For additional security, configure Cloudflare Access policies to require authentication (email OTP, SSO, or service tokens) before users can reach your dashboard.
+:::

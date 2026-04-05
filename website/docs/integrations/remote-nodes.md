@@ -92,3 +92,47 @@ Status for hver fjernserver vises i **Innstillinger → Fjernservere**:
 - **Frakoblet** — kan ikke nå fjernserveren
 - **Autentiseringsfeil** — API-nøkkel ugyldig eller utløpt
 - **Siste sync** — tidsstempel for siste vellykkede datasynkronisering
+
+## Cloudflare Tunnel (Remote Access)
+
+Som et alternativ til fjernserver-oppsettet kan du bruke Cloudflare Tunnel for å gi sikker fjerntilgang til én enkelt 3DPrintForge-instans — uten å åpne porter i brannmuren eller eksponere IP-adressen din.
+
+Gå til: **Innstillinger → System → Remote Access**
+
+### Fordeler
+
+- **Ingen port-forwarding** — Cloudflare håndterer all trafikk via sin edge
+- **Automatisk HTTPS** — gratis SSL-sertifikat via Cloudflare
+- **DDoS-beskyttelse** — Cloudflares innebygde beskyttelse
+- **Zero Trust** — kan kombineres med Cloudflare Access for ekstra autentisering
+
+### Oppsett
+
+1. Opprett en gratis Cloudflare-konto på [dash.cloudflare.com](https://dash.cloudflare.com)
+2. Legg til et domene i Cloudflare (gratis plan er tilstrekkelig)
+3. I 3DPrintForge: gå til **Innstillinger → System → Remote Access**
+4. Klikk **Konfigurer Cloudflare Tunnel**
+5. Følg instruksjonene for å installere `cloudflared` og autentisere
+6. Velg et underdomene (f.eks. `forge.ditt-domene.no`)
+7. Klikk **Aktiver Tunnel**
+
+### Sikkerhet
+
+:::warning Autentisering
+Selv med Cloudflare Tunnel anbefales det sterkt å ha autentisering aktivert i 3DPrintForge (**Innstillinger → Brukeradministrasjon**). Tunnelen gir sikker transport, men erstatter ikke applikasjonsautentisering.
+:::
+
+For ekstra sikkerhet kan du konfigurere Cloudflare Access:
+
+- **Tillatte e-poster** — begrens tilgang til spesifikke e-postadresser
+- **Engangskode** — krev OTP via e-post for hver pålogging
+- **GitHub/Google SSO** — bruk eksisterende identitetsleverandør
+
+### Feilsøking
+
+| Problem | Løsning |
+|---------|---------|
+| Tunnel kobler ikke til | Sjekk at `cloudflared` kjører: `systemctl status cloudflared` |
+| 502 Bad Gateway | Verifiser at 3DPrintForge kjører på riktig port (standard 3443) |
+| Sertifikatfeil | Tunnelen håndterer SSL — sjekk Cloudflare Dashboard for detaljer |
+| Treg tilkobling | Kamerastrøm via tunnel kan gi latens — vurder lavere oppløsning |

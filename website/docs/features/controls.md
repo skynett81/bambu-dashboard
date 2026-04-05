@@ -1,7 +1,7 @@
 ---
 sidebar_position: 5
 title: Printerkontroll
-description: Styr temperatur, hastighet, vifter og send G-code direkte til printeren
+description: Styr temperatur, hastighet, vifter, kalibrering, kamera og send G-code direkte til Bambu Lab, Snapmaker og Moonraker-printere
 ---
 
 # Printerkontroll
@@ -107,3 +107,87 @@ Under aktiv print kan du:
 - **Gjenoppta** — fortsetter en pauset print
 - **Stopp** — avbryter printen (ikke reversibelt)
 - **Nødstans** — umiddelbar stopp av alle motorer
+
+## Bambu Lab — Kalibrering og system
+
+### Kalibrerings-UI
+
+Kjør kalibreringsprosedyrer direkte fra dashboardet:
+
+- **Auto-kalibrering** — full kalibreringssyklus (vibrasjon, motor noise, bed leveling)
+- **Bed leveling** — automatisk sengkalibrering
+- **Vibrasjonskompensering** — input shaper-kalibrering
+- **Flow-kalibrering** — korriger filamentflyt for bedre overflater
+- **Toleranse-test** — sjekk printerens mekaniske presisjon
+
+### Kamerastyring
+
+- **Oppløsning** — bytt mellom SD/HD
+- **Timelapse** — aktiver/deaktiver automatisk timelapse-opptak
+- **LED-lys** — slå kammerlys av/på og juster lysstyrke
+- **Eksponering** — juster kameraeksponering
+
+### AMS-tørking
+
+- Start og stopp AMS-tørkesyklus direkte fra dashboardet
+- Overvåk fuktighet og temperatur under tørking
+- Konfigurer tørketid og måltemperatur per materiale
+
+### HMS-feilsystem
+
+Bambu Lab Health Management System (HMS) viser:
+
+- Aktive feil og advarsler fra printeren
+- Feilkoder med beskrivelse og løsningsforslag
+- Historikk over tidligere HMS-hendelser
+
+### MQTT-kommandoer
+
+Over 40 MQTT-kommandoer er tilgjengelige for Bambu Lab-printere, inkludert:
+
+- Print-styring (start, pause, gjenoppta, stopp)
+- Temperatur og hastighet
+- Lys og kamera
+- AMS-operasjoner
+- Kalibreringskommandoer
+- Systemkommandoer (nettverksinfo, firmware-versjon)
+
+## Snapmaker — Avanserte kontroller
+
+### NFC-filament
+
+Snapmaker U1 støtter NFC-filamentgjenkjenning:
+
+- Automatisk materialidentifikasjon via NFC-tagg
+- Temperaturprofiler lastes automatisk fra filamentdata
+- Fargeinformasjon synkroniseres til filamentlageret
+
+### Defektdeteksjon AI
+
+- AI-basert overvåking av printkvalitet under printing
+- Automatisk pause ved detekterte defekter (spaghetti, lag-forskyvning, adhesjon)
+- Konfigurerbar sensitivitet og varslingsnivå
+
+### Timelapse
+
+- Automatisk timelapse-opptak av alle prints
+- Konfigurerbar intervall og oppløsning
+- Last ned timelapse-videoer fra dashboardet
+
+### Printkonfigurasjon og kalibrering
+
+- Konfigurerbare printprofiler for Snapmaker U1
+- Kalibrering av alle akser og verktøyhoder
+- Automatisk Z-offset-justering
+
+### Luftrenser
+
+- Overvåk og kontroller den innebygde luftrenseren
+- Se filterstatus og levetid
+- Aktiver/deaktiver renseren manuelt eller automatisk
+
+### Strømmåler
+
+- Sanntids strømforbruk under printing
+- Historikk over energiforbruk per print
+- Integrasjon med kostnadsestimatoren for nøyaktig strømkostnad

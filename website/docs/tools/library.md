@@ -88,17 +88,36 @@ Koblingen viser designer-navn og original URL på filkortet.
 2. Lim inn din Printables API-nøkkel
 3. Koble filer til Printables-modeller på samme måte som MakerWorld
 
-## Sende til printer
+## Send to Printer
 
-Fra filbiblioteket kan du sende direkte til printer:
+Hver fil i biblioteket har en **Send to Printer**-knapp som sender modellen direkte til en tilkoblet printer:
 
-1. Klikk på filen → **Send til printer**
-2. Velg målprinter
-3. Velg AMS-spor (for flerfargeprints)
-4. Klikk **Start print** eller **Legg i kø**
+1. Klikk **Send to Printer** på filkortet (eller i detaljvisningen)
+2. Velg målprinter fra listen over tilkoblede printere
+3. Velg AMS-spor og filamentmapping (for flerfargeprints)
+4. Juster printinnstillinger (profil, hastighet, støtte)
+5. Klikk **Start Print** for umiddelbar start
+
+Støtter alle printertyper: Bambu Lab (via MQTT/FTPS), PrusaLink (via HTTP), Moonraker/Klipper (via WebSocket).
 
 :::warning Direktesending
-Direktesending starter printen umiddelbart uten bekreftelse i Bambu Studio. Pass på at printeren er klar.
+Direktesending starter printen umiddelbart uten bekreftelse i slicerprogramvaren. Pass på at printeren er klar og riktig filament er lastet.
+:::
+
+## Add to Queue
+
+I tillegg til direktesending kan du legge filer i print-køen for senere printing:
+
+1. Klikk **Add to Queue** på filkortet
+2. Velg målprinter (eller la planleggeren tildele automatisk)
+3. Sett prioritet (lav, normal, høy)
+4. Valgfritt: sett ønsket starttidspunkt
+5. Klikk **Legg i kø**
+
+Filer i køen vises i [Planlegger](../features/scheduler)-visningen og kan omorganiseres, redigeres eller fjernes. Køen støtter lastbalansering på tvers av flere printere.
+
+:::tip Rask kø-handling
+Du kan også dra og slippe filer fra biblioteket direkte til print-køen i planleggervisningen.
 :::
 
 ## 3D-forhåndsvisning

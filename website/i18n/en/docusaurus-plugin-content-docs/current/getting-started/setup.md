@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: First-time Setup
-description: Connect your Bambu Lab printer and configure the dashboard
+description: Connect your 3D printer and configure the dashboard
 ---
 
 # First-time Setup
@@ -17,9 +17,27 @@ The wizard is available at `https://your-server:3443/setup`. It guides you throu
 3. Test the connection
 4. Configure notifications (optional)
 
-## Adding a printer
+## Supported printer types
 
-You need three things to connect to your printer:
+3DPrintForge supports multiple connection protocols. The setup wizard detects your printer type automatically.
+
+| Printer brand | Connection | Required info |
+|---------------|-----------|---------------|
+| **Bambu Lab** | MQTT (port 8883) | IP, serial number, access code |
+| **Prusa** (MK4, Mini, XL) | PrusaLink HTTP API | IP, API key |
+| **Snapmaker** (U1, J1, A-series) | Moonraker / SACP | IP address |
+| **Voron** | Moonraker WebSocket | IP address |
+| **Creality** (K1, K1 Max, K2 Plus) | Moonraker WebSocket | IP address |
+| **Elegoo** (Neptune 4 series) | Moonraker WebSocket | IP address |
+| **AnkerMake** (M5, M5C) | Moonraker WebSocket | IP address |
+| **QIDI** (X-Max 3, X-Plus 3, Q1 Pro) | Moonraker WebSocket | IP address |
+| **RatRig** (V-Core, V-Minion) | Moonraker WebSocket | IP address |
+| **Sovol** (SV06, SV07, SV08) | Moonraker WebSocket | IP address |
+| Any Klipper printer | Moonraker WebSocket | IP address |
+
+## Adding a Bambu Lab printer
+
+You need three things to connect to a Bambu Lab printer:
 
 | Field | Description | Example |
 |-------|-------------|---------|
@@ -38,6 +56,27 @@ You need three things to connect to your printer:
 1. Tap the screen and select **Settings**
 2. Go to **WLAN**
 3. Look for **Access Code**
+
+## Adding a Prusa printer (PrusaLink)
+
+1. Ensure PrusaLink is enabled on your printer (Prusa MK4, Mini, XL)
+2. In the setup wizard, select **Prusa (PrusaLink)** as printer type
+3. Enter the printer's IP address
+4. Enter the PrusaLink API key (found in the printer's network settings or the PrusaLink web interface)
+5. Click **Test connection**
+
+## Adding a Moonraker/Klipper printer
+
+For Snapmaker, Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig, Sovol and other Klipper-based printers:
+
+1. Ensure Moonraker is running on the printer (most Klipper printers include it)
+2. In the setup wizard, select the brand or **Klipper/Moonraker** as printer type
+3. Enter the printer's IP address
+4. Click **Test connection**
+
+:::info Snapmaker U1
+The Snapmaker U1 supports both Moonraker and the native SACP protocol. For full feature access (NFC filament, AI defect detection, purifier, power monitor), the SACP connection is established automatically alongside Moonraker.
+:::
 
 :::tip Static IP address
 Set a static IP address for your printer in your router (DHCP reservation). This way you won't need to update the dashboard every time the printer gets a new IP.

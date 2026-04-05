@@ -12,12 +12,14 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 
 ## Hva er 3DPrintForge?
 
-3DPrintForge kobler seg til printerne dine via MQTT (Bambu Lab) eller Moonraker WebSocket (Snapmaker, Voron, Creality K1 og andre Klipper-printere) over LAN. Synkroniser modeller og printhistorikk via Bambu Cloud, Snapmaker Cloud, eller hent data direkte fra printeren.
+3DPrintForge kobler seg til printerne dine via MQTT (Bambu Lab), PrusaLink HTTP API (Prusa MK4/Mini/XL) eller Moonraker WebSocket (Snapmaker, Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig og andre Klipper-printere) over LAN. Snapmaker U1 har dyp integrasjon med NFC-filament, AI-defektdeteksjon og strømmåling. Synkroniser modeller og printhistorikk via Bambu Cloud, Snapmaker Cloud, eller hent data direkte fra printeren.
 
 ### Viktigste funksjoner
 
 - **Live dashboard** — sanntids temperatur, fremgang, kamera, AMS-status med LIVE-indikator
+- **Model Forge** — 8 innebygde 3D-verktoy: Sign Maker, Lithophane, Storage Box, Text Plate, Keychain, Cable Label, Image Relief og Stencil
 - **3D modellvisning** — 3MFConsortium 3mfViewer for 3MF-filer, gcode toolpath-visning med per-lag farger, Three.js-basert rendering
+- **G-code Analyzer** — fullstendig G-code-analyse med 3D toolpath-visning for alle printertyper
 - **AdminLTE 4** — moderne dashboard-rammeverk med treeview-sidebar og responsivt design
 - **CRM-system** — kunder, ordrer, fakturaer, bedriftsinnstillinger og printhistorikk-kobling
 - **Filamentlager** — spor alle spoler med AMS-synk, EXT-spool støtte, materialinfo, plate-kompatibilitet og tørkeguide
@@ -25,7 +27,7 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 - **Materialguide** — 15 materialer med temperaturer, plate-kompatibilitet, tørking, egenskaper og tips
 - **Printhistorikk** — komplett logg med modellnavn, MakerWorld-lenker, filamentforbruk, kostnader og 3D-forhåndsvisning
 - **Planlegger** — kalendervisning, print-kø med lastbalansering og filamentsjekk
-- **Printerkontroll** — temperatur, hastighet, vifter, G-code konsoll
+- **Printerkontroll** — temperatur, hastighet, vifter, G-code konsoll, kalibrering og kamerastyring
 - **Print Guard** — automatisk beskyttelse med xcam + 5 sensormonitorer
 - **Kostnadsestimator** — material, strøm, arbeid, slitasje, markup, filamentbytte-tid og salgsprisforslag
 - **Vedlikehold** — sporing med KB-baserte intervaller, dyselevetid, plate-levetid og guide
@@ -34,11 +36,26 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 - **AMS fuktighet/temperatur** — 5-nivå vurdering med anbefalinger for optimal oppbevaring
 - **Achievements** — 18 verdens landemerker som milepæler for filamentforbruk med XP-progresjon
 - **Varsler** — 7 kanaler (Telegram, Discord, e-post, ntfy, Pushover, SMS, webhook)
-- **Multi-printer, multi-brand** — Bambu Lab (MQTT) + Snapmaker, Voron, Creality og alle Klipper/Moonraker-printere
+- **Multi-printer, multi-brand** — Bambu Lab (MQTT), PrusaLink, Creality, Elegoo, AnkerMake, Voron, RatRig, QIDI, Snapmaker og alle Klipper/Moonraker-printere
+- **Snapmaker dyp integrasjon** — NFC-filament, defektdeteksjon AI, timelapse, kalibrering, luftrenser og strommaler
 - **Printer-capabilities** — per-merke konfigurasjon for filtilgang, kamera og funksjoner
-- **Filbibliotek** — 3MF/STL/gcode-bibliotek med thumbnails, kategorier, tags og 3D-forhåndsvisning
-- **Engelsk UI** — hele applikasjonen på engelsk, dokumentasjon tilgjengelig på norsk og engelsk
-- **Selvdriftet** — ingen sky-avhengighet, dine data på din maskin
+- **Filbibliotek** — 3MF/STL/gcode-bibliotek med thumbnails, kategorier, tags, 3D-forhandsvisning, Send to Printer og Add to Queue
+- **Remote Access** — Cloudflare Tunnel for sikker fjerntilgang uten port-forwarding
+- **PWA** — installerbar webapp med push-varsler
+- **Engelsk UI** — hele applikasjonen pa engelsk, dokumentasjon tilgjengelig pa norsk og engelsk
+- **Selvdriftet** — ingen sky-avhengighet, dine data pa din maskin
+
+### Nytt i v1.1.16
+
+- **Model Forge** — erstatter frittstående Sign Maker med 8 verktøy: Sign Maker, Lithophane, Storage Box, Text Plate, Keychain, Cable Label, Image Relief og Stencil
+- **Multi-brand utvidelse** — PrusaLink (Prusa MK4/Mini/XL), Creality, Elegoo, AnkerMake, Voron, RatRig, QIDI via Moonraker
+- **Snapmaker U1 dyp integrasjon** — NFC-filament, defektdeteksjon AI, timelapse, printkonfigurasjon, kalibrering, luftrenser og strømmåler. SACP-protokoll for eldre modeller
+- **Bambu Lab forbedringer** — 40+ MQTT-kommandoer, kalibrerings-UI, kamerastyring, AMS-tørking og HMS-feilsystem
+- **Moonraker API** — filbehandler, jobbkø, webkamera, oppdateringsbehandler og Spoolman-integrasjon
+- **Remote Access** — Cloudflare Tunnel under Innstillinger → System → Remote Access
+- **Library forbedringer** — Send to Printer og Add to Queue-knapper rett fra filbiblioteket
+- **G-code** — fullstendig Analyzer + 3D toolpath-visning
+- **PWA** — installerbar webapp med push-varsler
 
 ### Nytt i v1.1.15
 
@@ -86,13 +103,20 @@ Du kan prøve dashboardet uten en fysisk printer ved å kjøre `npm run demo`. D
 - **A-serien**: A1, A1 Combo, A1 mini
 - **H2-serien**: H2S, H2D (dobbel dyse), H2C (verktøybytter, 6 hoder)
 
+### PrusaLink (via HTTP API)
+- **Prusa MK4**, MK4S, MK3.9, MK3.5
+- **Prusa Mini**, Mini+
+- **Prusa XL** (multi-verktøy)
+
 ### Klipper/Moonraker-printere (via WebSocket + REST API)
-- **Snapmaker**: U1 (opptil 4 verktøyhoder), J1, A350T, A250T
+- **Snapmaker**: U1 (opptil 4 verktøyhoder, NFC-filament, AI defektdeteksjon), J1, A350T, A250T. SACP-støtte for eldre modeller
 - **Voron**: V0, Trident, V2.4
 - **Creality**: K1, K1 Max, K2 Plus (med Klipper-firmware)
+- **Elegoo**: Alle Klipper-baserte modeller via Moonraker
+- **AnkerMake**: Via Moonraker-integrasjon
 - **Sovol**: SV06, SV07, SV08
 - **QIDI**: X-Max 3, X-Plus 3, Q1 Pro
-- **Ratrig**: V-Core, V-Minion
+- **RatRig**: V-Core, V-Minion
 - **Alle andre** Klipper + Moonraker-baserte printere
 
 ## 3D-modellvisning
@@ -124,7 +148,8 @@ Du kan prøve dashboardet uten en fysisk printer ved å kjøre `npm run demo`. D
 - **Frontend**: AdminLTE 4 + vanilla HTML/CSS/JS + Three.js (vendored) + 3mfViewer (embedded), ingen build-steg
 - **Database**: SQLite (innebygd i Node.js 22)
 - **3D-visning**: Three.js r183 + 3MFConsortium 3mfViewer + lib3mf WASM
+- **PWA**: Installerbar webapp med push-varsler for print-hendelser
 - **Dokumentasjon**: Docusaurus med engelsk og norsk, automatisk bygget ved installasjon
-- **API**: 180+ endepunkter, OpenAPI-dokumentasjon på `/api/docs`
+- **API**: 590+ endepunkter, OpenAPI-dokumentasjon på `/api/docs`
 
 Se [Arkitektur](./advanced/architecture) for detaljer.

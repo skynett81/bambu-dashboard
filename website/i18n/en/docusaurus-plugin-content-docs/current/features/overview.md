@@ -6,7 +6,7 @@ description: Complete overview of all features in 3DPrintForge
 
 # Features Overview
 
-3DPrintForge brings everything you need to monitor and control your Bambu Lab printers together in one place.
+3DPrintForge brings everything you need to monitor and control your 3D printers together in one place — supporting Bambu Lab, Prusa, Snapmaker, and all Klipper/Moonraker-based printers.
 
 ## Dashboard
 
@@ -50,6 +50,20 @@ See [Scheduler](./scheduler) for full documentation.
 - Print queue with prioritization
 - Multi-printer dispatch
 
+## Model Forge
+
+See [Model Forge](../tools/model-forge) for full documentation.
+
+- 8 parametric design tools built into the dashboard
+- **Sign Maker** — custom text signs with fonts, borders and mounting holes
+- **Lithophane** — convert images to 3D-printable lithophanes
+- **Storage Box** — parametric storage boxes with dividers and lids
+- **Text Plate** — engraved or embossed text plates and name tags
+- **Keychain** — custom keychains with text and shapes
+- **Cable Label** — cable management labels with clip-on design
+- **Image Relief** — convert images to raised 3D relief models
+- **Stencil** — generate stencils from images or text for spray painting
+
 ## Printer control
 
 See [Controls](./controls) for full documentation.
@@ -59,6 +73,17 @@ See [Controls](./controls) for full documentation.
 - Fan control
 - G-code console
 - Filament load/unload
+- Bambu Lab: calibration UI, camera controls, AMS drying, HMS error system
+- Snapmaker U1: NFC filament, AI defect detection, timelapse, calibration, purifier, power monitor
+
+## G-code tools
+
+- **G-code Analyzer** — parse G-code files for estimated print time, filament usage, layer count, materials and more
+- **3D Toolpath Viewer** — interactive 3D visualisation of G-code toolpaths with per-layer colouring
+
+## Remote access
+
+Secure remote access via Cloudflare Tunnel, configured under **Settings > System > Remote Access**. Access your dashboard from anywhere without port forwarding or VPN.
 
 ## Notifications
 
@@ -92,7 +117,7 @@ The maintenance section tracks:
 - Wear tracking based on print history
 - Manual registration of maintenance tasks
 
-## Multi-printer
+## Multi-printer, multi-brand
 
 With multi-printer support you can:
 
@@ -100,6 +125,16 @@ With multi-printer support you can:
 - Switch between printers with the printer selector
 - View status overview for all printers simultaneously
 - Distribute print jobs with the print queue
+- Connect Bambu Lab (MQTT), Prusa (PrusaLink), Snapmaker (SACP/Moonraker), and all Klipper/Moonraker printers
+- Supported brands: Bambu Lab, Prusa, Snapmaker, Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig, Sovol and more
+
+## PWA support
+
+3DPrintForge is an installable Progressive Web App:
+
+- Install on desktop or mobile from the browser
+- Push notifications for print events (complete, error, pause)
+- Works offline for cached pages
 
 ## OBS overlay
 

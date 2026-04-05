@@ -12,12 +12,14 @@ description: A powerful, self-hosted dashboard for all your 3D printers
 
 ## What is 3DPrintForge?
 
-3DPrintForge connects to your printers via MQTT (Bambu Lab) or Moonraker WebSocket (Snapmaker, Voron, Creality K1, and other Klipper printers) over LAN. Sync models and print history via Bambu Cloud, Snapmaker Cloud, or fetch data directly from your printer.
+3DPrintForge connects to your printers via MQTT (Bambu Lab), PrusaLink (Prusa), or Moonraker WebSocket (Snapmaker, Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig and other Klipper printers) over LAN. Sync models and print history via Bambu Cloud, Snapmaker Cloud, or fetch data directly from your printer. The built-in **Model Forge** provides 8 parametric design tools so you can create custom models without leaving the dashboard. **Snapmaker U1** is supported with deep integration including NFC filament, AI defect detection, timelapse, calibration, purifier, and power monitoring via SACP.
 
 ### Key features
 
 - **Live dashboard** — real-time temperature, progress, camera, AMS status with LIVE indicator
 - **3D model viewing** — 3MFConsortium 3mfViewer for 3MF files, gcode toolpath viewer with per-layer colours, Three.js-based rendering
+- **Model Forge** — 8 parametric design tools: Sign Maker, Lithophane, Storage Box, Text Plate, Keychain, Cable Label, Image Relief, and Stencil
+- **G-code Analyzer** — full G-code analysis with estimated print time, filament usage, layer stats, and 3D toolpath viewer
 - **AdminLTE 4** — modern dashboard framework with treeview sidebar and responsive design
 - **CRM system** — customers, orders, invoices, company settings with history integration
 - **Filament inventory** — track all spools with AMS sync, EXT spool support, material info, plate compatibility, and drying guide
@@ -25,7 +27,7 @@ description: A powerful, self-hosted dashboard for all your 3D printers
 - **Material guide** — 15 materials with temperatures, plate compatibility, drying, properties, and tips
 - **Print history** — complete log with model names, MakerWorld links, filament consumption, costs, and 3D preview
 - **Planner** — calendar view, print queue with load balancing and filament check
-- **Printer control** — temperature, speed, fans, G-code console
+- **Printer control** — temperature, speed, fans, G-code console, Bambu calibration UI, camera controls, AMS drying
 - **Print Guard** — automatic protection with xcam + 5 sensor monitors
 - **Cost estimator** — material, electricity, labour, wear, markup, filament change time, and suggested sale price
 - **Maintenance** — tracking with KB-based intervals, nozzle lifespan, plate lifespan, and guide
@@ -33,12 +35,26 @@ description: A powerful, self-hosted dashboard for all your 3D printers
 - **Activity log** — persistent timeline from all events (prints, errors, maintenance, filament)
 - **AMS humidity/temperature** — 5-level rating with recommendations for optimal storage
 - **Achievements** — 18 world landmarks as milestones for filament consumption with XP progression
-- **Notifications** — 7 channels (Telegram, Discord, email, ntfy, Pushover, SMS, webhook)
-- **Multi-printer, multi-brand** — Bambu Lab (MQTT) + Snapmaker, Voron, Creality and all Klipper/Moonraker printers
+- **Notifications** — 7 channels (Telegram, Discord, email, ntfy, Pushover, SMS, webhook) + PWA push notifications
+- **Multi-printer, multi-brand** — Bambu Lab (MQTT) + Prusa (PrusaLink) + Snapmaker (SACP) + Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig and all Klipper/Moonraker printers
 - **Printer capabilities** — per-brand configuration for file access, camera, and features
-- **File library** — 3MF/STL/gcode library with thumbnails, categories, tags, and 3D preview
+- **File library** — 3MF/STL/gcode library with thumbnails, categories, tags, 3D preview, Send to Printer and Add to Queue
+- **Remote access** — Cloudflare Tunnel integration for secure access from anywhere
+- **PWA** — installable Progressive Web App with push notifications
 - **English UI** — entire application in English, documentation available in English and Norwegian
 - **Self-hosted** — no cloud dependency, your data on your machine
+
+### New in v1.1.16
+
+- **Model Forge** — 8 parametric design tools replacing standalone Sign Maker: Sign Maker, Lithophane, Storage Box, Text Plate, Keychain, Cable Label, Image Relief, and Stencil
+- **Multi-brand expansion** — PrusaLink (Prusa MK4, Mini, XL), Creality, Elegoo, AnkerMake, Voron, RatRig, QIDI via Moonraker
+- **Snapmaker U1 deep integration** — NFC filament recognition, AI defect detection, timelapse recording, print config, calibration, purifier control, power monitor, SACP for older models
+- **Bambu Lab enhancements** — 40+ MQTT commands, calibration UI, camera controls, AMS drying, HMS error system
+- **Moonraker API** — file manager, job queue, webcam integration, update manager, Spoolman support
+- **Remote access** — Cloudflare Tunnel built into Settings > System > Remote Access
+- **Library** — Send to Printer and Add to Queue buttons on file cards
+- **G-code** — Analyzer with detailed stats and 3D toolpath viewer
+- **PWA** — installable Progressive Web App with push notifications
 
 ### New in v1.1.15
 
@@ -86,13 +102,20 @@ You can try the dashboard without a physical printer by running `npm run demo`. 
 - **A series**: A1, A1 Combo, A1 mini
 - **H2 series**: H2S, H2D (dual nozzle), H2C (tool changer, 6 heads)
 
+### Prusa (via PrusaLink HTTP API)
+- **MK4** / **MK4S**
+- **Mini** / **Mini+**
+- **XL** (multi-tool)
+
 ### Klipper/Moonraker printers (via WebSocket + REST API)
-- **Snapmaker**: U1 (up to 4 toolheads), J1, A350T, A250T
+- **Snapmaker**: U1 (up to 4 toolheads, deep integration with SACP), J1, A350T, A250T
 - **Voron**: V0, Trident, V2.4
 - **Creality**: K1, K1 Max, K2 Plus (with Klipper firmware)
+- **Elegoo**: Neptune 4, Neptune 4 Pro, Neptune 4 Max (with Klipper firmware)
+- **AnkerMake**: M5, M5C (with Klipper/Moonraker)
 - **Sovol**: SV06, SV07, SV08
 - **QIDI**: X-Max 3, X-Plus 3, Q1 Pro
-- **Ratrig**: V-Core, V-Minion
+- **RatRig**: V-Core, V-Minion
 - **Any other** Klipper + Moonraker-based printer
 
 ## 3D model viewing
@@ -121,10 +144,10 @@ You can try the dashboard without a physical printer by running `npm run demo`. 
 3DPrintForge is built with Node.js 22 and vanilla HTML/CSS/JS — no heavy frameworks, no build step. The database is SQLite, built into Node.js 22.
 
 - **Backend**: Node.js 22 with 6 npm packages (mqtt, ws, basic-ftp, admin-lte, ssh2, @3mfconsortium/lib3mf)
-- **Frontend**: AdminLTE 4 + vanilla HTML/CSS/JS + Three.js (vendored) + 3mfViewer (embedded), no build step
+- **Frontend**: AdminLTE 4 + vanilla HTML/CSS/JS + Three.js (vendored) + 3mfViewer (embedded), no build step, PWA support
 - **Database**: SQLite (built into Node.js 22)
-- **3D viewing**: Three.js r183 + 3MFConsortium 3mfViewer + lib3mf WASM
+- **3D viewing**: Three.js r183 + 3MFConsortium 3mfViewer + lib3mf WASM + G-code 3D toolpath viewer
 - **Documentation**: Docusaurus with English and Norwegian, automatically built at installation
-- **API**: 180+ endpoints, OpenAPI documentation at `/api/docs`
+- **API**: 590+ endpoints, OpenAPI documentation at `/api/docs`
 
 See [Architecture](./advanced/architecture) for details.

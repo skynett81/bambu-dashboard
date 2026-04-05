@@ -103,3 +103,88 @@ During an active print you can:
 - **Resume** — continues a paused print
 - **Stop** — cancels the print (not reversible)
 - **Emergency stop** — immediate stop of all motors
+
+## Bambu Lab controls
+
+Bambu Lab printers expose additional control cards via 40+ MQTT commands:
+
+### Calibration UI
+
+Run calibration routines directly from the dashboard:
+- **Auto-level** — full bed mesh calibration
+- **Vibration compensation** — input shaping calibration
+- **Flow calibration** — extrusion multiplier tuning
+- **Motor noise cancellation** — stepper motor tuning
+
+### Camera controls
+
+- **Toggle camera light** — turn the chamber LED on/off
+- **Recording** — start/stop timelapse recording
+- **Resolution** — switch between available resolutions
+
+### AMS drying
+
+- Start and stop AMS drying cycles per slot
+- Set target temperature and duration
+- Monitor drying progress in real time
+
+### HMS error system
+
+- **HMS (Health Management System)** — real-time error codes from the printer
+- Severity levels with descriptions and suggested fixes
+- Error history log for diagnostics
+
+### System cards
+
+- **LED control** — chamber light brightness
+- **Nozzle type** — report installed nozzle to the printer
+- **Print speed** — override speed factor during print
+- **Firmware info** — view current firmware version
+
+## Snapmaker U1 controls
+
+The Snapmaker U1 has deep integration with the following control panels:
+
+### NFC filament
+
+- Automatic filament recognition via NFC reader
+- Material type, colour and temperature settings read from the spool tag
+- Linked to filament inventory for tracking
+
+### AI defect detection
+
+- Real-time defect monitoring during printing
+- Automatic pause on detected failures (spaghetti, layer shift, adhesion)
+- Sensitivity level configuration
+- Event log with captured images
+
+### Timelapse
+
+- Built-in timelapse recording
+- Configurable interval and resolution
+- Download timelapse videos from the dashboard
+
+### Print configuration
+
+- Per-print settings for speed, temperature and support
+- Profile management for different materials
+- Save and recall configuration presets
+
+### Calibration
+
+- Bed levelling (manual and auto)
+- Z-offset calibration
+- Extrusion calibration
+- First-layer calibration assist
+
+### Purifier control
+
+- Start/stop the built-in air purifier
+- Fan speed control
+- Filter life monitoring with replacement alerts
+
+### Power monitor
+
+- Real-time power consumption in watts
+- Per-print energy usage tracking
+- Cost calculation integration
