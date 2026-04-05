@@ -534,7 +534,7 @@
     let reviewHtml = '';
     if (ev._fromHistory && ev._historyId) {
       const rs = ev.review_status;
-      const reviewBadge = rs === 'approved' ? '<span style="color:var(--accent-green);font-weight:600">&#10003; Godkjent</span>'
+      const reviewBadge = rs === 'approved' ? '<span style="color:var(--accent-green);font-weight:600">&#10003; Approved</span>'
         : rs === 'rejected' ? '<span style="color:var(--accent-red);font-weight:600">&#10007; Rejected</span>'
         : rs === 'partial' ? '<span style="color:var(--accent-orange);font-weight:600">&#9680; Partial</span>'
         : '<span style="color:var(--text-muted)">Not reviewed</span>';
@@ -553,13 +553,13 @@
         reviewHtml = `<div class="sched-field" id="sched-review-${ev._historyId}" style="border-top:1px solid var(--border-color);padding-top:12px;margin-top:8px">
           <label>Kvalitetsvurdering</label>
           <div style="display:flex;gap:6px;margin-bottom:8px">
-            <button class="form-btn form-btn-sm" style="background:var(--accent-green);color:#fff" onclick="_schedSubmitReview(${ev._historyId},'approved',this)">&#10003; Godkjenn</button>
-            <button class="form-btn form-btn-sm" style="background:var(--accent-red);color:#fff" onclick="_schedShowRejectForm(${ev._historyId},${ev.filament_used_g || 0})">&#10007; Avvis</button>
-            <button class="form-btn form-btn-sm" style="background:var(--accent-orange);color:#fff" onclick="_schedShowRejectForm(${ev._historyId},0)">&#9680; Delvis</button>
+            <button class="form-btn form-btn-sm" style="background:var(--accent-green);color:#fff" onclick="_schedSubmitReview(${ev._historyId},'approved',this)">&#10003; Approve</button>
+            <button class="form-btn form-btn-sm" style="background:var(--accent-red);color:#fff" onclick="_schedShowRejectForm(${ev._historyId},${ev.filament_used_g || 0})">&#10007; Reject</button>
+            <button class="form-btn form-btn-sm" style="background:var(--accent-orange);color:#fff" onclick="_schedShowRejectForm(${ev._historyId},0)">&#9680; Partial</button>
           </div>
           <div id="sched-reject-form-${ev._historyId}" style="display:none">
-            <div class="sched-field"><label>Waste (gram)</label><input type="number" id="sched-waste-${ev._historyId}" min="0" step="0.1" placeholder="0"></div>
-            <div class="sched-field"><label>Notater</label><textarea id="sched-notes-${ev._historyId}" rows="2" placeholder="Valgfritt..."></textarea></div>
+            <div class="sched-field"><label>Waste (grams)</label><input type="number" id="sched-waste-${ev._historyId}" min="0" step="0.1" placeholder="0"></div>
+            <div class="sched-field"><label>Notes</label><textarea id="sched-notes-${ev._historyId}" rows="2" placeholder="Optional..."></textarea></div>
             <button class="form-btn form-btn-sm" style="background:var(--accent-red);color:#fff" onclick="_schedSubmitReview(${ev._historyId},'rejected',this)">Save rejection</button>
           </div>
         </div>`;
@@ -739,7 +739,7 @@
       // Close dialog and reload
       document.querySelector('.sched-dialog-overlay')?.remove();
       _loadEvents();
-      const labels = { approved: 'Godkjent', rejected: 'Avvist', partial: 'Delvis godkjent' };
+      const labels = { approved: 'Approved', rejected: 'Rejected', partial: 'Partially approved' };
       if (typeof showToast === 'function') showToast(labels[status] || status, 'success');
     } catch (e) {
       if (typeof showToast === 'function') showToast('Error saving', 'error');

@@ -53,15 +53,15 @@
     return Math.round(costNOK);
   }
   function reviewBadge(status) {
-    if (status === 'approved') return '<span class="ph-review-badge ph-review-approved" title="Approved">title="Approved">title="Godkjent">&#10003;#10003; Godkjent#10003; Approved</span>';
-    if (status === 'rejected') return '<span class="ph-review-badge ph-review-rejected" title="Rejected">title="Rejected">title="Avvist">&#10007;#10007; Avvist#10007; Rejected</span>';
-    if (status === 'partial') return '<span class="ph-review-badge ph-review-partial" title="Partially approved">title="Delvis godkjent">&#9680; Delvis#9680; Partial</span>';
+    if (status === 'approved') return '<span class="ph-review-badge ph-review-approved" title="Approved">&#10003; Approved</span>';
+    if (status === 'rejected') return '<span class="ph-review-badge ph-review-rejected" title="Rejected">&#10007; Rejected</span>';
+    if (status === 'partial') return '<span class="ph-review-badge ph-review-partial" title="Partial">&#9680; Partial</span>';
     return '<span class="ph-review-badge ph-review-none" title="Not reviewed">Not reviewed</span>';
   }
   function reviewBadgeCompact(status) {
-    if (status === 'approved') return '<span class="ph-review-dot ph-review-approved" title="Approved">title="Godkjent">&#10003;#10003;</span>';
-    if (status === 'rejected') return '<span class="ph-review-dot ph-review-rejected" title="Rejected">title="Avvist">&#10007;#10007;</span>';
-    if (status === 'partial') return '<span class="ph-review-dot ph-review-partial" title="Delvis godkjent">&#9680;</span>';
+    if (status === 'approved') return '<span class="ph-review-dot ph-review-approved" title="Approved">&#10003;</span>';
+    if (status === 'rejected') return '<span class="ph-review-dot ph-review-rejected" title="Rejected">&#10007;</span>';
+    if (status === 'partial') return '<span class="ph-review-dot ph-review-partial" title="Partial">&#9680;</span>';
     return '';
   }
 
@@ -370,7 +370,7 @@
             </div>
             <div class="ph-list-name" data-label="Fil" title="${esc(displayName)}">${esc(displayName)}</div>
             <div class="ph-list-date" data-label="Dato">${dateFull}</div>
-            <div class="ph-list-duration" data-label="Varighet">${duration}</div>
+            <div class="ph-list-duration" data-label="Duration">${duration}</div>
             <div class="ph-list-filament" data-label="Filament">${filWeight}</div>
             <div class="ph-list-cost" data-label="Kostnad">${row.filament_used_g ? `<span class="cost-badge">~${estimatePrintCostBadge(row.filament_used_g, row.filament_type)} kr</span>` : '--'}</div>
             <div class="ph-list-printer" data-label="Printer">${esc(pName)}</div>
@@ -1255,32 +1255,32 @@
         <div class="ph-review-info-row"><span class="ph-review-info-label">Printer:</span><span class="ph-review-info-value">${esc(pName)}</span></div>
         <div class="ph-review-info-row"><span class="ph-review-info-label">Status:</span><span class="ph-review-info-value" style="color:${statusColor(row.status)}">${statusLabel(row.status)}</span></div>
         <div class="ph-review-info-row"><span class="ph-review-info-label">Filament:</span><span class="ph-review-info-value">${filWeight}</span></div>
-        <div class="ph-review-info-row"><span class="ph-review-info-label">Varighet:</span><span class="ph-review-info-value">${duration}</span></div>
-        ${currentStatus ? `<div class="ph-review-info-row"><span class="ph-review-info-label">Gjeldende:</span><span class="ph-review-info-value">${reviewBadge(currentStatus)}</span></div>` : ''}
+        <div class="ph-review-info-row"><span class="ph-review-info-label">Duration:</span><span class="ph-review-info-value">${duration}</span></div>
+        ${currentStatus ? `<div class="ph-review-info-row"><span class="ph-review-info-label">Current:</span><span class="ph-review-info-value">${reviewBadge(currentStatus)}</span></div>` : ''}
       </div>
       <div class="ph-review-actions">
         <button class="ph-review-action-btn ph-review-action-approve${currentStatus === 'approved' ? ' active' : ''}" data-status="approved" onclick="window._selectReviewStatus(this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Godkjenn
+          Approve
         </button>
         <button class="ph-review-action-btn ph-review-action-reject${currentStatus === 'rejected' ? ' active' : ''}" data-status="rejected" onclick="window._selectReviewStatus(this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-          Avvis
+          Reject
         </button>
         <button class="ph-review-action-btn ph-review-action-partial${currentStatus === 'partial' ? ' active' : ''}" data-status="partial" onclick="window._selectReviewStatus(this)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20z"/></svg>
-          Delvis
+          Partial
         </button>
       </div>
       <div class="ph-review-waste-section" id="ph-review-waste-section" style="display:${currentStatus === 'rejected' || currentStatus === 'partial' ? '' : 'none'}">
-        <label class="ph-review-field-label">Svinn (gram)</label>
+        <label class="ph-review-field-label">Waste (grams)</label>
         <input type="number" class="form-control ph-review-waste-input" id="ph-review-waste" min="0" step="0.1"
           value="${row.review_waste_g ?? (currentStatus === 'rejected' ? (row.filament_used_g || 0) : '')}"
-          placeholder="${row.filament_used_g ? 'Maks: ' + Math.round(row.filament_used_g) + 'g' : '0'}">
+          placeholder="${row.filament_used_g ? 'Max: ' + Math.round(row.filament_used_g) + 'g' : '0'}">
       </div>
       <div class="ph-review-notes-section">
-        <label class="ph-review-field-label">Notater</label>
-        <textarea class="form-control ph-review-notes-input" id="ph-review-notes" rows="2" placeholder="Valgfritt...">${row.review_notes || ''}</textarea>
+        <label class="ph-review-field-label">Notes</label>
+        <textarea class="form-control ph-review-notes-input" id="ph-review-notes" rows="2" placeholder="Optional...">${row.review_notes || ''}</textarea>
       </div>
       <div class="ph-review-submit-row">
         <button class="form-btn form-btn-primary ph-review-save-btn" id="ph-review-save-btn" onclick="window._submitReview(${row.id})">Save review</button>

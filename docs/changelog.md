@@ -4,6 +4,56 @@ All notable changes to 3DPrintForge.
 
 ---
 
+## v1.1.17 — Knowledge Base, EULA, Camera Fixes, Community Integrations (2026-04-05)
+
+### Knowledge Base Expansion
+- 32 printers across 8 brands (Bambu Lab, Snapmaker, Prusa, Creality, Elegoo, Voron, AnkerMake, QIDI)
+- 60 accessories (nozzles, build plates, enclosures, tools, upgrades)
+- 93 filaments (12 brands: Polymaker, Prusament, eSUN, Hatchbox, Sunlu, Overture, Creality, Snapmaker)
+- 81 print profiles for 5 printer models
+- Brand-based printer filters (replaces Bambu A/P/X/H2 series)
+- 54 learning courses (12 new for multi-brand, Model Forge, calibration)
+
+### EULA
+- Full End User License Agreement (EULA.md)
+- Modal shown on first launch with checkbox acceptance
+- View EULA button in Settings > System > Data
+- AGPL-3.0 for personal use, commercial license from GeekTech.no
+
+### Camera Improvements
+- Per-printer-type camera: WSS for Bambu, snapshot polling for Moonraker
+- U1 uses printer_detection.jpg (fresh) instead of .monitor.jpg (stale)
+- Extended firmware auto-detection (paxx12 v4l2-mpp camera)
+- Native MJPEG stream when extended firmware is installed
+
+### Community Integrations (paxx12, community repos)
+- NFC Filament Tag generator (Model Forge tool #9) — OpenSpool format
+- 3MF Converter (Model Forge tool #10) — Bambu Lab → Snapmaker U1
+- Klipper Macro Manager — browse and run macros from dashboard
+- Quick Actions floating button (8 common operations)
+- RFID Mifare Classic format (SnapmakerResearchGroup)
+- Extended firmware detection + v4l2-mpp camera support
+
+### Model Info Panel
+- Multi-brand support: shows printer details for Bambu, Snapmaker, Klipper, PrusaLink
+- Capability badges for Bambu printers
+- NFC filament cards for Snapmaker U1
+- Klipper position/extruder/chamber info
+
+### UI Polish
+- All Norwegian fallback strings translated to English
+- Fixed corrupted HTML in review badges (history-table)
+- Filament analytics: Norwegian → English (waste, brand, color changes)
+
+### Bug Fixes
+- Camera WSS mixed content on HTTPS
+- EULA modal null check and global scope
+- Knowledge Base filter by brand instead of Bambu series
+- Camera-view log is not defined
+- Printer isolation on switch
+
+---
+
 ## v1.1.16 — Model Forge, Snapmaker Deep Integration, Multi-Brand Support (2026-04-05)
 
 ### Model Forge — 3D Model Generation Suite

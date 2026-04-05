@@ -185,13 +185,13 @@
     const totUsed = items.reduce((a, r) => a + (r.total_used_g || 0), 0);
 
     let html = '<div class="fa-heroes">';
-    html += hero('red', 'Totalt svinn', fmtW(totWaste), fmtPct(totWaste * 100 / (totUsed + totWaste || 1)) + ' av total');
-    html += hero('amber', 'Fargebytter', fmtNum(items.reduce((a, r) => a + (r.total_color_changes || 0), 0)), 'totalt');
+    html += hero('red', 'Total Waste', fmtW(totWaste), fmtPct(totWaste * 100 / (totUsed + totWaste || 1)) + ' of total');
+    html += hero('amber', 'Color Changes', fmtNum(items.reduce((a, r) => a + (r.total_color_changes || 0), 0)), 'total');
     html += '</div>';
 
-    html += '<div class="fa-section"><div class="fa-section-title">Svinnanalyse per materiale <span class="fa-section-badge">Siste 30 days</span></div>';
+    html += '<div class="fa-section"><div class="fa-section-title">Waste Analysis by Material <span class="fa-section-badge">Last 30 days</span></div>';
     html += '<div class="fa-table-wrap"><table class="fa-table"><thead><tr>';
-    html += '<th>Material</th><th>Merke</th><th>Status</th><th class="num">Prints</th><th class="num">Svinn</th><th class="num">Forbrukt</th><th class="num">Svinn-andel</th><th class="num">Fargebytter</th><th class="num">Snitt svinn/print</th>';
+    html += '<th>Material</th><th>Brand</th><th>Status</th><th class="num">Prints</th><th class="num">Waste</th><th class="num">Used</th><th class="num">Waste Ratio</th><th class="num">Color Changes</th><th class="num">Avg Waste/Print</th>';
     html += '</tr></thead><tbody>';
     for (const r of items) {
       html += `<tr>
@@ -303,7 +303,7 @@
           <div class="fa-row"><span>Per dag</span><span>${fmtW(r.avg_daily_g)}</span></div>
           <div class="fa-row"><span>Per uke</span><span>${fmtW(r.avg_weekly_g)}</span></div>
           <div class="fa-row"><span>Per month</span><span>${fmtW(r.avg_monthly_g)}</span></div>
-          <div class="fa-row"><span>Svinn-andel</span><span>${fmtPct((r.waste_ratio || 0) * 100)}</span></div>
+          <div class="fa-row"><span>Waste Ratio</span><span>${fmtPct((r.waste_ratio || 0) * 100)}</span></div>
           <div class="fa-row"><span>Kostnad per gram</span><span>${fmtKrG(r.avg_cost_per_g)}</span></div>
           <div class="fa-row"><span>Datapunkter</span><span>${fmtNum(r.sample_days)} days</span></div>
         </div>

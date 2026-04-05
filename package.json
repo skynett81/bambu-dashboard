@@ -1,6 +1,6 @@
 {
   "name": "3dprintforge",
-  "version": "1.1.16",
+  "version": "1.1.17",
   "type": "module",
   "description": "Self-hosted dashboard for all your 3D printers",
   "author": "SkyNett81",
