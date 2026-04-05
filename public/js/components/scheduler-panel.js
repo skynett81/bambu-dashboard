@@ -432,7 +432,7 @@
             ${ev.duration_seconds ? '<span>' + _fmtDuration(ev.duration_seconds) + '</span>' : ''}
             ${colorSwatch}
             ${filamentInfo}
-            ${ev.review_status === 'approved' ? '<span style="color:var(--accent-green)" title="Godkjent">&#10003;</span>' : ev.review_status === 'rejected' ? '<span style="color:var(--accent-red)" title="Avvist">&#10007;</span>' : ev.review_status === 'partial' ? '<span style="color:var(--accent-orange)" title="Delvis">&#9680;</span>' : (ev._fromHistory && !ev._fromLive ? '<span style="color:var(--text-muted);opacity:0.5" title="Ikke vurdert">?</span>' : '')}
+            ${ev.review_status === 'approved' ? '<span style="color:var(--accent-green)" title="Approved">&#10003;</span>' : ev.review_status === 'rejected' ? '<span style="color:var(--accent-red)" title="Rejected">&#10007;</span>' : ev.review_status === 'partial' ? '<span style="color:var(--accent-orange)" title="Partial">&#9680;</span>' : (ev._fromHistory && !ev._fromLive ? '<span style="color:var(--text-muted);opacity:0.5" title="Not reviewed">?</span>' : '')}
           </div>
         </div>
       </div>`;
@@ -535,9 +535,9 @@
     if (ev._fromHistory && ev._historyId) {
       const rs = ev.review_status;
       const reviewBadge = rs === 'approved' ? '<span style="color:var(--accent-green);font-weight:600">&#10003; Godkjent</span>'
-        : rs === 'rejected' ? '<span style="color:var(--accent-red);font-weight:600">&#10007; Avvist</span>'
-        : rs === 'partial' ? '<span style="color:var(--accent-orange);font-weight:600">&#9680; Delvis</span>'
-        : '<span style="color:var(--text-muted)">Ikke vurdert</span>';
+        : rs === 'rejected' ? '<span style="color:var(--accent-red);font-weight:600">&#10007; Rejected</span>'
+        : rs === 'partial' ? '<span style="color:var(--accent-orange);font-weight:600">&#9680; Partial</span>'
+        : '<span style="color:var(--text-muted)">Not reviewed</span>';
 
       if (rs) {
         // Already reviewed — show status

@@ -1106,7 +1106,7 @@
   window.formatStorage = function(printerId) {
     const meta = window.printerState?.getActivePrinterMeta?.() || {};
     const isUsb = ['P2S', 'P2S Combo', 'H2D'].includes(meta.model);
-    const label = isUsb ? 'USB' : t('controls.sd_card_short', 'SD-kort');
+    const label = isUsb ? 'USB' : t('controls.sd_card_short', 'SD Card');
     return confirmAction(
       t('controls.format_confirm', { storage: label }) || `Are you sure you want to format ${label}? All files will be permanently deleted.`,
       async () => {

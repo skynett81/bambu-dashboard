@@ -133,7 +133,7 @@
   function _renderSpoolLabels() {
     const grid = document.getElementById('lbl-grid');
     if (!grid) return;
-    if (!_spools.length) { grid.innerHTML = _emptyState('circle', _tl('labels.no_spools', 'Ingen spoler funnet')); return; }
+    if (!_spools.length) { grid.innerHTML = _emptyState('circle', _tl('labels.no_spools', 'No spools found')); return; }
 
     let html = '';
     for (const sp of _spools) {
@@ -224,7 +224,7 @@
     if (!grid) return;
     const state = window.printerState;
     const ids = state?.getPrinterIds() || [];
-    if (!ids.length) { grid.innerHTML = _emptyState('printer', _tl('labels.no_printers', 'Ingen printere funnet')); return; }
+    if (!ids.length) { grid.innerHTML = _emptyState('printer', _tl('labels.no_printers', 'No printers found')); return; }
 
     let html = '';
     for (const id of ids) {

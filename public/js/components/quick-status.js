@@ -116,8 +116,8 @@
     const sdInserted = data.sdcard;
     const useUsb = _isUsb();
     const sdStr = sdInserted
-      ? (useUsb ? t('quick_status.usb_inserted', 'Tilkoblet') : t('quick_status.sd_inserted'))
-      : (useUsb ? t('quick_status.usb_none', 'Ikke tilkoblet') : t('quick_status.sd_none'));
+      ? (useUsb ? t('quick_status.usb_inserted', 'Connected') : t('quick_status.sd_inserted'))
+      : (useUsb ? t('quick_status.usb_none', 'Not connected') : t('quick_status.sd_none'));
     const sdColor = sdInserted ? 'var(--accent-green)' : 'var(--text-muted)';
 
     // Light

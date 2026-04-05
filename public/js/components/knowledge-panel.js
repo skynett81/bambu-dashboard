@@ -493,9 +493,9 @@
         const ratingLabels = {
           excellent: 'Excellent',
           good: 'Bra',
-          fair: 'Greit',
+          fair: 'Fair',
           poor: 'Poor',
-          not_recommended: 'Ikke anbefalt'
+          not_recommended: 'Not Recommended'
         };
         const ratingIcons = {
           excellent: '★★★',
