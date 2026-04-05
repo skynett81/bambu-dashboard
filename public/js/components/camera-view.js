@@ -99,17 +99,9 @@
     _streamMode = null;
     streamActive = false;
 
-    // On HTTPS: use snapshot polling via main server (avoids separate cert on camera port)
-    // On HTTP: use direct WebSocket to camera port
-    if (location.protocol === 'https:') {
-      const printerId = window.printerState?.getActivePrinterId();
-      if (printerId) {
-        _startSnapshotPolling(container, printerId);
-        return;
-      }
-    }
-
-    const wsUrl = `ws://${location.hostname}:${port}`;
+    // Bambu printers: use WebSocket (wss:// on HTTPS, ws:// on HTTP)
+    const wsProto = location.protocol === 'https:' ? 'wss' : 'ws';
+    const wsUrl = `${wsProto}://${location.hostname}:${port}`;
 
     // Single connection — detect mode from first message and keep playing
     startPlayer(container, wsUrl);
