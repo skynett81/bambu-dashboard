@@ -11,7 +11,7 @@
 
   const ACC_FILTERS = ['all','ams','nozzle','build_plate','enclosure','tool','upgrade'];
   const FIL_FILTERS = ['all','standard','engineering','composite','flexible','support','specialty'];
-  const PRINTER_FILTERS = ['all','A','P','X','H2'];
+  const PRINTER_FILTERS = ['all','Bambu Lab','Snapmaker','Prusa','Creality','Elegoo','Voron','AnkerMake','QIDI'];
   const SORT_OPTIONS = {
     printers:    ['name_asc','name_desc','price_asc','price_desc','speed_desc','speed_asc','year_desc','year_asc'],
     accessories: ['name_asc','name_desc','price_asc','price_desc','category'],
@@ -142,7 +142,7 @@
       html += '<div class="kb-filters">';
       for (const f of PRINTER_FILTERS) {
         const active = f === _filter ? ' kb-filter-active' : '';
-        const label = f === 'all' ? t('kb.filter_all') : f + '-' + t('kb.series');
+        const label = f === 'all' ? t('kb.filter_all') : f;
         html += `<button class="kb-filter-chip${active}" onclick="kbFilter('${f}')" data-ripple>${label}</button>`;
       }
       html += '</div>';
@@ -194,12 +194,8 @@
     // Sub-filter
     if (_section === 'printers' && _filter !== 'all') {
       items = items.filter(i => {
-        const model = (i.model || '').toUpperCase();
-        if (_filter === 'A') return model.startsWith('A');
-        if (_filter === 'P') return model.startsWith('P');
-        if (_filter === 'X') return model.startsWith('X');
-        if (_filter === 'H2') return model.startsWith('H2');
-        return true;
+        const name = (i.full_name || i.model || '').toLowerCase();
+        return name.startsWith(_filter.toLowerCase());
       });
     } else if (_section === 'accessories' && _filter !== 'all') {
       items = items.filter(i => i.category === _filter);
