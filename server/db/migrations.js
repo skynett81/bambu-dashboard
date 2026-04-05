@@ -163,6 +163,105 @@ export function runMigrations() {
       )`);
     }},
 
+    // Multi-brand Knowledge Base data (Snapmaker, Prusa, Creality, Elegoo, Voron, AnkerMake, QIDI)
+    { version: 117, up: (db) => {
+      const ip = db.prepare('INSERT OR IGNORE INTO kb_printers (model, full_name, release_year, build_volume, max_speed, nozzle_type, has_ams, has_enclosure, has_lidar, has_camera, has_aux_fan, heated_bed_max, nozzle_temp_max, supported_filaments, connectivity, weight_kg, price_usd, pros, cons, tips, specs_json, wiki_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
+      const printers = [
+        // Snapmaker
+        ['Snapmaker U1','Snapmaker U1',2025,'271x335x275',500,'standard',0,1,0,1,1,110,300,
+          '["PLA","PETG","ABS","ASA","TPU","PA","PA-CF","PVA","PETG-CF","PLA-CF"]',
+          '["wifi","lan"]',28,1299,
+          '["4-extruder toolchanger — print with 4 colors/materials simultaneously","NFC filament detection on every spool — auto-identifies material and temps","AI defect detection via built-in camera (spaghetti, bed cleanliness, nozzle check)","Integrated air purifier with HEPA filter","Auto filament loading/unloading system","Klipper firmware with Moonraker API for full control","Massive build volume: 271×335×275mm"]',
+          '["Heavy and large footprint (28 kg)","Proprietary toolhead system","Higher price than single-extruder alternatives","New ecosystem — fewer community resources than established brands"]',
+          'The Snapmaker U1 is a 4-extruder toolchanger running Klipper. 3DPrintForge provides deep integration with all 13 custom Klipper modules.','{}',''],
+
+        ['Snapmaker A350','Snapmaker 2.0 A350T',2020,'320x350x330',100,'standard',0,1,0,0,0,80,275,
+          '["PLA","PETG","ABS","TPU"]','["wifi","usb"]',14,1199,
+          '["3-in-1: 3D printing + laser engraving + CNC carving","Large build volume","Linear rails on all axes","Modular design"]',
+          '["Slow compared to modern printers","No auto bed leveling sensor","Older SACP protocol"]',
+          'Connect via SACP protocol in 3DPrintForge for basic monitoring.','{}',''],
+
+        ['Snapmaker J1','Snapmaker J1',2023,'324x200x200',350,'standard',0,1,0,1,1,100,300,
+          '["PLA","PETG","ABS","ASA","TPU","PA","PVA"]','["wifi","lan"]',11,799,
+          '["IDEX dual extruder — mirror/duplicate/multi-material modes","Fast CoreXY kinematics","Enclosed chamber","Good value for IDEX"]',
+          '["Smaller build volume than A350","No AMS-style auto filament system"]',
+          'The J1 supports IDEX modes including mirror and duplicate printing for doubled output.','{}',''],
+
+        // Prusa
+        ['Prusa MK4','Prusa MK4S',2024,'250x210x220',200,'E3D-style',0,0,0,1,0,120,300,
+          '["PLA","PETG","ABS","ASA","TPU","PA","PC","PP"]','["wifi","lan","usb"]',7,799,
+          '["PrusaLink API for remote monitoring and control","Proven reliability — Prusa quality standards","Input shaper for reduced ringing","Nextruder with load cell for perfect first layers","Open source firmware"]',
+          '["No enclosure included (sold separately)","Slower than CoreXY alternatives","Single extruder only"]',
+          'Connect via PrusaLink in 3DPrintForge. Enable LAN access in printer settings.','{}','https://help.prusa3d.com'],
+
+        ['Prusa Mini','Prusa Mini+',2020,'180x180x180',150,'E3D-style',0,0,0,0,0,100,280,
+          '["PLA","PETG","ABS","ASA","TPU"]','["wifi","lan","usb"]',4.5,429,
+          '["Compact footprint — fits on a small desk","PrusaLink remote access","Excellent documentation and community","Affordable entry to Prusa ecosystem"]',
+          '["Small build volume","No camera built in","No enclosure"]',
+          'Great starter printer. Connect via PrusaLink for remote monitoring.','{}','https://help.prusa3d.com'],
+
+        ['Prusa XL','Prusa XL',2024,'360x360x360',200,'E3D-style',0,1,0,1,1,120,300,
+          '["PLA","PETG","ABS","ASA","TPU","PA","PC","PP","PVA"]','["wifi","lan","usb"]',23,1999,
+          '["Up to 5 toolheads for multi-material printing","Huge build volume: 360×360×360mm","Segmented heatbed — only heats what you need","CoreXY kinematics","PrusaLink remote access"]',
+          '["Expensive","Large and heavy","Long lead times"]',
+          'The XL supports up to 5 toolheads. Connect via PrusaLink in 3DPrintForge.','{}','https://help.prusa3d.com'],
+
+        // Creality
+        ['Creality K1','Creality K1',2023,'220x220x250',600,'proprietary',0,1,0,1,1,100,300,
+          '["PLA","PETG","ABS","ASA","TPU","PA"]','["wifi","lan"]',12.2,399,
+          '["Extremely fast — 600mm/s max speed","Enclosed chamber","Built-in camera with AI monitoring","Runs Klipper firmware","Affordable for a CoreXY"]',
+          '["Proprietary extruder design","Limited nozzle options","Build quality varies"]',
+          'Runs Klipper — connect via Moonraker in 3DPrintForge. Select type: Creality.','{}',''],
+
+        ['Creality K1 Max','Creality K1 Max',2023,'300x300x300',600,'proprietary',0,1,1,1,1,100,300,
+          '["PLA","PETG","ABS","ASA","TPU","PA","PA-CF"]','["wifi","lan"]',18,599,
+          '["Large build volume: 300×300×300mm","AI Lidar for first layer scanning","600mm/s speed","Enclosed with active carbon filter"]',
+          '["Loud at full speed","Proprietary hotend","Heavier than K1"]',
+          'Connect via Moonraker. Enable Creality Cloud bypass for LAN-only access.','{}',''],
+
+        ['Creality Ender-3 V3','Creality Ender-3 V3',2024,'220x220x250',500,'standard',0,0,0,0,1,100,300,
+          '["PLA","PETG","ABS","ASA","TPU"]','["wifi","lan","usb"]',7.8,219,
+          '["Budget-friendly with Klipper pre-installed","CoreXZ kinematics","Auto bed leveling","Direct drive extruder"]',
+          '["No enclosure","No camera","Basic display"]',
+          'Install Moonraker for remote access via 3DPrintForge.','{}',''],
+
+        // Elegoo
+        ['Elegoo Neptune 4 Pro','Elegoo Neptune 4 Pro',2023,'225x225x265',500,'standard',0,0,0,0,1,110,300,
+          '["PLA","PETG","ABS","ASA","TPU"]','["wifi","lan"]',8.7,259,
+          '["Klipper pre-installed","Fast printing — 500mm/s","Auto bed leveling with 121-point mesh","Excellent value for money"]',
+          '["No enclosure","No camera","Small community compared to Creality"]',
+          'Connect via Moonraker in 3DPrintForge. Select type: Elegoo.','{}',''],
+
+        ['Elegoo Neptune 4 Max','Elegoo Neptune 4 Max',2024,'420x420x480',500,'standard',0,0,0,0,1,110,300,
+          '["PLA","PETG","ABS","ASA","TPU"]','["wifi","lan"]',17,399,
+          '["Massive build volume: 420×420×480mm","Klipper firmware","Auto bed leveling","Affordable for the size"]',
+          '["Very large footprint","No enclosure","Bed takes time to heat"]',
+          'The largest affordable FDM printer. Connect via Moonraker.','{}',''],
+
+        // Voron
+        ['Voron 2.4','Voron 2.4 R2',2022,'350x350x350',500,'E3D V6',0,1,0,0,1,120,300,
+          '["PLA","PETG","ABS","ASA","TPU","PA","PC","PA-CF"]','["wifi","lan"]',12,800,
+          '["DIY CoreXY — fully customizable","Enclosed chamber for high-temp materials","Klipper firmware with full tuning","Active community with extensive mods","No vendor lock-in"]',
+          '["Self-sourced kit — requires assembly","Steep learning curve","No official support"]',
+          'Built with Klipper. Connect via Moonraker in 3DPrintForge. Select type: Voron.','{}','https://docs.vorondesign.com'],
+
+        // AnkerMake
+        ['AnkerMake M5','AnkerMake M5',2023,'235x235x250',500,'proprietary',0,0,0,1,0,100,260,
+          '["PLA","PETG","TPU"]','["wifi"]',9.8,399,
+          '["Built-in camera with AI monitoring","Fast printing","Easy setup","AnkerMake app"]',
+          '["Limited material range","Proprietary ecosystem","No enclosure"]',
+          'Flash Klipper firmware for Moonraker access. Some models support it natively.','{}',''],
+
+        // QIDI
+        ['QIDI X-Plus 3','QIDI Tech X-Plus 3',2023,'280x280x270',600,'standard',0,1,0,1,1,120,350,
+          '["PLA","PETG","ABS","ASA","TPU","PA","PA-CF","PC"]','["wifi","lan"]',16,499,
+          '["Enclosed chamber with active heating","CoreXY with 600mm/s speed","Klipper firmware","Dual Z motors","Built-in camera"]',
+          '["Smaller community than Creality","Proprietary screen UI","Limited third-party parts"]',
+          'Runs Klipper — connect via Moonraker in 3DPrintForge. Select type: QIDI.','{}',''],
+      ];
+      for (const p of printers) ip.run(...p);
+    }},
+
     // Community filament reviews + per-printer settings
     { version: 116, up: (db) => {
       db.exec(`CREATE TABLE IF NOT EXISTS community_filament_reviews (
