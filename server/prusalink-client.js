@@ -104,6 +104,33 @@ export class PrusaLinkClient {
       this.state._position = { x: status.printer.axis_x || 0, y: status.printer.axis_y || 0, z: status.printer.axis_z || 0 };
     }
 
+    // Nozzle diameter
+    if (status.printer?.nozzle_diameter !== undefined) this.state.nozzle_diameter = status.printer.nozzle_diameter;
+
+    // MMU/tool info
+    if (status.printer?.mmu_enabled !== undefined) {
+      this.state._mmu_enabled = status.printer.mmu_enabled;
+      this.state._mmu_version = status.printer.mmu_version || null;
+    }
+    if (status.printer?.slot !== undefined) {
+      this.state._active_slot = status.printer.slot;
+    }
+
+    // Storage
+    if (status.storage) {
+      this.state._storage = {
+        free: status.storage.free,
+        total: status.storage.total,
+        path: status.storage.path,
+      };
+    }
+
+    // Camera
+    if (status.camera) {
+      this.state._camera_available = true;
+      this.state._camera_id = status.camera.id;
+    }
+
     // Job info
     if (job) {
       if (job.progress !== undefined) this.state.mc_percent = Math.round(job.progress);
@@ -111,6 +138,11 @@ export class PrusaLinkClient {
       if (job.time_printing !== undefined) this.state.print_duration_seconds = Math.round(job.time_printing);
       if (job.file?.display_name) this.state.subtask_name = job.file.display_name;
       if (job.file?.m_timestamp) this.state._file_timestamp = job.file.m_timestamp;
+      if (job.file?.meta) {
+        this.state._slicer = job.file.meta.slicer || null;
+        this.state._layer_height = job.file.meta.layer_height || null;
+        this.state._slicer_filament_type = job.file.meta.filament_type || null;
+      }
     }
   }
 
@@ -132,6 +164,26 @@ export class PrusaLinkClient {
         break;
       case 'print_file':
         this._apiPost('/api/v1/job', { command: 'START', path: commandObj.filename });
+        break;
+      case 'speed':
+        this._apiPut('/api/v1/job', { command: 'SET_SPEED', value: commandObj.value || 100 });
+        break;
+      case 'set_nozzle_temp':
+      case 'set_temp_nozzle':
+        this._apiPut('/api/v1/status', { temp_nozzle: commandObj.target || 0 });
+        break;
+      case 'set_bed_temp':
+      case 'set_temp_bed':
+        this._apiPut('/api/v1/status', { temp_bed: commandObj.target || 0 });
+        break;
+      case 'gcode':
+        this._apiPost('/api/v1/job', { command: 'GCODE', gcode: commandObj.gcode });
+        break;
+      case 'mmu_load':
+        this._apiPost('/api/v1/job', { command: 'MMU_LOAD', slot: commandObj.slot || 0 });
+        break;
+      case 'mmu_unload':
+        this._apiPost('/api/v1/job', { command: 'MMU_UNLOAD' });
         break;
       default:
         log.warn(`Unknown PrusaLink command: ${action}`);
@@ -166,6 +218,33 @@ export class PrusaLinkClient {
 
   getSnapshotUrl() {
     return `${this._baseUrl}/api/v1/cameras/snap`;
+  }
+
+  /** Get last camera frame as buffer (for /frame.jpeg endpoint) */
+  async getCameraFrame() {
+    try {
+      const res = await this._fetchWithAuth('GET', '/api/v1/cameras/snap');
+      if (res.ok) return Buffer.from(await res.arrayBuffer());
+    } catch {}
+    return null;
+  }
+
+  // ── File listing ──
+
+  async listFiles() {
+    const data = await this._apiGet('/api/v1/files/local');
+    if (!data?.children) return [];
+    return data.children.filter(f => f.type === 'FILE').map(f => ({
+      path: f.display_name || f.name,
+      size: f.size || 0,
+      modified: f.m_timestamp || 0,
+    }));
+  }
+
+  // ── Printer info ──
+
+  async getPrinterInfo() {
+    return this._apiGet('/api/v1/info');
   }
 
   // ── HTTP with Digest Auth ──

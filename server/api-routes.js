@@ -1555,7 +1555,10 @@ export async function handleApiRequest(req, res) {
       const entry = _printerManager?.printers?.get(pid);
       // Support both Bambu camera and Moonraker camera
       let frame = entry?.camera?.getLastFrame() || entry?.moonCamera?.getSnapshot();
-      // Fallback: try live fetch from Moonraker webcam endpoint
+      // Fallback: try live fetch from Moonraker/PrusaLink webcam
+      if (!frame && entry?.client?.getCameraFrame) {
+        try { frame = await entry.client.getCameraFrame(); } catch { /* ignore */ }
+      }
       if (!frame && entry?.client?.getSnapshotUrl) {
         try {
           const snapUrl = entry.client.getSnapshotUrl();
@@ -4935,6 +4938,21 @@ export async function handleApiRequest(req, res) {
         _printerManager.handleCommand({ printer_id: pid, action: 'gcode', gcode: safe });
         return sendJson(res, { ok: true, ran: safe });
       });
+    }
+
+    // ── Brand Profiles (Prusa, Creality, Voron) ──
+    if (method === 'GET' && path.startsWith('/api/profiles/')) {
+      const brand = decodeURIComponent(path.split('/').pop());
+      const brandMap = { prusa: 'prusa-profiles.json', creality: 'creality-profiles.json', voron: 'voron-profiles.json' };
+      const file = brandMap[brand.toLowerCase()];
+      if (file) {
+        try {
+          const { readFileSync } = await import('node:fs');
+          const { join, dirname } = await import('node:path');
+          const { fileURLToPath } = await import('node:url');
+          return sendJson(res, JSON.parse(readFileSync(join(dirname(fileURLToPath(import.meta.url)), 'data', file), 'utf8')));
+        } catch (e) { return sendJson(res, { error: e.message }, 500); }
+      }
     }
 
     // ── EULA ──

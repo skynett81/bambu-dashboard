@@ -1,0 +1,20 @@
+{
+  "machines": {
+    "Prusa MK4": { "build_volume": [250, 210, 220], "nozzle": 0.4, "max_nozzle_temp": 300, "max_bed_temp": 120, "mmu_compatible": true, "input_shaper": true, "loadcell": true },
+    "Prusa MK3.9": { "build_volume": [250, 210, 210], "nozzle": 0.4, "max_nozzle_temp": 300, "max_bed_temp": 120, "mmu_compatible": true },
+    "Prusa Mini": { "build_volume": [180, 180, 180], "nozzle": 0.4, "max_nozzle_temp": 280, "max_bed_temp": 100, "mmu_compatible": false },
+    "Prusa XL": { "build_volume": [360, 360, 360], "nozzle": 0.4, "max_nozzle_temp": 300, "max_bed_temp": 120, "toolchanger": true, "max_tools": 5 }
+  },
+  "filaments": [
+    { "name": "Prusament PLA", "type": "PLA", "nozzle": 215, "bed": 60, "speed": 200, "density": 1.24 },
+    { "name": "Prusament PETG", "type": "PETG", "nozzle": 240, "bed": 85, "speed": 150, "density": 1.27 },
+    { "name": "Prusament ASA", "type": "ASA", "nozzle": 260, "bed": 105, "speed": 150, "density": 1.07 },
+    { "name": "Prusament PA11-CF", "type": "PA-CF", "nozzle": 275, "bed": 90, "speed": 100, "density": 1.12 },
+    { "name": "Prusament PC Blend", "type": "PC", "nozzle": 275, "bed": 110, "speed": 100, "density": 1.19 },
+    { "name": "Generic PLA", "type": "PLA", "nozzle": 210, "bed": 60, "speed": 200, "density": 1.24 },
+    { "name": "Generic PETG", "type": "PETG", "nozzle": 235, "bed": 80, "speed": 150, "density": 1.27 },
+    { "name": "Generic ABS", "type": "ABS", "nozzle": 255, "bed": 100, "speed": 150, "density": 1.04 },
+    { "name": "Generic TPU", "type": "TPU", "nozzle": 230, "bed": 50, "speed": 30, "density": 1.21 },
+    { "name": "Generic PVA", "type": "PVA", "nozzle": 195, "bed": 60, "speed": 100, "density": 1.23 }
+  ]
+}

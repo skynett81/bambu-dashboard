@@ -1,0 +1,19 @@
+{
+  "machines": {
+    "Creality K1": { "build_volume": [220, 220, 250], "max_speed": 600, "max_nozzle_temp": 300, "max_bed_temp": 100, "ai_camera": true, "enclosure": true, "input_shaper": true },
+    "Creality K1 Max": { "build_volume": [300, 300, 300], "max_speed": 600, "max_nozzle_temp": 300, "max_bed_temp": 100, "ai_camera": true, "lidar": true, "enclosure": true, "input_shaper": true },
+    "Creality Ender-3 V3": { "build_volume": [220, 220, 250], "max_speed": 500, "max_nozzle_temp": 300, "max_bed_temp": 100, "input_shaper": true },
+    "Creality K2 Plus": { "build_volume": [350, 350, 350], "max_speed": 600, "max_nozzle_temp": 300, "max_bed_temp": 120, "ai_camera": true, "enclosure": true }
+  },
+  "klipper_features": {
+    "K1": ["input_shaper", "pressure_advance", "ai_camera_detect", "self_check", "leveling_calibrate"],
+    "K1 Max": ["input_shaper", "pressure_advance", "ai_camera_detect", "lidar_scan", "self_check", "leveling_calibrate"]
+  },
+  "filaments": [
+    { "name": "Creality Hyper PLA", "type": "PLA", "nozzle": 220, "bed": 60, "speed": 300, "density": 1.24 },
+    { "name": "Creality Hyper PETG", "type": "PETG", "nozzle": 245, "bed": 80, "speed": 200, "density": 1.27 },
+    { "name": "Creality Hyper ABS", "type": "ABS", "nozzle": 260, "bed": 100, "speed": 200, "density": 1.04 },
+    { "name": "Creality Hyper TPU", "type": "TPU", "nozzle": 230, "bed": 50, "speed": 80, "density": 1.21 },
+    { "name": "Creality Ender PLA", "type": "PLA", "nozzle": 210, "bed": 60, "speed": 150, "density": 1.24 }
+  ]
+}

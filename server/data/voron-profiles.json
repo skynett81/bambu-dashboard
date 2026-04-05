@@ -1,0 +1,20 @@
+{
+  "machines": {
+    "Voron 0.2": { "build_volume": [120, 120, 120], "max_speed": 300, "max_nozzle_temp": 300, "max_bed_temp": 120, "enclosure": true },
+    "Voron 2.4": { "build_volume": [350, 350, 350], "max_speed": 500, "max_nozzle_temp": 300, "max_bed_temp": 120, "enclosure": true, "quad_gantry_level": true },
+    "Voron Trident": { "build_volume": [350, 350, 250], "max_speed": 500, "max_nozzle_temp": 300, "max_bed_temp": 120, "enclosure": true, "z_tilt": true },
+    "Voron Switchwire": { "build_volume": [250, 210, 210], "max_speed": 300, "max_nozzle_temp": 300, "max_bed_temp": 120 }
+  },
+  "klipper_features": {
+    "common": ["input_shaper", "pressure_advance", "bed_mesh", "quad_gantry_level", "z_tilt_adjust", "exclude_object"],
+    "stealthburner": ["neopixel_leds", "status_macros", "logo_led", "nozzle_led"],
+    "tap": ["probe_tap", "z_calibrate"],
+    "klicky": ["klicky_probe", "dock_undock"]
+  },
+  "filaments": [
+    { "name": "ABS (Voron recommended)", "type": "ABS", "nozzle": 250, "bed": 110, "speed": 300, "chamber": 50 },
+    { "name": "ASA (Voron recommended)", "type": "ASA", "nozzle": 260, "bed": 110, "speed": 300, "chamber": 50 },
+    { "name": "Generic PLA", "type": "PLA", "nozzle": 210, "bed": 60, "speed": 300 },
+    { "name": "Generic PETG", "type": "PETG", "nozzle": 240, "bed": 80, "speed": 200 }
+  ]
+}

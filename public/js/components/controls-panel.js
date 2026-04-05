@@ -488,6 +488,63 @@
       </div>`;
     }
 
+    // ===== CARD: Brand-specific tools =====
+    // Prusa: MMU controls
+    if (meta?.type === 'prusalink' || caps.prusaFeatures) {
+      html += `<div class="ctrl-card">
+        <div class="ctrl-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+          Prusa Controls
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendCommand('gcode',{gcode:'G28'})">Home</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendCommand('gcode',{gcode:'G29'})">Mesh Bed</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendCommand('mmu_load',{slot:0})">MMU Load T0</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendCommand('mmu_load',{slot:1})">MMU Load T1</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendCommand('mmu_load',{slot:2})">MMU Load T2</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendCommand('mmu_unload')">MMU Unload</button>
+        </div>
+      </div>`;
+    }
+
+    // Creality K1: AI camera + self-check
+    if (caps.crealityAI) {
+      html += `<div class="ctrl-card">
+        <div class="ctrl-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+          Creality AI
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('SELF_CHECK')">Self Check</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('LEVELING_CALIBRATE')">Auto Level</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('INPUT_SHAPER_CALIBRATE')">Input Shaper</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('PID_CALIBRATE HEATER=extruder TARGET=220')">PID Nozzle</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('PID_CALIBRATE HEATER=heater_bed TARGET=60')">PID Bed</button>
+        </div>
+        ${caps.crealityLidar ? '<div style="font-size:0.68rem;color:var(--text-muted);margin-top:4px">Lidar first-layer scanning available</div>' : ''}
+      </div>`;
+    }
+
+    // Voron: QGL, Z-tilt, Stealthburner LEDs
+    if (caps.voronFeatures) {
+      html += `<div class="ctrl-card">
+        <div class="ctrl-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+          Voron Tools
+        </div>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('QUAD_GANTRY_LEVEL')">QGL</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('Z_TILT_ADJUST')">Z-Tilt</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('BED_MESH_CALIBRATE')">Bed Mesh</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('SHAPER_CALIBRATE')">Input Shaper</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('CLEAN_NOZZLE')">Clean Nozzle</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('STATUS_READY')">LEDs On</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem" onclick="sendGcode('STATUS_OFF')">LEDs Off</button>
+          <button class="form-btn form-btn-sm" data-ripple style="font-size:0.72rem;color:var(--accent-red)" onclick="sendGcode('M112')">E-Stop</button>
+        </div>
+      </div>`;
+    }
+
     // ===== CARD: Klipper Macros (Moonraker printers) =====
     if (meta?.type === 'moonraker' || meta?.type === 'klipper' || meta?.type === 'creality' || meta?.type === 'elegoo' || meta?.type === 'voron') {
       html += `<div class="ctrl-card">
