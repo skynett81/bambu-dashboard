@@ -2,7 +2,7 @@
 
 **Version 1.0 — Effective Date: April 5, 2026**
 
-This End User License Agreement ("EULA") is a legal agreement between you ("User") and GeekTech AS ("Licensor"), the developer of 3DPrintForge ("Software"). By installing, accessing, or using the Software, you agree to be bound by the terms of this EULA.
+This End User License Agreement ("EULA") is a legal agreement between you ("User") and GeekTech.no ("Licensor"), the developer of 3DPrintForge ("Software"). By installing, accessing, or using the Software, you agree to be bound by the terms of this EULA.
 
 ---
 
@@ -12,10 +12,10 @@ This End User License Agreement ("EULA") is a legal agreement between you ("User
 The Software is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)** for personal, non-commercial use. You may install, use, modify, and distribute the Software in accordance with the AGPL-3.0 license terms.
 
 ### 1.2 Commercial Use
-Commercial use of the Software — including but not limited to operating a print farm for profit, selling prints managed by the Software, or integrating the Software into a commercial product — requires a valid commercial license from GeekTech AS. Commercial licenses are available at [geektech.no](https://geektech.no).
+Commercial use of the Software — including but not limited to operating a print farm for profit, selling prints managed by the Software, or integrating the Software into a commercial product — requires a valid commercial license from GeekTech.no. Commercial licenses are available at [geektech.no](https://geektech.no).
 
 ### 1.3 License Verification
-The Software periodically verifies its license status with GeekTech AS servers (`geektech.no/api`). This verification is required for commercial features including e-commerce integration, CRM, and multi-user access. The Software will continue to function for personal use without an active commercial license.
+The Software periodically verifies its license status with GeekTech.no servers (`geektech.no/api`). This verification is required for commercial features including e-commerce integration, CRM, and multi-user access. The Software will continue to function for personal use without an active commercial license.
 
 ---
 
@@ -51,7 +51,7 @@ The Software collects anonymous telemetry data on startup, including:
 - Number of connected printers (count only, no identifying information)
 - Feature usage statistics (aggregated, non-identifiable)
 
-Telemetry is sent to GeekTech AS servers and is used solely to improve the Software. No printer data, filenames, camera images, or personal information is transmitted.
+Telemetry is sent to GeekTech.no servers and is used solely to improve the Software. No printer data, filenames, camera images, or personal information is transmitted.
 
 ### 4.2 License Verification
 Commercial license verification communicates with `geektech.no/api` and transmits:
@@ -61,13 +61,13 @@ Commercial license verification communicates with `geektech.no/api` and transmit
 - Machine identifier (anonymized hardware fingerprint)
 
 ### 4.3 Cloud Connections
-When you connect to printer cloud services (Bambu Cloud, Snapmaker Cloud), the Software communicates directly with those services using your credentials. GeekTech AS does not receive or store your cloud credentials.
+When you connect to printer cloud services (Bambu Cloud, Snapmaker Cloud), the Software communicates directly with those services using your credentials. GeekTech.no does not receive or store your cloud credentials.
 
 ### 4.4 Local Data
 All printer data, print history, filament inventory, camera images, and configuration files are stored locally on your machine. The Software does not upload this data to any external server.
 
 ### 4.5 Cloudflare Tunnel
-If you enable Cloudflare Tunnel for remote access, your dashboard traffic is routed through Cloudflare's network. GeekTech AS does not control or monitor this traffic.
+If you enable Cloudflare Tunnel for remote access, your dashboard traffic is routed through Cloudflare's network. GeekTech.no does not control or monitor this traffic.
 
 ---
 
@@ -130,7 +130,7 @@ This EULA is effective until terminated. Your rights under this EULA will termin
 
 ## 10. Updates
 
-GeekTech AS may release updates, patches, or new versions of the Software. Updates may modify features, add or remove functionality, and change system requirements. By using the auto-update feature, you consent to receiving these updates.
+GeekTech.no may release updates, patches, or new versions of the Software. Updates may modify features, add or remove functionality, and change system requirements. By using the auto-update feature, you consent to receiving these updates.
 
 ---
 
@@ -142,7 +142,7 @@ This EULA shall be governed by and construed in accordance with the laws of Norw
 
 ## 12. Contact
 
-GeekTech AS
+GeekTech.no
 Website: [geektech.no](https://geektech.no)
 Email: support@geektech.no
 GitHub: [github.com/skynett81/3dprintforge](https://github.com/skynett81/3dprintforge)
@@ -157,5 +157,5 @@ By installing, accessing, or using 3DPrintForge, you acknowledge that you have r
 
 ---
 
-*© 2024-2026 GeekTech AS. All rights reserved.*
-*3DPrintForge is a trademark of GeekTech AS.*
+*© 2024-2026 GeekTech.no. All rights reserved.*
+*3DPrintForge is a trademark of GeekTech.no.*
