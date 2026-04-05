@@ -66,6 +66,26 @@
     const container = document.getElementById('camera-container');
     if (!container) return;
 
+    // Check for extended firmware v4l2-mpp stream (paxx12)
+    const printData = window.printerState?.getActivePrinterState?.() || {};
+    const pd = printData.print || printData;
+    if (pd._v4l2_mpp_port) {
+      const streamUrl = `http://${meta.ip || location.hostname}:${pd._v4l2_mpp_port}/?action=stream`;
+      if (!container.querySelector('img.cam-v4l2')) {
+        _cleanup();
+        const img = document.createElement('img');
+        img.className = 'camera-canvas cam-v4l2';
+        img.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000';
+        img.src = streamUrl;
+        container.innerHTML = '';
+        container.appendChild(img);
+        streamActive = true;
+        _streamMode = 'mjpeg-native';
+        console.log('[camera] Using v4l2-mpp MJPEG stream: ' + streamUrl);
+      }
+      return;
+    }
+
     // Moonraker printers: ALWAYS use snapshot, never WebSocket
     if (meta.type === 'moonraker') {
       if (_snapshotInterval) return; // already running

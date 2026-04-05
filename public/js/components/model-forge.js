@@ -12,6 +12,7 @@
     { id: 'relief', name: 'Image Relief', icon: '🗿', desc: 'Convert images to raised 3D surfaces or stamps', loader: 'loadForgeRelief' },
     { id: 'stencil', name: 'Stencil', icon: '✂️', desc: 'Create cut-out stencils from images', loader: 'loadForgeStencil' },
     { id: 'nfc-tag', name: 'NFC Filament Tag', icon: '🏷️', desc: 'Write filament info to NFC tags (OpenSpool format)', loader: 'loadForgeNfcTag' },
+    { id: '3mf-converter', name: '3MF Converter', icon: '🔄', desc: 'Convert Bambu Lab .3mf to Snapmaker U1 format', loader: 'loadForge3mfConverter' },
   ];
 
   window.loadModelForgePanel = function(subTool) {

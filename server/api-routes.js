@@ -5453,6 +5453,39 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ── Model Forge: 3MF Converter (Bambu → Snapmaker U1) ──
+    if (method === 'POST' && path === '/api/model-forge/3mf-converter/analyze') {
+      return readBinaryBody(req, async (buffer) => {
+        try {
+          const { analyze3mf } = await import('./generators/threemf-converter.js');
+          const result = await analyze3mf(buffer);
+          return sendJson(res, result);
+        } catch (e) { sendJson(res, { error: e.message }, 500); }
+      });
+    }
+
+    if (method === 'POST' && path === '/api/model-forge/3mf-converter/convert') {
+      return readBinaryBody(req, async (buffer) => {
+        try {
+          const { convertBambuToU1 } = await import('./generators/threemf-converter.js');
+          const converted = await convertBambuToU1(buffer);
+          res.writeHead(200, {
+            'Content-Type': 'application/octet-stream',
+            'Content-Disposition': 'attachment; filename="converted_U1.3mf"',
+            'Content-Length': converted.length
+          });
+          res.end(converted);
+        } catch (e) { sendJson(res, { error: 'Conversion failed: ' + e.message }, 500); }
+      });
+    }
+
+    if (method === 'GET' && path === '/api/model-forge/3mf-converter/filament-map') {
+      try {
+        const { getFilamentMap } = await import('./generators/threemf-converter.js');
+        return sendJson(res, getFilamentMap());
+      } catch (e) { sendJson(res, { error: e.message }, 500); }
+    }
+
     // ── Model Forge: Lithophane Generator ──
     if (method === 'POST' && path === '/api/model-forge/lithophane/generate-3mf') {
       return readBinaryBody(req, async (buffer) => {

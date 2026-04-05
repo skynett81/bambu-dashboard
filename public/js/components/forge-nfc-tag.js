@@ -3,8 +3,13 @@
 (function() {
   'use strict';
 
-  const MATERIALS = ['PLA','PLA+','PETG','ABS','ASA','TPU','PA','PA-CF','PC','PVA','HIPS','PLA-CF','PETG-CF','Wood PLA','Silk PLA'];
+  const MATERIALS = ['PLA','PLA+','PETG','ABS','ASA','TPU','PA','PA-CF','PC','PVA','HIPS','PLA-CF','PETG-CF','Wood PLA','Silk PLA','PLA Matte','PLA SnapSpeed'];
   const VENDORS = ['Bambu Lab','Snapmaker','Polymaker','Prusament','eSUN','Hatchbox','Sunlu','Overture','Creality','Generic'];
+
+  // Snapmaker U1 RFID tag format (Mifare Classic 1K)
+  // Based on SnapmakerResearchGroup/RFID reverse engineering
+  const SM_RFID_TYPES = { 0:'Reserved', 1:'PLA', 2:'PETG', 3:'ABS', 4:'TPU', 5:'PVA' };
+  const SM_RFID_SUBTYPES = { 0:'Reserved', 1:'Basic', 2:'Matte', 3:'SnapSpeed' };
 
   window.loadForgeNfcTag = function() {
     const el = document.getElementById('overlay-panel-body');
