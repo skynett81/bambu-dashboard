@@ -11,6 +11,7 @@
     { id: 'cable-label', name: 'Cable Label', icon: '🏷️', desc: 'Wrap-around labels for cables and wires', loader: 'loadForgeCableLabel' },
     { id: 'relief', name: 'Image Relief', icon: '🗿', desc: 'Convert images to raised 3D surfaces or stamps', loader: 'loadForgeRelief' },
     { id: 'stencil', name: 'Stencil', icon: '✂️', desc: 'Create cut-out stencils from images', loader: 'loadForgeStencil' },
+    { id: 'nfc-tag', name: 'NFC Filament Tag', icon: '🏷️', desc: 'Write filament info to NFC tags (OpenSpool format)', loader: 'loadForgeNfcTag' },
   ];
 
   window.loadModelForgePanel = function(subTool) {

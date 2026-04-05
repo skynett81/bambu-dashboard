@@ -16,8 +16,13 @@ import { createLogger } from './logger.js';
 const log = createLogger('moon-cam');
 
 const SNAPSHOT_CANDIDATES = [
-  { path: '/?action=snapshot', port: 8080 },   // 3DPrintForge camera server / mjpgstreamer
+  // v4l2-mpp (paxx12 extended firmware) — hardware-accelerated, best quality
+  { path: '/snapshot', port: 8080 },             // v4l2-mpp stream-http snapshot
+  { path: '/snapshot', port: 8081 },             // v4l2-mpp alt port
+  // Standard mjpgstreamer / 3DPrintForge camera server
+  { path: '/?action=snapshot', port: 8080 },     // mjpgstreamer / our Python camera server
   { path: '/?action=snapshot', port: 8081 },
+  // Moonraker proxied webcam
   { path: '/webcam/?action=snapshot', port: null },
   { path: '/webcam/?action=snapshot', port: 4408 },
   { path: '/webcam/snapshot', port: null },

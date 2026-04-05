@@ -611,6 +611,9 @@ export class MoonrakerClient {
         this._lightPin = lightPin.replace('output_pin ', '');
         log.info(`Detected light pin: ${this._lightPin}`);
       }
+      // Detect extended firmware (paxx12) by probing v4l2-mpp camera
+      this._detectExtendedFirmware();
+
       // Detect Snapmaker U1 by presence of machine_state_manager
       if (objects.includes('machine_state_manager')) {
         this._isSnapmakerU1 = true;
@@ -620,6 +623,38 @@ export class MoonrakerClient {
         if (this.onSmDetected) this.onSmDetected();
       }
     } catch { /* ignore */ }
+  }
+
+  // ---- Extended firmware detection (paxx12) ----
+
+  async _detectExtendedFirmware() {
+    // Check if v4l2-mpp camera streamer is available (extended firmware feature)
+    const ports = [8080, 8081];
+    for (const port of ports) {
+      try {
+        const res = await fetch(`http://${this.ip}:${port}/snapshot`, { signal: AbortSignal.timeout(2000) });
+        if (res.ok) {
+          const ct = res.headers.get('content-type') || '';
+          if (ct.includes('image')) {
+            this._extendedFirmware = true;
+            this._v4l2MppPort = port;
+            this.state._extended_firmware = true;
+            this.state._v4l2_mpp_port = port;
+            log.info(`Detected extended firmware (v4l2-mpp camera on port ${port})`);
+            return;
+          }
+        }
+      } catch { /* not available */ }
+    }
+    // Check for WebRTC endpoint (v4l2-mpp stream-webrtc)
+    try {
+      const res = await fetch(`http://${this.ip}:8081/`, { signal: AbortSignal.timeout(2000) });
+      if (res.ok) {
+        this._extendedFirmware = true;
+        this.state._extended_firmware = true;
+        log.info('Detected extended firmware (WebRTC available)');
+      }
+    } catch { /* not available */ }
   }
 
   // ---- Commands ----

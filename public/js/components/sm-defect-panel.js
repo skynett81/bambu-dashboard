@@ -113,6 +113,21 @@
       </div>`;
     }
 
+    // ── Extended Firmware Status ──
+    if (data._extended_firmware) {
+      html += `<div class="ctrl-card">
+        <div class="ctrl-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/></svg>
+          Extended Firmware
+          <span style="font-size:0.65rem;padding:1px 6px;border-radius:8px;background:var(--accent-green);color:#fff;margin-left:auto">Active</span>
+        </div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">
+          paxx12 custom firmware detected. Enhanced camera streaming available.
+          ${data._v4l2_mpp_port ? '<br>Camera: v4l2-mpp on port ' + data._v4l2_mpp_port : ''}
+        </div>
+      </div>`;
+    }
+
     return html;
   };
 
