@@ -3,8 +3,11 @@ set -e
 
 # 3DPrintForge - Install Script
 # Supports two modes:
-#   ./install.sh       → Web-based setup wizard (recommended)
+#   ./install.sh       → 7-step web setup wizard (recommended)
 #   ./install.sh --cli → Classic terminal-based installer
+#
+# The web wizard includes: EULA, system check, network scan,
+# multi-brand printer setup, admin account, server settings.
 
 BOLD='\033[1m'
 GREEN='\033[0;32m'
@@ -93,8 +96,9 @@ run_web_wizard() {
   PORT=${PORT:-3000}
 
   echo ""
-  echo -e "  ${CYAN}Starting setup wizard...${NC}"
+  echo -e "  ${CYAN}Starting 7-step setup wizard...${NC}"
   echo -e "  Open ${BOLD}http://${IP}:${PORT}${NC} in your browser."
+  echo -e "  Steps: EULA → System Check → Network Scan → Printers → Security → Settings → Launch"
   echo ""
   echo -e "  ${YELLOW}Press Ctrl+C to cancel.${NC}"
   echo ""

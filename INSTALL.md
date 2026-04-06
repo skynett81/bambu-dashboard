@@ -74,9 +74,16 @@ cd 3dprintforge
 This will:
 1. Check for Node.js 22+ (installs it if missing)
 2. Install npm dependencies
-3. Launch a **web-based setup wizard** at `http://<your-ip>:3000`
+3. Launch a **7-step web setup wizard** at `http://<your-ip>:3000`
 
-Open the setup wizard URL in your browser to add your printers and complete setup.
+The wizard guides you through:
+- **EULA acceptance**
+- **System check** with auto-install for missing components
+- **Network scan** to auto-discover printers on your LAN
+- **Printer setup** for Bambu Lab, Moonraker/Klipper, and PrusaLink printers with test connection
+- **Security** — create an admin account to protect your dashboard
+- **Server settings** — ports, camera, and quick notification setup
+- **Launch** — start the dashboard with optional systemd auto-start
 
 ### Terminal-based install (no browser needed)
 

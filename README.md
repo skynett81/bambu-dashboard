@@ -49,10 +49,20 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 - **A1 Series** — A1, A1 Combo, A1 Mini
 - **H2 Series** — H2S, H2D, H2C (toolchanger)
 
+### PrusaLink (HTTP REST API)
+
+- **Prusa** — MK4, MK3.9, Mini+, XL (with PrusaLink firmware)
+
 ### Moonraker / Klipper (WebSocket API)
 
-- **Snapmaker** — U1 and other models with Moonraker firmware
-- Any printer running **Klipper + Moonraker** (Voron, Ender, Prusa, etc.)
+- **Snapmaker** — U1 (deep integration: NFC filament, AI defect detection, timelapse)
+- **Voron** — all models with Klipper + Moonraker
+- **Creality** — K1, K1 Max, Ender 3 V3, and other Klipper models
+- **Elegoo** — Neptune series with Klipper firmware
+- **AnkerMake** — M5 series
+- **QIDI** — X-Max, X-Plus with Moonraker
+- **RatRig** — V-Core, V-Minion
+- Any printer running **Klipper + Moonraker**
 
 ## Supported Platforms
 
@@ -81,7 +91,14 @@ cd 3dprintforge
 This will:
 1. Check/install Node.js 22+
 2. Install npm dependencies
-3. Launch a web-based setup wizard where you add your printers
+3. Launch a 7-step web setup wizard:
+   - EULA acceptance
+   - System check with auto-install
+   - Network scan (auto-discover printers on LAN)
+   - Add printers (Bambu Lab, Moonraker/Klipper, PrusaLink) with test connection
+   - Create admin account with password
+   - Server settings and quick notification setup
+   - Summary and launch
 
 The setup wizard runs at `http://<your-ip>:3000` — open it in your browser to complete setup.
 
@@ -156,6 +173,13 @@ Edit `config.json` (created from `config.example.json`):
       "ip": "192.168.1.200",
       "type": "moonraker",
       "port": 80
+    },
+    {
+      "id": "my-prusa",
+      "name": "My MK4",
+      "ip": "192.168.1.150",
+      "type": "prusalink",
+      "accessCode": "your-api-key"
     }
   ],
   "server": {
@@ -177,13 +201,21 @@ Edit `config.json` (created from `config.example.json`):
 | `serial` | Printer screen: Settings > Device > Serial Number |
 | `accessCode` | Printer screen: Settings > WiFi/Network > LAN Access Code |
 
+**PrusaLink:**
+
+| Field | Where to Find |
+|-------|--------------|
+| `ip` | Printer screen: Settings > Network > IP Address |
+| `accessCode` | PrusaLink API key from printer screen or PrusaSlicer |
+
 **Moonraker / Klipper:**
 
 | Field | Where to Find |
 |-------|--------------|
 | `ip` | Your printer's network IP address |
 | `port` | Moonraker port (default 80) |
-> **Tip:** Printers can also be added, edited, and deleted from the Settings tab in the dashboard — no restart required.
+
+> **Tip:** The setup wizard auto-discovers Bambu and Moonraker printers on your network. Printers can also be added, edited, and deleted from the Settings tab in the dashboard — no restart required.
 
 ### Multiple Printers
 
@@ -202,6 +234,8 @@ The server includes HSTS and CSP security headers. To disable forced HTTPS, set 
 ---
 
 ## Authentication
+
+The setup wizard guides you through creating an admin account. You can also configure it manually:
 
 Authentication is **disabled by default**. Enable it to protect the dashboard:
 
@@ -276,11 +310,12 @@ docker compose pull && docker compose up -d
 
 ## More Documentation
 
-- **[Features](docs/features.md)** — complete feature list
-- **[Architecture](docs/architecture.md)** — stack, modules, components, project structure, systemd, Pterodactyl
-- **[Changelog](docs/changelog.md)** — version history from v1.0.0 to v1.1.15
+- **[Features](docs/project/features.md)** — complete feature list
+- **[Architecture](docs/project/architecture.md)** — stack, modules, components, project structure
+- **[Changelog](docs/project/changelog.md)** — version history
+- **[Security](docs/system/security.md)** — authentication, encryption, rate limiting, SSRF guards
 - **[Installation Guide](INSTALL.md)** — detailed step-by-step install instructions
-- **[Docusaurus Docs](website/)** — full documentation site served at `/docs/` from the dashboard and deployed to [GitHub Pages](https://skynett81.github.io/3dprintforge/)
+- **[Docusaurus Docs](website/)** — full documentation site at `/docs/` and [GitHub Pages](https://skynett81.github.io/3dprintforge/)
 
 ---
 
