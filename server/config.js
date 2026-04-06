@@ -123,12 +123,24 @@ function loadConfig() {
   if (process.env.GITHUB_TOKEN) config.update.githubToken = process.env.GITHUB_TOKEN;
 
   // Auth env overrides
+  if (process.env.REQUIRE_AUTH === 'true' || process.env.REQUIRE_AUTH === '1') {
+    config.auth.enabled = true;
+  }
   if (process.env.BAMBU_AUTH_PASSWORD) {
     config.auth.password = process.env.BAMBU_AUTH_PASSWORD;
     config.auth.enabled = true;
   }
   if (process.env.BAMBU_AUTH_USERNAME) {
     config.auth.username = process.env.BAMBU_AUTH_USERNAME;
+  }
+
+  // Security warning: auth disabled
+  if (!config.auth.enabled) {
+    console.warn('\n' + '='.repeat(70));
+    console.warn('⚠  WARNING: Authentication is DISABLED');
+    console.warn('   All API endpoints are accessible without credentials.');
+    console.warn('   Set REQUIRE_AUTH=true or enable auth in Settings to secure this instance.');
+    console.warn('='.repeat(70) + '\n');
   }
 
   return config;

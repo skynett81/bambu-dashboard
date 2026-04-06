@@ -473,23 +473,19 @@ export async function handleApiRequest(req, res) {
     return sendJson(res, _getPublicStatus());
   }
 
-  // Health check — no auth required (useful for monitoring tools and Docker health checks)
+  // Health check — minimal info, no auth (Docker health checks, load balancers)
   if (method === 'GET' && path === '/api/health') {
-    const health = {
-      status: 'ok',
-      uptime: Math.round(process.uptime()),
-      memory: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
-      version: _pkgVersion,
-      node: process.version,
-      timestamp: new Date().toISOString()
-    };
     res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(health));
+    res.end(JSON.stringify({ status: 'ok', timestamp: new Date().toISOString() }));
     return;
   }
 
-  // Prometheus-compatible metrics endpoint — no auth required
+  // Prometheus-compatible metrics endpoint — requires auth when enabled
   if (method === 'GET' && path === '/api/metrics') {
+    if (isAuthEnabled()) {
+      const authResult = checkAuth(req);
+      if (!authResult.authenticated) return sendJson(res, { error: 'Authentication required' }, 401);
+    }
     const metrics = _collectMetrics();
     res.writeHead(200, { 'Content-Type': 'text/plain; version=0.0.4' });
     res.end(metrics);
@@ -3514,8 +3510,15 @@ export async function handleApiRequest(req, res) {
     if (method === 'GET' && path === '/api/info') {
       return sendJson(res, { name: '3DPrintForge', version: _updater?.currentVersion || 'unknown', uptime: process.uptime() });
     }
-    if (method === 'GET' && path === '/api/health') {
-      return sendJson(res, { status: 'ok', timestamp: new Date().toISOString() });
+    if (method === 'GET' && path === '/api/health/detail') {
+      return sendJson(res, {
+        status: 'ok',
+        uptime: Math.round(process.uptime()),
+        memory: Math.round(process.memoryUsage().heapUsed / 1024 / 1024),
+        version: _pkgVersion,
+        node: process.version,
+        timestamp: new Date().toISOString()
+      });
     }
 
     // ---- Inventory: SpoolmanDB Community Database ----
@@ -3670,9 +3673,18 @@ export async function handleApiRequest(req, res) {
     if (method === 'GET' && path === '/api/backup/list') {
       return sendJson(res, listBackups());
     }
+    const _backupsDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'backups');
+    const _safeBackupPath = (fname) => {
+      // Path traversal guard: resolve and verify the path stays within backups dir
+      const resolved = join(_backupsDir, fname);
+      if (!resolved.startsWith(_backupsDir)) return null;
+      return resolved;
+    };
+
     const backupDlMatch = path.match(/^\/api\/backup\/download\/(.+\.db)$/);
     if (backupDlMatch && method === 'GET') {
-      const backupPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'backups', backupDlMatch[1]);
+      const backupPath = _safeBackupPath(backupDlMatch[1]);
+      if (!backupPath) return sendJson(res, { error: 'Invalid filename' }, 400);
       if (!existsSync(backupPath)) return sendJson(res, { error: 'Not found' }, 404);
       const stat = statSync(backupPath);
       res.writeHead(200, {
@@ -3684,7 +3696,8 @@ export async function handleApiRequest(req, res) {
     }
     if (method === 'DELETE' && path.match(/^\/api\/backup\/(.+\.db)$/)) {
       const fname = path.match(/^\/api\/backup\/(.+\.db)$/)[1];
-      const backupPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'backups', fname);
+      const backupPath = _safeBackupPath(fname);
+      if (!backupPath) return sendJson(res, { error: 'Invalid filename' }, 400);
       if (!existsSync(backupPath)) return sendJson(res, { error: 'Not found' }, 404);
       try { unlinkSync(backupPath); return sendJson(res, { ok: true }); }
       catch (e) { return sendJson(res, { error: e.message }, 500); }
@@ -3694,7 +3707,10 @@ export async function handleApiRequest(req, res) {
     const restoreMatch = path.match(/^\/api\/backup\/restore\/(.+\.db)$/);
     if (restoreMatch && method === 'POST') {
       try {
-        const result = restoreBackup(decodeURIComponent(restoreMatch[1]));
+        const fname = decodeURIComponent(restoreMatch[1]);
+        const backupPath = _safeBackupPath(fname);
+        if (!backupPath) return sendJson(res, { error: 'Invalid filename' }, 400);
+        const result = restoreBackup(fname);
         return sendJson(res, { ok: true, ...result, restart_required: true });
       } catch (e) { return sendJson(res, { error: e.message }, 500); }
     }
@@ -6877,25 +6893,28 @@ export async function handleApiRequest(req, res) {
         if (!rec || !rec.file_path || !existsSync(rec.file_path)) return sendJson(res, { error: 'Video not found' }, 404);
         const { speed, quality, trim_start, trim_end } = body;
         try {
-          const { execSync } = await import('node:child_process');
+          const { spawnSync } = await import('node:child_process');
           const outPath = rec.file_path.replace('.mp4', `_edited_${Date.now()}.mp4`);
-          let ffArgs = ['-y', '-i', rec.file_path];
-          // Trim
-          if (trim_start) ffArgs.push('-ss', String(trim_start));
-          if (trim_end) ffArgs.push('-to', String(trim_end));
-          // Speed
-          const spd = parseFloat(speed) || 1;
+          const ffArgs = ['-y', '-i', rec.file_path];
+          // Trim — sanitize: only allow numeric/colon values (HH:MM:SS or seconds)
+          const timeRe = /^[\d:.]+$/;
+          if (trim_start && timeRe.test(String(trim_start))) ffArgs.push('-ss', String(trim_start));
+          if (trim_end && timeRe.test(String(trim_end))) ffArgs.push('-to', String(trim_end));
+          // Speed — clamp to safe range
+          const spd = Math.max(0.25, Math.min(4, parseFloat(speed) || 1));
           if (spd !== 1) ffArgs.push('-filter:v', `setpts=${(1/spd).toFixed(3)}*PTS`);
-          // Quality
+          // Quality — allowlist only
           const crf = quality === 'high' ? 18 : quality === 'low' ? 28 : 23;
           ffArgs.push('-c:v', 'libx264', '-preset', 'fast', '-crf', String(crf), '-pix_fmt', 'yuv420p', outPath);
-          execSync('ffmpeg ' + ffArgs.join(' '), { timeout: 300000 });
+          // Use spawnSync with argument array — prevents shell injection
+          const result = spawnSync('ffmpeg', ffArgs, { timeout: 300000, stdio: ['ignore', 'pipe', 'pipe'] });
+          if (result.status !== 0) throw new Error(result.stderr?.toString().slice(-200) || 'ffmpeg failed');
           // Get file size
           const { statSync: st } = await import('node:fs');
           const size = st(outPath).size;
           sendJson(res, { ok: true, output: outPath, size_bytes: size });
         } catch (e) {
-          sendJson(res, { error: 'Re-encoding feilet: ' + e.message }, 500);
+          sendJson(res, { error: 'Re-encoding failed: ' + e.message }, 500);
         }
       });
     }
@@ -10287,9 +10306,32 @@ function _verifyTotp(secret, code, window = 1) {
   return false;
 }
 
+// ---- SSRF Guard ----
+function _isPrivateUrl(urlStr) {
+  try {
+    const u = new URL(urlStr);
+    const h = u.hostname;
+    if (h === 'localhost' || h === '127.0.0.1' || h === '::1' || h === '0.0.0.0' || h === '[::]') return true;
+    const p = h.split('.').map(Number);
+    if (p.length === 4 && p.every(n => !isNaN(n))) {
+      if (p[0] === 10) return true;
+      if (p[0] === 172 && p[1] >= 16 && p[1] <= 31) return true;
+      if (p[0] === 192 && p[1] === 168) return true;
+      if (p[0] === 169 && p[1] === 254) return true;
+    }
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return true;
+    return false;
+  } catch { return true; }
+}
+
 // ---- Webhook Dispatcher ----
 
 async function _dispatchWebhook(whConfig, payload, deliveryId) {
+  // SSRF guard: block private/internal URLs
+  if (_isPrivateUrl(whConfig.url)) {
+    log.warn('Webhook blocked: private/internal URL', whConfig.url);
+    return;
+  }
   const url = new URL(whConfig.url);
   const isHttps = url.protocol === 'https:';
   const reqModule = isHttps ? (await import('node:https')).default : (await import('node:http')).default;

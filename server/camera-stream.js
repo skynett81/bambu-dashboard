@@ -6,6 +6,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { WebSocketServer } from 'ws';
 import { createLogger } from './logger.js';
+import { isAuthEnabled, validateSession, validateApiKey } from './auth.js';
 
 const log = createLogger('camera');
 
@@ -78,7 +79,25 @@ export class CameraStream {
 
     log.info('WebSocket server on port ' + this.port + (isSecure ? ' (WSS)' : ''));
 
-    this.wss.on('connection', (ws) => {
+    this.wss.on('connection', (ws, req) => {
+      // Auth check: validate session token or API key from query param
+      if (isAuthEnabled()) {
+        const url = new URL(req.url, 'http://localhost');
+        const token = url.searchParams.get('token');
+        const apiKey = url.searchParams.get('apikey');
+        let authenticated = false;
+        if (token && validateSession(token)) authenticated = true;
+        if (apiKey) {
+          const fakeReq = { headers: { 'x-api-key': apiKey } };
+          if (validateApiKey(fakeReq)) authenticated = true;
+        }
+        if (!authenticated) {
+          log.warn('Camera WS connection rejected: authentication required');
+          ws.close(4401, 'Authentication required');
+          return;
+        }
+      }
+
       this.clients.add(ws);
       log.info('Client connected (' + this.clients.size + ' total), mode: ' + (this.mode || 'detecting'));
 
