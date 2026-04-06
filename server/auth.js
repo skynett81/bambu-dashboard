@@ -4,6 +4,8 @@ import { getUserByUsername, updateUser, getApiKeyByHash, updateApiKeyLastUsed } 
 
 // In-memory session store: Map<token, { createdAt, username, userId, roleId, roleName, permissions, displayName }>
 const sessions = new Map();
+// Reverse index: userId → Set<token> (for invalidating sessions on role change)
+const _userSessions = new Map();
 let _cleanupInterval = null;
 
 // ---- Password hashing (scrypt) ----
@@ -107,15 +109,21 @@ export function createSession(userOrUsername) {
   const perms = isObj && userOrUsername.permissions
     ? (typeof userOrUsername.permissions === 'string' ? JSON.parse(userOrUsername.permissions) : userOrUsername.permissions)
     : ['*'];
+  const userId = isObj ? (userOrUsername.id || null) : null;
   sessions.set(token, {
     createdAt: Date.now(),
     username: isObj ? userOrUsername.username : (userOrUsername || null),
-    userId: isObj ? (userOrUsername.id || null) : null,
+    userId,
     roleId: isObj ? (userOrUsername.role_id || null) : null,
     roleName: isObj ? (userOrUsername.role_name || null) : null,
     permissions: perms,
     displayName: isObj ? (userOrUsername.display_name || null) : null
   });
+  // Track in reverse index for invalidation
+  if (userId) {
+    if (!_userSessions.has(userId)) _userSessions.set(userId, new Set());
+    _userSessions.get(userId).add(token);
+  }
   return token;
 }
 
@@ -133,7 +141,25 @@ export function validateSession(token) {
 }
 
 export function destroySession(token) {
+  const session = sessions.get(token);
+  if (session?.userId) {
+    const set = _userSessions.get(session.userId);
+    if (set) { set.delete(token); if (set.size === 0) _userSessions.delete(session.userId); }
+  }
   sessions.delete(token);
+}
+
+/** Invalidate all sessions for a given user (e.g. after role/permission change) */
+export function invalidateUserSessions(userId) {
+  const tokens = _userSessions.get(userId);
+  if (!tokens) return 0;
+  let count = 0;
+  for (const token of tokens) {
+    sessions.delete(token);
+    count++;
+  }
+  _userSessions.delete(userId);
+  return count;
 }
 
 export function getSessionToken(req) {

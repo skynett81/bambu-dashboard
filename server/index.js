@@ -229,7 +229,9 @@ const SECURITY_HEADERS = {
   'Permissions-Policy': 'camera=(self), microphone=(), geolocation=(), interest-cohort=()',
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'",
+    // unsafe-inline required: frontend uses inline onclick handlers in 100+ IIFE components
+    // unsafe-eval removed: lib3mf WASM only needs wasm-unsafe-eval
+    "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
     "img-src 'self' data: blob: https:",
     "connect-src 'self' ws: wss: https://open.er-api.com",
@@ -238,7 +240,9 @@ const SECURITY_HEADERS = {
     "base-uri 'self'",
     "form-action 'self'",
     "frame-src 'self'",
-    "worker-src 'self' blob:"
+    "frame-ancestors 'self'",
+    "worker-src 'self' blob:",
+    "upgrade-insecure-requests"
   ].join('; ')
 };
 

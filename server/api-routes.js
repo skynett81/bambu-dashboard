@@ -12,7 +12,7 @@ import { createHmac, timingSafeEqual, randomBytes } from 'node:crypto';
 import { readFileSync, existsSync, statSync, createReadStream, writeFileSync, mkdirSync, unlinkSync, readdirSync } from 'node:fs';
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { isAuthEnabled, isMultiUser, validateCredentials, createSession, destroySession, getSessionToken, validateSession, hashPassword, validateApiKey, generateApiKey, hasPermission, validateCredentialsDB, getSessionUser, requirePermission } from './auth.js';
+import { isAuthEnabled, isMultiUser, validateCredentials, createSession, destroySession, getSessionToken, validateSession, hashPassword, validateApiKey, generateApiKey, hasPermission, validateCredentialsDB, getSessionUser, requirePermission, invalidateUserSessions } from './auth.js';
 import { getSlicerStatus, getSlicerProfiles, saveUploadedFile, sliceFile, uploadToPrinter, cleanupJob, getJobFilePath } from './slicer-service.js';
 import { buildPauseCommand, buildResumeCommand, buildGcodeMultiLine, buildFilamentUnloadSequence, buildFilamentLoadSequence, buildAmsTrayChangeCommand } from './mqtt-commands.js';
 import { getSlicerJobs as dbGetSlicerJobs, getSlicerJob as dbGetSlicerJob, deleteSlicerJob as dbDeleteSlicerJob, getSlicerJobByFilename } from './database.js';
@@ -88,11 +88,30 @@ function checkLoginRate(ip) {
   return entry.count <= LOGIN_MAX_ATTEMPTS;
 }
 
+// ---- TOTP rate limiter (keyed on userId:ip) ----
+const TOTP_MAX_ATTEMPTS = 5;
+const TOTP_WINDOW_MS = 15 * 60 * 1000;
+const _totpAttempts = new Map();
+
+function checkTotpRate(key) {
+  const now = Date.now();
+  const entry = _totpAttempts.get(key);
+  if (!entry || now - entry.firstAttempt > TOTP_WINDOW_MS) {
+    _totpAttempts.set(key, { count: 1, firstAttempt: now });
+    return true;
+  }
+  entry.count++;
+  return entry.count <= TOTP_MAX_ATTEMPTS;
+}
+
 // Cleanup stale entries every 5 minutes
 setInterval(() => {
   const now = Date.now();
   for (const [ip, entry] of _loginAttempts) {
     if (now - entry.firstAttempt > LOGIN_WINDOW_MS) _loginAttempts.delete(ip);
+  }
+  for (const [key, entry] of _totpAttempts) {
+    if (now - entry.firstAttempt > TOTP_WINDOW_MS) _totpAttempts.delete(key);
   }
 }, 5 * 60 * 1000);
 
@@ -6407,7 +6426,13 @@ export async function handleApiRequest(req, res) {
     if (roleMatch && method === 'PUT') {
       return readBody(req, res, (body) => {
         try {
-          updateRole(parseInt(roleMatch[1]), body);
+          const roleId = parseInt(roleMatch[1]);
+          updateRole(roleId, body);
+          // Invalidate sessions of all users with this role
+          try {
+            const usersWithRole = getUsers().filter(u => u.role_id === roleId);
+            for (const u of usersWithRole) invalidateUserSessions(u.id);
+          } catch {}
           return sendJson(res, { ok: true });
         } catch (e) { return sendJson(res, { error: e.message }, 500); }
       });
@@ -6454,14 +6479,21 @@ export async function handleApiRequest(req, res) {
           if (body.display_name !== undefined) updates.display_name = body.display_name;
           if (body.role_id !== undefined) updates.role_id = body.role_id;
           if (body.password) updates.password_hash = hashPassword(body.password);
-          updateUser(parseInt(userMatch[1]), updates);
+          const uid = parseInt(userMatch[1]);
+          updateUser(uid, updates);
+          // Invalidate sessions if role or password changed
+          if (body.role_id !== undefined || body.password) {
+            invalidateUserSessions(uid);
+          }
           return sendJson(res, { ok: true });
         } catch (e) { return sendJson(res, { error: e.message }, 500); }
       });
     }
 
     if (userMatch && method === 'DELETE') {
-      deleteUser(parseInt(userMatch[1]));
+      const uid = parseInt(userMatch[1]);
+      invalidateUserSessions(uid);
+      deleteUser(uid);
       return sendJson(res, { ok: true });
     }
 
@@ -8121,6 +8153,9 @@ export async function handleApiRequest(req, res) {
       return readBody(req, res, (body) => {
         const user = getSessionUser(req);
         if (!user) return sendJson(res, { error: 'Not authenticated' }, 401);
+        // TOTP brute-force rate limit: 5 attempts per 15 min per user+IP
+        const totpKey = `${user.id}:${_getClientIp(req)}`;
+        if (!checkTotpRate(totpKey)) return sendJson(res, { error: 'Too many TOTP attempts. Try again later.' }, 429);
         if (!body.code) return sendJson(res, { error: 'code required' }, 400);
         const dbUser = getUser(user.id);
         if (!dbUser || !dbUser.totp_secret) return sendJson(res, { error: 'TOTP not set up' }, 400);

@@ -146,6 +146,31 @@ function loadConfig() {
   return config;
 }
 
+/** Return config with secrets masked — safe for API responses */
+export function getSafeConfig() {
+  const safe = JSON.parse(JSON.stringify(config));
+  // Mask sensitive fields
+  if (safe.update?.githubToken) safe.update.githubToken = '***';
+  if (safe.auth?.password) safe.auth.password = '***';
+  if (safe.auth?.users) {
+    safe.auth.users = safe.auth.users.map(u => ({ ...u, password: '***' }));
+  }
+  // Mask printer access codes
+  if (safe.printers) {
+    safe.printers = safe.printers.map(p => ({ ...p, accessCode: p.accessCode ? '***' : '' }));
+  }
+  // Mask notification secrets
+  const nc = safe.notifications?.channels;
+  if (nc) {
+    if (nc.telegram?.botToken) nc.telegram.botToken = '***';
+    if (nc.email?.pass) nc.email.pass = '***';
+    if (nc.pushover?.apiToken) nc.pushover.apiToken = '***';
+    if (nc.ntfy?.token) nc.ntfy.token = '***';
+    if (nc.sms?.authToken) nc.sms.authToken = '***';
+  }
+  return safe;
+}
+
 export function saveConfig(updates) {
   let current = {};
   if (existsSync(CONFIG_PATH)) {
