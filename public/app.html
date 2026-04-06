@@ -106,14 +106,20 @@
     <div class="card">
       <div class="card-icon">🍎</div>
       <div class="card-title">iPhone / iPad</div>
-      <div class="card-sub">Install as native-like app</div>
-      <span class="badge badge-ready">PWA Ready</span>
+      <div class="card-sub">Native app or PWA install</div>
+      <span class="badge badge-ready">Available</span>
       <div class="qr-box"><img id="qr-ios" width="160" height="160" alt="iOS QR"></div>
       <br>
-      <a class="btn btn-ios" id="btn-ios" href="/">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
-        Open in Safari to Install
-      </a>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+        <a class="btn btn-ios" id="btn-ios-ipa" href="/app/download/ios">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download IPA
+        </a>
+        <a class="btn btn-pwa" href="/">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          PWA Install
+        </a>
+      </div>
     </div>
   </div>
 
@@ -142,16 +148,31 @@
   </div>
 
   <div class="instructions">
-    <h3>iPhone / iPad Installation</h3>
+    <h3>iPhone / iPad — Option A: Native App (IPA)</h3>
     <ol>
-      <li>Scan the QR code above with your iPhone camera, or open <code id="ios-url">https://...</code> in <strong>Safari</strong></li>
-      <li>Tap the <strong>Share</strong> button <span style="display:inline-block;width:20px;height:20px;border:1.5px solid var(--accent);border-radius:4px;text-align:center;line-height:18px;font-size:12px;vertical-align:middle">↑</span> at the bottom of Safari</li>
-      <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
-      <li>Tap <strong>Add</strong> — 3DPrintForge appears as an app on your home screen</li>
-      <li>Open the app — it runs fullscreen, just like a native app!</li>
+      <li>Download <strong>3DPrintForge.ipa</strong> from the button above</li>
+      <li>Install using one of these methods:
+        <ul style="margin:6px 0 6px 16px;list-style:disc">
+          <li><strong>AltStore</strong> — install via <a href="https://altstore.io" target="_blank" style="color:var(--accent)">altstore.io</a> (free, re-signs every 7 days)</li>
+          <li><strong>Sideloadly</strong> — drag IPA into <a href="https://sideloadly.io" target="_blank" style="color:var(--accent)">sideloadly.io</a> app on PC/Mac</li>
+          <li><strong>Apple Configurator</strong> — for managed devices (Mac only)</li>
+          <li><strong>TestFlight</strong> — if you have an Apple Developer account</li>
+        </ul>
+      </li>
+      <li>Open the app and enter your server URL: <code id="ios-url">https://...</code></li>
+    </ol>
+  </div>
+
+  <div class="instructions">
+    <h3>iPhone / iPad — Option B: PWA (no download needed)</h3>
+    <ol>
+      <li>Open <code id="pwa-url">https://...</code> in <strong>Safari</strong></li>
+      <li>Tap the <strong>Share</strong> button <span style="display:inline-block;width:20px;height:20px;border:1.5px solid var(--accent);border-radius:4px;text-align:center;line-height:18px;font-size:12px;vertical-align:middle">↑</span> at the bottom</li>
+      <li>Tap <strong>"Add to Home Screen"</strong> → <strong>Add</strong></li>
+      <li>Opens fullscreen with its own app icon</li>
     </ol>
     <div style="margin-top:12px;padding:10px;background:rgba(0,212,255,0.06);border:1px solid rgba(0,212,255,0.15);border-radius:8px;font-size:0.8rem;color:var(--accent)">
-      <strong>Tip:</strong> The PWA supports push notifications on iOS 16.4+, works offline, and has its own app icon. It looks and feels like a native app!
+      <strong>Tip:</strong> PWA supports push notifications on iOS 16.4+, works offline. The native IPA gives better performance and full notification support.
     </div>
   </div>
 
@@ -170,6 +191,8 @@ document.getElementById('qr-ios').src = '/api/qr?data=' + encodeURIComponent(bas
 // Fill server URL placeholders
 document.getElementById('server-url').textContent = baseUrl;
 document.getElementById('ios-url').textContent = baseUrl;
+const pwaEl = document.getElementById('pwa-url');
+if (pwaEl) pwaEl.textContent = baseUrl;
 
 // Fetch version
 fetch('/api/health').then(r => r.json()).then(d => {

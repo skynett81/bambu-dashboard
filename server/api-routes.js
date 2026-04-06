@@ -5173,6 +5173,21 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, { error: 'APK not available yet. Build with: cd App && npx expo prebuild && cd android && ./gradlew assembleRelease' }, 404);
     }
 
+    // ── App Download (IPA) ──
+    if (method === 'GET' && path === '/app/download/ios') {
+      const ipaPath = join(DATA_DIR, 'app', '3dprintforge.ipa');
+      if (existsSync(ipaPath)) {
+        const stat = statSync(ipaPath);
+        res.writeHead(200, {
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': 'attachment; filename="3DPrintForge.ipa"',
+          'Content-Length': stat.size
+        });
+        return createReadStream(ipaPath).pipe(res);
+      }
+      return sendJson(res, { error: 'IPA not available yet. Build via GitHub Actions or on macOS with Xcode.' }, 404);
+    }
+
     // ── EULA ──
     if (method === 'GET' && path === '/api/eula') {
       try {
