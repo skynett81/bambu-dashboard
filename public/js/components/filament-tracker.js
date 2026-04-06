@@ -1273,6 +1273,27 @@
           </div>`}
           ${s.comment ? `<div class="ph-detail-divider"></div><div class="ph-detail-field ph-detail-field-wide"><span class="ph-detail-label">${t('filament.comment', 'Comment')}</span><span class="ph-detail-value">${esc(s.comment)}</span></div>` : ''}
           <div class="ph-detail-divider"></div>
+          <div style="margin-bottom:10px">
+            <span class="ph-detail-label" style="margin-bottom:6px;display:block">Quick Actions</span>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="form-btn form-btn-sm" data-ripple style="background:var(--accent-red);color:#fff" onclick="window._spoolQuickAction(${s.id},'empty')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                Mark Empty
+              </button>
+              <button class="form-btn form-btn-sm" data-ripple style="background:var(--accent-orange);color:#fff" onclick="window._spoolQuickAction(${s.id},'set-weight')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M12 3v18M3 12h18"/></svg>
+                Set Remaining
+              </button>
+              <button class="form-btn form-btn-sm" data-ripple style="background:var(--accent-blue);color:#fff" onclick="window._spoolQuickAction(${s.id},'swap')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
+                Swap Spool
+              </button>
+              <button class="form-btn form-btn-sm" data-ripple onclick="window._spoolQuickAction(${s.id},'refill')">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+                Refill / New Spool
+              </button>
+            </div>
+          </div>
           <div class="spool-detail-actions">
             <button class="form-btn form-btn-sm" data-ripple onclick="this.closest('.ph-detail-overlay').remove();showEditSpoolForm(${s.id})">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -3309,6 +3330,103 @@
   };
 
   // ═══ Export ═══
+  window._spoolQuickAction = async function(spoolId, action) {
+    const overlay = document.querySelector('.ph-detail-overlay');
+
+    if (action === 'empty') {
+      if (!confirm('Mark this spool as empty (0g remaining)?')) return;
+      try {
+        await fetch(`/api/inventory/spools/${spoolId}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ remaining_weight_g: 0 })
+        });
+        if (typeof showToast === 'function') showToast('Spool marked as empty', 'success');
+        if (overlay) overlay.remove();
+        loadFilament();
+      } catch (e) { if (typeof showToast === 'function') showToast(e.message, 'error'); }
+      return;
+    }
+
+    if (action === 'set-weight') {
+      const weight = prompt('Enter remaining weight in grams:', '0');
+      if (weight === null) return;
+      const g = parseFloat(weight);
+      if (isNaN(g) || g < 0) { if (typeof showToast === 'function') showToast('Invalid weight', 'warning'); return; }
+      try {
+        await fetch(`/api/inventory/spools/${spoolId}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ remaining_weight_g: Math.round(g) })
+        });
+        if (typeof showToast === 'function') showToast(`Remaining set to ${Math.round(g)}g`, 'success');
+        if (overlay) overlay.remove();
+        loadFilament();
+      } catch (e) { if (typeof showToast === 'function') showToast(e.message, 'error'); }
+      return;
+    }
+
+    if (action === 'swap') {
+      // Unassign this spool from its slot, freeing it for another spool
+      if (!confirm('Unassign this spool from its printer slot?\n\nThis frees the slot so you can assign a different spool.')) return;
+      try {
+        await fetch(`/api/inventory/spools/${spoolId}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ printer_id: null, ams_unit: null, ams_tray: null })
+        });
+        if (typeof showToast === 'function') showToast('Spool unassigned from slot', 'success');
+        if (overlay) overlay.remove();
+        loadFilament();
+      } catch (e) { if (typeof showToast === 'function') showToast(e.message, 'error'); }
+      return;
+    }
+
+    if (action === 'refill') {
+      const choices = ['Replace with new spool (same type)', 'Reset to full (refill/rewind)'];
+      const choice = prompt('Refill options:\n1. Replace with new spool (archives this one)\n2. Reset to full weight (refill/rewind)\n\nEnter 1 or 2:', '1');
+      if (choice === '1') {
+        // Archive old spool, create new one with same profile
+        try {
+          await fetch(`/api/inventory/spools/${spoolId}`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ archived: 1 })
+          });
+          // Get the spool data to duplicate
+          const res = await fetch(`/api/inventory/spools/${spoolId}`);
+          const old = await res.json();
+          if (old.filament_profile_id) {
+            await fetch('/api/inventory/spools', {
+              method: 'POST', headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                filament_profile_id: old.filament_profile_id,
+                initial_weight_g: old.initial_weight_g,
+                printer_id: old.printer_id,
+                ams_unit: old.ams_unit,
+                ams_tray: old.ams_tray,
+                cost: old.cost,
+                location: old.location
+              })
+            });
+          }
+          if (typeof showToast === 'function') showToast('Old spool archived, new spool created in same slot', 'success');
+          if (overlay) overlay.remove();
+          loadFilament();
+        } catch (e) { if (typeof showToast === 'function') showToast(e.message, 'error'); }
+      } else if (choice === '2') {
+        try {
+          const res = await fetch(`/api/inventory/spools/${spoolId}`);
+          const s = await res.json();
+          await fetch(`/api/inventory/spools/${spoolId}`, {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ remaining_weight_g: s.initial_weight_g, used_weight_g: 0 })
+          });
+          if (typeof showToast === 'function') showToast('Spool reset to full', 'success');
+          if (overlay) overlay.remove();
+          loadFilament();
+        } catch (e) { if (typeof showToast === 'function') showToast(e.message, 'error'); }
+      }
+      return;
+    }
+  };
+
   window._recalcSpoolUsage = async function() {
     if (!confirm('Recalculate spool remaining weights from print history?\n\nThis will update all spools based on recorded filament usage.')) return;
     try {
