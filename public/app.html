@@ -214,11 +214,9 @@ if (!baseUrl || baseUrl.includes('{{')) {
   }
 }
 
-// QR codes
-// Use absolute URL for QR endpoint so it works from any origin
-var qrBase = baseUrl.includes('{{') ? '' : baseUrl;
-document.getElementById('qr-android').src = (qrBase || '') + '/api/qr?data=' + encodeURIComponent(baseUrl + '/app') + '&size=300';
-document.getElementById('qr-ios').src = (qrBase || '') + '/api/qr?data=' + encodeURIComponent(baseUrl) + '&size=300';
+// QR codes — always load from same origin (relative URL), but QR DATA points to HTTP LAN IP
+document.getElementById('qr-android').src = '/api/qr?data=' + encodeURIComponent(baseUrl + '/app') + '&size=300';
+document.getElementById('qr-ios').src = '/api/qr?data=' + encodeURIComponent(baseUrl) + '&size=300';
 
 // Fill URL placeholders
 document.getElementById('server-url').textContent = baseUrl;
