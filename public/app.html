@@ -44,16 +44,22 @@
     .qr-box canvas { display: block; }
 
     .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 10px 24px; border: none; border-radius: 10px;
-      font-size: 0.9rem; font-weight: 600; cursor: pointer;
-      text-decoration: none; transition: filter 0.2s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 14px 28px; border: none; border-radius: 12px;
+      font-size: 1rem; font-weight: 700; cursor: pointer;
+      text-decoration: none; transition: all 0.2s;
+      -webkit-appearance: none; -moz-appearance: none; appearance: none;
+      -webkit-tap-highlight-color: transparent;
+      min-height: 48px; min-width: 140px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      letter-spacing: 0.02em;
     }
-    .btn:hover { filter: brightness(1.1); }
+    .btn:hover { filter: brightness(1.1); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.4); }
+    .btn:active { transform: translateY(0); box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
     .btn-android { background: var(--green); color: #fff; }
     .btn-ios { background: var(--accent); color: #0a0e27; }
     .btn-pwa { background: var(--orange); color: #fff; }
-    .btn-disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+    .btn-disabled { background: var(--border); color: var(--muted); cursor: not-allowed; box-shadow: none; }
 
     .badge {
       display: inline-block; padding: 2px 8px; border-radius: 6px;
