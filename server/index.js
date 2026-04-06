@@ -1197,7 +1197,7 @@ if (httpsServer) {
   const docsBuild = join(dirname(fileURLToPath(import.meta.url)), '..', 'website', 'build');
   const docsSource = join(dirname(fileURLToPath(import.meta.url)), '..', 'website', 'docs');
   const docsPkg = join(dirname(fileURLToPath(import.meta.url)), '..', 'website', 'package.json');
-  const hasBuild = existsSync(join(docsBuild, 'index.html'));
+  const hasBuild = existsSync(join(docsBuild, 'intro.html')) || existsSync(join(docsBuild, 'index.html'));
   const hasSource = existsSync(docsSource) && existsSync(docsPkg);
 
   if (!hasBuild && hasSource) {
