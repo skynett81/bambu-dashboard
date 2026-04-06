@@ -198,16 +198,15 @@
 let baseUrl = window.location.origin;
 
 async function init() {
-  // If on localhost, fetch the actual LAN IP from server info
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-    try {
-      const r = await fetch('/api/info');
-      const info = await r.json();
-      if (info.ip && info.ip !== 'localhost') {
-        baseUrl = window.location.protocol + '//' + info.ip + ':' + window.location.port;
-      }
-    } catch {}
-  }
+  // Always resolve to LAN IP + HTTP port for QR codes
+  // iPhones reject self-signed HTTPS certs silently — use HTTP for phone access
+  try {
+    const r = await fetch('/api/info');
+    const info = await r.json();
+    if (info.ip && info.ip !== 'localhost') {
+      baseUrl = 'http://' + info.ip + ':' + (info.port || 3000);
+    }
+  } catch {}
 
   // QR codes — use 200px for better scanability, short URL for less dense QR
   document.getElementById('qr-android').src = '/api/qr?data=' + encodeURIComponent(baseUrl + '/app') + '&size=300';

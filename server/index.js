@@ -514,8 +514,14 @@ const forceHttps = hasSSL && config.server.forceHttps !== false;
 
 const httpServer = createHttpServer((req, res) => {
   if (forceHttps) {
+    const reqPath = (req.url || '').split('?')[0];
+    // Allow /app and /api/qr over HTTP — phones with self-signed cert issues need this
+    if (reqPath === '/app' || reqPath === '/app.html' || reqPath.startsWith('/app/download') || reqPath === '/api/qr' || reqPath === '/api/info' || reqPath === '/api/health') {
+      handleRequest(req, res);
+      return;
+    }
     const reqHost = req.headers.host || req.socket.localAddress || 'localhost';
-    const host = reqHost.replace(`:${PORT}`, '') .replace(/:\d+$/, '') + `:${HTTPS_PORT}`;
+    const host = reqHost.replace(`:${PORT}`, '').replace(/:\d+$/, '') + `:${HTTPS_PORT}`;
     res.writeHead(301, { Location: `https://${host}${req.url}` });
     res.end();
     return;
