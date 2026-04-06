@@ -94,7 +94,7 @@
       <div class="card-title">Android</div>
       <div class="card-sub">APK direct download</div>
       <span class="badge badge-ready">Available</span>
-      <div class="qr-box"><img id="qr-android" width="160" height="160" alt="Android QR"></div>
+      <div class="qr-box"><img id="qr-android" width="200" height="200" alt="Android QR"></div>
       <br>
       <a class="btn btn-android" id="btn-android" href="/app/download/android">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -108,7 +108,7 @@
       <div class="card-title">iPhone / iPad</div>
       <div class="card-sub">Native app or PWA install</div>
       <span class="badge badge-ready">Available</span>
-      <div class="qr-box"><img id="qr-ios" width="160" height="160" alt="iOS QR"></div>
+      <div class="qr-box"><img id="qr-ios" width="200" height="200" alt="iOS QR"></div>
       <br>
       <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
         <a class="btn btn-ios" id="btn-ios-ipa" href="/app/download/ios">
@@ -121,6 +121,11 @@
         </a>
       </div>
     </div>
+  </div>
+
+  <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:20px;text-align:center">
+    <div style="color:var(--muted);font-size:0.8rem;margin-bottom:6px">Your server address (type this on your phone if QR doesn't scan):</div>
+    <div style="font-family:monospace;font-size:1.1rem;color:var(--accent);font-weight:600" id="url-info">Loading...</div>
   </div>
 
   <div class="features">
@@ -182,17 +187,38 @@
 </div>
 
 <script>
-const baseUrl = window.location.origin;
+// Use LAN IP for QR codes so phones can reach the server
+// If accessing via localhost, try to get the real IP from the server
+let baseUrl = window.location.origin;
 
-// Set QR code images via server endpoint
-document.getElementById('qr-android').src = '/api/qr?data=' + encodeURIComponent(baseUrl + '/app/download/android') + '&size=160';
-document.getElementById('qr-ios').src = '/api/qr?data=' + encodeURIComponent(baseUrl) + '&size=160';
+async function init() {
+  // If on localhost, fetch the actual LAN IP from server info
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    try {
+      const r = await fetch('/api/info');
+      const info = await r.json();
+      if (info.ip && info.ip !== 'localhost') {
+        baseUrl = window.location.protocol + '//' + info.ip + ':' + window.location.port;
+      }
+    } catch {}
+  }
 
-// Fill server URL placeholders
-document.getElementById('server-url').textContent = baseUrl;
-document.getElementById('ios-url').textContent = baseUrl;
-const pwaEl = document.getElementById('pwa-url');
-if (pwaEl) pwaEl.textContent = baseUrl;
+  // QR codes — use 200px for better scanability, short URL for less dense QR
+  document.getElementById('qr-android').src = '/api/qr?data=' + encodeURIComponent(baseUrl + '/app') + '&size=200';
+  document.getElementById('qr-ios').src = '/api/qr?data=' + encodeURIComponent(baseUrl) + '&size=200';
+
+  // Fill URL placeholders
+  document.getElementById('server-url').textContent = baseUrl;
+  document.getElementById('ios-url').textContent = baseUrl;
+  const pwaEl = document.getElementById('pwa-url');
+  if (pwaEl) pwaEl.textContent = baseUrl;
+
+  // Show the actual URLs users need
+  const urlInfo = document.getElementById('url-info');
+  if (urlInfo) urlInfo.textContent = baseUrl;
+}
+
+init();
 
 // Fetch version
 fetch('/api/health').then(r => r.json()).then(d => {

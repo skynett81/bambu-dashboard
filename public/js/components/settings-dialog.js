@@ -759,8 +759,8 @@
         </div>
         <p class="text-muted" style="font-size:0.8rem;margin-bottom:10px">Monitor and control your printers from your phone.</p>
         <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
-          <div style="background:#fff;border-radius:8px;padding:6px;display:inline-block">
-            <img id="settings-qr-app" width="100" height="100" alt="QR" style="display:block">
+          <div style="background:#fff;border-radius:10px;padding:8px;display:inline-block">
+            <img id="settings-qr-app" width="140" height="140" alt="QR" style="display:block">
           </div>
           <div style="flex:1;min-width:200px">
             <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
@@ -806,9 +806,9 @@
       _loadSystemInfo();
       _loadScheduledTasks();
       _loadBackupList();
-      // Load Mobile App QR code
+      // Load Mobile App QR code — use LAN IP for scanability from phones
       const qrEl = document.getElementById('settings-qr-app');
-      if (qrEl) qrEl.src = '/api/qr?data=' + encodeURIComponent(window.location.origin + '/app') + '&size=100';
+      if (qrEl) qrEl.src = '/api/qr?data=' + encodeURIComponent(window.location.origin + '/app') + '&size=200';
 
     } else if (_systemSubTab === 'security') {
       let h = '<div class="settings-grid">';

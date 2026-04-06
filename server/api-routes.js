@@ -3638,7 +3638,18 @@ export async function handleApiRequest(req, res) {
 
     // ---- Info & Health ----
     if (method === 'GET' && path === '/api/info') {
-      return sendJson(res, { name: '3DPrintForge', version: _updater?.currentVersion || 'unknown', uptime: process.uptime() });
+      let ip = 'localhost';
+      try {
+        const { networkInterfaces } = await import('node:os');
+        const nets = networkInterfaces();
+        for (const ifaces of Object.values(nets)) {
+          for (const iface of ifaces) {
+            if (iface.family === 'IPv4' && !iface.internal) { ip = iface.address; break; }
+          }
+          if (ip !== 'localhost') break;
+        }
+      } catch {}
+      return sendJson(res, { name: '3DPrintForge', version: _updater?.currentVersion || 'unknown', uptime: process.uptime(), ip, port: config.server?.port || 3000, httpsPort: config.server?.httpsPort || 3443 });
     }
     if (method === 'GET' && path === '/api/health/detail') {
       return sendJson(res, {
