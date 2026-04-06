@@ -204,7 +204,7 @@ export class MoonrakerCamera {
       for (const path of SSH_CAMERA_PATHS) {
         const frame = await this._sshFetchFile(creds, path);
         if (frame && frame.length > 500) {
-          log.info(`SSH kamera funnet: ${creds.username}@${this.ip}:${path} (${frame.length} bytes)`);
+          log.info(`SSH camera found: ${creds.username}@${this.ip}:${path} (${frame.length} bytes)`);
           this._lastFrame = frame;
           this._lastFrameTime = Date.now();
           return { creds, path };
@@ -250,7 +250,7 @@ export class MoonrakerCamera {
     this._activeSource = 'http';
     this._activeUrl = url;
     this._failCount = 0;
-    log.info(`Kamera aktivt (HTTP): ${url}`);
+    log.info(`Camera active (HTTP): ${url}`);
     this._fetchHttpFrame(url);
     this._pollTimer = setInterval(() => this._fetchHttpFrame(url), this._pollInterval);
   }
@@ -281,7 +281,7 @@ export class MoonrakerCamera {
   _startSshPolling() {
     this._activeSource = 'ssh';
     this._failCount = 0;
-    log.info(`Kamera aktivt (SSH): ${this._sshCreds.username}@${this.ip}:${this._sshPath} @ ${Math.round(1000 / this._pollInterval)} fps`);
+    log.info(`Camera active (SSH): ${this._sshCreds.username}@${this.ip}:${this._sshPath} @ ${Math.round(1000 / this._pollInterval)} fps`);
     this._ensureSshConnection();
     this._pollTimer = setInterval(() => this._fetchSshFrame(), this._pollInterval);
   }

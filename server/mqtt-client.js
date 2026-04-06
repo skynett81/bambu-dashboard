@@ -17,6 +17,7 @@ export class BambuMqttClient {
     this.onXcamEvent = null;
     this._lastFirmwareVersions = {};
     this._lastXcamStatus = null;
+    this._printerConfig = config.printer;
   }
 
   connect() {
@@ -27,8 +28,7 @@ export class BambuMqttClient {
     // limitation of the Bambu Lab protocol.
 
     // TOFU cert pinning: store fingerprint on first connect, verify on subsequent
-    const pinnedFp = config.printer.certFingerprint || null;
-    this._certPinConfig = config;
+    const pinnedFp = this._printerConfig.certFingerprint || null;
 
     this.client = mqtt.connect(url, {
       username: 'bblp',
@@ -39,10 +39,14 @@ export class BambuMqttClient {
       connectTimeout: 10000
     });
 
-    // Verify cert fingerprint after TLS handshake (TOFU model)
-    this.client.stream?.on('secureConnect', () => {
+    this.client.on('connect', () => {
+      this.connected = true;
+      log.info('Connected to printer');
+
+      // TOFU cert fingerprint verification (after TLS handshake is complete)
       try {
-        const cert = this.client.stream.getPeerCertificate();
+        const stream = this.client.stream;
+        const cert = stream?.getPeerCertificate?.();
         if (cert?.fingerprint256) {
           const fp = cert.fingerprint256;
           if (pinnedFp && pinnedFp !== fp) {
@@ -53,18 +57,12 @@ export class BambuMqttClient {
           }
           if (!pinnedFp) {
             log.info('TOFU: Pinning printer TLS cert fingerprint: ' + fp.slice(0, 20) + '...');
-            // Store fingerprint for future verification (caller can persist to config)
             if (this.onCertPinned) this.onCertPinned(fp);
           }
         }
       } catch (e) {
         log.warn('Could not verify TLS cert: ' + e.message);
       }
-    });
-
-    this.client.on('connect', () => {
-      this.connected = true;
-      log.info('Connected to printer');
 
       const topic = `device/${this.serial}/report`;
       this.client.subscribe(topic, (err) => {

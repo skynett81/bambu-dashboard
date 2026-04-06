@@ -7300,7 +7300,7 @@ export async function handleApiRequest(req, res) {
         if (!p) return sendJson(res, { error: 'Not found' }, 404);
         if (body.enabled === false) {
           updateProject(projectId, { share_enabled: 0 });
-          addTimelineEvent(projectId, 'share_toggled', 'Delingslenke deaktivert');
+          addTimelineEvent(projectId, 'share_toggled', 'Share link disabled');
           return sendJson(res, { ok: true, share_enabled: false });
         }
         let token = p.share_token;
@@ -7309,7 +7309,7 @@ export async function handleApiRequest(req, res) {
         } else {
           updateProject(projectId, { share_enabled: 1 });
         }
-        addTimelineEvent(projectId, 'share_toggled', 'Delingslenke aktivert');
+        addTimelineEvent(projectId, 'share_toggled', 'Share link enabled');
         sendJson(res, { ok: true, share_token: token, share_enabled: true });
       });
     }
@@ -9135,7 +9135,7 @@ function _getApiDocs() {
       { method: 'GET', path: '/api/bambu/variants', tag: 'Bambu Lab', summary: 'Komplett Bambu Lab variant-database (228+ varianter)', permission: 'view' },
       { method: 'GET', path: '/api/bambu/variant/:id', tag: 'Bambu Lab', summary: 'Look up variant by ID (e.g. A00-K0)', permission: 'view' },
       { method: 'GET', path: '/api/bambu/product/:code', tag: 'Bambu Lab', summary: 'Look up variant by product code', permission: 'view' },
-      { method: 'GET', path: '/api/bambu/enrich-tray', tag: 'Bambu Lab', summary: 'Berik AMS-tray med fargenavn og hex fra variant-database', permission: 'view' },
+      { method: 'GET', path: '/api/bambu/enrich-tray', tag: 'Bambu Lab', summary: 'Enrich AMS tray with color name and hex from variant database', permission: 'view' },
       { method: 'GET', path: '/api/bambu/materials', tag: 'Bambu Lab', summary: 'Liste over alle Bambu Lab materialtyper', permission: 'view' },
       { method: 'GET', path: '/api/bambu/colors', tag: 'Bambu Lab', summary: 'Colors available for a material', permission: 'view' },
       { method: 'GET', path: '/api/bambu/print-stages', tag: 'Bambu Lab', summary: '36 print-stage koder med norske/engelske beskrivelser', permission: 'view' },
@@ -9157,7 +9157,7 @@ function _getApiDocs() {
       { method: 'POST', path: '/api/printers/:id/files/print', tag: 'Printers', summary: 'Start printing a file', permission: 'print' },
       { method: 'GET', path: '/api/printers/:id/camera', tag: 'Printers', summary: 'Get camera snapshot', permission: 'view' },
       { method: 'GET', path: '/api/printers/:id/stream.mjpeg', tag: 'Camera', summary: 'MJPEG live stream (multipart/x-mixed-replace)', permission: 'view' },
-      { method: 'GET', path: '/api/printers/:id/frame.jpeg', tag: 'Camera', summary: 'Siste JPEG-frame fra kamera', permission: 'view' },
+      { method: 'GET', path: '/api/printers/:id/frame.jpeg', tag: 'Camera', summary: 'Latest JPEG frame from camera', permission: 'view' },
       // History & Stats
       { method: 'GET', path: '/api/history', tag: 'History', summary: 'Get print history (paginated)', permission: 'view' },
       { method: 'GET', path: '/api/history/export', tag: 'History', summary: 'Export history as CSV', permission: 'view' },

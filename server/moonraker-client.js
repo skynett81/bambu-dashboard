@@ -266,7 +266,7 @@ export class MoonrakerClient {
         }
       } catch { /* not critical */ }
 
-      log.info(`Slicer metadata hentet for ${filename}`);
+      log.info(`Slicer metadata fetched for ${filename}`);
     } catch { /* not critical */ }
   }
 

@@ -1155,7 +1155,7 @@ export class PrintTracker {
       if (cached?.buffer) {
         const ext = cached.contentType === 'image/svg+xml' ? 'svg' : 'png';
         writeFileSync(join(thumbDir, `${historyId}.${ext}`), cached.buffer);
-        log.info('Thumbnail lagret for history #' + historyId);
+        log.info('Thumbnail saved for history #' + historyId);
         return;
       }
 

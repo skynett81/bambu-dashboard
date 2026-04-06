@@ -645,7 +645,7 @@ queueManager._failureDetector = failureDetector;
 setPrinterManager(manager);
 setFailureDetector(failureDetector);
 
-// Milestone frame provider — henter siste kamera-frame for instant screenshots
+// Milestone frame provider — fetches latest camera frame for instant screenshots
 setFrameProvider((printerId) => {
   const entry = manager.printers.get(printerId);
   // Bambu camera or Moonraker camera snapshot
@@ -813,7 +813,7 @@ for (const [id, entry] of manager.printers) {
     const origOnPrintEnd = entry.tracker.onPrintEnd;
     const origOnPrintStart = entry.tracker.onPrintStart;
 
-    // Cloud task provider — henter filament-estimat fra Bambu Cloud
+    // Cloud task provider — fetches filament estimate from Bambu Cloud
     let _cloudTaskCache = null;
     let _cloudTaskCacheTs = 0;
     entry.tracker.cloudTaskProvider = (filename) => {

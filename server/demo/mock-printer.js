@@ -38,7 +38,7 @@ export class MockPrinter {
   }
 
   start() {
-    console.log(`[demo] Mock-printer startet: ${this.id}`);
+    console.log(`[demo] Mock printer started: ${this.id}`);
     this.interval = setInterval(() => this._tick(), 1000);
   }
 
