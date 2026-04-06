@@ -751,6 +751,33 @@
         <p class="text-muted" style="font-size:0.72rem;margin:0"><strong>Restart:</strong> Stops the server process. Requires a process manager (systemd/pm2/Docker) to auto-restart.<br><strong>Clear Cache:</strong> Forces fresh translations and assets on next reload.<br><strong>Unregister SW:</strong> Removes the service worker — fixes stale cache issues.</p>
       </div>`;
 
+      // Mobile App card
+      h += `<div class="settings-card">
+        <div class="card-title" style="display:flex;align-items:center;gap:6px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          Mobile App
+        </div>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:10px">Monitor and control your printers from your phone.</p>
+        <div style="display:flex;gap:10px;align-items:flex-start;flex-wrap:wrap">
+          <div style="background:#fff;border-radius:8px;padding:6px;display:inline-block">
+            <img id="settings-qr-app" width="100" height="100" alt="QR" style="display:block">
+          </div>
+          <div style="flex:1;min-width:200px">
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+              <a class="form-btn form-btn-sm" data-ripple href="/app" target="_blank" style="background:var(--accent-green);color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download Page
+              </a>
+              <a class="form-btn form-btn-sm" data-ripple href="/app/download/android" style="text-decoration:none;display:inline-flex;align-items:center;gap:4px">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Android APK
+              </a>
+            </div>
+            <p class="text-muted" style="font-size:0.72rem;margin:0"><strong>Android:</strong> Download APK directly or scan QR code.<br><strong>iPhone/iPad:</strong> Open in Safari → Share → Add to Home Screen.<br><strong>Scan QR:</strong> Opens the download page on your phone.</p>
+          </div>
+        </div>
+      </div>`;
+
       // Backups card (full width)
       h += `<div class="settings-card">
         <div class="card-title" style="display:flex;align-items:center;justify-content:space-between">
@@ -779,6 +806,9 @@
       _loadSystemInfo();
       _loadScheduledTasks();
       _loadBackupList();
+      // Load Mobile App QR code
+      const qrEl = document.getElementById('settings-qr-app');
+      if (qrEl) qrEl.src = '/api/qr?data=' + encodeURIComponent(window.location.origin + '/app') + '&size=100';
 
     } else if (_systemSubTab === 'security') {
       let h = '<div class="settings-grid">';
