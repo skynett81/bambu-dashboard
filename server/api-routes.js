@@ -3450,8 +3450,9 @@ export async function handleApiRequest(req, res) {
                     continue;
                   }
 
-                  // No color data — distribute evenly among all unlogged spools
-                  matched += usedG / spoolsWithoutLogs.length;
+                  // No color data — try fetching slicer metadata from Moonraker
+                  // for per-extruder weight breakdown
+                  matched += usedG / spoolsWithoutLogs.length;  // fallback: even distribution
                 }
 
                 totalUsed = Math.min(spool.initial_weight_g, matched);

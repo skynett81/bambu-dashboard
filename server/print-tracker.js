@@ -7,6 +7,13 @@ import { createLogger } from './logger.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const log = createLogger('tracker');
+
+/** Simple RGB color distance for spool matching */
+function _colorDist(hex1, hex2) {
+  const r1 = parseInt(hex1.slice(0, 2), 16), g1 = parseInt(hex1.slice(2, 4), 16), b1 = parseInt(hex1.slice(4, 6), 16);
+  const r2 = parseInt(hex2.slice(0, 2), 16), g2 = parseInt(hex2.slice(2, 4), 16), b2 = parseInt(hex2.slice(4, 6), 16);
+  return Math.sqrt((r1 - r2) ** 2 + (g1 - g2) ** 2 + (b1 - b2) ** 2);
+}
 let HMS_CODES = {};
 try { HMS_CODES = JSON.parse(readFileSync(join(__dirname, 'hms-codes.json'), 'utf8')); } catch (e) { log.warn('Failed to load HMS codes', e.message); }
 
@@ -377,12 +384,43 @@ export class PrintTracker {
     const _isExt = _isExtFromMapping || (data.ams?.tray_now != null && parseInt(data.ams.tray_now) >= 254);
     let _effectiveTrayId = _isExt ? '254' : (data.ams?.tray_now != null ? String(data.ams.tray_now) : null);
 
-    // Moonraker/Klipper: detect active feed channel from Snapmaker filament_feed state
+    // Moonraker/Klipper: detect active spool from slicer metadata
+    // OrcaSlicer/SnapmakerOrca provides per-extruder weight array + colors
+    if (_effectiveTrayId == null && data._slicer_filament_weights) {
+      const weights = Array.isArray(data._slicer_filament_weights)
+        ? data._slicer_filament_weights
+        : [data._slicer_filament_weights];
+      // Find the extruder with the most filament usage
+      let maxIdx = 0, maxW = 0;
+      for (let i = 0; i < weights.length; i++) {
+        if ((weights[i] || 0) > maxW) { maxW = weights[i]; maxIdx = i; }
+      }
+      // Match slicer color to NFC/spool slot
+      if (data._slicer_filament_colours && data._sm_filament) {
+        const slicerColors = data._slicer_filament_colours.split(';').map(c => c.replace('#', '').slice(0, 6).toUpperCase());
+        const activeColor = slicerColors[maxIdx];
+        if (activeColor) {
+          // Find closest NFC channel by color distance
+          let bestCh = 0, bestDist = Infinity;
+          for (let ch = 0; ch < data._sm_filament.length; ch++) {
+            const nfcHex = (data._sm_filament[ch].color || '').replace('#', '').toUpperCase();
+            if (nfcHex) {
+              const dist = _colorDist(activeColor, nfcHex);
+              if (dist < bestDist) { bestDist = dist; bestCh = ch; }
+            }
+          }
+          _effectiveTrayId = String(bestCh);
+          log.info('Slicer→NFC color match: extruder ' + maxIdx + ' (#' + activeColor + ') → slot ' + bestCh + ' (dist:' + bestDist + ')');
+        }
+      }
+      if (_effectiveTrayId == null) _effectiveTrayId = String(maxIdx);
+    }
+    // Moonraker: detect active feed channel as fallback
     if (_effectiveTrayId == null && data._sm_feed_channels) {
       const active = data._sm_feed_channels.find(ch => ch.stateCategory === 'active' || ch.channel_state === 1);
       if (active) _effectiveTrayId = String(active.extruder || '0');
     }
-    // Moonraker fallback: if no feed channel info, default to slot 0
+    // Moonraker final fallback: default to slot 0
     if (_effectiveTrayId == null && data.filament_used_mm !== undefined) {
       _effectiveTrayId = '0';
     }
@@ -1316,28 +1354,65 @@ export class PrintTracker {
       }
     }
 
-    // Method 3: Moonraker/Klipper — deduct from spool linked to extruder slot 0
-    // Moonraker printers don't have AMS, so we use the active extruder slot
+    // Method 3: Moonraker/Klipper — use per-extruder slicer weights + color matching
     if (!spoolUpdated && filamentUsedG > 0) {
       try {
-        // Try extruder slot 0 (primary extruder for most Klipper printers)
-        let spool = getSpoolBySlot(this.printerId, 0, 0);
-        // Fallback: try slot (254, 0) used by some NFC-equipped printers
-        if (!spool) spool = getSpoolBySlot(this.printerId, 254, 0);
-        // Fallback: try any spool linked to this printer
-        if (!spool) {
-          try {
-            const row = getDb().prepare('SELECT id FROM spools WHERE printer_id = ? AND remaining_pct > 0 ORDER BY id LIMIT 1').get(this.printerId);
-            if (row) spool = { id: row.id };
-          } catch {}
+        const slicerWeights = Array.isArray(data._slicer_filament_weights) ? data._slicer_filament_weights : null;
+        const slicerColors = data._slicer_filament_colours ? data._slicer_filament_colours.split(';').map(c => c.replace('#', '').slice(0, 6).toUpperCase()) : null;
+        const nfcSlots = data._sm_filament || null;
+
+        if (slicerWeights && slicerColors && nfcSlots) {
+          // Per-extruder deduction: match each slicer extruder to a spool via NFC color
+          for (let ext = 0; ext < slicerWeights.length; ext++) {
+            const extWeight = slicerWeights[ext] || 0;
+            if (extWeight < 0.1) continue;
+
+            // Scale slicer weight by actual completion
+            const completionFactor = (data.mc_percent || 100) / 100;
+            const actualG = extWeight * completionFactor;
+
+            // Match slicer color to NFC slot
+            let bestSlot = ext; // default: extruder index = slot index
+            if (slicerColors[ext] && nfcSlots.length > 0) {
+              let bestDist = Infinity;
+              for (let ch = 0; ch < nfcSlots.length; ch++) {
+                const nfcHex = (nfcSlots[ch].color || '').replace('#', '').toUpperCase();
+                if (nfcHex) {
+                  const dist = _colorDist(slicerColors[ext], nfcHex);
+                  if (dist < bestDist) { bestDist = dist; bestSlot = ch; }
+                }
+              }
+            }
+
+            const spool = getSpoolBySlot(this.printerId, 0, bestSlot);
+            if (spool) {
+              useSpoolWeight(spool.id, actualG, 'moonraker-slicer', printHistoryId, this.printerId);
+              trackConsumedSinceWeight(spool.id, actualG);
+              log.info('Spool #' + spool.id + ' slot ' + bestSlot + ' usage: ' + actualG.toFixed(1) + 'g (slicer ext' + ext + ')');
+              spoolUpdated = true;
+            }
+          }
         }
-        if (spool) {
-          useSpoolWeight(spool.id, filamentUsedG, 'moonraker-estimate', printHistoryId, this.printerId);
-          trackConsumedSinceWeight(spool.id, filamentUsedG);
-          log.info('Spool #' + spool.id + ' usage (Moonraker): ' + filamentUsedG.toFixed(1) + 'g');
-          spoolUpdated = true;
-        } else {
-          log.debug('Moonraker print finished but no spool linked to printer ' + this.printerId);
+
+        // Fallback: single spool deduction using tray_id from print start
+        if (!spoolUpdated) {
+          const trayId = this.currentPrint?.tray_id != null ? parseInt(this.currentPrint.tray_id) : 0;
+          let spool = getSpoolBySlot(this.printerId, 0, trayId);
+          if (!spool) spool = getSpoolBySlot(this.printerId, 0, 0);
+          if (!spool) {
+            try {
+              const row = getDb().prepare('SELECT id FROM spools WHERE printer_id = ? AND remaining_weight_g > 0 ORDER BY id LIMIT 1').get(this.printerId);
+              if (row) spool = { id: row.id };
+            } catch {}
+          }
+          if (spool) {
+            useSpoolWeight(spool.id, filamentUsedG, 'moonraker-estimate', printHistoryId, this.printerId);
+            trackConsumedSinceWeight(spool.id, filamentUsedG);
+            log.info('Spool #' + spool.id + ' usage (Moonraker fallback): ' + filamentUsedG.toFixed(1) + 'g');
+            spoolUpdated = true;
+          } else {
+            log.debug('Moonraker print finished but no spool linked to printer ' + this.printerId);
+          }
         }
       } catch (e) {
         log.error('Moonraker spool usage update failed: ' + e.message);
