@@ -289,13 +289,37 @@ async function sendSms(conf, title, message) {
     // Generic HTTP SMS gateway
     const url = conf.gatewayUrl;
     if (!url) throw new Error('SMS gateway URL not configured');
+    // Sanitize extraParams: only allow string values
+    let extra = {};
+    if (conf.extraParams) {
+      try {
+        const parsed = JSON.parse(conf.extraParams);
+        for (const [k, v] of Object.entries(parsed)) {
+          if (typeof k === 'string' && (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean')) {
+            extra[k] = v;
+          }
+        }
+      } catch { /* invalid JSON — ignore */ }
+    }
     const payload = JSON.stringify({
       to: conf.toNumber,
       from: conf.fromNumber || 'BambuDash',
       message: text,
-      ...( conf.extraParams ? JSON.parse(conf.extraParams) : {} )
+      ...extra
     });
-    const headers = conf.gatewayHeaders ? JSON.parse(conf.gatewayHeaders) : {};
+    // Sanitize gatewayHeaders: only allow string-to-string pairs, block sensitive headers
+    let headers = {};
+    const blockedHeaders = new Set(['host', 'cookie', 'authorization', 'proxy-authorization', 'transfer-encoding']);
+    if (conf.gatewayHeaders) {
+      try {
+        const parsed = JSON.parse(conf.gatewayHeaders);
+        for (const [k, v] of Object.entries(parsed)) {
+          if (typeof k === 'string' && typeof v === 'string' && !blockedHeaders.has(k.toLowerCase())) {
+            headers[k] = v;
+          }
+        }
+      } catch { /* invalid JSON — ignore */ }
+    }
     return _httpPost(url, headers, payload);
   }
 }

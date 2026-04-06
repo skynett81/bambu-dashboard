@@ -13,35 +13,67 @@ export class WebSocketHub {
     this.onCommand = null;
 
     this.wss.on('connection', (ws, req) => {
-      // Auth check for WebSocket
+      // Auth check for WebSocket — supports cookie, query param, or first-message auth
       if (isAuthEnabled()) {
         const token = getSessionToken(req);
-        if (!validateSession(token)) {
-          ws.close(4001, 'Unauthorized');
-          return;
+        if (validateSession(token)) {
+          const session = getSessionUser(token);
+          ws._user = session || { permissions: ['view'] };
+          ws._authenticated = true;
+        } else {
+          // Allow first-message auth: client must send { type: 'auth', token: '...' } within 5s
+          ws._authenticated = false;
+          ws._user = { permissions: [] };
+          ws._authTimer = setTimeout(() => {
+            if (!ws._authenticated) {
+              ws.close(4001, 'Authentication timeout');
+            }
+          }, 5000);
         }
-        // Store user permissions on the WebSocket connection
-        const session = getSessionUser(token);
-        ws._user = session || { permissions: ['view'] };
       } else {
         ws._user = { permissions: ['*'] };
+        ws._authenticated = true;
       }
 
       this.clients.add(ws);
       log.info(`Client connected (${this.clients.size} total)`);
 
-      // Send all printer states + meta on connect
-      ws.send(JSON.stringify({
-        type: 'init',
-        data: {
-          printers: this.printerMeta,
-          states: this.printerStates
-        }
-      }));
+      // Send all printer states + meta on connect (only if already authenticated)
+      if (ws._authenticated) {
+        ws.send(JSON.stringify({
+          type: 'init',
+          data: {
+            printers: this.printerMeta,
+            states: this.printerStates
+          }
+        }));
+      }
 
       ws.on('message', (raw) => {
         try {
           const msg = JSON.parse(raw.toString());
+
+          // First-message auth: { type: 'auth', token: '<session_token>' }
+          if (msg.type === 'auth' && !ws._authenticated) {
+            if (msg.token && validateSession(msg.token)) {
+              ws._authenticated = true;
+              if (ws._authTimer) { clearTimeout(ws._authTimer); ws._authTimer = null; }
+              const session = getSessionUser(msg.token);
+              ws._user = session || { permissions: ['view'] };
+              // Send init data now that auth is confirmed
+              ws.send(JSON.stringify({
+                type: 'init',
+                data: { printers: this.printerMeta, states: this.printerStates }
+              }));
+            } else {
+              ws.close(4001, 'Invalid token');
+            }
+            return;
+          }
+
+          // Block unauthenticated messages
+          if (!ws._authenticated) return;
+
           if (msg.type === 'subscribe_logs') {
             ws._subscribedLogs = true;
             return;
@@ -164,7 +196,7 @@ export class WebSocketHub {
     }
 
     for (const ws of this.clients) {
-      if (ws.readyState === 1) {
+      if (ws.readyState === 1 && ws._authenticated) {
         ws.send(msg);
       }
     }

@@ -372,7 +372,7 @@ export async function handleAuthApiRequest(req, res) {
       if (!isAuthEnabled()) {
         return sendJson(res, { ok: true });
       }
-      const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket.remoteAddress || 'unknown';
+      const clientIp = _getClientIp(req);
       if (!checkLoginRate(clientIp)) {
         return sendJson(res, { error: 'Too many login attempts. Try again later.' }, 429);
       }
@@ -428,13 +428,26 @@ function broadcastPrinterMeta() {
   }
 }
 
+// Trusted proxy IPs — only accept X-Forwarded-For from these sources
+const _trustedProxies = new Set((process.env.TRUSTED_PROXIES || '').split(',').map(s => s.trim()).filter(Boolean));
+
+function _getClientIp(req) {
+  const remoteIp = req.socket?.remoteAddress || 'unknown';
+  // Only trust X-Forwarded-For if the direct connection is from a trusted proxy
+  if (_trustedProxies.size > 0 && _trustedProxies.has(remoteIp)) {
+    const xff = req.headers['x-forwarded-for'];
+    if (xff) return xff.split(',')[0].trim();
+  }
+  return remoteIp;
+}
+
 export async function handleApiRequest(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const path = url.pathname;
   const method = req.method;
 
   // General API rate limiting
-  const clientIp = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.socket?.remoteAddress || 'unknown';
+  const clientIp = _getClientIp(req);
   if (!checkApiRate(clientIp)) {
     const headers = getApiRateHeaders(clientIp);
     res.writeHead(429, { 'Content-Type': 'application/json', ...headers });

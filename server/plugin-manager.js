@@ -3,8 +3,33 @@ import { getDb } from './db/connection.js';
 import { readFileSync, existsSync, readdirSync, mkdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { createLogger } from './logger.js';
+import { config } from './config.js';
 
 const log = createLogger('plugin');
+
+// SSRF guard for plugin outbound HTTP
+function _assertPublicUrl(urlStr) {
+  try {
+    const u = new URL(urlStr);
+    const h = u.hostname;
+    if (h === 'localhost' || h === '127.0.0.1' || h === '::1' || h === '0.0.0.0') {
+      throw new Error('Plugin HTTP blocked: private/localhost URL');
+    }
+    const p = h.split('.').map(Number);
+    if (p.length === 4 && p.every(n => !isNaN(n))) {
+      if (p[0] === 10 || (p[0] === 172 && p[1] >= 16 && p[1] <= 31) ||
+          (p[0] === 192 && p[1] === 168) || (p[0] === 169 && p[1] === 254)) {
+        throw new Error('Plugin HTTP blocked: private IP range');
+      }
+    }
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') {
+      throw new Error('Plugin HTTP blocked: non-HTTP scheme');
+    }
+  } catch (e) {
+    if (e.message.startsWith('Plugin HTTP')) throw e;
+    throw new Error('Plugin HTTP blocked: invalid URL');
+  }
+}
 
 // Hook names the system supports
 const HOOK_NAMES = [
@@ -84,6 +109,38 @@ export class PluginManager {
       return;
     }
 
+    // Path traversal guard: entry must be within plugins dir
+    const resolvedEntry = join(pluginDir, dbPlugin.entry_point);
+    if (!resolvedEntry.startsWith(this._pluginsDir)) {
+      log.error('Plugin ' + dbPlugin.name + ': entry point path traversal blocked');
+      return;
+    }
+
+    // Manifest integrity check (if manifest.json with sha256 hash exists)
+    const manifestPath = join(pluginDir, 'manifest.json');
+    if (existsSync(manifestPath)) {
+      try {
+        const { createHash } = await import('node:crypto');
+        const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+        if (manifest.integrity) {
+          const code = readFileSync(entryPath);
+          const hash = 'sha256-' + createHash('sha256').update(code).digest('base64');
+          if (hash !== manifest.integrity) {
+            log.error('Plugin ' + dbPlugin.name + ': integrity check FAILED (code modified after signing)');
+            if (config.plugins?.allowUnsigned !== true) {
+              log.error('Set config.plugins.allowUnsigned = true to override');
+              return;
+            }
+            log.warn('Loading anyway — allowUnsigned is true');
+          } else {
+            log.info('Plugin ' + dbPlugin.name + ': integrity check passed');
+          }
+        }
+      } catch (e) {
+        log.warn('Plugin ' + dbPlugin.name + ': manifest parse error: ' + e.message);
+      }
+    }
+
     try {
       // Create plugin API sandbox
       const pluginApi = this._createPluginApi(dbPlugin);
@@ -134,10 +191,10 @@ export class PluginManager {
         }
       },
 
-      // HTTP helpers for outbound requests
+      // HTTP helpers for outbound requests (SSRF-guarded)
       http: {
-        get: async (url, opts) => { const r = await fetch(url, opts); return r.json(); },
-        post: async (url, body, opts) => { const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', ...opts?.headers }, body: JSON.stringify(body) }); return r.json(); }
+        get: async (url, opts) => { _assertPublicUrl(url); const r = await fetch(url, opts); return r.json(); },
+        post: async (url, body, opts) => { _assertPublicUrl(url); const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', ...opts?.headers }, body: JSON.stringify(body) }); return r.json(); }
       },
 
       // Register a custom API route under /api/plugins/{name}/

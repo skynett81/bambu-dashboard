@@ -147,7 +147,7 @@ export function getSessionToken(req) {
     const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
     const token = url.searchParams.get('token');
     if (token && /^[a-f0-9]{64}$/.test(token)) return token;
-  } catch { /* ugyldig URL-format — ignorer */ }
+  } catch { /* invalid URL format — ignore */ }
 
   return null;
 }
