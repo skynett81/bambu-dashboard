@@ -3322,7 +3322,7 @@
       const data = await res.json();
       if (data.ok) {
         if (typeof showToast === 'function') showToast(`Recalculated: ${data.updated} of ${data.total} spools updated`, 'success');
-        _loadSpools();
+        loadFilament();
       } else {
         if (typeof showToast === 'function') showToast(data.error || 'Recalculation failed', 'error');
       }
