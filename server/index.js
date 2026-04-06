@@ -372,8 +372,15 @@ function handleRequest(req, res) {
     }
   }
 
-  if (req.url.startsWith('/api/')) {
+  if (req.url.startsWith('/api/') || pathname.startsWith('/app/download')) {
     return handleApiRequest(req, res);
+  }
+
+  // /app → app download page
+  if (pathname === '/app') {
+    res.writeHead(302, { Location: '/app.html' });
+    res.end();
+    return;
   }
 
   // Print labels route (not under /api/)

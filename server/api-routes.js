@@ -5144,6 +5144,35 @@ export async function handleApiRequest(req, res) {
       }
     }
 
+    // ── QR Code Generator ──
+    if (method === 'GET' && path === '/api/qr') {
+      const data = url.searchParams.get('data');
+      const qrSize = parseInt(url.searchParams.get('size')) || 200;
+      if (!data) return sendJson(res, { error: 'data parameter required' }, 400);
+      try {
+        const { generateQRCode } = await import('./qr-generator.js');
+        const png = generateQRCode(data, Math.min(qrSize, 500));
+        res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600' });
+        res.end(png);
+      } catch (e) { sendJson(res, { error: 'QR generation failed: ' + e.message }, 500); }
+      return;
+    }
+
+    // ── App Download (APK) ──
+    if (method === 'GET' && path === '/app/download/android') {
+      const apkPath = join(DATA_DIR, 'app', '3dprintforge.apk');
+      if (existsSync(apkPath)) {
+        const stat = statSync(apkPath);
+        res.writeHead(200, {
+          'Content-Type': 'application/vnd.android.package-archive',
+          'Content-Disposition': 'attachment; filename="3DPrintForge.apk"',
+          'Content-Length': stat.size
+        });
+        return createReadStream(apkPath).pipe(res);
+      }
+      return sendJson(res, { error: 'APK not available yet. Build with: cd App && npx expo prebuild && cd android && ./gradlew assembleRelease' }, 404);
+    }
+
     // ── EULA ──
     if (method === 'GET' && path === '/api/eula') {
       try {
