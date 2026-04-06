@@ -136,7 +136,65 @@ docker compose up -d
 
 > **Important:** `network_mode: host` is required for LAN access to printers via MQTT (port 8883) and camera streams (port 322). This is already set in `docker-compose.yml`.
 
-### Option 4: Demo Mode (No Hardware)
+### Option 4: One-Line Install (curl)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/skynett81/3dprintforge/main/install.sh | bash
+```
+
+Or with wget:
+```bash
+wget -qO- https://raw.githubusercontent.com/skynett81/3dprintforge/main/install.sh | bash
+```
+
+### Option 5: Pterodactyl / wisp.gg
+
+Import the included egg file for game panel hosting:
+
+1. Go to **Admin > Nests > Import Egg**
+2. Upload `egg-3dprintforge.json`
+3. Create a server with the egg — it auto-installs Node.js and dependencies
+4. Set environment variables: `BAMBU_IP`, `BAMBU_SERIAL`, `BAMBU_ACCESS_CODE`
+
+### Option 6: systemd Service (Manual)
+
+After any install method, create a systemd service for auto-start:
+
+```bash
+sudo tee /etc/systemd/system/3dprintforge.service > /dev/null <<EOF
+[Unit]
+Description=3DPrintForge
+After=network.target
+
+[Service]
+Type=simple
+User=$(whoami)
+WorkingDirectory=$(pwd)
+ExecStart=$(which node) server/index.js
+Restart=on-failure
+RestartSec=5
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable --now 3dprintforge
+```
+
+Manage with: `sudo systemctl {start|stop|restart|status} 3dprintforge`
+
+### Option 7: PM2 Process Manager
+
+```bash
+npm install -g pm2
+pm2 start server/index.js --name 3dprintforge
+pm2 save
+pm2 startup  # auto-start on boot
+```
+
+### Option 8: Demo Mode (No Hardware)
 
 Try the dashboard without a real printer:
 
@@ -148,6 +206,34 @@ npm run demo
 ```
 
 This starts 3 simulated printers (P2S Combo, X1 Carbon, H2D) with live print cycles, telemetry, AMS data, and seeded history.
+
+### Option 9: Raspberry Pi
+
+```bash
+# Install Node.js 22 on Raspberry Pi (ARM64)
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+sudo apt-get install -y nodejs ffmpeg git
+
+git clone https://github.com/skynett81/3dprintforge.git
+cd 3dprintforge
+./install.sh
+```
+
+> **Tip:** Raspberry Pi 4 (2GB+) or Pi 5 recommended. Pi 3 works but camera streaming may be slow.
+
+### Option 10: Unraid / TrueNAS / NAS
+
+Use the Docker method with the Unraid Community Applications template or TrueNAS TrueCharts:
+
+```bash
+docker run -d --name 3dprintforge \
+  --network host \
+  -v /mnt/user/appdata/3dprintforge/data:/app/data \
+  -v /mnt/user/appdata/3dprintforge/config.json:/app/config.json \
+  -v /mnt/user/appdata/3dprintforge/certs:/app/certs \
+  --restart unless-stopped \
+  ghcr.io/skynett81/3dprintforge:latest
+```
 
 ---
 
