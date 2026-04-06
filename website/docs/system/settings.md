@@ -115,6 +115,16 @@ Globale webhook-innstillinger:
 | Database-opprydding | Automatisk sletting av gammel historikk |
 | Oppdateringer | Sjekk for nye versjoner |
 
+### Server Management
+
+Located in **Settings → System → Updates** tab:
+
+| Action | Description |
+|---|---|
+| Restart Server | Sends `POST /api/server/restart` and auto-reconnects when the server is back online |
+| Clear Browser Cache | Unregisters the service worker, clears all browser caches, and calls the server clear-cache endpoint |
+| Unregister Service Worker | Removes the service worker — fixes stale cache issues after updates |
+
 ## 3D-visning
 
 | Innstilling | Beskrivelse |

@@ -115,6 +115,16 @@ Global webhook settings:
 | Database cleanup | Automatic deletion of old history |
 | Updates | Check for new versions |
 
+### Server Management
+
+Located in **Settings → System → Updates** tab:
+
+| Action | Description |
+|---|---|
+| Restart Server | Sends `POST /api/server/restart` and auto-reconnects when the server is back online |
+| Clear Browser Cache | Unregisters the service worker, clears all browser caches, and calls the server clear-cache endpoint |
+| Unregister Service Worker | Removes the service worker — fixes stale cache issues after updates |
+
 ## 3D Viewing
 
 | Setting | Description |

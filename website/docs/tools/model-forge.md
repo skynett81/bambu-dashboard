@@ -1,131 +1,250 @@
 ---
 sidebar_position: 7
 title: Model Forge
-description: 8 innebygde 3D-generatorer for skilt, lithophane, bokser, tekstplater, nøkkelringer, kabeletiketter, relieff og sjablonger
+description: 17 built-in parametric 3D tools — sign maker, lithophane, storage box, text plate, keychain, cable label, relief, stencil, NFC tags, 3MF converter, calibration, lattice, multi-color, vase, threads, texture, and 3MF validator
 ---
 
 # Model Forge
 
-Model Forge er et integrert verktøysett i 3DPrintForge som lar deg generere printklare 3D-modeller direkte i dashboardet — uten behov for ekstern modelleringsprogramvare.
+Model Forge is a suite of 17 parametric design tools built into 3DPrintForge. Create custom 3D-printable models directly in the dashboard — no external CAD software required.
 
-Gå til: **https://localhost:3443/#model-forge**
+Go to: **https://localhost:3443/#model-forge**
 
-:::info Erstatter Sign Maker
-Model Forge erstatter den tidligere frittstående Sign Maker-funksjonen og utvider med 7 nye verktøy. Alle eksisterende Sign Maker-prosjekter er kompatible.
+:::info Technology
+All tools export 3MF files compatible with all major slicers. Model Forge is built on **lib3mf WASM** (3MF Consortium) with a shared **MeshBuilder** providing 9 geometry primitives. Every tool includes a live **Three.js** 3D preview.
 :::
 
-## Oversikt over verktøy
+## Tools overview
 
-Model Forge inneholder 8 spesialiserte 3D-generatorer:
+| # | Tool | Description |
+|---|------|-------------|
+| 1 | [Sign Maker](#sign-maker) | QR codes, labels, warning signs with frame and stand |
+| 2 | [Lithophane](#lithophane) | Convert images to 3D printable light panels (flat/curved/cylinder) |
+| 3 | [Storage Box](#storage-box) | Parametric boxes with dividers (Gridfinity compatible) |
+| 4 | [Text Plate](#text-plate) | Custom 3D text on a plate with multi-line support |
+| 5 | [Keychain](#keychain) | Custom keychains with text and shapes |
+| 6 | [Cable Label](#cable-label) | Wrap-around labels for cables and wires |
+| 7 | [Relief](#relief) | Convert images to raised 3D surfaces or stamps |
+| 8 | [Stencil](#stencil) | Create cut-out stencils from images |
+| 9 | [NFC Filament Tag](#nfc-filament-tag) | Write filament info to NFC tags (OpenSpool format) |
+| 10 | [3MF Converter](#3mf-converter) | Convert Bambu Lab .3mf to Snapmaker U1 format |
+| 11 | [Calibration Tools](#calibration-tools) | 8 sub-tools for printer calibration and testing |
+| 12 | [Lattice Structure](#lattice-structure) | BCC/FCC/octet/diamond/cubic lattice cells |
+| 13 | [Multi-Color](#multi-color) | Multi-object 3MF for AMS/MMU color assignment |
+| 14 | [Advanced Vase](#advanced-vase) | 7 vase profiles with parametric control |
+| 15 | [Threads & Joints](#threads--joints) | Bolts, nuts, standoffs, and snap-fit clips |
+| 16 | [Texture Surface](#texture-surface) | 8 embossed texture patterns for surfaces |
+| 17 | [3MF Validator](#3mf-validator) | Validate 3MF files, check mesh integrity, detect extensions |
 
-| Verktøy | Beskrivelse |
-|---------|-------------|
-| Sign Maker | Lag tilpassede skilt med tekst, symboler og dekorative rammer |
-| Lithophane | Konverter bilder til lithophane-modeller for bakbelysning |
-| Storage Box | Generer oppbevaringsbokser med tilpassede dimensjoner og skillevegger |
-| Text Plate | Lag tekstplater med valgfri font, størrelse og layout |
-| Keychain | Design egne nøkkelringer med tekst, former og hull |
-| Cable Label | Generer kabeletiketter for organisering av kabler og ledninger |
-| Image Relief | Konverter bilder til 3D-relieff med justerbar dybde |
-| Stencil | Lag sjablonger fra bilder eller tekst for maling og dekorasjon |
+---
 
 ## Sign Maker
 
-Lag tilpassede 3D-skilt med tekst og grafikk:
+Create custom text signs with QR codes, labels, and warning signs:
 
-- **Tekst** — skriv inn teksten du vil ha på skiltet
-- **Font** — velg mellom flere fonter (inkludert norske tegn)
-- **Ramme** — velg dekorativ ramme rundt skiltet
-- **Størrelse** — juster bredde, høyde og dybde
-- **Symboler** — legg til ikoner og symboler
-- **Forhåndsvisning** — se resultatet i sanntids 3D-visning
+- **Text** — single or multi-line text with font selection
+- **QR code** — embed a QR code alongside text
+- **Frame** — decorative border with adjustable thickness
+- **Stand** — integrated stand for desk placement
+- **Mounting holes** — wall mount option
+- **Size** — adjustable width, height, and depth
 
 ## Lithophane
 
-Konverter et bilde til en lithophane — en tynn plate der bildet blir synlig når lys skinner gjennom:
+Convert any image into a 3D-printable light panel:
 
-- **Last opp bilde** — støtter JPG, PNG og BMP
-- **Form** — flat, buet, sylindrisk eller kupp
-- **Oppløsning** — juster detaljenivå (piksler per mm)
-- **Tykkelse** — minimum og maksimum tykkelse
-- **Invertert** — bytt lys og mørke områder
-- **Forhåndsvisning** — se resultatet før generering
+- **Image upload** — JPG, PNG, or BMP
+- **Shape** — flat, curved, or cylindrical
+- **Resolution** — detail level (pixels per mm)
+- **Thickness** — minimum and maximum thickness range
+- **Inversion** — swap light and dark areas
+- **Border** — optional frame around the panel
 
-:::tip Beste resultat
-Bruk hvitt PLA-filament og skriv ut med 100% infill for best lysgjennomsiving. Plasser en LED-lyskilde bak for å se bildet.
+:::tip Best results
+Print with white PLA at 100% infill. Place a light source behind the panel to reveal the image.
 :::
 
 ## Storage Box
 
-Generer tilpassede oppbevaringsbokser:
+Generate parametric storage boxes with Gridfinity compatibility:
 
-- **Dimensjoner** — bredde, dybde og høyde i mm
-- **Veggtykkelse** — juster veggtykkelse
-- **Skillevegger** — legg til interne skillevegger (X- og Y-retning)
-- **Lokk** — valgfritt lokk med snap-fit eller skyvelokk
-- **Hjørner** — avrundede eller skarpe hjørner
-- **Etikettfelt** — valgfritt felt for etiketter på forsiden
+- **Dimensions** — width, depth, and height in mm
+- **Wall thickness** — adjustable walls
+- **Dividers** — internal divider grid (X and Y directions)
+- **Lid** — none, snap-fit, or sliding lid
+- **Corners** — rounded or sharp
+- **Label slot** — front-facing label area
+- **Gridfinity** — compatible base pattern for modular stacking
 
 ## Text Plate
 
-Lag 3D-tekstplater for merking og dekorasjon:
+Create 3D text plates with multi-line support:
 
-- **Tekst** — flerlinjet tekst med linjebrudd
-- **Font** — velg font og tekststørrelse
-- **Justering** — venstre, sentrert eller høyre
-- **Baseplattform** — juster størrelse og form på bunnplaten
-- **Opphevet/nedsunket** — velg om teksten skal stikke opp eller være innfelt
-- **Festehull** — valgfrie hull for skruer eller magneter
+- **Text** — multi-line text with line break control
+- **Font** — font and size selection
+- **Alignment** — left, center, or right
+- **Style** — embossed (raised) or engraved (recessed) text
+- **Base plate** — adjustable size and shape
+- **Mounting** — optional holes for screws or magnets
 
 ## Keychain
 
-Design egne nøkkelringer:
+Design custom keychains:
 
-- **Tekst** — kort tekst eller initialer
-- **Form** — rektangel, sirkel, oval, hjerte eller egendefinert
-- **Ringhull** — automatisk hull for nøkkelring
-- **Tykkelse** — juster total tykkelse
-- **Flerfarget** — mulighet for fargebytte per lag (for flerfargeprintere)
+- **Text** — short text or initials
+- **Shape** — rectangle, circle, oval, heart, tag, or custom
+- **Ring hole** — automatic attachment hole
+- **Thickness** — total keychain thickness
+- **Multi-color** — layer-based color swap support for AMS/MMU printers
 
 ## Cable Label
 
-Generer etiketter for kabelorganisering:
+Generate wrap-around cable management labels:
 
-- **Tekst** — kabelnavn eller identifikator
-- **Festetype** — clip-on, wrap-around eller flat
-- **Kabeldiameter** — tilpass til kabelstørrelse
-- **Font** — velg lesbar font for liten tekst
-- **Batch** — generer flere etiketter på én plate
+- **Text** — cable name or identifier
+- **Style** — clip-on or wrap-around
+- **Cable diameter** — common sizes or custom input
+- **Font** — readable fonts optimized for small text
+- **Batch** — generate multiple labels on one plate
 
-## Image Relief
+## Relief
 
-Konverter bilder til 3D-relieff:
+Convert images to raised 3D surfaces or stamps:
 
-- **Last opp bilde** — støtter JPG, PNG og BMP
-- **Dybde** — juster total relieff-dybde
-- **Inversjon** — bytt høyde og lavpunkt
-- **Glatthet** — juster overflatens glatthet
-- **Ramme** — legg til ramme rundt relieffet
-- **Oppløsning** — detaljnivå basert på bildestørrelse
+- **Image upload** — JPG, PNG, or BMP
+- **Depth** — adjustable relief depth
+- **Inversion** — swap raised and recessed areas
+- **Smoothing** — surface smoothness control
+- **Border** — optional frame around the relief
+- **Resolution** — detail level based on image size
 
 ## Stencil
 
-Lag sjablonger fra bilder eller tekst:
+Create cut-out stencils from images:
 
-- **Last opp bilde** — automatisk konvertering til sjablongformat
-- **Tekst** — alternativt, bruk tekst som sjablongmønster
-- **Broer** — automatisk generering av broer for å holde flytende elementer (som bokstaven O)
-- **Tykkelse** — sjablongtykkelse i mm
-- **Margin** — ramme rundt sjablongen
-- **Størrelse** — skaler opp eller ned
+- **Image upload** — automatic conversion with threshold control
+- **Text** — alternative text-based stencil
+- **Bridges** — automatic bridge generation for floating elements (e.g. the center of letters like O, A, B)
+- **Thickness** — stencil thickness in mm
+- **Margin** — border around the stencil
+- **Bridge width** — adjustable for structural integrity
 
-## Generelle funksjoner
+## NFC Filament Tag
 
-Alle verktøy i Model Forge deler disse fellesfunksjonene:
+Write filament information to NFC tags in OpenSpool format:
 
-- **3D-forhåndsvisning** — sanntids visning av modellen mens du justerer parametere
-- **Eksportformat** — eksporter som STL eller 3MF
-- **Send direkte til printer** — send generert modell rett til en tilkoblet printer
-- **Legg i kø** — legg til i print-køen for senere printing
-- **Lagre i biblioteket** — lagre generert modell i filbiblioteket
-- **Historikk** — se tidligere genererte modeller med mulighet for å redigere og regenerere
+- **Filament data** — material type, color, brand, weight
+- **OpenSpool format** — compatible with OpenSpool-enabled printers
+- **Tag writing** — direct NFC tag programming from the browser
+- **Spool inventory** — link to existing spools in your inventory
+
+## 3MF Converter
+
+Convert Bambu Lab .3mf project files to Snapmaker U1 format:
+
+- **Input** — Bambu Lab .3mf files with embedded print profiles
+- **Output** — converted .3mf compatible with Snapmaker U1
+- **Profile mapping** — translates Bambu print settings to Snapmaker equivalents
+- **Batch conversion** — convert multiple files at once
+
+## Calibration Tools
+
+8 sub-tools for printer calibration and testing:
+
+| Sub-tool | Purpose |
+|----------|---------|
+| Tolerance test | Test dimensional accuracy with graduated fit slots |
+| Bed level | Generate a bed leveling pattern for first-layer calibration |
+| Temp tower | Temperature tower for finding optimal print temperature |
+| Retraction test | Retraction distance and speed calibration |
+| Vase mode test | Spiral vase for testing single-wall quality |
+| QR block | QR code calibration block |
+| Custom shapes | Basic geometric shapes for testing |
+| Thread test | Threaded connection tolerance test |
+
+## Lattice Structure
+
+Generate lattice unit cells for lightweight structural infill:
+
+- **Type** — BCC, FCC, octet, diamond, or cubic lattice
+- **Cell size** — unit cell dimensions
+- **Strut diameter** — configurable strut thickness
+- **Array** — repeat cells in X, Y, Z directions
+- **Use case** — lightweight brackets, heat exchangers, aesthetic panels
+
+## Multi-Color
+
+Create multi-object 3MF files for AMS/MMU color assignment:
+
+- **Layout** — stack, side-by-side, or inlay arrangement
+- **Color assignment** — assign colors per object for multi-material printing
+- **AMS/MMU compatible** — ready for Bambu AMS, Prusa MMU, or similar systems
+- **Import** — combine existing STL/3MF files into one multi-color project
+
+## Advanced Vase
+
+Generate vases with 7 parametric profiles:
+
+| Profile | Shape |
+|---------|-------|
+| Cylinder | Straight walls |
+| Sine | Wavy sine-wave walls |
+| Bulge | Outward bulging mid-section |
+| Flare | Widening top opening |
+| Twist | Spiraling twisted walls |
+| Hourglass | Narrow middle, wide top and bottom |
+| Tulip | Tulip-shaped curved profile |
+
+All profiles support adjustable height, diameter, wall thickness, and resolution.
+
+## Threads & Joints
+
+Generate threaded fasteners and mechanical joints:
+
+- **Bolts** — M3 through M20 metric threads
+- **Nuts** — matching hex nuts for all bolt sizes
+- **Standoffs** — hex or round standoffs with threaded ends
+- **Snap-fit clips** — cantilever snap-fit joints for enclosures
+- **Thread pitch** — standard or custom pitch values
+
+## Texture Surface
+
+Generate embossed texture patterns for surfaces:
+
+| Pattern | Description |
+|---------|-------------|
+| Diamond plate | Industrial diamond tread plate |
+| Knurl | Straight or diagonal knurling |
+| Honeycomb | Hexagonal honeycomb grid |
+| Waves | Sinusoidal wave pattern |
+| Brick | Brick wall pattern |
+| Carbon fiber | Woven carbon fiber texture |
+| Dots | Regular dot array |
+| Crosshatch | Crossed diagonal lines |
+
+All patterns support adjustable depth, spacing, and tile size.
+
+## 3MF Validator
+
+Validate 3MF files for correctness and compatibility:
+
+- **File validation** — check 3MF structure against the specification
+- **Mesh integrity** — detect non-manifold edges, flipped normals, and degenerate triangles
+- **Extension detection** — identify 3MF extensions used (production, materials, beam lattice)
+- **Color matching** — compare model colors against your spool inventory
+- **Report** — detailed validation summary with warnings and errors
+
+---
+
+## Workflow
+
+1. Open **Model Forge** from the sidebar
+2. Select a tool
+3. Configure parameters using the live 3D preview
+4. Click **Generate** to create the 3MF file
+5. **Download** the file or **Send to Library** to store it
+6. From the library, use **Send to Printer** or **Add to Queue**
+
+:::tip Preview
+All tools show a live Three.js 3D preview as you adjust parameters. Rotate and zoom the preview to check the result before generating.
+:::
