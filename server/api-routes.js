@@ -5162,7 +5162,7 @@ export async function handleApiRequest(req, res) {
       if (!data) return sendJson(res, { error: 'data parameter required' }, 400);
       try {
         const { generateQRCode } = await import('./qr-generator.js');
-        const png = generateQRCode(data, Math.min(qrSize, 500));
+        const png = await generateQRCode(data, Math.min(qrSize, 500));
         res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600' });
         res.end(png);
       } catch (e) { sendJson(res, { error: 'QR generation failed: ' + e.message }, 500); }

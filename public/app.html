@@ -100,7 +100,7 @@
       <div class="card-title">Android</div>
       <div class="card-sub">APK direct download</div>
       <span class="badge badge-ready">Available</span>
-      <div class="qr-box"><img id="qr-android" width="200" height="200" alt="Android QR"></div>
+      <div class="qr-box"><img id="qr-android" width="250" height="250" alt="Android QR"></div>
       <br>
       <a class="btn btn-android" id="btn-android" href="/app/download/android">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -114,7 +114,7 @@
       <div class="card-title">iPhone / iPad</div>
       <div class="card-sub">Native app or PWA install</div>
       <span class="badge badge-ready">Available</span>
-      <div class="qr-box"><img id="qr-ios" width="200" height="200" alt="iOS QR"></div>
+      <div class="qr-box"><img id="qr-ios" width="250" height="250" alt="iOS QR"></div>
       <br>
       <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
         <a class="btn btn-ios" id="btn-ios-ipa" href="/app/download/ios">
@@ -210,8 +210,8 @@ async function init() {
   }
 
   // QR codes — use 200px for better scanability, short URL for less dense QR
-  document.getElementById('qr-android').src = '/api/qr?data=' + encodeURIComponent(baseUrl + '/app') + '&size=200';
-  document.getElementById('qr-ios').src = '/api/qr?data=' + encodeURIComponent(baseUrl) + '&size=200';
+  document.getElementById('qr-android').src = '/api/qr?data=' + encodeURIComponent(baseUrl + '/app') + '&size=300';
+  document.getElementById('qr-ios').src = '/api/qr?data=' + encodeURIComponent(baseUrl) + '&size=300';
 
   // Fill URL placeholders
   document.getElementById('server-url').textContent = baseUrl;
