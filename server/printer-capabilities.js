@@ -80,6 +80,22 @@ const CAPABILITIES = {
     },
     auth: { required: ['ip', 'accessCode'], methods: ['api-key', 'digest'] },
   },
+
+  octoprint: {
+    label: 'OctoPrint',
+    connection: 'http-poll',
+    fileAccess: 'http-api',
+    httpApi: { filesEndpoint: '/api/files/local', metadataEndpoint: '/api/files' },
+    camera: { modes: ['http-snapshot'], snapshotEndpoint: '/webcam/?action=snapshot' },
+    modelAccess: { method: 'octoprint-gcode', hasMeshIn3MF: false },
+    gcodeAccess: { method: 'http-download', endpoint: '/api/files/local/' },
+    features: {
+      ams: false, xcam: false, firmwareDetection: false,
+      ssdpDiscovery: false, cloudTasks: false, historySync: false,
+      multiExtruder: true,
+    },
+    auth: { required: ['ip', 'accessCode'], methods: ['api-key'] },
+  },
 };
 
 /**

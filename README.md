@@ -53,6 +53,14 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 
 - **Prusa** — MK4, MK3.9, Mini+, XL (with PrusaLink firmware)
 
+### OctoPrint (HTTP REST API)
+
+- **Ender 3** — all variants (Pro, V2, S1, Neo)
+- **Prusa MK3** — i3 MK3S+ with OctoPrint
+- **Anycubic** — Mega, Kobra, Vyper
+- **Artillery** — Sidewinder, Genius
+- **Any printer** running OctoPrint on Raspberry Pi or similar
+
 ### Moonraker / Klipper (WebSocket API)
 
 - **Snapmaker** — U1 (deep integration: NFC filament, AI defect detection, timelapse)
@@ -294,6 +302,15 @@ Edit `config.json` (created from `config.example.json`):
 | `ip` | Printer screen: Settings > Network > IP Address |
 | `accessCode` | PrusaLink API key from printer screen or PrusaSlicer |
 
+**OctoPrint:**
+
+| Field | Where to Find |
+|-------|--------------|
+| `ip` | OctoPrint host IP (e.g. your Raspberry Pi) |
+| `port` | OctoPrint port (default 80) |
+| `accessCode` | OctoPrint API key from Settings → API → Global API Key |
+| `webcamUrl` | Optional: Custom webcam snapshot URL |
+
 **Moonraker / Klipper:**
 
 | Field | Where to Find |
@@ -305,7 +322,7 @@ Edit `config.json` (created from `config.example.json`):
 
 ### Multiple Printers
 
-Mix Bambu Lab and Moonraker printers in the same `printers` array. Each printer gets its own connection and camera stream (on consecutive ports starting from `cameraWsPortStart`).
+Mix Bambu Lab, OctoPrint, PrusaLink, and Moonraker printers in the same `printers` array. Each printer gets its own connection and camera stream (on consecutive ports starting from `cameraWsPortStart`).
 
 ---
 

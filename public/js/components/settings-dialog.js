@@ -1476,6 +1476,8 @@
           <select class="form-input" id="pf-type" onchange="window._togglePrinterTypeFields()">
             <option value="bambu" ${curType === 'bambu' ? 'selected' : ''}>Bambu Lab (MQTT)</option>
             <option value="moonraker" ${curType === 'moonraker' ? 'selected' : ''}>Moonraker / Klipper (Snapmaker, Voron, Creality, etc.)</option>
+            <option value="prusalink" ${curType === 'prusalink' ? 'selected' : ''}>PrusaLink (Prusa MK4, Mini+, XL)</option>
+            <option value="octoprint" ${curType === 'octoprint' ? 'selected' : ''}>OctoPrint (Ender 3, Prusa MK3, Anycubic, etc.)</option>
           </select>
         </div>
         <div class="form-group">
@@ -1490,13 +1492,17 @@
           <label class="form-label">${t('settings.ip')}</label>
           <input class="form-input" id="pf-ip" value="${printer?.ip || ''}" placeholder="${t('settings.ip_placeholder')}">
         </div>
-        <div class="form-group pf-bambu-field" ${curType === 'moonraker' ? 'style="display:none"' : ''}>
+        <div class="form-group pf-bambu-field" ${curType === 'bambu' ? '' : 'style="display:none"'}>
           <label class="form-label">${t('settings.serial')}</label>
           <input class="form-input" id="pf-serial" value="${printer?.serial || ''}" placeholder="${t('settings.serial_placeholder')}">
         </div>
-        <div class="form-group pf-bambu-field" ${curType === 'moonraker' ? 'style="display:none"' : ''}>
-          <label class="form-label">${t('settings.access_code')}</label>
-          <input class="form-input" id="pf-access" value="" placeholder="${t('settings.access_code_hint')}">
+        <div class="form-group">
+          <label class="form-label" id="pf-access-label">${curType === 'octoprint' || curType === 'prusalink' ? 'API Key' : t('settings.access_code')}</label>
+          <input class="form-input" id="pf-access" value="" placeholder="${curType === 'octoprint' ? 'OctoPrint API key from Settings → API' : curType === 'prusalink' ? 'PrusaLink API key' : t('settings.access_code_hint')}">
+        </div>
+        <div class="form-group" id="pf-webcam-group" style="${curType === 'octoprint' ? '' : 'display:none'}">
+          <label class="form-label">Webcam URL (optional)</label>
+          <input class="form-input" id="pf-webcam" value="${printer?.webcamUrl || ''}" placeholder="http://ip/webcam/?action=snapshot">
         </div>
         <details style="margin-top:8px;border-top:1px solid var(--border-color);padding-top:8px">
           <summary style="cursor:pointer;font-size:0.8rem;font-weight:600">${t('settings.per_printer_cost_title')}</summary>
@@ -1549,9 +1555,21 @@
 
   window._togglePrinterTypeFields = function() {
     const type = document.getElementById('pf-type')?.value || 'bambu';
+    const isBambu = type === 'bambu';
+    const isOctoprint = type === 'octoprint';
+    const isPrusalink = type === 'prusalink';
+    // Serial field: only Bambu
     document.querySelectorAll('.pf-bambu-field').forEach(el => {
-      el.style.display = type === 'moonraker' ? 'none' : '';
+      el.style.display = isBambu ? '' : 'none';
     });
+    // Access code label changes per type
+    const accessLabel = document.querySelector('[for="pf-access"], #pf-access')?.previousElementSibling;
+    if (accessLabel) {
+      accessLabel.textContent = isOctoprint || isPrusalink ? 'API Key' : t('settings.access_code');
+    }
+    // Webcam URL: only for OctoPrint
+    const webcamGroup = document.getElementById('pf-webcam-group');
+    if (webcamGroup) webcamGroup.style.display = isOctoprint ? '' : 'none';
   };
 
   window.editPrinter = async function(id) {
@@ -1585,11 +1603,13 @@
     const machCost = document.getElementById('pf-machine-cost')?.value;
     const machLife = document.getElementById('pf-machine-lifetime')?.value;
     const type = document.getElementById('pf-type')?.value || 'bambu';
+    const webcamUrl = document.getElementById('pf-webcam')?.value.trim() || '';
     const body = { name, model, ip, serial, accessCode, type,
       printer_wattage: wattage ? parseFloat(wattage) : null,
       electricity_rate_kwh: elecRate ? parseFloat(elecRate) : null,
       machine_cost: machCost ? parseFloat(machCost) : null,
-      machine_lifetime_hours: machLife ? parseFloat(machLife) : null
+      machine_lifetime_hours: machLife ? parseFloat(machLife) : null,
+      ...(webcamUrl && { webcamUrl }),
     };
 
     try {

@@ -12,7 +12,7 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 
 ## Hva er 3DPrintForge?
 
-3DPrintForge kobler seg til printerne dine via MQTT (Bambu Lab), PrusaLink HTTP API (Prusa MK4/Mini/XL) eller Moonraker WebSocket (Snapmaker, Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig og andre Klipper-printere) over LAN. Snapmaker U1 har dyp integrasjon med NFC-filament, AI-defektdeteksjon og strømmåling. Synkroniser modeller og printhistorikk via Bambu Cloud, Snapmaker Cloud, eller hent data direkte fra printeren.
+3DPrintForge kobler seg til printerne dine via MQTT (Bambu Lab), PrusaLink HTTP API (Prusa MK4/Mini/XL), OctoPrint REST API (Ender 3, Prusa MK3, Anycubic, Artillery m.fl.) eller Moonraker WebSocket (Snapmaker, Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig og andre Klipper-printere) over LAN. Snapmaker U1 har dyp integrasjon med NFC-filament, AI-defektdeteksjon og strømmåling. Synkroniser modeller og printhistorikk via Bambu Cloud, Snapmaker Cloud, eller hent data direkte fra printeren.
 
 ### Viktigste funksjoner
 
@@ -36,7 +36,7 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 - **AMS fuktighet/temperatur** — 5-nivå vurdering med anbefalinger for optimal oppbevaring
 - **Achievements** — 18 verdens landemerker som milepæler for filamentforbruk med XP-progresjon
 - **Varsler** — 7 kanaler (Telegram, Discord, e-post, ntfy, Pushover, SMS, webhook)
-- **Multi-printer, multi-brand** — Bambu Lab (MQTT), PrusaLink, Creality, Elegoo, AnkerMake, Voron, RatRig, QIDI, Snapmaker og alle Klipper/Moonraker-printere
+- **Multi-printer, multi-brand** — Bambu Lab (MQTT), PrusaLink, OctoPrint, Creality, Elegoo, AnkerMake, Voron, RatRig, QIDI, Snapmaker og alle Klipper/Moonraker-printere
 - **Snapmaker dyp integrasjon** — NFC-filament, defektdeteksjon AI, timelapse, kalibrering, luftrenser og strommaler
 - **Printer-capabilities** — per-merke konfigurasjon for filtilgang, kamera og funksjoner
 - **Filbibliotek** — 3MF/STL/gcode-bibliotek med thumbnails, kategorier, tags, 3D-forhandsvisning, Send to Printer og Add to Queue
@@ -116,6 +116,13 @@ Du kan prøve dashboardet uten en fysisk printer ved å kjøre `npm run demo`. D
 - **Prusa MK4**, MK4S, MK3.9, MK3.5
 - **Prusa Mini**, Mini+
 - **Prusa XL** (multi-verktøy)
+
+### OctoPrint (via HTTP REST API)
+- **Ender 3**: alle varianter (Pro, V2, S1, Neo)
+- **Prusa MK3**: i3 MK3S+ med OctoPrint
+- **Anycubic**: Mega, Kobra, Vyper
+- **Artillery**: Sidewinder, Genius
+- **Alle andre** printere med OctoPrint på Raspberry Pi
 
 ### Klipper/Moonraker-printere (via WebSocket + REST API)
 - **Snapmaker**: U1 (opptil 4 verktøyhoder, NFC-filament, AI defektdeteksjon), J1, A350T, A250T. SACP-støtte for eldre modeller
