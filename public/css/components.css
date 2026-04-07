@@ -4168,11 +4168,15 @@
   margin-right: 8px;
 }
 
+/* .filament-bar — Alias for Bootstrap .progress with custom sizing */
 .filament-bar {
+  --bs-progress-height: 6px;
+  --bs-progress-bg: var(--bg-inset, rgba(0, 0, 0, 0.35));
+  --bs-progress-border-radius: 3px;
   width: 100%;
-  height: 6px;
-  background: var(--bg-inset, rgba(0, 0, 0, 0.35));
-  border-radius: 3px;
+  height: var(--bs-progress-height);
+  background: var(--bs-progress-bg);
+  border-radius: var(--bs-progress-border-radius);
   overflow: hidden;
   margin-top: 8px;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06);
@@ -4844,6 +4848,43 @@
 
 .settings-card:hover {
   box-shadow: var(--shadow-md);
+}
+
+/* Collapsible settings-card (Bootstrap accordion styling) */
+.settings-card.collapsible .card-title {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+.settings-card.collapsible .card-title::after {
+  content: '';
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid var(--text-muted);
+  border-bottom: 2px solid var(--text-muted);
+  transform: rotate(45deg);
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.settings-card.collapsible.collapsed .card-title::after {
+  transform: rotate(-45deg);
+}
+
+.settings-card.collapsible .card-collapse {
+  overflow: hidden;
+  max-height: 2000px;
+  transition: max-height 0.3s ease, opacity 0.2s;
+  opacity: 1;
+}
+
+.settings-card.collapsible.collapsed .card-collapse {
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
 }
 
 /* Printer list grid */
@@ -9812,6 +9853,42 @@ select:disabled {
 .ix-flash-error   { animation: flashError 0.5s ease; }
 
 /* ---- Enhanced Form Validation ---- */
+/* Bootstrap progress bars — dark mode overrides */
+[data-bs-theme="dark"] .progress {
+  --bs-progress-bg: var(--bg-inset, rgba(0, 0, 0, 0.35));
+}
+
+/* Bootstrap alerts — dark mode overrides */
+[data-bs-theme="dark"] .alert {
+  --bs-alert-bg: var(--bg-tertiary);
+  --bs-alert-border-color: var(--border-subtle);
+  border-radius: var(--radius);
+}
+
+[data-bs-theme="dark"] .alert-info {
+  --bs-alert-color: var(--accent-blue, #4aa3df);
+}
+
+[data-bs-theme="dark"] .alert-warning {
+  --bs-alert-color: #f0883e;
+}
+
+[data-bs-theme="dark"] .alert-danger {
+  --bs-alert-color: var(--accent-red, #e53935);
+}
+
+[data-bs-theme="dark"] .alert-success {
+  --bs-alert-color: var(--accent-green, #00c864);
+}
+
+/* Bootstrap input-group — dark mode overrides */
+.input-group-text {
+  background: var(--bg-tertiary);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
 /* Bootstrap validation states on .form-input */
 .form-input.is-invalid, .form-input.ix-invalid {
   border-color: var(--bs-form-invalid-border-color, var(--accent-red));

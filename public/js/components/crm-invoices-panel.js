@@ -43,9 +43,9 @@
     let html = '';
 
     if (_invoices.length === 0) {
-      html += `<div class="card"><div class="card-body" style="text-align:center;padding:2rem;opacity:0.6">
-        ${_esc(_tl('crm.no_invoices', 'No invoices'))}
-      </div></div>`;
+      html += `<div class="alert alert-info d-flex align-items-center gap-2" role="alert">
+        <i class="bi bi-info-circle"></i> ${_esc(_tl('crm.no_invoices', 'No invoices'))}
+      </div>`;
     } else {
       html += `<div class="card"><div class="card-body" style="padding:0">
         <table class="table table-hover table-sm" style="margin:0">

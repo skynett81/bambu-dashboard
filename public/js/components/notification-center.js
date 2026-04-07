@@ -71,13 +71,13 @@
     html += '<button class="notif-action-btn notif-action-clear" onclick="clearAllNotifications()" title="' + (typeof t === 'function' ? t('notification.clear_all_tooltip') : 'Clear all notifications') + '" data-bs-toggle="tooltip" data-bs-placement="bottom">' + (typeof t === 'function' ? t('notification.clear_all') : 'Clear') + '</button>';
     html += '</div></div>';
 
-    html += '<div class="notif-list">';
+    html += '<div class="notif-list list-group list-group-flush">';
     if (_notifications.length === 0) {
-      html += '<div class="notif-empty">' + (typeof t === 'function' ? t('notification.no_notifications') : 'No notifications yet') + '</div>';
+      html += '<div class="notif-empty list-group-item text-center text-muted">' + (typeof t === 'function' ? t('notification.no_notifications') : 'No notifications yet') + '</div>';
     } else {
       for (var i = 0; i < _notifications.length; i++) {
         var n = _notifications[i];
-        var cls = 'notif-item' + (n.read ? '' : ' unread');
+        var cls = 'notif-item list-group-item list-group-item-action' + (n.read ? '' : ' unread');
         html += '<div class="' + cls + '" data-notif-id="' + n.id + '" onclick="markNotificationRead(' + n.id + ')">';
         html += '<span class="notif-dot"></span>';
         html += '<span class="notif-type-icon">' + (TYPE_ICONS[n.type] || TYPE_ICONS.info) + '</span>';

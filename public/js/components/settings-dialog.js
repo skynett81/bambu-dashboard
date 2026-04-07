@@ -1502,21 +1502,33 @@
           <summary style="cursor:pointer;font-size:0.8rem;font-weight:600">${t('settings.per_printer_cost_title')}</summary>
           <p class="text-muted" style="font-size:0.7rem;margin:4px 0">${t('settings.per_printer_cost_hint')}</p>
           <div class="flex gap-sm" style="flex-wrap:wrap">
-            <div class="form-group" style="width:110px">
+            <div class="form-group" style="width:130px">
               <label class="form-label">${t('settings.printer_wattage')}</label>
-              <input class="form-input" id="pf-wattage" type="number" value="${printer?.printer_wattage || ''}" placeholder="--">
+              <div class="input-group input-group-sm">
+                <input class="form-input form-control" id="pf-wattage" type="number" value="${printer?.printer_wattage || ''}" placeholder="--">
+                <span class="input-group-text">W</span>
+              </div>
             </div>
-            <div class="form-group" style="width:110px">
+            <div class="form-group" style="width:140px">
               <label class="form-label">${t('settings.printer_electricity_rate')}</label>
-              <input class="form-input" id="pf-elec-rate" type="number" step="0.01" value="${printer?.electricity_rate_kwh || ''}" placeholder="--">
+              <div class="input-group input-group-sm">
+                <input class="form-input form-control" id="pf-elec-rate" type="number" step="0.01" value="${printer?.electricity_rate_kwh || ''}" placeholder="--">
+                <span class="input-group-text">kr/kWh</span>
+              </div>
             </div>
-            <div class="form-group" style="width:110px">
+            <div class="form-group" style="width:130px">
               <label class="form-label">${t('settings.printer_machine_cost')}</label>
-              <input class="form-input" id="pf-machine-cost" type="number" step="0.01" value="${printer?.machine_cost || ''}" placeholder="--">
+              <div class="input-group input-group-sm">
+                <input class="form-input form-control" id="pf-machine-cost" type="number" step="0.01" value="${printer?.machine_cost || ''}" placeholder="--">
+                <span class="input-group-text">kr</span>
+              </div>
             </div>
-            <div class="form-group" style="width:110px">
+            <div class="form-group" style="width:130px">
               <label class="form-label">${t('settings.printer_machine_lifetime')}</label>
-              <input class="form-input" id="pf-machine-lifetime" type="number" value="${printer?.machine_lifetime_hours || ''}" placeholder="--">
+              <div class="input-group input-group-sm">
+                <input class="form-input form-control" id="pf-machine-lifetime" type="number" value="${printer?.machine_lifetime_hours || ''}" placeholder="--">
+                <span class="input-group-text">h</span>
+              </div>
             </div>
           </div>
         </details>

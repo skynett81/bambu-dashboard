@@ -515,6 +515,14 @@
     });
   }
 
+  // ---- Collapsible Cards ----
+  // Auto-init: click card-title in .settings-card.collapsible toggles .collapsed
+  document.addEventListener('click', (e) => {
+    const title = e.target.closest('.settings-card.collapsible > .card-title');
+    if (!title) return;
+    title.parentElement.classList.toggle('collapsed');
+  });
+
   // ---- Form Validation Helpers ----
   // Mark a field as invalid with Bootstrap .is-invalid and optional feedback message
   window.markInvalid = function(input, message) {

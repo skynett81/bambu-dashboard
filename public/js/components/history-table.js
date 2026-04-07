@@ -1154,8 +1154,25 @@
       const filtersContent = BUILDERS['history-filters'] ? BUILDERS['history-filters'](filteredData) : '';
       const listContent = BUILDERS['history-list'] ? BUILDERS['history-list'](filteredData) : '';
 
+      // Mobile filter toggle button (visible only on small screens)
+      html += `<button class="btn btn-sm btn-outline-secondary d-lg-none mb-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#historyFiltersOffcanvas">
+        <i class="bi bi-funnel"></i> ${t('history.filters') || 'Filters'}
+      </button>`;
+
+      // Offcanvas for mobile filters
+      html += `<div class="offcanvas offcanvas-start" tabindex="-1" id="historyFiltersOffcanvas">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title">${t('history.filters') || 'Filters'}</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+          ${summaryContent ? `<div class="stats-module">${summaryContent}</div>` : ''}
+          ${filtersContent ? `<div class="stats-module">${filtersContent}</div>` : ''}
+        </div>
+      </div>`;
+
       html += `<div class="hist-2col">
-        <div class="hist-sidebar">
+        <div class="hist-sidebar d-none d-lg-flex">
           ${summaryContent ? `<div class="stats-module">${summaryContent}</div>` : ''}
           ${filtersContent ? `<div class="stats-module">${filtersContent}</div>` : ''}
         </div>
