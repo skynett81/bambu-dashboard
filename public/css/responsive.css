@@ -1,10 +1,21 @@
 /* ============================================================
  * responsive.css — Responsive overrides
- * AdminLTE handles sidebar collapse. We only adjust
- * dashboard grid, stats strip, and app-specific components.
+ * AdminLTE handles sidebar collapse. We adjust dashboard grid,
+ * stats strip, and app-specific components.
+ *
+ * Breakpoints (aligned with Bootstrap 5):
+ *   >= 1200px  xl   Desktop (default)
+ *   <= 1024px       Tablet landscape
+ *   <= 768px   md   Tablet portrait
+ *   <= 576px   sm   Mobile large (iPhone 14 etc.)
+ *   <= 480px        Mobile compact
+ *   <= 375px        Mobile small (iPhone SE)
  * ============================================================ */
 
-/* ---- Tablet (<=1024px) ---- */
+/* ---- Desktop large (>= 1200px) ---- */
+/* Default styles in main.css/components.css apply */
+
+/* ---- Tablet landscape (<=1024px) ---- */
 @media (max-width: 1024px) {
   .dashboard {
     grid-template-columns: 1fr 1fr;
@@ -42,56 +53,164 @@
   .panel-content-body { padding: 14px; }
 }
 
-/* ---- Small mobile (<=640px) ---- */
-@media (max-width: 640px) {
+/* ---- Tablet portrait (<=768px) ---- */
+@media (max-width: 768px) {
   .dashboard {
     grid-template-columns: 1fr;
     padding: 12px;
     gap: 12px;
   }
 
-  #progress-card { min-height: 380px; }
-  .print-viewport { min-height: 280px; }
+  #progress-card, #camera-card, #temp-card, #ams-card, #fans-card {
+    grid-column: auto;
+    grid-row: auto;
+  }
 
   .printer-selector {
     order: 3;
     width: 100%;
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .printer-tab {
-    font-size: 0.7rem;
-    padding: 4px 10px;
+    font-size: 0.75rem;
+    padding: 6px 12px;
   }
 
-  .qs-grid { grid-template-columns: 1fr; }
-  #progress-card, #camera-card, #temp-card, #ams-card, #fans-card { grid-column: auto; grid-row: auto; }
-  .ams-cards-row { grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .ams-visual-area { grid-template-columns: 1fr; padding: 10px 12px 6px; }
-  .ams-divider { display: none; }
-  .ams-ext-section { border-top: 1px solid var(--bs-border-color, var(--border-color)); padding-top: 10px; width: 100%; min-width: auto; justify-content: center; }
-  .stats-strip { flex-wrap: wrap; }
-  .spark-panel { min-width: 90px; flex: 1 1 calc(33% - 1px); }
-  .speed-buttons { flex-wrap: wrap; }
-  .stat-grid { grid-template-columns: repeat(2, 1fr); }
-  .controls-grid { grid-template-columns: 1fr 1fr; }
+  /* Stats strip: 2 columns */
+  .spark-panel { min-width: 90px; flex: 1 1 calc(50% - 4px); }
+  .stats-strip { flex-wrap: wrap; gap: 4px; }
 
-  .ctrl-fan-label, .ctrl-temp-label { width: 55px; font-size: 0.7rem; }
+  /* Controls: 2 columns */
+  .controls-grid { grid-template-columns: 1fr 1fr; }
+  .ctrl-fan-label, .ctrl-temp-label { width: 60px; font-size: 0.75rem; }
   .ctrl-temp-row { flex-wrap: wrap; }
   .ctrl-gcode { flex-direction: column; }
 
+  /* Tabs: scroll horizontally */
   .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
-  .tab-btn { padding: 6px 12px; font-size: 0.75rem; white-space: nowrap; }
+  .tab-btn { padding: 8px 14px; font-size: 0.78rem; white-space: nowrap; }
+
+  .qs-grid { grid-template-columns: 1fr; }
+  .ams-cards-row { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .ams-visual-area { grid-template-columns: 1fr; padding: 10px 12px 6px; }
+  .ams-divider { display: none; }
+  .ams-ext-section {
+    border-top: 1px solid var(--bs-border-color, var(--border-color));
+    padding-top: 10px;
+    width: 100%;
+    min-width: auto;
+    justify-content: center;
+  }
+
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .speed-buttons { flex-wrap: wrap; }
   .info-grid { grid-template-columns: 1fr; }
   .printer-config-header { flex-direction: column; align-items: flex-start; gap: 6px; }
 
   .panel-content-body { padding: 12px; }
-  .panel-content-header { padding: 8px 12px; }
+  .panel-content-header { padding: 10px 12px; }
+
+  /* History sidebar: hidden on mobile (uses offcanvas) */
+  .hist-sidebar { display: none; }
+}
+
+/* ---- Mobile large (<=576px) ---- */
+@media (max-width: 576px) {
+  /* Info-boxes: single column */
+  .info-box-strip {
+    grid-template-columns: 1fr;
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .info-box-strip .small-box .inner h3 { font-size: 1.5rem; }
+  .info-box-strip .small-box .inner p { font-size: 0.78rem; }
+
+  /* Progress card: reduce min-height */
+  #progress-card { min-height: auto; }
+  .print-viewport { min-height: 240px; }
+
+  /* Spark panels: 2 columns */
+  .spark-panel { flex: 1 1 calc(50% - 4px); }
+
+  /* AMS: 2 columns instead of 4 */
+  .ams-cards-row { grid-template-columns: repeat(2, 1fr); }
+
+  /* Breadcrumb: smaller */
+  #panel-breadcrumb .breadcrumb { font-size: 0.75rem; }
+
+  /* Form controls: full width */
+  .form-actions { flex-direction: column; }
+  .form-actions .form-btn { width: 100%; }
+
+  /* CRM cards: tighter */
+  .settings-card { padding: 14px; }
+}
+
+/* ---- Mobile compact (<=480px) ---- */
+@media (max-width: 480px) {
+  /* Dashboard: tighter */
+  .dashboard { padding: 8px; gap: 8px; }
+  .info-box-strip { padding: 8px; gap: 8px; }
+
+  /* Reduce card padding globally */
+  .card-body { padding: 10px; }
+  .card-header { padding: 8px 10px; }
+  .card-title { font-size: 0.85rem; }
+
+  /* Spark panels: 2 columns, no label */
+  .spark-label { display: none; }
+  .spark-panel { flex: 1 1 calc(50% - 4px); min-width: 70px; padding: 6px 8px; }
+  .spark-value { font-size: 0.85rem; }
+
+  /* Controls: single column */
+  .controls-grid { grid-template-columns: 1fr; }
+
+  /* Stats: single column */
+  .stat-grid { grid-template-columns: 1fr; }
+
+  /* Tabs: smaller */
+  .tab-btn { padding: 6px 10px; font-size: 0.72rem; }
+
+  /* Print viewport: compact */
+  .print-viewport { min-height: 200px; }
+
+  /* Panel: tighter padding */
+  .panel-content-body { padding: 8px; }
+  .panel-content-header { padding: 8px; }
+  .panel-content-title { font-size: 0.9rem; }
+}
+
+/* ---- Mobile small (<=375px) ---- */
+@media (max-width: 375px) {
+  .dashboard { padding: 6px; gap: 6px; }
+  .info-box-strip { padding: 6px; gap: 6px; }
+  .info-box-strip .small-box .inner h3 { font-size: 1.2rem; }
+  .info-box-strip .small-box .icon { font-size: 2rem; }
+
+  /* AMS: single column */
+  .ams-cards-row { grid-template-columns: 1fr 1fr; gap: 4px; }
+
+  /* Very compact spark panels */
+  .spark-panel { padding: 4px 6px; }
+  .spark-value { font-size: 0.78rem; }
+  .spark-trend { display: none; }
+
+  /* Printer tabs: very compact */
+  .printer-tab { padding: 4px 8px; font-size: 0.68rem; }
+
+  /* Hide non-essential elements */
+  .hud-separator, .hud-layers { display: none; }
+
+  /* Forms: compact */
+  .form-group { margin-bottom: 10px; }
+  .settings-card { padding: 10px; }
 }
 
 /* ---- Mobile sidebar toggle (bridges custom JS .open class to AdminLTE) ---- */
 @media (max-width: 991.98px) {
-  /* When JS adds .open to the sidebar, make it visible */
   .app-sidebar.open {
     transform: translateX(0) !important;
     margin-left: 0 !important;
@@ -114,9 +233,9 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 0;
+    padding: 6px 0;
     border: none;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
   }
   .resp-table tbody td::before {
     content: attr(data-label);
@@ -124,6 +243,7 @@
     color: var(--text-muted);
     margin-right: 12px;
     flex-shrink: 0;
+    min-width: 80px;
   }
   .resp-table tbody td:first-child {
     font-weight: 600;
@@ -149,7 +269,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 4px 0;
-    font-size: 0.8rem;
+    font-size: 0.82rem;
   }
   .ph-list .ph-list-row > div[data-label]:not(.ph-list-thumb)::before {
     content: attr(data-label);
@@ -165,6 +285,108 @@
     border-bottom: 1px solid var(--bs-border-color, var(--border-color));
     margin-bottom: 4px;
   }
+
+  /* History grid: 2 columns */
+  .ph-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px; }
+}
+
+@media (max-width: 480px) {
+  /* History grid: 1 column */
+  .ph-grid { grid-template-columns: 1fr !important; }
+}
+
+/* ---- Touch-Friendly Sizing (mobile) ---- */
+@media (max-width: 768px) {
+  /* Minimum 44px touch targets */
+  .form-btn, .ctrl-btn, .tab-btn, .sidebar-btn,
+  .printer-tab, .ctrl-tool-btn, .ctrl-preset-btn {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Form inputs: taller for touch */
+  .form-input, .form-select, .form-control, select, input[type="text"],
+  input[type="number"], input[type="email"], input[type="password"] {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  /* Active state for touch feedback */
+  .form-btn:active, .ctrl-btn:active, .tab-btn:active,
+  .sidebar-btn:active, .printer-tab:active {
+    opacity: 0.7;
+    transform: scale(0.97);
+    transition: all 0.1s;
+  }
+
+  /* Better tap highlight */
+  * { -webkit-tap-highlight-color: rgba(16, 179, 164, 0.15); }
+}
+
+/* ---- Minimum Font Sizes (readability) ---- */
+@media (max-width: 768px) {
+  /* Bump all tiny fonts to minimum 0.7rem (11px) */
+  .spark-label { font-size: 0.7rem !important; }
+  .spark-unit { font-size: 0.7rem !important; }
+  .badge { font-size: 0.7rem !important; }
+  .printer-tab-status { font-size: 0.7rem !important; }
+  .ams-tab-label { font-size: 0.7rem !important; }
+  .mini-metric { font-size: 0.7rem !important; }
+  .notif-item-time { font-size: 0.7rem !important; }
+  .te-page-info { font-size: 0.72rem; }
+}
+
+/* ---- Modal Sizing (mobile) ---- */
+@media (max-width: 576px) {
+  .ix-modal-panel {
+    width: 95% !important;
+    max-width: none !important;
+    margin: 8px auto;
+    max-height: calc(100vh - 16px);
+    border-radius: 12px;
+  }
+
+  .ix-modal-panel .modal-header,
+  .ix-modal-panel > div:first-child {
+    padding: 12px 16px;
+  }
+
+  .ix-modal-panel .modal-body,
+  .ix-modal-panel > div:nth-child(2) {
+    padding: 12px 16px;
+  }
+
+  /* Camera modal: full width */
+  .camera-modal-content {
+    width: 98vw !important;
+    max-width: none !important;
+  }
+}
+
+/* ---- Landscape Orientation ---- */
+@media (max-width: 900px) and (orientation: landscape) {
+  /* Dashboard: 2 columns even on smaller landscape screens */
+  .dashboard {
+    grid-template-columns: 1fr 1fr;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  /* Info-boxes: 2 columns in landscape */
+  .info-box-strip { grid-template-columns: repeat(2, 1fr); }
+
+  /* Reduce vertical space */
+  #progress-card { min-height: auto; }
+  .print-viewport { min-height: 180px; }
+  .card-header { padding: 6px 10px; }
+
+  /* Stats: row layout */
+  .spark-panel { flex: 1 1 auto; }
+
+  /* Sidebar: auto-hide in landscape mobile */
+  .panel-content-body { max-height: calc(100vh - 80px); overflow-y: auto; }
 }
 
 /* ---- Mobile utility classes ---- */
