@@ -12,7 +12,7 @@ description: A powerful, self-hosted dashboard for all your 3D printers
 
 ## What is 3DPrintForge?
 
-3DPrintForge connects to your printers via MQTT (Bambu Lab), PrusaLink (Prusa), or Moonraker WebSocket (Snapmaker, Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig and other Klipper printers) over LAN. Sync models and print history via Bambu Cloud, Snapmaker Cloud, or fetch data directly from your printer. The built-in **Model Forge** provides 17 parametric design tools so you can create custom models without leaving the dashboard. **Snapmaker U1** is supported with deep integration including NFC filament, AI defect detection, timelapse, calibration, purifier, and power monitoring via SACP.
+3DPrintForge connects to your printers via MQTT (Bambu Lab), PrusaLink (Prusa), OctoPrint REST API (Ender 3, Prusa MK3, Anycubic, Artillery), SACP binary protocol (Snapmaker J1, Artisan), Snapmaker 2.0 HTTP API (A150-A350), or Moonraker WebSocket (Snapmaker U1, Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig and other Klipper printers) over LAN. Sync models and print history via Bambu Cloud, Snapmaker Cloud, or fetch data directly from your printer. The built-in **Model Forge** provides 17 parametric design tools so you can create custom models without leaving the dashboard. **Snapmaker U1** is supported with deep integration including NFC filament (auto-synced to inventory), AI defect detection with probability logging, entangle detection, timelapse with frame capture, flow calibration with K-value trends, purifier, and power monitoring.
 
 ### Key features
 
@@ -36,7 +36,10 @@ description: A powerful, self-hosted dashboard for all your 3D printers
 - **AMS humidity/temperature** — 5-level rating with recommendations for optimal storage
 - **Achievements** — 18 world landmarks as milestones for filament consumption with XP progression
 - **Notifications** — 7 channels (Telegram, Discord, email, ntfy, Pushover, SMS, webhook) + PWA push notifications
-- **Multi-printer, multi-brand** — Bambu Lab (MQTT) + Prusa (PrusaLink) + Snapmaker (SACP) + Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig and all Klipper/Moonraker printers
+- **Multi-printer, multi-brand** — Bambu Lab (MQTT) + Prusa (PrusaLink) + OctoPrint + Snapmaker (SACP + HTTP + Moonraker) + Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig and all Klipper/Moonraker printers
+- **7 connector types** — Bambu MQTT, Moonraker WS, PrusaLink HTTP, OctoPrint HTTP, Snapmaker SACP TCP, Snapmaker 2.0 HTTP, Snapmaker U1 Moonraker
+- **AdminLTE 4 fully integrated** — info-boxes, sortable tables, breadcrumbs, pagination, offcanvas, accordions, Bootstrap tooltips, sidebar mini-mode
+- **Responsive design** — optimized for desktop, tablet, and mobile (down to 375px iPhone SE)
 - **Printer capabilities** — per-brand configuration for file access, camera, and features
 - **File library** — 3MF/STL/gcode library with thumbnails, categories, tags, 3D preview, Send to Printer and Add to Queue
 - **Remote access** — Cloudflare Tunnel integration for secure access from anywhere

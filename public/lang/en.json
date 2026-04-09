@@ -3819,7 +3819,36 @@
     "state_calibrating": "Calibrating",
     "state_loading": "Loading Filament",
     "state_unloading": "Unloading Filament",
-    "state_error": "Error"
+    "state_error": "Error",
+    "idex_mode": "IDEX Print Mode",
+    "idex_left_only": "Left Only (T0)",
+    "idex_right_only": "Right Only (T1)",
+    "idex_duplicate": "Duplicate",
+    "idex_mirror": "Mirror",
+    "idex_desc": "Duplicate prints 2 identical copies. Mirror creates a mirrored pair.",
+    "entangle_title": "Filament Entangle",
+    "entangle_extruder": "Extruder",
+    "cal_history": "Calibration History",
+    "cal_k_value": "K-value",
+    "cal_trend": "K-value Trend",
+    "cal_no_history": "No calibration history yet",
+    "timelapse_frames": "frames captured",
+    "defect_trend": "Defect Trend",
+    "nfc_synced": "NFC filament synced to inventory"
+  },
+  "octoprint": {
+    "api_key_hint": "OctoPrint API key from Settings → API → Global API Key",
+    "webcam_hint": "Custom webcam snapshot URL (optional)",
+    "approval_pending": "Waiting for approval on printer touchscreen...",
+    "approval_denied": "Connection denied by printer"
+  },
+  "connector": {
+    "bambu": "Bambu Lab (MQTT)",
+    "moonraker": "Moonraker / Klipper",
+    "prusalink": "PrusaLink",
+    "octoprint": "OctoPrint",
+    "sacp": "Snapmaker SACP",
+    "snapmaker_http": "Snapmaker 2.0 HTTP"
   },
   "cost": {
     "energy_info": "Energy cost based on spot prices"

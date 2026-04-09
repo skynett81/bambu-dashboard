@@ -33,12 +33,12 @@ describe('Database connection', () => {
     assert.strictEqual(a, b, 'getDb() skal alltid returnere samme instans');
   });
 
-  it('getDb() kaster feil før db er satt', () => {
+  it('getDb() throws error before db is set', () => {
     setDb(null);
     assert.throws(
       () => getDb(),
-      /ikke initialisert/i,
-      'getDb() skal kaste feil når db er null'
+      /not initialized/i,
+      'getDb() should throw when db is null'
     );
   });
 
