@@ -119,7 +119,7 @@
       // ── Filament Inventory Summary ──
       if (filament.length > 0) {
         const byMaterial = {};
-        for (const f of filament) { const m = f.material || 'Unknown'; byMaterial[m] = (byMaterial[m] || 0) + 1; }
+        for (const f of filament) { const m = f.type || f.material || f.filament_type || 'Unknown'; byMaterial[m] = (byMaterial[m] || 0) + 1; }
         html += `<div class="settings-card" style="overflow:hidden">
           <div class="card-title">Filament Inventory (${filament.length} spools)</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -134,12 +134,25 @@
       if (printErrors.length > 0) {
         html += `<div class="settings-card" style="overflow:hidden">
           <div class="card-title" style="color:var(--accent-red)">Recent Errors (${printErrors.length})</div>
-          <div style="max-height:150px;overflow-y:auto">
-            ${printErrors.slice(0, 10).map(e => `
-              <div style="display:flex;gap:6px;padding:3px 0;font-size:0.68rem;border-bottom:1px solid var(--border-subtle)">
-                <span class="text-muted" style="min-width:65px">${new Date(e.created_at || e.timestamp).toLocaleDateString()}</span>
-                <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.message || e.error || e.description || 'Error'}</span>
-              </div>`).join('')}
+          <div style="max-height:200px;overflow-y:auto">
+            ${printErrors.slice(0, 15).map(e => {
+              const ctx = typeof e.context === 'string' ? (() => { try { return JSON.parse(e.context); } catch { return {}; } })() : (e.context || {});
+              const wikiUrl = ctx.wiki_url || '';
+              const filename = ctx.filename || '';
+              const date = new Date(e.created_at || e.timestamp);
+              const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              const severity = e.severity || 'warning';
+              const sevColor = severity === 'error' || severity === 'critical' ? 'var(--accent-red)' : 'var(--accent-orange)';
+              return `<div style="padding:6px 0;border-bottom:1px solid var(--border-subtle)">
+                <div style="display:flex;align-items:center;gap:6px;font-size:0.72rem">
+                  <span style="width:8px;height:8px;border-radius:50%;background:${sevColor};flex-shrink:0"></span>
+                  <span style="font-weight:600">${e.code || 'Error'}</span>
+                  <span class="text-muted" style="margin-left:auto;font-size:0.6rem">${dateStr}</span>
+                </div>
+                ${filename ? `<div style="font-size:0.6rem;color:var(--text-muted);margin-top:2px;margin-left:14px">File: ${filename}</div>` : ''}
+                ${wikiUrl ? `<a href="${wikiUrl}" target="_blank" style="font-size:0.6rem;color:var(--accent-blue);margin-left:14px;text-decoration:none">📖 View on Bambu Wiki →</a>` : ''}
+              </div>`;
+            }).join('')}
           </div>
         </div>`;
       }
@@ -155,7 +168,7 @@
 
       // ── Top Endpoints ──
       html += `<div class="settings-card" style="overflow:hidden">
-        <div class="card-title">Top Endpoints (24h)</div>
+        <div class="card-title">Top Endpoints (24h) ${!topEndpoints.length ? '<span style="font-size:0.6rem;color:var(--text-muted)">— collecting data, refresh in 1 min</span>' : ''}</div>
         <div style="max-height:250px;overflow-y:auto">
           ${topEndpoints.length ? topEndpoints.map((ep, i) => `
             <div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:0.72rem;border-bottom:1px solid var(--border-subtle)">

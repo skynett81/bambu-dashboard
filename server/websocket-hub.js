@@ -1,6 +1,7 @@
 import { WebSocketServer } from 'ws';
 import { isAuthEnabled, getSessionToken, validateSession, getSessionUser, hasPermission } from './auth.js';
 import { onLog, createLogger } from './logger.js';
+import { recordWsConnect, recordWsDisconnect, recordWsMessage } from './analytics.js';
 const log = createLogger('ws');
 
 export class WebSocketHub {
@@ -36,6 +37,7 @@ export class WebSocketHub {
       }
 
       this.clients.add(ws);
+      try { recordWsConnect(); } catch {}
       log.info(`Client connected (${this.clients.size} total)`);
 
       // Send all printer states + meta on connect (only if already authenticated)
@@ -104,6 +106,7 @@ export class WebSocketHub {
 
       ws.on('close', () => {
         this.clients.delete(ws);
+        try { recordWsDisconnect(); } catch {}
         log.info(`Client disconnected (${this.clients.size} total)`);
       });
 
@@ -195,11 +198,15 @@ export class WebSocketHub {
       msg = JSON.stringify({ type, data });
     }
 
+    let sent = 0;
     for (const ws of this.clients) {
       if (ws.readyState === 1 && ws._authenticated) {
         ws.send(msg);
+        sent++;
       }
     }
+    // Track WS messages for analytics
+    if (sent > 0) { try { recordWsMessage('out', msg.length * sent); } catch {} }
   }
 
   getClientCount() {
