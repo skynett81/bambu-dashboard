@@ -685,6 +685,23 @@
       html += typeof renderBambuExtrasPanel === 'function' ? renderBambuExtrasPanel(data) : '';
     }
 
+    // ===== Temperature Graph (all printers) =====
+    if (data.nozzle_temper !== undefined || data.bed_temper !== undefined) {
+      html += typeof renderTempGraph === 'function' ? renderTempGraph() : '';
+    }
+
+    // ===== G-code Terminal (all printers) =====
+    html += typeof renderGcodeTerminal === 'function' ? renderGcodeTerminal() : '';
+
+    // ===== Printer File Browser (all with file support) =====
+    html += typeof renderPrinterFileBrowser === 'function' ? renderPrinterFileBrowser() : '';
+
+    // ===== Printer-Type Extras (OctoPrint connection, PrusaLink MMU, SACP laser/CNC, WLED, etc.) =====
+    if (data._printerProfile || data._mmu_enabled || data._headType || data._modules?.length ||
+        data._leds || data._buildVolume || data._firmware_retraction || data.exclude_object?.objects?.length || data._installedPlugins) {
+      html += typeof renderPrinterExtrasPanel === 'function' ? renderPrinterExtrasPanel(data) : '';
+    }
+
     // ===== CARD: Bambu Calibration (Bambu only) =====
     if (meta?.type !== 'moonraker' && meta?.type !== 'prusalink') {
       html += `<div class="ctrl-card">
@@ -816,6 +833,13 @@
 
     const lightBtn = container.querySelector('#ctrl-light-btn');
     if (lightBtn) lightBtn.classList.toggle('ctrl-tool-active', lightState === 'on');
+
+    // Update live temperature graph
+    if (typeof updateTempGraph === 'function') updateTempGraph(data);
+    // Feed G-code terminal with log data
+    if (typeof updateGcodeTerminal === 'function') updateGcodeTerminal(data);
+    // Update bed mesh if data changes
+    if (typeof updateBedMeshPanel === 'function') updateBedMeshPanel(data);
   }
 
   function updateTempCurrent(container, id, rawTemp) {
