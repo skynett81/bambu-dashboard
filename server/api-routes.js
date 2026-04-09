@@ -7208,9 +7208,9 @@ export async function handleApiRequest(req, res) {
     }
 
     // Serve individual timelapse frame
-    const frameMatch = path.match(/^\/api\/timelapse\/frames\/([^/]+)\/([^/]+)\/([^/]+)$/);
-    if (frameMatch && method === 'GET') {
-      const [, fPid, session, fname] = frameMatch;
+    const tlFrameMatch = path.match(/^\/api\/timelapse\/frames\/([^/]+)\/([^/]+)\/([^/]+)$/);
+    if (tlFrameMatch && method === 'GET') {
+      const [, fPid, session, fname] = tlFrameMatch;
       const framePath = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'timelapse', fPid, session, fname);
       if (existsSync(framePath)) {
         res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=86400' });
