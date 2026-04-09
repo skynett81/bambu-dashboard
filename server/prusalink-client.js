@@ -396,8 +396,11 @@ export class PrusaLinkClient {
 
   // ── PrusaConnect Cloud proxy (if token available) ──
 
+  // ── PrusaConnect Cloud Integration ──
+  // PrusaConnect (connect.prusa3d.com) is Prusa's cloud platform.
+  // PrusaLink firmware forwards telemetry to PrusaConnect when configured.
+
   async prusaConnectRegister(token) {
-    // PrusaConnect uses /api/v1/connect with bearer token
     try {
       const headers = { 'Authorization': `Bearer ${token}` };
       if (this.apiKey) headers['X-Api-Key'] = this.apiKey;
@@ -407,6 +410,38 @@ export class PrusaLinkClient {
       return res.ok;
     } catch {}
     return false;
+  }
+
+  async getPrusaConnectStatus() {
+    // Check if PrusaConnect is configured on this printer
+    const info = await this._apiGet('/api/v1/info');
+    return {
+      connected: info?.connect_status === 'connected',
+      connectUrl: info?.connect_url || 'https://connect.prusa3d.com',
+      registered: !!info?.connect_token,
+    };
+  }
+
+  // ── Additional PrusaLink queries for full coverage ──
+
+  async getTelemetry() {
+    return this._apiGet('/api/v1/telemetry');
+  }
+
+  async getEvents() {
+    return this._apiGet('/api/v1/events');
+  }
+
+  async getCurrentUser() {
+    return this._apiGet('/api/v1/user');
+  }
+
+  async getFlowRate() {
+    return this.state._flow_rate || 100;
+  }
+
+  async setLedBrightness(brightness) {
+    await this._apiPut('/api/v1/status', { led: brightness });
   }
 
   // ── HTTP with Digest Auth ──

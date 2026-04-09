@@ -1067,6 +1067,63 @@ export class SacpConnector {
     return null;
   }
 
+  // ══════════════════════════════════════════
+  // SERIAL PRINT — Line-by-line G-code streaming (0xac, 0x01/0x02)
+  // ══════════════════════════════════════════
+
+  async startSerialPrint(gcodeLines) {
+    if (!this._dispatcher) return false;
+    this._serialPrintLines = gcodeLines;
+    this._serialPrintIndex = 0;
+    this._serialPrintActive = true;
+
+    // Handler: printer requests next line (0xac, 0x01)
+    this._dispatcher.setHandler(0xac, 0x01, (req) => {
+      if (!this._serialPrintActive || this._serialPrintIndex >= this._serialPrintLines.length) {
+        // No more lines — send empty to indicate end
+        this._dispatcher.ack(0xac, 0x01, req.packet, Buffer.alloc(0));
+        this._serialPrintActive = false;
+        return;
+      }
+
+      const line = this._serialPrintLines[this._serialPrintIndex++];
+      const lineBuf = Buffer.from(line + '\n', 'utf8');
+      this._dispatcher.ack(0xac, 0x01, req.packet, lineBuf);
+
+      // Update progress
+      this.state.mc_percent = Math.round((this._serialPrintIndex / this._serialPrintLines.length) * 100);
+      this.state._serialPrintLine = this._serialPrintIndex;
+      this._broadcastState();
+    });
+
+    // Handler: print finished (0xac, 0x02)
+    this._dispatcher.setHandler(0xac, 0x02, (req) => {
+      this._serialPrintActive = false;
+      this.state.gcode_state = 'FINISH';
+      this._broadcastState();
+      this._dispatcher.ack(0xac, 0x02, req.packet, Buffer.alloc(1));
+    });
+
+    // Start serial print command
+    const payload = Buffer.alloc(4);
+    payload.writeUInt32LE(gcodeLines.length);
+    try {
+      await this._send({ set: 0xac, id: 0x02 }, PEER.CONTROLLER, payload);
+      log.info(`Serial print started: ${gcodeLines.length} lines`);
+      return true;
+    } catch (e) {
+      log.error(`Serial print start failed: ${e.message}`);
+      this._serialPrintActive = false;
+      return false;
+    }
+  }
+
+  stopSerialPrint() {
+    this._serialPrintActive = false;
+    this._serialPrintLines = [];
+    this._serialPrintIndex = 0;
+  }
+
   async getEmergencyStopInfo() {
     try {
       const resp = await this._send({ set: 0x01, id: 0x3b }, PEER.CONTROLLER, Buffer.alloc(0));

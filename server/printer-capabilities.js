@@ -113,6 +113,21 @@ const CAPABILITIES = {
     auth: { required: ['ip'], methods: ['token'] },
   },
 
+  ankermake: {
+    label: 'AnkerMake (via ankerctl)',
+    connection: 'http-ws-proxy',
+    fileAccess: 'http-api',
+    camera: { modes: ['ws-video'], videoEndpoint: '/ws/video', snapshotEndpoint: '/video' },
+    modelAccess: { method: 'none', hasMeshIn3MF: false },
+    gcodeAccess: { method: 'none' },
+    features: {
+      ams: false, xcam: false, firmwareDetection: false,
+      ssdpDiscovery: false, cloudTasks: false, historySync: false,
+      multiExtruder: false, ankerctlProxy: true,
+    },
+    auth: { required: ['ip'], methods: ['none'] },
+  },
+
   octoprint: {
     label: 'OctoPrint',
     connection: 'websocket-sockjs',

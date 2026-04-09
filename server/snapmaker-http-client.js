@@ -418,6 +418,91 @@ export class SnapmakerHttpClient {
     return null;
   }
 
+  // ── G-code query methods (max out HTTP API) ──
+
+  async getPosition() {
+    try {
+      const resp = await this._post('/api/v1/gcode', { token: this._token, code: 'M114' });
+      if (resp?.result) {
+        const m = resp.result.match(/X:([\d.]+)\s*Y:([\d.]+)\s*Z:([\d.]+)/);
+        if (m) {
+          this.state._position = { x: parseFloat(m[1]), y: parseFloat(m[2]), z: parseFloat(m[3]) };
+          return this.state._position;
+        }
+      }
+    } catch {}
+    return null;
+  }
+
+  async getFirmwareInfo() {
+    try {
+      const resp = await this._post('/api/v1/gcode', { token: this._token, code: 'M115' });
+      if (resp?.result) {
+        this.state._firmware_raw = resp.result;
+        const fw = resp.result.match(/FIRMWARE_NAME:([^\s]+)/);
+        const mv = resp.result.match(/MACHINE_TYPE:([^\s]+)/);
+        if (fw) this.state._firmware_name = fw[1];
+        if (mv) this.state._machine_type = mv[1];
+        return { firmware: fw?.[1], machineType: mv?.[1], raw: resp.result };
+      }
+    } catch {}
+    return null;
+  }
+
+  async getSDFileList() {
+    try {
+      const resp = await this._post('/api/v1/gcode', { token: this._token, code: 'M20' });
+      if (resp?.result) {
+        const files = resp.result.split('\n')
+          .filter(l => l.endsWith('.gcode') || l.endsWith('.3mf'))
+          .map(l => l.trim());
+        return files;
+      }
+    } catch {}
+    return [];
+  }
+
+  async getPrintTime() {
+    try {
+      const resp = await this._post('/api/v1/gcode', { token: this._token, code: 'M31' });
+      if (resp?.result) {
+        const m = resp.result.match(/(\d+)\s*h\s*(\d+)\s*m\s*(\d+)\s*s|(\d+)\s*min\s*(\d+)\s*sec/);
+        if (m) {
+          const hours = parseInt(m[1] || 0), mins = parseInt(m[2] || m[4] || 0), secs = parseInt(m[3] || m[5] || 0);
+          return hours * 3600 + mins * 60 + secs;
+        }
+      }
+    } catch {}
+    return 0;
+  }
+
+  async getSettings() {
+    try {
+      const resp = await this._post('/api/v1/gcode', { token: this._token, code: 'M503' });
+      if (resp?.result) {
+        this.state._settings_raw = resp.result;
+        // Parse key settings
+        const steps = resp.result.match(/M92.*?X([\d.]+).*?Y([\d.]+).*?Z([\d.]+).*?E([\d.]+)/);
+        if (steps) {
+          this.state._steps_per_mm = { x: parseFloat(steps[1]), y: parseFloat(steps[2]), z: parseFloat(steps[3]), e: parseFloat(steps[4]) };
+        }
+        return resp.result;
+      }
+    } catch {}
+    return null;
+  }
+
+  async getEndstopStatus() {
+    try {
+      const resp = await this._post('/api/v1/gcode', { token: this._token, code: 'M119' });
+      if (resp?.result) {
+        this.state._endstops = resp.result;
+        return resp.result;
+      }
+    } catch {}
+    return null;
+  }
+
   async getEnclosureStatus() {
     try {
       const res = await fetch(`${this._baseUrl}/api/v1/enclosure?token=${this._token}`, {

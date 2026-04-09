@@ -1651,6 +1651,41 @@ export class MoonrakerClient {
     return data?.result?.logs || [];
   }
 
+  // ── Notifiers ──
+
+  async getNotifiers() {
+    const data = await this._apiGet('/server/notifiers/list');
+    return data?.result?.notifiers || [];
+  }
+
+  // ── Spoolman integration ──
+
+  async getSpoolmanStatus() {
+    const data = await this._apiGet('/server/spoolman/status');
+    return data?.result || null;
+  }
+
+  async getSpoolmanSpools() {
+    const data = await this._apiGet('/server/spoolman/proxy?request_method=GET&path=/api/v1/spool');
+    return data?.result || [];
+  }
+
+  async setSpoolmanActiveSpool(spoolId) {
+    await this._apiPost('/server/spoolman/spool_id', { spool_id: spoolId });
+  }
+
+  async getSpoolmanActiveSpool() {
+    const data = await this._apiGet('/server/spoolman/spool_id');
+    return data?.result?.spool_id || null;
+  }
+
+  // ── Extensions ──
+
+  async getExtensions() {
+    const data = await this._apiGet('/server/extensions/list');
+    return data?.result?.extensions || [];
+  }
+
   async triggerUpdate(name) {
     return this._apiPost(`/machine/update/${name}`);
   }

@@ -734,6 +734,18 @@ export class OctoPrintClient {
 
   async getLanguages() { return this._apiGet('/api/languages'); }
   async deleteLanguage(locale, pack) { await this._apiDelete(`/api/languages/${locale}/${pack}`); }
+  async uploadLanguage(locale, buffer, filename) {
+    const boundary = '----3DPrintForge' + Date.now();
+    const localePart = `--${boundary}\r\nContent-Disposition: form-data; name="locale"\r\n\r\n${locale}\r\n`;
+    const filePart = `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: application/zip\r\n\r\n`;
+    const footer = `\r\n--${boundary}--\r\n`;
+    const body = Buffer.concat([Buffer.from(localePart + filePart), buffer, Buffer.from(footer)]);
+    const headers = { 'Content-Type': `multipart/form-data; boundary=${boundary}` };
+    if (this.apiKey) headers['X-Api-Key'] = this.apiKey;
+    const res = await fetch(`${this._baseUrl}/api/languages`, { method: 'POST', headers, body, signal: AbortSignal.timeout(30000) });
+    if (!res.ok) throw new Error(`Language upload failed: HTTP ${res.status}`);
+    return res.json();
+  }
 
   // ══════════════════════════════════════════
   // UTIL + WIZARD
