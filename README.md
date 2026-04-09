@@ -78,7 +78,9 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 - **Voron** — all models with Klipper + Moonraker
 - **Creality** — K1, K1 Max, Ender 3 V3, and other Klipper models
 - **Elegoo** — Neptune series with Klipper firmware
-- **AnkerMake** — M5 series (requires community Klipper firmware, not stock AnkerMake firmware)
+- **AnkerMake** — M5, M5C series. Two options:
+  - **Community Klipper firmware** — Full Moonraker support (recommended)
+  - **Stock firmware** — Use [ankermake-m5-protocol](https://github.com/Ankermgmt/ankermake-m5-protocol) alongside 3DPrintForge for native MQTT+PPPP access (Python-based, requires AnkerMake account token)
 - **QIDI** — X-Max, X-Plus with Moonraker
 - **RatRig** — V-Core, V-Minion
 - Any printer running **Klipper + Moonraker**

@@ -383,6 +383,41 @@ export class SnapmakerHttpClient {
 
   // ── Enclosure status ──
 
+  // ── Module detection via G-code ──
+
+  async detectModules() {
+    try {
+      const resp = await this._post('/api/v1/gcode', { token: this._token, code: 'M503' });
+      if (resp?.result) {
+        this.state._modules_raw = resp.result;
+        // Parse M503 output for module info
+        const hasEnclosure = resp.result.includes('M1010') || resp.result.includes('enclosure');
+        const hasHeatedBed = resp.result.includes('M140');
+        this.state._detected_modules = { enclosure: hasEnclosure, heatedBed: hasHeatedBed };
+      }
+    } catch {}
+  }
+
+  // ── Enclosure control commands (not just status) ──
+
+  async setEnclosureLed(brightness) {
+    await this._executeGcode(`M1010 S${brightness ? 1 : 0} P${brightness || 0}`);
+  }
+
+  async setEnclosureFan(speed) {
+    await this._executeGcode(`M1011 S${speed || 0}`);
+  }
+
+  // ── Print history from internal log ──
+
+  async getRecentPrints() {
+    try {
+      const resp = await this._post('/api/v1/gcode', { token: this._token, code: 'M27' });
+      return resp?.result || null;
+    } catch {}
+    return null;
+  }
+
   async getEnclosureStatus() {
     try {
       const res = await fetch(`${this._baseUrl}/api/v1/enclosure?token=${this._token}`, {

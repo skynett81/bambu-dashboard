@@ -171,6 +171,19 @@ export class MoonrakerClient {
       // ERCF/AFC multi-filament (Voron community)
       'ercf': null,
       'afc': null,
+      // Voron/Klipper extras (silently ignored if not available)
+      'probe': null,
+      'z_thermal_adjust': null,
+      'firmware_retraction': null,
+      'respond': null,
+      'quad_gantry_level': null,
+      'screws_tilt_adjust': null,
+      'z_tilt': null,
+      'input_shaper': null,
+      'manual_probe': null,
+      'neopixel sb_leds': null,
+      'neopixel my_neopixel': null,
+      'led chamber_led': null,
       // Snapmaker U1 specific (silently ignored on non-SM printers)
       'machine_state_manager': null,
       'filament_detect': null,
@@ -772,6 +785,85 @@ export class MoonrakerClient {
       };
     }
 
+    // Probe data (Tap, Klicky, Beacon, BLTouch)
+    const probe = status.probe;
+    if (probe) {
+      this.state._probe = {
+        lastQuery: probe.last_query,
+        lastZResult: probe.last_z_result,
+        name: probe.name || 'probe',
+      };
+    }
+
+    // Input shaper data
+    const is = status.input_shaper;
+    if (is) {
+      this.state._input_shaper = {
+        shaperFreqX: is.shaper_freq_x,
+        shaperFreqY: is.shaper_freq_y,
+        shaperTypeX: is.shaper_type_x,
+        shaperTypeY: is.shaper_type_y,
+        damping: is.damping_ratio_x,
+      };
+    }
+
+    // Quad gantry level
+    const qgl = status.quad_gantry_level;
+    if (qgl) {
+      this.state._qgl = { applied: qgl.applied };
+    }
+
+    // Z tilt
+    const zt = status.z_tilt;
+    if (zt) {
+      this.state._z_tilt = { applied: zt.applied };
+    }
+
+    // Screws tilt adjust
+    const sta = status.screws_tilt_adjust;
+    if (sta) {
+      this.state._screws_tilt = { results: sta.results, error: sta.error };
+    }
+
+    // Firmware retraction
+    const fr = status.firmware_retraction;
+    if (fr) {
+      this.state._firmware_retraction = {
+        retractLength: fr.retract_length,
+        retractSpeed: fr.retract_speed,
+        unretractExtraLength: fr.unretract_extra_length,
+        unretractSpeed: fr.unretract_speed,
+      };
+    }
+
+    // Z thermal adjust
+    const zta = status.z_thermal_adjust;
+    if (zta) {
+      this.state._z_thermal_adjust = {
+        enabled: zta.enabled,
+        currentZAdjust: zta.current_z_adjust,
+        temperature: zta.temperature,
+      };
+    }
+
+    // LED / Neopixel state
+    for (const ledKey of ['neopixel sb_leds', 'neopixel my_neopixel', 'led chamber_led']) {
+      const led = status[ledKey];
+      if (led) {
+        if (!this.state._leds) this.state._leds = {};
+        const name = ledKey.split(' ')[1] || ledKey;
+        this.state._leds[name] = {
+          colorData: led.color_data || [],
+        };
+      }
+    }
+
+    // Respond messages (M117/RESPOND)
+    const respond = status.respond;
+    if (respond?.msg) {
+      this.state._lastMessage = respond.msg;
+    }
+
     // ADC current sensors — motor/heater current monitoring
     const currentSensors = {};
     for (const key of ['heater_bed', 'extruder']) {
@@ -959,7 +1051,7 @@ export class MoonrakerClient {
         }
       }
 
-      // QIDI: Chamber heater is common on X-Max/X-Plus
+      // QIDI: Chamber heater + filament sensor + firmware version
       if (brand === 'QIDI') {
         const chamber = await this._apiGet('/printer/objects/query?heater_generic%20chamber_heater');
         if (chamber?.result?.status?.['heater_generic chamber_heater']) {
@@ -967,14 +1059,59 @@ export class MoonrakerClient {
           this.state.chamber_temper = Math.round(ch.temperature || 0);
           this.state._chamber_target = Math.round(ch.target || 0);
         }
+        // QIDI filament sensor
+        const fsens = await this._apiGet('/printer/objects/query?filament_switch_sensor%20fila');
+        if (fsens?.result?.status?.['filament_switch_sensor fila']) {
+          this.state._filament_sensor = {
+            name: 'fila', enabled: fsens.result.status['filament_switch_sensor fila'].enabled,
+            detected: fsens.result.status['filament_switch_sensor fila'].filament_detected,
+          };
+        }
+        // QIDI firmware detection
+        const mcuInfo = await this._apiGet('/printer/objects/query?mcu');
+        if (mcuInfo?.result?.status?.mcu) {
+          this.state._brand_firmware = mcuInfo.result.status.mcu.mcu_version || '';
+        }
       }
 
-      // RatRig: RatOS macros detection
+      // Creality: Nebula camera detection + firmware info
+      if (brand === 'Creality') {
+        // Try Creality-specific camera endpoints
+        try {
+          const camRes = await fetch(`http://${this.ip}:4408/?action=snapshot`, { signal: AbortSignal.timeout(2000) });
+          if (camRes.ok) this.state._brand_camera_confirmed = true;
+        } catch {}
+        // Sonic Pad firmware detection
+        const mcuInfo = await this._apiGet('/printer/objects/query?mcu');
+        if (mcuInfo?.result?.status?.mcu) {
+          this.state._brand_firmware = mcuInfo.result.status.mcu.mcu_version || '';
+          if (this.state._brand_firmware.includes('sonic')) this.state._brand_sonic_pad = true;
+        }
+      }
+
+      // RatRig: RatOS macros + Beacon probe data
       if (brand === 'RatRig') {
         const macros = await this._apiGet('/printer/objects/list');
         if (macros?.result?.objects) {
           const ratosObjects = macros.result.objects.filter(o => o.includes('ratos') || o.includes('beacon'));
           this.state._brand_ratos_objects = ratosObjects;
+          // Available RatOS calibration macros
+          const ratosGcodes = await this._apiGet('/printer/objects/query?gcode_macro%20GENERATE_SHAPER_GRAPHS&gcode_macro%20MEASURE_COREXY_BELT_TENSION&gcode_macro%20BEACON_CALIBRATE');
+          this.state._brand_ratos_macros = [];
+          if (ratosGcodes?.result?.status) {
+            for (const key of Object.keys(ratosGcodes.result.status)) {
+              this.state._brand_ratos_macros.push(key.replace('gcode_macro ', ''));
+            }
+          }
+        }
+        // Beacon probe specific data
+        const beacon = await this._apiGet('/printer/objects/query?beacon');
+        if (beacon?.result?.status?.beacon) {
+          this.state._brand_beacon = {
+            model: beacon.result.status.beacon.model || '',
+            lastContact: beacon.result.status.beacon.last_contact_result || null,
+            lastScan: beacon.result.status.beacon.last_scan_result || null,
+          };
         }
       }
 
@@ -1418,6 +1555,100 @@ export class MoonrakerClient {
   async getWledStrips() {
     const data = await this._apiGet('/machine/wled/strips');
     return data?.result?.strips || {};
+  }
+
+  // ── Moonraker Database ──
+
+  async getDatabaseItem(namespace, key) {
+    const path = key ? `/server/database/item?namespace=${namespace}&key=${key}` : `/server/database/item?namespace=${namespace}`;
+    const data = await this._apiGet(path);
+    return data?.result?.value ?? null;
+  }
+
+  async setDatabaseItem(namespace, key, value) {
+    await this._apiPost('/server/database/item', { namespace, key, value });
+  }
+
+  async deleteDatabaseItem(namespace, key) {
+    await this._apiDelete(`/server/database/item?namespace=${namespace}&key=${key}`);
+  }
+
+  async listDatabaseNamespaces() {
+    const data = await this._apiGet('/server/database/list');
+    return data?.result?.namespaces || [];
+  }
+
+  // ── Announcements ──
+
+  async getAnnouncements() {
+    const data = await this._apiGet('/server/announcements/list');
+    return data?.result?.entries || [];
+  }
+
+  async dismissAnnouncement(entryId) {
+    await this._apiPost(`/server/announcements/dismiss?entry_id=${entryId}`);
+  }
+
+  // ── GCode Store (terminal history) ──
+
+  async getGcodeStore(count = 100) {
+    const data = await this._apiGet(`/server/gcode_store?count=${count}`);
+    return data?.result?.gcode_store || [];
+  }
+
+  // ── Peripherals ──
+
+  async getUsbDevices() {
+    const data = await this._apiGet('/machine/peripherals/usb');
+    return data?.result?.usb_devices || [];
+  }
+
+  async getSerialDevices() {
+    const data = await this._apiGet('/machine/peripherals/serial');
+    return data?.result?.serial_devices || [];
+  }
+
+  async getVideoDevices() {
+    const data = await this._apiGet('/machine/peripherals/video');
+    return data?.result?.v4l_devices || [];
+  }
+
+  async getCanbusUuids(interface_ = 'can0') {
+    const data = await this._apiGet(`/machine/peripherals/canbus?interface=${interface_}`);
+    return data?.result?.can_uuids || [];
+  }
+
+  // ── File operations ──
+
+  async createFileZip(files, destination) {
+    const data = await this._apiPost('/server/files/zip', { items: files, dest: destination });
+    return data?.result || null;
+  }
+
+  async metascanFile(filename) {
+    await this._apiPost('/server/files/metascan', { filename });
+  }
+
+  async getFileThumbnails(filename) {
+    const data = await this._apiGet(`/server/files/thumbnails?filename=${encodeURIComponent(filename)}`);
+    return data?.result || [];
+  }
+
+  // ── Job Queue ──
+
+  async jumpQueueJob(jobIds) {
+    await this._apiPost('/server/job_queue/jump', { job_ids: jobIds });
+  }
+
+  // ── Log management ──
+
+  async rolloverLogs() {
+    await this._apiPost('/server/logs/rollover');
+  }
+
+  async getLogFiles() {
+    const data = await this._apiGet('/server/logs/list');
+    return data?.result?.logs || [];
   }
 
   async triggerUpdate(name) {

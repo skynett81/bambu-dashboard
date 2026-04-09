@@ -354,6 +354,61 @@ export class PrusaLinkClient {
     return this._apiGet('/api/v1/storage') || {};
   }
 
+  // ── Full printer state query ──
+
+  async getFullPrinterState() {
+    const [status, job, printer, info] = await Promise.all([
+      this._apiGet('/api/v1/status'),
+      this._apiGet('/api/v1/job'),
+      this._apiGet('/api/v1/printer'),
+      this._apiGet('/api/v1/info'),
+    ]);
+    return { status, job, printer, info };
+  }
+
+  // ── Vibration suppression (MK4/MK3.9) ──
+
+  async setVibrationSuppression(enabled) {
+    await this._apiPost('/api/v1/job', { command: 'GCODE', gcode: enabled ? 'M593 F40' : 'M593 F0' });
+  }
+
+  // ── Network info ──
+
+  async getNetworkSettings() {
+    const info = await this._apiGet('/api/v1/info');
+    return {
+      hostname: info?.hostname || '',
+      ip: info?.ip || '',
+      mac: info?.mac || '',
+    };
+  }
+
+  // ── MMU detailed ──
+
+  async getMMUState() {
+    if (!this.state._mmu_enabled) return null;
+    return {
+      enabled: this.state._mmu_enabled,
+      version: this.state._mmu_version,
+      activeSlot: this.state._active_slot,
+    };
+  }
+
+  // ── PrusaConnect Cloud proxy (if token available) ──
+
+  async prusaConnectRegister(token) {
+    // PrusaConnect uses /api/v1/connect with bearer token
+    try {
+      const headers = { 'Authorization': `Bearer ${token}` };
+      if (this.apiKey) headers['X-Api-Key'] = this.apiKey;
+      const res = await fetch(`${this._baseUrl}/api/v1/connect`, {
+        method: 'POST', headers, signal: AbortSignal.timeout(10000),
+      });
+      return res.ok;
+    } catch {}
+    return false;
+  }
+
   // ── HTTP with Digest Auth ──
 
   async _apiGet(path) {

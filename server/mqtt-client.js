@@ -274,6 +274,44 @@ export class BambuMqttClient {
       if (this.state.nozzle_type !== undefined) this.state._nozzle_type = this.state.nozzle_type;
       if (this.state.nozzle_diameter !== undefined) this.state._nozzle_diameter = this.state.nozzle_diameter;
 
+      // Lifecycle / hardware state
+      if (this.state.lifecycle !== undefined) this.state._lifecycle = this.state.lifecycle;
+      if (this.state.hw_switch_state !== undefined) this.state._hw_switches = this.state.hw_switch_state;
+      if (this.state.home_flag !== undefined) this.state._homed = this.state.home_flag;
+      if (this.state.force_upgrade !== undefined) this.state._force_upgrade = this.state.force_upgrade;
+
+      // Print error details
+      if (this.state.print_error !== undefined && this.state.print_error !== 0) {
+        this.state._print_error_code = this.state.print_error;
+      }
+
+      // Task/project IDs for cloud correlation
+      if (this.state.subtask_id) this.state._subtask_id = this.state.subtask_id;
+      if (this.state.profile_id) this.state._profile_id = this.state.profile_id;
+      if (this.state.project_id) this.state._project_id = this.state.project_id;
+      if (this.state.gcode_start_time) this.state._print_start_time = this.state.gcode_start_time;
+
+      // Network info
+      if (this.state.net) {
+        this.state._network = { ip: this.state.net.info?.ip, mask: this.state.net.info?.mask };
+      }
+
+      // SD card detailed status
+      if (this.state.sdcard !== undefined) this.state._sdcard = this.state.sdcard;
+
+      // AMS detailed: RFID reading state, tray detailed info
+      if (this.state.ams?.ams_rfid_reading !== undefined) this.state._ams_rfid_reading = this.state.ams.ams_rfid_reading;
+      if (this.state.ams_status !== undefined) this.state._ams_status_code = this.state.ams_status;
+
+      // Timestamp
+      if (this.state.t_utc) this.state._last_report_utc = this.state.t_utc;
+
+      // H2D dual-nozzle specific
+      if (this.state.nozzle_temper_2 !== undefined) {
+        this.state._nozzle2_temper = this.state.nozzle_temper_2;
+        this.state._nozzle2_target = this.state.nozzle_target_temper_2 || 0;
+      }
+
       // AMS summary for quick access
       if (this.state.ams?.ams) {
         this.state._ams_count = this.state.ams.ams.length;

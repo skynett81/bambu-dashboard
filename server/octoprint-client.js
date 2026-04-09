@@ -694,6 +694,69 @@ export class OctoPrintClient {
   }
 
   // ══════════════════════════════════════════
+  // ACCESS CONTROL — User/Group/Permission CRUD
+  // ══════════════════════════════════════════
+
+  async getPermissions() { return this._apiGet('/api/access/permissions'); }
+  async getGroups() { return this._apiGet('/api/access/groups'); }
+  async addGroup(group) { return this._apiPost('/api/access/groups', group); }
+  async updateGroup(key, group) { return this._apiPut(`/api/access/groups/${key}`, group); }
+  async deleteGroup(key) { await this._apiDelete(`/api/access/groups/${key}`); }
+  async getUsers() { return this._apiGet('/api/access/users'); }
+  async addUser(user) { return this._apiPost('/api/access/users', user); }
+  async getUser(username) { return this._apiGet(`/api/access/users/${username}`); }
+  async updateUser(username, user) { return this._apiPut(`/api/access/users/${username}`, user); }
+  async deleteUser(username) { await this._apiDelete(`/api/access/users/${username}`); }
+  async changePassword(username, password) { return this._apiPut(`/api/access/users/${username}/password`, { password }); }
+  async getUserSettings(username) { return this._apiGet(`/api/access/users/${username}/settings`); }
+  async updateUserSettings(username, settings) { return this._apiPatch(`/api/access/users/${username}/settings`, settings); }
+  async regenerateApiKey(username) { return this._apiPost(`/api/access/users/${username}/apikey`, {}); }
+  async deleteUserApiKey(username) { await this._apiDelete(`/api/access/users/${username}/apikey`); }
+
+  // ══════════════════════════════════════════
+  // PRINTER PROFILES — Full CRUD
+  // ══════════════════════════════════════════
+
+  async addPrinterProfile(profile) { return this._apiPost('/api/printerprofiles', { profile }); }
+  async updatePrinterProfile(id, profile) { return this._apiPatch(`/api/printerprofiles/${id}`, { profile }); }
+  async deletePrinterProfile(id) { await this._apiDelete(`/api/printerprofiles/${id}`); }
+
+  // ══════════════════════════════════════════
+  // SETTINGS — Read + Write
+  // ══════════════════════════════════════════
+
+  async updateSettings(settings) { return this._apiPost('/api/settings', settings); }
+  async regenerateSystemApiKey() { return this._apiPost('/api/settings/apikey', {}); }
+
+  // ══════════════════════════════════════════
+  // LANGUAGES
+  // ══════════════════════════════════════════
+
+  async getLanguages() { return this._apiGet('/api/languages'); }
+  async deleteLanguage(locale, pack) { await this._apiDelete(`/api/languages/${locale}/${pack}`); }
+
+  // ══════════════════════════════════════════
+  // UTIL + WIZARD
+  // ══════════════════════════════════════════
+
+  async testConnectivity(type, target) { return this._apiPost('/api/util/test', { command: type, ...target }); }
+  async getWizardData() { return this._apiGet('/setup/wizard'); }
+  async finishWizard(data) { return this._apiPost('/setup/wizard', data); }
+
+  // ══════════════════════════════════════════
+  // ADDITIONAL COMMANDS
+  // ══════════════════════════════════════════
+
+  async babystep(amount) {
+    // M290 Z{amount} — babystepping
+    await this._sendGcode(`M290 Z${amount || 0.05}`);
+  }
+
+  async setZOffset(offset) {
+    await this._sendGcode(`M851 Z${offset}`);
+  }
+
+  // ══════════════════════════════════════════
   // CAMERA
   // ══════════════════════════════════════════
 
@@ -740,6 +803,18 @@ export class OctoPrintClient {
       }
       return null;
     } catch (e) { log.error(`POST ${path}: ${e.message}`); return null; }
+  }
+
+  async _apiPut(path, body) {
+    try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (this.apiKey) headers['X-Api-Key'] = this.apiKey;
+      const res = await fetch(`${this._baseUrl}${path}`, {
+        method: 'PUT', headers, body: JSON.stringify(body), signal: AbortSignal.timeout(5000),
+      });
+      if (res.ok) { try { return await res.json(); } catch { return null; } }
+      return null;
+    } catch (e) { log.error(`PUT ${path}: ${e.message}`); return null; }
   }
 
   async _apiPatch(path, body) {

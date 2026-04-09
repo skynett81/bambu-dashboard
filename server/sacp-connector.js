@@ -944,8 +944,136 @@ export class SacpConnector {
     };
   }
 
-  async getCameraFrame() { return null; } // SACP machines don't expose camera via API
+  // ══════════════════════════════════════════
+  // CAMERA — Photo capture for calibration (0xb0)
+  // ══════════════════════════════════════════
+
+  async takePhoto(options = {}) {
+    const { index = 0, x = 0, y = 0, z = 0, feedRate = 3000, quality = 0 } = options;
+    const buf = Buffer.alloc(22);
+    buf[0] = index;
+    buf.writeFloatLE(x, 1);
+    buf.writeFloatLE(y, 5);
+    buf.writeFloatLE(z, 9);
+    buf.writeFloatLE(feedRate, 13);
+    buf[17] = quality;
+    try {
+      return await this._send({ set: 0xb0, id: 0x04 }, PEER.SCREEN, buf);
+    } catch { return null; }
+  }
+
+  async getPhoto(index = 0) {
+    try {
+      const resp = await this._send({ set: 0xb0, id: 0x05 }, PEER.SCREEN, Buffer.from([index]));
+      if (resp?.data) {
+        const { result: filename, nextOffset } = helper.readString(resp.data, 0);
+        const md5 = resp.data.subarray(nextOffset, nextOffset + 32).toString('utf8');
+        return { filename, md5 };
+      }
+    } catch {}
+    return null;
+  }
+
+  async getCameraCalibration(toolHeadType = 0) {
+    try {
+      return await this._send({ set: 0xb0, id: 0x03 }, PEER.SCREEN, Buffer.from([toolHeadType]));
+    } catch {}
+    return null;
+  }
+
+  async setCameraMatrix(toolHeadType, matrix) {
+    try {
+      const buf = Buffer.alloc(1 + matrix.length * 4);
+      buf[0] = toolHeadType;
+      for (let i = 0; i < matrix.length; i++) buf.writeFloatLE(matrix[i], 1 + i * 4);
+      return await this._send({ set: 0xb0, id: 0x07 }, PEER.SCREEN, buf);
+    } catch {}
+    return null;
+  }
+
+  async getCameraFrame() { return null; } // Photo capture via takePhoto(), not HTTP stream
   getSnapshotUrl() { return null; }
+
+  // ══════════════════════════════════════════
+  // FIRMWARE UPGRADE (0xad)
+  // ══════════════════════════════════════════
+
+  async upgradeFirmware(filename) {
+    const nameBuf = helper.stringToBuffer(filename);
+    try {
+      // Set handler for upgrade preparation status
+      this._dispatcher.setHandler(0xad, 0x03, (req) => {
+        this.state._upgradePrep = { progress: req.data?.[0] || 0 };
+        this._dispatcher.ack(0xad, 0x03, req.packet, Buffer.alloc(1));
+      });
+      // Set handler for upgrade result
+      this._dispatcher.setHandler(0xad, 0x10, (req) => {
+        this.state._upgradeResult = { success: req.data?.[0] === 0, code: req.data?.[0] };
+        this._dispatcher.ack(0xad, 0x10, req.packet, Buffer.alloc(1));
+      });
+      return await this._send({ set: 0xad, id: 0x00 }, PEER.CONTROLLER, nameBuf);
+    } catch (e) {
+      log.error(`Firmware upgrade failed: ${e.message}`);
+      return null;
+    }
+  }
+
+  // ══════════════════════════════════════════
+  // ADDITIONAL SYSTEM COMMANDS
+  // ══════════════════════════════════════════
+
+  async setMotorPowerHold(mode) {
+    // mode: 0 = release on idle, 1 = hold always
+    try {
+      return await this._send({ set: 0x01, id: 0x48 }, PEER.CONTROLLER, Buffer.from([mode]));
+    } catch {}
+    return null;
+  }
+
+  async updateCoordinateSystem(type) {
+    // type: 0 = MACHINE, 1 = WORKSPACE
+    try {
+      return await this._send({ set: 0x01, id: 0x31 }, PEER.CONTROLLER, Buffer.from([type]));
+    } catch {}
+    return null;
+  }
+
+  async setWorkOrigin(coordinates) {
+    const buf = Buffer.alloc(1 + coordinates.length * 5);
+    buf[0] = coordinates.length;
+    for (let i = 0; i < coordinates.length; i++) {
+      buf[1 + i * 5] = coordinates[i].axis; // 0=X, 1=Y, 2=Z
+      buf.writeFloatLE(coordinates[i].value, 2 + i * 5);
+    }
+    try {
+      return await this._send({ set: 0x01, id: 0x32 }, PEER.CONTROLLER, buf);
+    } catch {}
+    return null;
+  }
+
+  async getNetworkInfo() {
+    try {
+      const resp = await this._send({ set: 0x01, id: 0x25 }, PEER.CONTROLLER, Buffer.alloc(0));
+      return resp?.data || null;
+    } catch {}
+    return null;
+  }
+
+  async getNetworkStationState() {
+    try {
+      const resp = await this._send({ set: 0x01, id: 0x26 }, PEER.CONTROLLER, Buffer.alloc(0));
+      return resp?.data || null;
+    } catch {}
+    return null;
+  }
+
+  async getEmergencyStopInfo() {
+    try {
+      const resp = await this._send({ set: 0x01, id: 0x3b }, PEER.CONTROLLER, Buffer.alloc(0));
+      return resp?.data || null;
+    } catch {}
+    return null;
+  }
 
   // ══════════════════════════════════════════
   // INTERNAL HELPERS
