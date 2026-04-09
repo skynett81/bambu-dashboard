@@ -298,6 +298,234 @@
     }
   };
 
+  // ══════════════════════════════════════════
+  // REMAINING 20 PANELS
+  // ══════════════════════════════════════════
+
+  function _inject(id, html) {
+    const container = document.getElementById('overlay-panel-body');
+    if (!container) return;
+    let el = document.getElementById(id);
+    if (el) { el.innerHTML = html; return; }
+    el = document.createElement('div');
+    el.id = id;
+    el.style.cssText = 'margin-bottom:10px';
+    el.innerHTML = html;
+    container.insertBefore(el, container.firstChild);
+  }
+
+  function _badge(label, value, color) {
+    return `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:6px;background:var(--bg-inset);font-size:0.68rem;margin-right:4px"><span style="color:${color || 'var(--text-muted)'}">${label}:</span> <strong>${value}</strong></span>`;
+  }
+
+  // History: temps + fan + sensor events per print
+  function _injectHistory(data) {
+    let html = '';
+    if (data.nozzle_temper) html += _badge('Nozzle', data.nozzle_temper + '°C', '#ff6b6b');
+    if (data.bed_temper) html += _badge('Bed', data.bed_temper + '°C', '#4ecdc4');
+    if (data._filament_sensor) html += _badge('Sensor', data._filament_sensor.detected ? '✓' : '⚠', data._filament_sensor.detected ? 'var(--accent-green)' : 'var(--accent-red)');
+    if (data._speed_level) html += _badge('Speed', ['','Silent','Normal','Sport','Ludicrous'][data._speed_level] || '', '');
+    if (html) _inject('injected-history', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Analysis: bed mesh trend, TMC trends
+  function _injectAnalysis(data) {
+    let html = '';
+    if (data._bed_mesh?.meshMatrix?.length) {
+      let min = Infinity, max = -Infinity;
+      for (const r of data._bed_mesh.meshMatrix) for (const v of r) { if (v < min) min = v; if (v > max) max = v; }
+      const v = Math.round((max - min) * 1000) / 1000;
+      html += _badge('Bed Mesh', v + 'mm', v < 0.1 ? 'var(--accent-green)' : 'var(--accent-orange)');
+    }
+    if (data._input_shaper) {
+      html += _badge('Shaper X', (data._input_shaper.shaperFreqX?.toFixed(0) || '?') + 'Hz', '');
+      html += _badge('Shaper Y', (data._input_shaper.shaperFreqY?.toFixed(0) || '?') + 'Hz', '');
+    }
+    if (data._pressure_advance !== undefined) html += _badge('PA', data._pressure_advance, '');
+    if (html) _inject('injected-analysis', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Queue: build volume + filament sensor + temp ready
+  function _injectQueue(data) {
+    let html = '';
+    const vol = data._buildVolume || data._printerProfile?.volume;
+    if (vol) {
+      const w = vol.width || vol.x || 0, d = vol.depth || vol.y || 0, h = vol.height || vol.z || 0;
+      if (w) html += _badge('Build Vol', `${w}×${d}×${h}mm`, '');
+    }
+    if (data._filament_sensor) html += _badge('Filament', data._filament_sensor.detected ? 'Ready' : 'Missing!', data._filament_sensor.detected ? 'var(--accent-green)' : 'var(--accent-red)');
+    if (data.nozzle_temper > 50) html += _badge('Nozzle', data.nozzle_temper + '°C', data.nozzle_temper > 180 ? 'var(--accent-green)' : 'var(--accent-orange)');
+    if (html) _inject('injected-queue', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Scheduler: printer capability per job
+  function _injectScheduler(data) {
+    let html = '';
+    if (data._heatedBed !== undefined) html += _badge('Heated Bed', data._heatedBed ? '✓' : '✗', data._heatedBed ? 'var(--accent-green)' : 'var(--accent-red)');
+    if (data._heatedChamber !== undefined) html += _badge('Chamber', data._heatedChamber ? '✓' : '✗', data._heatedChamber ? 'var(--accent-green)' : 'var(--text-muted)');
+    if (data._extruderCount > 1) html += _badge('Extruders', data._extruderCount, '');
+    if (data._ercf) html += _badge('ERCF', data._ercf.numGates + ' gates', 'var(--accent-cyan)');
+    if (html) _inject('injected-scheduler', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Library: printer type for send-to-printer
+  function _injectLibrary(data) {
+    const brand = data._detected_brand || '';
+    if (!brand && !data.gcode_state) return;
+    let html = _badge('Printer', brand || 'Connected', 'var(--accent-green)');
+    if (data.gcode_state === 'RUNNING') html += _badge('Status', 'Printing', 'var(--accent-orange)');
+    else if (data.gcode_state === 'IDLE') html += _badge('Status', 'Ready', 'var(--accent-green)');
+    _inject('injected-library', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Cost Estimator: power from ADC, nozzle wear
+  function _injectCostEstimator(data) {
+    let html = '';
+    if (data._sm_current?.heater_bed) html += _badge('Bed Current', data._sm_current.heater_bed.current + 'A', '');
+    if (data._nozzle_diameter) html += _badge('Nozzle', data._nozzle_diameter + 'mm', '');
+    if (data._nozzle_type) html += _badge('Type', data._nozzle_type, '');
+    if (html) _inject('injected-costestimator', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Achievements: printer milestones
+  function _injectAchievements(data) {
+    let html = '';
+    if (data._bed_mesh) html += _badge('Bed Meshes', '✓', 'var(--accent-green)');
+    if (data._ercf) html += _badge('ERCF', data._ercf.numGates + ' gates', 'var(--accent-cyan)');
+    if (data._sm_filament?.length > 2) html += _badge('NFC Spools', data._sm_filament.length, 'var(--accent-green)');
+    if (html) _inject('injected-achievements', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Calendar: printer availability
+  function _injectCalendar(data) {
+    const state = data.gcode_state || 'OFFLINE';
+    const color = state === 'IDLE' ? 'var(--accent-green)' : state === 'RUNNING' ? 'var(--accent-blue)' : state === 'PAUSE' ? 'var(--accent-orange)' : 'var(--accent-red)';
+    _inject('injected-calendar', `<div style="margin-bottom:8px">${_badge('Printer', state, color)}</div>`);
+  }
+
+  // CRM: printer capability per order
+  function _injectCrm(data) {
+    let html = '';
+    const vol = data._buildVolume || data._printerProfile?.volume;
+    if (vol) {
+      const w = vol.width || vol.x || 0;
+      if (w) html += _badge('Max Size', `${w}×${vol.depth || vol.y}×${vol.height || vol.z}mm`, '');
+    }
+    if (data._extruderCount > 1) html += _badge('Multi-Color', data._extruderCount + ' tools', 'var(--accent-cyan)');
+    if (html) _inject('injected-crm', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Knowledge: printer-specific tips
+  function _injectKnowledge(data) {
+    const brand = data._detected_brand || '';
+    if (!brand) return;
+    let tip = '';
+    if (brand === 'Voron') tip = 'Tip: Run SHAPER_CALIBRATE after building for best print quality.';
+    else if (brand === 'Creality') tip = 'Tip: K1 series benefits from input shaper tuning via Sonic Pad.';
+    else if (brand === 'QIDI') tip = 'Tip: Use chamber heater for ABS/ASA prints on QIDI X-Max.';
+    if (tip) _inject('injected-knowledge', `<div class="alert alert-info" style="font-size:0.72rem;margin-bottom:8px">${tip}</div>`);
+  }
+
+  // Profiles: per-printer capabilities
+  function _injectProfiles(data) {
+    let html = '';
+    if (data._printerProfile?.name) html += _badge('Profile', data._printerProfile.name, '');
+    if (data._extruderCount) html += _badge('Extruders', data._extruderCount, '');
+    if (data._heatedBed !== undefined) html += _badge('Heated Bed', data._heatedBed ? '✓' : '✗', '');
+    if (data._heatedChamber) html += _badge('Chamber', '✓', 'var(--accent-green)');
+    if (html) _inject('injected-profiles', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Labels: printer info for QR
+  function _injectLabels(data) {
+    let html = '';
+    if (data._nozzle_diameter) html += _badge('Nozzle', data._nozzle_diameter + 'mm', '');
+    if (data._detected_brand) html += _badge('Brand', data._detected_brand, '');
+    if (html) _inject('injected-labels', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Logs: MQTT debug + terminal
+  function _injectLogs(data) {
+    if (!data._terminalLog?.length) return;
+    _inject('injected-logs', `<div style="background:#0d1117;border-radius:6px;padding:6px 8px;font-family:monospace;font-size:0.65rem;color:#8b949e;max-height:120px;overflow-y:auto;margin-bottom:8px">
+      ${data._terminalLog.map(l => `<div>${l}</div>`).join('')}
+    </div>`);
+  }
+
+  // Widgets: mini live data widgets
+  function _injectWidgets(data) {
+    let html = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">';
+    if (data.nozzle_temper) html += `<div class="settings-card" style="padding:8px;min-width:80px;text-align:center"><div style="font-size:0.6rem;color:var(--text-muted)">Nozzle</div><div style="font-size:1.2rem;font-weight:700;color:#ff6b6b">${data.nozzle_temper}°</div></div>`;
+    if (data.bed_temper) html += `<div class="settings-card" style="padding:8px;min-width:80px;text-align:center"><div style="font-size:0.6rem;color:var(--text-muted)">Bed</div><div style="font-size:1.2rem;font-weight:700;color:#4ecdc4">${data.bed_temper}°</div></div>`;
+    if (data.mc_percent !== undefined) html += `<div class="settings-card" style="padding:8px;min-width:80px;text-align:center"><div style="font-size:0.6rem;color:var(--text-muted)">Progress</div><div style="font-size:1.2rem;font-weight:700">${data.mc_percent}%</div></div>`;
+    if (data.spd_mag) html += `<div class="settings-card" style="padding:8px;min-width:80px;text-align:center"><div style="font-size:0.6rem;color:var(--text-muted)">Speed</div><div style="font-size:1.2rem;font-weight:700">${data.spd_mag}%</div></div>`;
+    html += '</div>';
+    _inject('injected-widgets', html);
+  }
+
+  // Screenshots: camera availability
+  function _injectScreenshots(data) {
+    if (!data._camera_state && !data._brand_camera_confirmed) return;
+    _inject('injected-screenshots', `<div style="margin-bottom:8px">${_badge('Camera', data._camera_state?.resolution || 'Available', 'var(--accent-green)')} ${data._camera_state?.recording ? _badge('Status', '● Recording', 'var(--accent-red)') : ''}</div>`);
+  }
+
+  // Filament Analytics: NFC trends, ERCF usage
+  function _injectFilamentAnalytics(data) {
+    let html = '';
+    if (data._sm_filament?.length) html += _badge('NFC Spools', data._sm_filament.length + ' detected', 'var(--accent-green)');
+    if (data._ercf) html += _badge('ERCF Gates', data._ercf.numGates, 'var(--accent-cyan)');
+    if (data._afc) html += _badge('AFC Lanes', data._afc.lanes?.length || 0, 'var(--accent-cyan)');
+    if (html) _inject('injected-filamentanalytics', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Material Recommendations: printer-specific
+  function _injectMaterialRec(data) {
+    let tips = [];
+    if (data._nozzle_type === 'hardened_steel') tips.push('Hardened steel nozzle detected — CF/GF materials compatible');
+    if (data._heatedChamber) tips.push('Heated chamber available — ABS/ASA/PA recommended');
+    if (data._nozzle_diameter && data._nozzle_diameter !== 0.4) tips.push(`Non-standard nozzle: ${data._nozzle_diameter}mm — adjust line width`);
+    if (data._detected_brand === 'Voron' && data._nevermore) tips.push('Nevermore filter active — safe for ABS/ASA fumes');
+    if (tips.length) _inject('injected-materialrec', tips.map(t => `<div class="alert alert-info" style="font-size:0.72rem;margin-bottom:4px">${t}</div>`).join(''));
+  }
+
+  // Plugins: OctoPrint/Moonraker plugins
+  function _injectPlugins(data) {
+    let html = '';
+    if (data._installedPlugins?.length) {
+      html += `<div class="alert alert-info" style="font-size:0.72rem;margin-bottom:8px">OctoPrint: ${data._installedPlugins.length} plugins installed</div>`;
+    }
+    if (data._brand_ratos_objects?.length) {
+      html += `<div class="alert alert-info" style="font-size:0.72rem;margin-bottom:8px">RatOS: ${data._brand_ratos_objects.length} custom objects detected</div>`;
+    }
+    if (data._modules?.length) {
+      html += `<div class="alert alert-info" style="font-size:0.72rem;margin-bottom:8px">SACP Modules: ${data._modules.map(m => m.name).join(', ')}</div>`;
+    }
+    if (html) _inject('injected-plugins', html);
+  }
+
+  // Error Analysis: HMS + TMC + defect trends
+  function _injectErrorAnalysis(data) {
+    let html = '';
+    if (data.hms?.length) html += _badge('HMS Errors', data.hms.length, 'var(--accent-red)');
+    if (data._active_errors) html += _badge('Active', data._active_errors, 'var(--accent-red)');
+    if (data._tmc) {
+      const issues = Object.entries(data._tmc).filter(([, v]) => v.temperature > 80);
+      if (issues.length) html += _badge('TMC Hot', issues.map(([n]) => n).join(','), 'var(--accent-orange)');
+    }
+    if (data._sm_defect?.noodle?.probability > 0.3) html += _badge('Spaghetti', Math.round(data._sm_defect.noodle.probability * 100) + '%', 'var(--accent-orange)');
+    if (html) _inject('injected-erroranalysis', `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">${html}</div>`);
+  }
+
+  // Backup: printer config reminder
+  function _injectBackup(data) {
+    const printerCount = Object.keys(window.printerState?.printers || {}).length;
+    if (printerCount > 0) {
+      _inject('injected-backup', `<div class="alert alert-info" style="font-size:0.72rem;margin-bottom:8px">
+        ${printerCount} printer(s) configured — backup includes all printer settings, filament profiles, and calibration data.
+      </div>`);
+    }
+  }
+
   /**
    * Master injection — call from updateDashboard for active panel enrichment
    */
@@ -305,10 +533,32 @@
     const panel = window._activePanel;
     if (!panel) return;
 
-    if (panel === 'diagnostics') injectDiagnosticsData(data);
-    else if (panel === 'maintenance') injectMaintenanceData(data);
-    else if (panel === 'errors') injectErrorsData(data);
-    else if (panel === 'filament' || panel === 'inventory') injectFilamentData(data);
-    else if (panel === 'protection') injectProtectionData(data);
+    switch (panel) {
+      case 'diagnostics': injectDiagnosticsData(data); break;
+      case 'maintenance': injectMaintenanceData(data); break;
+      case 'errors': injectErrorsData(data); break;
+      case 'filament': case 'inventory': injectFilamentData(data); break;
+      case 'protection': injectProtectionData(data); break;
+      case 'history': _injectHistory(data); break;
+      case 'analysis': case 'stats': _injectAnalysis(data); break;
+      case 'queue': _injectQueue(data); break;
+      case 'scheduler': case 'calendar': _injectScheduler(data); _injectCalendar(data); break;
+      case 'library': _injectLibrary(data); break;
+      case 'costestimator': _injectCostEstimator(data); break;
+      case 'achievements': _injectAchievements(data); break;
+      case 'crm-dashboard': case 'crm-orders': case 'crm-invoices': case 'crm-customers': _injectCrm(data); break;
+      case 'knowledge': _injectKnowledge(data); break;
+      case 'profiles': _injectProfiles(data); break;
+      case 'labels': _injectLabels(data); break;
+      case 'logs': _injectLogs(data); break;
+      case 'widgets': _injectWidgets(data); break;
+      case 'screenshots': _injectScreenshots(data); break;
+      case 'filamentanalytics': _injectFilamentAnalytics(data); break;
+      case 'materialrec': _injectMaterialRec(data); break;
+      case 'plugins': _injectPlugins(data); break;
+      case 'erroranalysis': _injectErrorAnalysis(data); break;
+      case 'backup': _injectBackup(data); break;
+    }
   };
 })();
+
