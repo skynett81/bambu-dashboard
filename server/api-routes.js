@@ -5494,8 +5494,15 @@ export async function handleApiRequest(req, res) {
         const { getDefectEvents } = await import('./db/snapmaker.js');
         return sendJson(res, {
           current: smState._sm_defect || null,
+          entangle: smState._sm_entangle || null,
           events: getDefectEvents(pid, 50),
         });
+      }
+
+      if (method === 'GET' && smPath === 'defects/trend') {
+        const days = parseInt(url.searchParams.get('days')) || 30;
+        const { getDefectTrend } = await import('./db/snapmaker.js');
+        return sendJson(res, getDefectTrend(pid, days));
       }
 
       if (method === 'GET' && smPath === 'print-config') {
@@ -7047,6 +7054,36 @@ export async function handleApiRequest(req, res) {
     if (method === 'GET' && path === '/api/timelapse') {
       const printerId = url.searchParams.get('printer_id');
       return sendJson(res, getTimelapseRecordings(printerId));
+    }
+
+    // List timelapse frame sessions (auto-captured from Snapmaker U1)
+    if (method === 'GET' && path === '/api/timelapse/frames') {
+      const printerId = url.searchParams.get('printer_id') || '';
+      const baseDir = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'timelapse', printerId);
+      try {
+        const { readdirSync, statSync: fs } = await import('node:fs');
+        if (!existsSync(baseDir)) return sendJson(res, []);
+        const sessions = readdirSync(baseDir).filter(d => {
+          try { return fs(join(baseDir, d)).isDirectory(); } catch { return false; }
+        }).map(d => {
+          const frames = readdirSync(join(baseDir, d)).filter(f => f.endsWith('.jpg'));
+          return { session: d, printer_id: printerId, frames: frames.length, path: `/api/timelapse/frames/${printerId}/${d}` };
+        }).sort((a, b) => b.session.localeCompare(a.session));
+        return sendJson(res, sessions);
+      } catch { return sendJson(res, []); }
+    }
+
+    // Serve individual timelapse frame
+    const frameMatch = path.match(/^\/api\/timelapse\/frames\/([^/]+)\/([^/]+)\/([^/]+)$/);
+    if (frameMatch && method === 'GET') {
+      const [, fPid, session, fname] = frameMatch;
+      const framePath = join(dirname(fileURLToPath(import.meta.url)), '..', 'data', 'timelapse', fPid, session, fname);
+      if (existsSync(framePath)) {
+        res.writeHead(200, { 'Content-Type': 'image/jpeg', 'Cache-Control': 'public, max-age=86400' });
+        createReadStream(framePath).pipe(res);
+        return;
+      }
+      return sendJson(res, { error: 'Frame not found' }, 404);
     }
 
     const timelapseIdMatch = path.match(/^\/api\/timelapse\/(\d+)$/);

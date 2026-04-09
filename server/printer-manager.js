@@ -83,6 +83,7 @@ export class PrinterManager {
     if (printerConf.type === 'prusalink') return 'prusalink';
     if (printerConf.type === 'octoprint') return 'octoprint';
     if (printerConf.type === 'sacp') return 'sacp';
+    if (printerConf.type === 'snapmaker-http' || printerConf.type === 'sm-http') return 'snapmaker-http';
     // Klipper-based brands → Moonraker connector
     if (['creality', 'elegoo', 'anker', 'voron', 'ratrig', 'qidi'].includes(printerConf.type)) return 'moonraker';
     // Auto-detect: Bambu printers use serial + accessCode, Moonraker printers don't need serial
@@ -139,6 +140,11 @@ export class PrinterManager {
       client = new SacpConnector({ printer: printerConf }, connectorHub);
       client._buildCommand = buildSacpCommand;
       log.info(`Using SACP connector for ${printerConf.name}`);
+    } else if (connectorType === 'snapmaker-http') {
+      const { SnapmakerHttpClient, buildSnapmakerHttpCommand } = await import('./snapmaker-http-client.js');
+      client = new SnapmakerHttpClient({ printer: printerConf }, connectorHub);
+      client._buildCommand = buildSnapmakerHttpCommand;
+      log.info(`Using Snapmaker HTTP connector for ${printerConf.name}`);
     } else if (connectorType === 'octoprint') {
       const { OctoPrintClient, buildOctoPrintCommand } = await import('./octoprint-client.js');
       client = new OctoPrintClient({ printer: printerConf }, connectorHub);

@@ -97,6 +97,22 @@ const CAPABILITIES = {
     auth: { required: ['ip'] },
   },
 
+  'snapmaker-http': {
+    label: 'Snapmaker 2.0 HTTP',
+    connection: 'http-token',
+    fileAccess: 'http-upload',
+    camera: { modes: [] },
+    modelAccess: { method: 'none', hasMeshIn3MF: false },
+    gcodeAccess: { method: 'http-upload' },
+    features: {
+      ams: false, xcam: false, firmwareDetection: true,
+      ssdpDiscovery: false, cloudTasks: false, historySync: false,
+      multiExtruder: false, enclosure: true, multiModule: true,
+      sacpDiscovery: true, tokenAuth: true,
+    },
+    auth: { required: ['ip'], methods: ['token'] },
+  },
+
   octoprint: {
     label: 'OctoPrint',
     connection: 'http-poll',

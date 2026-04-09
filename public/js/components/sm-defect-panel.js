@@ -29,6 +29,33 @@
       </div>`;
     }
 
+    // ── Filament Entangle Detection ──
+    if (data._sm_entangle) {
+      const channels = Object.entries(data._sm_entangle);
+      if (channels.length > 0) {
+        html += `<div class="ctrl-card">
+          <div class="ctrl-card-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg>
+            Filament Entangle
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            ${channels.map(([key, val]) => {
+              const factor = val.detectFactor || 0;
+              const pct = Math.round(factor * 100);
+              const color = factor > 0.8 ? 'var(--accent-red)' : factor > 0.5 ? 'var(--accent-orange)' : 'var(--accent-green)';
+              return `<div style="background:var(--bg-inset);border-radius:6px;padding:6px 8px">
+                <div style="font-size:0.72rem;color:var(--text-muted)">Extruder ${key.replace('e','')}</div>
+                <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+                  <div class="filament-bar" style="flex:1"><div class="filament-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+                  <span style="font-size:0.75rem;font-weight:600;color:${color}">${pct}%</span>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      }
+    }
+
     // ── Timelapse ──
     if (data._sm_timelapse !== undefined) {
       const active = data._sm_timelapse?.active;

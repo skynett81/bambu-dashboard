@@ -471,10 +471,25 @@ export class MoonrakerClient {
           dryingTemp: ch.DRYING_TEMP || 0,
           dryingTime: ch.DRYING_TIME || 0,
         };
-        // Persist to DB cache (fire-and-forget)
+        // Persist to DB cache + sync to main filament inventory (fire-and-forget)
         try {
           import('./db/snapmaker.js').then(({ upsertNfcFilament }) => {
             upsertNfcFilament(this._printerId, idx, data);
+          }).catch(() => {});
+
+          // Auto-sync NFC spool to filament inventory
+          import('./db/index.js').then(({ getDb }) => {
+            const db = getDb();
+            const sku = data.sku || `nfc-${this._printerId}-ch${idx}`;
+            const existing = db.prepare('SELECT id FROM filament WHERE sku = ?').get(sku);
+            if (!existing) {
+              db.prepare(`INSERT INTO filament (name, material, vendor, color, color_hex, weight_total_g, sku, source, printer_id)
+                VALUES (?, ?, ?, ?, ?, ?, ?, 'nfc', ?)`).run(
+                `${data.vendor || 'Snapmaker'} ${data.type || 'PLA'} ${data.subType || ''}`.trim(),
+                data.type || 'PLA', data.vendor || 'Snapmaker', data.subType || '',
+                data.color || '#000000', data.weight || 1000, sku, this._printerId
+              );
+            }
           }).catch(() => {});
         } catch { /* ignore */ }
         return data;
@@ -497,12 +512,27 @@ export class MoonrakerClient {
       this.state._sm_feed_channels = channels;
     }
 
-    // Filament entangle detection
+    // Filament entangle detection — track + log high factors
     for (let i = 0; i < 4; i++) {
       const fed = status[`filament_entangle_detect e${i}_filament`];
       if (fed) {
         if (!this.state._sm_entangle) this.state._sm_entangle = {};
         this.state._sm_entangle[`e${i}`] = { detectFactor: fed.detect_factor };
+
+        // Log entangle event when factor exceeds threshold during printing
+        if (fed.detect_factor > 0.7 && this.state.gcode_state === 'RUNNING') {
+          const logKey = `_entangleLog_e${i}`;
+          if (!this[logKey]) {
+            this[logKey] = Date.now();
+            try {
+              import('./db/snapmaker.js').then(m => m.addDefectEvent(
+                this._printerId, 'entangle', fed.detect_factor > 0.9 ? 'high' : 'warning',
+                { extruder: i, detect_factor: fed.detect_factor }, null, fed.detect_factor
+              ));
+            } catch {}
+          }
+          if (this[logKey] && Date.now() - this[logKey] > 120000) this[logKey] = null; // re-log after 2min
+        }
       }
     }
 
@@ -516,12 +546,41 @@ export class MoonrakerClient {
         residue: dd.residue,
         nozzle: dd.nozzle,
       };
+
+      // Log defect events when probability exceeds threshold (0.5)
+      if (dd.main_enable && this.state.gcode_state === 'RUNNING') {
+        const logThreshold = 0.5;
+        if (dd.noodle?.probability > logThreshold && !this._lastNoodleLog) {
+          this._lastNoodleLog = Date.now();
+          try { import('./db/snapmaker.js').then(m => m.addDefectEvent(this._printerId, 'spaghetti', dd.noodle.probability > 0.8 ? 'high' : 'warning', dd.noodle, null, dd.noodle.probability)); } catch {}
+        }
+        if (dd.residue?.probability > logThreshold && !this._lastResidueLog) {
+          this._lastResidueLog = Date.now();
+          try { import('./db/snapmaker.js').then(m => m.addDefectEvent(this._printerId, 'residue', 'warning', dd.residue, null, dd.residue.probability)); } catch {}
+        }
+        // Reset log flags after 60s to allow re-logging
+        if (this._lastNoodleLog && Date.now() - this._lastNoodleLog > 60000) this._lastNoodleLog = null;
+        if (this._lastResidueLog && Date.now() - this._lastResidueLog > 60000) this._lastResidueLog = null;
+      }
     }
 
-    // Timelapse
+    // Timelapse — track active state + auto-capture frames
     const tl = status.timelapse;
     if (tl) {
-      this.state._sm_timelapse = { active: tl.is_active };
+      const wasActive = this.state._sm_timelapse?.active;
+      this.state._sm_timelapse = { active: tl.is_active, frameCount: this._timelapseFrameCount || 0 };
+
+      // Auto-capture frame every 30s during active timelapse
+      if (tl.is_active && this.state.gcode_state === 'RUNNING') {
+        if (!this._timelapseTimer) {
+          this._timelapseFrameCount = 0;
+          this._timelapseDir = null;
+          this._timelapseTimer = setInterval(() => this._captureTimelapseFrame(), 30000);
+        }
+      } else if (!tl.is_active && wasActive) {
+        // Timelapse ended
+        if (this._timelapseTimer) { clearInterval(this._timelapseTimer); this._timelapseTimer = null; }
+      }
     }
 
     // Print task config
@@ -961,6 +1020,34 @@ export class MoonrakerClient {
 
   getStreamUrl() {
     return `${this._baseUrl}/webcam/?action=stream`;
+  }
+
+  /** Capture timelapse frame to disk */
+  async _captureTimelapseFrame() {
+    try {
+      const { existsSync, mkdirSync, writeFileSync } = await import('node:fs');
+      const { join } = await import('node:path');
+
+      // Create timelapse directory
+      if (!this._timelapseDir) {
+        const dataDir = join(import.meta.dirname, '..', 'data', 'timelapse', this._printerId);
+        const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+        this._timelapseDir = join(dataDir, ts);
+        mkdirSync(this._timelapseDir, { recursive: true });
+      }
+
+      // Capture snapshot
+      const url = this.getSnapshotUrl();
+      const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (res.ok) {
+        const buffer = Buffer.from(await res.arrayBuffer());
+        const frameNum = String(this._timelapseFrameCount++).padStart(5, '0');
+        writeFileSync(join(this._timelapseDir, `frame_${frameNum}.jpg`), buffer);
+        this.state._sm_timelapse.frameCount = this._timelapseFrameCount;
+      }
+    } catch (e) {
+      // Non-critical — skip frame
+    }
   }
 
   // ---- Moonraker Update Manager ----

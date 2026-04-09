@@ -28,15 +28,25 @@ export function getNfcFilaments(printerId) {
 
 // ── Defect Events ──
 
-export function addDefectEvent(printerId, eventType, severity, details, printHistoryId) {
+export function addDefectEvent(printerId, eventType, severity, details, printHistoryId, probability) {
   const db = getDb();
   return db.prepare(`INSERT INTO sm_defect_events (printer_id, print_history_id, event_type, severity, details)
-    VALUES (?, ?, ?, ?, ?)`).run(printerId, printHistoryId || null, eventType, severity || 'warning', details || null);
+    VALUES (?, ?, ?, ?, ?)`).run(
+    printerId, printHistoryId || null, eventType, severity || 'warning',
+    JSON.stringify({ ...(typeof details === 'string' ? { message: details } : details || {}), probability: probability ?? null })
+  );
 }
 
 export function getDefectEvents(printerId, limit) {
   const db = getDb();
   return db.prepare('SELECT * FROM sm_defect_events WHERE printer_id = ? ORDER BY detected_at DESC LIMIT ?').all(printerId, limit || 50);
+}
+
+export function getDefectTrend(printerId, days) {
+  const db = getDb();
+  return db.prepare(`SELECT date(detected_at) as day, event_type, COUNT(*) as count
+    FROM sm_defect_events WHERE printer_id = ? AND detected_at >= datetime('now', ?)
+    GROUP BY day, event_type ORDER BY day`).all(printerId, `-${days || 30} days`);
 }
 
 export function acknowledgeDefectEvent(eventId) {
