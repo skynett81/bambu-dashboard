@@ -1534,9 +1534,9 @@
           <label class="form-label" id="pf-access-label">${curType === 'octoprint' || curType === 'prusalink' ? 'API Key' : t('settings.access_code')}</label>
           <input class="form-input" id="pf-access" value="" placeholder="${curType === 'octoprint' ? 'OctoPrint API key from Settings → API' : curType === 'prusalink' ? 'PrusaLink API key' : t('settings.access_code_hint')}">
         </div>
-        <div class="form-group" id="pf-webcam-group" style="${curType === 'octoprint' ? '' : 'display:none'}">
-          <label class="form-label">Webcam URL (optional)</label>
-          <input class="form-input" id="pf-webcam" value="${printer?.webcamUrl || ''}" placeholder="http://ip/webcam/?action=snapshot">
+        <!-- Type-specific configuration sections -->
+        <div id="pf-type-config">
+          ${_renderTypeConfig(curType, printer)}
         </div>
         <details style="margin-top:8px;border-top:1px solid var(--border-color);padding-top:8px">
           <summary style="cursor:pointer;font-size:0.8rem;font-weight:600">${t('settings.per_printer_cost_title')}</summary>
@@ -1587,6 +1587,110 @@
     if (area) renderPrinterForm(area);
   };
 
+  function _renderTypeConfig(type, printer) {
+    const p = printer || {};
+    let h = '';
+
+    if (type === 'bambu') {
+      h += `
+        <div class="form-group"><label class="form-label">MQTT Port</label>
+          <div class="input-group input-group-sm"><input class="form-input form-control" id="pf-port" type="number" value="${p.port || 8883}" placeholder="8883"><span class="input-group-text">TCP</span></div></div>
+        <div class="form-group"><label class="form-label">Camera</label>
+          <select class="form-input" id="pf-camera-mode">
+            <option value="rtsp" ${p.cameraMode === 'rtsp' ? 'selected' : ''}>RTSP Stream (default)</option>
+            <option value="jpeg" ${p.cameraMode === 'jpeg' ? 'selected' : ''}>JPEG over TLS</option>
+            <option value="off" ${p.cameraMode === 'off' ? 'selected' : ''}>Disabled</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">Camera Resolution</label>
+          <select class="form-input" id="pf-camera-res">
+            <option value="1080p" ${p.cameraResolution === '1080p' ? 'selected' : ''}>1080p</option>
+            <option value="720p" ${(p.cameraResolution || '720p') === '720p' ? 'selected' : ''}>720p (default)</option>
+            <option value="480p" ${p.cameraResolution === '480p' ? 'selected' : ''}>480p</option>
+          </select></div>
+        <div class="form-group"><label class="form-label"><input type="checkbox" id="pf-cloud-sync" ${p.cloudSync !== false ? 'checked' : ''}> Enable Bambu Cloud sync</label></div>
+        <div class="form-group"><label class="form-label"><input type="checkbox" id="pf-auto-ams" ${p.autoAmsSync !== false ? 'checked' : ''}> Auto-sync AMS filament to inventory</label></div>`;
+    }
+
+    if (type === 'moonraker') {
+      h += `
+        <div class="form-group"><label class="form-label">Moonraker Port</label>
+          <div class="input-group input-group-sm"><input class="form-input form-control" id="pf-port" type="number" value="${p.port || 80}" placeholder="80"><span class="input-group-text">HTTP</span></div></div>
+        <div class="form-group"><label class="form-label">Webcam URL (optional)</label>
+          <input class="form-input" id="pf-webcam" value="${p.webcamUrl || ''}" placeholder="Auto-detected from Moonraker"></div>
+        <div class="form-group"><label class="form-label">Brand hint</label>
+          <select class="form-input" id="pf-brand-hint">
+            <option value="" ${!p.brandHint ? 'selected' : ''}>Auto-detect</option>
+            <option value="voron" ${p.brandHint === 'voron' ? 'selected' : ''}>Voron</option>
+            <option value="creality" ${p.brandHint === 'creality' ? 'selected' : ''}>Creality</option>
+            <option value="elegoo" ${p.brandHint === 'elegoo' ? 'selected' : ''}>Elegoo</option>
+            <option value="qidi" ${p.brandHint === 'qidi' ? 'selected' : ''}>QIDI</option>
+            <option value="ratrig" ${p.brandHint === 'ratrig' ? 'selected' : ''}>RatRig/RatOS</option>
+            <option value="sovol" ${p.brandHint === 'sovol' ? 'selected' : ''}>Sovol</option>
+            <option value="snapmaker" ${p.brandHint === 'snapmaker' ? 'selected' : ''}>Snapmaker U1</option>
+          </select></div>
+        <div class="form-group"><label class="form-label">API Key (optional)</label>
+          <input class="form-input" id="pf-moonraker-key" value="${p.moonrakerApiKey || ''}" placeholder="Only if Moonraker requires authentication"></div>
+        <div class="form-group"><label class="form-label"><input type="checkbox" id="pf-power-device" ${p.powerDevice ? 'checked' : ''}> Has smart plug / PSU relay</label></div>
+        <div class="form-group" id="pf-power-name-group" style="${p.powerDevice ? '' : 'display:none'}"><label class="form-label">Power device name</label>
+          <input class="form-input" id="pf-power-name" value="${p.powerDeviceName || ''}" placeholder="e.g. printer_psu"></div>`;
+    }
+
+    if (type === 'prusalink') {
+      h += `
+        <div class="form-group"><label class="form-label">Port</label>
+          <div class="input-group input-group-sm"><input class="form-input form-control" id="pf-port" type="number" value="${p.port || 80}" placeholder="80"><span class="input-group-text">HTTP</span></div></div>
+        <div class="form-group"><label class="form-label">Username (for Digest Auth)</label>
+          <input class="form-input" id="pf-username" value="${p.username || 'maker'}" placeholder="maker"></div>
+        <div class="form-group"><label class="form-label"><input type="checkbox" id="pf-prusa-connect" ${p.prusaConnect ? 'checked' : ''}> PrusaConnect cloud enabled</label></div>`;
+    }
+
+    if (type === 'octoprint') {
+      h += `
+        <div class="form-group"><label class="form-label">Port</label>
+          <div class="input-group input-group-sm"><input class="form-input form-control" id="pf-port" type="number" value="${p.port || 80}" placeholder="80 or 5000"><span class="input-group-text">HTTP</span></div></div>
+        <div class="form-group"><label class="form-label">Webcam URL (optional)</label>
+          <input class="form-input" id="pf-webcam" value="${p.webcamUrl || ''}" placeholder="Auto-detected from OctoPrint settings"></div>
+        <div class="form-group"><label class="form-label">Plugins to enable</label>
+          <div style="display:flex;flex-direction:column;gap:4px;font-size:0.78rem">
+            <label><input type="checkbox" id="pf-plugin-psu" ${p.pluginPsu ? 'checked' : ''}> PSU Control (power on/off)</label>
+            <label><input type="checkbox" id="pf-plugin-filament" ${p.pluginFilament ? 'checked' : ''}> Filament Manager (spool tracking)</label>
+            <label><input type="checkbox" id="pf-plugin-bedlevel" ${p.pluginBedLevel ? 'checked' : ''}> Bed Level Visualizer</label>
+          </div></div>`;
+    }
+
+    if (type === 'sacp') {
+      h += `
+        <div class="form-group"><label class="form-label">Port</label>
+          <div class="input-group input-group-sm"><input class="form-input form-control" id="pf-port" type="number" value="${p.port || 8888}" placeholder="8888 (TCP) or 8889 (UDP)"><span class="input-group-text">TCP/UDP</span></div></div>
+        <div class="form-group"><label class="form-label">Transport</label>
+          <select class="form-input" id="pf-transport">
+            <option value="tcp" ${(p.transport || 'tcp') === 'tcp' ? 'selected' : ''}>TCP (J1, Artisan, A-series)</option>
+            <option value="udp" ${p.transport === 'udp' ? 'selected' : ''}>UDP (Ray)</option>
+          </select></div>`;
+    }
+
+    if (type === 'ankermake') {
+      h += `
+        <div class="form-group"><label class="form-label">ankerctl Port</label>
+          <div class="input-group input-group-sm"><input class="form-input form-control" id="pf-port" type="number" value="${p.port || 4470}" placeholder="4470"><span class="input-group-text">HTTP</span></div></div>
+        <div class="alert alert-info" style="font-size:0.75rem;margin-top:6px">
+          <strong>Setup required:</strong> Install and run <a href="https://github.com/Ankermgmt/ankermake-m5-protocol" target="_blank">ankerctl</a> on the same network.<br>
+          <code>pip install ankermake && ankerctl webserver --port 4470</code>
+        </div>`;
+    }
+
+    if (type === 'snapmaker-http') {
+      h += `
+        <div class="form-group"><label class="form-label">Port</label>
+          <div class="input-group input-group-sm"><input class="form-input form-control" id="pf-port" type="number" value="${p.port || 8080}" placeholder="8080"><span class="input-group-text">HTTP</span></div></div>
+        <div class="alert alert-warning" style="font-size:0.75rem;margin-top:6px">
+          <strong>Note:</strong> After saving, approve the connection on the printer touchscreen.
+        </div>`;
+    }
+
+    return h;
+  }
+
   window._togglePrinterTypeFields = function() {
     const type = document.getElementById('pf-type')?.value || 'bambu';
     const isBambu = type === 'bambu';
@@ -1597,13 +1701,22 @@
       el.style.display = isBambu ? '' : 'none';
     });
     // Access code label changes per type
-    const accessLabel = document.querySelector('[for="pf-access"], #pf-access')?.previousElementSibling;
+    const accessLabel = document.getElementById('pf-access-label');
     if (accessLabel) {
-      accessLabel.textContent = isOctoprint || isPrusalink ? 'API Key' : t('settings.access_code');
+      if (isOctoprint) accessLabel.textContent = 'API Key';
+      else if (isPrusalink) accessLabel.textContent = 'API Key';
+      else if (type === 'ankermake') accessLabel.textContent = 'Not required';
+      else if (type === 'sacp' || type === 'snapmaker-http') accessLabel.textContent = 'Not required';
+      else accessLabel.textContent = t('settings.access_code');
     }
-    // Webcam URL: only for OctoPrint
-    const webcamGroup = document.getElementById('pf-webcam-group');
-    if (webcamGroup) webcamGroup.style.display = isOctoprint ? '' : 'none';
+    // Hide access code for types that don't need it
+    const accessGroup = document.getElementById('pf-access')?.closest('.form-group');
+    if (accessGroup) {
+      accessGroup.style.display = (type === 'ankermake' || type === 'sacp' || type === 'snapmaker-http') ? 'none' : '';
+    }
+    // Re-render type-specific config
+    const configEl = document.getElementById('pf-type-config');
+    if (configEl) configEl.innerHTML = _renderTypeConfig(type, null);
   };
 
   window.editPrinter = async function(id) {
@@ -1638,13 +1751,44 @@
     const machLife = document.getElementById('pf-machine-lifetime')?.value;
     const type = document.getElementById('pf-type')?.value || 'bambu';
     const webcamUrl = document.getElementById('pf-webcam')?.value.trim() || '';
+    const port = document.getElementById('pf-port')?.value;
+
     const body = { name, model, ip, serial, accessCode, type,
       printer_wattage: wattage ? parseFloat(wattage) : null,
       electricity_rate_kwh: elecRate ? parseFloat(elecRate) : null,
       machine_cost: machCost ? parseFloat(machCost) : null,
       machine_lifetime_hours: machLife ? parseFloat(machLife) : null,
       ...(webcamUrl && { webcamUrl }),
+      ...(port && { port: parseInt(port) }),
     };
+
+    // Collect type-specific config fields
+    if (type === 'bambu') {
+      body.cameraMode = document.getElementById('pf-camera-mode')?.value || 'rtsp';
+      body.cameraResolution = document.getElementById('pf-camera-res')?.value || '720p';
+      body.cloudSync = document.getElementById('pf-cloud-sync')?.checked !== false;
+      body.autoAmsSync = document.getElementById('pf-auto-ams')?.checked !== false;
+    }
+    if (type === 'moonraker') {
+      const brandHint = document.getElementById('pf-brand-hint')?.value;
+      if (brandHint) body.brandHint = brandHint;
+      const moonKey = document.getElementById('pf-moonraker-key')?.value.trim();
+      if (moonKey) body.moonrakerApiKey = moonKey;
+      body.powerDevice = document.getElementById('pf-power-device')?.checked || false;
+      if (body.powerDevice) body.powerDeviceName = document.getElementById('pf-power-name')?.value.trim() || '';
+    }
+    if (type === 'prusalink') {
+      body.username = document.getElementById('pf-username')?.value.trim() || 'maker';
+      body.prusaConnect = document.getElementById('pf-prusa-connect')?.checked || false;
+    }
+    if (type === 'octoprint') {
+      body.pluginPsu = document.getElementById('pf-plugin-psu')?.checked || false;
+      body.pluginFilament = document.getElementById('pf-plugin-filament')?.checked || false;
+      body.pluginBedLevel = document.getElementById('pf-plugin-bedlevel')?.checked || false;
+    }
+    if (type === 'sacp') {
+      body.transport = document.getElementById('pf-transport')?.value || 'tcp';
+    }
 
     try {
       if (existingId) {
