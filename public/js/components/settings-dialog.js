@@ -1509,7 +1509,7 @@
             <option value="moonraker" ${curType === 'moonraker' ? 'selected' : ''}>Moonraker / Klipper (Snapmaker, Voron, Creality, etc.)</option>
             <option value="prusalink" ${curType === 'prusalink' ? 'selected' : ''}>PrusaLink (Prusa MK4, Mini+, XL)</option>
             <option value="octoprint" ${curType === 'octoprint' ? 'selected' : ''}>OctoPrint (Ender 3, Prusa MK3, Anycubic, etc.)</option>
-            <option value="sacp" ${curType === 'sacp' ? 'selected' : ''}>Snapmaker SACP (J1, J1s, Artisan)</option>
+            <option value="sacp" ${curType === 'sacp' ? 'selected' : ''}>Snapmaker SACP (J1, J1s, Artisan, Ray)</option>
             <option value="snapmaker-http" ${curType === 'snapmaker-http' ? 'selected' : ''}>Snapmaker 2.0 HTTP (A150, A250, A350)</option>
           </select>
         </div>

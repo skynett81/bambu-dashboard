@@ -322,14 +322,8 @@ export class SnapmakerHttpClient {
     return { filename };
   }
 
-  async getCameraFrame() {
-    // Snapmaker 2.0 doesn't have a camera API
-    return null;
-  }
-
-  getSnapshotUrl() {
-    return null;
-  }
+  async getCameraFrame() { return null; }
+  getSnapshotUrl() { return null; }
 
   async getPrinterInfo() {
     try {
@@ -337,6 +331,54 @@ export class SnapmakerHttpClient {
         signal: AbortSignal.timeout(5000),
       });
       if (res.ok) return res.json();
+    } catch {}
+    return null;
+  }
+
+  // ── File listing with pagination (SstpHttpChannel.listFiles) ──
+
+  async listFiles(page = 1, pageSize = 20) {
+    try {
+      const res = await fetch(`${this._baseUrl}/api/v1/files?token=${this._token}&page=${page}&limit=${pageSize}`, {
+        signal: AbortSignal.timeout(10000),
+      });
+      if (res.ok) return res.json();
+    } catch {}
+    return { files: [], total: 0 };
+  }
+
+  async deleteFile(filename) {
+    try {
+      await fetch(`${this._baseUrl}/api/v1/files/${encodeURIComponent(filename)}?token=${this._token}`, {
+        method: 'DELETE', signal: AbortSignal.timeout(5000),
+      });
+    } catch (e) { log.error(`Delete failed: ${e.message}`); }
+  }
+
+  // ── G-code terminal toggle (from SstpHttpChannel) ──
+
+  async enableGcodeOutput() {
+    await this._post('/api/v1/gcode/enable_output', { token: this._token });
+  }
+
+  async disableGcodeOutput() {
+    await this._post('/api/v1/gcode/disable_output', { token: this._token });
+  }
+
+  // ── Enclosure status ──
+
+  async getEnclosureStatus() {
+    try {
+      const res = await fetch(`${this._baseUrl}/api/v1/enclosure?token=${this._token}`, {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        this.state._enclosure = {
+          led: data.led, fan: data.fan, doorOpen: data.door,
+        };
+        return data;
+      }
     } catch {}
     return null;
   }

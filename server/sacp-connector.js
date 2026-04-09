@@ -2,8 +2,9 @@
  * Snapmaker SACP Connector — Full implementation
  * Corrected command IDs from Luban SacpClient.ts reference.
  *
- * Supports: J1, J1s (IDEX), Artisan, A150, A250, A350
- * Protocol: Binary TCP on port 8888 via @snapmaker/snapmaker-sacp-sdk
+ * Supports: J1, J1s (IDEX), Artisan, A150, A250, A350, Ray
+ * Protocol: Binary TCP:8888 (J1/Artisan/A-series) or UDP:8889 (Ray)
+ * via @snapmaker/snapmaker-sacp-sdk
  *
  * Command ID reference (verified against Luban source):
  * - Auth:        0x01, 0x05 → PeerId.SCREEN (not CONTROLLER)
@@ -25,6 +26,7 @@
  */
 
 import { createConnection } from 'node:net';
+import dgram from 'node:dgram';
 import { Dispatcher, helper } from '@snapmaker/snapmaker-sacp-sdk';
 import { hostname } from 'node:os';
 
@@ -87,6 +89,25 @@ const CMD = {
   SET_PURIFIER_SWITCH:{ set: 0x17, id: 0x03 },
   SUB_PURIFIER:       { set: 0x17, id: 0xa0 },
 
+  // CNC Head (0x11)
+  SET_CNC_POWER:      { set: 0x11, id: 0x02 },
+  SET_CNC_SPEED:      { set: 0x11, id: 0x03 },
+  SWITCH_CNC:         { set: 0x11, id: 0x05 },
+  SUB_CNC_SPEED:      { set: 0x11, id: 0xa0 },
+
+  // Laser Head (0x12)
+  GET_LASER_INFO:     { set: 0x12, id: 0x01 },
+  SET_LASER_POWER:    { set: 0x12, id: 0x02 },
+  SET_LASER_BRIGHTNESS:{ set: 0x12, id: 0x03 },
+  SET_FOCAL_LENGTH:   { set: 0x12, id: 0x04 },
+  SET_LASER_LOCK:     { set: 0x12, id: 0x07 },
+  GET_LASER_LOCK:     { set: 0x12, id: 0x0a },
+  SET_FIRE_SENSITIVITY:{ set: 0x12, id: 0x0d },
+  GET_FIRE_SENSITIVITY:{ set: 0x12, id: 0x0e },
+  SET_CROSSHAIR:      { set: 0x12, id: 0x10 },
+  GET_CROSSHAIR:      { set: 0x12, id: 0x11 },
+  SUB_LASER_POWER:    { set: 0x12, id: 0xa1 },
+
   // Print Job Control (0xac) — CORRECT IDs from Luban
   GET_GCODE_FILE:     { set: 0xac, id: 0x00 },
   START_PRINT:        { set: 0xac, id: 0x03 },
@@ -126,7 +147,12 @@ const MODULE_NAMES = {
   0: '3D Print Head', 1: 'CNC Router', 2: '1.6W Laser',
   7: 'Air Purifier', 13: 'Dual Extruder', 14: '10W Laser',
   16: 'Enclosure', 19: '20W Laser', 20: '40W Laser',
+  518: 'Ray Enclosure',
 };
+
+const PRINTING_MODULES = [0, 13]; // Single head, Dual Extruder
+const LASER_MODULES = [2, 14, 19, 20]; // 1.6W, 10W, 20W, 40W
+const CNC_MODULES = [1];
 
 export class SacpConnector {
   constructor(config, hub) {
@@ -147,6 +173,9 @@ export class SacpConnector {
     this._machineInfo = null;
     this._modules = [];
     this._machineSize = null;
+    this._transport = config.printer.transport || (config.printer.model?.includes('Ray') ? 'udp' : 'tcp');
+    this._udpSocket = null;
+    this._headType = null; // 'fdm', 'laser', 'cnc' — detected from modules
   }
 
   // ══════════════════════════════════════════
@@ -167,11 +196,20 @@ export class SacpConnector {
     this.connected = false;
     if (this._dispatcher) { this._dispatcher.dispose(); this._dispatcher = null; }
     if (this._socket) { this._socket.destroy(); this._socket = null; }
+    if (this._udpSocket) { try { this._udpSocket.close(); } catch {} this._udpSocket = null; }
   }
 
   _connect() {
     this._clearTimers();
 
+    if (this._transport === 'udp') {
+      this._connectUdp();
+    } else {
+      this._connectTcp();
+    }
+  }
+
+  _connectTcp() {
     this._socket = createConnection({ host: this.ip, port: this.port }, () => {
       log.info(`TCP connected to ${this.ip}:${this.port}`);
       this._dispatcher = new Dispatcher('tcp', this._socket);
@@ -182,7 +220,7 @@ export class SacpConnector {
       if (this.connected) {
         this.connected = false;
         this.hub.broadcast('connection', { status: 'disconnected' });
-        log.warn(`SACP error: ${err.message}`);
+        log.warn(`SACP TCP error: ${err.message}`);
       }
       this._scheduleReconnect();
     });
@@ -191,7 +229,38 @@ export class SacpConnector {
       if (this.connected) {
         this.connected = false;
         this.hub.broadcast('connection', { status: 'disconnected' });
-        log.warn('SACP connection closed');
+        log.warn('SACP TCP connection closed');
+      }
+      this._scheduleReconnect();
+    });
+  }
+
+  _connectUdp() {
+    log.info(`Connecting via UDP to ${this.ip}:${this.port}`);
+    this._udpSocket = dgram.createSocket('udp4');
+
+    this._udpSocket.bind(8889, () => {
+      log.info('UDP socket bound to port 8889');
+
+      // Create dispatcher with UDP socket wrapper (Luban pattern)
+      this._dispatcher = new Dispatcher('udp', {
+        socket: this._udpSocket,
+        host: this.ip,
+        port: this.port,
+      });
+
+      this._authenticate();
+    });
+
+    this._udpSocket.on('message', (buffer) => {
+      if (this._dispatcher) this._dispatcher.read(buffer);
+    });
+
+    this._udpSocket.on('error', (err) => {
+      log.warn(`SACP UDP error: ${err.message}`);
+      if (this.connected) {
+        this.connected = false;
+        this.hub.broadcast('connection', { status: 'disconnected' });
       }
       this._scheduleReconnect();
     });
@@ -282,7 +351,16 @@ export class SacpConnector {
       if (resp?.data) {
         this._modules = this._parseModules(resp.data);
         this.state._modules = this._modules;
-        log.info(`Modules: ${this._modules.map(m => m.name).join(', ')}`);
+
+        // Detect head type from installed modules
+        this._headType = 'fdm'; // default
+        for (const m of this._modules) {
+          if (LASER_MODULES.includes(m.moduleId)) { this._headType = 'laser'; break; }
+          if (CNC_MODULES.includes(m.moduleId)) { this._headType = 'cnc'; break; }
+          if (PRINTING_MODULES.includes(m.moduleId)) { this._headType = 'fdm'; break; }
+        }
+        this.state._headType = this._headType;
+        log.info(`Modules: ${this._modules.map(m => m.name).join(', ')} [head: ${this._headType}]`);
       }
     } catch (e) { log.warn(`Module info failed: ${e.message}`); }
 
@@ -610,6 +688,74 @@ export class SacpConnector {
         this._executeGcode('M112');
         break;
 
+      // ── Laser commands (Artisan/A-series/Ray) ──
+      case 'laser_power': {
+        const buf = Buffer.alloc(4);
+        buf[0] = 0; // key
+        buf.writeUInt16LE(Math.round((commandObj.power || 0) * 10), 1); // power * 10
+        this._send(CMD.SET_LASER_POWER, PEER.CONTROLLER, buf);
+        break;
+      }
+      case 'laser_brightness': {
+        const buf = Buffer.alloc(4);
+        buf[0] = 0;
+        buf.writeUInt16LE(commandObj.brightness || 0, 1);
+        this._send(CMD.SET_LASER_BRIGHTNESS, PEER.CONTROLLER, buf);
+        break;
+      }
+      case 'laser_focal_length': {
+        const buf = Buffer.alloc(5);
+        buf[0] = 0;
+        buf.writeFloatLE(commandObj.focalLength || 0, 1);
+        this._send(CMD.SET_FOCAL_LENGTH, PEER.CONTROLLER, buf);
+        break;
+      }
+      case 'laser_lock': {
+        const buf = Buffer.alloc(3);
+        buf[0] = 0;
+        buf[1] = commandObj.locked ? 1 : 0;
+        this._send(CMD.SET_LASER_LOCK, PEER.CONTROLLER, buf);
+        break;
+      }
+      case 'laser_fire_sensitivity': {
+        const buf = Buffer.alloc(4);
+        buf[0] = 0;
+        buf.writeUInt16LE(commandObj.sensitivity || 50, 1);
+        this._send(CMD.SET_FIRE_SENSITIVITY, PEER.CONTROLLER, buf);
+        break;
+      }
+      case 'laser_crosshair': {
+        const buf = Buffer.alloc(9);
+        buf[0] = 0;
+        buf.writeFloatLE(commandObj.x || 0, 1);
+        buf.writeFloatLE(commandObj.y || 0, 5);
+        this._send(CMD.SET_CROSSHAIR, PEER.CONTROLLER, buf);
+        break;
+      }
+
+      // ── CNC commands (Artisan/A-series) ──
+      case 'cnc_power': {
+        const buf = Buffer.alloc(3);
+        buf[0] = 0;
+        buf[1] = Math.round(commandObj.power || 0); // 0-100
+        this._send(CMD.SET_CNC_POWER, PEER.CONTROLLER, buf);
+        break;
+      }
+      case 'cnc_speed': {
+        const buf = Buffer.alloc(5);
+        buf[0] = 0;
+        buf.writeUInt32LE(commandObj.rpm || 12000, 1);
+        this._send(CMD.SET_CNC_SPEED, PEER.CONTROLLER, buf);
+        break;
+      }
+      case 'cnc_switch': {
+        const buf = Buffer.alloc(3);
+        buf[0] = 0;
+        buf[1] = commandObj.enabled ? 1 : 0;
+        this._send(CMD.SWITCH_CNC, PEER.CONTROLLER, buf);
+        break;
+      }
+
       // ── IDEX modes (J1) ──
       case 'idex_single_left':
         this._executeGcode('M605 S0\nT0');
@@ -696,6 +842,45 @@ export class SacpConnector {
     return null;
   }
 
+  async getLaserInfo() {
+    try {
+      const resp = await this._send(CMD.GET_LASER_INFO, PEER.CONTROLLER, Buffer.alloc(1));
+      if (resp?.data && resp.data.length >= 6) {
+        return {
+          focalLength: resp.data.readFloatLE(1),
+          power: resp.data.length >= 10 ? resp.data.readUInt16LE(5) / 10 : 0,
+        };
+      }
+    } catch {}
+    return null;
+  }
+
+  async getLaserLockStatus() {
+    try {
+      const resp = await this._send(CMD.GET_LASER_LOCK, PEER.CONTROLLER, Buffer.alloc(1));
+      if (resp?.data) return { locked: resp.data[1] === 1 };
+    } catch {}
+    return null;
+  }
+
+  async getFireSensorSensitivity() {
+    try {
+      const resp = await this._send(CMD.GET_FIRE_SENSITIVITY, PEER.CONTROLLER, Buffer.alloc(1));
+      if (resp?.data && resp.data.length >= 3) return { sensitivity: resp.data.readUInt16LE(1) };
+    } catch {}
+    return null;
+  }
+
+  async getCrosshairOffset() {
+    try {
+      const resp = await this._send(CMD.GET_CROSSHAIR, PEER.CONTROLLER, Buffer.alloc(1));
+      if (resp?.data && resp.data.length >= 9) {
+        return { x: resp.data.readFloatLE(1), y: resp.data.readFloatLE(5) };
+      }
+    } catch {}
+    return null;
+  }
+
   // ══════════════════════════════════════════
   // FILE TRANSFER (compressed, with correct chunk size)
   // ══════════════════════════════════════════
@@ -773,14 +958,33 @@ export class SacpConnector {
   _parseModules(data) {
     const modules = [];
     try {
+      // Use SDK ModuleInfo parser if available
+      const ModuleInfo = require('@snapmaker/snapmaker-sacp-sdk/dist/models/ModuleInfo').default;
+      if (ModuleInfo?.parseArray) {
+        const parsed = ModuleInfo.parseArray(data);
+        for (const m of parsed) {
+          modules.push({
+            moduleId: m.moduleId,
+            name: MODULE_NAMES[m.moduleId] || `Module ${m.moduleId}`,
+            index: m.moduleIndex,
+            state: m.moduleState, // 0=NORMAL, 1=UPGRADING, 2=UNAVAIL
+            serialNumber: m.serialNumber,
+            hardwareVersion: m.hardwareVersion,
+            firmwareVersion: m.moduleFirmwareVersion || '',
+          });
+        }
+        return modules;
+      }
+    } catch {}
+
+    // Fallback: simple parsing
+    try {
       const count = data[0];
       let offset = 1;
       for (let i = 0; i < count && offset + 2 <= data.length; i++) {
         const moduleId = data.readUInt16LE(offset);
-        const name = MODULE_NAMES[moduleId] || `Module ${moduleId}`;
-        modules.push({ moduleId, name });
-        // ModuleInfo has variable byte length — read it from the model
-        offset += 30; // approximate, sufficient for detection
+        modules.push({ moduleId, name: MODULE_NAMES[moduleId] || `Module ${moduleId}` });
+        offset += 30;
       }
     } catch {}
     return modules;

@@ -154,6 +154,7 @@ const MODEL_OVERRIDES = {
   'Snapmaker 2.0 A150': { features: { enclosure: true, multiModule: true } },
   'Snapmaker 2.0 A250': { features: { enclosure: true, multiModule: true } },
   'Snapmaker 2.0 A350': { features: { enclosure: true, multiModule: true } },
+  'Snapmaker Ray': { features: { laser: true, multiModule: false }, connection: 'sacp-udp' },
 
   // Prusa models (PrusaLink)
   'Prusa MK4': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 210, 220] },

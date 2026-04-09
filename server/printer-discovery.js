@@ -187,13 +187,80 @@ export class PrinterDiscovery {
       sacpResults = await discoverSacpPrinters(3000);
     } catch { /* SACP discovery optional */ }
 
+    // mDNS discovery for Snapmaker Ray (queries _printer._udp.local)
+    let mdnsResults = [];
+    try {
+      mdnsResults = await this._discoverMdns(2000);
+    } catch { /* mDNS optional */ }
+
     const [bambu, moonraker] = await Promise.all([
       this.scan(timeoutMs),
       this.scanMoonraker(extraIps, 3000),
     ]);
-    const combined = [...bambu, ...moonraker, ...sacpResults];
+    const combined = [...bambu, ...moonraker, ...sacpResults, ...mdnsResults];
     this._cache = combined;
     return combined;
+  }
+
+  /**
+   * mDNS discovery for Snapmaker Ray (queries _printer._udp.local and _printer._tcp.local)
+   */
+  async _discoverMdns(timeoutMs = 2000) {
+    return new Promise((resolve) => {
+      const found = new Map();
+      let udpSocket;
+      try {
+        const dgram = require('node:dgram');
+        udpSocket = dgram.createSocket({ type: 'udp4', reuseAddr: true });
+      } catch { resolve([]); return; }
+
+      const timer = setTimeout(() => {
+        try { udpSocket.close(); } catch {}
+        resolve([...found.values()]);
+      }, timeoutMs);
+
+      udpSocket.on('message', (msg, rinfo) => {
+        // Simple mDNS response parsing — look for _printer._udp.local PTR records
+        const text = msg.toString('utf8');
+        if (text.includes('_printer._udp.local') || text.includes('_printer._tcp.local')) {
+          found.set(rinfo.address, {
+            ip: rinfo.address,
+            name: `Snapmaker Ray (${rinfo.address})`,
+            model: 'Snapmaker Ray',
+            type: 'sacp',
+            transport: 'udp',
+            mdns: true,
+          });
+        }
+      });
+
+      udpSocket.on('error', () => {
+        clearTimeout(timer);
+        try { udpSocket.close(); } catch {}
+        resolve([]);
+      });
+
+      // Send mDNS query to multicast address
+      udpSocket.bind(0, () => {
+        try {
+          // Simple DNS PTR query for _printer._udp.local
+          const query = Buffer.from([
+            0x00, 0x00, // Transaction ID
+            0x00, 0x00, // Flags (standard query)
+            0x00, 0x01, // Questions: 1
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // Answer/Auth/Additional: 0
+            // Question: _printer._udp.local PTR
+            0x08, 0x5f, 0x70, 0x72, 0x69, 0x6e, 0x74, 0x65, 0x72, // _printer
+            0x04, 0x5f, 0x75, 0x64, 0x70, // _udp
+            0x05, 0x6c, 0x6f, 0x63, 0x61, 0x6c, // local
+            0x00, // end
+            0x00, 0x0c, // Type: PTR
+            0x00, 0x01, // Class: IN
+          ]);
+          udpSocket.send(query, 5353, '224.0.0.251');
+        } catch {}
+      });
+    });
   }
 
   getCached() { return this._cache; }
