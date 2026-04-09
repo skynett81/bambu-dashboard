@@ -25,7 +25,7 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 - **590+ API endpoints** — full REST API with OpenAPI docs at `/api/docs`
 - **English UI** — entire application in English, documentation site available in English and Norwegian
 - **Docusaurus documentation** — available at `/docs/` and on GitHub Pages
-- **Zero frameworks** — pure HTML/CSS/JS frontend, Node.js 22 backend with 6 npm packages
+- **Zero frameworks** — pure HTML/CSS/JS frontend, Node.js 22 backend with 9 npm packages
 
 ---
 

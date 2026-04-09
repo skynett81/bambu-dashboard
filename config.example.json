@@ -10,11 +10,42 @@
       "type": "bambu"
     },
     {
-      "id": "my-snapmaker",
+      "id": "my-snapmaker-u1",
       "name": "Snapmaker U1",
       "ip": "192.168.1.101",
       "model": "Snapmaker U1",
       "type": "moonraker"
+    },
+    {
+      "id": "my-snapmaker-j1",
+      "name": "Snapmaker J1",
+      "ip": "192.168.1.102",
+      "model": "Snapmaker J1",
+      "type": "sacp"
+    },
+    {
+      "id": "my-snapmaker-a350",
+      "name": "Snapmaker A350",
+      "ip": "192.168.1.103",
+      "model": "Snapmaker 2.0 A350",
+      "type": "snapmaker-http"
+    },
+    {
+      "id": "my-prusa",
+      "name": "Prusa MK4",
+      "ip": "192.168.1.104",
+      "accessCode": "your-prusalink-api-key",
+      "model": "MK4",
+      "type": "prusalink"
+    },
+    {
+      "id": "my-octoprint",
+      "name": "Ender 3 V2",
+      "ip": "192.168.1.105",
+      "accessCode": "your-octoprint-api-key",
+      "model": "Ender 3 V2",
+      "type": "octoprint",
+      "webcamUrl": "http://192.168.1.105/webcam/?action=snapshot"
     }
   ],
   "auth": {

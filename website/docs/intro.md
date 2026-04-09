@@ -160,7 +160,7 @@ Du kan prøve dashboardet uten en fysisk printer ved å kjøre `npm run demo`. D
 
 3DPrintForge er bygget med Node.js 22 og vanilla HTML/CSS/JS — ingen tunge rammeverk, ingen build-steg. Databasen er SQLite, innebygd i Node.js 22.
 
-- **Backend**: Node.js 22 med 6 npm-pakker (mqtt, ws, basic-ftp, admin-lte, ssh2, @3mfconsortium/lib3mf)
+- **Backend**: Node.js 22 med 9 npm-pakker (mqtt, ws, basic-ftp, admin-lte, bootstrap, ssh2, qrcode, @3mfconsortium/lib3mf, @snapmaker/snapmaker-sacp-sdk)
 - **Frontend**: AdminLTE 4 + vanilla HTML/CSS/JS + Three.js (vendored) + 3mfViewer (embedded), ingen build-steg
 - **Database**: SQLite (innebygd i Node.js 22)
 - **3D-visning**: Three.js r183 + 3MFConsortium 3mfViewer + lib3mf WASM
