@@ -146,7 +146,12 @@
         ${usageHtml}
         <div class="filament-status-meta">
           ${slotLabel} &middot; ${tempMin}-${tempMax}°C
+          ${data._ercf ? ` &middot; ERCF Gate ${data._ercf.gate ?? '?'}` : ''}
+          ${data._afc ? ` &middot; AFC Lane ${data._afc.currentLane ?? '?'}` : ''}
         </div>
+        ${displayRemain < 30 && isPrinting && data.mc_percent > 0 ? `<div style="font-size:0.6rem;color:var(--accent-orange);margin-top:2px">
+          ⚠ Estimated runout at ~${Math.min(100, Math.round(data.mc_percent + (displayRemain / (100 - data.mc_percent + 0.1)) * (100 - data.mc_percent)))}% print progress
+        </div>` : ''}
       </div>`;
   };
 

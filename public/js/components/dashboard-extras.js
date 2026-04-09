@@ -241,4 +241,45 @@
     if (cam.resolution) html += `<span class="text-muted">${cam.resolution}</span>`;
     badge.innerHTML = html;
   }
+
+  // ── AI Detection Status on Camera ──
+  function _updateAiDetectionBadge(data) {
+    if (!data.xcam && !data._sm_defect) return;
+
+    let badge = document.getElementById('dashboard-ai-badge');
+    const cameraCard = document.getElementById('camera-card');
+    if (!badge && cameraCard) {
+      const container = cameraCard.querySelector('.camera-container') || cameraCard.querySelector('.card-body');
+      if (container) {
+        badge = document.createElement('div');
+        badge.id = 'dashboard-ai-badge';
+        badge.style.cssText = 'position:absolute;top:4px;left:4px;display:flex;gap:3px;z-index:5;pointer-events:none';
+        container.style.position = 'relative';
+        container.appendChild(badge);
+      }
+    }
+    if (!badge) return;
+
+    let html = '';
+    // Bambu xcam
+    if (data.xcam) {
+      if (data.xcam.first_layer_inspector) html += '<span style="font-size:0.55rem;padding:1px 4px;border-radius:4px;background:rgba(0,0,0,0.7);color:var(--accent-cyan)">1st Layer AI</span>';
+      if (data.xcam.spaghetti_detector) html += '<span style="font-size:0.55rem;padding:1px 4px;border-radius:4px;background:rgba(0,0,0,0.7);color:var(--accent-orange)">Spaghetti AI</span>';
+    }
+    // Snapmaker defect detection
+    if (data._sm_defect?.enabled) {
+      html += '<span style="font-size:0.55rem;padding:1px 4px;border-radius:4px;background:rgba(0,0,0,0.7);color:var(--accent-green)">AI Defect</span>';
+      if (data._sm_defect.noodle?.probability > 0.5) {
+        html += `<span style="font-size:0.55rem;padding:1px 4px;border-radius:4px;background:rgba(255,0,0,0.7);color:#fff">⚠ ${Math.round(data._sm_defect.noodle.probability * 100)}%</span>`;
+      }
+    }
+    badge.innerHTML = html;
+  }
+
+  // Override updateDashboardExtras to include AI badge
+  const _origUpdate = window.updateDashboardExtras;
+  window.updateDashboardExtras = function(data) {
+    _origUpdate(data);
+    _updateAiDetectionBadge(data);
+  };
 })();

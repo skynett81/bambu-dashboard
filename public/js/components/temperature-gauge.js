@@ -4,14 +4,14 @@
   const GAUGES_STANDARD = {
     'gauge-nozzle': { max: 300, key: 'nozzle_temper', targetKey: 'nozzle_target_temper', label: 'temperature.nozzle' },
     'gauge-bed': { max: 120, key: 'bed_temper', targetKey: 'bed_target_temper', label: 'temperature.bed' },
-    'gauge-chamber': { max: 60, key: 'chamber_temper', targetKey: null, label: 'temperature.chamber' }
+    'gauge-chamber': { max: 60, key: 'chamber_temper', targetKey: '_chamber_target', label: 'temperature.chamber' }
   };
 
   const GAUGES_DUAL = {
     'gauge-nozzle': { max: 350, key: 'nozzle_temper', targetKey: 'nozzle_target_temper', label: 'temperature.nozzle_l' },
     'gauge-nozzle-r': { max: 350, key: 'nozzle_temper_2', targetKey: 'nozzle_target_temper_2', label: 'temperature.nozzle_r' },
     'gauge-bed': { max: 120, key: 'bed_temper', targetKey: 'bed_target_temper', label: 'temperature.bed' },
-    'gauge-chamber': { max: 65, key: 'chamber_temper', targetKey: null, label: 'temperature.chamber' }
+    'gauge-chamber': { max: 65, key: 'chamber_temper', targetKey: '_chamber_target', label: 'temperature.chamber' }
   };
 
   let currentMode = 'standard';
@@ -251,6 +251,29 @@
     const sparkChamber = document.getElementById('spark-chamber');
     if (sparkChamber) {
       sparkChamber.style.display = (data.chamber_temper != null) ? '' : 'none';
+    }
+
+    // System temperatures (MCU/RPi) — show as small badges below gauges
+    if (data._system_temps) {
+      let sysContainer = document.getElementById('system-temps-badges');
+      if (!sysContainer) {
+        const tempCard = document.getElementById('temp-card')?.querySelector('.card-body');
+        if (tempCard) {
+          sysContainer = document.createElement('div');
+          sysContainer.id = 'system-temps-badges';
+          sysContainer.style.cssText = 'display:flex;gap:6px;margin-top:4px;flex-wrap:wrap';
+          tempCard.appendChild(sysContainer);
+        }
+      }
+      if (sysContainer) {
+        let badges = '';
+        for (const [key, val] of Object.entries(data._system_temps)) {
+          const label = key === 'mcu_temp' ? 'MCU' : key === 'raspberry_pi' ? 'Host' : key;
+          const color = val.temp > 70 ? 'var(--accent-red)' : val.temp > 55 ? 'var(--accent-orange)' : 'var(--text-muted)';
+          badges += `<span style="font-size:0.6rem;color:${color}">${label}: ${val.temp}°C</span>`;
+        }
+        sysContainer.innerHTML = badges;
+      }
     }
   };
 

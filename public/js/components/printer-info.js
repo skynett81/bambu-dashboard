@@ -112,6 +112,53 @@
         <span class="info-value ${spaghetti ? 'text-green' : 'text-muted'}">${spaghetti ? t('printer_info.active') : t('printer_info.off')}</span>
       </div>`;
 
+    // Build volume (if available)
+    const vol = state._buildVolume || state._printerProfile?.volume;
+    if (vol) {
+      const w = vol.width || vol.x || 0, d = vol.depth || vol.y || 0, h = vol.height || vol.z || 0;
+      if (w) html += `<div class="info-item"><span class="info-label">Build Volume</span><span class="info-value">${w}×${d}×${h}mm</span></div>`;
+    }
+
+    // Input shaper (Klipper)
+    if (state._input_shaper) {
+      const is = state._input_shaper;
+      html += `<div class="info-item"><span class="info-label">Input Shaper</span><span class="info-value">X:${is.shaperTypeX || '?'} ${is.shaperFreqX?.toFixed(0) || '?'}Hz · Y:${is.shaperTypeY || '?'} ${is.shaperFreqY?.toFixed(0) || '?'}Hz</span></div>`;
+    }
+
+    // Pressure advance (Klipper)
+    if (state._pressure_advance !== undefined) {
+      html += `<div class="info-item"><span class="info-label">Pressure Advance</span><span class="info-value">${state._pressure_advance}</span></div>`;
+    }
+
+    // MCU firmware (Klipper)
+    if (state._mcu?.mcuVersion) {
+      html += `<div class="info-item"><span class="info-label">MCU Firmware</span><span class="info-value" style="font-size:0.65rem">${state._mcu.mcuVersion.slice(0, 30)}</span></div>`;
+    }
+
+    // System temps (MCU/RPi)
+    if (state._system_temps) {
+      for (const [key, val] of Object.entries(state._system_temps)) {
+        const label = key === 'mcu_temp' ? 'MCU Temp' : key === 'raspberry_pi' ? 'Host CPU' : key;
+        const color = val.temp > 70 ? 'text-red' : val.temp > 55 ? '' : 'text-green';
+        html += `<div class="info-item"><span class="info-label">${label}</span><span class="info-value ${color}">${val.temp}°C</span></div>`;
+      }
+    }
+
+    // Installed modules (SACP)
+    if (state._modules?.length) {
+      html += `<div class="info-item"><span class="info-label">Modules</span><span class="info-value" style="font-size:0.65rem">${state._modules.map(m => m.name).join(', ')}</span></div>`;
+    }
+
+    // Detected brand (Moonraker)
+    if (state._detected_brand) {
+      html += `<div class="info-item"><span class="info-label">Detected Brand</span><span class="info-value">${state._detected_brand}</span></div>`;
+    }
+
+    // Extruder count
+    if (state._extruderCount > 1) {
+      html += `<div class="info-item"><span class="info-label">Extruders</span><span class="info-value">${state._extruderCount}</span></div>`;
+    }
+
     html += '</div>';
 
     // Firmware history toggle

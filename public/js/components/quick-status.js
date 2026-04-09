@@ -189,22 +189,41 @@
       const fanColor = data.cooling_fan_speed > 0 ? 'var(--accent-blue)' : 'var(--text-muted)';
       const posStr = data._position ? `X:${data._position.x} Y:${data._position.y} Z:${data._position.z}` : '--';
 
+      // Extra Moonraker indicators
+      const meshVar = data._bed_mesh?.meshMatrix?.length ? (() => { let mn = Infinity, mx = -Infinity; for (const r of data._bed_mesh.meshMatrix) for (const v of r) { if (v < mn) mn = v; if (v > mx) mx = v; } return Math.round((mx - mn) * 1000) / 1000; })() : null;
+      const meshStr = meshVar !== null ? `${meshVar}mm` : '--';
+      const meshColor = meshVar !== null ? (meshVar < 0.1 ? 'var(--accent-green)' : meshVar < 0.3 ? 'var(--accent-orange)' : 'var(--accent-red)') : 'var(--text-muted)';
+      const fsensor = data._filament_sensor;
+      const fsStr = fsensor ? (fsensor.detected ? 'Detected' : 'Missing!') : '--';
+      const fsColor = fsensor ? (fsensor.detected ? 'var(--accent-green)' : 'var(--accent-red)') : 'var(--text-muted)';
+      const ercfStr = data._ercf ? `Gate ${data._ercf.gate ?? '?'} / T${data._ercf.tool ?? '?'}` : '';
+
       container.innerHTML = `<div class="qs-grid${isFirstRender ? ' stagger-in' : ''}">
         ${item('nozzle', activeExt + ' Extruder', extTemp, extColor)}
         ${item('nozzle', 'Bed', bedTemp + bedTarget, bedColor)}
         ${item('speed', t('quick_status.speed'), speedPct, '')}
         ${item('light', 'Fan', fanPct, fanColor)}
+        ${meshVar !== null ? item('guard', 'Bed Mesh', meshStr, meshColor) : ''}
+        ${fsensor ? item('error', 'Filament', fsStr, fsColor) : ''}
+        ${ercfStr ? item('nozzle', 'ERCF', ercfStr, 'var(--accent-cyan)') : ''}
         ${item('error', t('quick_status.error'), errStr, errColor, 'qs-error-value')}
         ${item('guard', t('protection.title'), guardStr, guardColor, 'qs-guard-value')}
       </div>`;
     } else {
       // Bambu Lab status
+      // Bambu camera state
+      const camRec = data._camera_state?.recording;
+      const camTl = data._camera_state?.timelapse;
+      const camStr = camRec ? '● REC' : camTl ? '⏱ Timelapse' : data._camera_state?.resolution || 'Ready';
+      const camColor = camRec ? 'var(--accent-red)' : camTl ? 'var(--accent-cyan)' : 'var(--accent-green)';
+
       container.innerHTML = `<div class="qs-grid${isFirstRender ? ' stagger-in' : ''}">
         ${item('wifi', t('quick_status.wifi'), wifiSig, wifiCol)}
         ${item('nozzle', t('quick_status.nozzle'), nozzleStr, '')}
         ${storageItem}
         ${item('light', t('quick_status.light'), lightStr, lightColor)}
         ${item('speed', t('quick_status.speed'), speedStr, '')}
+        ${data._camera_state ? item('guard', 'Camera', camStr, camColor) : ''}
         ${item('error', t('quick_status.error'), errStr, errColor, 'qs-error-value')}
         ${item('guard', t('protection.title'), guardStr, guardColor, 'qs-guard-value')}
       </div>`;

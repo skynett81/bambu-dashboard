@@ -11,7 +11,9 @@
     chamber_temp: [],
     fan_part: [],
     speed_mag: [],
-    layer_pct: []
+    layer_pct: [],
+    mcu_temp: [],
+    humidity: []
   };
 
   function pushValue(key, val) {
@@ -125,6 +127,22 @@
         return total > 0 ? `${d.layer_num || 0}/${total}` : '--';
       },
       valColor: () => '#00e676'
+    },
+    {
+      id: 'spark-mcu',
+      key: 'mcu_temp',
+      color: '#ff9800',
+      extract: d => d._system_temps?.mcu_temp?.temp ?? d._system_temps?.raspberry_pi?.temp,
+      format: v => v != null ? `${Math.round(v)}°` : '--',
+      valColor: v => v > 70 ? '#ff5252' : v > 55 ? '#ff9800' : ''
+    },
+    {
+      id: 'spark-humidity',
+      key: 'humidity',
+      color: '#29b6f6',
+      extract: d => d._ams_humidity?.[0]?.humidity ?? d.ams?.ams?.[0]?.humidity,
+      format: v => v != null ? `${Math.round(v)}%` : '--',
+      valColor: v => v > 60 ? '#ff5252' : v > 40 ? '#ff9800' : v > 0 ? '#29b6f6' : ''
     }
   ];
 
