@@ -668,6 +668,23 @@
       html += typeof renderSmCalibrationPanel === 'function' ? renderSmCalibrationPanel(data) : '';
     }
 
+    // ===== Bed Mesh Heatmap (Klipper) =====
+    if (data._bed_mesh?.meshMatrix?.length) {
+      html += typeof renderBedMeshPanel === 'function' ? renderBedMeshPanel(data) : '';
+    }
+
+    // ===== Klipper Extras (Power, ERCF/AFC, System, Diagnostics) =====
+    if (data._detected_brand || data._ercf || data._afc || data._system_temps || data._tmc || data._mcu ||
+        data._input_shaper || data._filament_sensor || data._nevermore || data._powerDevices || data._pluginData?.psucontrol) {
+      html += typeof renderKlipperExtrasPanel === 'function' ? renderKlipperExtrasPanel(data) : '';
+    }
+
+    // ===== Bambu Extras (Fans, Prepare, WiFi, Camera, Lights, Speed Level) =====
+    if (data._fan_part !== undefined || data._fan_aux !== undefined || data._wifi_rssi ||
+        data._camera_state || data._lights || data._speed_level !== undefined || data._prepare_percent > 0 || data._upgrade?.status) {
+      html += typeof renderBambuExtrasPanel === 'function' ? renderBambuExtrasPanel(data) : '';
+    }
+
     // ===== CARD: Bambu Calibration (Bambu only) =====
     if (meta?.type !== 'moonraker' && meta?.type !== 'prusalink') {
       html += `<div class="ctrl-card">
