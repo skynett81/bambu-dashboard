@@ -257,6 +257,8 @@ function updateDashboard(data) {
   if (typeof updateSparklineStats === 'function') updateSparklineStats(data);
   if (typeof updateCountdownTimer === 'function') updateCountdownTimer(data);
   if (typeof updateFilamentRing === 'function') updateFilamentRing(data);
+  if (typeof updateDashboardExtras === 'function') updateDashboardExtras(data);
+  if (typeof injectPanelData === 'function') injectPanelData(data);
   updateStatusBar(data);
 }
 
