@@ -53,6 +53,17 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 
 - **Prusa** — MK4, MK3.9, Mini+, XL (with PrusaLink firmware)
 
+### Snapmaker SACP (Binary TCP, port 8888)
+
+- **Snapmaker J1**, J1s — IDEX dual-nozzle with mirror/duplicate modes
+- **Snapmaker Artisan** — 400×400×400, dual extruder, enclosure, air purifier
+- Uses official `@snapmaker/snapmaker-sacp-sdk` npm package
+
+### Snapmaker 2.0 HTTP (REST API, port 8080)
+
+- **Snapmaker A150**, A250, A350 — with touchscreen token approval
+- Supports enclosure LED, fan, temperature control
+
 ### OctoPrint (HTTP REST API)
 
 - **Ender 3** — all variants (Pro, V2, S1, Neo)
@@ -63,7 +74,7 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 
 ### Moonraker / Klipper (WebSocket API)
 
-- **Snapmaker** — U1 (deep integration: NFC filament, AI defect detection, timelapse)
+- **Snapmaker** — U1 (deep integration: NFC filament, AI defect detection, timelapse, entangle detection, calibration trends)
 - **Voron** — all models with Klipper + Moonraker
 - **Creality** — K1, K1 Max, Ender 3 V3, and other Klipper models
 - **Elegoo** — Neptune series with Klipper firmware

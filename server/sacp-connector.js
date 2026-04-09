@@ -441,6 +441,22 @@ export class SacpConnector {
       case 'emergency_stop':
         this._executeGcode('M112');
         break;
+      // J1 IDEX modes (M605)
+      case 'idex_single_left':
+        this._executeGcode('M605 S0\nT0'); // Single mode, left extruder
+        break;
+      case 'idex_single_right':
+        this._executeGcode('M605 S0\nT1'); // Single mode, right extruder
+        break;
+      case 'idex_duplicate':
+        this._executeGcode('M605 S2'); // Duplication mode
+        break;
+      case 'idex_mirror':
+        this._executeGcode('M605 S3'); // Mirror mode
+        break;
+      case 'idex_backup':
+        this._executeGcode('M605 S4'); // Backup mode (J1-specific)
+        break;
       default:
         log.warn(`Unknown SACP command: ${action}`);
     }

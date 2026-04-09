@@ -8,6 +8,35 @@
   window.renderSmAdvancedPanel = function(data) {
     let html = '';
 
+    // ── IDEX Mode Controls (J1/J1s only) ──
+    if (data._sm_idex || window._printerModel?.includes('J1')) {
+      html += `<div class="ctrl-card">
+        <div class="ctrl-card-title">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="8" height="12" rx="1"/><rect x="14" y="6" width="8" height="12" rx="1"/></svg>
+          IDEX Print Mode
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px">
+          <button class="form-btn form-btn-sm" data-ripple onclick="sendCommand('idex_single_left')" style="font-size:0.72rem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="8" height="12" rx="1" fill="currentColor" opacity="0.3"/><rect x="14" y="6" width="8" height="12" rx="1"/></svg>
+            Left Only (T0)
+          </button>
+          <button class="form-btn form-btn-sm" data-ripple onclick="sendCommand('idex_single_right')" style="font-size:0.72rem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="8" height="12" rx="1"/><rect x="14" y="6" width="8" height="12" rx="1" fill="currentColor" opacity="0.3"/></svg>
+            Right Only (T1)
+          </button>
+          <button class="form-btn form-btn-sm" data-ripple onclick="sendCommand('idex_duplicate')" style="font-size:0.72rem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="8" height="12" rx="1" fill="currentColor" opacity="0.3"/><rect x="14" y="6" width="8" height="12" rx="1" fill="currentColor" opacity="0.3"/></svg>
+            Duplicate
+          </button>
+          <button class="form-btn form-btn-sm" data-ripple onclick="sendCommand('idex_mirror')" style="font-size:0.72rem">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="8" height="12" rx="1" fill="currentColor" opacity="0.3"/><rect x="14" y="6" width="8" height="12" rx="1" fill="currentColor" opacity="0.3"/><line x1="12" y1="4" x2="12" y2="20" stroke-dasharray="2"/></svg>
+            Mirror
+          </button>
+        </div>
+        <p style="font-size:0.65rem;color:var(--text-muted);margin:6px 0 0">Duplicate prints 2 identical copies. Mirror creates a mirrored pair. Only available when not printing.</p>
+      </div>`;
+    }
+
     // ── Defect Detection ──
     if (data._sm_defect) {
       const d = data._sm_defect;

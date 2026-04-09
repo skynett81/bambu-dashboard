@@ -1,38 +1,56 @@
 {
   "PLA": {
-    "Standard": { "load_temp": 220, "unload_temp": 220, "clean_temp": 230, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04 },
-    "Basic": { "load_temp": 210, "unload_temp": 210, "clean_temp": 220, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04 },
-    "SnapSpeed": { "load_temp": 220, "unload_temp": 220, "clean_temp": 230, "is_soft": false, "flow_k": 0.025, "flow_k_min": 0.005, "flow_k_max": 0.045 },
-    "Matte": { "load_temp": 210, "unload_temp": 210, "clean_temp": 220, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04 },
-    "Silk": { "load_temp": 220, "unload_temp": 220, "clean_temp": 230, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04 },
-    "Eco": { "load_temp": 210, "unload_temp": 210, "clean_temp": 220, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04 }
+    "Standard": { "load_temp": 220, "unload_temp": 220, "clean_temp": 230, "bed_temp": 60, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04, "max_volumetric_speed": 15, "density": 1.24 },
+    "Basic": { "load_temp": 210, "unload_temp": 210, "clean_temp": 220, "bed_temp": 60, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04, "max_volumetric_speed": 12, "density": 1.24 },
+    "SnapSpeed": { "load_temp": 220, "unload_temp": 220, "clean_temp": 230, "bed_temp": 60, "is_soft": false, "flow_k": 0.025, "flow_k_min": 0.005, "flow_k_max": 0.045, "max_volumetric_speed": 20, "density": 1.24 },
+    "Matte": { "load_temp": 210, "unload_temp": 210, "clean_temp": 220, "bed_temp": 60, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04, "max_volumetric_speed": 15, "density": 1.24 },
+    "Silk": { "load_temp": 220, "unload_temp": 220, "clean_temp": 230, "bed_temp": 60, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04, "max_volumetric_speed": 15, "density": 1.24 },
+    "Eco": { "load_temp": 210, "unload_temp": 210, "clean_temp": 220, "bed_temp": 60, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04, "max_volumetric_speed": 12, "density": 1.24 }
   },
   "PLA-CF": {
-    "default": { "load_temp": 230, "unload_temp": 230, "clean_temp": 240, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04 }
+    "default": { "load_temp": 230, "unload_temp": 230, "clean_temp": 240, "bed_temp": 60, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04, "max_volumetric_speed": 12, "density": 1.30, "nozzle_type": "hardened_steel" }
   },
   "PETG": {
-    "Standard": { "load_temp": 245, "unload_temp": 245, "clean_temp": 255, "is_soft": false, "flow_k": 0.03, "flow_k_min": 0.01, "flow_k_max": 0.06 }
+    "Standard": { "load_temp": 245, "unload_temp": 245, "clean_temp": 255, "bed_temp": 80, "is_soft": false, "flow_k": 0.03, "flow_k_min": 0.01, "flow_k_max": 0.06, "max_volumetric_speed": 12, "density": 1.27 }
   },
   "PETG-CF": {
-    "default": { "load_temp": 260, "unload_temp": 255, "clean_temp": 265, "is_soft": false, "flow_k": 0.03, "flow_k_min": 0.01, "flow_k_max": 0.06 }
+    "default": { "load_temp": 260, "unload_temp": 255, "clean_temp": 265, "bed_temp": 80, "is_soft": false, "flow_k": 0.03, "flow_k_min": 0.01, "flow_k_max": 0.06, "max_volumetric_speed": 10, "density": 1.35, "nozzle_type": "hardened_steel" }
   },
   "ABS": {
-    "Standard": { "load_temp": 255, "unload_temp": 255, "clean_temp": 265, "is_soft": false, "flow_k": 0.025, "flow_k_min": 0.008, "flow_k_max": 0.05 }
+    "Standard": { "load_temp": 255, "unload_temp": 255, "clean_temp": 265, "bed_temp": 100, "is_soft": false, "flow_k": 0.025, "flow_k_min": 0.008, "flow_k_max": 0.05, "max_volumetric_speed": 12, "density": 1.04, "enclosure_required": true }
   },
   "ASA": {
-    "Standard": { "load_temp": 260, "unload_temp": 255, "clean_temp": 265, "is_soft": false, "flow_k": 0.025, "flow_k_min": 0.008, "flow_k_max": 0.05 }
+    "Standard": { "load_temp": 260, "unload_temp": 255, "clean_temp": 265, "bed_temp": 100, "is_soft": false, "flow_k": 0.025, "flow_k_min": 0.008, "flow_k_max": 0.05, "max_volumetric_speed": 12, "density": 1.07, "enclosure_required": true }
   },
   "PA-CF": {
-    "default": { "load_temp": 280, "unload_temp": 270, "clean_temp": 285, "is_soft": false, "flow_k": 0.04, "flow_k_min": 0.015, "flow_k_max": 0.065 }
+    "default": { "load_temp": 280, "unload_temp": 270, "clean_temp": 285, "bed_temp": 100, "is_soft": false, "flow_k": 0.04, "flow_k_min": 0.015, "flow_k_max": 0.065, "max_volumetric_speed": 8, "density": 1.40, "nozzle_type": "hardened_steel", "enclosure_required": true, "drying_temp": 80, "drying_time": 8 }
+  },
+  "PA": {
+    "Standard": { "load_temp": 270, "unload_temp": 260, "clean_temp": 275, "bed_temp": 90, "is_soft": false, "flow_k": 0.035, "flow_k_min": 0.012, "flow_k_max": 0.06, "max_volumetric_speed": 10, "density": 1.14, "enclosure_required": true, "drying_temp": 80, "drying_time": 8 }
   },
   "TPU": {
-    "95A": { "load_temp": 230, "unload_temp": 220, "clean_temp": 240, "is_soft": true, "flow_k": 0.01, "flow_k_min": 0.005, "flow_k_max": 0.03 },
-    "High-Flow": { "load_temp": 225, "unload_temp": 215, "clean_temp": 235, "is_soft": true, "flow_k": 0.015, "flow_k_min": 0.005, "flow_k_max": 0.03 }
+    "95A": { "load_temp": 230, "unload_temp": 220, "clean_temp": 240, "bed_temp": 60, "is_soft": true, "flow_k": 0.01, "flow_k_min": 0.005, "flow_k_max": 0.03, "max_volumetric_speed": 5, "density": 1.21 },
+    "High-Flow": { "load_temp": 225, "unload_temp": 215, "clean_temp": 235, "bed_temp": 60, "is_soft": true, "flow_k": 0.015, "flow_k_min": 0.005, "flow_k_max": 0.03, "max_volumetric_speed": 8, "density": 1.21 }
+  },
+  "TPE": {
+    "default": { "load_temp": 220, "unload_temp": 210, "clean_temp": 230, "bed_temp": 50, "is_soft": true, "flow_k": 0.01, "flow_k_min": 0.005, "flow_k_max": 0.025, "max_volumetric_speed": 4, "density": 1.20 }
   },
   "PVA": {
-    "default": { "load_temp": 210, "unload_temp": 200, "clean_temp": 215, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04 }
+    "default": { "load_temp": 210, "unload_temp": 200, "clean_temp": 215, "bed_temp": 60, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04, "max_volumetric_speed": 8, "density": 1.23, "drying_temp": 50, "drying_time": 6, "support_material": true }
   },
   "PET": {
-    "Standard": { "load_temp": 245, "unload_temp": 240, "clean_temp": 250, "is_soft": false, "flow_k": 0.03, "flow_k_min": 0.01, "flow_k_max": 0.06 }
+    "Standard": { "load_temp": 245, "unload_temp": 240, "clean_temp": 250, "bed_temp": 80, "is_soft": false, "flow_k": 0.03, "flow_k_min": 0.01, "flow_k_max": 0.06, "max_volumetric_speed": 12, "density": 1.38 }
+  },
+  "Breakaway": {
+    "default": { "load_temp": 230, "unload_temp": 220, "clean_temp": 240, "bed_temp": 60, "is_soft": false, "flow_k": 0.025, "flow_k_min": 0.008, "flow_k_max": 0.05, "max_volumetric_speed": 10, "density": 1.22, "support_material": true }
+  },
+  "Support-PLA": {
+    "default": { "load_temp": 210, "unload_temp": 200, "clean_temp": 220, "bed_temp": 60, "is_soft": false, "flow_k": 0.02, "flow_k_min": 0.005, "flow_k_max": 0.04, "max_volumetric_speed": 12, "density": 1.24, "support_material": true }
+  },
+  "PC": {
+    "Standard": { "load_temp": 270, "unload_temp": 260, "clean_temp": 280, "bed_temp": 110, "is_soft": false, "flow_k": 0.035, "flow_k_min": 0.012, "flow_k_max": 0.06, "max_volumetric_speed": 10, "density": 1.20, "enclosure_required": true, "drying_temp": 80, "drying_time": 6 }
+  },
+  "HIPS": {
+    "Standard": { "load_temp": 240, "unload_temp": 230, "clean_temp": 250, "bed_temp": 100, "is_soft": false, "flow_k": 0.025, "flow_k_min": 0.008, "flow_k_max": 0.05, "max_volumetric_speed": 10, "density": 1.05, "enclosure_required": true, "support_material": true }
   }
 }
