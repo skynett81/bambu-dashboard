@@ -314,6 +314,46 @@ export class PrusaLinkClient {
     };
   }
 
+  // ── Firmware update ──
+
+  async checkFirmwareUpdate() {
+    return this._apiGet('/api/v1/update/buddy') || this._apiGet('/api/v1/update/firmware');
+  }
+
+  async triggerFirmwareUpdate(env) {
+    return this._apiPost(`/api/v1/update/${env || 'buddy'}`, {});
+  }
+
+  // ── Camera management ──
+
+  async listCameras() {
+    return this._apiGet('/api/v1/cameras') || [];
+  }
+
+  async getCameraConfig(cameraId) {
+    return this._apiGet(`/api/v1/cameras/${cameraId}/config`);
+  }
+
+  async testCameraConnection(cameraId) {
+    return this._apiPost(`/api/v1/cameras/${cameraId}/connection`, {});
+  }
+
+  // ── Transfer (upload progress) ──
+
+  async getActiveTransfers() {
+    return this._apiGet('/api/v1/transfer') || [];
+  }
+
+  async cancelTransfer(transferId) {
+    return this._apiDelete(`/api/v1/transfer/${transferId}`);
+  }
+
+  // ── Storage info ──
+
+  async getStorageInfo() {
+    return this._apiGet('/api/v1/storage') || {};
+  }
+
   // ── HTTP with Digest Auth ──
 
   async _apiGet(path) {

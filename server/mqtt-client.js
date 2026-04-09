@@ -203,6 +203,77 @@ export class BambuMqttClient {
       if (this.state.bed_temper !== undefined) this.state._bed_actual = this.state.bed_temper;
       if (this.state.bed_target_temper !== undefined) this.state._bed_target = this.state.bed_target_temper;
 
+      // Lights report — actual LED state feedback
+      if (this.state.lights_report && Array.isArray(this.state.lights_report)) {
+        this.state._lights = {};
+        for (const l of this.state.lights_report) {
+          if (l.node) this.state._lights[l.node] = { mode: l.mode, led_on_time: l.led_on_time };
+        }
+      }
+
+      // Chamber temperature (X1C, X1E, H2 series)
+      if (this.state.chamber_temper !== undefined) {
+        this.state._chamber_actual = this.state.chamber_temper;
+      }
+
+      // Camera state (ipcam)
+      if (this.state.ipcam) {
+        this.state._camera_state = {
+          recording: this.state.ipcam.ipcam_record === 'enable',
+          timelapse: this.state.ipcam.timelapse === 'enable',
+          resolution: this.state.ipcam.resolution || '',
+          dev: this.state.ipcam.ipcam_dev || '',
+          tutkServer: this.state.ipcam.tutk_server || '',
+        };
+      }
+
+      // Firmware upgrade state
+      if (this.state.upgrade_state) {
+        this.state._upgrade = {
+          sequence_id: this.state.upgrade_state.sequence_id,
+          progress: this.state.upgrade_state.progress || '',
+          status: this.state.upgrade_state.status || '',
+          newVersion: this.state.upgrade_state.new_version || '',
+          forceUpgrade: this.state.upgrade_state.force_upgrade || false,
+          message: this.state.upgrade_state.message || '',
+        };
+      }
+
+      // Fan speeds readback
+      if (this.state.big_fan1_speed !== undefined) this.state._fan_aux = this.state.big_fan1_speed;
+      if (this.state.big_fan2_speed !== undefined) this.state._fan_chamber = this.state.big_fan2_speed;
+      if (this.state.heatbreak_fan_speed !== undefined) this.state._fan_heatbreak = this.state.heatbreak_fan_speed;
+      if (this.state.cooling_fan_speed !== undefined) this.state._fan_part = this.state.cooling_fan_speed;
+
+      // Print preparation progress
+      if (this.state.gcode_file_prepare_percent !== undefined) {
+        this.state._prepare_percent = parseInt(this.state.gcode_file_prepare_percent) || 0;
+      }
+
+      // WiFi signal strength
+      if (this.state.wifi_signal !== undefined) {
+        this.state._wifi_rssi = this.state.wifi_signal;
+      }
+
+      // Speed level (discrete 1-4)
+      if (this.state.spd_lvl !== undefined) {
+        this.state._speed_level = this.state.spd_lvl;
+      }
+
+      // Maintenance schedule from firmware
+      if (this.state.maintain !== undefined) {
+        this.state._maintenance_data = this.state.maintain;
+      }
+
+      // Storage state
+      if (this.state.stg_cur !== undefined) {
+        this.state._storage_state = this.state.stg_cur;
+      }
+
+      // Nozzle info readback
+      if (this.state.nozzle_type !== undefined) this.state._nozzle_type = this.state.nozzle_type;
+      if (this.state.nozzle_diameter !== undefined) this.state._nozzle_diameter = this.state.nozzle_diameter;
+
       // AMS summary for quick access
       if (this.state.ams?.ams) {
         this.state._ams_count = this.state.ams.ams.length;
@@ -212,11 +283,6 @@ export class BambuMqttClient {
       // HMS error code tracking
       if (this.state.hms?.length > 0) {
         this.state._active_errors = this.state.hms.filter(h => h.attr > 0).length;
-      }
-
-      // Print statistics summary
-      if (this.state.mc_percent !== undefined) {
-        this.state._print_progress_pct = this.state.mc_percent;
       }
 
       this.hub.broadcast('status', { print: this.state });

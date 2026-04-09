@@ -154,6 +154,23 @@ export class MoonrakerClient {
       'temperature_sensor cavity': null,
       'purifier': null,
       'exclude_object': null,
+      // Klipper diagnostic objects (silently ignored if not available)
+      'bed_mesh': null,
+      'mcu': null,
+      'tmc2209 stepper_x': null,
+      'tmc2209 stepper_y': null,
+      'tmc2240 stepper_x': null,
+      'tmc2240 stepper_y': null,
+      'filament_switch_sensor runout': null,
+      'filament_switch_sensor filament_sensor': null,
+      'temperature_fan controller_fan': null,
+      'temperature_fan exhaust_fan': null,
+      'fan_generic nevermore_internal': null,
+      'temperature_sensor mcu_temp': null,
+      'temperature_sensor raspberry_pi': null,
+      // ERCF/AFC multi-filament (Voron community)
+      'ercf': null,
+      'afc': null,
       // Snapmaker U1 specific (silently ignored on non-SM printers)
       'machine_state_manager': null,
       'filament_detect': null,
@@ -652,6 +669,109 @@ export class MoonrakerClient {
       this.state._sm_park = parkState;
     }
 
+    // Bed mesh data (for visualization)
+    const bm = status.bed_mesh;
+    if (bm) {
+      this.state._bed_mesh = {
+        profileName: bm.profile_name || '',
+        meshMin: bm.mesh_min || [0, 0],
+        meshMax: bm.mesh_max || [0, 0],
+        probeCount: bm.probed_matrix?.length || 0,
+        meshMatrix: bm.mesh_matrix || [],
+        profiles: bm.profiles || {},
+      };
+    }
+
+    // MCU health
+    const mcu = status.mcu;
+    if (mcu) {
+      this.state._mcu = {
+        lastStats: mcu.last_stats || {},
+        mcuVersion: mcu.mcu_version || '',
+        mcuBuild: mcu.mcu_build_versions || '',
+      };
+    }
+    // MCU temperature sensors
+    for (const key of ['mcu_temp', 'raspberry_pi']) {
+      const ts = status[`temperature_sensor ${key}`];
+      if (ts) {
+        if (!this.state._system_temps) this.state._system_temps = {};
+        this.state._system_temps[key] = { temp: Math.round((ts.temperature || 0) * 10) / 10 };
+      }
+    }
+
+    // TMC driver diagnostics
+    for (const driver of ['tmc2209 stepper_x', 'tmc2209 stepper_y', 'tmc2240 stepper_x', 'tmc2240 stepper_y']) {
+      const tmc = status[driver];
+      if (tmc) {
+        if (!this.state._tmc) this.state._tmc = {};
+        const name = driver.split(' ')[1];
+        this.state._tmc[name] = {
+          temperature: tmc.temperature,
+          run_current: tmc.run_current,
+          hold_current: tmc.hold_current,
+        };
+      }
+    }
+
+    // Filament switch sensor (runout detection)
+    for (const sensorName of ['runout', 'filament_sensor']) {
+      const fss = status[`filament_switch_sensor ${sensorName}`];
+      if (fss) {
+        this.state._filament_sensor = {
+          name: sensorName,
+          enabled: fss.enabled,
+          detected: fss.filament_detected,
+        };
+      }
+    }
+
+    // Temperature-controlled fans
+    for (const fanName of ['controller_fan', 'exhaust_fan']) {
+      const tf = status[`temperature_fan ${fanName}`];
+      if (tf) {
+        if (!this.state._temp_fans) this.state._temp_fans = {};
+        this.state._temp_fans[fanName] = {
+          speed: Math.round((tf.speed || 0) * 100),
+          temperature: Math.round((tf.temperature || 0) * 10) / 10,
+          target: Math.round((tf.target || 0) * 10) / 10,
+        };
+      }
+    }
+
+    // Nevermore filter (Voron community)
+    const nevermore = status['fan_generic nevermore_internal'];
+    if (nevermore) {
+      this.state._nevermore = { speed: Math.round((nevermore.speed || 0) * 100) };
+    }
+
+    // ERCF multi-filament (Voron community)
+    const ercf = status.ercf;
+    if (ercf) {
+      this.state._ercf = {
+        enabled: ercf.enabled,
+        tool: ercf.tool,
+        gate: ercf.gate,
+        filament: ercf.filament,
+        isHomed: ercf.is_homed,
+        action: ercf.action || 'idle',
+        numGates: ercf.num_gates || 0,
+        gateStatus: ercf.gate_status || [],
+        gateColor: ercf.gate_color || [],
+      };
+    }
+
+    // AFC (Automated Filament Changer)
+    const afc = status.afc;
+    if (afc) {
+      this.state._afc = {
+        enabled: afc.enabled,
+        currentLane: afc.current_lane,
+        lanes: afc.lanes || [],
+        status: afc.status || 'idle',
+      };
+    }
+
     // ADC current sensors — motor/heater current monitoring
     const currentSensors = {};
     for (const key of ['heater_bed', 'extruder']) {
@@ -970,6 +1090,47 @@ export class MoonrakerClient {
       case 'restart':
         this._apiPost('/printer/restart');
         break;
+
+      // System/OS commands
+      case 'system_reboot':
+        this._apiPost('/machine/reboot');
+        break;
+      case 'system_shutdown':
+        this._apiPost('/machine/shutdown');
+        break;
+      case 'service_restart': {
+        const svc = commandObj.service || 'klipper';
+        this._apiPost(`/machine/services/restart?service=${svc}`);
+        break;
+      }
+      case 'service_stop': {
+        const svc2 = commandObj.service || 'klipper';
+        this._apiPost(`/machine/services/stop?service=${svc2}`);
+        break;
+      }
+
+      // Power device control (smart plugs, GPIO, relays)
+      case 'power_on': {
+        const dev = commandObj.device || '';
+        this._apiPost(`/machine/device_power/device?device=${encodeURIComponent(dev)}&action=on`);
+        break;
+      }
+      case 'power_off': {
+        const dev2 = commandObj.device || '';
+        this._apiPost(`/machine/device_power/device?device=${encodeURIComponent(dev2)}&action=off`);
+        break;
+      }
+
+      // WLED strip control
+      case 'wled_on':
+        this._apiPost(`/machine/wled/on?strip=${commandObj.strip || 'strip'}`);
+        break;
+      case 'wled_off':
+        this._apiPost(`/machine/wled/off?strip=${commandObj.strip || 'strip'}`);
+        break;
+      case 'wled_preset':
+        this._apiPost(`/machine/wled/strip?strip=${commandObj.strip || 'strip'}&preset=${commandObj.preset || 1}`);
+        break;
       case 'firmware_restart':
         this._apiPost('/printer/firmware_restart');
         break;
@@ -1205,6 +1366,60 @@ export class MoonrakerClient {
     return data?.result || null;
   }
 
+  // ── Power device management ──
+
+  async getPowerDevices() {
+    const data = await this._apiGet('/machine/device_power/devices');
+    return data?.result?.devices || [];
+  }
+
+  async getPowerDeviceStatus(device) {
+    const data = await this._apiGet(`/machine/device_power/device?device=${encodeURIComponent(device)}`);
+    return data?.result || null;
+  }
+
+  // ── Bed mesh data ──
+
+  async getBedMeshProfiles() {
+    const data = await this._apiGet('/printer/objects/query?bed_mesh');
+    return data?.result?.status?.bed_mesh || null;
+  }
+
+  // ── Process stats (CPU/memory) ──
+
+  async getProcessStats() {
+    const data = await this._apiGet('/machine/proc_stats');
+    return data?.result || null;
+  }
+
+  // ── System info ──
+
+  async getSystemInfo() {
+    const data = await this._apiGet('/machine/system_info');
+    return data?.result?.system_info || null;
+  }
+
+  // ── Temperature history store ──
+
+  async getTemperatureStore() {
+    const data = await this._apiGet('/server/temperature_store');
+    return data?.result || null;
+  }
+
+  // ── Service management ──
+
+  async getServices() {
+    const data = await this._apiGet('/machine/system_info');
+    return data?.result?.system_info?.available_services || [];
+  }
+
+  // ── WLED strips ──
+
+  async getWledStrips() {
+    const data = await this._apiGet('/machine/wled/strips');
+    return data?.result?.strips || {};
+  }
+
   async triggerUpdate(name) {
     return this._apiPost(`/machine/update/${name}`);
   }
@@ -1275,6 +1490,15 @@ export function buildMoonrakerCommand(msg) {
     case 'pushall': return { _moonraker_action: 'pushall' };
     case 'home': return { _moonraker_action: 'home' };
     case 'emergency_stop': return { _moonraker_action: 'emergency_stop' };
+    case 'system_reboot': return { _moonraker_action: 'system_reboot' };
+    case 'system_shutdown': return { _moonraker_action: 'system_shutdown' };
+    case 'service_restart': return { _moonraker_action: 'service_restart', service: msg.service };
+    case 'service_stop': return { _moonraker_action: 'service_stop', service: msg.service };
+    case 'power_on': return { _moonraker_action: 'power_on', device: msg.device };
+    case 'power_off': return { _moonraker_action: 'power_off', device: msg.device };
+    case 'wled_on': return { _moonraker_action: 'wled_on', strip: msg.strip };
+    case 'wled_off': return { _moonraker_action: 'wled_off', strip: msg.strip };
+    case 'wled_preset': return { _moonraker_action: 'wled_preset', strip: msg.strip, preset: msg.preset };
     case 'light': return { _moonraker_action: 'light', mode: msg.mode };
     case 'sm_feed_auto': return { _moonraker_action: 'sm_feed_auto', channel: msg.channel };
     case 'sm_feed_manual': return { _moonraker_action: 'sm_feed_manual', channel: msg.channel };

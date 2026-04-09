@@ -78,7 +78,7 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 - **Voron** — all models with Klipper + Moonraker
 - **Creality** — K1, K1 Max, Ender 3 V3, and other Klipper models
 - **Elegoo** — Neptune series with Klipper firmware
-- **AnkerMake** — M5 series
+- **AnkerMake** — M5 series (requires community Klipper firmware, not stock AnkerMake firmware)
 - **QIDI** — X-Max, X-Plus with Moonraker
 - **RatRig** — V-Core, V-Minion
 - Any printer running **Klipper + Moonraker**
