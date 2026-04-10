@@ -255,7 +255,18 @@ export class Updater {
     const tag = `v${version}`;
     try {
       execSync('git fetch origin --tags', { cwd: ROOT_DIR, timeout: 30000, stdio: 'pipe' });
-      execSync(`git checkout ${tag}`, { cwd: ROOT_DIR, timeout: 10000, stdio: 'pipe' });
+      // Determine current branch (stay on it instead of detached HEAD)
+      let branch;
+      try {
+        branch = execSync('git rev-parse --abbrev-ref HEAD', { cwd: ROOT_DIR, timeout: 5000, encoding: 'utf8' }).trim();
+      } catch { branch = ''; }
+      if (branch && branch !== 'HEAD') {
+        // On a branch — fast-forward merge the tag to stay on branch
+        execSync(`git merge --ff-only ${tag}`, { cwd: ROOT_DIR, timeout: 10000, stdio: 'pipe' });
+      } else {
+        // Detached HEAD or unknown — fall back to checkout
+        execSync(`git checkout ${tag}`, { cwd: ROOT_DIR, timeout: 10000, stdio: 'pipe' });
+      }
     } catch (e) {
       throw new Error(`Git update failed: ${e.message}`);
     }
