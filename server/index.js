@@ -1216,8 +1216,23 @@ function shutdown() {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
-// Start servers
-httpServer.listen(PORT, () => {
+// Start servers — retry if port is still held by the previous process
+function listenWithRetry(server, port, label, cb) {
+  let attempts = 0;
+  const maxAttempts = 10;
+  server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE' && attempts < maxAttempts) {
+      attempts++;
+      log.warn(`${label} port ${port} in use — retrying (${attempts}/${maxAttempts})...`);
+      setTimeout(() => server.listen(port), 1000);
+    } else {
+      log.error(`${label} failed to bind port ${port}: ${err.message}`);
+    }
+  });
+  server.listen(port, cb);
+}
+
+listenWithRetry(httpServer, PORT, 'HTTP', () => {
   const printerCount = manager.getPrinterIds().length + (IS_DEMO ? demoMockPrinters.length : 0);
   const { ips, names } = getLocalAddresses();
   // Filter out IPv6 for display (too long for banner), keep IPv4 + hostnames
@@ -1259,7 +1274,7 @@ httpServer.listen(PORT, () => {
 });
 
 if (httpsServer) {
-  httpsServer.listen(HTTPS_PORT, () => {
+  listenWithRetry(httpsServer, HTTPS_PORT, 'HTTPS', () => {
     log.info(`HTTPS active on port ${HTTPS_PORT}`);
   });
 }
