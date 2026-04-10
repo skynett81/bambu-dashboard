@@ -4,6 +4,73 @@ All notable changes to 3DPrintForge.
 
 ---
 
+## v1.1.18 — Universal Multi-Printer UI, Analytics, OctoPrint & Snapmaker Deep Integration (2026-04-11)
+
+### Universal Multi-Printer Dashboard
+- All 35+ dashboard panels now work with all 8 printer types (Bambu, Snapmaker, Moonraker, PrusaLink, OctoPrint, AnkerMake, Creality, Elegoo)
+- Per-printer-type configuration UI for all connector types
+- Printer-specific data injection across all core components (filament ring, printer info, controls, camera)
+- Three new dashboard panels for complete printer type coverage
+
+### AWStats-Inspired Analytics System
+- Full web analytics dashboard: requests per hour, top endpoints, active sessions, device & browser breakdown, operating systems
+- Print farm overview cards: success rate, print hours, filament used, spool count, queue status, error count
+- System info bar: version, uptime, memory, DB size, Node version
+- Print history chart with color-coded success/failure/cancelled visualization
+
+### OctoPrint Complete Rewrite
+- WebSocket real-time connection (replaces polling)
+- Native OctoPrint API integration with full feature parity
+- API key auth, state mapping, camera snapshot, file management
+
+### Snapmaker Deep Integration
+- SACP protocol complete rewrite with deep U1 improvements
+- SACP connector for J1/Artisan/A-series printers
+- Snapmaker 2.0 HTTP connector
+- Cloud sync, firmware checking, power monitoring, G-code reference
+- J1 IDEX modes (mirror, duplicate, multi-material)
+- Ray UDP support, laser/CNC commands, mDNS discovery
+- Expanded filament profiles
+
+### AdminLTE 4 UI Framework
+- Complete AdminLTE 4 coverage: offcanvas, accordion, list groups, input groups, alerts, progress bars
+- Admin features: info-boxes, table enhancer, validation, dropdowns, breadcrumbs, pagination
+- Bootstrap 5 JS integration with tooltip migration and sidebar mini-mode
+- Custom UI components aligned with Bootstrap 5 / AdminLTE 4 standards
+
+### Responsive Design & Mobile
+- Comprehensive responsive design overhaul for mobile/tablet
+- iOS native app (IPA) download with dual install options
+- App download page with QR codes at /app
+- Multiple QR code fixes for iPhone scanability and LAN IP resolution
+
+### Filament Tracking Improvements
+- Per-spool filament tracking using OrcaSlicer metadata + NFC color matching
+- Spool recalculation with color matching and Moonraker tray tracking
+- Filament tracking for all Moonraker/Klipper printers
+- Spool quick actions: mark empty, set weight, swap, refill
+
+### Bug Fixes (12 critical)
+- Queue panel crash when API returns error instead of array
+- Rate limiting triggered by 50 individual cost-estimate calls (replaced with batch endpoint)
+- Unbounded proxy cache maps causing potential memory exhaustion (capped at 500 entries)
+- Library file upload crash from unprotected writeFileSync
+- Camera stream cleanup failure when ffmpeg already exited
+- Migration ordering (115, 116, 117) corrected
+- weightToLength returning null for empty spools (0 weight)
+- Cost report NaN from NULL total_seconds
+- Analytics panel crash on non-array API responses
+- Library panel crash on non-array file list response
+- Norwegian log message replaced with English
+
+### New API Endpoints
+- `POST /api/inventory/cost-estimate/batch` — batch cost estimation for up to 200 items in a single request
+
+### Setup & Configuration
+- 7-step multi-brand setup wizard supporting all printer brands
+
+---
+
 ## v1.1.17 — Security Hardening, Model Forge Expansion, 3D Viewer Enhancements (2026-04-06)
 
 ### Knowledge Base Expansion

@@ -45,6 +45,18 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 - **Engelsk UI** — hele applikasjonen pa engelsk, dokumentasjon tilgjengelig pa norsk og engelsk
 - **Selvdriftet** — ingen sky-avhengighet, dine data pa din maskin
 
+### Nytt i v1.1.18
+
+- **Universell multi-printer UI** — alle 35+ dashbord-paneler fungerer nå med alle 8 printertyper (Bambu, Snapmaker, Moonraker, PrusaLink, OctoPrint, AnkerMake, Creality, Elegoo)
+- **AWStats-inspirert analytics** — full webanalyse med forespørsler per time, topp-endepunkter, sesjoner, enhetsoversikt og operativsystemer
+- **OctoPrint full rewrite** — WebSocket-støtte, nativt API, full funksjonsparitet med andre konnektorer
+- **Snapmaker dyp integrasjon** — SACP-rewrite, Cloud-synk, firmware-sjekk, strømmåling, J1 IDEX-moduser, Ray UDP/laser/CNC, mDNS discovery
+- **AdminLTE 4 komplett** — offcanvas, accordion, list groups, info-boxes, table enhancer, validering, sidebar mini-modus
+- **Responsivt design** — full mobil/tablet-optimalisering med iOS-kompatible QR-koder og nedlastingssider
+- **7-trinns oppsettveiviser** — multi-brand installer som støtter alle printermerker
+- **Batch kostnadsestimat** — ny POST /api/inventory/cost-estimate/batch (opptil 200 elementer)
+- **12 feilrettinger** — API-sikkerhet, rate limiting, minnelekkasjer, migreringsrekkefølge, kamera-cleanup
+
 ### Nytt i v1.1.17
 
 - **Model Forge utvidet til 17 verktøy** — 6 nye: Lattice Structure, Multi-Color, Advanced Vase, Threads & Joints, Texture Surface, 3MF Validator
