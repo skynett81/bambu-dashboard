@@ -32,17 +32,24 @@
         fetch('/api/system/info').then(r => r.json()).catch(() => ({})),
       ]);
 
+      // Ensure API responses are arrays (may return {error:...} on failure)
+      const _history = Array.isArray(history) ? history : [];
+      const _printers = Array.isArray(printers) ? printers : [];
+      const _filament = Array.isArray(filament) ? filament : [];
+      const _queue = Array.isArray(queue) ? queue : [];
+      const _printErrors = Array.isArray(printErrors) ? printErrors : [];
+
       // Calculate print stats
-      const totalPrints = history.length;
-      const successPrints = history.filter(h => h.status === 'completed').length;
-      const failedPrints = history.filter(h => h.status === 'failed').length;
+      const totalPrints = _history.length;
+      const successPrints = _history.filter(h => h.status === 'completed').length;
+      const failedPrints = _history.filter(h => h.status === 'failed').length;
       const successRate = totalPrints > 0 ? Math.round((successPrints / totalPrints) * 100) : 0;
-      const totalPrintHours = Math.round(history.reduce((s, h) => s + (h.duration_seconds || 0), 0) / 3600 * 10) / 10;
-      const totalFilamentG = Math.round(history.reduce((s, h) => s + (h.filament_used_g || 0), 0));
-      const totalSpools = filament.length;
-      const activeQueue = Array.isArray(queue) ? queue.length : 0;
+      const totalPrintHours = Math.round(_history.reduce((s, h) => s + (h.duration_seconds || 0), 0) / 3600 * 10) / 10;
+      const totalFilamentG = Math.round(_history.reduce((s, h) => s + (h.filament_used_g || 0), 0));
+      const totalSpools = _filament.length;
+      const activeQueue = _queue.length;
       const onlinePrinters = Object.keys(window.printerState?.printers || {}).length;
-      const totalPrinters = printers.length;
+      const totalPrinters = _printers.length;
 
       let html = '<div class="analytics-layout" style="display:flex;flex-direction:column;gap:14px">';
 
@@ -56,7 +63,7 @@
       html += _statCard('Spools', totalSpools, '🎨');
       html += _statCard('Printers', `${onlinePrinters}/${totalPrinters}`, '🖨️', onlinePrinters > 0 ? 'var(--accent-green)' : 'var(--accent-red)');
       html += _statCard('Queue', activeQueue, '📋');
-      html += _statCard('Errors', printErrors.length, '⚠️', printErrors.length > 0 ? 'var(--accent-red)' : '');
+      html += _statCard('Errors', _printErrors.length, '⚠️', _printErrors.length > 0 ? 'var(--accent-red)' : '');
       html += _statCard('Requests', overview.today?.requests || 0, '📊');
       html += _statCard('Bandwidth', _fmtBytes(overview.today?.bytes || 0), '📡');
       html += _statCard('Sessions', overview.activeSessions || 0, '👥');
@@ -77,11 +84,11 @@
       }
 
       // ── Print Success/Failure Chart ──
-      if (history.length > 0) {
+      if (_history.length > 0) {
         html += `<div class="settings-card" style="overflow:hidden">
           <div class="card-title">Print History — Last ${totalPrints} prints</div>
           <div style="display:flex;gap:2px;height:30px;border-radius:4px;overflow:hidden">
-            ${history.slice(0, 50).map(h => {
+            ${_history.slice(0, 50).map(h => {
               const color = h.status === 'completed' ? 'var(--accent-green)' : h.status === 'failed' ? 'var(--accent-red)' : h.status === 'cancelled' ? 'var(--accent-orange)' : 'var(--bg-tertiary)';
               const dur = h.duration_seconds ? Math.round(h.duration_seconds / 60) + 'm' : '';
               return `<div style="flex:1;background:${color};min-width:4px" title="${h.filename || '?'} — ${h.status} ${dur}"></div>`;
@@ -90,17 +97,17 @@
           <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:0.6rem;color:var(--text-muted)">
             <span>✅ ${successPrints} completed</span>
             <span>❌ ${failedPrints} failed</span>
-            <span>⏹ ${history.filter(h => h.status === 'cancelled').length} cancelled</span>
+            <span>⏹ ${_history.filter(h => h.status === 'cancelled').length} cancelled</span>
           </div>
         </div>`;
       }
 
       // ── Printer Utilization ──
-      if (printers.length > 0) {
+      if (_printers.length > 0) {
         html += `<div class="settings-card" style="overflow:hidden">
           <div class="card-title">Printers (${onlinePrinters}/${totalPrinters} online)</div>
           <div style="display:flex;flex-direction:column;gap:4px">
-            ${printers.map(p => {
+            ${_printers.map(p => {
               const state = window.printerState?.printers?.[p.id];
               const gState = state?.gcode_state || 'OFFLINE';
               const color = gState === 'RUNNING' ? 'var(--accent-green)' : gState === 'IDLE' ? 'var(--accent-blue)' : gState === 'PAUSE' ? 'var(--accent-orange)' : 'var(--accent-red)';
@@ -117,11 +124,11 @@
       }
 
       // ── Filament Inventory Summary ──
-      if (filament.length > 0) {
+      if (_filament.length > 0) {
         const byMaterial = {};
-        for (const f of filament) { const m = f.type || f.material || f.filament_type || 'Unknown'; byMaterial[m] = (byMaterial[m] || 0) + 1; }
+        for (const f of _filament) { const m = f.type || f.material || f.filament_type || 'Unknown'; byMaterial[m] = (byMaterial[m] || 0) + 1; }
         html += `<div class="settings-card" style="overflow:hidden">
-          <div class="card-title">Filament Inventory (${filament.length} spools)</div>
+          <div class="card-title">Filament Inventory (${_filament.length} spools)</div>
           <div style="display:flex;gap:6px;flex-wrap:wrap">
             ${Object.entries(byMaterial).sort((a, b) => b[1] - a[1]).map(([mat, count]) =>
               `<span style="padding:2px 8px;border-radius:12px;background:var(--bg-inset);font-size:0.68rem">${mat}: <strong>${count}</strong></span>`
@@ -131,11 +138,11 @@
       }
 
       // ── Recent Errors ──
-      if (printErrors.length > 0) {
+      if (_printErrors.length > 0) {
         html += `<div class="settings-card" style="overflow:hidden">
-          <div class="card-title" style="color:var(--accent-red)">Recent Errors (${printErrors.length})</div>
+          <div class="card-title" style="color:var(--accent-red)">Recent Errors (${_printErrors.length})</div>
           <div style="max-height:200px;overflow-y:auto">
-            ${printErrors.slice(0, 15).map(e => {
+            ${_printErrors.slice(0, 15).map(e => {
               const ctx = typeof e.context === 'string' ? (() => { try { return JSON.parse(e.context); } catch { return {}; } })() : (e.context || {});
               const wikiUrl = ctx.wiki_url || '';
               const filename = ctx.filename || '';

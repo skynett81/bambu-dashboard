@@ -559,7 +559,7 @@ export class CameraStream {
     this._stopWatchdog();
     if (this.ffmpeg) {
       log.info('Stopping ffmpeg');
-      this.ffmpeg.kill('SIGTERM');
+      try { this.ffmpeg.kill('SIGTERM'); } catch {}
       this.ffmpeg = null;
     }
     this._cleanupJpeg();

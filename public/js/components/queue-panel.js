@@ -612,7 +612,8 @@
   async function _reload() {
     try {
       const resp = await fetch('/api/queue');
-      _queues = await resp.json();
+      const data = await resp.json();
+      _queues = Array.isArray(data) ? data : [];
     } catch { _queues = []; }
     _render();
     if (_selectedQueue) _loadQueueItems(_selectedQueue);

@@ -20,7 +20,7 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 - **Model Forge** — 17 parametric 3D generators: signs, lithophanes, boxes, vases, threads, lattices, textures, and more
 - **Cloud Slicer** — upload files, auto-slice with OrcaSlicer/PrusaSlicer, FTPS to printer
 - **7 notification channels** — Telegram, Discord, Email, Webhook, ntfy, Pushover, SMS
-- **Multi-brand** — Bambu Lab, Snapmaker, Prusa, Creality, Elegoo, Voron, AnkerMake, QIDI, RatRig
+- **Multi-brand** — Bambu Lab, Snapmaker, Prusa, OctoPrint, Creality, Elegoo, Voron, AnkerMake, QIDI, RatRig
 - **Security hardened** — CIS/NIS2 aligned: scrypt auth, CSRF, CSP, rate limiting, TOFU cert pinning, SSRF guards
 - **590+ API endpoints** — full REST API with OpenAPI docs at `/api/docs`
 - **English UI** — entire application in English, documentation site available in English and Norwegian

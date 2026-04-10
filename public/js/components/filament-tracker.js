@@ -4626,11 +4626,18 @@
       let totalFilament = 0, totalElectricity = 0, totalDepreciation = 0, totalCost = 0;
       const byMaterial = {};
       const rows = [];
-      for (const r of completed.slice(0, 50)) {
-        try {
-          const params = new URLSearchParams({ filament_g: r.filament_used_g, duration_s: r.duration_seconds || 0 });
-          const cRes = await fetch('/api/inventory/cost-estimate?' + params);
-          const cost = await cRes.json();
+      const batch = completed.slice(0, 50);
+      const batchResp = await fetch('/api/inventory/cost-estimate/batch', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(batch.map(r => ({ filament_g: r.filament_used_g, duration_s: r.duration_seconds || 0 })))
+      });
+      const costs = await batchResp.json();
+      if (Array.isArray(costs)) {
+        for (let i = 0; i < batch.length; i++) {
+          const r = batch[i];
+          const cost = costs[i];
+          if (!cost || cost.error) continue;
           totalFilament += cost.filament_cost;
           totalElectricity += cost.electricity_cost;
           totalDepreciation += cost.depreciation_cost;
@@ -4640,7 +4647,7 @@
           byMaterial[mat].count++;
           byMaterial[mat].cost += cost.total_cost;
           rows.push({ name: r.filename, cost: cost.total_cost });
-        } catch {}
+        }
       }
       let h = `<div class="fil-health-legend" style="gap:12px;margin-bottom:8px">
         <span><strong>${t('filament.filament_cost')}:</strong> ${formatCurrency(totalFilament)}</span>

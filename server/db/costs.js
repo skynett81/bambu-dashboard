@@ -302,7 +302,7 @@ export function getCostStatistics(printerId = null, startDate = null, endDate = 
     GROUP BY ph.filament_type ORDER BY total_cost DESC`).all(...params);
 
   const currency = getInventorySetting('cost_currency') || 'NOK';
-  const totalH = summary.total_seconds / 3600;
+  const totalH = (summary.total_seconds || 0) / 3600;
 
   return {
     summary: {

@@ -163,6 +163,43 @@ export function runMigrations() {
       )`);
     }},
 
+    // Snapmaker calibration results
+    { version: 115, up: (db) => {
+      db.exec(`CREATE TABLE IF NOT EXISTS sm_calibration_results (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        printer_id TEXT NOT NULL,
+        cal_type TEXT NOT NULL,
+        extruder INTEGER DEFAULT 0,
+        k_value REAL,
+        result_data TEXT,
+        calibrated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`);
+    }},
+
+    // Community filament reviews + per-printer settings
+    { version: 116, up: (db) => {
+      db.exec(`CREATE TABLE IF NOT EXISTS community_filament_reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        filament_id INTEGER NOT NULL,
+        user_name TEXT DEFAULT 'Anonymous',
+        rating INTEGER CHECK(rating BETWEEN 1 AND 5),
+        review_text TEXT,
+        printer_model TEXT,
+        print_quality TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`);
+      db.exec(`CREATE TABLE IF NOT EXISTS community_filament_settings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        filament_id INTEGER NOT NULL,
+        printer_model TEXT NOT NULL,
+        nozzle_temp INTEGER, bed_temp INTEGER,
+        print_speed INTEGER, retraction_length REAL, retraction_speed INTEGER,
+        notes TEXT,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(filament_id, printer_model)
+      )`);
+    }},
+
     // Multi-brand Knowledge Base data (Snapmaker, Prusa, Creality, Elegoo, Voron, AnkerMake, QIDI)
     { version: 117, up: (db) => {
       const ip = db.prepare('INSERT OR IGNORE INTO kb_printers (model, full_name, release_year, build_volume, max_speed, nozzle_type, has_ams, has_enclosure, has_lidar, has_camera, has_aux_fan, heated_bed_max, nozzle_temp_max, supported_filaments, connectivity, weight_kg, price_usd, pros, cons, tips, specs_json, wiki_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)');
@@ -260,43 +297,6 @@ export function runMigrations() {
           'Runs Klipper — connect via Moonraker in 3DPrintForge. Select type: QIDI.','{}',''],
       ];
       for (const p of printers) ip.run(...p);
-    }},
-
-    // Community filament reviews + per-printer settings
-    { version: 116, up: (db) => {
-      db.exec(`CREATE TABLE IF NOT EXISTS community_filament_reviews (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        filament_id INTEGER NOT NULL,
-        user_name TEXT DEFAULT 'Anonymous',
-        rating INTEGER CHECK(rating BETWEEN 1 AND 5),
-        review_text TEXT,
-        printer_model TEXT,
-        print_quality TEXT,
-        created_at TEXT NOT NULL DEFAULT (datetime('now'))
-      )`);
-      db.exec(`CREATE TABLE IF NOT EXISTS community_filament_settings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        filament_id INTEGER NOT NULL,
-        printer_model TEXT NOT NULL,
-        nozzle_temp INTEGER, bed_temp INTEGER,
-        print_speed INTEGER, retraction_length REAL, retraction_speed INTEGER,
-        notes TEXT,
-        created_at TEXT NOT NULL DEFAULT (datetime('now')),
-        UNIQUE(filament_id, printer_model)
-      )`);
-    }},
-
-    // Snapmaker calibration results
-    { version: 115, up: (db) => {
-      db.exec(`CREATE TABLE IF NOT EXISTS sm_calibration_results (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        printer_id TEXT NOT NULL,
-        cal_type TEXT NOT NULL,
-        extruder INTEGER DEFAULT 0,
-        k_value REAL,
-        result_data TEXT,
-        calibrated_at TEXT NOT NULL DEFAULT (datetime('now'))
-      )`);
     }},
 
     // Multi-brand KB data seed: accessories, filaments, profiles for all brands

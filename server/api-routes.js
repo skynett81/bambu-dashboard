@@ -3836,6 +3836,21 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, estimatePrintCost(filamentG, durationS, spoolId, printerId));
     }
 
+    // ---- Inventory: Batch Cost Estimate ----
+    if (method === 'POST' && path === '/api/inventory/cost-estimate/batch') {
+      return readBody(req, res, (body) => {
+        const items = Array.isArray(body) ? body : [];
+        if (items.length > 200) return sendError(res, 400, 'Maximum 200 items per batch');
+        const results = items.map(item => estimatePrintCost(
+          parseFloat(item.filament_g || 0),
+          parseInt(item.duration_s || 0),
+          item.spool_id ? parseInt(item.spool_id) : null,
+          item.printer_id || null
+        ));
+        return sendJson(res, results);
+      });
+    }
+
     // ---- Prometheus Metrics (legacy path, handled before auth at /api/metrics) ----
     if (method === 'GET' && path === '/metrics') {
       const metrics = _collectMetrics();
@@ -4985,7 +5000,9 @@ export async function handleApiRequest(req, res) {
         const libDir = join(DATA_DIR, 'library');
         try { mkdirSync(libDir, { recursive: true }); } catch {}
         const filePath = join(libDir, storedName);
-        writeFileSync(filePath, buffer);
+        try { writeFileSync(filePath, buffer); } catch (e) {
+          return sendJson(res, { error: 'Failed to save file: ' + e.message }, 500);
+        }
         // Try thumbnail extraction for 3mf using lib3mf
         let thumbPath = null;
         if (ext === '3mf') {
@@ -10284,6 +10301,7 @@ async function deletePrinterFile(ip, accessCode, filePath) {
 
 const _mwCache = new Map();
 const MW_CACHE_TTL = 3600000; // 1 hour
+const _PROXY_CACHE_MAX = 500; // max entries per cache to prevent memory exhaustion
 
 async function handleMakerWorldFetch(designId, res) {
   const cached = _mwCache.get(designId);
@@ -10324,6 +10342,7 @@ async function handleMakerWorldFetch(designId, res) {
       print_settings: Object.keys(printSettings).length ? printSettings : null,
       fallback: false
     };
+    if (_mwCache.size >= _PROXY_CACHE_MAX) { const oldest = _mwCache.keys().next().value; _mwCache.delete(oldest); }
     _mwCache.set(designId, { data, ts: Date.now() });
     sendJson(res, data);
   } catch {
@@ -10489,10 +10508,12 @@ async function handlePrintablesFetch(id, res) {
       fallback: false
     };
 
+    if (_printablesCache.size >= _PROXY_CACHE_MAX) { const oldest = _printablesCache.keys().next().value; _printablesCache.delete(oldest); }
     _printablesCache.set(id, { data, ts: Date.now() });
     sendJson(res, data);
   } catch {
     const fallback = { url, source: 'printables', fallback: true };
+    if (_printablesCache.size >= _PROXY_CACHE_MAX) { const oldest = _printablesCache.keys().next().value; _printablesCache.delete(oldest); }
     _printablesCache.set(id, { data: fallback, ts: Date.now() });
     sendJson(res, fallback);
   }
@@ -10554,6 +10575,7 @@ async function handleThingiverseFetch(id, res) {
       source: 'thingiverse',
       fallback: false
     };
+    if (_thingiverseCache.size >= _PROXY_CACHE_MAX) { const oldest = _thingiverseCache.keys().next().value; _thingiverseCache.delete(oldest); }
     _thingiverseCache.set(id, { data, ts: Date.now() });
     sendJson(res, data);
   } catch {
@@ -10574,10 +10596,12 @@ async function handleThingiverseFetch(id, res) {
         source: 'thingiverse',
         fallback: true
       };
-      _thingiverseCache.set(id, { data, ts: Date.now() });
+      if (_thingiverseCache.size >= _PROXY_CACHE_MAX) { const oldest = _thingiverseCache.keys().next().value; _thingiverseCache.delete(oldest); }
+    _thingiverseCache.set(id, { data, ts: Date.now() });
       sendJson(res, data);
     } catch {
       const fallback = { url, source: 'thingiverse', fallback: true };
+      if (_thingiverseCache.size >= _PROXY_CACHE_MAX) { const oldest = _thingiverseCache.keys().next().value; _thingiverseCache.delete(oldest); }
       _thingiverseCache.set(id, { data: fallback, ts: Date.now() });
       sendJson(res, fallback);
     }

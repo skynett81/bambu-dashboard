@@ -1050,7 +1050,8 @@ export function measureSpoolWeight(spoolId, grossWeightG) {
 // ---- Length Calculations ----
 
 export function weightToLength(weightG, density, diameterMm) {
-  if (!weightG || !density || !diameterMm) return null;
+  if (weightG == null || density == null || diameterMm == null) return null;
+  if (density <= 0 || diameterMm <= 0) return null;
   const radiusCm = (diameterMm / 10) / 2;
   const volumeCm3 = weightG / density;
   const lengthCm = volumeCm3 / (Math.PI * radiusCm * radiusCm);
@@ -1058,7 +1059,8 @@ export function weightToLength(weightG, density, diameterMm) {
 }
 
 export function lengthToWeight(lengthMm, density, diameterMm) {
-  if (!lengthMm || !density || !diameterMm) return null;
+  if (lengthMm == null || density == null || diameterMm == null) return null;
+  if (density <= 0 || diameterMm <= 0) return null;
   const radiusCm = (diameterMm / 10) / 2;
   const lengthCm = lengthMm / 10;
   const volumeCm3 = lengthCm * Math.PI * radiusCm * radiusCm;

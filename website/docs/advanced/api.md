@@ -82,6 +82,8 @@ API-et er rate-begrenset for å beskytte serveren:
 | PUT | `/api/filaments/:id` | Oppdater spole |
 | DELETE | `/api/filaments/:id` | Slett spole |
 | GET | `/api/filaments/stats` | Forbruksstatistikk |
+| GET | `/api/inventory/cost-estimate` | Kostnadsestimat for enkelt-print |
+| POST | `/api/inventory/cost-estimate/batch` | Batch-kostnadsestimat (array av items) |
 
 ### Printhistorikk
 | Metode | Endepunkt | Beskrivelse |

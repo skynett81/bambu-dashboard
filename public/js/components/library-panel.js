@@ -125,7 +125,8 @@
     if (_filter.search) params.set('q', _filter.search);
     try {
       const r = await fetch(`/api/library?${params}`);
-      const data = await r.json();
+      const raw = await r.json();
+      const data = Array.isArray(raw) ? raw : [];
       if (reset) _files = data;
       else _files = _files.concat(data);
       _renderGrid();

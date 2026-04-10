@@ -726,7 +726,7 @@ export class PrintTracker {
         if (typeChanged || diaChanged) {
           retireNozzleSession(active.id);
           createNozzleSession(this.printerId, nType || active.nozzle_type, nDia || active.nozzle_diameter);
-          log.info('Dysebytte detektert: ' + active.nozzle_type + ' ' + active.nozzle_diameter + 'mm → ' + nType + ' ' + nDia + 'mm');
+          log.info('Nozzle change detected: ' + active.nozzle_type + ' ' + active.nozzle_diameter + 'mm → ' + nType + ' ' + nDia + 'mm');
         }
       }
     } catch (e) {
