@@ -131,84 +131,97 @@ export class MoonrakerClient {
 
   // ---- WebSocket subscription ----
 
-  _subscribe() {
-    // Subscribe to printer object updates via Moonraker JSON-RPC
-    const objects = {
-      'print_stats': null,
-      'display_status': null,
-      'heater_bed': null,
-      'extruder': null,
-      'extruder1': null,
-      'extruder2': null,
-      'extruder3': null,
-      'fan': null,
-      'toolhead': null,
-      'gcode_move': null,
-      'motion_report': null,
-      'heaters': null,
-      'system_stats': null,
-      'webhooks': null,
-      'idle_timeout': null,
-      'virtual_sdcard': null,
-      'fan_generic cavity_fan': null,
-      'temperature_sensor cavity': null,
-      'purifier': null,
-      'exclude_object': null,
-      // Klipper diagnostic objects (silently ignored if not available)
-      'bed_mesh': null,
-      'mcu': null,
-      'tmc2209 stepper_x': null,
-      'tmc2209 stepper_y': null,
-      'tmc2240 stepper_x': null,
-      'tmc2240 stepper_y': null,
-      'filament_switch_sensor runout': null,
-      'filament_switch_sensor filament_sensor': null,
-      'temperature_fan controller_fan': null,
-      'temperature_fan exhaust_fan': null,
-      'fan_generic nevermore_internal': null,
-      'temperature_sensor mcu_temp': null,
-      'temperature_sensor raspberry_pi': null,
-      // ERCF/AFC multi-filament (Voron community)
-      'ercf': null,
-      'afc': null,
-      // Voron/Klipper extras (silently ignored if not available)
-      'probe': null,
-      'z_thermal_adjust': null,
-      'firmware_retraction': null,
-      'respond': null,
-      'quad_gantry_level': null,
-      'screws_tilt_adjust': null,
-      'z_tilt': null,
-      'input_shaper': null,
-      'manual_probe': null,
-      'neopixel sb_leds': null,
-      'neopixel my_neopixel': null,
-      'led chamber_led': null,
-      // Snapmaker U1 specific (silently ignored on non-SM printers)
-      'machine_state_manager': null,
-      'filament_detect': null,
-      'filament_feed left': null,
-      'filament_feed right': null,
-      'filament_entangle_detect e0_filament': null,
-      'filament_entangle_detect e1_filament': null,
-      'filament_entangle_detect e2_filament': null,
-      'filament_entangle_detect e3_filament': null,
-      'defect_detection': null,
-      'timelapse': null,
-      'print_task_config': null,
-      'power_loss_check': null,
-      'park_detector t0': null,
-      'park_detector t1': null,
-      'park_detector t2': null,
-      'park_detector t3': null,
-      'adc_current_sensor heater_bed': null,
-      'adc_current_sensor extruder': null,
-      'flow_calibrator': null,
-      // Additional Moonraker objects for comprehensive monitoring
-      'filament_motion_sensor filament_sensor': null,
-      'heater_generic': null,
-    };
+  async _subscribe() {
+    // Step 1: Discover ALL available Klipper objects
+    const listId = ++this._subscriptionId;
+    this._wsSend({ jsonrpc: '2.0', method: 'printer.objects.list', id: listId });
 
+    // Wait for the object list response, then subscribe to everything
+    const onList = (raw) => {
+      try {
+        const msg = JSON.parse(raw.toString());
+        if (msg.id !== listId) return;
+        this.ws.removeListener('message', onList);
+
+        const available = msg.result?.objects || [];
+        this._availableObjects = available;
+        log.info(`Klipper objects discovered: ${available.length}`);
+
+        // Subscribe to ALL discovered objects (null = all fields)
+        const objects = {};
+        for (const obj of available) {
+          objects[obj] = null;
+        }
+
+        this._wsSend({
+          jsonrpc: '2.0',
+          method: 'printer.objects.subscribe',
+          params: { objects },
+          id: ++this._subscriptionId,
+        });
+
+        // Store discovered object categories for the dashboard
+        this.state._discovered_objects = this._categorizeObjects(available);
+      } catch { /* ignore */ }
+    };
+    this.ws.on('message', onList);
+
+    // Timeout fallback — if object list doesn't arrive in 5s, use static list
+    setTimeout(() => {
+      this.ws.removeListener('message', onList);
+      if (!this._availableObjects) {
+        log.warn('Object list timeout — falling back to static subscription');
+        this._subscribeStatic();
+      }
+    }, 5000);
+  }
+
+  // Categorize discovered objects for the dashboard
+  _categorizeObjects(objects) {
+    const cats = { sensors: [], fans: [], heaters: [], motors: [], leds: [], filament: [], other: [] };
+    for (const obj of objects) {
+      if (obj.startsWith('temperature_sensor ') || obj.startsWith('adc_current_sensor ')) cats.sensors.push(obj);
+      else if (obj.startsWith('fan') || obj.startsWith('temperature_fan ')) cats.fans.push(obj);
+      else if (obj.startsWith('heater') || obj === 'extruder' || obj.startsWith('extruder')) cats.heaters.push(obj);
+      else if (obj.startsWith('tmc') || obj.startsWith('stepper')) cats.motors.push(obj);
+      else if (obj.startsWith('neopixel ') || obj.startsWith('led ') || obj.startsWith('dotstar ')) cats.leds.push(obj);
+      else if (obj.startsWith('filament_')) cats.filament.push(obj);
+      else cats.other.push(obj);
+    }
+    return cats;
+  }
+
+  // Static fallback subscription (used if object list query fails)
+  _subscribeStatic() {
+    const objects = {
+      'print_stats': null, 'display_status': null, 'heater_bed': null,
+      'extruder': null, 'extruder1': null, 'extruder2': null, 'extruder3': null,
+      'fan': null, 'toolhead': null, 'gcode_move': null, 'motion_report': null,
+      'heaters': null, 'system_stats': null, 'webhooks': null, 'idle_timeout': null,
+      'virtual_sdcard': null, 'bed_mesh': null, 'mcu': null, 'probe': null,
+      'firmware_retraction': null, 'input_shaper': null, 'exclude_object': null,
+      'quad_gantry_level': null, 'z_tilt': null, 'respond': null, 'purifier': null,
+      'fan_generic cavity_fan': null, 'temperature_sensor cavity': null,
+      'temperature_sensor mcu_temp': null, 'temperature_sensor raspberry_pi': null,
+      'tmc2209 stepper_x': null, 'tmc2209 stepper_y': null,
+      'tmc2240 stepper_x': null, 'tmc2240 stepper_y': null,
+      'filament_switch_sensor runout': null, 'filament_switch_sensor filament_sensor': null,
+      'filament_motion_sensor filament_sensor': null,
+      'temperature_fan controller_fan': null, 'temperature_fan exhaust_fan': null,
+      'fan_generic nevermore_internal': null, 'ercf': null, 'afc': null,
+      'neopixel sb_leds': null, 'neopixel my_neopixel': null, 'led chamber_led': null,
+      'screws_tilt_adjust': null, 'z_thermal_adjust': null, 'manual_probe': null,
+      // Snapmaker U1 specific
+      'machine_state_manager': null, 'filament_detect': null,
+      'filament_feed left': null, 'filament_feed right': null,
+      'filament_entangle_detect e0_filament': null, 'filament_entangle_detect e1_filament': null,
+      'filament_entangle_detect e2_filament': null, 'filament_entangle_detect e3_filament': null,
+      'defect_detection': null, 'timelapse': null, 'print_task_config': null,
+      'power_loss_check': null, 'park_detector t0': null, 'park_detector t1': null,
+      'park_detector t2': null, 'park_detector t3': null,
+      'adc_current_sensor heater_bed': null, 'adc_current_sensor extruder': null,
+      'flow_calibrator': null,
+    };
     this._wsSend({
       jsonrpc: '2.0',
       method: 'printer.objects.subscribe',
@@ -221,9 +234,13 @@ export class MoonrakerClient {
 
   async _requestFullState() {
     try {
+      // Build query from discovered objects or use core set
+      const queryObjects = this._availableObjects
+        ? this._availableObjects.map(o => encodeURIComponent(o)).join('&')
+        : 'print_stats&display_status&heater_bed&extruder&extruder1&extruder2&extruder3&fan&toolhead&gcode_move&virtual_sdcard&idle_timeout&system_stats&purifier&exclude_object&machine_state_manager&filament_detect&defect_detection&timelapse&print_task_config&power_loss_check&flow_calibrator';
       const [info, status, history] = await Promise.all([
         this._apiGet('/printer/info'),
-        this._apiGet('/printer/objects/query?print_stats&display_status&heater_bed&extruder&extruder1&extruder2&extruder3&fan&toolhead&gcode_move&virtual_sdcard&idle_timeout&system_stats&fan_generic%20cavity_fan&temperature_sensor%20cavity&purifier&exclude_object&machine_state_manager&filament_detect&filament_feed%20left&filament_feed%20right&defect_detection&timelapse&print_task_config&power_loss_check&flow_calibrator'),
+        this._apiGet(`/printer/objects/query?${queryObjects}`),
         this._apiGet('/server/history/list?limit=1&order=desc'),
       ]);
 
@@ -441,18 +458,6 @@ export class MoonrakerClient {
 
     // Message (display)
     if (ds.message) this.state._display_message = ds.message;
-
-    // Cavity fan (enclosure fan)
-    const cavFan = status['fan_generic cavity_fan'];
-    if (cavFan?.speed !== undefined) {
-      this.state._cavity_fan_speed = Math.round((cavFan.speed || 0) * 100);
-    }
-
-    // Cavity temperature sensor
-    const cavTemp = status['temperature_sensor cavity'];
-    if (cavTemp?.temperature !== undefined) {
-      this.state.chamber_temper = Math.round(cavTemp.temperature);
-    }
 
     // Purifier
     const pur = status.purifier;
@@ -707,47 +712,29 @@ export class MoonrakerClient {
         mcuBuild: mcu.mcu_build_versions || '',
       };
     }
-    // MCU temperature sensors
-    for (const key of ['mcu_temp', 'raspberry_pi']) {
-      const ts = status[`temperature_sensor ${key}`];
-      if (ts) {
-        if (!this.state._system_temps) this.state._system_temps = {};
-        this.state._system_temps[key] = { temp: Math.round((ts.temperature || 0) * 10) / 10 };
-      }
-    }
+    // ---- Dynamic object extraction (all discovered objects) ----
 
-    // TMC driver diagnostics
-    for (const driver of ['tmc2209 stepper_x', 'tmc2209 stepper_y', 'tmc2240 stepper_x', 'tmc2240 stepper_y']) {
-      const tmc = status[driver];
-      if (tmc) {
-        if (!this.state._tmc) this.state._tmc = {};
-        const name = driver.split(' ')[1];
-        this.state._tmc[name] = {
-          temperature: tmc.temperature,
-          run_current: tmc.run_current,
-          hold_current: tmc.hold_current,
+    // All filament switch sensors (dynamic names)
+    for (const key of Object.keys(status)) {
+      if (key.startsWith('filament_switch_sensor ')) {
+        const name = key.slice('filament_switch_sensor '.length);
+        const fss = status[key];
+        if (!this.state._filament_sensors) this.state._filament_sensors = {};
+        this.state._filament_sensors[name] = {
+          enabled: fss.enabled, detected: fss.filament_detected,
         };
+        // Keep legacy field for backward compat
+        this.state._filament_sensor = { name, enabled: fss.enabled, detected: fss.filament_detected };
       }
     }
 
-    // Filament switch sensor (runout detection)
-    for (const sensorName of ['runout', 'filament_sensor']) {
-      const fss = status[`filament_switch_sensor ${sensorName}`];
-      if (fss) {
-        this.state._filament_sensor = {
-          name: sensorName,
-          enabled: fss.enabled,
-          detected: fss.filament_detected,
-        };
-      }
-    }
-
-    // Temperature-controlled fans
-    for (const fanName of ['controller_fan', 'exhaust_fan']) {
-      const tf = status[`temperature_fan ${fanName}`];
-      if (tf) {
+    // All temperature-controlled fans (dynamic names)
+    for (const key of Object.keys(status)) {
+      if (key.startsWith('temperature_fan ')) {
+        const name = key.slice('temperature_fan '.length);
+        const tf = status[key];
         if (!this.state._temp_fans) this.state._temp_fans = {};
-        this.state._temp_fans[fanName] = {
+        this.state._temp_fans[name] = {
           speed: Math.round((tf.speed || 0) * 100),
           temperature: Math.round((tf.temperature || 0) * 10) / 10,
           target: Math.round((tf.target || 0) * 10) / 10,
@@ -755,10 +742,95 @@ export class MoonrakerClient {
       }
     }
 
-    // Nevermore filter (Voron community)
-    const nevermore = status['fan_generic nevermore_internal'];
-    if (nevermore) {
-      this.state._nevermore = { speed: Math.round((nevermore.speed || 0) * 100) };
+    // All generic fans (dynamic names)
+    for (const key of Object.keys(status)) {
+      if (key.startsWith('fan_generic ')) {
+        const name = key.slice('fan_generic '.length);
+        const gf = status[key];
+        if (!this.state._generic_fans) this.state._generic_fans = {};
+        this.state._generic_fans[name] = { speed: Math.round((gf.speed || 0) * 100) };
+        // Keep legacy fields
+        if (name === 'cavity_fan') this.state._cavity_fan_speed = Math.round((gf.speed || 0) * 100);
+        if (name === 'nevermore_internal') this.state._nevermore = { speed: Math.round((gf.speed || 0) * 100) };
+      }
+    }
+
+    // All temperature sensors (dynamic names)
+    for (const key of Object.keys(status)) {
+      if (key.startsWith('temperature_sensor ')) {
+        const name = key.slice('temperature_sensor '.length);
+        const ts = status[key];
+        if (!this.state._temperature_sensors) this.state._temperature_sensors = {};
+        this.state._temperature_sensors[name] = {
+          temperature: Math.round((ts.temperature || 0) * 10) / 10,
+          measuredMinTemp: ts.measured_min_temp != null ? Math.round(ts.measured_min_temp * 10) / 10 : null,
+          measuredMaxTemp: ts.measured_max_temp != null ? Math.round(ts.measured_max_temp * 10) / 10 : null,
+        };
+        // Keep legacy system_temps
+        if (name === 'mcu_temp' || name === 'raspberry_pi' || name === 'cavity') {
+          if (!this.state._system_temps) this.state._system_temps = {};
+          this.state._system_temps[name] = { temp: Math.round((ts.temperature || 0) * 10) / 10 };
+          if (name === 'cavity') this.state.chamber_temper = Math.round(ts.temperature || 0);
+        }
+      }
+    }
+
+    // All heater_generic (dynamic names — chamber heaters, custom heaters)
+    for (const key of Object.keys(status)) {
+      if (key.startsWith('heater_generic ')) {
+        const name = key.slice('heater_generic '.length);
+        const hg = status[key];
+        if (!this.state._generic_heaters) this.state._generic_heaters = {};
+        this.state._generic_heaters[name] = {
+          temperature: Math.round((hg.temperature || 0) * 10) / 10,
+          target: Math.round((hg.target || 0) * 10) / 10,
+          power: hg.power != null ? Math.round(hg.power * 100) : null,
+        };
+      }
+    }
+
+    // All LED/neopixel/dotstar strips (dynamic names)
+    for (const key of Object.keys(status)) {
+      if (key.startsWith('neopixel ') || key.startsWith('led ') || key.startsWith('dotstar ')) {
+        const led = status[key];
+        if (!this.state._leds) this.state._leds = {};
+        const name = key.includes(' ') ? key.split(' ').slice(1).join(' ') : key;
+        this.state._leds[name] = { colorData: led.color_data || [] };
+      }
+    }
+
+    // All TMC drivers (dynamic names)
+    for (const key of Object.keys(status)) {
+      if (key.startsWith('tmc2209 ') || key.startsWith('tmc2240 ') || key.startsWith('tmc2130 ') || key.startsWith('tmc5160 ')) {
+        const tmc = status[key];
+        if (!this.state._tmc) this.state._tmc = {};
+        const name = key.split(' ')[1];
+        this.state._tmc[name] = {
+          temperature: tmc.temperature, run_current: tmc.run_current, hold_current: tmc.hold_current,
+        };
+      }
+    }
+
+    // All output pins (dynamic names)
+    for (const key of Object.keys(status)) {
+      if (key.startsWith('output_pin ')) {
+        const name = key.slice('output_pin '.length);
+        const pin = status[key];
+        if (!this.state._output_pins) this.state._output_pins = {};
+        this.state._output_pins[name] = { value: pin.value };
+      }
+    }
+
+    // All filament motion sensors (dynamic names)
+    for (const key of Object.keys(status)) {
+      if (key.startsWith('filament_motion_sensor ')) {
+        const name = key.slice('filament_motion_sensor '.length);
+        const fms = status[key];
+        if (!this.state._filament_motion_sensors) this.state._filament_motion_sensors = {};
+        this.state._filament_motion_sensors[name] = {
+          enabled: fms.enabled, detected: fms.filament_detected,
+        };
+      }
     }
 
     // ERCF multi-filament (Voron community)
@@ -849,17 +921,7 @@ export class MoonrakerClient {
       };
     }
 
-    // LED / Neopixel state
-    for (const ledKey of ['neopixel sb_leds', 'neopixel my_neopixel', 'led chamber_led']) {
-      const led = status[ledKey];
-      if (led) {
-        if (!this.state._leds) this.state._leds = {};
-        const name = ledKey.split(' ')[1] || ledKey;
-        this.state._leds[name] = {
-          colorData: led.color_data || [],
-        };
-      }
-    }
+    // LED / Neopixel state — handled by dynamic extraction above
 
     // Respond messages (M117/RESPOND)
     const respond = status.respond;
