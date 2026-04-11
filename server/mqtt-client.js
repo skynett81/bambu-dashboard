@@ -318,10 +318,97 @@ export class BambuMqttClient {
         this.state._ams_humidity = this.state.ams.ams.map(a => ({ id: a.id, humidity: a.humidity, temp: a.temp }));
       }
 
-      // HMS error code tracking
+      // HMS error code tracking with full details
       if (this.state.hms?.length > 0) {
         this.state._active_errors = this.state.hms.filter(h => h.attr > 0).length;
+        this.state._hms_errors = this.state.hms.filter(h => h.attr > 0).map(h => ({
+          attr: h.attr, code: h.code, msg: h.msg || ''
+        }));
       }
+
+      // Speed magnitude (percentage, more precise than spd_lvl discrete 1-4)
+      if (this.state.spd_mag !== undefined) this.state._speed_percent = this.state.spd_mag;
+
+      // Current G-code action (what the printer is doing right now)
+      if (this.state.print_gcode_action !== undefined) this.state._gcode_action = this.state.print_gcode_action;
+
+      // Cloud connectivity state
+      if (this.state.online !== undefined) this.state._cloud_online = this.state.online;
+      if (this.state.cloud_api_state !== undefined) this.state._cloud_api_state = this.state.cloud_api_state;
+
+      // WiFi network details
+      if (this.state.net) {
+        if (this.state.net.ssid) this.state._wifi_ssid = this.state.net.ssid;
+        if (this.state.net.bssid) this.state._wifi_bssid = this.state.net.bssid;
+      }
+
+      // External spool (vt_tray) — P2S/A1 filament properties
+      if (this.state.vt_tray) {
+        this.state._ext_spool = {
+          id: this.state.vt_tray.id,
+          type: this.state.vt_tray.tray_type || '',
+          subType: this.state.vt_tray.tray_sub_brands || '',
+          color: this.state.vt_tray.tray_color || '',
+          weight: this.state.vt_tray.tray_weight || 0,
+          bedTemp: this.state.vt_tray.bed_temp || 0,
+          nozzleTempMin: this.state.vt_tray.nozzle_temp_min || 0,
+          nozzleTempMax: this.state.vt_tray.nozzle_temp_max || 0,
+          dryingTemp: this.state.vt_tray.drying_temp || 0,
+          dryingTime: this.state.vt_tray.drying_time || 0,
+          k: this.state.vt_tray.k || 0,
+        };
+      }
+
+      // AMS tray switching state
+      if (this.state.ams) {
+        if (this.state.ams.tray_now !== undefined) this.state._ams_tray_now = this.state.ams.tray_now;
+        if (this.state.ams.tray_pre !== undefined) this.state._ams_tray_pre = this.state.ams.tray_pre;
+        if (this.state.ams.tray_tar !== undefined) this.state._ams_tray_tar = this.state.ams.tray_tar;
+        if (this.state.ams.ams_exist_bits !== undefined) this.state._ams_exist_bits = this.state.ams.ams_exist_bits;
+        if (this.state.ams.tray_exist_bits !== undefined) this.state._tray_exist_bits = this.state.ams.tray_exist_bits;
+        if (this.state.ams.tray_read_done_bits !== undefined) this.state._tray_read_done = this.state.ams.tray_read_done_bits;
+      }
+
+      // AMS tray detailed filament properties (drying info, temps, K-factor)
+      if (this.state.ams?.ams) {
+        this.state._ams_trays = [];
+        for (const unit of this.state.ams.ams) {
+          if (!unit.tray) continue;
+          for (const tray of unit.tray) {
+            this.state._ams_trays.push({
+              amsId: unit.id, trayId: tray.id,
+              type: tray.tray_type || '', subBrands: tray.tray_sub_brands || '',
+              color: tray.tray_color || '', weight: tray.tray_weight || 0,
+              bedTemp: tray.bed_temp || 0,
+              nozzleTempMin: tray.nozzle_temp_min || 0,
+              nozzleTempMax: tray.nozzle_temp_max || 0,
+              dryingTemp: tray.drying_temp || 0,
+              dryingTime: tray.drying_time || 0,
+              k: tray.k || 0,
+              remain: tray.remain ?? null,
+            });
+          }
+        }
+      }
+
+      // X-Cam AI detection confidence scores
+      if (this.state.xcam) {
+        this.state._xcam = {
+          firstLayerInspector: this.state.xcam.first_layer_inspector ?? null,
+          spaghettiDetector: this.state.xcam.spaghetti_detector ?? null,
+          printHalt: this.state.xcam.print_halt ?? null,
+          allow: this.state.xcam.allow_skip_parts ?? null,
+          buildplateMarkerDetector: this.state.xcam.buildplate_marker_detector ?? null,
+        };
+      }
+      if (this.state.xcam_status !== undefined) this.state._xcam_status = this.state.xcam_status;
+
+      // Subtask name / gcode file for display
+      if (this.state.subtask_name) this.state._subtask_name = this.state.subtask_name;
+      if (this.state.gcode_file) this.state._gcode_file = this.state.gcode_file;
+
+      // All storage states (not just current)
+      if (this.state.stg !== undefined) this.state._storage_states = this.state.stg;
 
       this.hub.broadcast('status', { print: this.state });
     }

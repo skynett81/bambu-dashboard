@@ -142,7 +142,20 @@ export class PrusaLinkClient {
         this.state._slicer = job.file.meta.slicer || null;
         this.state._layer_height = job.file.meta.layer_height || null;
         this.state._slicer_filament_type = job.file.meta.filament_type || null;
+        // Filament usage estimates from slicer metadata
+        if (job.file.meta.filament_used_mm != null) {
+          this.state.filament_used_mm = Math.round(job.file.meta.filament_used_mm);
+        }
+        if (job.file.meta.filament_used_g != null) {
+          this.state._slicer_filament_weight = Math.round(job.file.meta.filament_used_g);
+        }
+        if (job.file.meta.estimated_print_time != null) {
+          this.state._slicer_estimated_time = Math.round(job.file.meta.estimated_print_time);
+        }
       }
+      // Layer info
+      if (job.current_layer != null) this.state.layer_num = job.current_layer;
+      if (job.total_layers != null) this.state.total_layer_num = job.total_layers;
     }
   }
 
@@ -258,11 +271,25 @@ export class PrusaLinkClient {
   async listFiles() {
     const data = await this._apiGet('/api/v1/files/local');
     if (!data?.children) return [];
-    return data.children.filter(f => f.type === 'FILE').map(f => ({
-      path: f.display_name || f.name,
-      size: f.size || 0,
-      modified: f.m_timestamp || 0,
-    }));
+    return this._flattenFiles(data.children, '');
+  }
+
+  _flattenFiles(children, prefix) {
+    const files = [];
+    for (const f of children) {
+      const path = prefix ? `${prefix}/${f.display_name || f.name}` : (f.display_name || f.name);
+      if (f.type === 'FOLDER' && f.children) {
+        files.push(...this._flattenFiles(f.children, path));
+      } else if (f.type === 'FILE') {
+        files.push({
+          path,
+          size: f.size || 0,
+          modified: f.m_timestamp || 0,
+          meta: f.meta || null,
+        });
+      }
+    }
+    return files;
   }
 
   // ── Printer info ──

@@ -204,6 +204,9 @@ export class MoonrakerClient {
       'adc_current_sensor heater_bed': null,
       'adc_current_sensor extruder': null,
       'flow_calibrator': null,
+      // Additional Moonraker objects for comprehensive monitoring
+      'filament_motion_sensor filament_sensor': null,
+      'heater_generic': null,
     };
 
     this._wsSend({
@@ -883,6 +886,95 @@ export class MoonrakerClient {
     if (this.state._sm_power?.voltageType !== undefined) {
       this.state._sm_inputVoltage = this.state._sm_power.voltageType === 1 ? '220V' : '110V';
     }
+
+    // ---- Previously subscribed but not extracted ----
+
+    // Motion report — real-time kinematics (live position, velocity)
+    const mr = status.motion_report;
+    if (mr) {
+      this.state._motion = {
+        livePosition: mr.live_position || null,
+        liveVelocity: mr.live_velocity != null ? Math.round(mr.live_velocity * 10) / 10 : null,
+        liveExtruderVelocity: mr.live_extruder_velocity != null ? Math.round(mr.live_extruder_velocity * 100) / 100 : null,
+      };
+    }
+
+    // System stats — CPU, memory, system load
+    const ss = status.system_stats;
+    if (ss) {
+      this.state._system_stats = {
+        sysload: ss.sysload != null ? Math.round(ss.sysload * 100) / 100 : null,
+        cpuTemp: ss.cputemp != null ? Math.round(ss.cputemp * 10) / 10 : null,
+        memAvail: ss.memavail != null ? Math.round(ss.memavail) : null,
+      };
+    }
+
+    // Webhooks — Klipper connection state
+    const wh = status.webhooks;
+    if (wh) {
+      this.state._klipper_state = {
+        state: wh.state || 'unknown',
+        stateMessage: wh.state_message || '',
+      };
+    }
+
+    // Toolhead limits — max velocity/acceleration from config
+    if (th.max_velocity !== undefined || th.max_accel !== undefined) {
+      this.state._toolhead_limits = {
+        maxVelocity: th.max_velocity || null,
+        maxAccel: th.max_accel || null,
+        maxAccelToDecel: th.max_accel_to_decel || null,
+        squareCornerVelocity: th.square_corner_velocity || null,
+        homedAxes: th.homed_axes || '',
+      };
+    }
+
+    // G-code coordinate system (gcode position vs physical position)
+    if (gm.gcode_position) {
+      this.state._gcode_position = {
+        x: Math.round((gm.gcode_position[0] || 0) * 10) / 10,
+        y: Math.round((gm.gcode_position[1] || 0) * 10) / 10,
+        z: Math.round((gm.gcode_position[2] || 0) * 10) / 10,
+        e: Math.round((gm.gcode_position[3] || 0) * 10) / 10,
+      };
+    }
+    if (gm.homing_origin) {
+      this.state._homing_origin = {
+        x: gm.homing_origin[0] || 0,
+        y: gm.homing_origin[1] || 0,
+        z: gm.homing_origin[2] || 0,
+      };
+    }
+    // Extrude factor (flow rate multiplier)
+    if (gm.extrude_factor !== undefined) {
+      this.state._flow_factor = Math.round((gm.extrude_factor || 1) * 100);
+    }
+
+    // Filament motion sensor (more precise than switch sensor)
+    const fms = status['filament_motion_sensor filament_sensor'];
+    if (fms) {
+      this.state._filament_motion_sensor = {
+        enabled: fms.enabled,
+        detected: fms.filament_detected,
+      };
+    }
+
+    // Idle timeout
+    const it = status.idle_timeout;
+    if (it) {
+      this.state._idle_timeout = {
+        state: it.state || 'unknown',
+        printingTime: it.printing_time || 0,
+      };
+    }
+
+    // Heaters list
+    const heaters = status.heaters;
+    if (heaters?.available_heaters) {
+      this.state._available_heaters = heaters.available_heaters;
+      this.state._available_sensors = heaters.available_sensors || [];
+    }
+
   }
 
   // ---- WebSocket message handler ----
@@ -1555,6 +1647,48 @@ export class MoonrakerClient {
   async getWledStrips() {
     const data = await this._apiGet('/machine/wled/strips');
     return data?.result?.strips || {};
+  }
+
+  // ── Moonraker Power Devices ──
+
+  async getPowerDevices() {
+    const data = await this._apiGet('/machine/device_power/devices');
+    return data?.result?.devices || [];
+  }
+
+  async setPowerDevice(device, action) {
+    return this._apiPost(`/machine/device_power/device?device=${encodeURIComponent(device)}&action=${action}`);
+  }
+
+  async getPowerDeviceStatus(device) {
+    const data = await this._apiGet(`/machine/device_power/device?device=${encodeURIComponent(device)}`);
+    return data?.result?.[device] || null;
+  }
+
+  // ── Moonraker Update Manager ──
+
+  async getUpdateStatus() {
+    const data = await this._apiGet('/machine/update/status');
+    return data?.result || null;
+  }
+
+  // ── Moonraker Announcements ──
+
+  async getAnnouncements() {
+    const data = await this._apiGet('/server/announcements/list');
+    return data?.result?.entries || [];
+  }
+
+  // ── Moonraker Job History ──
+
+  async getJobHistory(limit = 50) {
+    const data = await this._apiGet(`/server/history/list?limit=${limit}`);
+    return data?.result?.jobs || [];
+  }
+
+  async getJobTotals() {
+    const data = await this._apiGet('/server/history/totals');
+    return data?.result?.job_totals || null;
   }
 
   // ── Moonraker Database ──

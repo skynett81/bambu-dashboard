@@ -227,14 +227,36 @@ export class OctoPrintClient {
       }
     }
 
-    // Current Z
+    // Position — X, Y from offsets/resend, Z from currentZ
     if (current.currentZ != null) {
       this.state._position = { ...(this.state._position || {}), z: current.currentZ };
+    }
+    // Track X/Y from job position if available
+    if (current.job?.position) {
+      this.state._position = {
+        ...(this.state._position || {}),
+        x: current.job.position.x ?? this.state._position?.x,
+        y: current.job.position.y ?? this.state._position?.y,
+      };
+    }
+
+    // Print time left estimate
+    if (current.progress?.printTimeLeft != null) {
+      this.state.mc_remaining_time = Math.round(current.progress.printTimeLeft / 60);
     }
 
     // Logs (last 10 lines for terminal)
     if (current.logs?.length) {
       this.state._terminalLog = current.logs.slice(-10);
+    }
+
+    // Resends / communication quality
+    if (current.resends) {
+      this.state._resends = {
+        count: current.resends.count || 0,
+        transmitted: current.resends.transmitted || 0,
+        ratio: current.resends.ratio || 0,
+      };
     }
   }
 
@@ -270,6 +292,10 @@ export class OctoPrintClient {
             extruders: defaultProfile.extruder,
             axes: defaultProfile.axes,
           };
+          // Nozzle diameter from profile
+          if (defaultProfile.extruder?.nozzleDiameter) {
+            this.state.nozzle_diameter = defaultProfile.extruder.nozzleDiameter;
+          }
         }
       }
 
@@ -286,6 +312,41 @@ export class OctoPrintClient {
         }
       }
     } catch (e) { log.warn(`Initial data fetch failed: ${e.message}`); }
+
+    // Fetch disk usage and plugin data in background
+    try {
+      const [diskInfo, connInfo] = await Promise.all([
+        this._apiGet('/api/files/local').catch(() => null),
+        this._apiGet('/api/connection').catch(() => null),
+      ]);
+      if (diskInfo) {
+        this.state._storage = {
+          free: diskInfo.free || 0,
+          total: diskInfo.total || 0,
+        };
+      }
+      if (connInfo?.current) {
+        this.state._connection = {
+          port: connInfo.current.port,
+          baudrate: connInfo.current.baudrate,
+          printerProfile: connInfo.current.printerProfile,
+          state: connInfo.current.state,
+        };
+      }
+      // Fetch plugin data if available
+      if (this._plugins?.includes('psucontrol')) {
+        const psu = await this._apiGet('/api/plugin/psucontrol').catch(() => null);
+        if (psu) this.state._psu = { isPSUOn: psu.isPSUOn ?? false };
+      }
+      if (this._plugins?.includes('bedlevelvisualizer')) {
+        const blv = await this._apiGet('/api/plugin/bedlevelvisualizer').catch(() => null);
+        if (blv?.mesh) this.state._bed_mesh = { mesh: blv.mesh };
+      }
+      if (this._plugins?.includes('enclosure')) {
+        const enc = await this._apiGet('/api/plugin/enclosure').catch(() => null);
+        if (enc) this.state._enclosure = enc;
+      }
+    } catch { /* non-critical */ }
   }
 
   // ── HTTP Polling fallback ──
