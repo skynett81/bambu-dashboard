@@ -737,6 +737,7 @@ setDiscovery(discovery, testMqttConnection);
 // Bambu Lab Cloud
 const bambuCloud = new BambuCloud();
 setBambuCloud(bambuCloud);
+manager.setBambuCloud(bambuCloud);
 
 // Material Recommender Service
 const materialRecommender = new MaterialRecommenderService(broadcastAll);

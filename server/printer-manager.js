@@ -39,6 +39,14 @@ export class PrinterManager {
     }
   }
 
+  setBambuCloud(cloud) {
+    this._bambuCloud = cloud;
+    // Inject into existing Bambu MQTT clients
+    for (const [, entry] of this.printers) {
+      if (entry.client?.setBambuCloud) entry.client.setBambuCloud(cloud);
+    }
+  }
+
   _dispatchPlugin(hookName, data) {
     if (this._pluginManager?.dispatch) {
       this._pluginManager.dispatch(hookName, data).catch(() => {});
@@ -190,6 +198,10 @@ export class PrinterManager {
       const { buildCommandFromClientMessage } = await import('./mqtt-commands.js');
       client = new BambuMqttClient({ printer: printerConf }, connectorHub);
       client._buildCommand = buildCommandFromClientMessage;
+      // Inject Bambu Cloud client for firmware version checks
+      if (this._bambuCloud && client.setBambuCloud) {
+        client.setBambuCloud(this._bambuCloud);
+      }
       log.info(`Using Bambu MQTT connector for ${printerConf.name}`);
     }
 

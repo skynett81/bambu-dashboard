@@ -123,20 +123,76 @@ export class BambuMqttClient {
 
   // Check firmware update status from Bambu upgrade_state (already reported via MQTT)
   async checkFirmwareUpdate() {
+    // Helper: extract current OTA version from local MQTT info module
+    const getCurrentOta = () => {
+      // state._info is the result of deepMerge on msg.info which has shape { module: [...] }
+      const modules = this.state._info?.module || this.state.info?.module || [];
+      if (!Array.isArray(modules)) return '';
+      const ota = modules.find(m => m?.name === 'ota');
+      if (ota?.sw_ver) return ota.sw_ver;
+      // Try 'esp32' / 'rv1126' which are common Bambu main board names
+      const main = modules.find(m => ['esp32', 'rv1126', 'mc'].includes(m?.name));
+      if (main?.sw_ver) return main.sw_ver;
+      // Fallback: first module's sw_ver
+      return modules[0]?.sw_ver || '';
+    };
+
+    // Request fresh firmware/hardware version from printer via MQTT
+    if (this.connected) {
+      try {
+        this.sendCommand({ info: { sequence_id: String(this.seqId++), command: 'get_version' } });
+      } catch {}
+    }
+
+    // Check MQTT-reported upgrade_state first (printer knows about pending update)
     const upg = this.state._upgrade;
-    const current = (this.state._info?.find?.(m => m.name === 'ota')?.sw_ver) || this.state.info?.module?.find?.(m => m.name === 'ota')?.sw_ver || '';
+    let current = getCurrentOta();
     if (upg && upg.newVersion && upg.newVersion !== current) {
       return {
         available: true,
-        current,
+        current: current || 'unknown',
         latest: upg.newVersion,
         status: upg.status,
         message: upg.message,
         forceUpgrade: upg.forceUpgrade,
+        source: 'mqtt',
       };
     }
-    return { available: false, current };
+
+    // Fall back to Bambu Cloud API if available
+    if (this._bambuCloud?.isAuthenticated?.()) {
+      try {
+        const resp = await this._bambuCloud.getDeviceVersion();
+        // Response format: { message: "success", devices: [{ dev_id, firmware: [{ version, name, ... }], ... }] }
+        const devices = resp?.devices || [];
+        const myDevice = devices.find(d => d.dev_id === this.serial || d.dev_id === this.serial?.toUpperCase());
+        if (myDevice) {
+          // firmware array contains modules — find ota/latest entry
+          const modules = myDevice.firmware || [];
+          const ota = modules.find(m => m.name === 'ota' || m.type === 'firmware') || modules[0];
+          const latestVersion = ota?.version || ota?.latest_version || myDevice.latest_version;
+          const currentVersion = myDevice.firmware_version || current || '';
+          if (latestVersion && currentVersion && latestVersion !== currentVersion) {
+            return {
+              available: true,
+              current: currentVersion,
+              latest: latestVersion,
+              releaseNotes: ota?.description || '',
+              source: 'bambu-cloud',
+            };
+          }
+          if (currentVersion) current = currentVersion;
+        }
+      } catch (e) {
+        // Cloud check failed — continue with MQTT-only result
+      }
+    }
+
+    return { available: false, current: current || 'unknown' };
   }
+
+  // Allow injecting Bambu Cloud client for firmware checks
+  setBambuCloud(cloud) { this._bambuCloud = cloud; }
 
   // Trigger firmware update via MQTT
   async triggerFirmwareUpdate() {
