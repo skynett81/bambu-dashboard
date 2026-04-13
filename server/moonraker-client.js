@@ -13,6 +13,18 @@ import { WebSocket } from 'ws';
 import { getExtruderSlots } from './db/printers.js';
 import { mapSmState, mapFeedState, argbToHex } from './snapmaker-state-map.js';
 
+// Semver-ish comparison: returns true if a > b
+function _versionGt(a, b) {
+  const pa = String(a).split('.').map(n => parseInt(n, 10) || 0);
+  const pb = String(b).split('.').map(n => parseInt(n, 10) || 0);
+  for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+    const x = pa[i] || 0, y = pb[i] || 0;
+    if (x > y) return true;
+    if (x < y) return false;
+  }
+  return false;
+}
+
 const log = createLogger('moonraker');
 
 // Map Klipper states to the internal gcode_state format
@@ -1727,34 +1739,75 @@ export class MoonrakerClient {
     return data?.result?.[device] || null;
   }
 
-  // ── Firmware check (wraps update manager) ──
+  // ── Firmware check (wraps update manager or Snapmaker wiki for U1) ──
 
   async checkFirmwareUpdate() {
+    // Try Moonraker update_manager first
     try {
       const status = await this.getUpdateStatus();
-      if (!status?.version_info) return { available: false, reason: 'update_manager not configured' };
-      const updates = [];
-      for (const [pkg, info] of Object.entries(status.version_info)) {
-        const current = info.version || info.installed_hash || '';
-        const latest = info.remote_version || info.remote_hash || '';
-        if (latest && current && latest !== current) {
-          updates.push({
-            module: pkg,
-            current,
-            latest,
-            pendingCommits: info.pending_commits || 0,
-          });
+      if (status?.version_info && Object.keys(status.version_info).length > 0) {
+        const updates = [];
+        for (const [pkg, info] of Object.entries(status.version_info)) {
+          const current = info.version || info.installed_hash || '';
+          const latest = info.remote_version || info.remote_hash || '';
+          if (latest && current && latest !== current) {
+            updates.push({
+              module: pkg,
+              current,
+              latest,
+              pendingCommits: info.pending_commits || 0,
+            });
+          }
+        }
+        if (updates.length > 0) {
+          return { available: true, count: updates.length, updates, busy: status.busy || false };
         }
       }
-      return {
-        available: updates.length > 0,
-        count: updates.length,
-        updates,
-        busy: status.busy || false,
-      };
+    } catch {}
+
+    // Detect Snapmaker U1 and fall back to wiki scraping
+    try {
+      const sysInfoRes = await this._apiGet('/printer/info');
+      const sysInfo = sysInfoRes?.result || {};
+      const swVer = sysInfo.software_version || '';
+      const hostname = sysInfo.hostname || '';
+      const isU1 = hostname === 'lava' || swVer.includes('lava') || swVer.match(/^1\.\d+\.\d+\.\d+_\d+/);
+
+      if (isU1) {
+        // Extract current version (e.g. "1.2.0.106_20260323113459" → "1.2.0")
+        const m = swVer.match(/^(\d+)\.(\d+)\.(\d+)/);
+        const current = m ? `${m[1]}.${m[2]}.${m[3]}` : swVer;
+
+        // Fetch latest from Snapmaker wiki
+        const wikiRes = await fetch('https://wiki.snapmaker.com/en/snapmaker_u1/firmware/release_notes', {
+          signal: AbortSignal.timeout(8000),
+          headers: { 'User-Agent': '3dprintforge' },
+        });
+        if (wikiRes.ok) {
+          const html = await wikiRes.text();
+          // Parse "V1.2.0 (2026-03-23)" pattern
+          const versionMatch = html.match(/V(\d+\.\d+\.\d+)\s*\((\d{4}-\d{2}-\d{2})\)/);
+          if (versionMatch) {
+            const latest = versionMatch[1];
+            const releaseDate = versionMatch[2];
+            const updateAvailable = _versionGt(latest, current);
+            return {
+              available: updateAvailable,
+              current,
+              latest,
+              releaseDate,
+              releaseUrl: 'https://wiki.snapmaker.com/en/snapmaker_u1/firmware/release_notes',
+              source: 'snapmaker-wiki',
+            };
+          }
+        }
+        return { available: false, current, reason: 'Could not fetch Snapmaker wiki' };
+      }
     } catch (e) {
       return { available: false, error: e.message };
     }
+
+    return { available: false, reason: 'update_manager not configured and not a U1' };
   }
 
   async triggerFirmwareUpdate(pkg) {
