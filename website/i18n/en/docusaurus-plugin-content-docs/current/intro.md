@@ -47,6 +47,21 @@ description: A powerful, self-hosted dashboard for all your 3D printers
 - **English UI** — entire application in English, documentation available in English and Norwegian
 - **Self-hosted** — no cloud dependency, your data on your machine
 
+### New in v1.1.18
+
+- **Universal multi-printer UI** — all 35+ dashboard panels now work with all 8 printer types (Bambu, Snapmaker, Moonraker, PrusaLink, OctoPrint, AnkerMake, Creality, Elegoo)
+- **AWStats-inspired analytics** — full web analytics with requests per hour, top endpoints, sessions, device and OS breakdown
+- **OctoPrint full rewrite** — WebSocket support, native API, full feature parity with other connectors
+- **Snapmaker deep integration** — SACP rewrite, Cloud sync, firmware check, power monitoring, J1 IDEX modes, Ray UDP/laser/CNC, mDNS discovery
+- **Complete AdminLTE 4** — offcanvas, accordion, list groups, info-boxes, table enhancer, validation, sidebar mini mode
+- **Responsive design** — full mobile/tablet optimisation with iOS-compatible QR codes and download pages
+- **7-step setup wizard** — multi-brand installer supporting all printer brands
+- **Batch cost estimation** — new POST /api/inventory/cost-estimate/batch (up to 200 items)
+- **Unified firmware update system** — cross-brand firmware check and update UI in Settings with badge notifications
+- **Dynamic Klipper object discovery** — automatic subscription to all available Klipper objects regardless of naming
+- **Bambu firmware 01.02.00.00 features** — new commands for disable motors, bed low-power, manual filament change, print while drying
+- **12 bug fixes** — API safety, rate limiting, memory leaks, migration ordering, camera cleanup
+
 ### New in v1.1.17
 
 - **Model Forge expanded to 17 tools** — 6 new: Lattice Structure, Multi-Color, Advanced Vase, Threads & Joints, Texture Surface, 3MF Validator
