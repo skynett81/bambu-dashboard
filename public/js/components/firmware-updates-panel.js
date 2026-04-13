@@ -131,7 +131,6 @@
   }
 
   async function triggerUpdate(printerId) {
-    if (!confirm(`Trigger firmware update on ${printerId}? This will start the update process on the printer.`)) return;
     try {
       const res = await fetch('/api/firmware/trigger/' + encodeURIComponent(printerId), {
         method: 'POST',
@@ -139,13 +138,86 @@
         body: JSON.stringify({}),
       });
       const data = await res.json();
-      if (res.ok) {
+
+      // Manual update required (e.g. Bambu Lab)
+      if (data.requiresManualUpdate) {
+        showManualUpdateDialog(printerId, data);
+        return;
+      }
+
+      if (res.ok && data.ok !== false) {
         showToast('Update triggered: ' + (data.message || 'OK'), 'success');
       } else {
-        showToast('Trigger failed: ' + (data.error || 'Unknown error'), 'error');
+        showToast('Trigger failed: ' + (data.error || data.message || 'Unknown error'), 'error');
       }
     } catch (e) {
       showToast('Trigger failed: ' + e.message, 'error');
+    }
+  }
+
+  function showManualUpdateDialog(printerId, info) {
+    const existing = document.getElementById('fw-manual-dialog');
+    if (existing) existing.remove();
+    const instructions = (info.instructions || []).map(i => `<li>${_esc(i)}</li>`).join('');
+    const backdrop = document.createElement('div');
+    backdrop.id = 'fw-manual-dialog';
+    backdrop.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:center;justify-content:center;padding:20px';
+    backdrop.innerHTML = `
+      <div class="card" style="max-width:540px;width:100%">
+        <div class="card-header">
+          <h5 class="card-title mb-0"><i class="bi bi-info-circle"></i> Manual update required</h5>
+        </div>
+        <div class="card-body">
+          <p>${_esc(info.message || 'This printer requires manual firmware update.')}</p>
+          <ol class="mb-3">${instructions}</ol>
+          <div class="alert alert-info mb-3" style="font-size:0.88rem">
+            <i class="bi bi-lightbulb"></i> After you've installed the update on the printer, click <strong>"Mark as Updated"</strong> below to clear this notification. The next auto-check will verify the new version.
+          </div>
+          <div class="d-flex gap-2 justify-content-end flex-wrap">
+            <button class="btn btn-secondary" id="fw-dlg-close">Close</button>
+            <button class="btn btn-outline-primary" id="fw-dlg-recheck" data-printer="${_esc(printerId)}">
+              <i class="bi bi-arrow-repeat"></i> Recheck now
+            </button>
+            <button class="btn btn-success" id="fw-dlg-dismiss" data-printer="${_esc(printerId)}">
+              <i class="bi bi-check"></i> Mark as Updated
+            </button>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(backdrop);
+    backdrop.addEventListener('click', e => { if (e.target === backdrop) backdrop.remove(); });
+    document.getElementById('fw-dlg-close').addEventListener('click', () => backdrop.remove());
+    document.getElementById('fw-dlg-recheck').addEventListener('click', async () => {
+      backdrop.remove();
+      await checkPrinter(printerId);
+    });
+    document.getElementById('fw-dlg-dismiss').addEventListener('click', async () => {
+      backdrop.remove();
+      await dismissUpdate(printerId);
+    });
+  }
+
+  async function dismissUpdate(printerId) {
+    try {
+      const res = await fetch('/api/firmware/dismiss/' + encodeURIComponent(printerId), { method: 'POST' });
+      const data = await res.json();
+      if (res.ok) {
+        showToast('Update dismissed. Run "Check Now" to verify.', 'success');
+        fetchStatus();
+        // Also update the sidebar badge
+        setTimeout(() => {
+          const badge = document.getElementById('fw-nav-badge');
+          if (badge) {
+            const n = parseInt(badge.textContent || '0') - 1;
+            if (n <= 0) badge.style.display = 'none';
+            else badge.textContent = n;
+          }
+        }, 500);
+      } else {
+        showToast('Dismiss failed: ' + (data.error || 'Unknown'), 'error');
+      }
+    } catch (e) {
+      showToast('Dismiss failed: ' + e.message, 'error');
     }
   }
 
@@ -197,12 +269,15 @@
                     <span class="badge text-bg-success">Latest: ${_esc(u.latest_available || '?')}</span>
                   </div>
                 </div>
-                <div class="btn-group">
+                <div class="btn-group flex-wrap">
                   <button class="btn btn-sm btn-outline-secondary" onclick="window._fwCheck('${_esc(u.printer_id)}')" title="Recheck">
                     <i class="bi bi-arrow-repeat"></i> Recheck
                   </button>
                   <button class="btn btn-sm btn-warning" onclick="window._fwTrigger('${_esc(u.printer_id)}')" title="Install update">
                     <i class="bi bi-download"></i> Install Update
+                  </button>
+                  <button class="btn btn-sm btn-outline-success" onclick="window._fwDismiss('${_esc(u.printer_id)}')" title="Mark as already updated">
+                    <i class="bi bi-check"></i> Mark as Updated
                   </button>
                 </div>
               </div>
@@ -236,6 +311,7 @@
   // Expose action handlers for inline onclick
   window._fwCheck = checkPrinter;
   window._fwTrigger = triggerUpdate;
+  window._fwDismiss = dismissUpdate;
   window.loadFirmwareUpdatesPanel = fetchStatus;
 
   // Listen for WebSocket firmware check events

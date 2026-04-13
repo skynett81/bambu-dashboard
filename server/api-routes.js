@@ -2200,11 +2200,25 @@ export async function handleApiRequest(req, res) {
       return readBody(req, res, async (body) => {
         try {
           const result = await client.triggerFirmwareUpdate(body?.module);
-          return sendJson(res, { ok: true, ...result });
+          // If connector indicates manual update is required, return 200 with instructions
+          // (not an error — just informational)
+          return sendJson(res, result);
         } catch (e) {
           return sendJson(res, { error: e.message }, 500);
         }
       });
+    }
+
+    if (method === 'POST' && path.startsWith('/api/firmware/dismiss/')) {
+      // Mark a firmware update as dismissed (user updated manually or wants to ignore it)
+      const printerId = path.slice('/api/firmware/dismiss/'.length);
+      try {
+        const db = (await import('./db/connection.js')).getDb();
+        db.prepare(`UPDATE firmware_history SET update_available = 0 WHERE printer_id = ? AND update_available = 1`).run(printerId);
+        return sendJson(res, { ok: true, message: 'Update dismissed. Run "Check Now" after installing the update to verify.' });
+      } catch (e) {
+        return sendJson(res, { error: e.message }, 500);
+      }
     }
 
     // ---- XCam Events ----

@@ -195,10 +195,22 @@ export class BambuMqttClient {
   setBambuCloud(cloud) { this._bambuCloud = cloud; }
 
   // Trigger firmware update via MQTT
+  // NOTE: Bambu firmware updates cannot reliably be triggered from third-party LAN clients.
+  // The upgrade.start command requires a pre-authorized firmware URL from Bambu Cloud
+  // which is only obtained through Bambu Handy / Studio or the printer's own screen.
+  // This method returns instructions for the user instead of silently failing.
   async triggerFirmwareUpdate() {
-    if (!this.connected) throw new Error('Not connected');
-    this.sendCommand({ upgrade: { sequence_id: String(Date.now()), command: 'start' } });
-    return { ok: true, message: 'Upgrade start command sent — printer will begin update process' };
+    return {
+      ok: false,
+      requiresManualUpdate: true,
+      message: 'Bambu Lab firmware updates must be initiated from the printer itself or from Bambu Handy/Studio. This is a Bambu Lab limitation, not a 3DPrintForge one.',
+      instructions: [
+        'Open Bambu Handy on your phone, or Bambu Studio on your computer',
+        'Go to Device → Settings → Firmware Update',
+        'Or: on the printer itself, tap Settings → General → Firmware Update',
+        'After updating, click "Recheck" here to clear the badge'
+      ]
+    };
   }
 
   // Camera — Bambu uses RTSPS stream handled by camera-stream.js
