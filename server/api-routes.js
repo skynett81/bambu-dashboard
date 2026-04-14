@@ -5998,6 +5998,66 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ── Model Forge: Spur Gear Generator ──
+    if (method === 'POST' && path === '/api/model-forge/gear/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateGear3MF } = await import('./generators/gear-generator.js');
+          const buf = await generateGear3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="gear.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Gear generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Pulley Generator ──
+    if (method === 'POST' && path === '/api/model-forge/pulley/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generatePulley3MF } = await import('./generators/pulley-generator.js');
+          const buf = await generatePulley3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="pulley.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Pulley generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Spring Generator ──
+    if (method === 'POST' && path === '/api/model-forge/spring/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateSpring3MF } = await import('./generators/spring-generator.js');
+          const buf = await generateSpring3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="spring.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Spring generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Hinge Generator ──
+    if (method === 'POST' && path === '/api/model-forge/hinge/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateHinge3MF } = await import('./generators/hinge-generator.js');
+          const buf = await generateHinge3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="hinge.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Hinge generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Snap-fit Connector ──
+    if (method === 'POST' && path === '/api/model-forge/snapfit/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateSnapfit3MF } = await import('./generators/snapfit-generator.js');
+          const buf = await generateSnapfit3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="snapfit.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Snap-fit generation failed: ' + e.message }, 500); }
+      });
+    }
+
     // ── Model Forge: Storage Box Generator ──
     if (method === 'POST' && path === '/api/model-forge/storage-box/generate-3mf') {
       return readBody(req, res, async (body) => {

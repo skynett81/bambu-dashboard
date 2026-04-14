@@ -238,6 +238,167 @@ export class MeshBuilder {
   }
 
   /**
+   * Extruded polygon — watertight prism from an arbitrary closed 2D polygon.
+   * The polygon must be simple (non-self-intersecting) and ordered CCW when
+   * viewed from +Z for outward-facing side normals.
+   *
+   * Uses fan triangulation from the polygon centroid for the top and bottom
+   * caps. This only produces valid triangulations for convex or star-shaped
+   * polygons. For general simple polygons a proper ear-clipping pass would
+   * be required.
+   *
+   * @param {Array<[number, number]>} points - polygon vertices [[x,y], ...]
+   * @param {number} z - base Z
+   * @param {number} depth - Z extrusion height
+   */
+  addExtrudedPolygon(points, z, depth) {
+    const n = points.length;
+    if (n < 3) return;
+    const base = this.vOff;
+    // Bottom ring
+    for (const [px, py] of points) this._addVertex(px, py, z);
+    // Top ring
+    for (const [px, py] of points) this._addVertex(px, py, z + depth);
+    // Centroid for fan triangulation
+    let cx = 0, cy = 0;
+    for (const [px, py] of points) { cx += px; cy += py; }
+    cx /= n; cy /= n;
+    const bCenter = this._addVertex(cx, cy, z);
+    const tCenter = this._addVertex(cx, cy, z + depth);
+    // Bottom cap (normal faces -Z, reversed winding)
+    for (let i = 0; i < n; i++) {
+      const a = base + i;
+      const b = base + ((i + 1) % n);
+      this._addTri(bCenter, b, a);
+    }
+    // Top cap (normal faces +Z)
+    for (let i = 0; i < n; i++) {
+      const a = base + n + i;
+      const b = base + n + ((i + 1) % n);
+      this._addTri(tCenter, a, b);
+    }
+    // Side walls
+    for (let i = 0; i < n; i++) {
+      const bl = base + i;
+      const br = base + ((i + 1) % n);
+      const tl = bl + n;
+      const tr = br + n;
+      this._addTri(bl, br, tr);
+      this._addTri(bl, tr, tl);
+    }
+  }
+
+  /**
+   * Extruded annulus — watertight prism with a hole. Both rings must have
+   * the same number of vertices (ordered so that outer[i] and inner[i] lie
+   * along the same radial direction). The outer ring must be CCW and the
+   * inner ring describes the hole boundary — it is implicitly reversed
+   * during triangulation.
+   *
+   * @param {Array<[number, number]>} outer
+   * @param {Array<[number, number]>} inner
+   * @param {number} z
+   * @param {number} depth
+   */
+  addExtrudedAnnulus(outer, inner, z, depth) {
+    const n = outer.length;
+    if (inner.length !== n || n < 3) return;
+    const base = this.vOff;
+    for (const [px, py] of outer) this._addVertex(px, py, z);          // bottom outer
+    for (const [px, py] of inner) this._addVertex(px, py, z);          // bottom inner
+    for (const [px, py] of outer) this._addVertex(px, py, z + depth);  // top outer
+    for (const [px, py] of inner) this._addVertex(px, py, z + depth);  // top inner
+
+    const Ob = base, Ib = base + n, Ot = base + 2 * n, It = base + 3 * n;
+
+    // Bottom annular cap (faces -Z)
+    for (let i = 0; i < n; i++) {
+      const iN = (i + 1) % n;
+      this._addTri(Ob + i, Ib + i, Ib + iN);
+      this._addTri(Ob + i, Ib + iN, Ob + iN);
+    }
+    // Top annular cap (faces +Z)
+    for (let i = 0; i < n; i++) {
+      const iN = (i + 1) % n;
+      this._addTri(Ot + i, Ot + iN, It + iN);
+      this._addTri(Ot + i, It + iN, It + i);
+    }
+    // Outer side wall (faces outward)
+    for (let i = 0; i < n; i++) {
+      const iN = (i + 1) % n;
+      this._addTri(Ob + i, Ob + iN, Ot + iN);
+      this._addTri(Ob + i, Ot + iN, Ot + i);
+    }
+    // Inner side wall (faces inward — reversed winding)
+    for (let i = 0; i < n; i++) {
+      const iN = (i + 1) % n;
+      this._addTri(Ib + i, It + iN, Ib + iN);
+      this._addTri(Ib + i, It + i, It + iN);
+    }
+  }
+
+  /**
+   * Helical tube — watertight coil with a circular cross-section.
+   * Great for compression springs, coiled heating elements, decorative coils.
+   *
+   * @param {number} cx - coil center X
+   * @param {number} cy - coil center Y
+   * @param {number} zStart - start Z (bottom of coil)
+   * @param {number} R - major radius (center of tube to coil axis)
+   * @param {number} pitch - vertical distance per full turn (mm)
+   * @param {number} turns - number of full turns
+   * @param {number} wireR - tube (wire) radius
+   * @param {number} [majorSegs=24] - segments per turn along the helix
+   * @param {number} [minorSegs=8] - segments around the wire cross-section
+   */
+  addHelicalTube(cx, cy, zStart, R, pitch, turns, wireR, majorSegs, minorSegs) {
+    const M = Math.max(8, Math.round((majorSegs || 24) * turns));
+    const m = Math.max(4, minorSegs || 8);
+    const base = this.vOff;
+    for (let i = 0; i <= M; i++) {
+      const t = (i / M) * turns;
+      const u = t * Math.PI * 2;
+      const cu = Math.cos(u), su = Math.sin(u);
+      const axialZ = zStart + t * pitch;
+      // Frenet-lite frame: forward along helix tangent, binormal ~ Z,
+      // normal ~ radial outward. The tube cross-section lies in the
+      // (normal, binormal) plane which we approximate as (radial, Z).
+      for (let j = 0; j < m; j++) {
+        const v = (j / m) * Math.PI * 2;
+        const cv = Math.cos(v), sv = Math.sin(v);
+        const radial = R + wireR * cv;
+        this._addVertex(cx + cu * radial, cy + su * radial, axialZ + wireR * sv);
+      }
+    }
+    for (let i = 0; i < M; i++) {
+      for (let j = 0; j < m; j++) {
+        const jN = (j + 1) % m;
+        const a = base + i * m + j;
+        const b = base + (i + 1) * m + j;
+        const c = base + (i + 1) * m + jN;
+        const d = base + i * m + jN;
+        this._addTri(a, b, c);
+        this._addTri(a, c, d);
+      }
+    }
+    // Cap the two open ends with fans so the tube is watertight.
+    const startCenter = this._addVertex(cx + R, cy, zStart);
+    const endCenter = this._addVertex(
+      cx + Math.cos(turns * Math.PI * 2) * R,
+      cy + Math.sin(turns * Math.PI * 2) * R,
+      zStart + turns * pitch
+    );
+    // Cap windings must use the OPPOSITE edge direction from the side
+    // walls on the shared ring, otherwise the manifold check fails. Start
+    // cap uses (center, j, jN); end cap uses (center, jN, j).
+    for (let j = 0; j < m; j++) {
+      const jN = (j + 1) % m;
+      this._addTri(startCenter, base + j, base + jN);
+      this._addTri(endCenter, base + M * m + jN, base + M * m + j);
+    }
+  }
+
+  /**
    * Torus — watertight torus ring. Used for hinges, springs, o-rings.
    * @param {number} cx - center X
    * @param {number} cy - center Y

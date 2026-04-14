@@ -33,6 +33,11 @@
     { id: 'multi-color', name: 'Multi-Color', icon: '🎨', desc: 'Multi-material colored parts for AMS/MMU color assignment', loader: 'loadForgeMultiColor', category: 'creative' },
     { id: 'vase', name: 'Advanced Vase', icon: '🏺', desc: 'Spiral vases with sine, bulge, flare, twist and tulip profiles', loader: 'loadForgeVase', category: 'creative' },
     { id: 'thread', name: 'Threads & Joints', icon: '🔩', desc: 'Metric bolts, nuts, standoffs and snap-fit joints (M3–M20)', loader: 'loadForgeThread', category: 'mechanical' },
+    { id: 'gear', name: 'Spur Gear', icon: '⚙️', desc: 'Parametric involute spur gears — teeth, module, bore', loader: 'loadForgeGear', category: 'mechanical' },
+    { id: 'pulley', name: 'Timing Belt Pulley', icon: '⚙️', desc: 'GT2/GT3/HTD pulleys with optional flanges and bore', loader: 'loadForgePulley', category: 'mechanical' },
+    { id: 'spring', name: 'Compression Spring', icon: '🌀', desc: 'Helical coil spring — coils, diameter, wire, pitch', loader: 'loadForgeSpring', category: 'mechanical' },
+    { id: 'hinge', name: 'Print-in-place Hinge', icon: '🪝', desc: 'Barrel hinge with interlocking knuckles and pin', loader: 'loadForgeHinge', category: 'mechanical' },
+    { id: 'snapfit', name: 'Snap-fit Connector', icon: '🔒', desc: 'Cantilever snap-fit pair — male hook + female catch', loader: 'loadForgeSnapfit', category: 'mechanical' },
     { id: 'texture', name: 'Texture Surface', icon: '🧱', desc: 'Procedural textures: diamond plate, knurl, honeycomb, waves, brick', loader: 'loadForgeTexture', category: 'creative' },
     { id: 'validator', name: '3MF Validator', icon: '✅', desc: 'Validate 3MF files, check mesh integrity, detect extensions, match colors', loader: 'loadForgeValidator', category: 'tools' },
   ];
