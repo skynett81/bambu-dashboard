@@ -6274,6 +6274,90 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ── Model Forge: Voronoi Tray ──
+    if (method === 'POST' && path === '/api/model-forge/voronoi-tray/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateVoronoiTray3MF } = await import('./generators/voronoi-tray-generator.js');
+          const buf = await generateVoronoiTray3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="voronoi_tray.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Voronoi tray generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Topo Map ──
+    if (method === 'POST' && path === '/api/model-forge/topo-map/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateTopoMap3MF } = await import('./generators/topo-map-generator.js');
+          const buf = await generateTopoMap3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="topo_map.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Topo map generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: 3D QR Code ──
+    if (method === 'POST' && path === '/api/model-forge/qr3d/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateQr3d3MF } = await import('./generators/qr3d-generator.js');
+          const buf = await generateQr3d3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="qr3d.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: '3D QR code generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Shape Extruder ──
+    if (method === 'POST' && path === '/api/model-forge/shape/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateShape3MF } = await import('./generators/shape-extruder-generator.js');
+          const buf = await generateShape3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="shape.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Shape generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Honeycomb Tile ──
+    if (method === 'POST' && path === '/api/model-forge/honeycomb/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateHoneycombTile3MF } = await import('./generators/honeycomb-tile-generator.js');
+          const buf = await generateHoneycombTile3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="honeycomb_tile.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Honeycomb generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Dice Tower ──
+    if (method === 'POST' && path === '/api/model-forge/dice-tower/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateDiceTower3MF } = await import('./generators/dice-tower-generator.js');
+          const buf = await generateDiceTower3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="dice_tower.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Dice tower generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Miniature Base ──
+    if (method === 'POST' && path === '/api/model-forge/mini-base/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateMiniBase3MF } = await import('./generators/mini-base-generator.js');
+          const buf = await generateMiniBase3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="mini_base.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Mini base generation failed: ' + e.message }, 500); }
+      });
+    }
+
     // ── Model Forge: Storage Box Generator ──
     if (method === 'POST' && path === '/api/model-forge/storage-box/generate-3mf') {
       return readBody(req, res, async (body) => {

@@ -56,6 +56,13 @@
     { id: 'vesa-mount', name: 'VESA Mount', icon: '🖥️', desc: 'VESA MIS-D plate (75 or 100mm patterns)', loader: 'loadForgeVesaMount', category: 'tech' },
     { id: 'electronics-case', name: 'Electronics Case', icon: '💻', desc: 'Parametric case + lid for Pi, Arduino or custom boards', loader: 'loadForgeElectronicsCase', category: 'tech' },
     { id: 'battery-holder', name: 'Battery Holder', icon: '🔋', desc: 'Compact block with bores for AA/AAA/18650/21700/C/D', loader: 'loadForgeBatteryHolder', category: 'tech' },
+    { id: 'voronoi-tray', name: 'Voronoi Tray', icon: '🧩', desc: 'Rectangular tray with irregular voronoi compartments', loader: 'loadForgeVoronoiTray', category: 'creative' },
+    { id: 'topo-map', name: 'Topographic Map', icon: '🗺️', desc: 'Synthetic 3D terrain tile from layered noise', loader: 'loadForgeTopoMap', category: 'creative' },
+    { id: 'qr3d', name: '3D QR Code', icon: '⬛', desc: 'Raised QR code for WiFi, URLs, or any text', loader: 'loadForgeQr3d', category: 'creative' },
+    { id: 'shape', name: 'Shape Extruder', icon: '✨', desc: 'Extrude stars, hearts, flowers, polygons into solids', loader: 'loadForgeShape', category: 'creative' },
+    { id: 'honeycomb', name: 'Honeycomb Tile', icon: '🍯', desc: 'Flat tile with hexagonal honeycomb surface pattern', loader: 'loadForgeHoneycomb', category: 'creative' },
+    { id: 'dice-tower', name: 'Dice Tower', icon: '🎲', desc: 'Compact tabletop dice tower with internal bounce ramps', loader: 'loadForgeDiceTower', category: 'creative' },
+    { id: 'mini-base', name: 'Miniature Base', icon: '♟️', desc: 'Round tabletop miniature base with lip and magnet option', loader: 'loadForgeMiniBase', category: 'creative' },
     { id: 'texture', name: 'Texture Surface', icon: '🧱', desc: 'Procedural textures: diamond plate, knurl, honeycomb, waves, brick', loader: 'loadForgeTexture', category: 'creative' },
     { id: 'validator', name: '3MF Validator', icon: '✅', desc: 'Validate 3MF files, check mesh integrity, detect extensions, match colors', loader: 'loadForgeValidator', category: 'tools' },
   ];
