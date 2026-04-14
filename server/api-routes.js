@@ -6118,6 +6118,102 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ── Model Forge: Hook ──
+    if (method === 'POST' && path === '/api/model-forge/hook/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateHook3MF } = await import('./generators/hook-generator.js');
+          const buf = await generateHook3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="wall_hook.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Hook generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Cable Clip ──
+    if (method === 'POST' && path === '/api/model-forge/cable-clip/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateCableClip3MF } = await import('./generators/cable-clip-generator.js');
+          const buf = await generateCableClip3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="cable_clip.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Cable clip generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Plant Pot ──
+    if (method === 'POST' && path === '/api/model-forge/plant-pot/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generatePlantPot3MF } = await import('./generators/plant-pot-generator.js');
+          const buf = await generatePlantPot3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="plant_pot.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Plant pot generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Desk Organizer ──
+    if (method === 'POST' && path === '/api/model-forge/desk-organizer/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateDeskOrganizer3MF } = await import('./generators/desk-organizer-generator.js');
+          const buf = await generateDeskOrganizer3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="organizer.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Organizer generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Wall Bracket ──
+    if (method === 'POST' && path === '/api/model-forge/wall-bracket/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateWallBracket3MF } = await import('./generators/wall-bracket-generator.js');
+          const buf = await generateWallBracket3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="wall_bracket.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Wall bracket generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Wall Plate ──
+    if (method === 'POST' && path === '/api/model-forge/wall-plate/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateWallPlate3MF } = await import('./generators/wall-plate-generator.js');
+          const buf = await generateWallPlate3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="wall_plate.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Wall plate generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Lidded Box ──
+    if (method === 'POST' && path === '/api/model-forge/lidded-box/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateLiddedBox3MF } = await import('./generators/lidded-box-generator.js');
+          const buf = await generateLiddedBox3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="lidded_box.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Lidded box generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Peg Rail ──
+    if (method === 'POST' && path === '/api/model-forge/peg-rail/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generatePegRail3MF } = await import('./generators/peg-rail-generator.js');
+          const buf = await generatePegRail3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="peg_rail.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Peg rail generation failed: ' + e.message }, 500); }
+      });
+    }
+
     // ── Model Forge: Storage Box Generator ──
     if (method === 'POST' && path === '/api/model-forge/storage-box/generate-3mf') {
       return readBody(req, res, async (body) => {
