@@ -381,6 +381,7 @@ const PANEL_TITLES = {
   plugins: 'tabs.plugins',
   backup: 'tabs.backup',
   'firmware-updates': 'Firmware Updates',
+  'prusa-resources': 'Prusa Resources',
   playground: 'tabs.playground',
   settings: 'tabs.settings',
   materialrec: 'material_rec.title',
@@ -429,6 +430,11 @@ const PANEL_LOADERS = {
     const body = document.getElementById('overlay-panel-body');
     if (body) body.innerHTML = '<div id="firmware-updates-panel"></div>';
     if (typeof loadFirmwareUpdatesPanel === 'function') loadFirmwareUpdatesPanel();
+  },
+  'prusa-resources': () => {
+    const body = document.getElementById('overlay-panel-body');
+    if (body) body.innerHTML = '<div id="prusa-resources-panel"></div>';
+    if (typeof loadPrusaResourcesPanel === 'function') loadPrusaResourcesPanel();
   },
   playground: () => { if (typeof loadPlaygroundPanel === 'function') loadPlaygroundPanel(); },
   costestimator: () => { if (typeof loadCostEstimatorPanel === 'function') loadCostEstimatorPanel(); },

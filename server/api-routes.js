@@ -2209,6 +2209,64 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ---- Prusa Resources (PrusaSlicer profiles, error codes, G-code reference) ----
+    if (method === 'GET' && path === '/api/prusa/filaments') {
+      const { getPrusaFilaments } = await import('./prusa-importer.js');
+      return sendJson(res, getPrusaFilaments({
+        vendor: url.searchParams.get('vendor'),
+        filament_vendor: url.searchParams.get('filament_vendor'),
+        material_type: url.searchParams.get('material_type'),
+        q: url.searchParams.get('q'),
+        limit: url.searchParams.get('limit'),
+      }));
+    }
+    if (method === 'GET' && path === '/api/prusa/print-profiles') {
+      const { getPrusaPrintProfiles } = await import('./prusa-importer.js');
+      return sendJson(res, getPrusaPrintProfiles({
+        vendor: url.searchParams.get('vendor'),
+        q: url.searchParams.get('q'),
+        limit: url.searchParams.get('limit'),
+      }));
+    }
+    if (method === 'GET' && path === '/api/prusa/printer-profiles') {
+      const { getPrusaPrinterProfiles } = await import('./prusa-importer.js');
+      return sendJson(res, getPrusaPrinterProfiles({
+        vendor: url.searchParams.get('vendor'),
+        family: url.searchParams.get('family'),
+      }));
+    }
+    if (method === 'GET' && path === '/api/prusa/errors') {
+      const { searchPrusaErrorCodes } = await import('./prusa-importer.js');
+      return sendJson(res, searchPrusaErrorCodes({
+        model: url.searchParams.get('model'),
+        category: url.searchParams.get('category'),
+        q: url.searchParams.get('q'),
+        limit: url.searchParams.get('limit'),
+      }));
+    }
+    const prusaErrMatch = path.match(/^\/api\/prusa\/errors\/([^/]+)$/);
+    if (method === 'GET' && prusaErrMatch) {
+      const { getPrusaErrorCode } = await import('./prusa-importer.js');
+      const model = url.searchParams.get('model');
+      return sendJson(res, getPrusaErrorCode(prusaErrMatch[1], model));
+    }
+    if (method === 'GET' && path === '/api/prusa/gcodes') {
+      const { getPrusaGcodeReference } = await import('./prusa-importer.js');
+      return sendJson(res, getPrusaGcodeReference({
+        q: url.searchParams.get('q'),
+        model: url.searchParams.get('model'),
+      }));
+    }
+    if (method === 'GET' && path === '/api/prusa/refresh-status') {
+      const { getPrusaRefreshStatus } = await import('./prusa-importer.js');
+      return sendJson(res, getPrusaRefreshStatus());
+    }
+    if (method === 'POST' && path === '/api/prusa/refresh') {
+      const { importAllPrusaResources } = await import('./prusa-importer.js');
+      importAllPrusaResources().catch(e => log.error('Prusa refresh failed: ' + e.message));
+      return sendJson(res, { ok: true, message: 'Prusa resource refresh started' });
+    }
+
     if (method === 'GET' && path === '/api/firmware/settings') {
       const { getInventorySetting } = await import('./database.js');
       return sendJson(res, {

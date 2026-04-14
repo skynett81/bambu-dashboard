@@ -828,6 +828,121 @@ export function runMigrations() {
         db.prepare("INSERT OR IGNORE INTO inventory_settings (key, value) VALUES ('firmware_dev_notifications', '1')").run();
       } catch {}
     }},
+
+    // Prusa full resource integration (PrusaSlicer profiles + Error Codes + G-code reference + OpenAPI)
+    { version: 123, up: (db) => {
+      // Filament profiles from PrusaSlicer resources/profiles/*.ini
+      db.exec(`CREATE TABLE IF NOT EXISTS prusa_filament_profiles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        vendor TEXT NOT NULL,
+        profile_name TEXT NOT NULL,
+        material_type TEXT,
+        inherits TEXT,
+        filament_vendor TEXT,
+        density REAL,
+        cost REAL,
+        diameter REAL,
+        nozzle_temp INTEGER,
+        nozzle_temp_first_layer INTEGER,
+        bed_temp INTEGER,
+        bed_temp_first_layer INTEGER,
+        fan_speed_min INTEGER,
+        fan_speed_max INTEGER,
+        cooling INTEGER,
+        max_volumetric_speed REAL,
+        retraction_length REAL,
+        retraction_speed REAL,
+        compatible_printers_condition TEXT,
+        raw_json TEXT,
+        imported_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(vendor, profile_name)
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_prusa_filaments_material ON prusa_filament_profiles(material_type)');
+      db.exec('CREATE INDEX IF NOT EXISTS idx_prusa_filaments_vendor ON prusa_filament_profiles(vendor)');
+      db.exec('CREATE INDEX IF NOT EXISTS idx_prusa_filaments_filvendor ON prusa_filament_profiles(filament_vendor)');
+
+      // Print profiles (layer height, infill, speed, quality presets)
+      db.exec(`CREATE TABLE IF NOT EXISTS prusa_print_profiles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        vendor TEXT NOT NULL,
+        profile_name TEXT NOT NULL,
+        inherits TEXT,
+        layer_height REAL,
+        first_layer_height REAL,
+        perimeters INTEGER,
+        top_solid_layers INTEGER,
+        bottom_solid_layers INTEGER,
+        infill_density REAL,
+        infill_pattern TEXT,
+        perimeter_speed REAL,
+        infill_speed REAL,
+        travel_speed REAL,
+        support_material INTEGER,
+        compatible_printers_condition TEXT,
+        raw_json TEXT,
+        imported_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(vendor, profile_name)
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_prusa_print_vendor ON prusa_print_profiles(vendor)');
+
+      // Printer profiles (bed size, firmware type, extruder count)
+      db.exec(`CREATE TABLE IF NOT EXISTS prusa_printer_profiles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        vendor TEXT NOT NULL,
+        profile_name TEXT NOT NULL,
+        model_id TEXT,
+        family TEXT,
+        variant TEXT,
+        bed_shape TEXT,
+        max_print_height REAL,
+        nozzle_diameter REAL,
+        technology TEXT,
+        thumbnail TEXT,
+        default_materials TEXT,
+        raw_json TEXT,
+        imported_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(vendor, profile_name)
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_prusa_printer_vendor ON prusa_printer_profiles(vendor)');
+      db.exec('CREATE INDEX IF NOT EXISTS idx_prusa_printer_family ON prusa_printer_profiles(family)');
+
+      // Error codes (from Prusa-Error-Codes repo)
+      db.exec(`CREATE TABLE IF NOT EXISTS prusa_error_codes (
+        code TEXT NOT NULL,
+        printer_model TEXT NOT NULL,
+        category TEXT,
+        title TEXT,
+        text TEXT,
+        action TEXT,
+        buddy_type INTEGER,
+        approved INTEGER DEFAULT 0,
+        imported_at TEXT NOT NULL DEFAULT (datetime('now')),
+        PRIMARY KEY(code, printer_model)
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_prusa_errors_model ON prusa_error_codes(printer_model)');
+      db.exec('CREATE INDEX IF NOT EXISTS idx_prusa_errors_category ON prusa_error_codes(category)');
+
+      // Custom G-code reference (Prusa-specific G/M codes from firmware docs)
+      db.exec(`CREATE TABLE IF NOT EXISTS prusa_gcode_reference (
+        code TEXT PRIMARY KEY,
+        title TEXT,
+        description TEXT,
+        parameters TEXT,
+        example TEXT,
+        printer_models TEXT,
+        source_url TEXT,
+        imported_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`);
+
+      // Prusa data refresh metadata (last fetched timestamps)
+      db.exec(`CREATE TABLE IF NOT EXISTS prusa_data_refresh (
+        resource TEXT PRIMARY KEY,
+        last_fetched_at TEXT,
+        status TEXT,
+        error TEXT,
+        items_imported INTEGER DEFAULT 0
+      )`);
+    }},
   ];
 
   for (const m of migrations) {

@@ -145,6 +145,8 @@ export class PrusaLinkClient {
 
     // Job info
     if (job) {
+      // Track job id for spec-compliant /api/v1/job/{id}/pause etc.
+      if (job.id !== undefined) this.state._job_id = job.id;
       if (job.progress !== undefined) this.state.mc_percent = Math.round(job.progress);
       if (job.time_remaining !== undefined) this.state.mc_remaining_time = Math.round(job.time_remaining / 60);
       if (job.time_printing !== undefined) this.state.print_duration_seconds = Math.round(job.time_printing);
@@ -173,21 +175,38 @@ export class PrusaLinkClient {
 
   // ── Commands ──
 
+  // Current job id for spec-compliant /api/v1/job/{id}/pause endpoints
+  // (fetched from /api/v1/job response; we cache it here)
+  _getCurrentJobId() {
+    return this.state?._job_id || null;
+  }
+
   sendCommand(commandObj) {
     if (!this.connected) return;
     const action = commandObj._prusalink_action || commandObj.action;
+    const jobId = this._getCurrentJobId();
 
     switch (action) {
       case 'pause':
-        this._apiPut('/api/v1/job', { command: 'PAUSE' });
+        // Spec-compliant (OpenAPI 1.0-draft): POST /api/v1/job/{id}/pause
+        if (jobId) this._apiPost(`/api/v1/job/${jobId}/pause`, {});
+        else this._apiPut('/api/v1/job', { command: 'PAUSE' });
         break;
       case 'resume':
-        this._apiPut('/api/v1/job', { command: 'RESUME' });
+        if (jobId) this._apiPost(`/api/v1/job/${jobId}/resume`, {});
+        else this._apiPut('/api/v1/job', { command: 'RESUME' });
+        break;
+      case 'continue':
+        // New in spec: resume after pause-for-error
+        if (jobId) this._apiPost(`/api/v1/job/${jobId}/continue`, {});
         break;
       case 'stop':
-        this._apiDelete('/api/v1/job');
+        if (jobId) this._apiDelete(`/api/v1/job/${jobId}`);
+        else this._apiDelete('/api/v1/job');
         break;
       case 'print_file':
+        // Spec: POST /api/v1/files/{storage}/{path} with Print-After-Upload header
+        // or PUT /api/v1/files/{storage}/{path} body to start
         this._apiPost('/api/v1/job', { command: 'START', path: commandObj.filename });
         break;
       case 'speed':

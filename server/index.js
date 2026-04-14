@@ -686,6 +686,10 @@ const firmwareChecker = new FirmwareChecker({ printerManager: manager, hub, noti
 setFirmwareChecker(firmwareChecker);
 firmwareChecker.start();
 
+// Prusa Resources Refresh (PrusaSlicer profiles + error codes + G-code reference)
+const { startPrusaRefresh, stopPrusaRefresh } = await import('./prusa-importer.js');
+startPrusaRefresh();
+
 // Queue Manager
 const queueManager = new QueueManager(manager, notifier, broadcastAll, null); // failureDetector set below
 queueManager.init();
@@ -1216,6 +1220,7 @@ function shutdown() {
   queueManager.shutdown();
   updater.shutdown();
   firmwareChecker.shutdown();
+  try { stopPrusaRefresh(); } catch {}
   notifier.shutdown();
   manager.shutdown();
   discovery.shutdown();
