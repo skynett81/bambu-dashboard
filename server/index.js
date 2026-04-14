@@ -690,6 +690,10 @@ firmwareChecker.start();
 const { startPrusaRefresh, stopPrusaRefresh } = await import('./prusa-importer.js');
 startPrusaRefresh();
 
+// Multi-brand Resources Refresh (Bambu HMS + Klipper G-codes + Snapmaker + OctoPrint plugins)
+const { startBrandRefresh, stopBrandRefresh } = await import('./brand-resources-importer.js');
+startBrandRefresh();
+
 // Queue Manager
 const queueManager = new QueueManager(manager, notifier, broadcastAll, null); // failureDetector set below
 queueManager.init();
@@ -1221,6 +1225,7 @@ function shutdown() {
   updater.shutdown();
   firmwareChecker.shutdown();
   try { stopPrusaRefresh(); } catch {}
+  try { stopBrandRefresh(); } catch {}
   notifier.shutdown();
   manager.shutdown();
   discovery.shutdown();

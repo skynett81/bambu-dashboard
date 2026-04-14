@@ -381,7 +381,8 @@ const PANEL_TITLES = {
   plugins: 'tabs.plugins',
   backup: 'tabs.backup',
   'firmware-updates': 'Firmware Updates',
-  'prusa-resources': 'Prusa Resources',
+  'resources': 'Resources',
+  'jscad': 'JSCAD Studio',
   playground: 'tabs.playground',
   settings: 'tabs.settings',
   materialrec: 'material_rec.title',
@@ -431,10 +432,15 @@ const PANEL_LOADERS = {
     if (body) body.innerHTML = '<div id="firmware-updates-panel"></div>';
     if (typeof loadFirmwareUpdatesPanel === 'function') loadFirmwareUpdatesPanel();
   },
-  'prusa-resources': () => {
+  'resources': () => {
     const body = document.getElementById('overlay-panel-body');
-    if (body) body.innerHTML = '<div id="prusa-resources-panel"></div>';
-    if (typeof loadPrusaResourcesPanel === 'function') loadPrusaResourcesPanel();
+    if (body) body.innerHTML = '<div id="resources-panel"></div>';
+    if (typeof loadResourcesPanel === 'function') loadResourcesPanel();
+  },
+  'jscad': () => {
+    const body = document.getElementById('overlay-panel-body');
+    if (body) body.innerHTML = '<div id="jscad-panel"></div>';
+    if (typeof loadJscadPanel === 'function') loadJscadPanel();
   },
   playground: () => { if (typeof loadPlaygroundPanel === 'function') loadPlaygroundPanel(); },
   costestimator: () => { if (typeof loadCostEstimatorPanel === 'function') loadCostEstimatorPanel(); },

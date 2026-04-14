@@ -2209,6 +2209,77 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ---- JSCAD Generator (scripted parametric 3D modeling) ----
+    if (method === 'POST' && path === '/api/jscad/render') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { renderJscadToStl } = await import('./generators/jscad-generator.js');
+          const result = await renderJscadToStl(body?.code || '', body?.params || {});
+          res.writeHead(200, {
+            'Content-Type': 'model/stl',
+            'Content-Length': result.stl.length,
+            'X-Triangle-Count': String(result.triangleCount),
+            'X-Warnings': JSON.stringify(result.warnings).slice(0, 2000),
+          });
+          return res.end(result.stl);
+        } catch (e) {
+          return sendJson(res, { error: e.message }, 400);
+        }
+      });
+    }
+    if (method === 'POST' && path === '/api/jscad/params') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { extractParameterDefinitions } = await import('./generators/jscad-generator.js');
+          const defs = extractParameterDefinitions(body?.code || '');
+          return sendJson(res, { parameters: defs || [] });
+        } catch (e) {
+          return sendJson(res, { error: e.message }, 400);
+        }
+      });
+    }
+    if (method === 'GET' && path === '/api/jscad/examples') {
+      const { EXAMPLES } = await import('./generators/jscad-generator.js');
+      return sendJson(res, EXAMPLES);
+    }
+
+    // ---- Multi-brand Resources (Bambu/Klipper/Snapmaker/OctoPrint) ----
+    if (method === 'GET' && path === '/api/brands/errors') {
+      const { getBrandErrorCodes } = await import('./brand-resources-importer.js');
+      return sendJson(res, getBrandErrorCodes({
+        brand: url.searchParams.get('brand'),
+        printer_model: url.searchParams.get('model'),
+        category: url.searchParams.get('category'),
+        q: url.searchParams.get('q'),
+        limit: url.searchParams.get('limit'),
+      }));
+    }
+    if (method === 'GET' && path === '/api/brands/gcodes') {
+      const { getBrandGcodes } = await import('./brand-resources-importer.js');
+      return sendJson(res, getBrandGcodes({
+        brand: url.searchParams.get('brand'),
+        q: url.searchParams.get('q'),
+        model: url.searchParams.get('model'),
+        limit: url.searchParams.get('limit'),
+      }));
+    }
+    if (method === 'GET' && path === '/api/brands/octoprint-plugins') {
+      const { getOctoPrintPlugins } = await import('./brand-resources-importer.js');
+      return sendJson(res, getOctoPrintPlugins({
+        q: url.searchParams.get('q'),
+        limit: url.searchParams.get('limit'),
+      }));
+    }
+    if (method === 'GET' && path === '/api/brands/refresh-status') {
+      const { getBrandRefreshStatus } = await import('./brand-resources-importer.js');
+      return sendJson(res, getBrandRefreshStatus());
+    }
+    if (method === 'POST' && path === '/api/brands/refresh') {
+      const { importAllBrandResources } = await import('./brand-resources-importer.js');
+      importAllBrandResources().catch(e => log.error('Brand refresh failed: ' + e.message));
+      return sendJson(res, { ok: true, message: 'Brand resources refresh started' });
+    }
+
     // ---- Prusa Resources (PrusaSlicer profiles, error codes, G-code reference) ----
     if (method === 'GET' && path === '/api/prusa/filaments') {
       const { getPrusaFilaments } = await import('./prusa-importer.js');

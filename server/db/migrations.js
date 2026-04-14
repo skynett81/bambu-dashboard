@@ -943,6 +943,71 @@ export function runMigrations() {
         items_imported INTEGER DEFAULT 0
       )`);
     }},
+
+    // Unified multi-brand resources (error codes, G-code reference, etc. across all brands)
+    { version: 124, up: (db) => {
+      // Generic error code database for all brands (Bambu, Snapmaker, Klipper, OctoPrint, etc.)
+      db.exec(`CREATE TABLE IF NOT EXISTS brand_error_codes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        brand TEXT NOT NULL,
+        code TEXT NOT NULL,
+        printer_model TEXT,
+        category TEXT,
+        severity TEXT,
+        title TEXT,
+        description TEXT,
+        causes TEXT,
+        actions TEXT,
+        wiki_url TEXT,
+        imported_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(brand, code, printer_model)
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_brand_err_brand ON brand_error_codes(brand)');
+      db.exec('CREATE INDEX IF NOT EXISTS idx_brand_err_code ON brand_error_codes(code)');
+      db.exec('CREATE INDEX IF NOT EXISTS idx_brand_err_category ON brand_error_codes(category)');
+
+      // Generic G-code reference for all brands
+      db.exec(`CREATE TABLE IF NOT EXISTS brand_gcode_reference (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        brand TEXT NOT NULL,
+        code TEXT NOT NULL,
+        title TEXT,
+        description TEXT,
+        parameters TEXT,
+        example TEXT,
+        printer_models TEXT,
+        category TEXT,
+        source_url TEXT,
+        imported_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(brand, code)
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_brand_gcode_brand ON brand_gcode_reference(brand)');
+      db.exec('CREATE INDEX IF NOT EXISTS idx_brand_gcode_code ON brand_gcode_reference(code)');
+
+      // OctoPrint plugin catalog
+      db.exec(`CREATE TABLE IF NOT EXISTS octoprint_plugins (
+        id TEXT PRIMARY KEY,
+        title TEXT,
+        description TEXT,
+        author TEXT,
+        homepage TEXT,
+        license TEXT,
+        tags TEXT,
+        compatibility TEXT,
+        stats_json TEXT,
+        imported_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_octoprint_plugins_title ON octoprint_plugins(title)');
+
+      // Unified refresh metadata for brand resources
+      db.exec(`CREATE TABLE IF NOT EXISTS brand_data_refresh (
+        resource TEXT PRIMARY KEY,
+        last_fetched_at TEXT,
+        status TEXT,
+        error TEXT,
+        items_imported INTEGER DEFAULT 0
+      )`);
+    }},
   ];
 
   for (const m of migrations) {
