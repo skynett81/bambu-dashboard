@@ -1,0 +1,49 @@
+# Maintainer: SkyNett81 <noreply@geektech.no>
+pkgname=3dprintforge
+pkgver=1.1.18
+pkgrel=1
+pkgdesc="Self-hosted dashboard for managing Bambu Lab, Prusa, Snapmaker, OctoPrint and other 3D printers"
+arch=('x86_64')
+url="https://github.com/skynett81/3dprintforge"
+license=('AGPL-3.0-only')
+depends=('gtk3' 'libnotify' 'nss' 'libxss' 'libxtst' 'xdg-utils' 'at-spi2-core' 'util-linux-libs' 'alsa-lib')
+source=("3dprintforge-${pkgver}.tar.gz")
+sha256sums=('SKIP')
+
+package() {
+  cd "${srcdir}/linux-unpacked" 2>/dev/null || cd "${srcdir}"
+  install -d "${pkgdir}/opt/3DPrintForge"
+  cp -r . "${pkgdir}/opt/3DPrintForge/"
+
+  # Bin wrapper
+  install -d "${pkgdir}/usr/bin"
+  cat > "${pkgdir}/usr/bin/3dprintforge" << 'WRAPPER'
+#!/bin/sh
+exec /opt/3DPrintForge/3dprintforge --no-sandbox "$@"
+WRAPPER
+  chmod +x "${pkgdir}/usr/bin/3dprintforge"
+
+  # Desktop entry
+  install -Dm644 /dev/stdin "${pkgdir}/usr/share/applications/3dprintforge.desktop" << 'DESKTOP'
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=3DPrintForge
+GenericName=3D Printer Dashboard
+Comment=Self-hosted 3D printer dashboard for Bambu, Prusa, Snapmaker, OctoPrint and more
+Exec=3dprintforge %U
+Icon=3dprintforge
+Terminal=false
+StartupNotify=true
+StartupWMClass=3dprintforge
+Categories=Graphics;Utility;Development;
+Keywords=3d;printer;printing;bambu;prusa;octoprint;snapmaker;moonraker;klipper;
+MimeType=x-scheme-handler/3dprintforge;
+DESKTOP
+
+  # Icon
+  if [ -f "/home/skynett81/Dev/Prosjekter/3DPrintForge/Server/electron/assets/icon.png" ]; then
+    install -Dm644 /home/skynett81/Dev/Prosjekter/3DPrintForge/Server/electron/assets/icon.png \
+      "${pkgdir}/usr/share/icons/hicolor/256x256/apps/3dprintforge.png"
+  fi
+}

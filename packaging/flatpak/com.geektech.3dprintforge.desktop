@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=3DPrintForge
+GenericName=3D Printer Dashboard
+Comment=Self-hosted 3D printer dashboard for Bambu, Prusa, Snapmaker, OctoPrint and more
+Exec=3dprintforge %U
+Icon=com.geektech.3dprintforge
+Terminal=false
+StartupNotify=true
+StartupWMClass=3dprintforge
+Categories=Graphics;Utility;Development;
+Keywords=3d;printer;printing;bambu;prusa;octoprint;snapmaker;moonraker;klipper;
+MimeType=x-scheme-handler/3dprintforge;

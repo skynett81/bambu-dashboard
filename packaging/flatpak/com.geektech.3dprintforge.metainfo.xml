@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.geektech.3dprintforge</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>AGPL-3.0-only</project_license>
+  <name>3DPrintForge</name>
+  <summary>Self-hosted 3D printer dashboard</summary>
+  <description>
+    <p>A self-hosted dashboard for managing Bambu Lab, Prusa, Snapmaker, OctoPrint, Moonraker-based, Creality, Elegoo, Voron, AnkerMake, QIDI and other 3D printers from one place.</p>
+    <p>Features include live monitoring, print queue management, filament inventory, firmware updates, print guard AI failure detection, cost estimation, CRM system for print services, multi-brand knowledge base, JSCAD scripted 3D modeling, and much more.</p>
+  </description>
+  <launchable type="desktop-id">com.geektech.3dprintforge.desktop</launchable>
+  <url type="homepage">https://github.com/skynett81/3dprintforge</url>
+  <url type="bugtracker">https://github.com/skynett81/3dprintforge/issues</url>
+  <url type="help">https://skynett81.github.io/3dprintforge/</url>
+  <developer_name>SkyNett81 / GeekTech</developer_name>
+  <releases>
+    <release version="1.1.18" date="2026-04-14"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>

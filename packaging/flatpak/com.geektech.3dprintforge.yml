@@ -1,0 +1,45 @@
+# Flatpak manifest for 3DPrintForge
+# Build: flatpak-builder build-dir com.geektech.3dprintforge.yml --force-clean --install --user
+app-id: com.geektech.3dprintforge
+runtime: org.freedesktop.Platform
+runtime-version: '24.08'
+sdk: org.freedesktop.Sdk
+base: org.electronjs.Electron2.BaseApp
+base-version: '24.08'
+command: 3dprintforge
+separate-locales: false
+
+finish-args:
+  - --share=network
+  - --share=ipc
+  - --socket=x11
+  - --socket=wayland
+  - --socket=pulseaudio
+  - --device=all
+  - --filesystem=home
+  - --filesystem=xdg-documents
+  - --filesystem=xdg-download
+  - --talk-name=org.freedesktop.Notifications
+  - --talk-name=org.kde.StatusNotifierWatcher
+  - --own-name=com.geektech.3dprintforge
+
+modules:
+  - name: 3dprintforge
+    buildsystem: simple
+    build-commands:
+      - cp -r linux-unpacked /app/3dprintforge
+      - install -Dm755 launcher.sh /app/bin/3dprintforge
+      - install -Dm644 com.geektech.3dprintforge.desktop /app/share/applications/com.geektech.3dprintforge.desktop
+      - install -Dm644 icon.png /app/share/icons/hicolor/256x256/apps/com.geektech.3dprintforge.png
+      - install -Dm644 com.geektech.3dprintforge.metainfo.xml /app/share/metainfo/com.geektech.3dprintforge.metainfo.xml
+    sources:
+      - type: archive
+        path: ../../dist-electron/3dprintforge-1.1.18.tar.gz
+      - type: file
+        path: launcher.sh
+      - type: file
+        path: com.geektech.3dprintforge.desktop
+      - type: file
+        path: icon.png
+      - type: file
+        path: com.geektech.3dprintforge.metainfo.xml
