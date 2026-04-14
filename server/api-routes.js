@@ -6214,6 +6214,66 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ── Model Forge: Phone Stand ──
+    if (method === 'POST' && path === '/api/model-forge/phone-stand/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generatePhoneStand3MF } = await import('./generators/phone-stand-generator.js');
+          const buf = await generatePhoneStand3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="phone_stand.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Phone stand generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Headphone Stand ──
+    if (method === 'POST' && path === '/api/model-forge/headphone-stand/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateHeadphoneStand3MF } = await import('./generators/headphone-stand-generator.js');
+          const buf = await generateHeadphoneStand3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="headphone_stand.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Headphone stand generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: VESA Mount ──
+    if (method === 'POST' && path === '/api/model-forge/vesa-mount/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateVesaMount3MF } = await import('./generators/vesa-mount-generator.js');
+          const buf = await generateVesaMount3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="vesa_mount.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'VESA mount generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Electronics Case ──
+    if (method === 'POST' && path === '/api/model-forge/electronics-case/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateElectronicsCase3MF } = await import('./generators/electronics-case-generator.js');
+          const buf = await generateElectronicsCase3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="electronics_case.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Electronics case generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Battery Holder ──
+    if (method === 'POST' && path === '/api/model-forge/battery-holder/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateBatteryHolder3MF } = await import('./generators/battery-holder-generator.js');
+          const buf = await generateBatteryHolder3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="battery_holder.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Battery holder generation failed: ' + e.message }, 500); }
+      });
+    }
+
     // ── Model Forge: Storage Box Generator ──
     if (method === 'POST' && path === '/api/model-forge/storage-box/generate-3mf') {
       return readBody(req, res, async (body) => {

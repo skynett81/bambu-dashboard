@@ -51,6 +51,11 @@
     { id: 'wall-plate', name: 'Wall Plate', icon: '⬜', desc: 'Blank wall plate with 4 corner screw holes', loader: 'loadForgeWallPlate', category: 'home' },
     { id: 'lidded-box', name: 'Lidded Box', icon: '📦', desc: 'Parametric box + friction-fit lid on one print', loader: 'loadForgeLiddedBox', category: 'home' },
     { id: 'peg-rail', name: 'Peg Rail', icon: '🪵', desc: 'Wall rail with multiple hanging pegs', loader: 'loadForgePegRail', category: 'home' },
+    { id: 'phone-stand', name: 'Phone Stand', icon: '📱', desc: 'Desktop stand with angled back and front lip', loader: 'loadForgePhoneStand', category: 'tech' },
+    { id: 'headphone-stand', name: 'Headphone Stand', icon: '🎧', desc: 'T-shape desktop headphone stand with yoke cross-bar', loader: 'loadForgeHeadphoneStand', category: 'tech' },
+    { id: 'vesa-mount', name: 'VESA Mount', icon: '🖥️', desc: 'VESA MIS-D plate (75 or 100mm patterns)', loader: 'loadForgeVesaMount', category: 'tech' },
+    { id: 'electronics-case', name: 'Electronics Case', icon: '💻', desc: 'Parametric case + lid for Pi, Arduino or custom boards', loader: 'loadForgeElectronicsCase', category: 'tech' },
+    { id: 'battery-holder', name: 'Battery Holder', icon: '🔋', desc: 'Compact block with bores for AA/AAA/18650/21700/C/D', loader: 'loadForgeBatteryHolder', category: 'tech' },
     { id: 'texture', name: 'Texture Surface', icon: '🧱', desc: 'Procedural textures: diamond plate, knurl, honeycomb, waves, brick', loader: 'loadForgeTexture', category: 'creative' },
     { id: 'validator', name: '3MF Validator', icon: '✅', desc: 'Validate 3MF files, check mesh integrity, detect extensions, match colors', loader: 'loadForgeValidator', category: 'tools' },
   ];
