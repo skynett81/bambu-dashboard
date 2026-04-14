@@ -38,6 +38,11 @@
     { id: 'spring', name: 'Compression Spring', icon: '🌀', desc: 'Helical coil spring — coils, diameter, wire, pitch', loader: 'loadForgeSpring', category: 'mechanical' },
     { id: 'hinge', name: 'Print-in-place Hinge', icon: '🪝', desc: 'Barrel hinge with interlocking knuckles and pin', loader: 'loadForgeHinge', category: 'mechanical' },
     { id: 'snapfit', name: 'Snap-fit Connector', icon: '🔒', desc: 'Cantilever snap-fit pair — male hook + female catch', loader: 'loadForgeSnapfit', category: 'mechanical' },
+    { id: 'spool-adapter', name: 'Spool Adapter', icon: '🎯', desc: 'Tube adapter to fit a spool hub onto a different mount', loader: 'loadForgeSpoolAdapter', category: 'printer' },
+    { id: 'cable-chain', name: 'Cable Chain Link', icon: '⛓️', desc: 'Drag chain segment — print many and connect with pins', loader: 'loadForgeCableChain', category: 'printer' },
+    { id: 'first-layer', name: 'First Layer Test', icon: '📐', desc: 'Bed leveling + Z offset calibration pattern', loader: 'loadForgeFirstLayer', category: 'printer' },
+    { id: 'nozzle-storage', name: 'Nozzle Storage', icon: '🔩', desc: 'Storage block with labeled bores for M6 printer nozzles', loader: 'loadForgeNozzleStorage', category: 'printer' },
+    { id: 'scraper-holder', name: 'Scraper Holder', icon: '🪚', desc: 'Wall-mounted bracket for a bed scraper or putty knife', loader: 'loadForgeScraperHolder', category: 'printer' },
     { id: 'texture', name: 'Texture Surface', icon: '🧱', desc: 'Procedural textures: diamond plate, knurl, honeycomb, waves, brick', loader: 'loadForgeTexture', category: 'creative' },
     { id: 'validator', name: '3MF Validator', icon: '✅', desc: 'Validate 3MF files, check mesh integrity, detect extensions, match colors', loader: 'loadForgeValidator', category: 'tools' },
   ];

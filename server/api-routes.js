@@ -6058,6 +6058,66 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // ── Model Forge: Filament Spool Adapter ──
+    if (method === 'POST' && path === '/api/model-forge/spool-adapter/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateSpoolAdapter3MF } = await import('./generators/spool-adapter-generator.js');
+          const buf = await generateSpoolAdapter3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="spool_adapter.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Spool adapter generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Cable Chain Link ──
+    if (method === 'POST' && path === '/api/model-forge/cable-chain/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateCableChain3MF } = await import('./generators/cable-chain-generator.js');
+          const buf = await generateCableChain3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="cable_chain_link.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Cable chain generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: First Layer Test ──
+    if (method === 'POST' && path === '/api/model-forge/first-layer/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateFirstLayerTest3MF } = await import('./generators/first-layer-test-generator.js');
+          const buf = await generateFirstLayerTest3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="first_layer.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'First layer test generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Nozzle Storage ──
+    if (method === 'POST' && path === '/api/model-forge/nozzle-storage/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateNozzleStorage3MF } = await import('./generators/nozzle-storage-generator.js');
+          const buf = await generateNozzleStorage3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="nozzle_storage.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Nozzle storage generation failed: ' + e.message }, 500); }
+      });
+    }
+
+    // ── Model Forge: Scraper Holder ──
+    if (method === 'POST' && path === '/api/model-forge/scraper-holder/generate-3mf') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { generateScraperHolder3MF } = await import('./generators/scraper-holder-generator.js');
+          const buf = await generateScraperHolder3MF(body);
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': 'attachment; filename="scraper_holder.3mf"', 'Content-Length': buf.length });
+          res.end(buf);
+        } catch (e) { sendJson(res, { error: 'Scraper holder generation failed: ' + e.message }, 500); }
+      });
+    }
+
     // ── Model Forge: Storage Box Generator ──
     if (method === 'POST' && path === '/api/model-forge/storage-box/generate-3mf') {
       return readBody(req, res, async (body) => {
