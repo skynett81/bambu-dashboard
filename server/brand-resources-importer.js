@@ -264,6 +264,249 @@ export async function importSnapmakerResources() {
 }
 
 // ══════════════════════════════════════════
+// CREALITY — K1/K1 Max/K2 firmware + Klipper-specific G-codes
+// ══════════════════════════════════════════
+
+export async function importCrealityResources() {
+  const db = getDb();
+  const startTs = Date.now();
+
+  // Creality-specific Klipper commands (beyond standard Klipper)
+  const crealityGcodes = [
+    ['CR_BED_HEATING_AUTO', 'Auto Bed Temp', 'Creality AI-assisted bed temperature calibration.', '', 'CR_BED_HEATING_AUTO', 'K1,K1 Max,K2 Plus'],
+    ['CR_LIDAR_CALIBRATE', 'AI Lidar Calibrate', 'Calibrate AI lidar for first layer scanning (K1 Max/K2).', '', 'CR_LIDAR_CALIBRATE', 'K1 Max,K2 Plus'],
+    ['CR_CARBON_FILTER', 'Carbon Filter Fan', 'Control active carbon filter fan (K1 Max).', 'SPEED=[0-255]', 'CR_CARBON_FILTER SPEED=128', 'K1 Max,K2 Plus'],
+    ['CR_CALIBRATE_PA', 'Pressure Advance Calibrate', 'Run Creality Print pressure advance calibration.', '', 'CR_CALIBRATE_PA', 'K1,K1 Max,K2 Plus,Ender 3 V3'],
+    ['CR_CHAMBER_TEMP', 'Chamber Temperature', 'Read chamber temperature sensor.', '', 'CR_CHAMBER_TEMP', 'K1 Max,K2 Plus'],
+    ['TIMELAPSE_TAKE_FRAME', 'Timelapse Frame', 'Capture timelapse frame at current layer.', '', 'TIMELAPSE_TAKE_FRAME', 'K1,K1 Max,K2 Plus'],
+    ['TIMELAPSE_RENDER', 'Timelapse Render', 'Render collected timelapse frames to video.', '', 'TIMELAPSE_RENDER', 'K1,K1 Max,K2 Plus'],
+    ['M605', 'IDEX Mode', 'Set IDEX mode (Creality CR-X models).', 'S[0-2]', 'M605 S0', 'CR-X,CR-X Pro'],
+    ['G34', 'Z-Alignment', 'Automatic Z-axis alignment for dual-Z printers.', '', 'G34', 'K1 Max,K2 Plus'],
+  ];
+
+  // Creality common error codes (from Creality community troubleshooting)
+  const crealityErrors = [
+    ['E001', 'serious', 'Temperature', 'Hotend thermistor disconnected', 'Extruder temperature reading is invalid', 'Check thermistor wiring on hotend'],
+    ['E002', 'serious', 'Temperature', 'Heatbed thermistor disconnected', 'Bed temperature reading is invalid', 'Check thermistor wiring under bed'],
+    ['E003', 'warning', 'Motion', 'X-axis homing failed', 'X-axis endstop not triggered during home', 'Check X-axis endstop and belt'],
+    ['E004', 'warning', 'Motion', 'Y-axis homing failed', 'Y-axis endstop not triggered', 'Check Y-axis endstop and belt'],
+    ['E005', 'warning', 'Motion', 'Z-axis homing failed', 'Z-probe or endstop not triggered', 'Check probe connection and alignment'],
+    ['E006', 'warning', 'Filament', 'Filament runout', 'Filament sensor triggered during print', 'Load filament and resume'],
+    ['E009', 'serious', 'Lidar', 'AI lidar failure', 'K1 Max/K2 AI lidar module not responding', 'Power cycle printer; check lidar cable'],
+    ['E010', 'serious', 'Temperature', 'Thermal runaway', 'Temperature did not respond to heating commands', 'Power off immediately; check thermistor and heater'],
+  ];
+
+  _insertBrandGcodes(db, 'creality', crealityGcodes, 'https://github.com/CrealityOfficial');
+  _insertBrandErrors(db, 'creality', crealityErrors, ['K1', 'K1 Max', 'K1 SE', 'K2 Plus', 'Ender 3 V3', 'Ender 3 V3 Plus', 'CR-10 Smart Pro']);
+
+  const durationMs = Date.now() - startTs;
+  const count = crealityGcodes.length + (crealityErrors.length * 7);
+  log.info(`Imported ${count} Creality entries in ${Math.round(durationMs / 1000)}s`);
+  _setRefreshStatus('creality_resources', 'ok', count);
+  return { imported: count, durationMs };
+}
+
+// ══════════════════════════════════════════
+// ELEGOO — Neptune 4 Pro/Max resources
+// ══════════════════════════════════════════
+
+export async function importElegooResources() {
+  const db = getDb();
+  const startTs = Date.now();
+
+  const elegooGcodes = [
+    ['EG_SAVE_VIBRATION', 'Save Vibration Calibration', 'Store input shaper results from resonance test.', '', 'EG_SAVE_VIBRATION', 'Neptune 4,Neptune 4 Pro,Neptune 4 Max'],
+    ['EG_AUTO_LEVEL', 'Auto Level', 'Run Elegoo 121-point bed mesh calibration.', '', 'EG_AUTO_LEVEL', 'Neptune 4,Neptune 4 Pro,Neptune 4 Max,Neptune 4 Plus'],
+    ['M106 P0', 'Part Fan 0', 'Control part cooling fan 0 (main).', 'S[0-255]', 'M106 P0 S255', 'all Elegoo'],
+    ['M106 P2', 'Side Fan', 'Control side auxiliary fan (Neptune 4 Pro).', 'S[0-255]', 'M106 P2 S128', 'Neptune 4 Pro,Neptune 4 Max'],
+    ['M600', 'Filament Change', 'Pause for filament change at current position.', '', 'M600', 'all Elegoo'],
+    ['EG_RESTORE_PROBE', 'Restore Probe Offset', 'Restore Z-probe offset from saved value.', '', 'EG_RESTORE_PROBE', 'Neptune 4,Neptune 4 Pro'],
+    ['SKEW_PROFILE_LOAD', 'Load Skew Profile', 'Load XY skew correction profile.', 'NAME=[name]', 'SKEW_PROFILE_LOAD NAME=default', 'Neptune 4 Plus,Neptune 4 Max'],
+  ];
+
+  const elegooErrors = [
+    ['ELG_001', 'warning', 'Temperature', 'Hotend thermistor error', 'Temperature sensor reading out of range', 'Check thermistor connection'],
+    ['ELG_002', 'serious', 'Motion', 'Homing sequence failed', 'One or more axes failed to home', 'Check all endstops and belts'],
+    ['ELG_003', 'warning', 'Filament', 'Filament sensor triggered', 'Filament runout detected', 'Load new spool'],
+    ['ELG_004', 'info', 'Bed', 'Bed mesh not calibrated', 'No mesh profile loaded', 'Run EG_AUTO_LEVEL or G29'],
+    ['ELG_005', 'serious', 'Power', 'PSU voltage out of range', 'Power supply voltage drifted from nominal', 'Check PSU; may need replacement'],
+  ];
+
+  _insertBrandGcodes(db, 'elegoo', elegooGcodes, 'https://github.com/Elegoo3DPrinters');
+  _insertBrandErrors(db, 'elegoo', elegooErrors, ['Neptune 4', 'Neptune 4 Pro', 'Neptune 4 Plus', 'Neptune 4 Max']);
+
+  const durationMs = Date.now() - startTs;
+  const count = elegooGcodes.length + (elegooErrors.length * 4);
+  log.info(`Imported ${count} Elegoo entries in ${Math.round(durationMs / 1000)}s`);
+  _setRefreshStatus('elegoo_resources', 'ok', count);
+  return { imported: count, durationMs };
+}
+
+// ══════════════════════════════════════════
+// VORON — toolhead + mod database + calibration
+// ══════════════════════════════════════════
+
+export async function importVoronResources() {
+  const db = getDb();
+  const startTs = Date.now();
+
+  const voronGcodes = [
+    ['G32', 'Full Home + Level', 'Home all axes and run QGL (2.4/Trident) or Z tilt.', '', 'G32', 'V2.4,Trident,Phoenix'],
+    ['QUAD_GANTRY_LEVEL', 'Quad Gantry Level', 'Level gantry by probing all four corners (V2.4).', 'RETRIES=[n] HORIZONTAL_MOVE_Z=[z]', 'QUAD_GANTRY_LEVEL', 'V2.4'],
+    ['Z_TILT_ADJUST', 'Z Tilt Adjust', 'Adjust Z steppers for level gantry (Trident).', '', 'Z_TILT_ADJUST', 'Trident,Switchwire'],
+    ['CLEAN_NOZZLE', 'Clean Nozzle', 'Move to brush and wipe nozzle (Stealthburner/Afterburner).', '', 'CLEAN_NOZZLE', 'V2.4,Trident,V0,V1'],
+    ['ATTACH_PROBE_LOCK', 'Attach Klicky Probe', 'Attach magnetic Klicky/Klickyng probe.', '', 'ATTACH_PROBE_LOCK', 'Klicky mod'],
+    ['DOCK_PROBE_UNLOCK', 'Dock Klicky Probe', 'Return Klicky probe to dock.', '', 'DOCK_PROBE_UNLOCK', 'Klicky mod'],
+    ['TAP_PROBE', 'Voron Tap Probe', 'Trigger Voron Tap (load cell probe).', '', 'TAP_PROBE', 'V2.4,Trident with Tap'],
+    ['NEVERMORE_ON', 'Activate Nevermore', 'Turn on Nevermore carbon filter.', 'SPEED=[0-255]', 'NEVERMORE_ON SPEED=255', 'enclosed Voron'],
+    ['NEVERMORE_OFF', 'Deactivate Nevermore', 'Turn off Nevermore filter.', '', 'NEVERMORE_OFF', 'enclosed Voron'],
+    ['PURGE_LINE', 'Purge Line', 'Print a Voron-style purge line at start.', '', 'PURGE_LINE', 'all Voron'],
+    ['PRINT_START', 'Print Start Macro', 'Voron standard print start macro (heating, leveling, purging).', 'BED=[t] EXTRUDER=[t] CHAMBER=[t]', 'PRINT_START BED=110 EXTRUDER=245', 'all Voron'],
+    ['PRINT_END', 'Print End Macro', 'Voron standard print end macro (cooling, parking).', '', 'PRINT_END', 'all Voron'],
+    ['PARK', 'Park Toolhead', 'Park toolhead at safe position (bed back-right corner typically).', '', 'PARK', 'all Voron'],
+    ['CENTER', 'Center Toolhead', 'Move toolhead to bed center.', '', 'CENTER', 'all Voron'],
+    ['M600', 'Filament Change', 'Pause for manual filament change.', '', 'M600', 'all'],
+    ['BLTOUCH_DEBUG', 'BLTouch Debug', 'Manual BLTouch control for diagnostics.', 'COMMAND=[cmd]', 'BLTOUCH_DEBUG COMMAND=pin_down', 'BLTouch users'],
+    ['BED_SCREWS_ADJUST', 'Bed Screws Adjust', 'Manual bed screw leveling helper (V0/Switchwire).', '', 'BED_SCREWS_ADJUST', 'V0,Switchwire'],
+  ];
+
+  // Voron-specific mod / accessory database
+  const voronMods = [
+    // These are stored as "gcode reference" entries with description acting as mod info
+    ['MOD_STEALTHBURNER', 'Stealthburner', 'Modern Voron toolhead with CNC cowl, 5015 part cooling fans, ADXL345 mount.', '', '', 'all Voron'],
+    ['MOD_AFTERBURNER', 'Afterburner (legacy)', 'Older Voron toolhead (V1.8/V2.2) — superseded by Stealthburner.', '', '', 'V1,V2 legacy'],
+    ['MOD_GALILEO', 'Galileo 2', 'High-performance gear-reduction extruder with planetary gearbox.', '', '', 'V2,Trident,Phoenix'],
+    ['MOD_CLOCKWORK2', 'Clockwork 2', 'Stealthburner default extruder.', '', '', 'all Stealthburner'],
+    ['MOD_TAP', 'Voron Tap', 'Load-cell based Z probe built into toolhead. Ultra-accurate nozzle-contact probing.', '', '', 'V2.4,Trident,Phoenix'],
+    ['MOD_KLICKY', 'Klicky Probe', 'Magnetic dockable inductive probe.', '', '', 'all (legacy)'],
+    ['MOD_CAN_BUS', 'CAN Bus Toolhead', 'CAN bus control board on toolhead reduces wire count.', '', '', 'all modern Voron'],
+    ['MOD_NEVERMORE', 'Nevermore Air Filter', 'Active carbon HEPA filter for enclosed printers (ABS/ASA safety).', '', '', 'enclosed Voron'],
+    ['MOD_CHAMBER_HEATER', 'Chamber Heater', 'Active heater for high-temp materials (PA, PC).', '', '', 'Voron 2.4,Trident'],
+    ['MOD_ADXL345', 'ADXL345 Accelerometer', 'Input shaper calibration via accelerometer measurements.', '', '', 'all'],
+    ['MOD_LED_STRIP', 'Addressable LEDs', 'Neopixel/WS2812 status LEDs for print progress.', '', '', 'all'],
+    ['MOD_FILAMENT_SENSOR', 'Filament Runout Sensor', 'BTT SFS 2.0, Annex, or homemade runout detection.', '', '', 'all'],
+  ];
+
+  _insertBrandGcodes(db, 'voron', [...voronGcodes, ...voronMods], 'https://docs.vorondesign.com');
+
+  // Voron calibration / common issues as "error codes"
+  const voronErrors = [
+    ['VORON_QGL_FAIL', 'warning', 'Motion', 'QGL convergence failed', 'Quad gantry level could not reach target within max retries', 'Check Z motor belts and pulleys; verify probe consistency'],
+    ['VORON_PROBE_NOISE', 'warning', 'Probe', 'Probe readings noisy', 'Tap/Klicky probe accuracy > 0.01mm', 'Check probe mount tightness; re-run PROBE_ACCURACY'],
+    ['VORON_BELT_NOT_TENSIONED', 'warning', 'Motion', 'Belt tension uneven', 'A and B belt frequencies differ by more than 5Hz', 'Adjust belt tensioners to match A and B belts'],
+    ['VORON_INPUT_SHAPER_LOW', 'info', 'Calibration', 'Low shaper frequency', 'Shaper frequency below 30Hz indicates frame flex or loose belts', 'Check frame squareness, belt tension'],
+    ['VORON_FIRST_LAYER_SQUISH', 'info', 'Print quality', 'First layer squish incorrect', 'First layer shows under- or over-extrusion', 'Re-tune Z offset with a first layer calibration print'],
+  ];
+
+  _insertBrandErrors(db, 'voron', voronErrors, ['V0.2', 'V1.8', 'V2.4', 'Trident', 'Switchwire', 'Phoenix']);
+
+  const durationMs = Date.now() - startTs;
+  const count = voronGcodes.length + voronMods.length + (voronErrors.length * 6);
+  log.info(`Imported ${count} Voron entries in ${Math.round(durationMs / 1000)}s`);
+  _setRefreshStatus('voron_resources', 'ok', count);
+  return { imported: count, durationMs };
+}
+
+// ══════════════════════════════════════════
+// ANKERMAKE — M5/M5C protocol + firmware
+// ══════════════════════════════════════════
+
+export async function importAnkerMakeResources() {
+  const db = getDb();
+  const startTs = Date.now();
+
+  const ankerGcodes = [
+    ['M1000', 'Upload Progress', 'AnkerMake print progress update (internal protocol).', '', 'M1000', 'M5,M5C'],
+    ['M1001', 'Status Query', 'Query AnkerMake status via MQTT.', '', 'M1001', 'M5,M5C'],
+    ['M1002', 'Video Stream', 'Enable/disable AnkerMake video streaming (AI camera).', '', 'M1002', 'M5,M5C'],
+    ['M104', 'Set Hotend Temp', 'Set hotend temperature without waiting.', 'S[temp]', 'M104 S220', 'all Anker'],
+    ['M140', 'Set Bed Temp', 'Set bed temperature without waiting.', 'S[temp]', 'M140 S60', 'all Anker'],
+    ['M106', 'Part Fan', 'Set part cooling fan speed.', 'S[0-255]', 'M106 S255', 'all Anker'],
+    ['G28', 'Home', 'Home all axes.', 'X Y Z', 'G28', 'all Anker'],
+    ['G29', 'Bed Level', 'Run automatic bed leveling.', '', 'G29', 'all Anker'],
+  ];
+
+  const ankerErrors = [
+    ['ANK_E01', 'warning', 'Connection', 'Cloud connection lost', 'M5 cannot reach AnkerMake cloud servers', 'Check internet; restart printer'],
+    ['ANK_E02', 'warning', 'Camera', 'AI camera offline', 'Built-in AI camera not responding', 'Power cycle printer'],
+    ['ANK_E03', 'warning', 'Filament', 'Filament runout', 'Runout sensor triggered', 'Load filament and resume'],
+    ['ANK_E04', 'serious', 'Temperature', 'Thermal runaway', 'Temperature not responding to commands', 'Power off; check thermistor'],
+    ['ANK_E05', 'warning', 'Bed', 'Auto level failed', 'Probe could not reach bed', 'Check probe wiring; clean nozzle'],
+    ['ANK_E06', 'info', 'Network', 'ankerctl not connected', '3DPrintForge cannot reach ankerctl proxy', 'Start ankerctl on port 4470'],
+  ];
+
+  _insertBrandGcodes(db, 'anker', ankerGcodes, 'https://github.com/Ankermgmt/ankermake-m5-protocol');
+  _insertBrandErrors(db, 'anker', ankerErrors, ['M5', 'M5C']);
+
+  const durationMs = Date.now() - startTs;
+  const count = ankerGcodes.length + (ankerErrors.length * 2);
+  log.info(`Imported ${count} AnkerMake entries in ${Math.round(durationMs / 1000)}s`);
+  _setRefreshStatus('anker_resources', 'ok', count);
+  return { imported: count, durationMs };
+}
+
+// ══════════════════════════════════════════
+// QIDI — X-Plus 3 / Q1 Pro / X-Max 3 resources
+// ══════════════════════════════════════════
+
+export async function importQidiResources() {
+  const db = getDb();
+  const startTs = Date.now();
+
+  const qidiGcodes = [
+    ['QIDI_CHAMBER_ON', 'Chamber Heater On', 'Enable active chamber heater (X-Plus 3/X-Max 3).', 'S[temp]', 'QIDI_CHAMBER_ON S65', 'X-Plus 3,X-Max 3,Q1 Pro'],
+    ['QIDI_CHAMBER_OFF', 'Chamber Heater Off', 'Disable chamber heater.', '', 'QIDI_CHAMBER_OFF', 'X-Plus 3,X-Max 3,Q1 Pro'],
+    ['QIDI_AUX_FAN', 'Auxiliary Fan', 'Control auxiliary part cooling fan.', 'S[0-255]', 'QIDI_AUX_FAN S255', 'X-Plus 3,X-Max 3,Q1 Pro'],
+    ['QIDI_FILTER_FAN', 'Carbon Filter Fan', 'Control internal carbon filter fan.', 'S[0-255]', 'QIDI_FILTER_FAN S128', 'X-Plus 3,X-Max 3'],
+    ['QIDI_INPUT_SHAPER', 'Input Shaper Auto', 'Run automatic input shaper calibration.', 'AXIS=[X|Y|ALL]', 'QIDI_INPUT_SHAPER AXIS=ALL', 'X-Plus 3,X-Max 3,Q1 Pro'],
+    ['QIDI_BED_MESH', 'Bed Mesh Calibrate', 'Run QIDI 64-point bed mesh.', '', 'QIDI_BED_MESH', 'X-Plus 3,X-Max 3,Q1 Pro'],
+    ['QIDI_PURGE', 'Purge Line', 'Print QIDI-style purge line before print.', '', 'QIDI_PURGE', 'all QIDI'],
+    ['SET_KINEMATIC_POSITION', 'Kinematic Position', 'Reset Klipper kinematic position (advanced).', 'X Y Z', 'SET_KINEMATIC_POSITION X=0 Y=0', 'all Klipper'],
+  ];
+
+  const qidiErrors = [
+    ['QIDI_E01', 'warning', 'Chamber', 'Chamber heater timeout', 'Active chamber heater did not reach target', 'Check chamber heater wiring'],
+    ['QIDI_E02', 'warning', 'Motion', 'Bed mesh out of range', 'Bed mesh probe values exceed safe range', 'Re-level bed manually; check probe'],
+    ['QIDI_E03', 'info', 'Filament', 'Filament runout', 'Runout sensor triggered', 'Load new filament'],
+    ['QIDI_E04', 'serious', 'Temperature', 'Hotend thermal runaway', 'Hotend temperature not responding', 'Power off; check thermistor'],
+    ['QIDI_E05', 'warning', 'Cooling', 'Carbon filter fan stalled', 'Filter fan tachometer reports no movement', 'Replace carbon filter fan'],
+  ];
+
+  _insertBrandGcodes(db, 'qidi', qidiGcodes, 'https://github.com/QIDITECH');
+  _insertBrandErrors(db, 'qidi', qidiErrors, ['X-Plus 3', 'X-Max 3', 'Q1 Pro', 'X-Smart 3']);
+
+  const durationMs = Date.now() - startTs;
+  const count = qidiGcodes.length + (qidiErrors.length * 4);
+  log.info(`Imported ${count} QIDI entries in ${Math.round(durationMs / 1000)}s`);
+  _setRefreshStatus('qidi_resources', 'ok', count);
+  return { imported: count, durationMs };
+}
+
+// ══════════════════════════════════════════
+// Shared insertion helpers
+// ══════════════════════════════════════════
+
+function _insertBrandGcodes(db, brand, rows, sourceUrl) {
+  const ins = db.prepare(`INSERT OR REPLACE INTO brand_gcode_reference
+    (brand, code, title, description, parameters, example, printer_models, source_url)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`);
+  for (const [code, title, desc, params, example, models] of rows) {
+    ins.run(brand, code, title, desc, params, example, models, sourceUrl);
+  }
+}
+
+function _insertBrandErrors(db, brand, rows, printerModels) {
+  const ins = db.prepare(`INSERT OR REPLACE INTO brand_error_codes
+    (brand, code, printer_model, category, severity, title, description, actions, wiki_url)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+  for (const [code, severity, category, title, desc, action] of rows) {
+    for (const model of printerModels) {
+      ins.run(brand, code, model, category, severity, title, desc, action, '');
+    }
+  }
+}
+
+// ══════════════════════════════════════════
 // OCTOPRINT — plugin catalog
 // ══════════════════════════════════════════
 
@@ -321,6 +564,11 @@ export async function importAllBrandResources() {
   try { results.bambu = await importBambuResources(); } catch (e) { results.bambu = { error: e.message }; }
   try { results.klipper = await importKlipperResources(); } catch (e) { results.klipper = { error: e.message }; }
   try { results.snapmaker = await importSnapmakerResources(); } catch (e) { results.snapmaker = { error: e.message }; }
+  try { results.creality = await importCrealityResources(); } catch (e) { results.creality = { error: e.message }; }
+  try { results.elegoo = await importElegooResources(); } catch (e) { results.elegoo = { error: e.message }; }
+  try { results.voron = await importVoronResources(); } catch (e) { results.voron = { error: e.message }; }
+  try { results.anker = await importAnkerMakeResources(); } catch (e) { results.anker = { error: e.message }; }
+  try { results.qidi = await importQidiResources(); } catch (e) { results.qidi = { error: e.message }; }
   try { results.octoprint = await importOctoPrintResources(); } catch (e) { results.octoprint = { error: e.message }; }
   return results;
 }

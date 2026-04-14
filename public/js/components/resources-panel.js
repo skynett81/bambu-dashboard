@@ -11,8 +11,13 @@
   const BRANDS = [
     { id: 'prusa', label: 'Prusa', icon: 'bi-printer', tabs: ['filaments', 'print-profiles', 'printer-profiles', 'errors', 'gcodes'] },
     { id: 'bambu', label: 'Bambu Lab', icon: 'bi-gem', tabs: ['errors', 'gcodes'] },
-    { id: 'klipper', label: 'Klipper', icon: 'bi-cpu', tabs: ['gcodes'] },
+    { id: 'klipper', label: 'Klipper (generic)', icon: 'bi-cpu', tabs: ['gcodes'] },
     { id: 'snapmaker', label: 'Snapmaker', icon: 'bi-hexagon', tabs: ['errors', 'gcodes'] },
+    { id: 'creality', label: 'Creality', icon: 'bi-triangle', tabs: ['errors', 'gcodes'] },
+    { id: 'elegoo', label: 'Elegoo', icon: 'bi-lightning', tabs: ['errors', 'gcodes'] },
+    { id: 'voron', label: 'Voron', icon: 'bi-hexagon-half', tabs: ['errors', 'gcodes'] },
+    { id: 'anker', label: 'AnkerMake', icon: 'bi-lightning-charge', tabs: ['errors', 'gcodes'] },
+    { id: 'qidi', label: 'QIDI', icon: 'bi-box', tabs: ['errors', 'gcodes'] },
     { id: 'octoprint', label: 'OctoPrint', icon: 'bi-plug', tabs: ['plugins'] },
   ];
 

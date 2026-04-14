@@ -46,6 +46,8 @@ export class MoonrakerClient {
     this.ip = config.printer.ip;
     this.port = config.printer.port || 80;
     this._printerId = config.printer.id || '';
+    this._printerBrand = (config.printer.type || '').toLowerCase(); // 'creality', 'elegoo', 'voron', 'qidi', 'anker', 'snapmaker', etc.
+    this._printerModel = config.printer.model || '';
     this.apiKey = config.printer.accessCode || '';
     this.hub = hub;
     this.ws = null;
@@ -1816,11 +1818,100 @@ export class MoonrakerClient {
       return { available: false, error: e.message };
     }
 
-    return { available: false, reason: 'update_manager not configured and not a U1' };
+    // Brand-specific firmware fallback for non-U1 Moonraker printers
+    try {
+      const brandResult = await this._checkBrandFirmware();
+      if (brandResult) return brandResult;
+    } catch (e) {
+      return { available: false, error: e.message };
+    }
+
+    return { available: false, reason: 'update_manager not configured and brand not recognized' };
   }
 
   async triggerFirmwareUpdate(pkg) {
     return this.triggerUpdate(pkg || 'klipper');
+  }
+
+  // Brand-specific firmware check via GitHub releases
+  async _checkBrandFirmware() {
+    const brand = this._printerBrand || this._guessBrand();
+    if (!brand) return null;
+
+    // Map brand → GitHub repo(s) that publish firmware
+    const brandRepos = {
+      'creality': ['CrealityOfficial/Creality-Wiki'],
+      'elegoo': ['Elegoo3DPrinters/Neptune-4'],
+      'voron': ['VoronDesign/Voron-2'],
+      'anker': ['Ankermgmt/ankermake-m5-protocol'],
+      'ankermake': ['Ankermgmt/ankermake-m5-protocol'],
+      'qidi': ['QIDITECH/qidi-klipper'],
+      'ratrig': ['RatOS/RatOS'],
+    };
+    const repos = brandRepos[brand];
+    if (!repos || repos.length === 0) return null;
+
+    // Get current Klipper version from printer.info
+    let current = 'unknown';
+    try {
+      const info = await this._apiGet('/printer/info');
+      current = info?.result?.software_version || 'unknown';
+    } catch {}
+
+    // Fetch latest GitHub release
+    try {
+      const repo = repos[0];
+      const res = await fetch(`https://api.github.com/repos/${repo}/releases/latest`, {
+        signal: AbortSignal.timeout(8000),
+        headers: { 'Accept': 'application/vnd.github+json', 'User-Agent': '3dprintforge' },
+      });
+      if (!res.ok) {
+        // Some repos use tags instead of releases
+        const tagsRes = await fetch(`https://api.github.com/repos/${repo}/tags`, {
+          signal: AbortSignal.timeout(8000),
+          headers: { 'Accept': 'application/vnd.github+json', 'User-Agent': '3dprintforge' },
+        });
+        if (!tagsRes.ok) return { available: false, current, source: `${brand}-github`, reason: 'No releases or tags found' };
+        const tags = await tagsRes.json();
+        if (!Array.isArray(tags) || tags.length === 0) return { available: false, current, source: `${brand}-github` };
+        const latest = tags[0]?.name || '';
+        return {
+          available: false, // Can't reliably compare Klipper version to vendor tag
+          current,
+          latest,
+          source: `${brand}-github-tag`,
+          reason: 'Brand firmware tracked via tags — manual verification recommended',
+        };
+      }
+      const release = await res.json();
+      const tag = (release.tag_name || '').replace(/^v/, '');
+      return {
+        available: false, // User must manually confirm brand firmware updates
+        current,
+        latest: tag,
+        releaseUrl: release.html_url || `https://github.com/${repo}/releases`,
+        releaseNotes: (release.body || '').slice(0, 2000),
+        publishedAt: release.published_at,
+        source: `${brand}-github`,
+        reason: 'Brand firmware — compare versions manually',
+      };
+    } catch (e) {
+      return { available: false, current, error: e.message, source: `${brand}-github` };
+    }
+  }
+
+  // Guess brand from Klipper hostname or software_version
+  _guessBrand() {
+    const model = (this._printerModel || '').toLowerCase();
+    const swVer = (this.state?._klipper_state?.state_message || '').toLowerCase();
+    const combined = `${model} ${swVer}`;
+    if (/creality|k1|k2|ender/i.test(combined)) return 'creality';
+    if (/elegoo|neptune/i.test(combined)) return 'elegoo';
+    if (/voron|v0|v1|v2\.4|trident|phoenix|switchwire/i.test(combined)) return 'voron';
+    if (/anker|m5/i.test(combined)) return 'anker';
+    if (/qidi|x-plus|x-max|q1 pro/i.test(combined)) return 'qidi';
+    if (/ratrig|ratos|v-core/i.test(combined)) return 'ratrig';
+    return null;
   }
 
   // Fetch dev commits from Snapmaker U1 open-source repos since the last release
