@@ -17,7 +17,7 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 - **Print Guard** — automatic protection using xcam + 5 sensor monitors (temp, filament, fan, stall, errors)
 - **Print Queue** — multi-printer dispatch with load balancing and pre-print filament checks
 - **Filament Inventory** — favorites, color filters, bulk add, HueForge TD, CSV import, Spoolman sync
-- **Model Forge** — 17 parametric 3D generators: signs, lithophanes, boxes, vases, threads, lattices, textures, and more
+- **Model Forge** — 51 parametric 3D generators across 8 categories: organization (Gridfinity, storage boxes, cable labels), mechanical (gears, pulleys, springs, hinges, snap-fits), printer (spool adapters, cable chains, first-layer tests, nozzle storage), home (hooks, clips, pots, organizers, wall plates, lidded boxes), tech (phone/headphone stands, VESA mounts, Raspberry Pi cases, battery holders), creative (voronoi, topographic maps, 3D QR, shapes, honeycomb, dice towers, miniature bases)
 - **Cloud Slicer** — upload files, auto-slice with OrcaSlicer/PrusaSlicer, FTPS to printer
 - **7 notification channels** — Telegram, Discord, Email, Webhook, ntfy, Pushover, SMS
 - **Multi-brand** — Bambu Lab, Snapmaker, Prusa, OctoPrint, Creality, Elegoo, Voron, AnkerMake, QIDI, RatRig

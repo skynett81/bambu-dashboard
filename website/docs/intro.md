@@ -17,7 +17,7 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 ### Viktigste funksjoner
 
 - **Live dashboard** — sanntids temperatur, fremgang, kamera, AMS-status med LIVE-indikator
-- **Model Forge** — 17 innebygde 3D-verktoy: Sign Maker, Lithophane, Storage Box, Text Plate, Keychain, Cable Label, Image Relief, Stencil, NFC Filament Tag, 3MF Converter, Calibration Tools, Lattice Structure, Multi-Color, Advanced Vase, Threads & Joints, Texture Surface og 3MF Validator
+- **Model Forge** — 51 innebygde 3D-verktøy på tvers av 8 kategorier: organisering (Gridfinity Baseplate/Bin/Lid/Tool Holder, Storage Box, Cable Label, Desk Organizer, Lidded Box, Peg Rail), mekanikk (Gear, Pulley, Spring, Hinge, Snap-fit, Threads & Joints, Lattice Structure), printerspesifikt (Spool Adapter, Cable Chain, First Layer Test, Nozzle Storage, Scraper Holder, Calibration Tools), hjem (Wall Hook, Cable Clip, Plant Pot, Wall Bracket, Wall Plate), teknologi (Phone Stand, Headphone Stand, VESA Mount, Raspberry Pi/Arduino Case, Battery Holder), og kreativt (Sign Maker, Lithophane, Text Plate, Keychain, Image Relief, Stencil, Multi-Color, Advanced Vase, Texture Surface, NFC Filament Tag, Voronoi Tray, Topographic Map, 3D QR Code, Shape Extruder, Honeycomb Tile, Dice Tower, Miniature Base)
 - **3D modellvisning** — 3MFConsortium 3mfViewer for 3MF-filer, gcode toolpath-visning med per-lag farger, Three.js-basert rendering
 - **G-code Analyzer** — fullstendig G-code-analyse med 3D toolpath-visning for alle printertyper
 - **AdminLTE 4** — moderne dashboard-rammeverk med treeview-sidebar og responsivt design

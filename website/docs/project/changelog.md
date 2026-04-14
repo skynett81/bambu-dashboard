@@ -4,6 +4,77 @@ All notable changes to 3DPrintForge.
 
 ---
 
+## Unreleased — Model Forge Expansion (34 new parametric tools)
+
+Adds 34 new parametric generators to Model Forge, bringing the total from
+17 to **51 tools** across **8 categories**: Organization, Mechanical,
+Printer, Home, Tech, Creative, Calibration, Utilities.
+
+### Batch 1 — Organization (Gridfinity)
+- **Gridfinity Baseplate** — 42mm grid, 1..12 units per axis, chamfered pockets
+- **Gridfinity Bin** — 1..6 grid units, 2..15 height units (7mm each)
+- **Gridfinity Lid** — flat lid with skirt
+- **Gridfinity Tool Holder** — block with round tool slots
+
+### Batch 2 — Mechanical
+- **Spur Gear** — involute profile, module 0.3..5, bore
+- **Timing Belt Pulley** — GT2/GT3/HTD profiles with optional flanges
+- **Compression Spring** — helical coil, configurable coils/wire/pitch
+- **Print-in-place Hinge** — interlocking knuckles + pin
+- **Snap-fit Connector** — cantilever pair (male hook + female catch)
+
+### Batch 3 — Printer
+- **Filament Spool Adapter** — annular tube between two hub sizes
+- **Cable Chain Link** — drag chain segment with pivot holes
+- **First Layer Test** — single-layer calibration pattern
+- **Nozzle Storage Block** — labeled bores for M6 nozzles
+- **Scraper Holder** — wall-mount bracket
+
+### Batch 4 — Home
+- **Wall Hook** — plate + peg with screw holes
+- **Cable Clip** — C-shape snap clip
+- **Plant Pot** — tapered, hollow wall
+- **Desk Organizer** — tray with MxN compartments
+- **Wall Bracket** — L-bracket with optional gusset
+- **Wall Plate** — EU 86×86mm blank plate
+- **Lidded Box** — body + friction-fit lid
+- **Peg Rail** — horizontal rail with multiple pegs
+
+### Batch 5 — Tech
+- **Phone / Tablet Stand** — tilted back + base + front lip
+- **Headphone Stand** — T-shape with cross-bar yoke
+- **VESA Mount Plate** — 75 and 100mm MIS-D patterns
+- **Electronics Case** — parametric case + lid with standoffs (Pi 4/5, Arduino)
+- **Battery Holder** — AA/AAA/C/D/18650/21700/CR123A bores
+
+### Batch 6 — Creative
+- **Voronoi Tray** — randomized voronoi compartments
+- **Topographic Map** — synthetic terrain from layered noise
+- **3D QR Code** — raised QR for URLs, WiFi, any text
+- **Shape Extruder** — star, heart, flower, polygon, circle
+- **Honeycomb Tile** — hexagonal pattern tile
+- **Dice Tower** — tabletop tower with internal bounce ramps
+- **Miniature Base** — round tabletop figure base
+
+### Infrastructure improvements
+- **mesh-builder primitives**: `addExtrudedRoundedRect`, `addFrustumRoundedRect`,
+  `addExtrudedPolygon`, `addExtrudedAnnulus`, `addHelicalTube`, `addHexPrism`, `addTorus`
+- **`_shared/validate.js`** — shared num/int/bool/str validators for generators
+- **`forge-common.js`** — shared UI helper that cuts new-tool UI code by ~60%
+- **Category-grouped Model Forge hub** — tools now organized in the hub view
+
+### Quality
+- Every new tool is verified watertight via `lib3mf.IsManifoldAndOriented`
+- No slicer mesh repair required — models print as-is
+
+### v1 limitations (documented inline, target future release)
+- Square outer corners on Gridfinity parts (no 4mm fillet)
+- Gridfinity bins have flat bottoms (no chamfered foot)
+- No magnet pockets in baseplates (needs CSG)
+- Dice tower and phone stand use triangular prisms (not curved)
+
+---
+
 ## v1.1.18 — Universal Multi-Printer UI, Analytics, OctoPrint & Snapmaker Deep Integration (2026-04-11)
 
 ### Universal Multi-Printer Dashboard
