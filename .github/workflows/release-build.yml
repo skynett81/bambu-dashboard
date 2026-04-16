@@ -77,12 +77,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - name: Build Windows installers (unsigned placeholder)
-        run: npx electron-builder --win nsis portable
+      - name: Build Windows installers (nsis + portable + appx for Microsoft Store)
+        run: npx electron-builder --win nsis portable appx
       - uses: actions/upload-artifact@v4
         with:
           name: windows-installers-unsigned
-          path: dist-electron/*.exe
+          path: |
+            dist-electron/*.exe
+            dist-electron/*.appx
 
   sign-windows:
     needs: build-windows
@@ -120,7 +122,7 @@ jobs:
       - name: Generate SHA256SUMS
         run: |
           cd artifacts
-          find . -type f \( -name '*.exe' -o -name '*.AppImage' -o -name '*.deb' -o -name '*.rpm' -o -name '*.flatpak' -o -name '*.zst' -o -name '*.tar.gz' -o -name '*.dmg' -o -name '*.zip' \) -exec sha256sum {} \; | sed 's|\./||' > SHA256SUMS.txt
+          find . -type f \( -name '*.exe' -o -name '*.appx' -o -name '*.AppImage' -o -name '*.deb' -o -name '*.rpm' -o -name '*.flatpak' -o -name '*.zst' -o -name '*.tar.gz' -o -name '*.dmg' -o -name '*.zip' \) -exec sha256sum {} \; | sed 's|\./||' > SHA256SUMS.txt
           cat SHA256SUMS.txt
       - name: Upload to GitHub release
         uses: softprops/action-gh-release@v2
@@ -128,6 +130,7 @@ jobs:
           tag_name: ${{ github.ref_name }}
           files: |
             artifacts/**/*.exe
+            artifacts/**/*.appx
             artifacts/**/*.AppImage
             artifacts/**/*.deb
             artifacts/**/*.rpm

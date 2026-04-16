@@ -167,6 +167,16 @@
       "owner": "skynett81",
       "repo": "3dprintforge"
     },
+    "appx": {
+      "applicationId": "3DPrintForge",
+      "identityName": "GeekTech.3DPrintForge",
+      "publisher": "CN=GeekTech",
+      "publisherDisplayName": "GeekTech",
+      "displayName": "3DPrintForge",
+      "languages": ["en-US", "nb-NO"],
+      "showNameOnTiles": true,
+      "backgroundColor": "#1a1d21"
+    },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
