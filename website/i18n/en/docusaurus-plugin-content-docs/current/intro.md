@@ -47,6 +47,21 @@ description: A powerful, self-hosted dashboard for all your 3D printers
 - **English UI** — entire application in English, documentation available in English and Norwegian
 - **Self-hosted** — no cloud dependency, your data on your machine
 
+### New in v1.1.19
+
+- **Model Forge 51 tools** — 34 new across 8 categories: Gridfinity (baseplate/bin/lid/tool holder), mechanical (gear/pulley/spring/hinge/snap-fit), printer (spool adapter/cable chain/first layer test/nozzle storage), home (wall hook/cable clip/plant pot/wall bracket), tech (phone stand/headphone stand/VESA mount/RPi case), creative (voronoi/topographic map/3D QR code/honeycomb/dice tower/miniature base)
+- **JSCAD Studio** — scripted parametric 3D modelling with live code editor, @jscad/modeling primitives, STL export, 4 built-in examples
+- **Complete Prusa integration** — 6,735 filament profiles, 1,539 print profiles, 254 printer models, 968 error codes, 26 G-codes from PrusaSlicer + Prusa-Error-Codes repos
+- **All 8 brands deep** — Bambu (230 HMS + 20 G-codes), Klipper (32), Snapmaker (24), Creality (65), Elegoo (27), Voron (59 + mods database), AnkerMake (20), QIDI (28), OctoPrint (402 plugins)
+- **OctoPrint deep integration** — 50+ WebSocket events, system commands, user/group management, settings viewer, plugin inspection, connection manager
+- **Unified firmware update system** — check + update + dev commits tracking across all brands via Bambu Cloud, Snapmaker Wiki, GitHub releases
+- **Bambu firmware 01.02.00.00 features** — Print While Drying, motor disable, bed low-power mode, manual filament change, internal timelapse storage
+- **Electron desktop app** — system tray, native notifications, auto-start at login, auto-updater, deep linking
+- **Linux packages** — AppImage, deb, rpm, Flatpak, Arch pkg.tar.zst, tar.gz
+- **Windows packages** — NSIS installer, portable exe, MSIX for Microsoft Store
+- **macOS** — zip archive (unsigned)
+- **6 bug fixes** — defect auto-pause crash, rediscovery broadcast, Bambu Cloud array safety, firmware checker fallback, camera polling backoff
+
 ### New in v1.1.18
 
 - **Universal multi-printer UI** — all 35+ dashboard panels now work with all 8 printer types (Bambu, Snapmaker, Moonraker, PrusaLink, OctoPrint, AnkerMake, Creality, Elegoo)

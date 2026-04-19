@@ -146,7 +146,7 @@ const config: Config = {
           ],
         },
       ],
-      copyright: `3DPrintForge v1.1.18 — ${new Date().getFullYear()}`,
+      copyright: `3DPrintForge v1.1.19 — ${new Date().getFullYear()}`,
     },
     prism: {
       theme: prismThemes.github,

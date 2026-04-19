@@ -45,6 +45,20 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 - **Engelsk UI** — hele applikasjonen pa engelsk, dokumentasjon tilgjengelig pa norsk og engelsk
 - **Selvdriftet** — ingen sky-avhengighet, dine data pa din maskin
 
+### Nytt i v1.1.19
+
+- **Model Forge 51 verktøy** — 34 nye: Gridfinity (baseplate/bin/lid/tool holder), gir/pulley/fjær/hengsel/snapfit, spole-adapter/kabellkjede/førstelagtest/dyseoppbevaring, veggkrok/kabelklips/potteplante/veggbrakett, telefonholder/hodetelefonholder/VESA-feste/RaspberryPi-kabinett, voronoi/topografisk kart/3D QR-kode/honeycomb/terningttårn/miniatyrbase
+- **JSCAD Studio** — scripted parametrisk 3D-modellering med live kode-editor, @jscad/modeling, STL-eksport, 4 eksempler
+- **Prusa fullt integrert** — 6735 filament-profiler, 1539 print-profiler, 254 printermodeller, 968 feilkoder, 26 G-koder fra PrusaSlicer + Prusa-Error-Codes
+- **Alle 8 merker** — Bambu (230 HMS + 20 G-koder), Klipper (32), Snapmaker (24), Creality (65), Elegoo (27), Voron (59 + mods-database), AnkerMake (20), QIDI (28), OctoPrint (402 plugins)
+- **OctoPrint dyp integrasjon** — 50+ events via WebSocket, systemkommandoer, brukerhåndtering, innstillinger, plugin-inspeksjon, tilkoblingsmanager
+- **Unified firmware system** — sjekk + oppdatering + dev commits-tracking for alle merker via Bambu Cloud, Snapmaker Wiki, GitHub releases
+- **Bambu firmware 01.02.00.00** — Print While Drying, motor disable, bed low-power, manuell filamentbytte, timelapse intern lagring
+- **Electron desktop-app** — system tray, native varsler, auto-start, auto-updater, deep linking
+- **Linux pakker** — AppImage, deb, rpm, Flatpak, Arch pkg.tar.zst, tar.gz
+- **Windows pakker** — NSIS installer, portable exe, MSIX for Microsoft Store
+- **macOS** — zip (unsigned)
+
 ### Nytt i v1.1.18
 
 - **Universell multi-printer UI** — alle 35+ dashbord-paneler fungerer nå med alle 8 printertyper (Bambu, Snapmaker, Moonraker, PrusaLink, OctoPrint, AnkerMake, Creality, Elegoo)

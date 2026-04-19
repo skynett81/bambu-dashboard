@@ -4,7 +4,7 @@ All notable changes to 3DPrintForge.
 
 ---
 
-## Unreleased — Model Forge Expansion (34 new parametric tools)
+## v1.1.19 — Model Forge 51 Tools, JSCAD Studio, Electron Desktop App, 10-Brand Deep Integration (2026-04-19)
 
 Adds 34 new parametric generators to Model Forge, bringing the total from
 17 to **51 tools** across **8 categories**: Organization, Mechanical,
@@ -67,11 +67,90 @@ Printer, Home, Tech, Creative, Calibration, Utilities.
 - Every new tool is verified watertight via `lib3mf.IsManifoldAndOriented`
 - No slicer mesh repair required — models print as-is
 
-### v1 limitations (documented inline, target future release)
-- Square outer corners on Gridfinity parts (no 4mm fillet)
-- Gridfinity bins have flat bottoms (no chamfered foot)
-- No magnet pockets in baseplates (needs CSG)
-- Dice tower and phone stand use triangular prisms (not curved)
+### JSCAD Studio
+- Scripted parametric 3D modelling with live code editor
+- Server-side rendering via @jscad/modeling in Node VM sandbox (10s timeout)
+- All jscad primitives, booleans, transforms, extrusions available
+- Binary STL export with triangle count verification
+- 4 built-in examples: Cube, Gear, Text Plate, Honeycomb
+- Dynamic parameter UI from getParameterDefinitions()
+
+### Complete Prusa Ecosystem Integration
+- 6,735 filament profiles from PrusaSlicer (104+ vendor INI files)
+- 1,539 print profiles (layer heights, speeds, patterns)
+- 254 printer models across all brands
+- 968 error codes from Prusa-Error-Codes YAML (buddy/MMU/SLA)
+- 26 Prusa-specific G-code commands (M572, M862.x, M701/702, etc.)
+- PrusaLink OpenAPI-compliant pause/resume/continue endpoints
+- Automatic refresh every 7 days
+
+### All 8 Brands Deep Integration
+- Bambu Lab: 230 HMS error codes + 20 G-codes
+- Klipper (generic): 32 commands (covers Voron, Creality, Elegoo, AnkerMake, QIDI, RatRig)
+- Snapmaker U1: 14 custom G-codes + 10 error codes
+- Creality: 9 K1/K2 G-codes + 8 error codes
+- Elegoo: 7 Neptune 4 G-codes + 5 error codes
+- Voron: 17 community G-codes + 12 mod catalog entries + 5 calibration issues
+- AnkerMake: 8 M5/M5C G-codes + 6 error codes
+- QIDI: 8 X-Plus 3 G-codes + 5 error codes
+- OctoPrint: 402 plugins from official catalog
+
+### OctoPrint Deep Integration
+- 50+ WebSocket event types subscribed and mapped to state
+- System commands manager (restart, shutdown, reboot, custom)
+- User and group management with permission matrix
+- Full settings tree viewer
+- Plugin inspection with active/installed status
+- Connection manager (port, baudrate, printer profile)
+- Printer profiles CRUD
+
+### Unified Firmware Update System
+- Cross-brand firmware check: Bambu Cloud, Snapmaker Wiki, PrusaLink GitHub, Moonraker update_manager
+- Development commits tracking for open-source repos (Snapmaker U1 klipper/moonraker/fluidd)
+- Firmware Updates panel in sidebar with badge count
+- Formatted release notes with Markdown renderer
+- Manual update dialog with instructions for brands that don't support remote trigger
+- Dismiss / Mark as Updated for completed updates
+- Notifications via all 7 channels
+
+### Bambu Lab Firmware 01.02.00.00 Features
+- New MQTT commands: disable_motors, bed_low_power, manual_filament_change, print_while_drying, timelapse_storage, delete_timelapse
+- New state: _stopping, _bed_heating_mode, _motors_enabled, _ext_manual_change, _timelapse_storage, _drying_while_printing, _xcam_frame
+- HMS errors now include causes, wiki_url, severity
+
+### Electron Desktop App
+- Native desktop wrapper for Linux, Windows, macOS
+- System tray with printer status (polled every 30s)
+- Native OS notifications via IPC bridge
+- Application menu with Cmd/Ctrl keyboard shortcuts
+- Single instance lock + auto-start at login
+- Auto-updater via electron-updater (GitHub releases)
+- Custom 3dprintforge:// protocol handler
+- File associations for .3mf, .stl, .gcode
+
+### Linux Packaging
+- AppImage, .deb (Ubuntu/Debian), .rpm (Fedora/RHEL), Flatpak, Arch pkg.tar.zst, tar.gz
+- Arch PKGBUILD in packaging/arch/
+- Flatpak manifest with Electron BaseApp runtime
+- Universal desktop-install.sh (auto-detects distro)
+- systemd user service with auto-restart
+
+### Windows & macOS Packaging
+- NSIS installer with desktop/start menu shortcuts
+- Portable .exe (no install)
+- MSIX/AppX config for Microsoft Store submission
+- macOS .zip (unsigned)
+- GitHub Actions CI workflow for all platforms
+- SignPath.io integration ready for free EV code signing
+- SHA-256 checksums for all artifacts
+
+### Bug Fixes
+- Defect auto-pause crash: 'entry' undefined in printer-manager closure
+- Rediscovery broadcast: old_ip sent as new_ip due to premature mutation
+- Bambu Cloud firmware check: Array.isArray guards on devices/modules
+- Firmware checker: _info treated as array instead of object
+- Library panel: queue list Array.isArray validation
+- Camera polling: exponential backoff on error (1s → 2s → 4s → 8s → max 30s)
 
 ---
 
