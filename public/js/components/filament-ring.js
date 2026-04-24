@@ -72,7 +72,20 @@
 
     const printerId = window.printerState?.getActivePrinterId?.();
 
-    let html = '<div class="card-title">Filament <span class="ams-live-badge" title="Live via Moonraker">LIVE</span></div>';
+    // Brand-appropriate title. AMS is Bambu only — we're on the Klipper
+    // render path here, so never say AMS. Pick the label that matches the
+    // actual hardware: Snapmaker U1 has "toolheads", Voron/RatRig with ERCF
+    // or AFC carry their own names, and generic multi-extruder Klipper
+    // setups fall back to "Multi-Extruder".
+    const _meta = window.printerState?.getActivePrinterMeta?.() || {};
+    const _model = (_meta.model || '').toLowerCase();
+    const _isU1 = data._isSnapmakerU1 || /snapmaker.*u1/.test(_model);
+    let _title = 'Filament';
+    if (_isU1) _title = 'Toolheads';
+    else if (data._ercf) _title = 'ERCF';
+    else if (data._afc) _title = 'AFC';
+    else if (extraCount > 0) _title = 'Multi-Extruder';
+    let html = `<div class="card-title">${_title} <span class="ams-live-badge" title="Live via Moonraker">LIVE</span></div>`;
 
     // Active spool info bar — identical to P2S fr-active-bar
     if (activeExtIdx >= 0) {
