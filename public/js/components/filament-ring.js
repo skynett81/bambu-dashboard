@@ -125,12 +125,23 @@
       const colorName = linkedSpool?.bambu_color_name || linkedSpool?.color_name || getColorName(c);
       const nozzleRange = isHeating ? ext.temp + '–' + ext.target + '°C' : '';
 
-      // Remaining % and weight from inventory spool
+      // Remaining % and weight from inventory spool.
+      // Use realtimeFilament() for the currently-active toolhead so the
+      // percentage ticks down live as the print consumes filament. Parked
+      // toolheads just show their DB value since they're not consuming.
       let remainPct, weightG, totalG;
       if (linkedSpool && linkedSpool.initial_weight_g > 0) {
-        remainPct = Math.max(0, Math.round((linkedSpool.remaining_weight_g / linkedSpool.initial_weight_g) * 100));
-        weightG = Math.round(linkedSpool.remaining_weight_g) + 'g';
-        totalG = Math.round(linkedSpool.initial_weight_g) + 'g';
+        const rG = linkedSpool.remaining_weight_g || 0;
+        const tG = linkedSpool.initial_weight_g;
+        if (typeof window.realtimeFilament === 'function') {
+          const rt = window.realtimeFilament({ remainG: rG, totalG: tG, isActive: isAct, data });
+          remainPct = rt.current;
+          weightG = rt.currentG + 'g';
+        } else {
+          remainPct = Math.max(0, Math.round((rG / tG) * 100));
+          weightG = Math.round(rG) + 'g';
+        }
+        totalG = Math.round(tG) + 'g';
       } else {
         const slicerW = (slicer.weights[ext.index] > 0) ? slicer.weights[ext.index] : 0;
         remainPct = slicerW > 0 ? 70 : 25;
