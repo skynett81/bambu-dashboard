@@ -727,7 +727,10 @@
 
         <div class="card filament-ring-card" id="filament-ring"></div>
 
-        <div class="card" id="ams-card">
+        <!-- AMS is Bambu Lab proprietary. Hide by default so non-Bambu printers
+             don't show an empty card on first paint; ams-panel.js reveals it
+             when pt.isBambu && data.ams.ams.length > 0. -->
+        <div class="card" id="ams-card" style="display:none">
           <div class="ams-top-bar" id="ams-top-bar">
             <div class="ams-humidity-info" id="ams-humidity-info"></div>
           </div>
