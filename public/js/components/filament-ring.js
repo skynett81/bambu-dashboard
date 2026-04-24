@@ -139,15 +139,27 @@
       const nozzleRange = isHeating ? ext.temp + '–' + ext.target + '°C' : '';
 
       // Remaining % and weight from inventory spool.
-      // Use realtimeFilament() for the currently-active toolhead so the
-      // percentage ticks down live as the print consumes filament. Parked
-      // toolheads just show their DB value since they're not consuming.
+      // Every toolhead that the slicer assigned filament to ticks down as
+      // the print progresses — not just the currently-active one. Pass
+      // the tool index so realtimeFilament picks the per-tool weight
+      // from _slicer_filament_weights[] (U1 uses different amounts per
+      // toolhead — using the job total would over-estimate consumption).
+      // Tools with zero slicer weight (not used in this print) stay at
+      // their DB value.
       let remainPct, weightG, totalG;
       if (linkedSpool && linkedSpool.initial_weight_g > 0) {
         const rG = linkedSpool.remaining_weight_g || 0;
         const tG = linkedSpool.initial_weight_g;
+        const perToolWeights = Array.isArray(data._slicer_filament_weights) ? data._slicer_filament_weights : null;
+        const thisToolUsesFilament = !perToolWeights || (perToolWeights[ext.index] > 0);
         if (typeof window.realtimeFilament === 'function') {
-          const rt = window.realtimeFilament({ remainG: rG, totalG: tG, isActive: isAct, data });
+          const rt = window.realtimeFilament({
+            remainG: rG,
+            totalG: tG,
+            isActive: thisToolUsesFilament,  // tick any tool participating in this print
+            data,
+            toolIndex: ext.index,
+          });
           remainPct = rt.current;
           weightG = rt.currentG + 'g';
         } else {
