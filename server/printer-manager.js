@@ -246,7 +246,12 @@ export class PrinterManager {
     let moonCamera = null;
     if (connectorType === 'moonraker') {
       // Auto-provision camera first, then start MoonrakerCamera
-      await provisionCamera(printerConf.ip, printerConf.port || 80).catch(() => {});
+      try {
+        const ok = await provisionCamera(printerConf.ip, printerConf.port || 80);
+        log.info(`Camera provisioning for ${printerConf.name} (${printerConf.ip}): ${ok ? 'OK' : 'skipped/failed'}`);
+      } catch (e) {
+        log.warn(`Camera provisioning for ${printerConf.name} (${printerConf.ip}) threw: ${e.message}`);
+      }
       moonCamera = new MoonrakerCamera({
         ...this.config,
         printer: printerConf

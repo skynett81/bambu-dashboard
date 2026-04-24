@@ -170,11 +170,15 @@ function _sshExec(ip, creds, cmd) {
 }
 
 async function _checkMonitorFile(ip, creds) {
+  // Snapmaker U1 V1.3.0 ships printer_detection.jpg (refreshed during printing)
+  // instead of the old .monitor.jpg. Accept either so the Python camera server
+  // can serve whichever file the firmware writes.
   const result = await _sshExec(ip, creds,
-    'test -f /tmp/.monitor.jpg && stat -c %s /tmp/.monitor.jpg || echo 0'
+    'for f in /tmp/printer_detection.jpg /tmp/.monitor.jpg; do ' +
+    'test -f "$f" && stat -c %s "$f" 2>/dev/null; done | sort -rn | head -1 || echo 0'
   );
   if (!result) return false;
-  const size = parseInt(result.trim());
+  const size = parseInt(result.trim() || '0');
   return size > 500;
 }
 

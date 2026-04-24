@@ -10,8 +10,18 @@
 
 import { createLogger } from './logger.js';
 import { WebSocket } from 'ws';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import { getExtruderSlots } from './db/printers.js';
 import { mapSmState, mapFeedState, argbToHex } from './snapmaker-state-map.js';
+
+// Package version for server.connection.identify — read once at module load
+let CLIENT_VERSION = 'unknown';
+try {
+  const pkgPath = join(dirname(fileURLToPath(import.meta.url)), '..', 'package.json');
+  CLIENT_VERSION = JSON.parse(readFileSync(pkgPath, 'utf8')).version || 'unknown';
+} catch { /* keep default */ }
 
 // Semver-ish comparison: returns true if a > b
 function _versionGt(a, b) {
@@ -26,6 +36,81 @@ function _versionGt(a, b) {
 }
 
 const log = createLogger('moonraker');
+
+// Snapmaker U1 exception severity levels (from u1-klipper exception_manager.py).
+// level=1 reports-only, 2 pauses, 3 cancels.
+const U1_EXCEPTION_LEVELS = {
+  1: 'info',
+  2: 'pause',
+  3: 'cancel',
+};
+
+// Snapmaker U1 module ID → wiki anchor slug. Source: u1-klipper/exception_manager.py
+// ExceptionList.MODULE_ID_* constants matched with wiki.snapmaker.com anchor IDs.
+const U1_MODULE_SLUGS = {
+  522: 'motion-control',
+  523: 'toolhead',
+  524: 'camera',
+  525: 'filament-feeder',
+  526: 'heated-bed',
+  527: 'chamber-temperature-detection',
+  528: 'homing-anomaly',
+  529: 'gcode',
+  530: 'detectioncalibration',
+  531: 'print-file',
+  532: 'defect-detection',
+  533: 'purifier',
+  2052: 'system',
+};
+
+// Build a Snapmaker wiki help URL from an exception object.
+// Falls back to the error-codes index page when module ID is unknown.
+export function buildU1HelpUrl(ex) {
+  const base = 'https://wiki.snapmaker.com/en/snapmaker_u1/troubleshooting/u1_error_codes';
+  if (!ex || typeof ex.id !== 'number') return base;
+  const slug = U1_MODULE_SLUGS[ex.id];
+  const idPad = String(ex.id).padStart(4, '0');
+  return slug ? `${base}#h-${idPad}-${slug}` : `${base}#h-${idPad}`;
+}
+
+// Parse U1 filament_parameters into a flat catalog: one entry per
+// (material, vendor, subType) with per-diameter flow values.
+// The on-printer schema is: { [material]: { [vendor_...]: { [sub_...]: { load_temp, flow_k: {"02":...,"04":...}, ...}}}}
+export function extractU1FilamentCatalog(fp) {
+  if (!fp || typeof fp !== 'object') return null;
+  const catalog = {
+    version: fp.version || null,
+    hardFlowK: fp.hard_filaments_max_flow_k ?? null,
+    softFlowK: fp.soft_filaments_max_flow_k ?? null,
+    entries: [],
+  };
+  for (const [material, vendorMap] of Object.entries(fp)) {
+    if (typeof vendorMap !== 'object' || vendorMap === null) continue;
+    if (['version', 'hard_filaments_max_flow_k', 'soft_filaments_max_flow_k'].includes(material)) continue;
+    for (const [vendorKey, subMap] of Object.entries(vendorMap)) {
+      if (!vendorKey.startsWith('vendor_') || typeof subMap !== 'object' || subMap === null) continue;
+      const vendor = vendorKey.slice('vendor_'.length);
+      for (const [subKey, params] of Object.entries(subMap)) {
+        if (!subKey.startsWith('sub_') || typeof params !== 'object' || params === null) continue;
+        const subType = subKey.slice('sub_'.length);
+        catalog.entries.push({
+          material,
+          vendor,
+          subType,
+          loadTemp: params.load_temp ?? null,
+          unloadTemp: params.unload_temp ?? null,
+          cleanNozzleTemp: params.clean_nozzle_temp ?? null,
+          flowTemp: params.flow_temp ?? null,
+          isSoft: !!params.is_soft,
+          flowK: params.flow_k || null,
+          flowKMin: params.flow_k_min || null,
+          flowKMax: params.flow_k_max || null,
+        });
+      }
+    }
+  }
+  return catalog;
+}
 
 // Map Klipper states to the internal gcode_state format
 const STATE_MAP = {
@@ -49,6 +134,7 @@ export class MoonrakerClient {
     this._printerBrand = (config.printer.type || '').toLowerCase(); // 'creality', 'elegoo', 'voron', 'qidi', 'anker', 'snapmaker', etc.
     this._printerModel = config.printer.model || '';
     this.apiKey = config.printer.accessCode || '';
+    this.token = config.printer.token || '';  // JWT token (preferred over apiKey for Moonraker)
     this.hub = hub;
     this.ws = null;
     this.state = {};
@@ -62,6 +148,32 @@ export class MoonrakerClient {
     this._ledName = null;       // Detected Klipper LED object name
     this._lightPin = null;      // Detected output_pin for light
     this._isSnapmakerU1 = false; // Auto-detected Snapmaker U1
+    this._connectionId = null;   // Set by server.connection.identify
+  }
+
+  // Build auth headers for HTTP requests. Prefers Bearer token over X-Api-Key.
+  _authHeaders() {
+    if (this.token) return { 'Authorization': `Bearer ${this.token}` };
+    if (this.apiKey) return { 'X-Api-Key': this.apiKey };
+    return {};
+  }
+
+  // Fetch a short-lived one-shot token from Moonraker for WebSocket auth
+  // (query-param auth — Moonraker does not honour headers in WS upgrades reliably).
+  async _fetchOneshotToken() {
+    if (!this.apiKey && !this.token) return null;
+    try {
+      const res = await fetch(`${this._baseUrl}/access/oneshot_token`, {
+        headers: this._authHeaders(),
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!res.ok) return null;
+      const data = await res.json();
+      return data?.result || null;
+    } catch (e) {
+      log.warn(`oneshot_token fetch failed: ${e.message}`);
+      return null;
+    }
   }
 
   get _baseUrl() {
@@ -92,21 +204,29 @@ export class MoonrakerClient {
     this.connected = false;
   }
 
-  _connectWebSocket() {
+  async _connectWebSocket() {
     if (this.ws) {
       this.ws.removeAllListeners();
       this.ws.close();
     }
 
-    const headers = {};
-    if (this.apiKey) headers['X-Api-Key'] = this.apiKey;
+    // Moonraker recommends one-shot token in the WS query string for authentication
+    // (header-based auth on upgrade is not reliably supported). Fetch it first.
+    let wsUrl = this._wsUrl;
+    const oneshotToken = await this._fetchOneshotToken();
+    if (oneshotToken) {
+      wsUrl += `?token=${encodeURIComponent(oneshotToken)}`;
+    }
 
-    this.ws = new WebSocket(this._wsUrl, { headers, rejectUnauthorized: false });
+    const headers = this._authHeaders();
+
+    this.ws = new WebSocket(wsUrl, { headers, rejectUnauthorized: false });
 
     this.ws.on('open', () => {
       this.connected = true;
       log.info(`Moonraker WebSocket connected: ${this.ip}`);
       this.hub.broadcast('connection', { status: 'connected' });
+      this._sendIdentify();
       this._subscribe();
       this._requestFullState();
       this._autoDetectModel();
@@ -141,6 +261,28 @@ export class MoonrakerClient {
       this._reconnectTimer = null;
       this._connectWebSocket();
     }, 5000);
+  }
+
+  // Identify this connection to Moonraker (replaces deprecated server.websocket.id).
+  // Supported since Moonraker 0.7+; server returns a connection_id for tracking.
+  _sendIdentify() {
+    const params = {
+      client_name: '3DPrintForge',
+      version: CLIENT_VERSION,
+      type: 'other',
+      url: 'https://skynett81.github.io/3dprintforge',
+    };
+    if (this.token) params.access_token = this.token;
+    if (this.apiKey) params.api_key = this.apiKey;
+
+    const id = ++this._subscriptionId;
+    this._pendingIdentify = id;
+    this._wsSend({
+      jsonrpc: '2.0',
+      method: 'server.connection.identify',
+      params,
+      id,
+    });
   }
 
   // ---- WebSocket subscription ----
@@ -231,10 +373,16 @@ export class MoonrakerClient {
       'filament_entangle_detect e0_filament': null, 'filament_entangle_detect e1_filament': null,
       'filament_entangle_detect e2_filament': null, 'filament_entangle_detect e3_filament': null,
       'defect_detection': null, 'timelapse': null, 'print_task_config': null,
-      'power_loss_check': null, 'park_detector t0': null, 'park_detector t1': null,
-      'park_detector t2': null, 'park_detector t3': null,
+      'power_loss_check': null,
+      'power_loss_check e0': null, 'power_loss_check e1': null,
+      'power_loss_check e2': null, 'power_loss_check e3': null,
       'adc_current_sensor heater_bed': null, 'adc_current_sensor extruder': null,
-      'flow_calibrator': null,
+      // Snapmaker U1 V1.3.0 — confirmed objects from live V1.3.0 printer.
+      // Tool pin state (park/active/grab) is on each extruder object, not a
+      // separate park_detector object. Flow calibrator is a gcode macro only.
+      'exception_manager': null, 'filament_parameters': null, 'configfile': null,
+      'extruder_offset_calibration': null, 'auto_screws_tilt_adjust': null,
+      'pause_resume': null,
     };
     this._wsSend({
       jsonrpc: '2.0',
@@ -404,6 +552,11 @@ export class MoonrakerClient {
     // Temperatures — primary extruder
     if (ext.temperature !== undefined) this.state.nozzle_temper = Math.round(ext.temperature);
     if (ext.target !== undefined) this.state.nozzle_target_temper = Math.round(ext.target);
+    // Per-tool nozzle diameter (Snapmaker U1 V1.3.0+ allows 0.2/0.4/0.6/0.8 per toolhead).
+    // Klipper reports it on the [extruder] config object; prefer it over the global default.
+    if (ext.nozzle_diameter !== undefined && ext.nozzle_diameter !== null) {
+      this.state.nozzle_diameter = Number(ext.nozzle_diameter);
+    }
 
     // Multi-extruder support (Snapmaker U1 has up to 4)
     // Merge into existing _extra_extruders (WS only sends changed fields)
@@ -411,16 +564,25 @@ export class MoonrakerClient {
     const extras = [ext1, ext2, ext3];
     for (let i = 0; i < extras.length; i++) {
       const ex = extras[i];
-      if (ex?.temperature !== undefined) {
+      if (ex?.temperature !== undefined || ex?.nozzle_diameter !== undefined) {
         this.state._extra_extruders[i] = {
           ...(this.state._extra_extruders[i] || {}),
-          temperature: Math.round(ex.temperature),
-          target: Math.round(ex.target || 0),
+          ...(ex?.temperature !== undefined ? { temperature: Math.round(ex.temperature) } : {}),
+          ...(ex?.target !== undefined ? { target: Math.round(ex.target || 0) } : {}),
           state: ex.state || this.state._extra_extruders[i]?.state || null,
           switch_count: ex.switch_count ?? this.state._extra_extruders[i]?.switch_count ?? 0,
           pressure_advance: ex.pressure_advance ?? this.state._extra_extruders[i]?.pressure_advance ?? null,
+          ...(ex?.nozzle_diameter !== undefined && ex.nozzle_diameter !== null
+            ? { nozzle_diameter: Number(ex.nozzle_diameter) }
+            : {}),
         };
       }
+    }
+    // Summary array of per-tool diameters for quick UI access.
+    const primaryDiam = this.state.nozzle_diameter;
+    const diams = [primaryDiam, ...this.state._extra_extruders.map(e => e?.nozzle_diameter)];
+    if (diams.some(d => d !== undefined && d !== null)) {
+      this.state._nozzle_diameters = diams;
     }
 
     // Primary extruder state
@@ -461,13 +623,15 @@ export class MoonrakerClient {
     // Toolhead info
     if (th.extruder) this.state._active_extruder = th.extruder;
 
-    // Error state
-    if (ps.state === 'error' && ps.message) {
+    // Error state. The QR/help URL lands on state later via the exception_manager
+    // handler below — here we only track the basic error flag + message text.
+    if (ps.state === 'error') {
       this.state.print_error = 1;
-      this.state.print_error_msg = ps.message;
-    } else if (ps.state !== 'error') {
+      if (ps.message) this.state.print_error_msg = ps.message;
+    } else if (ps.state !== undefined) {
       this.state.print_error = 0;
       this.state.print_error_msg = '';
+      this.state.print_error_qr_url = '';
     }
 
     // Message (display)
@@ -688,20 +852,97 @@ export class MoonrakerClient {
       this.state._sm_flow_cal = fc;
     }
 
-    // Park detector — which extruder is active vs parked (U1 toolchanger)
-    const parkState = {};
-    for (let i = 0; i < 4; i++) {
-      const pd = status[`park_detector t${i}`];
-      if (pd) {
-        parkState[`t${i}`] = {
-          parked: pd.park_state === 'PARKED',
-          active: pd.park_state === 'ACTIVATE',
-          state: pd.park_state || 'UNKNOWN',
-        };
+    // Tool park / active state (U1 V1.3.0 — derived from extruder[0..3].state
+    // plus the park_pin / active_pin / grab_valid_pin trio).
+    //
+    // CRITICAL: Moonraker `notify_status_update` only sends fields that changed.
+    // An extruder-only temperature delta arrives as `{extruder:{temperature:130}}`
+    // without park_pin / state / active_pin. If we rebuild _sm_park from the
+    // delta alone, we lose the previous park state for the other tools and
+    // briefly flip `active_extruder` to something incorrect — that's visible
+    // as UI jitter across every tool/filament card every telemetry tick.
+    // Merge into the existing state instead.
+    const tools = [status.extruder, status.extruder1, status.extruder2, status.extruder3];
+    if (!this.state._sm_park) this.state._sm_park = {};
+    let parkChanged = false;
+    for (let i = 0; i < tools.length; i++) {
+      const tool = tools[i];
+      if (!tool) continue;
+      // Only update this tool slot when the delta actually contains tool-state fields.
+      if (tool.park_pin === undefined && tool.active_pin === undefined &&
+          tool.grab_valid_pin === undefined && tool.state === undefined) continue;
+      const prev = this.state._sm_park[`t${i}`] || {};
+      const next = {
+        parked: tool.park_pin === true || tool.state === 'PARKED',
+        active: tool.active_pin === true || tool.state === 'ACTIVATE',
+        grabbed: tool.grab_valid_pin === true,
+        state: tool.state || prev.state || 'UNKNOWN',
+      };
+      if (prev.parked !== next.parked || prev.active !== next.active ||
+          prev.grabbed !== next.grabbed || prev.state !== next.state) {
+        this.state._sm_park[`t${i}`] = next;
+        parkChanged = true;
       }
     }
-    if (Object.keys(parkState).length > 0) {
-      this.state._sm_park = parkState;
+    // Derive _active_extruder from the tool with active=true (stable across deltas).
+    if (parkChanged) {
+      for (const [key, ps] of Object.entries(this.state._sm_park)) {
+        if (ps.active) {
+          const idx = parseInt(key.slice(1), 10);
+          this.state._active_extruder = idx === 0 ? 'extruder' : `extruder${idx}`;
+          break;
+        }
+      }
+    }
+
+    // Per-tool extruder offset vectors (U1 XYZ offset calibration).
+    // Same delta-safe merge — only replace slot values when the delta carries them.
+    for (let i = 0; i < tools.length; i++) {
+      const off = tools[i]?.extruder_offset;
+      if (Array.isArray(off) && off.length === 3) {
+        if (!this.state._extruder_offsets) {
+          this.state._extruder_offsets = [null, null, null, null];
+        }
+        this.state._extruder_offsets[i] = off.map(v => Math.round(v * 10000) / 10000);
+      }
+    }
+
+    // U1 V1.1.0+ exception manager — structured errors with {id,index,code,level,message}.
+    const em = status.exception_manager;
+    if (em && Array.isArray(em.exceptions)) {
+      this.state._u1_exceptions = em.exceptions.map(ex => ({
+        id: ex.id,
+        index: ex.index,
+        code: ex.code,
+        level: ex.level,
+        levelLabel: U1_EXCEPTION_LEVELS[ex.level] || 'unknown',
+        message: ex.message || '',
+        helpUrl: buildU1HelpUrl(ex),
+      }));
+      // Surface the highest-severity exception's help URL for the quick-status badge.
+      const active = this.state._u1_exceptions
+        .slice()
+        .sort((a, b) => (b.level || 0) - (a.level || 0))[0];
+      if (active) this.state.print_error_qr_url = active.helpUrl;
+    }
+
+    // U1 V1.3.0 filament_parameters — on-printer catalog (vendor → material → sub-type
+    // with per-diameter flow values). The catalog is ~9 KB and nearly static
+    // (only changes on firmware update), so we diff by the printer's reported
+    // version string and skip the state write otherwise. Writing on every
+    // merge would bloat every WebSocket broadcast with 9 KB of unchanged JSON
+    // and trigger browser-side re-renders on every tick.
+    if (status.filament_parameters) {
+      const fpVer = String(status.filament_parameters.version || '');
+      if (fpVer !== this._lastFilamentParamsVer) {
+        this._lastFilamentParamsVer = fpVer;
+        this.state._u1_filament_catalog = extractU1FilamentCatalog(status.filament_parameters);
+      }
+    }
+
+    // U1 V1.3.0 auto_screws_tilt_adjust — bed leveling progress.
+    if (status.auto_screws_tilt_adjust) {
+      this.state._u1_screws_tilt = status.auto_screws_tilt_adjust;
     }
 
     // Bed mesh data (for visualization)
@@ -715,6 +956,16 @@ export class MoonrakerClient {
         meshMatrix: bm.mesh_matrix || [],
         profiles: bm.profiles || {},
       };
+    }
+
+    // Snapmaker U1 V1.1.1+ heated-bed flatness deviation.
+    // Snapmaker has not yet documented the exact field name; we probe a set of
+    // plausible object paths and fall back to deriving deviation from the bed
+    // mesh matrix if none of them are present. The derived value is always a
+    // safe floor — if Snapmaker ships a first-party number later, it wins.
+    const flatnessDev = this._extractFlatnessDeviation(status);
+    if (flatnessDev !== null) {
+      this.state._bed_flatness = flatnessDev;
     }
 
     // MCU health
@@ -789,17 +1040,24 @@ export class MoonrakerClient {
       }
     }
 
-    // All heater_generic (dynamic names — chamber heaters, custom heaters)
+    // All heater_generic (dynamic names — chamber heaters, custom heaters).
+    // Creality K2, QIDI Plus4/Q1 Pro, Voron (Nevermore), and Snapmaker U1 all
+    // expose their chamber heater here under various names; we also promote
+    // the first chamber-sounding one to state._chamber_heater for quick access.
     for (const key of Object.keys(status)) {
       if (key.startsWith('heater_generic ')) {
         const name = key.slice('heater_generic '.length);
         const hg = status[key];
         if (!this.state._generic_heaters) this.state._generic_heaters = {};
-        this.state._generic_heaters[name] = {
+        const entry = {
           temperature: Math.round((hg.temperature || 0) * 10) / 10,
           target: Math.round((hg.target || 0) * 10) / 10,
           power: hg.power != null ? Math.round(hg.power * 100) : null,
         };
+        this.state._generic_heaters[name] = entry;
+        if (/chamber|cavity/i.test(name) && !this.state._chamber_heater) {
+          this.state._chamber_heater = { name, ...entry };
+        }
       }
     }
 
@@ -832,6 +1090,25 @@ export class MoonrakerClient {
         const pin = status[key];
         if (!this.state._output_pins) this.state._output_pins = {};
         this.state._output_pins[name] = { value: pin.value };
+      }
+    }
+
+    // All fan_generic objects (Nevermore carbon filter, named cooling fans,
+    // Squirrel exhaust, etc.). Parse like _generic_heaters so the dashboard
+    // can render a generic "named fan" tile for each one.
+    for (const key of Object.keys(status)) {
+      if (key.startsWith('fan_generic ') || key.startsWith('temperature_fan ')) {
+        const prefix = key.startsWith('fan_generic ') ? 'fan_generic ' : 'temperature_fan ';
+        const name = key.slice(prefix.length);
+        const fan = status[key];
+        if (!this.state._generic_fans) this.state._generic_fans = {};
+        this.state._generic_fans[name] = {
+          kind: prefix.trim(),
+          speed: fan.speed != null ? Math.round(fan.speed * 100) : null,
+          rpm: fan.rpm != null ? Math.round(fan.rpm) : null,
+          temperature: fan.temperature != null ? Math.round(fan.temperature * 10) / 10 : null,
+          target: fan.target != null ? Math.round(fan.target * 10) / 10 : null,
+        };
       }
     }
 
@@ -1076,6 +1353,61 @@ export class MoonrakerClient {
     // Print events
     if (msg.method === 'notify_gcode_response') {
       // G-code response — could be used for error detection
+    }
+
+    // Moonraker 0.8+ real-time notifications — surface to dashboard for live UI updates.
+    if (msg.method === 'notify_announcement_update' && msg.params?.[0]) {
+      this.hub?.broadcast?.('moonraker_announcement', {
+        entries: msg.params[0].entries || [],
+      });
+    }
+    if (msg.method === 'notify_announcement_dismissed' && msg.params?.[0]) {
+      this.hub?.broadcast?.('moonraker_announcement', {
+        dismissed: msg.params[0].entry_id,
+      });
+    }
+    if (msg.method === 'notify_job_queue_changed' && msg.params?.[0]) {
+      const p = msg.params[0];
+      this.hub?.broadcast?.('moonraker_queue', {
+        action: p.action,
+        queue: p.updated_queue || [],
+        queue_state: p.queue_state,
+      });
+    }
+    if (msg.method === 'notify_history_changed' && msg.params?.[0]) {
+      const p = msg.params[0];
+      this.hub?.broadcast?.('moonraker_history', {
+        action: p.action,
+        job: p.job,
+      });
+    }
+    if (msg.method === 'notify_filelist_changed' && msg.params?.[0]) {
+      const p = msg.params[0];
+      this.hub?.broadcast?.('moonraker_filelist', {
+        action: p.action,
+        item: p.item,
+        source_item: p.source_item,
+      });
+    }
+    if (msg.method === 'notify_service_state_changed' && msg.params?.[0]) {
+      this.hub?.broadcast?.('moonraker_service', { services: msg.params[0] });
+    }
+    if (msg.method === 'notify_power_changed' && msg.params?.[0]) {
+      const p = msg.params[0];
+      this.hub?.broadcast?.('moonraker_power', {
+        device: p.device,
+        status: p.status,
+        locked_while_printing: p.locked_while_printing,
+      });
+    }
+    // Spoolman connectivity / pending-report changes surface via the
+    // `spoolman:spoolman_status_changed` server event. Broadcast to dashboard
+    // so the spool-panel can re-render without polling.
+    if (msg.method === 'notify_spoolman_status_changed' && msg.params?.[0]) {
+      this.hub?.broadcast?.('spoolman_status', msg.params[0]);
+    }
+    if (msg.method === 'notify_active_spool_set' && msg.params?.[0]) {
+      this.hub?.broadcast?.('spoolman_active_spool', msg.params[0]);
     }
 
     // JSON-RPC response (subscription ack, query results)
@@ -1413,6 +1745,11 @@ export class MoonrakerClient {
         this._apiPost(`/machine/services/stop?service=${svc2}`);
         break;
       }
+      case 'service_start': {
+        const svc3 = commandObj.service || 'klipper';
+        this._apiPost(`/machine/services/start?service=${svc3}`);
+        break;
+      }
 
       // Power device control (smart plugs, GPIO, relays)
       case 'power_on': {
@@ -1425,6 +1762,60 @@ export class MoonrakerClient {
         this._apiPost(`/machine/device_power/device?device=${encodeURIComponent(dev2)}&action=off`);
         break;
       }
+      case 'power_toggle': {
+        this.togglePowerDevice(commandObj.device || '');
+        break;
+      }
+
+      // Klipper [exclude_object] — skip during print (OrcaSlicer workflow)
+      case 'exclude_object_name':
+        this.excludeObject(commandObj.name);
+        break;
+      case 'exclude_object_id':
+        this.excludeObjectById(commandObj.id);
+        break;
+      case 'exclude_object_reset':
+        this.resetExcludedObjects();
+        break;
+
+      // CAN-bus discovery for setup wizards
+      case 'canbus_scan':
+        this.scanCanbus(commandObj.interface).then(r => {
+          this.hub?.broadcast?.('moonraker_canbus_scan', r);
+        }).catch(() => {});
+        break;
+
+      // Update manager
+      case 'update_refresh':
+        this.refreshUpdateStatus(commandObj.name);
+        break;
+      case 'update_full':
+        this.triggerFullUpdate();
+        break;
+
+      // Notifier test-trigger
+      case 'notifier_test':
+        this.testNotifier(commandObj.name);
+        break;
+
+      // History CRUD
+      case 'history_reset_totals':
+        this.resetHistoryTotals();
+        break;
+      case 'history_delete':
+        if (commandObj.uid) this.deleteHistoryJob(commandObj.uid);
+        break;
+
+      // Input shaper tuning
+      case 'input_shaper_measure':
+        this.measureAxesNoise();
+        break;
+      case 'input_shaper_calibrate':
+        try { this.shaperCalibrate(commandObj.axis); } catch (e) { log.warn(e.message); }
+        break;
+      case 'input_shaper_test':
+        try { this.testResonances(commandObj.axis, commandObj.output); } catch (e) { log.warn(e.message); }
+        break;
 
       // WLED strip control
       case 'wled_on':
@@ -1563,8 +1954,7 @@ export class MoonrakerClient {
     const footer = `\r\n--${boundary}--\r\n`;
     const body = Buffer.concat([Buffer.from(header), buffer, Buffer.from(footer)]);
 
-    const headers = { 'Content-Type': `multipart/form-data; boundary=${boundary}`, 'Content-Length': body.length };
-    if (this.apiKey) headers['X-Api-Key'] = this.apiKey;
+    const headers = { 'Content-Type': `multipart/form-data; boundary=${boundary}`, 'Content-Length': body.length, ...this._authHeaders() };
 
     try {
       const res = await fetch(`${this._baseUrl}/server/files/upload`, {
@@ -1586,8 +1976,7 @@ export class MoonrakerClient {
     const footer = `\r\n--${boundary}--\r\n`;
     const body = Buffer.concat([Buffer.from(header), buffer, Buffer.from(printField), Buffer.from(footer)]);
 
-    const headers = { 'Content-Type': `multipart/form-data; boundary=${boundary}`, 'Content-Length': body.length };
-    if (this.apiKey) headers['X-Api-Key'] = this.apiKey;
+    const headers = { 'Content-Type': `multipart/form-data; boundary=${boundary}`, 'Content-Length': body.length, ...this._authHeaders() };
 
     try {
       const res = await fetch(`${this._baseUrl}/server/files/upload`, {
@@ -1671,16 +2060,65 @@ export class MoonrakerClient {
     return data?.result || null;
   }
 
-  // ── Power device management ──
-
-  async getPowerDevices() {
-    const data = await this._apiGet('/machine/device_power/devices');
-    return data?.result?.devices || [];
+  /** Rescan upstream repos without actually installing anything. */
+  async refreshUpdateStatus(name) {
+    const qs = name ? `?name=${encodeURIComponent(name)}` : '';
+    return this._apiPost(`/machine/update/refresh${qs}`);
   }
 
-  async getPowerDeviceStatus(device) {
-    const data = await this._apiGet(`/machine/device_power/device?device=${encodeURIComponent(device)}`);
-    return data?.result || null;
+  /** Trigger a full update (klipper + moonraker + system + web clients).
+   *  Moonraker 0.10.0 (Jan 2026) consolidated the deprecated /machine/update/full,
+   *  /machine/update/client, /machine/update/moonraker, /machine/update/klipper, and
+   *  /machine/update/system endpoints into a single /machine/update/upgrade endpoint.
+   *  Try the new endpoint first, fall back to /machine/update/full for older servers. */
+  async triggerFullUpdate() {
+    const ok = await this._apiPostStatus('/machine/update/upgrade');
+    if (ok) return;
+    return this._apiPost('/machine/update/full');
+  }
+
+  // POST wrapper that returns true on HTTP 2xx (for feature-detection of new endpoints).
+  async _apiPostStatus(path, body) {
+    const headers = { 'Content-Type': 'application/json', ...this._authHeaders() };
+    try {
+      const res = await fetch(`${this._baseUrl}${path}`, {
+        method: 'POST',
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+        signal: AbortSignal.timeout(5000),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  // ── Klipper input-shaper command surface ──
+  // Small safety wrapper: only allow [XYZE] axis names through the gcode
+  // script channel so callers can't inject arbitrary commands via the axis
+  // parameter. Output names are also whitelisted.
+  _validateAxis(axis) {
+    if (!/^[XYZE]$/i.test(String(axis))) throw new Error(`invalid axis: ${axis}`);
+    return String(axis).toUpperCase();
+  }
+
+  measureAxesNoise() {
+    return this._apiPost('/printer/gcode/script', { script: 'MEASURE_AXES_NOISE' });
+  }
+
+  shaperCalibrate(axis) {
+    const script = axis
+      ? `SHAPER_CALIBRATE AXIS=${this._validateAxis(axis)}`
+      : 'SHAPER_CALIBRATE';
+    return this._apiPost('/printer/gcode/script', { script });
+  }
+
+  testResonances(axis, output = 'resonances') {
+    const ax = this._validateAxis(axis);
+    if (!/^[A-Za-z0-9_\-]+$/.test(output)) throw new Error(`invalid output name: ${output}`);
+    return this._apiPost('/printer/gcode/script', {
+      script: `TEST_RESONANCES AXIS=${ax} OUTPUT=${output}`,
+    });
   }
 
   // ── Bed mesh data ──
@@ -1739,6 +2177,41 @@ export class MoonrakerClient {
   async getPowerDeviceStatus(device) {
     const data = await this._apiGet(`/machine/device_power/device?device=${encodeURIComponent(device)}`);
     return data?.result?.[device] || null;
+  }
+
+  /**
+   * Toggle a Moonraker power device (smart plug, GPIO, HomeAssistant switch).
+   * Reads current state via /machine/device_power/device, flips it, and
+   * issues the opposite action. Returns the new state, or null on failure.
+   */
+  async togglePowerDevice(device) {
+    const current = await this.getPowerDeviceStatus(device);
+    const action = current === 'on' ? 'off' : 'on';
+    await this.setPowerDevice(device, action);
+    return action;
+  }
+
+  // ── Klipper EXCLUDE_OBJECT surface (for skip-object during active print) ──
+
+  /**
+   * Skip an object during an active print by its name. Klipper exposes this
+   * via the EXCLUDE_OBJECT G-code macro (requires [exclude_object] in
+   * printer.cfg, which is the default in OrcaSlicer-configured Klipper).
+   */
+  excludeObject(name) {
+    if (!name) return;
+    return this._apiPost('/printer/gcode/script', { script: `EXCLUDE_OBJECT NAME=${name}` });
+  }
+
+  /** Skip an object by its numeric ID from `printer.objects.exclude_object`. */
+  excludeObjectById(id) {
+    if (id == null) return;
+    return this._apiPost('/printer/gcode/script', { script: `EXCLUDE_OBJECT ID=${id}` });
+  }
+
+  /** Un-exclude all objects (useful if a user accidentally skipped one). */
+  resetExcludedObjects() {
+    return this._apiPost('/printer/gcode/script', { script: 'EXCLUDE_OBJECT RESET=1' });
   }
 
   // ── Firmware check (wraps update manager or Snapmaker wiki for U1) ──
@@ -1838,18 +2311,9 @@ export class MoonrakerClient {
     const brand = this._printerBrand || this._guessBrand();
     if (!brand) return null;
 
-    // Map brand → GitHub repo(s) that publish firmware
-    const brandRepos = {
-      'creality': ['CrealityOfficial/Creality-Wiki'],
-      'elegoo': ['Elegoo3DPrinters/Neptune-4'],
-      'voron': ['VoronDesign/Voron-2'],
-      'anker': ['Ankermgmt/ankermake-m5-protocol'],
-      'ankermake': ['Ankermgmt/ankermake-m5-protocol'],
-      'qidi': ['QIDITECH/qidi-klipper'],
-      'ratrig': ['RatOS/RatOS'],
-    };
-    const repos = brandRepos[brand];
-    if (!repos || repos.length === 0) return null;
+    const repo = this._resolveBrandRepo(brand, this._printerModel);
+    if (!repo) return null;
+    const repos = [repo];
 
     // Get current Klipper version from printer.info
     let current = 'unknown';
@@ -1897,6 +2361,61 @@ export class MoonrakerClient {
       };
     } catch (e) {
       return { available: false, current, error: e.message, source: `${brand}-github` };
+    }
+  }
+
+  // Heated-bed flatness deviation (mm), derived from the bed mesh matrix.
+  //
+  // Snapmaker U1 V1.3.0 does not expose a dedicated flatness object — verified
+  // against a live printer's /printer/objects/list. Peak-to-peak across the
+  // probed mesh is the authoritative reading and matches what Snapmaker Orca
+  // reports on the wizard screen.
+  //
+  // Threshold mapping (matches Snapmaker wiki guidance):
+  //   < 0.10 mm → ok
+  //   < 0.30 mm → warn
+  //   >= 0.30 mm → fail
+  _extractFlatnessDeviation(status) {
+    const mesh = status.bed_mesh?.mesh_matrix || this.state._bed_mesh?.meshMatrix;
+    if (!Array.isArray(mesh) || mesh.length === 0 || !Array.isArray(mesh[0])) return null;
+
+    let mn = Infinity, mx = -Infinity;
+    for (const row of mesh) {
+      for (const v of row) {
+        if (typeof v === 'number' && Number.isFinite(v)) {
+          if (v < mn) mn = v;
+          if (v > mx) mx = v;
+        }
+      }
+    }
+    if (mn === Infinity || mx === -Infinity) return null;
+
+    const dev = Math.round((mx - mn) * 1000) / 1000;
+    const status_ = dev < 0.10 ? 'ok' : dev < 0.30 ? 'warn' : 'fail';
+    return { deviation_mm: dev, source: 'derived', status: status_ };
+  }
+
+  // Resolve GitHub repo for firmware check based on brand + model.
+  // QIDI and Elegoo ship per-model firmware repos rather than a single brand-wide repo.
+  _resolveBrandRepo(brand, model) {
+    const m = (model || '').toLowerCase();
+    switch (brand) {
+      case 'creality': return 'CrealityOfficial/Creality-Wiki';
+      case 'elegoo':
+        if (/centauri/.test(m)) return 'elegooofficial/CentauriCarbon';
+        return 'Elegoo3DPrinters/Neptune-4';
+      case 'voron': return 'VoronDesign/Voron-2';
+      case 'anker':
+      case 'ankermake': return 'Ankermgmt/ankermake-m5-protocol';
+      case 'qidi':
+        if (/max.?4/.test(m)) return 'QIDITECH/QIDI_MAX4';
+        if (/plus.?4|x-plus.?4/.test(m)) return 'QIDITECH/QIDI_PLUS4';
+        if (/max.?3|x-max.?3/.test(m)) return 'QIDITECH/QIDI_MAX3';
+        if (/plus.?3|x-plus.?3/.test(m)) return 'QIDITECH/QIDI_PLUS3';
+        if (/q1.?pro/.test(m)) return 'QIDITECH/Q1_PRO';
+        return 'QIDITECH/QIDI_PLUS4';
+      case 'ratrig': return 'RatOS/RatOS';
+      default: return null;
     }
   }
 
@@ -1979,6 +2498,23 @@ export class MoonrakerClient {
     return data?.result?.job_totals || null;
   }
 
+  /** Fetch a single history entry by its uid. */
+  async getHistoryJob(uid) {
+    const data = await this._apiGet(`/server/history/job?uid=${encodeURIComponent(uid)}`);
+    return data?.result?.job || null;
+  }
+
+  /** Delete a history entry by uid. Returns true on success. */
+  async deleteHistoryJob(uid) {
+    const r = await this._apiDelete(`/server/history/delete?uid=${encodeURIComponent(uid)}`);
+    return !!r;
+  }
+
+  /** Reset accumulated job totals (lifetime filament/time stats). */
+  async resetHistoryTotals() {
+    return this._apiPost('/server/history/reset_totals');
+  }
+
   // ── Moonraker Database ──
 
   async getDatabaseItem(namespace, key) {
@@ -2040,6 +2576,59 @@ export class MoonrakerClient {
     return data?.result?.can_uuids || [];
   }
 
+  /**
+   * Scan the CAN bus for unassigned Klipper/Katapult nodes (setup-UI helper).
+   * Distinguishes between the three outcomes a user needs to know about:
+   *   - ok=true: scan ran cleanly, uuids is the result list (may be empty)
+   *   - arbitration_error: the bus has broken termination, no-ACK, or a
+   *     single-node bus — the scan could not complete reliably
+   *   - interface_not_found: the named can interface (can0, can1, ...) isn't
+   *     configured on the host — user should check systemd-networkd / ifconfig
+   *   - unreachable: Moonraker itself didn't respond (network / auth / timeout)
+   */
+  async scanCanbus(interface_ = 'can0') {
+    const url = `${this._baseUrl}/machine/peripherals/canbus?interface=${encodeURIComponent(interface_)}`;
+    try {
+      const res = await fetch(url, {
+        headers: this._authHeaders(),
+        signal: AbortSignal.timeout(10000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        return {
+          ok: true,
+          interface: interface_,
+          uuids: data?.result?.can_uuids || [],
+          error: null,
+        };
+      }
+      // Non-2xx: parse body for Moonraker's structured error message
+      let message = `HTTP ${res.status}`;
+      try {
+        const body = await res.json();
+        message = body?.error?.message || body?.message || message;
+      } catch { /* non-JSON body */ }
+
+      let code = 'http_error';
+      if (/arbitration/i.test(message)) code = 'arbitration_error';
+      else if (/interface.*not\s+found|no such (interface|device)/i.test(message)) code = 'interface_not_found';
+
+      return {
+        ok: false,
+        interface: interface_,
+        uuids: [],
+        error: { code, message },
+      };
+    } catch (e) {
+      return {
+        ok: false,
+        interface: interface_,
+        uuids: [],
+        error: { code: 'unreachable', message: e.message },
+      };
+    }
+  }
+
   // ── File operations ──
 
   async createFileZip(files, destination) {
@@ -2073,23 +2662,57 @@ export class MoonrakerClient {
     return data?.result?.logs || [];
   }
 
-  // ── Notifiers ──
+  // ── Notifiers (Apprise passthrough configured in moonraker.conf) ──
 
   async getNotifiers() {
     const data = await this._apiGet('/server/notifiers/list');
     return data?.result?.notifiers || [];
   }
 
-  // ── Spoolman integration ──
+  /**
+   * Trigger a test notification through a configured notifier.
+   * Useful for a "Test" button next to each notifier in the dashboard.
+   */
+  async testNotifier(name) {
+    return this._apiPost(`/server/notifiers/test?name=${encodeURIComponent(name)}`);
+  }
+
+  // ── Spoolman integration (v2 response format — Moonraker 0.9+) ──
 
   async getSpoolmanStatus() {
+    // v1 format still the canonical shape here — { spoolman_connected, pending_reports, spool_id }
     const data = await this._apiGet('/server/spoolman/status');
     return data?.result || null;
   }
 
+  // Internal: proxy a request to Spoolman via Moonraker using v2 response envelope.
+  // Returns { ok: boolean, data?: <spoolman_json>, error?: { status_code, message } }.
+  // v2 separates Spoolman-side errors from Moonraker transport errors so callers can
+  // distinguish "Spoolman disconnected" from "Moonraker unreachable".
+  async _spoolmanProxy(method, path, body = null) {
+    // Moonraker requires path to start with "/v1/" — paths starting with "/api/" are rejected.
+    const query = new URLSearchParams({
+      request_method: method,
+      path,
+      use_v2_response: 'true',
+    }).toString();
+
+    const res = body
+      ? await this._apiPostRaw(`/server/spoolman/proxy?${query}`, body)
+      : await this._apiGet(`/server/spoolman/proxy?${query}`);
+
+    if (!res) return { ok: false, error: { status_code: 0, message: 'Moonraker unreachable' } };
+
+    const envelope = res.result;
+    if (envelope?.error) {
+      return { ok: false, error: envelope.error };
+    }
+    return { ok: true, data: envelope?.response ?? null };
+  }
+
   async getSpoolmanSpools() {
-    const data = await this._apiGet('/server/spoolman/proxy?request_method=GET&path=/api/v1/spool');
-    return data?.result || [];
+    const r = await this._spoolmanProxy('GET', '/v1/spool');
+    return r.ok && Array.isArray(r.data) ? r.data : [];
   }
 
   async setSpoolmanActiveSpool(spoolId) {
@@ -2101,6 +2724,24 @@ export class MoonrakerClient {
     return data?.result?.spool_id || null;
   }
 
+  // POST variant that returns the parsed response (the default _apiPost discards it).
+  async _apiPostRaw(path, body) {
+    const headers = { 'Content-Type': 'application/json', ...this._authHeaders() };
+    try {
+      const r = await fetch(`${this._baseUrl}${path}`, {
+        method: 'POST',
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!r.ok) return null;
+      return r.json();
+    } catch (e) {
+      log.error(`POST ${path}: ${e.message}`);
+      return null;
+    }
+  }
+
   // ── Extensions ──
 
   async getExtensions() {
@@ -2109,14 +2750,17 @@ export class MoonrakerClient {
   }
 
   async triggerUpdate(name) {
+    // Moonraker 0.10.0+ prefers /machine/update/upgrade?name=<pkg>.
+    // Fall back to per-package /machine/update/<name> for older servers.
+    const ok = await this._apiPostStatus(`/machine/update/upgrade?name=${encodeURIComponent(name)}`);
+    if (ok) return;
     return this._apiPost(`/machine/update/${name}`);
   }
 
   // ---- HTTP helpers ----
 
   async _apiGet(path) {
-    const headers = {};
-    if (this.apiKey) headers['X-Api-Key'] = this.apiKey;
+    const headers = this._authHeaders();
     try {
       const res = await fetch(`${this._baseUrl}${path}`, { headers, signal: AbortSignal.timeout(5000) });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -2128,8 +2772,7 @@ export class MoonrakerClient {
   }
 
   async _apiPost(path, body) {
-    const headers = { 'Content-Type': 'application/json' };
-    if (this.apiKey) headers['X-Api-Key'] = this.apiKey;
+    const headers = { 'Content-Type': 'application/json', ...this._authHeaders() };
     try {
       const res = await fetch(`${this._baseUrl}${path}`, {
         method: 'POST',
@@ -2144,8 +2787,7 @@ export class MoonrakerClient {
   }
 
   async _apiDelete(path) {
-    const headers = {};
-    if (this.apiKey) headers['X-Api-Key'] = this.apiKey;
+    const headers = this._authHeaders();
     try {
       const res = await fetch(`${this._baseUrl}${path}`, { method: 'DELETE', headers, signal: AbortSignal.timeout(5000) });
       if (!res.ok) log.warn(`DELETE ${path}: HTTP ${res.status}`);
@@ -2198,6 +2840,22 @@ export function buildMoonrakerCommand(msg) {
     case 'sm_timelapse_frame': return { _moonraker_action: 'sm_timelapse_frame' };
     case 'sm_flow_calibrate': return { _moonraker_action: 'sm_flow_calibrate' };
     case 'sm_set_print_config': return { _moonraker_action: 'sm_set_print_config', ...msg };
+    // 2025–2026 additions
+    case 'power_toggle': return { _moonraker_action: 'power_toggle', device: msg.device };
+    case 'service_start': return { _moonraker_action: 'service_start', service: msg.service };
+    case 'exclude_object':
+      if (msg.reset) return { _moonraker_action: 'exclude_object_reset' };
+      if (msg.id != null) return { _moonraker_action: 'exclude_object_id', id: msg.id };
+      return { _moonraker_action: 'exclude_object_name', name: msg.name };
+    case 'canbus_scan': return { _moonraker_action: 'canbus_scan', interface: msg.interface || 'can0' };
+    case 'update_refresh': return { _moonraker_action: 'update_refresh', name: msg.name };
+    case 'update_full': return { _moonraker_action: 'update_full' };
+    case 'notifier_test': return { _moonraker_action: 'notifier_test', name: msg.name };
+    case 'history_reset_totals': return { _moonraker_action: 'history_reset_totals' };
+    case 'history_delete': return { _moonraker_action: 'history_delete', uid: msg.uid };
+    case 'input_shaper_measure': return { _moonraker_action: 'input_shaper_measure' };
+    case 'input_shaper_calibrate': return { _moonraker_action: 'input_shaper_calibrate', axis: msg.axis };
+    case 'input_shaper_test': return { _moonraker_action: 'input_shaper_test', axis: msg.axis, output: msg.output };
     default: return { _moonraker_action: action, ...msg };
   }
 }

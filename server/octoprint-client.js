@@ -449,6 +449,16 @@ export class OctoPrintClient {
         });
       }
 
+      // OctoPrint 2.0 (RC imminent Apr 2026) introduces plugin-based non-serial
+      // connectors and may ship breaking REST API changes. Log a warning so that
+      // any client-side quirks surface in the logs with a clear pointer.
+      const srvVer = String(version?.server || '');
+      const major = parseInt(srvVer.split('.')[0] || '0', 10);
+      if (major >= 2) {
+        this.state._octoprint2x = true;
+        log.warn(`OctoPrint ${srvVer} detected — client compatibility with 2.x is not yet validated. Please report issues.`);
+      }
+
       // Cache printer profile
       if (profile?.profiles) {
         const defaultProfile = Object.values(profile.profiles).find(p => p.default) || Object.values(profile.profiles)[0];
@@ -951,6 +961,45 @@ export class OctoPrintClient {
 
   async sendPluginCommand(pluginName, command) {
     return this._apiPost(`/api/plugin/${pluginName}`, command);
+  }
+
+  // OctoPrint 1.11+ — health_check plugin hook
+  // Calls the server-side health_check plugin endpoint added in 1.11.0.
+  // Returns { checks: [{name, status, severity, message}] } or null when
+  // the plugin isn't available (older OctoPrint / plugin disabled).
+  async getHealthChecks() {
+    return this._apiGet('/api/plugin/health_check').catch(() => null);
+  }
+
+  // OctoPrint 1.11+ — 2FA / MfaPlugin detection
+  // Returns { mfa_available, enabled_methods: [...] } for the current user
+  // context. Lets the dashboard show a "Set up 2FA" nudge when the user
+  // hasn't enrolled yet. Returns null for OctoPrint < 1.11 without erroring.
+  async getMfaStatus() {
+    const data = await this._apiGet('/api/plugin/mfa/status').catch(() => null);
+    if (!data) return null;
+    return {
+      available: !!data.available,
+      enrolled: !!data.enrolled,
+      methods: Array.isArray(data.methods) ? data.methods : [],
+    };
+  }
+
+  // OctoPrint popular plugins (added in this batch)
+  async getOctolapseStatus() {
+    return this._apiGet('/api/plugin/octolapse').catch(() => null);
+  }
+
+  async getPrintTimeGeniusEstimate() {
+    return this._apiGet('/api/plugin/PrintTimeGenius').catch(() => null);
+  }
+
+  async getHeaterTimeoutStatus() {
+    return this._apiGet('/api/plugin/heatertimeout').catch(() => null);
+  }
+
+  async getFirmwareUpdaterStatus() {
+    return this._apiGet('/api/plugin/firmwareupdater/status').catch(() => null);
   }
 
   // PSU Control

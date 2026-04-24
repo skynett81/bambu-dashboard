@@ -54,6 +54,43 @@ import { fileURLToPath } from 'node:url';
 import { isAuthEnabled, isMultiUser, validateCredentials, createSession, destroySession, getSessionToken, validateSession, hashPassword, validateApiKey, generateApiKey, hasPermission, validateCredentialsDB, getSessionUser, requirePermission, invalidateUserSessions } from './auth.js';
 import { getSlicerStatus, getSlicerProfiles, saveUploadedFile, sliceFile, uploadToPrinter, cleanupJob, getJobFilePath } from './slicer-service.js';
 import { buildPauseCommand, buildResumeCommand, buildGcodeMultiLine, buildFilamentUnloadSequence, buildFilamentLoadSequence, buildAmsTrayChangeCommand } from './mqtt-commands.js';
+import { verifyOctoEverywhereWebhook } from './octoeverywhere-webhook.js';
+import { verifyObicoWebhook } from './obico-webhook.js';
+import { verifySimplyPrintWebhook } from './simplyprint-webhook.js';
+import { TigerTagLookup } from './tigertag-lookup.js';
+import { findPrinterPreset, listPrinterPresetsForVendor, listAllCapabilities } from './printer-presets.js';
+import { listMultiMaterialSystems, getMultiMaterialSystem } from './multi-material-capabilities.js';
+import { fromConfig as makeSpoolmanClient } from './spoolman-client.js';
+import {
+  recordLocationClimate, setSpoolmanSyncStatus,
+  getExtraFieldSchemas, addExtraFieldSchema, deleteExtraFieldSchema,
+  listMaterials, listPurgeMatrix,
+  listOrcaSlicerFilaments, getOrcaSlicerFilament,
+  markVendorSpoolmanSynced, locationIdToSpoolmanPath,
+} from './db/spools.js';
+import { refreshSpoolmanDb, refresh3DFP, forceRefreshAll } from './filament-db-refresh.js';
+import { syncOrcaSlicerLibrary } from './orcaslicer-library-sync.js';
+import { refreshModularSpoolmanDb, refreshPerVendorFilaments } from './spoolmandb-modular.js';
+import { getCachedImage } from './filament-image-cache.js';
+import { importFromSpoolman } from './spoolman-import.js';
+import { detectAndLinkDuplicates, getDuplicatesFor } from './filament-dedupe.js';
+import { refreshTypeBridge, spoolmanTypeToLocalMaterial, localMaterialToSpoolmanType } from './spoolman-type-bridge.js';
+import { trackPricesFromCache, getCheapestListings, getPriceTrend } from './threedfp-price-tracker.js';
+import { getHealthHistory as getSpoolmanHealthHistory } from './spoolman-health-monitor.js';
+import { onFilamentProfileUpserted, onFilamentProfileDeleted, onSpoolCreated, onSpoolUpdated, onSpoolDeleted, onVendorUpserted } from './spoolman-sync-hooks.js';
+import { importKbMarkdown } from './kb-markdown-importer.js';
+
+// Lazy singleton — users can enable online lookup via a config flag (off by default).
+let _tigerTagLookup = null;
+function _getTigerTag() {
+  if (!_tigerTagLookup) {
+    _tigerTagLookup = new TigerTagLookup({
+      offlineDb: {},
+      enableOnlineLookup: !!(config.tigertag?.enableOnlineLookup),
+    });
+  }
+  return _tigerTagLookup;
+}
 import { getSlicerJobs as dbGetSlicerJobs, getSlicerJob as dbGetSlicerJob, deleteSlicerJob as dbDeleteSlicerJob, getSlicerJobByFilename } from './database.js';
 import * as _energy from './energy-service.js';
 import * as _power from './power-monitor.js';
@@ -568,8 +605,18 @@ export async function handleApiRequest(req, res) {
     return;
   }
 
+  // Incoming webhooks from external services (OctoEverywhere, Obico,
+  // SimplyPrint) authenticate via their own shared-secret / HMAC schemes,
+  // not session cookies. Bypass the session auth check — the webhook
+  // verifiers return 401 if the signature/secret is wrong.
+  const isIncomingWebhook = method === 'POST' && (
+    path === '/api/webhook/octoeverywhere' ||
+    path === '/api/webhook/obico' ||
+    path === '/api/webhook/simplyprint'
+  );
+
   // Centralized permission check for all API routes
-  if (isAuthEnabled()) {
+  if (isAuthEnabled() && !isIncomingWebhook) {
     const perm = getRoutePermission(method, path);
     if (!requirePerm(req, res, perm)) return;
   }
@@ -3309,7 +3356,10 @@ export async function handleApiRequest(req, res) {
     }
 
     // ---- Inventory: Vendors ----
-    if (method === 'GET' && path === '/api/inventory/vendors') {
+    // /api/vendors is the public path documented in OpenAPI; /api/inventory/vendors
+    // is the internal alias used by older admin pages. Both resolve to the same
+    // handler so tests and external consumers can rely on either.
+    if (method === 'GET' && (path === '/api/inventory/vendors' || path === '/api/vendors')) {
       const filters = {};
       if (url.searchParams.get('limit')) filters.limit = parseInt(url.searchParams.get('limit'));
       if (url.searchParams.get('offset')) filters.offset = parseInt(url.searchParams.get('offset'));
@@ -3412,25 +3462,39 @@ export async function handleApiRequest(req, res) {
       return readBody(req, res, (body) => {
         const result = addSpool(body);
         _broadcastInventory('created', 'spool', { id: result.id });
+        // Fire-and-forget: push to Spoolman if configured (no-op otherwise).
+        // Hook swallows errors so local CRUD never fails due to remote.
+        onSpoolCreated({ ...body, id: result.id }).catch(() => {});
         sendJson(res, result, 201);
       });
     }
     if (spoolMatch && method === 'PUT') {
       return readBody(req, res, (body) => {
+        const spoolId = parseInt(spoolMatch[1]);
         if (body.used_weight_g_add) {
           const addG = parseFloat(body.used_weight_g_add);
-          if (addG > 0) useSpoolWeight(parseInt(spoolMatch[1]), addG, 'manual');
+          if (addG > 0) useSpoolWeight(spoolId, addG, 'manual');
           delete body.used_weight_g_add;
-          if (Object.keys(body).length === 0) { _broadcastInventory('updated', 'spool', { id: parseInt(spoolMatch[1]) }); return sendJson(res, { ok: true }); }
+          if (Object.keys(body).length === 0) {
+            _broadcastInventory('updated', 'spool', { id: spoolId });
+            const updated = getSpool(spoolId);
+            if (updated) onSpoolUpdated(updated, updated.spoolman_updated_at).catch(() => {});
+            return sendJson(res, { ok: true });
+          }
         }
-        updateSpool(parseInt(spoolMatch[1]), body);
-        _broadcastInventory('updated', 'spool', { id: parseInt(spoolMatch[1]) });
+        updateSpool(spoolId, body);
+        _broadcastInventory('updated', 'spool', { id: spoolId });
+        const updated = getSpool(spoolId);
+        if (updated) onSpoolUpdated(updated, updated.spoolman_updated_at).catch(() => {});
         sendJson(res, { ok: true });
       });
     }
     if (spoolMatch && method === 'DELETE') {
-      deleteSpool(parseInt(spoolMatch[1]));
-      _broadcastInventory('deleted', 'spool', { id: parseInt(spoolMatch[1]) });
+      const spoolId = parseInt(spoolMatch[1]);
+      const existing = getSpool(spoolId);
+      deleteSpool(spoolId);
+      _broadcastInventory('deleted', 'spool', { id: spoolId });
+      if (existing?.external_id) onSpoolDeleted(existing.external_id, spoolId).catch(() => {});
       return sendJson(res, { ok: true });
     }
 
@@ -5149,6 +5213,643 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, getWebhookDeliveries(parseInt(webhookDeliveriesMatch[1])));
     }
 
+    // ---- Incoming webhooks from cloud print-monitoring services ----
+    // Users paste these URLs into OctoEverywhere / Obico / SimplyPrint
+    // plugin settings. The shared secret is stored on the notifications
+    // config and compared in constant time by each webhook verifier.
+    if (method === 'POST' && path === '/api/webhook/octoeverywhere') {
+      return readBody(req, res, async (body) => {
+        const secret = config.notifications?.incoming_webhooks?.octoeverywhere_secret || '';
+        const r = verifyOctoEverywhereWebhook(body, secret);
+        if (!r.ok) return sendJson(res, { error: r.reason }, r.status);
+        if (_notifier?.notify) {
+          _notifier.notify(`octoeverywhere:${r.event.type}`, {
+            printerId: r.event.printerId,
+            printerName: r.event.printerName,
+            fileName: r.event.fileName,
+            progress: r.event.progress,
+            snapshotUrl: r.event.snapshotUrl,
+            error: r.event.error,
+            source: 'octoeverywhere',
+          });
+        }
+        return sendJson(res, { ok: true });
+      });
+    }
+
+    if (method === 'POST' && path === '/api/webhook/obico') {
+      return readBinaryBody(req, res, async (rawBody) => {
+        const secret = config.notifications?.incoming_webhooks?.obico_secret || '';
+        const sig = req.headers['x-obico-signature'] || '';
+        const r = verifyObicoWebhook(rawBody, sig, secret);
+        if (!r.ok) return sendJson(res, { error: r.reason }, r.status);
+        if (_notifier?.notify) {
+          _notifier.notify(`obico:${r.event.type}`, {
+            printerId: r.event.printerId,
+            printerName: r.event.printerName,
+            fileName: r.event.fileName,
+            progress: r.event.progress,
+            failureScore: r.event.failureScore,
+            snapshotUrl: r.event.snapshotUrl,
+            source: 'obico',
+          });
+        }
+        return sendJson(res, { ok: true });
+      });
+    }
+
+    // ---- Inventory: expiring spools, location climate, two-way Spoolman sync ----
+    if (method === 'GET' && path === '/api/inventory/spools/expiring') {
+      const u = new URL(req.url, 'http://localhost');
+      const within = parseInt(u.searchParams.get('within') || '30', 10);
+      return sendJson(res, getExpiringSpools(within));
+    }
+
+    const locClimateMatch = path.match(/^\/api\/inventory\/locations\/(\d+)\/climate$/);
+    if (locClimateMatch && method === 'POST') {
+      return readBody(req, res, (body) => {
+        const locId = parseInt(locClimateMatch[1], 10);
+        const t = typeof body.temp === 'number' ? body.temp : null;
+        const h = typeof body.humidity === 'number' ? body.humidity : null;
+        try {
+          const result = recordLocationClimate(locId, t, h);
+          return sendJson(res, { ok: true, ...result });
+        } catch (e) { return sendJson(res, { error: e.message }, 400); }
+      });
+    }
+
+    if (method === 'POST' && path === '/api/spoolman/refresh-db') {
+      // Force-refresh SpoolmanDB + 3DFilamentProfiles from their upstream sources
+      const result = await forceRefreshAll();
+      return sendJson(res, result);
+    }
+
+    if (method === 'GET' && path === '/api/spoolman/health') {
+      const client = makeSpoolmanClient(config);
+      if (!client) return sendJson(res, { enabled: false });
+      const h = await client.health();
+      return sendJson(res, { enabled: true, ...h });
+    }
+
+    // Two-way sync: create/update/delete a spool in Spoolman (outgoing)
+    if (method === 'POST' && path === '/api/spoolman/spool') {
+      const client = makeSpoolmanClient(config);
+      if (!client) return sendJson(res, { error: 'Spoolman not configured' }, 400);
+      return readBody(req, res, async (body) => {
+        try {
+          // Convert our hierarchical location_id to Spoolman's "/"-joined path.
+          // Spoolman v2 stores location as a free-text string, so we normalise
+          // our local hierarchy before pushing the spool.
+          if (body.location_id && !body.location) {
+            const path = locationIdToSpoolmanPath(body.location_id);
+            if (path) body.location = path;
+          }
+          const created = await client.createSpool(body);
+          if (body.local_spool_id) setSpoolmanSyncStatus(body.local_spool_id);
+          return sendJson(res, created, 201);
+        } catch (e) {
+          if (body.local_spool_id) setSpoolmanSyncStatus(body.local_spool_id, e.message);
+          return sendJson(res, { error: e.message }, 502);
+        }
+      });
+    }
+
+    // ---- Vendor two-way sync to Spoolman (opt-in) ----
+    const vendorSyncMatch = path.match(/^\/api\/vendors\/(\d+)\/spoolman-sync$/);
+    if (vendorSyncMatch && method === 'POST') {
+      const vendorId = parseInt(vendorSyncMatch[1], 10);
+      const client = makeSpoolmanClient(config);
+      if (!client) return sendJson(res, { error: 'Spoolman not configured' }, 400);
+      const vendor = getVendors().find(v => v.id === vendorId);
+      if (!vendor) return sendJson(res, { error: 'vendor not found' }, 404);
+      try {
+        const payload = {
+          name: vendor.name,
+          comment: vendor.comment || null,
+          website: vendor.website || null,
+          empty_spool_weight: vendor.empty_spool_weight_g || null,
+        };
+        let result;
+        if (vendor.spoolman_id) {
+          result = await client.updateVendor(vendor.spoolman_id, payload);
+        } else {
+          result = await client.createVendor(payload);
+          if (result?.id) markVendorSpoolmanSynced(vendorId, result.id);
+        }
+        return sendJson(res, { ok: true, spoolman: result });
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+    }
+
+    const smSpoolMatch = path.match(/^\/api\/spoolman\/spool\/(\d+)$/);
+    if (smSpoolMatch && (method === 'PATCH' || method === 'PUT')) {
+      const client = makeSpoolmanClient(config);
+      if (!client) return sendJson(res, { error: 'Spoolman not configured' }, 400);
+      return readBody(req, res, async (body) => {
+        try {
+          const updated = await client.updateSpool(parseInt(smSpoolMatch[1], 10), body);
+          if (body.local_spool_id) setSpoolmanSyncStatus(body.local_spool_id);
+          return sendJson(res, updated);
+        } catch (e) {
+          if (body.local_spool_id) setSpoolmanSyncStatus(body.local_spool_id, e.message);
+          return sendJson(res, { error: e.message }, 502);
+        }
+      });
+    }
+
+    if (smSpoolMatch && method === 'DELETE') {
+      const client = makeSpoolmanClient(config);
+      if (!client) return sendJson(res, { error: 'Spoolman not configured' }, 400);
+      try {
+        await client.deleteSpool(parseInt(smSpoolMatch[1], 10));
+        return sendJson(res, { ok: true });
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+    }
+
+    // ---- KB markdown → materials_taxonomy + kb_filaments import ----
+    // Parses website/docs/kb/filaments/*.md and seeds the rich Norwegian
+    // filament guides into our local DB. Safe to re-run.
+    if (method === 'POST' && path === '/api/kb/import-markdown') {
+      try {
+        const result = await importKbMarkdown();
+        return sendJson(res, result);
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+    }
+
+    // ---- Canonical 60+ filament catalogue seed ----
+    if (method === 'POST' && path === '/api/materials/seed-catalog') {
+      try {
+        const { seedMaterialsCatalog } = await import('./materials-catalog-seed.js');
+        return sendJson(res, seedMaterialsCatalog());
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+    }
+
+    // ---- Extended KB import (build-plates, maintenance, troubleshooting) ----
+    if (method === 'POST' && path === '/api/kb/import-extended') {
+      try {
+        const { importExtendedKb } = await import('./kb-extended-importer.js');
+        return sendJson(res, await importExtendedKb());
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+    }
+
+    // ---- Extended KB list/get endpoints (multilingual: ?locale=nb|en) ----
+    const _kbLocale = (req) => {
+      const u = new URL(req.url, 'http://localhost');
+      const l = u.searchParams.get('locale');
+      return (l === 'en' || l === 'nb') ? l : 'nb';
+    };
+
+    if (method === 'GET' && path === '/api/kb/build-plates') {
+      const locale = _kbLocale(req);
+      const rows = (await import('./db/connection.js')).getDb()
+        .prepare('SELECT id, slug, title, description, surface_type, max_temp_c, locale FROM kb_build_plates WHERE locale = ? ORDER BY title').all(locale);
+      return sendJson(res, rows);
+    }
+    const plateDetailMatch = path.match(/^\/api\/kb\/build-plates\/([a-z0-9-]+)$/);
+    if (plateDetailMatch && method === 'GET') {
+      const locale = _kbLocale(req);
+      const row = (await import('./db/connection.js')).getDb()
+        .prepare('SELECT * FROM kb_build_plates WHERE slug = ? AND locale = ?').get(plateDetailMatch[1], locale)
+        || (await import('./db/connection.js')).getDb()
+        .prepare('SELECT * FROM kb_build_plates WHERE slug = ? AND locale = \'nb\'').get(plateDetailMatch[1]);
+      if (!row) return sendJson(res, { error: 'not found' }, 404);
+      return sendJson(res, row);
+    }
+
+    if (method === 'GET' && path === '/api/kb/maintenance') {
+      const locale = _kbLocale(req);
+      const rows = (await import('./db/connection.js')).getDb()
+        .prepare('SELECT id, slug, title, description, topic, frequency_days, difficulty, locale FROM kb_maintenance WHERE locale = ? ORDER BY title').all(locale);
+      return sendJson(res, rows);
+    }
+    const maintDetailMatch = path.match(/^\/api\/kb\/maintenance\/([a-z0-9-]+)$/);
+    if (maintDetailMatch && method === 'GET') {
+      const locale = _kbLocale(req);
+      const row = (await import('./db/connection.js')).getDb()
+        .prepare('SELECT * FROM kb_maintenance WHERE slug = ? AND locale = ?').get(maintDetailMatch[1], locale)
+        || (await import('./db/connection.js')).getDb()
+        .prepare('SELECT * FROM kb_maintenance WHERE slug = ? AND locale = \'nb\'').get(maintDetailMatch[1]);
+      if (!row) return sendJson(res, { error: 'not found' }, 404);
+      return sendJson(res, row);
+    }
+
+    if (method === 'GET' && path === '/api/kb/troubleshooting') {
+      const locale = _kbLocale(req);
+      const rows = (await import('./db/connection.js')).getDb()
+        .prepare('SELECT id, slug, title, description, symptom, locale FROM kb_troubleshooting WHERE locale = ? ORDER BY title').all(locale);
+      return sendJson(res, rows);
+    }
+    const tsDetailMatch = path.match(/^\/api\/kb\/troubleshooting\/([a-z0-9-]+)$/);
+    if (tsDetailMatch && method === 'GET') {
+      const locale = _kbLocale(req);
+      const row = (await import('./db/connection.js')).getDb()
+        .prepare('SELECT * FROM kb_troubleshooting WHERE slug = ? AND locale = ?').get(tsDetailMatch[1], locale)
+        || (await import('./db/connection.js')).getDb()
+        .prepare('SELECT * FROM kb_troubleshooting WHERE slug = ? AND locale = \'nb\'').get(tsDetailMatch[1]);
+      if (!row) return sendJson(res, { error: 'not found' }, 404);
+      return sendJson(res, row);
+    }
+
+    // ---- Spoolman-compatible JSON export ----
+    // Emits our DB in the exact shape Spoolman expects so users can
+    // migrate back or feed another instance. Three top-level arrays:
+    // vendors, filaments, spools. Ids are preserved from our local
+    // rows; external_id / spoolman_id are passed through when known.
+    if (method === 'GET' && path === '/api/spoolman/export') {
+      try {
+        const vendors = getVendors().map(v => ({
+          id: v.spoolman_id || v.id,
+          name: v.name,
+          website: v.website || null,
+          comment: v.comment || null,
+          empty_spool_weight: v.empty_spool_weight_g || null,
+        }));
+        const filaments = getFilamentProfiles().map(fp => ({
+          id: fp.spoolman_id || fp.id,
+          name: fp.name,
+          vendor: fp.vendor_id ? { id: fp.vendor_id } : null,
+          material: fp.material,
+          density: fp.density,
+          diameter: fp.diameter || 1.75,
+          weight: fp.weight_g || 1000,
+          spool_weight: fp.spool_weight_g || null,
+          settings_extruder_temp: fp.nozzle_temp_max || null,
+          settings_bed_temp: fp.bed_temp_max || null,
+          color_hex: fp.color_hex || null,
+          price: fp.price || null,
+          article_number: fp.article_number || null,
+        }));
+        const spools = getAllSpoolsForExport().map(s => ({
+          id: s.external_id || s.id,
+          filament: s.filament_profile_id ? { id: s.filament_profile_id } : null,
+          initial_weight: s.initial_weight_g || null,
+          remaining_weight: s.remaining_weight_g || 0,
+          used_weight: s.used_weight_g || 0,
+          lot_nr: s.lot_number || null,
+          location: s.location || null,
+          price: s.cost || null,
+          purchase_date: s.purchase_date || null,
+          archived: !!s.archived,
+          comment: s.comment || null,
+        }));
+        res.setHeader('Content-Disposition', 'attachment; filename="spoolman-export.json"');
+        return sendJson(res, { vendors, filaments, spools, _meta: { exported_at: new Date().toISOString(), source: '3DPrintForge' } });
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+    }
+
+    // ---- Extra-field sync with Spoolman ----
+    if (method === 'POST' && path === '/api/extra-fields/sync') {
+      const client = makeSpoolmanClient(config);
+      if (!client) return sendJson(res, { error: 'Spoolman not configured' }, 400);
+      try {
+        const results = {};
+        for (const entity of ['spool', 'filament', 'vendor']) {
+          const remote = await client.listExtraFields(entity).catch(() => []);
+          const localRows = getExtraFieldSchemas(entity);
+          const localKeys = new Set(localRows.map(r => r.key));
+          let imported = 0;
+          if (Array.isArray(remote)) {
+            for (const f of remote) {
+              if (localKeys.has(f.key)) continue;
+              try {
+                addExtraFieldSchema({
+                  entity, key: f.key, name: f.name || f.key,
+                  field_type: f.field_type || 'text',
+                  default_value: f.default_value || null,
+                  choices: Array.isArray(f.choices) ? f.choices : null,
+                  unit: f.unit || null,
+                  order_index: f.order || 0,
+                });
+                imported++;
+              } catch {}
+            }
+          }
+          results[entity] = { remote: remote?.length || 0, local: localRows.length, imported };
+        }
+        return sendJson(res, results);
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+    }
+
+    // ---- QR code for a spool ----
+    //   GET /api/inventory/spools/:id/qr.png → PNG QR code encoding the
+    //   spool's short_id (or its numeric id when short_id isn't set).
+    const qrMatch = path.match(/^\/api\/inventory\/spools\/(\d+)\/qr\.png$/);
+    if (qrMatch && method === 'GET') {
+      try {
+        const { default: qrcode } = await import('qrcode');
+        const spool = getSpool(parseInt(qrMatch[1], 10));
+        if (!spool) return sendJson(res, { error: 'not found' }, 404);
+        const payload = spool.short_id || `spool:${spool.id}`;
+        const buf = await qrcode.toBuffer(payload, { type: 'png', errorCorrectionLevel: 'M', margin: 1, width: 256 });
+        res.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' });
+        return res.end(buf);
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+    }
+
+    // Printable label (HTML) — caller can pipe this through print-to-PDF.
+    const labelMatch = path.match(/^\/api\/inventory\/spools\/(\d+)\/label$/);
+    if (labelMatch && method === 'GET') {
+      const spool = getSpool(parseInt(labelMatch[1], 10));
+      if (!spool) return sendJson(res, { error: 'not found' }, 404);
+      const profile = spool.filament_profile_id ? getFilamentProfile(spool.filament_profile_id) : null;
+      const qrUrl = `/api/inventory/spools/${spool.id}/qr.png`;
+      const vendor = profile?.vendor_id ? getVendors().find(v => v.id === profile.vendor_id)?.name : '';
+      const html = `<!doctype html><html><head><meta charset="utf-8"><title>Spool ${spool.id}</title>
+<style>body{margin:0;padding:10mm;font-family:system-ui,sans-serif}
+.label{width:62mm;height:29mm;border:1px dashed #999;padding:2mm;display:flex;gap:2mm;page-break-after:always}
+.qr{flex:0 0 25mm;height:25mm}
+.meta{flex:1;font-size:9pt;line-height:1.25}
+.mat{font-weight:700;font-size:11pt}
+.short{font-family:monospace;font-size:10pt;color:#555}
+@media print{body{padding:0}.label{border:none}}
+</style></head><body>
+<div class="label">
+  <img class="qr" src="${qrUrl}" alt="QR">
+  <div class="meta">
+    <div class="mat">${_escHtml(profile?.material || '')} ${_escHtml(profile?.color_name || '')}</div>
+    <div>${_escHtml(vendor || '')}</div>
+    <div class="short">${_escHtml(spool.short_id || ('#' + spool.id))}</div>
+    <div>${spool.remaining_weight_g || 0} g left</div>
+  </div>
+</div>
+</body></html>`;
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+      return res.end(html);
+    }
+
+    // ---- OrcaSlicer preset → local filament profile import ----
+    const orcaImportMatch = path.match(/^\/api\/orcaslicer\/filaments\/(\d+)\/import$/);
+    if (orcaImportMatch && method === 'POST') {
+      const row = getOrcaSlicerFilament(parseInt(orcaImportMatch[1], 10));
+      if (!row) return sendJson(res, { error: 'not found' }, 404);
+      try {
+        // Upsert vendor
+        let vendor = getVendors().find(v => v.name.toLowerCase() === row.vendor.toLowerCase());
+        let vendorId = vendor?.id;
+        if (!vendorId) vendorId = addVendor({ name: row.vendor }).id || addVendor({ name: row.vendor });
+        let raw = {};
+        try { raw = JSON.parse(row.raw_json); } catch {}
+        const profile = addFilamentProfile({
+          name: row.name,
+          vendor_id: vendorId,
+          material: row.material || 'PLA',
+          nozzle_temp_min: row.nozzle_temp_min,
+          nozzle_temp_max: row.nozzle_temp_max,
+          bed_temp_min: row.bed_temp_min,
+          bed_temp_max: row.bed_temp_max,
+          max_volumetric_speed: row.max_volumetric_speed,
+          diameter: raw.filament_diameter?.[0] || 1.75,
+          density: raw.filament_density?.[0] || null,
+          source: 'orcaslicer',
+          external_id: `orcaslicer:${row.id}`,
+        });
+        return sendJson(res, { ok: true, profile_id: profile?.id || profile, imported_from: 'orcaslicer' });
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+    }
+
+    // ---- Profile compatibility matcher ----
+    // Suggests the nearest community profile for a user's draft profile
+    // by fingerprinting (vendor + material + color_hex). Small, deterministic,
+    // never returns more than 10 candidates.
+    if (method === 'POST' && path === '/api/filaments/find-match') {
+      return readBody(req, res, (body) => {
+        const vendorName = String(body.vendor || '').toLowerCase();
+        const material = String(body.material || '').toLowerCase();
+        const color = String(body.color_hex || '').replace('#', '').toLowerCase();
+        const candidates = getCommunityFilaments()
+          .filter(c => (!vendorName || (c.manufacturer || '').toLowerCase() === vendorName)
+                    && (!material || (c.material || '').toLowerCase() === material)
+                    && (!color || (c.color_hex || '').toLowerCase() === color))
+          .slice(0, 10);
+        return sendJson(res, { count: candidates.length, candidates });
+      });
+    }
+
+    // ---- Initial full-import from Spoolman ----
+    if (method === 'POST' && path === '/api/spoolman/import-all') {
+      try {
+        const result = await importFromSpoolman();
+        return sendJson(res, result);
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+    }
+
+    // ---- Spoolman health history ----
+    if (method === 'GET' && path === '/api/spoolman/health-history') {
+      const u = new URL(req.url, 'http://localhost');
+      const limit = parseInt(u.searchParams.get('limit') || '100', 10);
+      return sendJson(res, getSpoolmanHealthHistory(limit));
+    }
+
+    // ---- filament_type taxonomy bridge ----
+    if (method === 'POST' && path === '/api/spoolman/refresh-type-bridge') {
+      try {
+        const r = await refreshTypeBridge();
+        return sendJson(res, r);
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+    }
+
+    // ---- Duplicate detection ----
+    if (method === 'POST' && path === '/api/filaments/detect-duplicates') {
+      return sendJson(res, detectAndLinkDuplicates());
+    }
+    const dupForMatch = path.match(/^\/api\/filaments\/(\d+)\/duplicates$/);
+    if (dupForMatch && method === 'GET') {
+      return sendJson(res, getDuplicatesFor(parseInt(dupForMatch[1], 10)));
+    }
+
+    // ---- 3DFP price tracking + trend + cheapest-per-profile ----
+    if (method === 'POST' && path === '/api/filaments/track-prices') {
+      return sendJson(res, trackPricesFromCache());
+    }
+    if (method === 'GET' && path === '/api/filaments/cheapest-listings') {
+      return sendJson(res, getCheapestListings());
+    }
+    const priceTrendMatch = path.match(/^\/api\/filaments\/(\d+)\/price-trend$/);
+    if (priceTrendMatch && method === 'GET') {
+      const u = new URL(req.url, 'http://localhost');
+      const days = parseInt(u.searchParams.get('days') || '30', 10);
+      return sendJson(res, getPriceTrend(parseInt(priceTrendMatch[1], 10), days));
+    }
+
+    // ---- Per-vendor SpoolmanDB filament refresh ----
+    if (method === 'POST' && path === '/api/spoolmandb/refresh-per-vendor') {
+      try {
+        const r = await refreshPerVendorFilaments();
+        return sendJson(res, r);
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+    }
+
+    // ---- Filament-profile two-way sync ----
+    const profileSyncMatch = path.match(/^\/api\/filament-profiles\/(\d+)\/spoolman-sync$/);
+    if (profileSyncMatch && method === 'POST') {
+      try {
+        const profile = getFilamentProfile(parseInt(profileSyncMatch[1], 10));
+        if (!profile) return sendJson(res, { error: 'not found' }, 404);
+        await onFilamentProfileUpserted(profile);
+        return sendJson(res, { ok: true });
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+    }
+    const profileSyncDelMatch = path.match(/^\/api\/filament-profiles\/(\d+)\/spoolman-sync$/);
+    if (profileSyncDelMatch && method === 'DELETE') {
+      try {
+        const profile = getFilamentProfile(parseInt(profileSyncDelMatch[1], 10));
+        if (profile?.spoolman_id) await onFilamentProfileDeleted(profile.spoolman_id);
+        return sendJson(res, { ok: true });
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+    }
+
+    // ---- Extra-field schema (Spoolman-compatible custom fields) ----
+    const extraFieldMatch = path.match(/^\/api\/extra-fields\/(spool|filament|vendor)$/);
+    if (extraFieldMatch && method === 'GET') {
+      return sendJson(res, getExtraFieldSchemas(extraFieldMatch[1]));
+    }
+    if (extraFieldMatch && method === 'POST') {
+      return readBody(req, res, (body) => {
+        try {
+          const id = addExtraFieldSchema({ ...body, entity: extraFieldMatch[1] });
+          return sendJson(res, { ok: true, id }, 201);
+        } catch (e) { return sendJson(res, { error: e.message }, 400); }
+      });
+    }
+    const extraFieldDelMatch = path.match(/^\/api\/extra-fields\/(\d+)$/);
+    if (extraFieldDelMatch && method === 'DELETE') {
+      deleteExtraFieldSchema(parseInt(extraFieldDelMatch[1], 10));
+      return sendJson(res, { ok: true });
+    }
+
+    // ---- Materials taxonomy + purge matrix ----
+    if (method === 'GET' && path === '/api/materials/taxonomy') {
+      return sendJson(res, listMaterials());
+    }
+    if (method === 'GET' && path === '/api/filaments/purge-matrix') {
+      const u = new URL(req.url, 'http://localhost');
+      return sendJson(res, listPurgeMatrix({
+        from: u.searchParams.get('from'),
+        to: u.searchParams.get('to'),
+      }));
+    }
+
+    // ---- OrcaSlicer library ----
+    if (method === 'GET' && path === '/api/orcaslicer/filaments') {
+      const u = new URL(req.url, 'http://localhost');
+      return sendJson(res, listOrcaSlicerFilaments({
+        vendor: u.searchParams.get('vendor'),
+        material: u.searchParams.get('material'),
+      }));
+    }
+    const orcaDetailMatch = path.match(/^\/api\/orcaslicer\/filaments\/(\d+)$/);
+    if (orcaDetailMatch && method === 'GET') {
+      const f = getOrcaSlicerFilament(parseInt(orcaDetailMatch[1], 10));
+      if (!f) return sendJson(res, { error: 'not found' }, 404);
+      // Parse raw_json so the client can import presets directly
+      try { f.raw = JSON.parse(f.raw_json); } catch { f.raw = null; }
+      return sendJson(res, f);
+    }
+    if (method === 'POST' && path === '/api/orcaslicer/sync') {
+      try {
+        const result = await syncOrcaSlicerLibrary();
+        return sendJson(res, result);
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+    }
+
+    // ---- Modular SpoolmanDB refresh (vendors + materials + purge) ----
+    if (method === 'POST' && path === '/api/spoolmandb/refresh-modular') {
+      try {
+        const result = await refreshModularSpoolmanDb();
+        return sendJson(res, result);
+      } catch (e) { return sendJson(res, { error: e.message }, 502); }
+    }
+
+    // ---- Cached filament image proxy ----
+    //   GET /api/filament-image?url=<https-source> → redirects to /data/filament-images/<hash>.<ext>
+    // Uses URL-hash under the hood so the dashboard never leaks IPs to
+    // third-party CDNs even when rendering community-DB images.
+    if (method === 'GET' && path === '/api/filament-image') {
+      const u = new URL(req.url, 'http://localhost');
+      const src = u.searchParams.get('url') || '';
+      const local = await getCachedImage(src);
+      if (!local) return sendJson(res, { error: 'cache miss' }, 404);
+      // Serve the file directly (small, already on disk)
+      try {
+        const data = readFileSync(local);
+        const ext = (local.split('.').pop() || 'jpg').toLowerCase();
+        const contentType = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif' }[ext] || 'application/octet-stream';
+        res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': 'public, max-age=2592000' });
+        return res.end(data);
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+    }
+
+    // ---- TD-vote submission (3DFilamentProfiles community rating) ----
+    if (method === 'POST' && path === '/api/filaments/td-vote') {
+      return readBody(req, res, (body) => {
+        const { filament_id, vote } = body || {};
+        if (!filament_id || typeof vote !== 'number') return sendJson(res, { error: 'filament_id + vote required' }, 400);
+        try {
+          // submitTdVote already exists in the database module — just expose it
+          const r = submitTdVote(filament_id, vote, getSessionUser(req)?.username || 'anonymous');
+          return sendJson(res, { ok: true, ...r });
+        } catch (e) { return sendJson(res, { error: e.message }, 500); }
+      });
+    }
+
+    // ---- TigerTag NFC filament DB lookup ----
+    if (method === 'GET' && path === '/api/tigertag/lookup') {
+      const u = new URL(req.url, 'http://localhost');
+      const uid = u.searchParams.get('uid') || '';
+      if (!uid) return sendJson(res, { error: 'uid query param required' }, 400);
+      try {
+        const profile = await _getTigerTag().lookup(uid);
+        return sendJson(res, { uid, profile });
+      } catch (e) {
+        return sendJson(res, { error: e.message }, 500);
+      }
+    }
+
+    // ---- Printer preset / multi-material capability catalogue ----
+    if (method === 'GET' && path === '/api/presets/printer') {
+      const u = new URL(req.url, 'http://localhost');
+      const vendor = u.searchParams.get('vendor');
+      const model = u.searchParams.get('model');
+      if (vendor && model) {
+        const preset = findPrinterPreset(vendor, model);
+        return sendJson(res, preset || { error: 'not found' }, preset ? 200 : 404);
+      }
+      if (vendor) {
+        return sendJson(res, listPrinterPresetsForVendor(vendor));
+      }
+      return sendJson(res, { capabilities: listAllCapabilities() });
+    }
+
+    if (method === 'GET' && path === '/api/presets/multi-material') {
+      const u = new URL(req.url, 'http://localhost');
+      const id = u.searchParams.get('id');
+      if (id) {
+        const sys = getMultiMaterialSystem(id);
+        return sendJson(res, sys || { error: 'not found' }, sys ? 200 : 404);
+      }
+      return sendJson(res, listMultiMaterialSystems());
+    }
+
+    if (method === 'POST' && path === '/api/webhook/simplyprint') {
+      return readBinaryBody(req, res, async (rawBody) => {
+        const secret = config.notifications?.incoming_webhooks?.simplyprint_secret || '';
+        const sig = req.headers['x-simplyprint-signature'] || '';
+        const ts = req.headers['x-simplyprint-timestamp'] || '0';
+        const r = verifySimplyPrintWebhook(rawBody, sig, ts, secret);
+        if (!r.ok) return sendJson(res, { error: r.reason }, r.status);
+        if (_notifier?.notify) {
+          _notifier.notify(`simplyprint:${r.event.type}`, {
+            printerId: r.event.printerId,
+            printerName: r.event.printerName,
+            fileName: r.event.fileName,
+            progress: r.event.progress,
+            layer: r.event.layer,
+            source: 'simplyprint',
+          });
+        }
+        return sendJson(res, { ok: true });
+      });
+    }
+
     // ---- Print Cost ----
     const costMatch = path.match(/^\/api\/cost\/(\d+)$/);
     if (costMatch && method === 'GET') {
@@ -5526,6 +6227,59 @@ export async function handleApiRequest(req, res) {
         const safe = body.macro.replace(/[^A-Z0-9_]/gi, '');
         _printerManager.handleCommand({ printer_id: pid, action: 'gcode', gcode: safe });
         return sendJson(res, { ok: true, ran: safe });
+      });
+    }
+
+    // ── U1 V1.3.0 filament_parameters catalog ──
+    // Exposes the per-material/vendor/sub-type catalog the printer ships with,
+    // so the UI can offer a "Sync from printer" action in the filament tracker.
+    const u1CatalogMatch = path.match(/^\/api\/printers\/([^/]+)\/u1\/filament-catalog$/);
+    if (u1CatalogMatch && method === 'GET') {
+      const pid = decodeURIComponent(u1CatalogMatch[1]);
+      const entry = _printerManager?.printers?.get(pid);
+      if (!entry?.client?.state) return sendJson(res, { error: 'Printer not found' }, 404);
+      const catalog = entry.client.state._u1_filament_catalog;
+      if (!catalog) return sendJson(res, { error: 'Filament catalog not available (printer offline or not U1 V1.3.0+)' }, 404);
+      return sendJson(res, catalog);
+    }
+
+    // ── U1 exceptions list ──
+    const u1ExcMatch = path.match(/^\/api\/printers\/([^/]+)\/u1\/exceptions$/);
+    if (u1ExcMatch && method === 'GET') {
+      const pid = decodeURIComponent(u1ExcMatch[1]);
+      const entry = _printerManager?.printers?.get(pid);
+      if (!entry?.client?.state) return sendJson(res, { error: 'Printer not found' }, 404);
+      const list = entry.client.state._u1_exceptions || [];
+      return sendJson(res, { exceptions: list, count: list.length });
+    }
+
+    // ── U1 debug dump — all V1.3.0-specific state fields in one call ──
+    const u1DebugMatch = path.match(/^\/api\/printers\/([^/]+)\/u1\/debug$/);
+    if (u1DebugMatch && method === 'GET') {
+      const pid = decodeURIComponent(u1DebugMatch[1]);
+      const entry = _printerManager?.printers?.get(pid);
+      if (!entry?.client?.state) return sendJson(res, { error: 'Printer not found' }, 404);
+      const s = entry.client.state;
+      return sendJson(res, {
+        firmware: s._info?.software_version || null,
+        hostname: s._info?.hostname || null,
+        klipper_state: s._klipper_state || null,
+        nozzle_diameter: s.nozzle_diameter ?? null,
+        nozzle_diameters_per_tool: s._nozzle_diameters || null,
+        extruder_offsets: s._extruder_offsets || null,
+        tool_park_state: s._sm_park || null,
+        active_extruder: s._active_extruder || null,
+        bed_flatness: s._bed_flatness || null,
+        exceptions: s._u1_exceptions || [],
+        print_error_qr_url: s.print_error_qr_url || null,
+        filament_catalog_entries: s._u1_filament_catalog?.entries?.length || 0,
+        filament_catalog_version: s._u1_filament_catalog?.version || null,
+        screws_tilt: s._u1_screws_tilt || null,
+        machine_state: {
+          main: s._sm_machine_state ?? null,
+          name: s._sm_state_name || null,
+          category: s._sm_state_category || null,
+        },
       });
     }
 
