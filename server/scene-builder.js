@@ -128,13 +128,17 @@ export function validateScene(scene) {
   if (!scene || typeof scene !== 'object') throw new Error('scene must be an object');
   if (!Array.isArray(scene.shapes)) throw new Error('scene.shapes must be an array');
   if (scene.shapes.length === 0) throw new Error('scene must contain at least one shape');
+  const allowed = ['box', 'sphere', 'cylinder', 'cone', 'torus', 'prism', 'pyramid', 'mesh', 'generator'];
   for (const s of scene.shapes) {
     if (!s.type) throw new Error('shape.type required');
-    if (!['box', 'sphere', 'cylinder', 'cone', 'torus', 'prism', 'pyramid', 'mesh'].includes(s.type)) {
+    if (!allowed.includes(s.type)) {
       throw new Error(`unsupported shape.type '${s.type}'`);
     }
     if (s.type === 'mesh' && !s.params?.meshFile) {
       throw new Error('mesh-shape requires params.meshFile');
+    }
+    if (s.type === 'generator' && !s.params?.generatorKey) {
+      throw new Error('generator-shape requires params.generatorKey');
     }
   }
   return true;
@@ -196,6 +200,13 @@ export async function buildSceneAsync(scene, opts = {}) {
       const buf = readFileSync(fullPath);
       const { bufferToMesh } = await import('./format-converter.js');
       base = await bufferToMesh(buf, safe);
+    } else if (s.type === 'generator') {
+      const { runGeneratorWithOpts, hasGenerator } = await import('./ai-forge-generators.js');
+      const key = s.params?.generatorKey;
+      if (!hasGenerator(key)) throw new Error(`unknown generator key '${key}'`);
+      const result = await runGeneratorWithOpts(key, s.params?.generatorOpts || {});
+      const { bufferToMesh } = await import('./format-converter.js');
+      base = await bufferToMesh(result.buffer, `mesh.${result.format}`);
     } else {
       base = _buildShape(s.type, s.params || {});
     }

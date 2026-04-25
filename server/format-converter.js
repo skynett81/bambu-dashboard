@@ -216,16 +216,20 @@ export function meshToObjString(mesh) {
  */
 export async function tmfBufferToMesh(buf) {
   const parsed = await parse3mfBuffer(buf);
+  // lib3mf-parser returns `parsed.meshes` with each entry holding
+  // `vertices` (Float32Array) and `triangles` (Uint32Array). Concatenate
+  // them with vertex re-indexing so the result is a single indexed mesh.
   const positions = [];
   const indices = [];
-  let offset = 0;
-  if (parsed?.objects) {
-    for (const obj of parsed.objects) {
-      if (!obj.vertices || !obj.triangles) continue;
-      for (const v of obj.vertices) positions.push(v[0], v[1], v[2]);
-      for (const tri of obj.triangles) indices.push(offset + tri[0], offset + tri[1], offset + tri[2]);
-      offset = positions.length / 3;
-    }
+  let vOffset = 0;
+  const meshes = parsed?.meshes || parsed?.objects || [];
+  for (const m of meshes) {
+    const verts = m.vertices;
+    const tris = m.triangles;
+    if (!verts || !tris) continue;
+    for (let i = 0; i < verts.length; i++) positions.push(verts[i]);
+    for (let i = 0; i < tris.length; i++) indices.push(vOffset + tris[i]);
+    vOffset = positions.length / 3;
   }
   return {
     positions: new Float32Array(positions),

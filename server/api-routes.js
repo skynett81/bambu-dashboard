@@ -6562,6 +6562,48 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // Preview a single scene shape — returns indexed mesh data
+    // (positions + indices arrays as plain JSON) so the Three.js viewport
+    // can render the actual generator/mesh-import geometry instead of a
+    // placeholder. Used by the Scene Composer Shape Gallery.
+    if (method === 'POST' && path === '/api/ai-forge/scenes/preview-shape') {
+      return readBody(req, res, async (body) => {
+        try {
+          if (!body.type) return sendJson(res, { error: 'type required' }, 400);
+          // Reuse buildSceneAsync with a single-shape scene for consistency.
+          const { buildSceneAsync } = await import('./scene-builder.js');
+          const { meshStats } = await import('./mesh-transforms.js');
+          const scene = {
+            name: 'preview',
+            shapes: [{
+              id: 'preview',
+              type: body.type,
+              params: body.params || {},
+              transform: { px: 0, py: 0, pz: 0, rx: 0, ry: 0, rz: 0, sx: 1, sy: 1, sz: 1 },
+              hole: false,
+            }],
+          };
+          const mesh = await buildSceneAsync(scene, { useCsg: false });
+          const stats = meshStats(mesh);
+          return sendJson(res, {
+            positions: Array.from(mesh.positions),
+            indices: Array.from(mesh.indices),
+            stats,
+          });
+        } catch (e) {
+          return sendJson(res, { error: e.message }, 400);
+        }
+      });
+    }
+
+    // Default opts for a generator key (used by the UI to pre-fill form).
+    if (method === 'GET' && path.match(/^\/api\/ai-forge\/scenes\/generator-defaults\/[a-z0-9_]+$/)) {
+      const key = path.split('/').pop();
+      const { defaultGeneratorOpts, hasGenerator } = await import('./ai-forge-generators.js');
+      if (!hasGenerator(key)) return sendJson(res, { error: 'unknown generator key' }, 404);
+      return sendJson(res, { generatorKey: key, opts: defaultGeneratorOpts(key) });
+    }
+
     // Upload a mesh file (STL/OBJ/3MF) to be referenced as a scene shape.
     if (method === 'POST' && path === '/api/ai-forge/scenes/upload-mesh') {
       const chunks = [];

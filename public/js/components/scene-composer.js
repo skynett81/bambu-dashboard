@@ -113,12 +113,14 @@
             <button class="form-btn" id="sc-new">New</button>
             <button class="form-btn" id="sc-open">Open…</button>
             <button class="form-btn" id="sc-save">Save</button>
+            <button class="form-btn" id="sc-gallery" title="Insert from Model Forge generator gallery">Gallery…</button>
             <button class="form-btn" id="sc-import-stl" title="Import STL/OBJ/3MF as a scene shape">Import…</button>
             <input type="file" id="sc-import-file" accept=".stl,.obj,.3mf" style="display:none">
             <span style="border-left:1px solid var(--border-color);height:24px;margin:0 4px"></span>
             <button class="form-btn" id="sc-undo" title="Undo (Ctrl+Z)">↶</button>
             <button class="form-btn" id="sc-redo" title="Redo (Ctrl+Y)">↷</button>
             <button class="form-btn" id="sc-duplicate" title="Duplicate (Ctrl+D)">Duplicate</button>
+            <button class="form-btn" id="sc-pattern" title="Pattern array (linear / radial)">Pattern…</button>
             <button class="form-btn" id="sc-delete" title="Delete (Del)">Delete</button>
             <span style="border-left:1px solid var(--border-color);height:24px;margin:0 4px"></span>
             <span style="font-size:0.78rem;opacity:0.7">Mirror:</span>
@@ -130,6 +132,15 @@
             <button class="form-btn" data-align="y-center">centerY</button>
             <button class="form-btn" data-align="z-min">groundZ</button>
             <span style="border-left:1px solid var(--border-color);height:24px;margin:0 4px"></span>
+            <label style="font-size:0.78rem">Snap:
+              <select id="sc-snap" class="form-control" style="display:inline-block;width:auto;font-size:0.78rem">
+                <option value="0">off</option>
+                <option value="0.5">0.5</option>
+                <option value="1" selected>1mm</option>
+                <option value="5">5mm</option>
+                <option value="10">10mm</option>
+              </select>
+            </label>
             <label style="font-size:0.78rem"><input type="checkbox" id="sc-csg" checked> CSG holes</label>
             <button class="form-btn primary" id="sc-render" style="margin-left:auto">Render &amp; Download</button>
             <span style="font-size:0.85rem;opacity:0.7;margin-left:8px" id="sc-saved-status">●</span>
@@ -156,6 +167,8 @@
     document.getElementById('sc-delete').onclick = _deleteSelected;
     document.getElementById('sc-import-stl').onclick = () => document.getElementById('sc-import-file').click();
     document.getElementById('sc-import-file').onchange = (e) => _importStl(e.target.files[0]);
+    document.getElementById('sc-gallery').onclick = _openGallery;
+    document.getElementById('sc-pattern').onclick = _openPatternDialog;
     document.querySelectorAll('[data-mirror]').forEach(b => b.onclick = () => _mirrorSelected(b.dataset.mirror));
     document.querySelectorAll('[data-align]').forEach(b => b.onclick = () => _alignSelected(b.dataset.align));
 
@@ -290,6 +303,179 @@
       for (const s of selected) s.transform.pz = min;
     }
     _markDirty(); _renderSidePanel(); _rebuildViewport();
+  }
+
+  // ── Snap-to-grid helper ─────────────────────────────────────────────
+
+  function _snapValue(v) {
+    const step = parseFloat(document.getElementById('sc-snap')?.value) || 0;
+    if (step <= 0) return v;
+    return Math.round(v / step) * step;
+  }
+
+  // ── Pattern array (linear / radial) ─────────────────────────────────
+
+  function _openPatternDialog() {
+    if (_state.selectedIds.size === 0) return _toast('Select a shape first', 'info');
+    const mode = prompt('Pattern type:\n  1 = Linear (along X)\n  2 = Radial (around Z axis)\n\nEnter 1 or 2:', '1');
+    if (mode === '1') {
+      const count = parseInt(prompt('Linear count (2–20)?', '4'), 10);
+      const spacing = parseFloat(prompt('Spacing in mm?', '30'));
+      if (Number.isFinite(count) && count >= 2 && count <= 20 && Number.isFinite(spacing)) {
+        _patternLinear(count, spacing);
+      }
+    } else if (mode === '2') {
+      const count = parseInt(prompt('Radial count (2–20)?', '6'), 10);
+      const radius = parseFloat(prompt('Radius (mm)?', '40'));
+      if (Number.isFinite(count) && count >= 2 && count <= 20 && Number.isFinite(radius)) {
+        _patternRadial(count, radius);
+      }
+    }
+  }
+
+  function _patternLinear(count, spacing) {
+    _pushUndo();
+    const newIds = [];
+    const sourceIds = Array.from(_state.selectedIds);
+    for (const sid of sourceIds) {
+      const src = _state.scene.shapes.find(sh => sh.id === sid);
+      if (!src) continue;
+      // Skip the source itself; create N-1 copies for total of N items.
+      for (let i = 1; i < count; i++) {
+        const copy = JSON.parse(JSON.stringify(src));
+        copy.id = `s${Date.now().toString(36)}_${i}_${Math.floor(Math.random() * 1000)}`;
+        copy.name = `${src.name} #${i + 1}`;
+        copy.transform.px = (src.transform.px || 0) + spacing * i;
+        _state.scene.shapes.push(copy);
+        newIds.push(copy.id);
+      }
+    }
+    _state.selectedIds = new Set([...sourceIds, ...newIds]);
+    _markDirty(); _renderSidePanel(); _rebuildViewport();
+    _toast(`Linear pattern: ${count} × ${sourceIds.length} shapes`, 'success');
+  }
+
+  function _patternRadial(count, radius) {
+    _pushUndo();
+    const newIds = [];
+    const sourceIds = Array.from(_state.selectedIds);
+    for (const sid of sourceIds) {
+      const src = _state.scene.shapes.find(sh => sh.id === sid);
+      if (!src) continue;
+      // Centre is the source's existing position; rotate copies around Z.
+      const cx = src.transform.px || 0;
+      const cy = src.transform.py || 0;
+      // Move source to first ring position.
+      src.transform.px = cx + radius;
+      src.transform.py = cy;
+      for (let i = 1; i < count; i++) {
+        const angle = (2 * Math.PI * i) / count;
+        const copy = JSON.parse(JSON.stringify(src));
+        copy.id = `s${Date.now().toString(36)}_${i}_${Math.floor(Math.random() * 1000)}`;
+        copy.name = `${src.name} #${i + 1}`;
+        copy.transform.px = cx + radius * Math.cos(angle);
+        copy.transform.py = cy + radius * Math.sin(angle);
+        copy.transform.rz = (src.transform.rz || 0) + angle;
+        _state.scene.shapes.push(copy);
+        newIds.push(copy.id);
+      }
+    }
+    _state.selectedIds = new Set([...sourceIds, ...newIds]);
+    _markDirty(); _renderSidePanel(); _rebuildViewport();
+    _toast(`Radial pattern: ${count} copies`, 'success');
+  }
+
+  // ── Shape Gallery (Model Forge generators) ──────────────────────────
+
+  async function _openGallery() {
+    try {
+      const r = await fetch('/api/ai-forge/generators');
+      const data = await r.json();
+      const gens = data.generators || [];
+      // Build a simple modal overlay (no third-party modal lib).
+      const existing = document.getElementById('sc-gallery-overlay');
+      if (existing) existing.remove();
+      const overlay = document.createElement('div');
+      overlay.id = 'sc-gallery-overlay';
+      overlay.style.cssText = `position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;display:flex;align-items:center;justify-content:center`;
+      overlay.innerHTML = `
+        <div style="background:var(--bg-card,#fff);color:var(--text-color,#000);border-radius:8px;padding:1rem;max-width:640px;width:90%;max-height:80vh;overflow:auto">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <h4 style="margin:0">Shape Gallery — Model Forge Generators</h4>
+            <button class="form-btn" id="sc-gallery-close">×</button>
+          </div>
+          <p style="font-size:0.85rem;opacity:0.7">Click a generator to insert it as a scene shape with default options. Customise via the properties panel after inserting.</p>
+          <div id="sc-gallery-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:6px">
+            ${gens.map(g =>
+              `<button class="form-btn" data-key="${_esc(g.key)}" style="text-align:left;padding:8px;font-size:0.78rem">
+                <strong>${_esc(g.key)}</strong><br>
+                <small style="opacity:0.7">${_esc(g.description)}</small>
+              </button>`
+            ).join('')}
+          </div>
+        </div>`;
+      document.body.appendChild(overlay);
+      overlay.querySelector('#sc-gallery-close').onclick = () => overlay.remove();
+      overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
+      overlay.querySelectorAll('button[data-key]').forEach(b => {
+        b.onclick = async () => {
+          await _insertGenerator(b.dataset.key);
+          overlay.remove();
+        };
+      });
+    } catch (e) { _toast(`Gallery load failed: ${e.message}`, 'error'); }
+  }
+
+  async function _insertGenerator(key) {
+    try {
+      const r = await fetch(`/api/ai-forge/scenes/generator-defaults/${key}`);
+      const data = await r.json();
+      if (!r.ok) { _toast(data.error || 'Insert failed', 'error'); return; }
+      _pushUndo();
+      const id = `s${Date.now().toString(36)}_${Math.floor(Math.random() * 1000)}`;
+      _state.scene.shapes.push({
+        id,
+        name: `${key} ${_state.scene.shapes.length + 1}`,
+        type: 'generator',
+        params: { generatorKey: key, generatorOpts: data.opts },
+        transform: _defaultTransform(),
+        color: _randomColor(),
+        hole: false,
+      });
+      _state.selectedIds.clear(); _state.selectedIds.add(id);
+      _markDirty(); _renderSidePanel(); _rebuildViewport();
+      _toast(`Inserted ${key}`, 'success');
+      // Fire-and-forget preview load so the placeholder is replaced with real geometry.
+      _loadGeneratorPreview(id);
+    } catch (e) { _toast(`Insert failed: ${e.message}`, 'error'); }
+  }
+
+  async function _loadGeneratorPreview(shapeId) {
+    if (!_state.THREE) return;
+    const s = _state.scene.shapes.find(sh => sh.id === shapeId);
+    if (!s || s.type !== 'generator') return;
+    try {
+      const r = await fetch('/api/ai-forge/scenes/preview-shape', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type: 'generator', params: s.params }),
+      });
+      const data = await r.json();
+      if (!r.ok) return;
+      const THREE = _state.THREE;
+      const geom = new THREE.BufferGeometry();
+      geom.setAttribute('position', new THREE.BufferAttribute(new Float32Array(data.positions), 3));
+      geom.setIndex(new THREE.BufferAttribute(new Uint32Array(data.indices), 1));
+      geom.computeVertexNormals();
+      const mat = new THREE.MeshLambertMaterial({ color: new THREE.Color(s.color || '#3b82f6') });
+      const mesh = new THREE.Mesh(geom, mat);
+      mesh.userData.shapeId = s.id;
+      _applyTransform(mesh, s.transform);
+      const existing = _state.meshNodes.get(s.id);
+      if (existing) _state.scene3.remove(existing);
+      _state.scene3.add(mesh);
+      _state.meshNodes.set(s.id, mesh);
+      _highlightSelected();
+    } catch { /* preview is best-effort */ }
   }
 
   async function _importStl(file) {
@@ -484,7 +670,13 @@
         _pushUndo();
         const k = input.dataset.key;
         let val = parseFloat(e.target.value) || 0;
-        if (k.startsWith('r')) val = val * Math.PI / 180;
+        if (k.startsWith('p')) {
+          // Position values respect snap-to-grid.
+          val = _snapValue(val);
+          e.target.value = val;
+        } else if (k.startsWith('r')) {
+          val = val * Math.PI / 180;
+        }
         s.transform[k] = val;
         _markDirty(); _rebuildViewport();
       };
@@ -550,6 +742,7 @@
     _state.mouse = new THREE.Vector2();
 
     canvas.onclick = _onViewportClick;
+    _setupHandleDragging();
 
     function animate() {
       if (!_state.renderer) return; // panel closed
@@ -652,6 +845,128 @@
       mesh.material.emissive = mesh.material.emissive || new _state.THREE.Color(0x000000);
       mesh.material.emissive.set(isSel ? 0x444444 : 0x000000);
     }
+    _updateTransformHandles();
+  }
+
+  // ── Visual translate handles (3 colored arrows) ────────────────────
+
+  function _ensureHandlesGroup() {
+    if (!_state.THREE || !_state.scene3) return null;
+    if (_state.handlesGroup) return _state.handlesGroup;
+    const THREE = _state.THREE;
+    const group = new THREE.Group();
+    group.name = 'translate-handles';
+    group.visible = false;
+    const arrowLen = 18;
+    const headLen = 4;
+    const headW = 2;
+    const axes = [
+      { dir: new THREE.Vector3(1, 0, 0), color: 0xff4444 },
+      { dir: new THREE.Vector3(0, 1, 0), color: 0x44ff44 },
+      { dir: new THREE.Vector3(0, 0, 1), color: 0x4488ff },
+    ];
+    for (const a of axes) {
+      const arrow = new THREE.ArrowHelper(a.dir, new THREE.Vector3(0, 0, 0), arrowLen, a.color, headLen, headW);
+      arrow.userData.axisDir = a.dir.clone();
+      arrow.userData.axisColor = a.color;
+      // Make the arrow line thicker and add a hit-cylinder for raycasting.
+      const hitGeo = new THREE.CylinderGeometry(1.5, 1.5, arrowLen, 8);
+      const hitMat = new THREE.MeshBasicMaterial({ color: a.color, transparent: true, opacity: 0.0 });
+      const hit = new THREE.Mesh(hitGeo, hitMat);
+      // Cylinder is along Y; rotate to align with axis direction.
+      if (a.dir.x === 1) hit.rotation.z = -Math.PI / 2;
+      else if (a.dir.z === 1) hit.rotation.x = Math.PI / 2;
+      hit.position.copy(a.dir).multiplyScalar(arrowLen / 2);
+      hit.userData.axisDir = a.dir.clone();
+      hit.userData.handle = true;
+      arrow.add(hit);
+      group.add(arrow);
+    }
+    _state.scene3.add(group);
+    _state.handlesGroup = group;
+    return group;
+  }
+
+  function _updateTransformHandles() {
+    const group = _ensureHandlesGroup();
+    if (!group) return;
+    if (_state.selectedIds.size !== 1) {
+      group.visible = false;
+      return;
+    }
+    const id = Array.from(_state.selectedIds)[0];
+    const mesh = _state.meshNodes.get(id);
+    if (!mesh) { group.visible = false; return; }
+    group.visible = true;
+    group.position.copy(mesh.position);
+  }
+
+  function _setupHandleDragging() {
+    if (!_state.renderer) return;
+    const canvas = _state.renderer.domElement;
+    const THREE = _state.THREE;
+    let dragging = null; // { axis: 'x'|'y'|'z', start: Vector3, shape, plane }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      if (_state.selectedIds.size !== 1) return;
+      const group = _state.handlesGroup;
+      if (!group || !group.visible) return;
+      const rect = canvas.getBoundingClientRect();
+      _state.mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      _state.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      _state.raycaster.setFromCamera(_state.mouse, _state.camera);
+      const hits = _state.raycaster.intersectObjects(group.children, true);
+      const hit = hits.find(h => h.object.userData.axisDir);
+      if (!hit) return;
+      e.stopPropagation();
+      _state.controls.enabled = false; // pause orbit while dragging
+      const axisDir = hit.object.userData.axisDir.clone();
+      const id = Array.from(_state.selectedIds)[0];
+      const shape = _state.scene.shapes.find(sh => sh.id === id);
+      // Build a plane through current shape position, normal perpendicular to axis + facing camera.
+      const camDir = new THREE.Vector3();
+      _state.camera.getWorldDirection(camDir);
+      const planeNormal = camDir.clone().sub(camDir.clone().projectOnVector(axisDir)).normalize();
+      const plane = new THREE.Plane();
+      plane.setFromNormalAndCoplanarPoint(planeNormal, group.position);
+      const hitPoint = new THREE.Vector3();
+      _state.raycaster.ray.intersectPlane(plane, hitPoint);
+      _pushUndo();
+      dragging = {
+        axisDir,
+        plane,
+        startPoint: hitPoint.clone(),
+        startTransform: { ...shape.transform },
+        shape,
+      };
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (!dragging) return;
+      const rect = canvas.getBoundingClientRect();
+      _state.mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+      _state.mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+      _state.raycaster.setFromCamera(_state.mouse, _state.camera);
+      const point = new THREE.Vector3();
+      _state.raycaster.ray.intersectPlane(dragging.plane, point);
+      const delta = point.clone().sub(dragging.startPoint).dot(dragging.axisDir);
+      const snapped = _snapValue(delta);
+      const t = dragging.shape.transform;
+      if (Math.abs(dragging.axisDir.x) > 0.5) t.px = (dragging.startTransform.px || 0) + snapped;
+      if (Math.abs(dragging.axisDir.y) > 0.5) t.py = (dragging.startTransform.py || 0) + snapped;
+      if (Math.abs(dragging.axisDir.z) > 0.5) t.pz = (dragging.startTransform.pz || 0) + snapped;
+      const mesh = _state.meshNodes.get(dragging.shape.id);
+      if (mesh) _applyTransform(mesh, t);
+      _state.handlesGroup.position.copy(mesh.position);
+      _markDirty();
+    });
+
+    canvas.addEventListener('pointerup', () => {
+      if (!dragging) return;
+      dragging = null;
+      _state.controls.enabled = true;
+      _renderSidePanel(); // refresh numeric inputs
+    });
   }
 
   // ── Save / Open / New / Render ─────────────────────────────────────

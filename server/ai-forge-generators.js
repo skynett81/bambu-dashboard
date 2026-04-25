@@ -333,6 +333,34 @@ export async function runGenerator(intent) {
 }
 
 /**
+ * Call a generator directly with already-mapped opts (bypasses the
+ * intent mapper). Used by the Scene Composer where the user has
+ * already filled in the generator's specific options via the UI.
+ */
+export async function runGeneratorWithOpts(key, opts = {}) {
+  const entry = GENERATOR_REGISTRY[key];
+  if (!entry) throw new Error(`No generator registered for key '${key}'`);
+  const mod = await entry.import();
+  const fn = mod[entry.fn];
+  if (typeof fn !== 'function') {
+    throw new Error(`Generator module missing function ${entry.fn}`);
+  }
+  const buffer = await fn(opts);
+  return { buffer, format: entry.format, opts, generatorKey: key };
+}
+
+/**
+ * Default opts for a generator (the same shape mapParams produces from
+ * an empty intent). Used by the UI to pre-fill the form when a user
+ * inserts a generator-shape into a scene.
+ */
+export function defaultGeneratorOpts(key) {
+  const entry = GENERATOR_REGISTRY[key];
+  if (!entry) return {};
+  return entry.mapParams({ params: {}, text: null, modifiers: {}, count: 1, raw: '' });
+}
+
+/**
  * List the registry as a UI-friendly array.
  */
 export function listGenerators() {
