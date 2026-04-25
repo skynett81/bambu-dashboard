@@ -1430,6 +1430,64 @@ export function runMigrations() {
       }
     }},
 
+    // v135: Native Slicer profile library (printer / filament / process)
+    { version: 135, up: (db) => {
+      db.exec(`CREATE TABLE IF NOT EXISTS slicer_profiles (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        kind TEXT NOT NULL,             -- 'printer' | 'filament' | 'process'
+        name TEXT NOT NULL,
+        vendor TEXT,
+        settings_json TEXT NOT NULL,    -- JSON dump of slicer settings
+        is_default INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now')),
+        UNIQUE(kind, name)
+      )`);
+      db.exec(`CREATE INDEX IF NOT EXISTS idx_slicer_profiles_kind ON slicer_profiles(kind)`);
+
+      // Seed sensible defaults so the slicer works out of the box.
+      const insert = db.prepare(`INSERT OR IGNORE INTO slicer_profiles
+        (kind, name, vendor, settings_json, is_default) VALUES (?, ?, ?, ?, ?)`);
+
+      // Filament profiles — temps + flow tuned per material.
+      const filaments = [
+        { name: 'Generic PLA',  vendor: 'Generic', s: { nozzleTemp: 215, bedTemp: 60,  fanSpeed: 100, retraction: 1.5, density: 1.24 }, def: 1 },
+        { name: 'Generic PETG', vendor: 'Generic', s: { nozzleTemp: 235, bedTemp: 75,  fanSpeed: 50,  retraction: 1.0, density: 1.27 }, def: 0 },
+        { name: 'Generic ABS',  vendor: 'Generic', s: { nozzleTemp: 245, bedTemp: 100, fanSpeed: 0,   retraction: 1.0, density: 1.04 }, def: 0 },
+        { name: 'Generic ASA',  vendor: 'Generic', s: { nozzleTemp: 250, bedTemp: 100, fanSpeed: 0,   retraction: 1.0, density: 1.07 }, def: 0 },
+        { name: 'Generic TPU',  vendor: 'Generic', s: { nozzleTemp: 220, bedTemp: 50,  fanSpeed: 100, retraction: 0.5, density: 1.21 }, def: 0 },
+        { name: 'Bambu PLA Basic', vendor: 'Bambu Lab', s: { nozzleTemp: 220, bedTemp: 65, fanSpeed: 100, retraction: 0.8, density: 1.24 }, def: 0 },
+        { name: 'Snapmaker PLA',   vendor: 'Snapmaker', s: { nozzleTemp: 210, bedTemp: 60, fanSpeed: 100, retraction: 1.0, density: 1.24 }, def: 0 },
+      ];
+      for (const f of filaments) insert.run('filament', f.name, f.vendor, JSON.stringify(f.s), f.def);
+
+      // Process (quality) profiles.
+      const processes = [
+        { name: 'Draft (0.30 mm)',  s: { layerHeight: 0.30, lineWidth: 0.42, perimeters: 2, infillDensity: 0.15, printSpeed: 80, firstLayerSpeed: 25, infillAngle: 45 }, def: 0 },
+        { name: 'Normal (0.20 mm)', s: { layerHeight: 0.20, lineWidth: 0.40, perimeters: 2, infillDensity: 0.20, printSpeed: 60, firstLayerSpeed: 20, infillAngle: 45 }, def: 1 },
+        { name: 'Fine (0.12 mm)',   s: { layerHeight: 0.12, lineWidth: 0.40, perimeters: 3, infillDensity: 0.25, printSpeed: 45, firstLayerSpeed: 15, infillAngle: 45 }, def: 0 },
+        { name: 'Strong (0.20 mm 3 walls 40%)', s: { layerHeight: 0.20, lineWidth: 0.40, perimeters: 3, infillDensity: 0.40, printSpeed: 50, firstLayerSpeed: 18, infillAngle: 45 }, def: 0 },
+      ];
+      for (const p of processes) insert.run('process', p.name, 'Generic', JSON.stringify(p.s), p.def);
+
+      // Printer profiles — common build volumes.
+      const printers = [
+        { name: 'Bambu Lab P2S',  vendor: 'Bambu Lab', s: { buildVolume: [256, 256, 256], travelSpeed: 200 }, def: 0 },
+        { name: 'Bambu Lab X1C',  vendor: 'Bambu Lab', s: { buildVolume: [256, 256, 256], travelSpeed: 200 }, def: 0 },
+        { name: 'Bambu Lab A1',   vendor: 'Bambu Lab', s: { buildVolume: [256, 256, 256], travelSpeed: 200 }, def: 0 },
+        { name: 'Bambu Lab H2D',  vendor: 'Bambu Lab', s: { buildVolume: [325, 320, 325], travelSpeed: 250 }, def: 0 },
+        { name: 'Snapmaker U1',   vendor: 'Snapmaker', s: { buildVolume: [220, 220, 220], travelSpeed: 150 }, def: 1 },
+        { name: 'Snapmaker J1',   vendor: 'Snapmaker', s: { buildVolume: [300, 200, 200], travelSpeed: 200 }, def: 0 },
+        { name: 'Voron 2.4 350',  vendor: 'Voron',     s: { buildVolume: [350, 350, 350], travelSpeed: 250 }, def: 0 },
+        { name: 'Prusa MK4S',     vendor: 'Prusa',     s: { buildVolume: [250, 210, 220], travelSpeed: 180 }, def: 0 },
+        { name: 'Prusa CORE One', vendor: 'Prusa',     s: { buildVolume: [250, 220, 270], travelSpeed: 200 }, def: 0 },
+        { name: 'Creality K1',    vendor: 'Creality',  s: { buildVolume: [220, 220, 250], travelSpeed: 250 }, def: 0 },
+        { name: 'Creality K2 Plus', vendor: 'Creality', s: { buildVolume: [350, 350, 350], travelSpeed: 250 }, def: 0 },
+        { name: 'Generic 220³',   vendor: 'Generic',   s: { buildVolume: [220, 220, 220], travelSpeed: 150 }, def: 0 },
+      ];
+      for (const p of printers) insert.run('printer', p.name, p.vendor, JSON.stringify(p.s), p.def);
+    }},
+
     // v134: Scene Composer projects
     { version: 134, up: (db) => {
       db.exec(`CREATE TABLE IF NOT EXISTS ai_forge_scenes (

@@ -68,6 +68,7 @@
     'modelforge':       'Model Forge',
     'signmaker':        'Sign Maker',
     'slicer':           'Slicer Bridge',
+    'slicer-studio':    'Slicer Studio',
     'jscad':            'JSCAD Studio',
     'octoprint':        'OctoPrint Bridge',
     'resources':        'Vendor Resources',

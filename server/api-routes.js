@@ -7016,6 +7016,47 @@ export async function handleApiRequest(req, res) {
       return;
     }
 
+    // ── Slicer Studio: profile library ──
+    if (method === 'GET' && path === '/api/slicer/native/profiles') {
+      const { listProfiles } = await import('./db/slicer-profiles.js');
+      const kind = url.searchParams.get('kind');
+      return sendJson(res, { profiles: listProfiles(kind) });
+    }
+
+    const profIdMatch = path.match(/^\/api\/slicer\/native\/profiles\/(\d+)$/);
+    if (profIdMatch && method === 'GET') {
+      const { getProfile } = await import('./db/slicer-profiles.js');
+      const p = getProfile(parseInt(profIdMatch[1], 10));
+      if (!p) return sendJson(res, { error: 'not found' }, 404);
+      return sendJson(res, p);
+    }
+
+    if (method === 'POST' && path === '/api/slicer/native/profiles') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { createProfile } = await import('./db/slicer-profiles.js');
+          return sendJson(res, createProfile(body), 201);
+        } catch (e) { return sendJson(res, { error: e.message }, 400); }
+      });
+    }
+
+    if (profIdMatch && method === 'PUT') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { updateProfile } = await import('./db/slicer-profiles.js');
+          const p = updateProfile(parseInt(profIdMatch[1], 10), body);
+          if (!p) return sendJson(res, { error: 'not found' }, 404);
+          return sendJson(res, p);
+        } catch (e) { return sendJson(res, { error: e.message }, 400); }
+      });
+    }
+
+    if (profIdMatch && method === 'DELETE') {
+      const { deleteProfile } = await import('./db/slicer-profiles.js');
+      const ok = deleteProfile(parseInt(profIdMatch[1], 10));
+      return sendJson(res, { ok }, ok ? 200 : 404);
+    }
+
     if (method === 'POST' && path === '/api/slicer/native/slice') {
       // Project's own pure-JS slicer. No external slicer required.
       // EXPERIMENTAL — single perimeter + linear infill, no supports.
@@ -7033,18 +7074,32 @@ export async function handleApiRequest(req, res) {
         try {
           const buf = Buffer.concat(chunks);
           const filename = url.searchParams.get('filename') || 'model.stl';
+          // Merge profiles (printer + filament + process) if their IDs were supplied;
+          // explicit query-string overrides win on top.
+          const { mergeProfiles } = await import('./db/slicer-profiles.js');
+          const merged = mergeProfiles({
+            printerId:  parseInt(url.searchParams.get('printerId'),  10) || null,
+            filamentId: parseInt(url.searchParams.get('filamentId'), 10) || null,
+            processId:  parseInt(url.searchParams.get('processId'),  10) || null,
+          });
+          const _q = (k, def, kind = 'float') => {
+            const v = url.searchParams.get(k);
+            if (v === null) return merged[k] !== undefined ? merged[k] : def;
+            return kind === 'int' ? parseInt(v, 10) : parseFloat(v);
+          };
           const settings = {
-            layerHeight:    parseFloat(url.searchParams.get('layerHeight'))    || 0.2,
-            lineWidth:      parseFloat(url.searchParams.get('lineWidth'))      || 0.4,
-            perimeters:     parseInt(url.searchParams.get('perimeters'), 10)   || 2,
-            infillDensity:  parseFloat(url.searchParams.get('infillDensity'))  || 0.2,
-            infillAngle:    parseFloat(url.searchParams.get('infillAngle'))    || 45,
-            printSpeed:     parseFloat(url.searchParams.get('printSpeed'))     || 60,
-            firstLayerSpeed:parseFloat(url.searchParams.get('firstLayerSpeed'))|| 20,
-            travelSpeed:    parseFloat(url.searchParams.get('travelSpeed'))    || 120,
-            bedTemp:        parseFloat(url.searchParams.get('bedTemp'))        || 60,
-            nozzleTemp:     parseFloat(url.searchParams.get('nozzleTemp'))     || 215,
-            material:       url.searchParams.get('material') || 'PLA',
+            layerHeight:    _q('layerHeight',    0.2),
+            lineWidth:      _q('lineWidth',      0.4),
+            perimeters:     _q('perimeters',     2,   'int'),
+            infillDensity:  _q('infillDensity',  0.2),
+            infillAngle:    _q('infillAngle',    45),
+            printSpeed:     _q('printSpeed',     60),
+            firstLayerSpeed:_q('firstLayerSpeed',20),
+            travelSpeed:    _q('travelSpeed',    120),
+            bedTemp:        _q('bedTemp',        60),
+            nozzleTemp:     _q('nozzleTemp',     215),
+            material:       url.searchParams.get('material') || merged.material || 'PLA',
+            ...(merged.buildVolume ? { buildVolume: merged.buildVolume } : {}),
           };
 
           const start = Date.now();
