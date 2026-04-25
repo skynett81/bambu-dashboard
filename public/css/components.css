@@ -4904,6 +4904,7 @@
 #system-sub-content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  grid-auto-flow: dense;
   gap: 12px;
   align-items: start;
 }
@@ -4926,6 +4927,31 @@
 #system-sub-content .settings-card.full-width,
 .settings-card.full-width {
   grid-column: 1 / -1;
+}
+
+/* Inherently wide content inside the sub-content grids — these contain
+   their own internal grids or wide tables, so they always take a full row. */
+#printer-sub-content > .printer-list-grid,
+#general-sub-content > .printer-list-grid,
+#appearance-sub-content > .printer-list-grid,
+#notif-sub-content > .printer-list-grid,
+#system-sub-content > .printer-list-grid,
+#printer-sub-content > #discovery-results,
+#printer-sub-content > #printer-form-area,
+#general-sub-content > #cloud-content,
+#system-sub-content > .table-responsive,
+#system-sub-content > table {
+  grid-column: 1 / -1;
+}
+
+/* Margin-on-card classes are redundant inside the auto-fit grid (the
+   `gap` handles spacing). Clear them so cards align cleanly. */
+#printer-sub-content .settings-card,
+#general-sub-content .settings-card,
+#appearance-sub-content .settings-card,
+#notif-sub-content .settings-card,
+#system-sub-content .settings-card {
+  margin: 0 !important;
 }
 
 @media (max-width: 768px) {
