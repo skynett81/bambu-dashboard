@@ -13412,3 +13412,47 @@ body.compact-mode h2, body.compact-mode h3 { font-size: 0.95rem; }
     display: none;
   }
 }
+
+/* ============================================================
+ * G-code Studio
+ * ============================================================ */
+.gcode-studio-wrap { display:flex; flex-direction:column; gap:12px; height:calc(100vh - 160px); min-height:500px; }
+.gcs-toolbar { display:flex; gap:8px; align-items:center; padding:8px 12px; background:var(--bg-tertiary); border-radius:8px; flex-wrap:wrap; }
+.gcs-toolbar-sep { width:1px; height:24px; background:var(--border-color); margin:0 4px; }
+.gcs-toolbar-spacer { flex:1; }
+.gcs-grid { display:grid; grid-template-columns:280px 1fr 360px; gap:12px; flex:1; min-height:0; }
+.gcs-pane { background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:8px; display:flex; flex-direction:column; overflow:hidden; }
+.gcs-pane-title { padding:8px 12px; font-size:0.75rem; font-weight:600; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); border-bottom:1px solid var(--border-color); background:var(--bg-tertiary); }
+.gcs-snip-controls { display:flex; flex-direction:column; gap:4px; padding:8px; }
+.gcs-snip-list { flex:1; overflow-y:auto; padding:4px; }
+.gcs-snip { padding:8px 10px; border:1px solid var(--border-color); border-radius:6px; margin-bottom:6px; cursor:pointer; transition:background 0.15s; }
+.gcs-snip:hover { background:var(--bg-tertiary); }
+.gcs-snip-head { display:flex; justify-content:space-between; align-items:center; gap:6px; }
+.gcs-snip-name { font-size:0.78rem; font-weight:600; }
+.gcs-snip-fw { font-size:0.6rem; padding:1px 4px; border-radius:3px; background:var(--bg-tertiary); color:var(--text-muted); text-transform:uppercase; }
+.gcs-snip-desc { font-size:0.7rem; color:var(--text-muted); margin:4px 0 0; line-height:1.3; }
+.gcs-snip-actions { display:flex; gap:4px; margin-top:6px; }
+.gcs-snip-actions .form-btn { font-size:0.65rem; padding:2px 6px; }
+.gcs-editor-pane { min-width:0; }
+.gcs-editor { flex:1; width:100%; resize:none; padding:10px 12px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:0.8rem; line-height:1.5; tab-size:2; background:var(--bg-primary); color:var(--text-primary); border:none; outline:none; }
+.gcs-issues-list { flex:1; overflow-y:auto; padding:8px; }
+.gcs-issues-summary { padding:6px 8px; margin-bottom:8px; border-radius:4px; background:var(--bg-tertiary); font-size:0.7rem; }
+.gcs-issue { padding:6px 8px; border-radius:4px; margin-bottom:4px; cursor:pointer; border-left:3px solid var(--text-muted); background:var(--bg-tertiary); transition:background 0.15s; }
+.gcs-issue:hover { background:var(--bg-primary); }
+.gcs-issue-error { border-left-color:var(--accent-red); }
+.gcs-issue-warning { border-left-color:var(--accent-orange); }
+.gcs-issue-info { border-left-color:var(--accent-blue); }
+.gcs-issue-head { display:flex; gap:6px; align-items:center; margin-bottom:2px; }
+.gcs-issue-sev { font-size:0.55rem; font-weight:700; padding:1px 4px; border-radius:3px; }
+.gcs-sev-error { background:var(--accent-red); color:#fff; }
+.gcs-sev-warning { background:var(--accent-orange); color:#fff; }
+.gcs-sev-info { background:var(--accent-blue); color:#fff; }
+.gcs-issue-line { font-size:0.65rem; color:var(--text-muted); font-family:ui-monospace,monospace; }
+.gcs-issue-code { font-size:0.6rem; padding:1px 4px; border-radius:3px; background:var(--bg-primary); color:var(--text-muted); margin-left:auto; }
+.gcs-issue-msg { font-size:0.72rem; line-height:1.35; color:var(--text-primary); }
+.gcs-issue-empty { text-align:center; padding:30px 12px; }
+.gcs-dialog-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; }
+.gcs-dialog { background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:10px; padding:20px; min-width:400px; max-width:600px; max-height:90vh; overflow-y:auto; }
+@media (max-width: 1100px) {
+  .gcs-grid { grid-template-columns:1fr; grid-template-rows:auto 1fr auto; }
+}

@@ -1008,6 +1008,396 @@ export function runMigrations() {
         items_imported INTEGER DEFAULT 0
       )`);
     }},
+
+    // v125 — Spool shelf-life warn window + Spoolman two-way sync state +
+    // location climate-alert state. Note: `expiry_date` column itself
+    // already exists from a previous migration — we just add the warn window.
+    { version: 125, up: (db) => {
+      // Configurable warning window (in days) before expiry triggers an alert.
+      try { db.exec('ALTER TABLE spools ADD COLUMN expiry_warn_days INTEGER DEFAULT 30'); } catch {}
+
+      // Last-known Spoolman sync state per spool — used to avoid sync loops
+      // and to show per-row sync status in the inventory UI.
+      try { db.exec('ALTER TABLE spools ADD COLUMN spoolman_synced_at TEXT'); } catch {}
+      try { db.exec('ALTER TABLE spools ADD COLUMN spoolman_sync_error TEXT'); } catch {}
+
+      // Location climate alert state (when an out-of-range reading was first seen)
+      try { db.exec('ALTER TABLE locations ADD COLUMN last_temp REAL'); } catch {}
+      try { db.exec('ALTER TABLE locations ADD COLUMN last_humidity REAL'); } catch {}
+      try { db.exec('ALTER TABLE locations ADD COLUMN last_climate_at TEXT'); } catch {}
+      try { db.exec('ALTER TABLE locations ADD COLUMN climate_alert_since TEXT'); } catch {}
+    }},
+
+    // v126 — Spoolman extra_field schema, material taxonomy, vendor metadata,
+    // purge matrix, OrcaSlicer library cache. Enables user-defined custom
+    // fields, richer vendor/material info, filament-to-filament purge values,
+    // and the OrcaSlicer community-profile import pipeline.
+    { version: 126, up: (db) => {
+      // User-defined custom fields (entity = 'spool' | 'filament' | 'vendor')
+      db.exec(`CREATE TABLE IF NOT EXISTS extra_field_schema (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        entity TEXT NOT NULL,
+        key TEXT NOT NULL,
+        name TEXT NOT NULL,
+        field_type TEXT NOT NULL DEFAULT 'text',
+        default_value TEXT,
+        choices TEXT,
+        unit TEXT,
+        order_index INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(entity, key)
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_extra_field_entity ON extra_field_schema(entity)');
+
+      // Rich materials taxonomy (PLA → PLA+ → PLA Silk hierarchy etc.)
+      db.exec(`CREATE TABLE IF NOT EXISTS materials_taxonomy (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        material TEXT NOT NULL UNIQUE,
+        parent_material TEXT,
+        category TEXT,
+        description TEXT,
+        density REAL,
+        glass_temp_c REAL,
+        extruder_temp_min REAL,
+        extruder_temp_max REAL,
+        bed_temp_min REAL,
+        bed_temp_max REAL,
+        enclosure_required INTEGER DEFAULT 0,
+        food_safe INTEGER DEFAULT 0,
+        source TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_materials_parent ON materials_taxonomy(parent_material)');
+
+      // Additional vendor metadata — website, logo URL, support contact
+      try { db.exec('ALTER TABLE vendors ADD COLUMN logo_url TEXT'); } catch {}
+      try { db.exec('ALTER TABLE vendors ADD COLUMN support_email TEXT'); } catch {}
+      try { db.exec('ALTER TABLE vendors ADD COLUMN country_code TEXT'); } catch {}
+      try { db.exec('ALTER TABLE vendors ADD COLUMN spoolman_id INTEGER'); } catch {}
+      try { db.exec('ALTER TABLE vendors ADD COLUMN spoolman_synced_at TEXT'); } catch {}
+
+      // Filament-to-filament purge matrix (from SpoolmanDB or OrcaSlicer defaults)
+      db.exec(`CREATE TABLE IF NOT EXISTS filament_purge_matrix (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        from_material TEXT NOT NULL,
+        to_material TEXT NOT NULL,
+        from_color_hex TEXT,
+        to_color_hex TEXT,
+        purge_volume_mm3 REAL NOT NULL,
+        source TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(from_material, to_material, from_color_hex, to_color_hex)
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_purge_matrix_from ON filament_purge_matrix(from_material)');
+      db.exec('CREATE INDEX IF NOT EXISTS idx_purge_matrix_to ON filament_purge_matrix(to_material)');
+
+      // Cached filament images (SHA-256 keyed by source URL)
+      db.exec(`CREATE TABLE IF NOT EXISTS filament_image_cache (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        source_url TEXT NOT NULL UNIQUE,
+        local_path TEXT NOT NULL,
+        content_type TEXT,
+        size_bytes INTEGER,
+        fetched_at TEXT NOT NULL DEFAULT (datetime('now')),
+        last_used_at TEXT
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_image_cache_fetched ON filament_image_cache(fetched_at)');
+
+      // OrcaSlicer community filament library index
+      db.exec(`CREATE TABLE IF NOT EXISTS orcaslicer_filaments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        vendor TEXT NOT NULL,
+        name TEXT NOT NULL,
+        material TEXT,
+        printer_type TEXT,
+        nozzle_temp_min REAL,
+        nozzle_temp_max REAL,
+        bed_temp_min REAL,
+        bed_temp_max REAL,
+        max_volumetric_speed REAL,
+        raw_json TEXT,
+        source_url TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(vendor, name, printer_type)
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_orca_vendor ON orcaslicer_filaments(vendor)');
+      db.exec('CREATE INDEX IF NOT EXISTS idx_orca_material ON orcaslicer_filaments(material)');
+    }},
+
+    // v127 — Spoolman conflict tracking + price-listing comparison +
+    // duplicate detection + filament_type bridge
+    { version: 127, up: (db) => {
+      // Conflict resolution: track last-known Spoolman updated_at so we can
+      // detect concurrent edits from both sides.
+      try { db.exec('ALTER TABLE spools ADD COLUMN spoolman_updated_at TEXT'); } catch {}
+      try { db.exec('ALTER TABLE filament_profiles ADD COLUMN spoolman_id INTEGER'); } catch {}
+      try { db.exec('ALTER TABLE filament_profiles ADD COLUMN spoolman_updated_at TEXT'); } catch {}
+      try { db.exec('ALTER TABLE filament_profiles ADD COLUMN spoolman_synced_at TEXT'); } catch {}
+      try { db.exec('ALTER TABLE filament_profiles ADD COLUMN local_updated_at TEXT'); } catch {}
+
+      // Multi-listing prices: detach price_history from the single-price
+      // assumption. Each row now carries the retailer/listing identifier.
+      try { db.exec('ALTER TABLE price_history ADD COLUMN listing_id TEXT'); } catch {}
+      try { db.exec('ALTER TABLE price_history ADD COLUMN retailer TEXT'); } catch {}
+      try { db.exec('ALTER TABLE price_history ADD COLUMN retailer_url TEXT'); } catch {}
+      try { db.exec('ALTER TABLE price_history ADD COLUMN in_stock INTEGER'); } catch {}
+
+      // Duplicate detection flags: when the seed pipeline finds the same
+      // filament arriving from multiple sources, we mark them as linked.
+      try { db.exec('ALTER TABLE filament_profiles ADD COLUMN duplicate_of INTEGER REFERENCES filament_profiles(id) ON DELETE SET NULL'); } catch {}
+      try { db.exec('ALTER TABLE filament_profiles ADD COLUMN merged_sources TEXT'); } catch {}
+
+      // Bridge Spoolman filament_types to our materials_taxonomy
+      db.exec(`CREATE TABLE IF NOT EXISTS spoolman_type_bridge (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        spoolman_type TEXT NOT NULL UNIQUE,
+        local_material TEXT NOT NULL,
+        last_synced_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`);
+
+      // Spoolman health-monitor state
+      db.exec(`CREATE TABLE IF NOT EXISTS spoolman_health_log (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        checked_at TEXT NOT NULL DEFAULT (datetime('now')),
+        ok INTEGER NOT NULL,
+        error TEXT
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_spoolman_health_time ON spoolman_health_log(checked_at)');
+    }},
+
+    // v128 — KB expansion: build-plates, maintenance, troubleshooting from website/docs/kb/
+    { version: 128, up: (db) => {
+      db.exec(`CREATE TABLE IF NOT EXISTS kb_build_plates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT NOT NULL UNIQUE,
+        title TEXT NOT NULL,
+        description TEXT,
+        surface_type TEXT,
+        max_temp_c REAL,
+        compatible_materials TEXT,
+        incompatible_materials TEXT,
+        glue_required TEXT,
+        cleaning_tips TEXT,
+        body_markdown TEXT,
+        source_file TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_kb_plates_slug ON kb_build_plates(slug)');
+
+      db.exec(`CREATE TABLE IF NOT EXISTS kb_maintenance (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT NOT NULL UNIQUE,
+        title TEXT NOT NULL,
+        description TEXT,
+        topic TEXT,
+        frequency_days INTEGER,
+        difficulty INTEGER,
+        body_markdown TEXT,
+        source_file TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_kb_maint_topic ON kb_maintenance(topic)');
+
+      db.exec(`CREATE TABLE IF NOT EXISTS kb_troubleshooting (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT NOT NULL UNIQUE,
+        title TEXT NOT NULL,
+        description TEXT,
+        symptom TEXT,
+        causes TEXT,
+        solutions TEXT,
+        body_markdown TEXT,
+        source_file TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+      )`);
+      db.exec('CREATE INDEX IF NOT EXISTS idx_kb_ts_symptom ON kb_troubleshooting(symptom)');
+    }},
+
+    // v129 — multilingual KB. SQLite doesn't let us drop a column-level
+    // UNIQUE constraint, so we rebuild each kb_* table with the new
+    // (slug, locale) key, copy the data over, and index by (slug, locale).
+    { version: 129, up: (db) => {
+      const rebuild = (table, createSql) => {
+        // 1. Rename the original, 2. Recreate with locale + composite unique,
+        // 3. Copy all rows with locale='nb', 4. Drop the temp.
+        db.exec(`ALTER TABLE ${table} RENAME TO ${table}_old_v128`);
+        db.exec(createSql);
+        const cols = db.prepare(`PRAGMA table_info(${table}_old_v128)`).all().map(c => c.name);
+        const colList = cols.join(', ');
+        db.exec(`INSERT INTO ${table} (${colList}, locale) SELECT ${colList}, 'nb' FROM ${table}_old_v128`);
+        db.exec(`DROP TABLE ${table}_old_v128`);
+      };
+
+      rebuild('kb_build_plates', `CREATE TABLE kb_build_plates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT NOT NULL,
+        locale TEXT NOT NULL DEFAULT 'nb',
+        title TEXT NOT NULL,
+        description TEXT,
+        surface_type TEXT,
+        max_temp_c REAL,
+        compatible_materials TEXT,
+        incompatible_materials TEXT,
+        glue_required TEXT,
+        cleaning_tips TEXT,
+        body_markdown TEXT,
+        source_file TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(slug, locale)
+      )`);
+
+      rebuild('kb_maintenance', `CREATE TABLE kb_maintenance (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT NOT NULL,
+        locale TEXT NOT NULL DEFAULT 'nb',
+        title TEXT NOT NULL,
+        description TEXT,
+        topic TEXT,
+        frequency_days INTEGER,
+        difficulty INTEGER,
+        body_markdown TEXT,
+        source_file TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(slug, locale)
+      )`);
+
+      rebuild('kb_troubleshooting', `CREATE TABLE kb_troubleshooting (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT NOT NULL,
+        locale TEXT NOT NULL DEFAULT 'nb',
+        title TEXT NOT NULL,
+        description TEXT,
+        symptom TEXT,
+        causes TEXT,
+        solutions TEXT,
+        body_markdown TEXT,
+        source_file TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(slug, locale)
+      )`);
+
+      // kb_filaments + materials_taxonomy just get a locale column — existing
+      // data keeps its unique indexes, we add locale for display purposes only.
+      try { db.exec("ALTER TABLE kb_filaments ADD COLUMN locale TEXT DEFAULT 'nb'"); } catch {}
+      try { db.exec("ALTER TABLE materials_taxonomy ADD COLUMN locale TEXT DEFAULT 'nb'"); } catch {}
+    }},
+
+    // v130 — if v129 ran against an earlier schema that already had UNIQUE(slug)
+    // on the kb_* tables, the ALTER-based v129 couldn't drop that constraint
+    // and importing locale='en' hit UNIQUE errors. Rebuild the three tables
+    // to the correct schema when they still show slug-only uniqueness.
+    { version: 130, up: (db) => {
+      const needsRebuild = (table) => {
+        const idx = db.prepare(`PRAGMA index_list('${table}')`).all();
+        const slugOnly = idx.some(i => {
+          if (i.unique !== 1) return false;
+          const cols = db.prepare(`PRAGMA index_info('${i.name}')`).all();
+          return cols.length === 1 && cols[0].name === 'slug';
+        });
+        return slugOnly;
+      };
+      const rebuild = (table, createSql, copyCols) => {
+        if (!needsRebuild(table)) return;
+        db.exec(`ALTER TABLE ${table} RENAME TO ${table}_v129_old`);
+        db.exec(createSql);
+        db.exec(`INSERT INTO ${table} (${copyCols}) SELECT ${copyCols} FROM ${table}_v129_old`);
+        db.exec(`DROP TABLE ${table}_v129_old`);
+      };
+
+      rebuild('kb_build_plates', `CREATE TABLE kb_build_plates (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT NOT NULL,
+        locale TEXT NOT NULL DEFAULT 'nb',
+        title TEXT NOT NULL,
+        description TEXT,
+        surface_type TEXT,
+        max_temp_c REAL,
+        compatible_materials TEXT,
+        incompatible_materials TEXT,
+        glue_required TEXT,
+        cleaning_tips TEXT,
+        body_markdown TEXT,
+        source_file TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(slug, locale)
+      )`, 'slug, locale, title, description, surface_type, max_temp_c, compatible_materials, incompatible_materials, glue_required, cleaning_tips, body_markdown, source_file, updated_at');
+
+      rebuild('kb_maintenance', `CREATE TABLE kb_maintenance (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT NOT NULL,
+        locale TEXT NOT NULL DEFAULT 'nb',
+        title TEXT NOT NULL,
+        description TEXT,
+        topic TEXT,
+        frequency_days INTEGER,
+        difficulty INTEGER,
+        body_markdown TEXT,
+        source_file TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(slug, locale)
+      )`, 'slug, locale, title, description, topic, frequency_days, difficulty, body_markdown, source_file, updated_at');
+
+      rebuild('kb_troubleshooting', `CREATE TABLE kb_troubleshooting (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT NOT NULL,
+        locale TEXT NOT NULL DEFAULT 'nb',
+        title TEXT NOT NULL,
+        description TEXT,
+        symptom TEXT,
+        causes TEXT,
+        solutions TEXT,
+        body_markdown TEXT,
+        source_file TEXT,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(slug, locale)
+      )`, 'slug, locale, title, description, symptom, causes, solutions, body_markdown, source_file, updated_at');
+    }},
+
+    // v131: G-code Studio snippet library
+    { version: 131, up: (db) => {
+      db.exec(`CREATE TABLE IF NOT EXISTS gcode_snippets (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        category TEXT,
+        firmware TEXT,
+        description TEXT,
+        body TEXT NOT NULL,
+        tags TEXT,
+        printer_models TEXT,
+        is_shared INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      )`);
+      db.exec(`CREATE INDEX IF NOT EXISTS idx_gcode_snippets_category ON gcode_snippets(category)`);
+      db.exec(`CREATE INDEX IF NOT EXISTS idx_gcode_snippets_firmware ON gcode_snippets(firmware)`);
+
+      // Seed common snippets so the library isn't empty on first install.
+      const exists = db.prepare('SELECT COUNT(*) as c FROM gcode_snippets').get();
+      if (!exists.c) {
+        const insert = db.prepare(`INSERT INTO gcode_snippets
+          (name, category, firmware, description, body, tags, is_shared)
+          VALUES (?, ?, ?, ?, ?, ?, 1)`);
+        const seed = [
+          ['Home all axes', 'movement', 'auto', 'Home X, Y and Z to endstops', 'G28', 'home,calibration'],
+          ['Auto bed level', 'calibration', 'auto', 'Run bed mesh / ABL', 'G28\nG29', 'bed-mesh,calibration'],
+          ['Preheat PLA', 'temperature', 'auto', 'Standard PLA preheat (210/60)', 'M104 S210\nM140 S60', 'preheat,pla'],
+          ['Preheat PETG', 'temperature', 'auto', 'Standard PETG preheat (240/80)', 'M104 S240\nM140 S80', 'preheat,petg'],
+          ['Preheat ABS', 'temperature', 'auto', 'Standard ABS preheat (250/100)', 'M104 S250\nM140 S100', 'preheat,abs'],
+          ['Cool down', 'temperature', 'auto', 'Turn off all heaters', 'M104 S0\nM140 S0\nM107', 'cooldown'],
+          ['Filament change', 'maintenance', 'marlin', 'M600 with retract', 'M600', 'filament-change'],
+          ['Pause print', 'control', 'auto', 'Pause and park toolhead', 'M0', 'pause'],
+          ['Emergency stop', 'control', 'marlin', 'Halt printer immediately', 'M112', 'emergency,safety'],
+          ['Save Klipper state', 'klipper', 'klipper', 'Persist current settings', 'SAVE_CONFIG', 'klipper,config'],
+          ['Klipper bed mesh', 'klipper', 'klipper', 'Calibrate bed mesh', 'BED_MESH_CALIBRATE\nSAVE_CONFIG', 'klipper,bed-mesh'],
+          ['U1 NFC status', 'snapmaker', 'snapmaker', 'Report NFC filament sensor status', 'SM_NFC_STATUS', 'snapmaker,u1,nfc'],
+          ['U1 tool pick T0', 'snapmaker', 'snapmaker', 'Pick up toolhead 0', 'SM_TOOL_PICK T0', 'snapmaker,u1,toolchanger'],
+          ['U1 tool park', 'snapmaker', 'snapmaker', 'Park currently active toolhead', 'SM_TOOL_PARK', 'snapmaker,u1,toolchanger'],
+          ['U1 calibrate tools', 'snapmaker', 'snapmaker', 'Run automatic tool offset calibration', 'SM_CALIBRATE_TOOLS', 'snapmaker,u1,calibration'],
+          ['U1 purifier on', 'snapmaker', 'snapmaker', 'Turn on air purifier (80%)', 'SM_PURIFIER_ON S80', 'snapmaker,u1,purifier'],
+        ];
+        for (const row of seed) insert.run(...row);
+      }
+    }},
   ];
 
   for (const m of migrations) {
