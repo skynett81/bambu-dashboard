@@ -5,21 +5,26 @@
   let _sortMode = 'name';
   let _gridLayout = localStorage.getItem('fleet-grid-layout') || 'auto';
 
-  // Printer model images — SVG icons for known brands
-  function _printerModelImage(model, type) {
+  // SVG fallback — used both as the no-model placeholder and as the
+  // onerror target when the vendor photo isn't cached/available.
+  function _printerModelSvg(model, type) {
     const m = (model || '').toLowerCase();
-    // Color by brand
     let brandColor = 'var(--text-muted)';
     let brandName = model || 'Printer';
-    if (m.includes('snapmaker')) { brandColor = '#00A98F'; brandName = model; }
-    else if (m.includes('voron')) { brandColor = '#E74C3C'; brandName = model; }
-    else if (m.includes('creality') || m.includes('k1')) { brandColor = '#1E88E5'; brandName = model; }
-    else if (m.includes('p1') || m.includes('p2') || m.includes('x1') || m.includes('a1') || m.includes('h2')) { brandColor = '#00AE42'; brandName = model; }
+    if (m.includes('snapmaker')) { brandColor = '#00A98F'; }
+    else if (m.includes('voron')) { brandColor = '#E74C3C'; }
+    else if (m.includes('creality') || m.includes('k1')) { brandColor = '#1E88E5'; }
+    else if (m.includes('p1') || m.includes('p2') || m.includes('x1') || m.includes('a1') || m.includes('h2')) { brandColor = '#00AE42'; }
     else if (m.includes('sovol')) { brandColor = '#FF6F00'; }
     else if (m.includes('qidi')) { brandColor = '#7B1FA2'; }
     else if (m.includes('ratrig')) { brandColor = '#F44336'; }
-    // Toolhead count icon
-    const isMultiHead = m.includes('u1') || m.includes('h2d') || m.includes('h2c') || m.includes('tool');
+    else if (m.includes('flashforge')) { brandColor = '#FB8C00'; }
+    else if (m.includes('biqu') || m.includes('bigtreetech')) { brandColor = '#FFB300'; }
+    else if (m.includes('two trees') || m.includes('sk-1')) { brandColor = '#3F51B5'; }
+    else if (m.includes('anycubic') || m.includes('kobra')) { brandColor = '#FFA000'; }
+    else if (m.includes('elegoo')) { brandColor = '#039BE5'; }
+    else if (m.includes('prusa')) { brandColor = '#FB8C00'; }
+    const isMultiHead = m.includes('u1') || m.includes('h2d') || m.includes('h2c') || m.includes('idex') || m.includes('toolchanger') || m.includes('xl');
     const headsSvg = isMultiHead
       ? '<rect x="14" y="6" width="4" height="6" rx="1" fill="currentColor" opacity="0.6"/><rect x="22" y="6" width="4" height="6" rx="1" fill="currentColor" opacity="0.6"/><rect x="30" y="6" width="4" height="6" rx="1" fill="currentColor" opacity="0.6"/><rect x="38" y="6" width="4" height="6" rx="1" fill="currentColor" opacity="0.6"/>'
       : '<rect x="24" y="6" width="8" height="8" rx="2" fill="currentColor" opacity="0.6"/>';
@@ -33,6 +38,29 @@
       </svg>
       <span style="font-size:0.7rem;font-weight:600;color:${brandColor};text-align:center">${brandName}</span>
       ${type === 'moonraker' ? '<span style="font-size:0.55rem;color:var(--text-muted)">Moonraker</span>' : ''}
+    </div>`;
+  }
+
+  // Printer model images — try the vendor-photo cache first, fall back to
+  // the SVG placeholder if the server has no cached image (returns 404).
+  // The wrapping <span> + onerror swap keeps the layout identical for both
+  // states so card height doesn't jitter when an image loads/fails.
+  function _printerModelImage(model, type) {
+    const fallback = _printerModelSvg(model, type);
+    if (!model) return fallback;
+    const slug = String(model).toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    if (!slug) return fallback;
+    // Use object-fit: contain so images aren't cropped; max-height keeps
+    // it inside the card slot. The onerror swap replaces <img> with the
+    // SVG fallback markup if the cache returns 404.
+    const fbAttr = encodeURIComponent(fallback);
+    return `<div class="fleet-vendor-image" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:96px">
+      <img src="/api/printer-image/${encodeURIComponent(slug)}"
+           alt="${(model || '').replace(/"/g, '&quot;')}"
+           loading="lazy"
+           style="max-width:100%;max-height:140px;object-fit:contain"
+           data-fallback="${fbAttr}"
+           onerror="this.outerHTML=decodeURIComponent(this.dataset.fallback)">
     </div>`;
   }
 

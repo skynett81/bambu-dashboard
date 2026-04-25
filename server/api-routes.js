@@ -337,6 +337,10 @@ function getRoutePermission(method, path) {
   // AI Model Forge — local mesh generation, no printer-state mutation
   if (path.startsWith('/api/ai-forge/')) return 'view';
 
+  // Printer-image cache — read-only for everyone, admin upload/refresh
+  if (method === 'GET' && path.startsWith('/api/printer-image')) return 'view';
+  if (path.startsWith('/api/printer-image')) return 'admin';
+
   // Default: require view for GET, admin for everything else
   return method === 'GET' ? 'view' : 'admin';
 }
@@ -6918,6 +6922,79 @@ export async function handleApiRequest(req, res) {
         printerId: url.searchParams.get('printer_id') || undefined,
         days: url.searchParams.get('days') ? parseInt(url.searchParams.get('days'), 10) : undefined,
       }));
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // PRINTER IMAGE CACHE (Fleet vendor photos)
+    // ──────────────────────────────────────────────────────────────────
+
+    if (method === 'GET' && path === '/api/printer-image/registry') {
+      const { listRegistry, getCacheStats } = await import('./printer-image-service.js');
+      return sendJson(res, { registry: listRegistry(), stats: getCacheStats() });
+    }
+
+    if (method === 'POST' && path === '/api/printer-image/refresh') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { refreshAll } = await import('./printer-image-service.js');
+          const result = await refreshAll({ force: !!body?.force });
+          return sendJson(res, result);
+        } catch (e) { return sendJson(res, { error: e.message }, 500); }
+      });
+    }
+
+    const printerImgMatch = path.match(/^\/api\/printer-image\/([^/]+)$/);
+    if (printerImgMatch && method === 'GET') {
+      try {
+        const model = decodeURIComponent(printerImgMatch[1]);
+        const { getPrinterImage } = await import('./printer-image-service.js');
+        const result = await getPrinterImage(model);
+        if (!result) return sendJson(res, { error: 'no image for model' }, 404);
+        res.writeHead(200, {
+          'Content-Type': result.contentType,
+          'Content-Length': result.buffer.length,
+          'Cache-Control': 'public, max-age=86400',
+          'X-Image-Source': result.source || 'cache',
+        });
+        return res.end(result.buffer);
+      } catch (e) {
+        return sendJson(res, { error: e.message }, 500);
+      }
+    }
+
+    if (printerImgMatch && method === 'POST') {
+      // Admin upload — binary body becomes the cached image.
+      const chunks = [];
+      let total = 0;
+      const limit = 5 * 1024 * 1024; // 5 MB cap for printer photos
+      let aborted = false;
+      req.on('data', (c) => {
+        total += c.length;
+        if (total > limit) { aborted = true; req.destroy(); return; }
+        chunks.push(c);
+      });
+      req.on('end', async () => {
+        if (aborted) return sendJson(res, { error: 'image too large (max 5 MB)' }, 413);
+        try {
+          const model = decodeURIComponent(printerImgMatch[1]);
+          const buf = Buffer.concat(chunks);
+          const ct = req.headers['content-type'] || 'image/png';
+          const { uploadPrinterImage } = await import('./printer-image-service.js');
+          const result = uploadPrinterImage(model, buf, ct);
+          return sendJson(res, result, 201);
+        } catch (e) {
+          return sendJson(res, { error: e.message }, 400);
+        }
+      });
+      return;
+    }
+
+    if (printerImgMatch && method === 'DELETE') {
+      try {
+        const model = decodeURIComponent(printerImgMatch[1]);
+        const { clearPrinterImage } = await import('./printer-image-service.js');
+        return sendJson(res, clearPrinterImage(model));
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
     }
 
     // ──────────────────────────────────────────────────────────────────
