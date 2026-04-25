@@ -82,8 +82,13 @@
       parts.push(renderH2dAiToggles(print._xcam));
     }
 
-    // Chamber heater (Moonraker) + chamber temp control (Bambu)
-    if (print._chamber_heater || print._printer_model?.id === 'h2d' || print._printer_model?.id === 'x1e') {
+    // Chamber heater (Moonraker) + chamber temp control (Bambu).
+    // H-series + X1E all have heated chambers — H2D / H2D Pro / H2C / H2S
+    // and the older X1E. H2D Pro and H2S are recent additions.
+    const _pmId = print._printer_model?.id;
+    if (print._chamber_heater
+        || _pmId === 'h2d' || _pmId === 'h2d_pro' || _pmId === 'h2c' || _pmId === 'h2s'
+        || _pmId === 'x1e') {
       parts.push(renderChamberControl(print));
     }
 

@@ -3,11 +3,105 @@ import { createHash } from 'node:crypto';
 import { createLogger } from './logger.js';
 const log = createLogger('mqtt');
 
+// Map a Bambu serial-number prefix to a printer model descriptor.
+// Community reverse-engineering (OpenBambuAPI, ha-bambulab) has stable
+// mappings for the 2023–2026 line-up. Returns { id, label, nozzleCount,
+// dualNozzle, amsDefault } so the dashboard can pick the right UI variant.
+//
+// `infoModule` is optional: an array of {name, product_name, ...} from
+// the printer's MQTT info report. When provided we refine the
+// serial-prefix guess against the printer's self-reported model name —
+// this is the only reliable way to distinguish H2D vs H2D Pro since
+// they ship under similar serial ranges.
+export function detectBambuModel(serial, infoModule = null) {
+  const s = typeof serial === 'string' ? serial.toUpperCase() : '';
+  const prefix = s.length >= 3 ? s.slice(0, 3) : '';
+  const MAP = {
+    '00M': { id: 'x1c',       label: 'X1 Carbon', nozzleCount: 1, dualNozzle: false, amsDefault: 'ams' },
+    '03W': { id: 'x1e',       label: 'X1E',       nozzleCount: 1, dualNozzle: false, amsDefault: 'ams' },
+    '01P': { id: 'p1p',       label: 'P1P',       nozzleCount: 1, dualNozzle: false, amsDefault: 'ams' },
+    '01S': { id: 'p1s',       label: 'P1S',       nozzleCount: 1, dualNozzle: false, amsDefault: 'ams' },
+    '039': { id: 'a1',        label: 'A1',        nozzleCount: 1, dualNozzle: false, amsDefault: 'ams_lite' },
+    '030': { id: 'a1_mini',   label: 'A1 mini',   nozzleCount: 1, dualNozzle: false, amsDefault: 'ams_lite' },
+    '094': { id: 'p2s',       label: 'P2S',       nozzleCount: 1, dualNozzle: false, amsDefault: 'ams_lite' },
+    '095': { id: 'p2s',       label: 'P2S',       nozzleCount: 1, dualNozzle: false, amsDefault: 'ams_lite' },
+    '0CM': { id: 'h2d',       label: 'H2D',       nozzleCount: 2, dualNozzle: true,  amsDefault: 'ams_2_pro' },
+    '0CE': { id: 'h2d_pro',   label: 'H2D Pro',   nozzleCount: 2, dualNozzle: true,  amsDefault: 'ams_2_pro' },
+    '0CS': { id: 'h2s',       label: 'H2S',       nozzleCount: 1, dualNozzle: false, amsDefault: 'ams_2_pro' },
+    '0CC': { id: 'h2c',       label: 'H2C',       nozzleCount: 7, dualNozzle: false, amsDefault: 'vortek' },
+  };
+  let detected = MAP[prefix] || { id: 'unknown', label: 'Unknown' };
+
+  // Refine via printer-reported product_name on the main controller
+  // module — H2D Pro and H2D may share a serial prefix range, so we
+  // override based on what the firmware self-reports.
+  if (Array.isArray(infoModule)) {
+    for (const m of infoModule) {
+      const pn = String(m?.product_name || '').toLowerCase();
+      if (!pn) continue;
+      if (pn.includes('h2d pro')) {
+        return { id: 'h2d_pro', label: 'H2D Pro', nozzleCount: 2, dualNozzle: true, amsDefault: 'ams_2_pro' };
+      }
+      if (pn === 'h2d' || pn.endsWith(' h2d')) {
+        return { id: 'h2d', label: 'H2D', nozzleCount: 2, dualNozzle: true, amsDefault: 'ams_2_pro' };
+      }
+      if (pn === 'h2s' || pn.endsWith(' h2s')) {
+        return { id: 'h2s', label: 'H2S', nozzleCount: 1, dualNozzle: false, amsDefault: 'ams_2_pro' };
+      }
+      if (pn === 'h2c' || pn.endsWith(' h2c')) {
+        return { id: 'h2c', label: 'H2C', nozzleCount: 7, dualNozzle: false, amsDefault: 'vortek' };
+      }
+    }
+  }
+  return detected;
+}
+
+// Detect AMS hardware model from info.module entry (hw_ver + product_name).
+// Returns one of: 'ams_2_pro', 'ams_ht', 'ams_lite', 'ams', 'unknown'.
+// Sources: greghesp/ha-bambulab#1256 (N3F05 = AMS 2 Pro), OpenBambuAPI mqtt.md.
+export function detectAmsModel(hwVer, productName) {
+  const hv = String(hwVer || '').toUpperCase();
+  const pn = String(productName || '').toLowerCase();
+
+  if (hv.startsWith('N3F05') || pn.includes('ams 2 pro')) return 'ams_2_pro';
+  if (hv.startsWith('AHT') || pn.includes('ams ht')) return 'ams_ht';
+  if (pn.includes('ams lite') || hv.startsWith('AMS_F')) return 'ams_lite';
+  if (hv.startsWith('AMS') || /^ams(\s|\(|$)/.test(pn)) return 'ams';
+  return 'unknown';
+}
+
+// Classify an MQTT connection error. Returns { status, hint } for auth errors, null otherwise.
+// Bambu Authorization Control System (rolled out 2025) requires either a valid
+// Bambu Connect-signed request OR LAN-only Developer Mode. Third-party clients
+// must enable Developer Mode on the printer to retain full control.
+export function classifyMqttError(err) {
+  if (!err) return null;
+  const msg = String(err.message || '').toLowerCase();
+  const code = err.code;
+
+  const isAuth =
+    msg.includes('not authorized') ||
+    msg.includes('bad user name') ||
+    msg.includes('bad username') ||
+    msg.includes('bad password') ||
+    code === 4 || // MQTT 3.1.1 CONNACK: Bad user name or password
+    code === 5;   // MQTT 3.1.1 CONNACK: Not authorized
+
+  if (!isAuth) return null;
+
+  return {
+    status: 'auth_error',
+    message: err.message || 'MQTT authentication failed',
+    hint: 'Check your access code, or enable LAN-only Developer Mode on the printer (Settings → General → LAN Only → Developer Mode) — required by the Bambu Authorization Control System for third-party clients.',
+  };
+}
+
 export class BambuMqttClient {
   constructor(config, hub) {
     this.ip = config.printer.ip;
     this.serial = config.printer.serial;
     this.accessCode = config.printer.accessCode;
+    this.developerMode = !!config.printer.developerMode;
     this.hub = hub;
     this.client = null;
     this.state = {};
@@ -18,6 +112,26 @@ export class BambuMqttClient {
     this._lastFirmwareVersions = {};
     this._lastXcamStatus = null;
     this._printerConfig = config.printer;
+    this._authErrorBroadcast = false;
+
+    // Pre-populate printer-model descriptor so the UI knows immediately
+    // whether this is a dual-nozzle H2D, a 7-nozzle H2C Vortek, etc.,
+    // without waiting for the first MQTT payload.
+    this.state._printer_model = detectBambuModel(this.serial);
+  }
+
+  // Handle a classified auth error: broadcast once until reset.
+  _handleAuthError(err) {
+    const classified = classifyMqttError(err);
+    if (!classified) return;
+    if (this._authErrorBroadcast) return;
+    this._authErrorBroadcast = true;
+    log.error(`Bambu auth error: ${classified.message}`);
+    log.error(`Hint: ${classified.hint}`);
+    this.hub?.broadcast?.('connection', {
+      ...classified,
+      vendor: 'bambu',
+    });
   }
 
   connect() {
@@ -27,10 +141,20 @@ export class BambuMqttClient {
     // cannot be enabled without breaking connectivity. This is a known
     // limitation of the Bambu Lab protocol.
 
+    if (!this.developerMode) {
+      log.warn('Bambu Authorization Control System (2025) requires LAN-only Developer Mode for reliable third-party control. Enable it: printer Settings → General → LAN Only → Developer Mode, then set "developerMode": true in the printer config to silence this warning.');
+    }
+
     // TOFU cert pinning: store fingerprint on first connect, verify on subsequent
     const pinnedFp = this._printerConfig.certFingerprint || null;
 
+    // Explicit, stable client-id keeps Bambu's per-account connection cap
+    // diagnostics clear (avoid library-generated random IDs and the flagged
+    // `nodered_*` prefix). Also ensures reconnects reuse the same session.
+    const clientId = `3dprintforge-${this.serial}`;
+
     this.client = mqtt.connect(url, {
+      clientId,
       username: 'bblp',
       password: this.accessCode,
       rejectUnauthorized: false, // Required: Bambu printers use self-signed certs
@@ -92,6 +216,7 @@ export class BambuMqttClient {
 
     this.client.on('error', (err) => {
       log.error('Error: ' + err.message);
+      this._handleAuthError(err);
     });
 
     this.client.on('close', () => {
@@ -259,16 +384,35 @@ export class BambuMqttClient {
       this.state._info = this._deepMerge(this.state._info || {}, msg.info);
       updated = true;
 
-      // Detect firmware changes
-      if (msg.info.module && Array.isArray(msg.info.module) && this.onFirmwareInfo) {
-        for (const mod of msg.info.module) {
-          if (!mod.name || !mod.sw_ver) continue;
-          const key = `${mod.name}_${mod.sw_ver}`;
-          if (!this._lastFirmwareVersions[key]) {
-            this._lastFirmwareVersions[key] = true;
-            this.onFirmwareInfo(mod);
+      // Detect firmware changes + build AMS hardware model map (AMS 2 Pro, AMS HT, etc.)
+      if (msg.info.module && Array.isArray(msg.info.module)) {
+        // Refine printer-model detection using firmware-reported product_name —
+        // necessary to disambiguate H2D vs H2D Pro and to upgrade an
+        // 'unknown' detection when the serial prefix is new.
+        const refined = detectBambuModel(this.serial, msg.info.module);
+        if (refined && refined.id !== 'unknown') {
+          this.state._printer_model = refined;
+        }
+        if (this.onFirmwareInfo) {
+          for (const mod of msg.info.module) {
+            if (!mod.name || !mod.sw_ver) continue;
+            const key = `${mod.name}_${mod.sw_ver}`;
+            if (!this._lastFirmwareVersions[key]) {
+              this._lastFirmwareVersions[key] = true;
+              this.onFirmwareInfo(mod);
+            }
           }
         }
+        // Expose AMS hardware identification for per-unit UI hints / capability detection.
+        const amsModules = msg.info.module.filter(m => typeof m.name === 'string' && m.name.startsWith('ams'));
+        this.state._ams_models = amsModules.map(m => ({
+          name: m.name,
+          sn: m.sn || '',
+          hwVer: m.hw_ver || '',
+          swVer: m.sw_ver || '',
+          productName: m.product_name || '',
+          model: detectAmsModel(m.hw_ver, m.product_name),
+        }));
       }
     }
 
@@ -404,10 +548,19 @@ export class BambuMqttClient {
         this.state._nozzle2_target = this.state.nozzle_target_temper_2 || 0;
       }
 
-      // AMS summary for quick access
+      // AMS summary for quick access.
+      // AMS 2 Pro / AMS HT add `humidity_raw` (actual RH%), `dry_time` (minutes remaining),
+      // and `dry_sf_reason` (safety-stop reason). BambuStudio#7931 and Bambuddy docs.
       if (this.state.ams?.ams) {
         this.state._ams_count = this.state.ams.ams.length;
-        this.state._ams_humidity = this.state.ams.ams.map(a => ({ id: a.id, humidity: a.humidity, temp: a.temp }));
+        this.state._ams_humidity = this.state.ams.ams.map(a => ({
+          id: a.id,
+          humidity: a.humidity,
+          humidityRaw: a.humidity_raw !== undefined ? Number(a.humidity_raw) : null,
+          temp: a.temp,
+          dryTime: a.dry_time !== undefined ? Number(a.dry_time) : null,
+          drySfReason: a.dry_sf_reason !== undefined ? Number(a.dry_sf_reason) : null,
+        }));
       }
 
       // HMS error code tracking with full details + firmware 01.02.00.00 detailed causes
@@ -520,7 +673,9 @@ export class BambuMqttClient {
         if (this.state.ams.tray_read_done_bits !== undefined) this.state._tray_read_done = this.state.ams.tray_read_done_bits;
       }
 
-      // AMS tray detailed filament properties (drying info, temps, K-factor)
+      // AMS tray detailed filament properties (drying info, temps, K-factor).
+      // Field set aligned with ha-bambulab entities for parity: RFID identifiers,
+      // multi-color palette, bed_temp_type, flow ratio (n), calibration index.
       if (this.state.ams?.ams) {
         this.state._ams_trays = [];
         for (const unit of this.state.ams.ams) {
@@ -530,19 +685,29 @@ export class BambuMqttClient {
               amsId: unit.id, trayId: tray.id,
               type: tray.tray_type || '', subBrands: tray.tray_sub_brands || '',
               color: tray.tray_color || '', weight: tray.tray_weight || 0,
+              colors: Array.isArray(tray.tray_colors) ? tray.tray_colors.slice() : null,
               bedTemp: tray.bed_temp || 0,
+              bedTempType: tray.bed_temp_type != null ? String(tray.bed_temp_type) : null,
               nozzleTempMin: tray.nozzle_temp_min || 0,
               nozzleTempMax: tray.nozzle_temp_max || 0,
               dryingTemp: tray.drying_temp || 0,
               dryingTime: tray.drying_time || 0,
               k: tray.k || 0,
+              flowRatio: tray.n != null ? Number(tray.n) : null,
+              caliIdx: tray.cali_idx != null ? Number(tray.cali_idx) : null,
+              tagUid: tray.tag_uid || null,
+              trayUuid: tray.tray_uuid || null,
+              trayInfoIdx: tray.tray_info_idx != null ? Number(tray.tray_info_idx) : null,
               remain: tray.remain ?? null,
             });
           }
         }
       }
 
-      // X-Cam AI detection confidence scores
+      // X-Cam AI detection confidence scores + H2D granular toggles.
+      // H2D (2026) adds clump_detector (nozzle clumping), airprint_detector,
+      // pileup_detector (purge chute), and printing_monitor master toggle.
+      // Field names confirmed via OpenBambuAPI mqtt.md.
       if (this.state.xcam) {
         this.state._xcam = {
           firstLayerInspector: this.state.xcam.first_layer_inspector ?? null,
@@ -550,6 +715,11 @@ export class BambuMqttClient {
           printHalt: this.state.xcam.print_halt ?? null,
           allow: this.state.xcam.allow_skip_parts ?? null,
           buildplateMarkerDetector: this.state.xcam.buildplate_marker_detector ?? null,
+          // H2D (2026 firmware)
+          clumpDetector: this.state.xcam.clump_detector ?? null,
+          airprintDetector: this.state.xcam.airprint_detector ?? null,
+          pileupDetector: this.state.xcam.pileup_detector ?? null,
+          printingMonitor: this.state.xcam.printing_monitor ?? null,
         };
       }
       if (this.state.xcam_status !== undefined) this.state._xcam_status = this.state.xcam_status;

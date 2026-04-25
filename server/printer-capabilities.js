@@ -166,7 +166,26 @@ const MODEL_OVERRIDES = {
   'X1': { camera: { modes: ['rtsp'] }, buildVolume: [256, 256, 256] },
   'X1C': { camera: { modes: ['rtsp'] }, buildVolume: [256, 256, 256] },
   'X1E': { camera: { modes: ['rtsp'] }, buildVolume: [256, 256, 256] },
-  'H2D': { camera: { modes: ['rtsp'] }, buildVolume: [325, 320, 325] },
+  'H2D': {
+    camera: { modes: ['rtsp'] },
+    buildVolume: [325, 320, 325],
+    features: { multiExtruder: true, idex: true, dualNozzle: true, enclosure: true, chamber: true, chamberHeated: true, ai: true, hasLaser: false },
+  },
+  'H2D Pro': {
+    camera: { modes: ['rtsp'] },
+    buildVolume: [325, 320, 325],
+    features: { multiExtruder: true, idex: true, dualNozzle: true, enclosure: true, chamber: true, chamberHeated: true, ai: true, hasLaser: true, refreshableNozzle: true, highTempBed: true },
+  },
+  'H2C': {
+    camera: { modes: ['rtsp'] },
+    buildVolume: [325, 320, 325],
+    features: { multiExtruder: true, multiColor: true, vortek: true, enclosure: true, chamber: true, chamberHeated: true, ai: true },
+  },
+  'H2S': {
+    camera: { modes: ['rtsp'] },
+    buildVolume: [256, 256, 256],
+    features: { enclosure: true, chamber: true, chamberHeated: true, ai: true },
+  },
   'Snapmaker U1': {
     features: { multiExtruder: true, toolheads: 4, purifier: true },
     buildVolume: [220, 220, 220],

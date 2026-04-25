@@ -56,4 +56,52 @@ describe('detectBambuModel() — serial-number prefix mapping', () => {
     assert.equal(detectBambuModel(null).id, 'unknown');
     assert.equal(detectBambuModel(undefined).id, 'unknown');
   });
+
+  it('identifies H2D Pro by serial prefix 0CE (high-temp variant)', () => {
+    const m = detectBambuModel('0CE00004444');
+    assert.equal(m.id, 'h2d_pro');
+    assert.equal(m.label, 'H2D Pro');
+    assert.equal(m.dualNozzle, true);
+    assert.equal(m.amsDefault, 'ams_2_pro');
+  });
+
+  it('refines H2D Pro detection from info.module product_name', () => {
+    // Even with a generic/unknown serial, the firmware-reported product_name
+    // should upgrade the detection to H2D Pro.
+    const m = detectBambuModel('ZZZ99999999', [
+      { name: 'mc', product_name: 'Bambu Lab H2D Pro', hw_ver: '...', sw_ver: '01.05.00' },
+    ]);
+    assert.equal(m.id, 'h2d_pro');
+    assert.equal(m.label, 'H2D Pro');
+  });
+
+  it('keeps H2D distinct from H2D Pro via product_name', () => {
+    // A generic H2D should NOT be promoted to H2D Pro.
+    const h2d = detectBambuModel('0CM12345678', [
+      { name: 'mc', product_name: 'Bambu Lab H2D' },
+    ]);
+    assert.equal(h2d.id, 'h2d');
+    assert.notEqual(h2d.id, 'h2d_pro');
+  });
+
+  it('refines H2S / H2C from product_name when prefix is new', () => {
+    const h2s = detectBambuModel('XXX1111', [{ product_name: 'Bambu Lab H2S' }]);
+    assert.equal(h2s.id, 'h2s');
+    const h2c = detectBambuModel('XXX2222', [{ product_name: 'Bambu Lab H2C' }]);
+    assert.equal(h2c.id, 'h2c');
+    assert.equal(h2c.nozzleCount, 7);
+  });
+
+  it('ignores unknown product_name and falls back to serial-prefix guess', () => {
+    const m = detectBambuModel('00M12345678', [
+      { product_name: 'Some Other Product' },
+    ]);
+    assert.equal(m.id, 'x1c'); // serial wins
+  });
+
+  it('handles infoModule = null / non-array gracefully', () => {
+    assert.equal(detectBambuModel('00M12345678', null).id, 'x1c');
+    assert.equal(detectBambuModel('00M12345678', undefined).id, 'x1c');
+    assert.equal(detectBambuModel('00M12345678', 'not-an-array').id, 'x1c');
+  });
 });

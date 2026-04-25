@@ -546,7 +546,7 @@
     "O1E": {
       "model_id": "O1E",
       "display_name": "Bambu Lab H2D Pro",
-      "model_name": "X1E",
+      "model_name": "H2D Pro",
       "nozzle_temp_range": [
         0,
         350
