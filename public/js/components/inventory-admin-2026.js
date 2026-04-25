@@ -61,157 +61,121 @@
     state.extraFields = { spool: sfSpool || [], filament: sfFil || [], vendor: sfVen || [] };
     state.conflicts = Array.isArray(conflicts) ? conflicts.filter(s => s.spoolman_sync_error) : [];
 
+    // Compact-card helper — keeps each section's markup short while
+    // maintaining a uniform visual density across the 2-column grid.
+    const card = (icon, title, body, opts = {}) => `
+      <details class="card" ${opts.open ? 'open' : ''} style="padding:10px;margin:0">
+        <summary style="cursor:pointer;font-weight:600;font-size:0.88rem"><i class="bi bi-${icon}"></i> ${title}</summary>
+        <div style="margin-top:8px;font-size:0.82rem">${body}</div>
+      </details>`;
+
     el.innerHTML = `
       <div id="inv-spoolman-health" style="margin-bottom:8px"></div>
-
       ${state.conflicts.length ? renderConflicts() : ''}
 
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-cloud-arrow-down"></i> Initial import from Spoolman
-        </summary>
-        <div style="margin-top:8px;font-size:0.85rem">
-          <p class="text-muted" style="font-size:0.8rem">Pulls every vendor, filament profile, and spool from the connected Spoolman server. Safe to re-run — existing rows are updated in place.</p>
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.importAll()">Run import</button>
-          <span id="inv-import-result" style="margin-left:8px;font-size:0.8rem"></span>
+      <!-- Top action bar — most-used buttons always visible -->
+      <div class="card" style="padding:10px;margin-bottom:10px">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:0.82rem">
+          <strong style="margin-right:6px">Quick actions:</strong>
+          <button class="form-btn form-btn-sm" onclick="_invAdmin.importAll()" title="Pull every vendor / filament / spool from Spoolman">
+            <i class="bi bi-cloud-arrow-down"></i> Import from Spoolman
+          </button>
+          <button class="form-btn form-btn-sm" onclick="_invAdmin.detectDupes()" title="Find and link duplicate filament profiles">
+            <i class="bi bi-files"></i> Dedupe profiles
+          </button>
+          <button class="form-btn form-btn-sm" onclick="_invAdmin.trackPrices()" title="Snapshot current retailer prices">
+            <i class="bi bi-cash-coin"></i> Track prices
+          </button>
+          <button class="form-btn form-btn-sm" onclick="_invAdmin.syncExtraFields()" title="Pull custom-field schema from Spoolman">
+            <i class="bi bi-sliders"></i> Sync custom fields
+          </button>
+          <button class="form-btn form-btn-sm" onclick="_invAdmin.refreshTypeBridge()">
+            <i class="bi bi-arrow-repeat"></i> Refresh type-bridge
+          </button>
+          <button class="form-btn form-btn-sm" onclick="_invAdmin.refreshPerVendor()">
+            <i class="bi bi-arrow-repeat"></i> Refresh SMDB per vendor
+          </button>
+          <a class="form-btn form-btn-sm" href="/api/spoolman/export" download>
+            <i class="bi bi-box-arrow-down"></i> Export JSON
+          </a>
+          <span style="margin-left:auto;display:flex;gap:8px;font-size:0.78rem">
+            <span id="inv-import-result"></span>
+            <span id="inv-dupe-result"></span>
+            <span id="inv-climate-result"></span>
+          </span>
         </div>
-      </details>
+      </div>
 
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-files"></i> Duplicate filament profiles
-        </summary>
-        <div style="margin-top:8px">
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.detectDupes()">Detect &amp; link duplicates</button>
-          <span id="inv-dupe-result" style="margin-left:8px;font-size:0.8rem"></span>
-        </div>
-      </details>
+      <!-- 2-column grid for everything else (auto-fits to 1 column on narrow viewports) -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:10px">
 
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-currency-dollar"></i> Cheapest retailer per filament
-        </summary>
-        <div style="margin-top:8px;max-height:280px;overflow-y:auto;font-size:0.82rem">
-          ${renderCheapest()}
-        </div>
-      </details>
+        ${card('currency-dollar', 'Cheapest retailer per filament',
+          `<div style="max-height:280px;overflow-y:auto">${renderCheapest()}</div>`,
+          { open: true })}
 
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-sliders"></i> Custom fields (Spoolman-compatible)
-        </summary>
-        <div style="margin-top:8px">
-          ${renderExtraFields()}
-          <button class="form-btn form-btn-sm mt-sm" onclick="_invAdmin.syncExtraFields()">Pull from Spoolman</button>
-        </div>
-      </details>
+        ${card('shop', 'Vendor → Spoolman sync',
+          `<div id="inv-vendor-list" style="max-height:280px;overflow-y:auto"></div>`,
+          { open: true })}
 
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-search"></i> OrcaSlicer preset browser
-        </summary>
-        <div style="margin-top:8px">
-          <div style="display:flex;gap:6px;flex-wrap:wrap">
-            <input class="form-input" id="inv-orca-vendor" placeholder="Vendor (e.g. BBL, Prusa)" style="width:160px">
-            <input class="form-input" id="inv-orca-material" placeholder="Material (e.g. PLA, PETG)" style="width:140px">
+        ${card('sliders', 'Custom fields (Spoolman-compatible)', renderExtraFields())}
+
+        ${card('search', 'OrcaSlicer preset browser', `
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <input class="form-input" id="inv-orca-vendor" placeholder="Vendor (BBL, Prusa…)" style="flex:1;min-width:120px">
+            <input class="form-input" id="inv-orca-material" placeholder="Material (PLA, PETG…)" style="flex:1;min-width:120px">
             <button class="form-btn form-btn-sm" onclick="_invAdmin.searchOrca()">Search</button>
           </div>
-          <div id="inv-orca-results" style="margin-top:8px;max-height:320px;overflow-y:auto;font-size:0.82rem"></div>
-        </div>
-      </details>
+          <div id="inv-orca-results" style="max-height:320px;overflow-y:auto"></div>`)}
 
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-thermometer-half"></i> Record location climate
-        </summary>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-          <input class="form-input" id="inv-loc-id" type="number" placeholder="Location ID" style="width:110px">
-          <input class="form-input" id="inv-loc-temp" type="number" step="0.1" placeholder="Temp °C" style="width:110px">
-          <input class="form-input" id="inv-loc-humid" type="number" step="0.1" placeholder="Humidity %" style="width:110px">
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.recordClimate()">Record</button>
-          <span id="inv-climate-result" style="font-size:0.8rem"></span>
-        </div>
-      </details>
+        ${card('search-heart', 'Profile compatibility matcher', `
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <input class="form-input" id="inv-match-vendor" placeholder="Vendor" style="flex:1;min-width:100px">
+            <input class="form-input" id="inv-match-material" placeholder="Material" style="flex:1;min-width:100px">
+            <input class="form-input" id="inv-match-color" placeholder="color_hex" style="flex:1;min-width:120px">
+            <button class="form-btn form-btn-sm" onclick="_invAdmin.findMatch()">Match</button>
+          </div>
+          <div id="inv-match-out" style="max-height:260px;overflow-y:auto"></div>`)}
 
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-diagram-3"></i> Materials taxonomy &amp; purge matrix
-        </summary>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.loadTaxonomy()">Load materials</button>
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.loadPurge()">Load purge matrix</button>
-        </div>
-        <div id="inv-taxonomy-out" style="margin-top:8px;max-height:220px;overflow-y:auto;font-size:0.82rem"></div>
-        <div id="inv-purge-out" style="margin-top:8px;max-height:220px;overflow-y:auto;font-size:0.82rem"></div>
-      </details>
+        ${card('graph-up', 'Price trend (per profile)', `
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <input class="form-input" id="inv-trend-id" type="number" placeholder="Profile ID" style="flex:1;min-width:100px">
+            <input class="form-input" id="inv-trend-days" type="number" placeholder="Days" value="30" style="width:80px">
+            <button class="form-btn form-btn-sm" onclick="_invAdmin.loadTrend()">Load</button>
+          </div>
+          <div id="inv-trend-out"></div>`)}
 
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-printer"></i> Printer presets &amp; multi-material systems
-        </summary>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-          <input class="form-input" id="inv-preset-vendor" placeholder="Vendor (e.g. bambu)" style="width:180px">
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.listPresets()">List presets</button>
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.listMM()">List MM systems</button>
-        </div>
-        <div id="inv-preset-out" style="margin-top:8px;max-height:260px;overflow-y:auto;font-size:0.82rem"></div>
-      </details>
+        ${card('thermometer-half', 'Record location climate', `
+          <div style="display:grid;grid-template-columns:repeat(3,1fr) auto;gap:6px;align-items:end">
+            <input class="form-input" id="inv-loc-id" type="number" placeholder="Location ID">
+            <input class="form-input" id="inv-loc-temp" type="number" step="0.1" placeholder="Temp °C">
+            <input class="form-input" id="inv-loc-humid" type="number" step="0.1" placeholder="Humidity %">
+            <button class="form-btn form-btn-sm" onclick="_invAdmin.recordClimate()">Record</button>
+          </div>`)}
 
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-graph-up"></i> Price trend (per filament profile)
-        </summary>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-          <input class="form-input" id="inv-trend-id" type="number" placeholder="Profile ID" style="width:120px">
-          <input class="form-input" id="inv-trend-days" type="number" placeholder="Days" value="30" style="width:90px">
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.loadTrend()">Load</button>
-        </div>
-        <div id="inv-trend-out" style="margin-top:8px;font-size:0.82rem"></div>
-      </details>
+        ${card('diagram-3', 'Materials taxonomy & purge matrix', `
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <button class="form-btn form-btn-sm" onclick="_invAdmin.loadTaxonomy()">Load materials</button>
+            <button class="form-btn form-btn-sm" onclick="_invAdmin.loadPurge()">Load purge matrix</button>
+          </div>
+          <div id="inv-taxonomy-out" style="max-height:200px;overflow-y:auto"></div>
+          <div id="inv-purge-out" style="margin-top:6px;max-height:200px;overflow-y:auto"></div>`)}
 
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-search-heart"></i> Profile compatibility matcher
-        </summary>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-          <input class="form-input" id="inv-match-vendor" placeholder="Vendor" style="width:140px">
-          <input class="form-input" id="inv-match-material" placeholder="Material" style="width:120px">
-          <input class="form-input" id="inv-match-color" placeholder="color_hex (no #)" style="width:140px">
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.findMatch()">Find match</button>
-        </div>
-        <div id="inv-match-out" style="margin-top:8px;max-height:260px;overflow-y:auto;font-size:0.82rem"></div>
-      </details>
+        ${card('printer', 'Printer presets & MM systems', `
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <input class="form-input" id="inv-preset-vendor" placeholder="Vendor (bambu, prusa…)" style="flex:1;min-width:120px">
+            <button class="form-btn form-btn-sm" onclick="_invAdmin.listPresets()">Presets</button>
+            <button class="form-btn form-btn-sm" onclick="_invAdmin.listMM()">MM systems</button>
+          </div>
+          <div id="inv-preset-out" style="max-height:260px;overflow-y:auto"></div>`)}
 
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-shop"></i> Vendor → Spoolman sync
-        </summary>
-        <div id="inv-vendor-list" style="margin-top:8px;max-height:240px;overflow-y:auto;font-size:0.82rem"></div>
-      </details>
-
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-activity"></i> Spoolman health history &amp; type-bridge
-        </summary>
-        <div style="margin-top:8px">
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.loadHealthHistory()">Load last 50 checks</button>
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.loadTypeBridge()">View type-bridge mappings</button>
-        </div>
-        <div id="inv-health-out" style="margin-top:8px;max-height:200px;overflow-y:auto;font-size:0.82rem"></div>
-        <div id="inv-bridge-out" style="margin-top:8px;max-height:200px;overflow-y:auto;font-size:0.82rem"></div>
-      </details>
-
-      <details class="card mb-sm" style="padding:10px">
-        <summary style="cursor:pointer;font-weight:600">
-          <i class="bi bi-box-arrow-down"></i> Export &amp; tools
-        </summary>
-        <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">
-          <a class="form-btn form-btn-sm" href="/api/spoolman/export" download>Download Spoolman JSON</a>
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.trackPrices()">Track prices now</button>
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.refreshPerVendor()">Refresh per-vendor SMDB</button>
-          <button class="form-btn form-btn-sm" onclick="_invAdmin.refreshTypeBridge()">Refresh type-bridge</button>
-        </div>
-      </details>
+        ${card('activity', 'Spoolman health history & type-bridge', `
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <button class="form-btn form-btn-sm" onclick="_invAdmin.loadHealthHistory()">Last 50 checks</button>
+            <button class="form-btn form-btn-sm" onclick="_invAdmin.loadTypeBridge()">Type-bridge map</button>
+          </div>
+          <div id="inv-health-out" style="max-height:180px;overflow-y:auto"></div>
+          <div id="inv-bridge-out" style="margin-top:6px;max-height:180px;overflow-y:auto"></div>`)}
+      </div>
     `;
 
     // Async-populate the vendor list
