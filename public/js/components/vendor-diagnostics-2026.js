@@ -30,61 +30,75 @@
   function render() {
     const el = document.getElementById('vendor-diagnostics-2026');
     if (!el) return;
+
+    // Compact-card helper — uniform visual density across the grid.
+    const card = (icon, title, body, opts = {}) => `
+      <details class="card" ${opts.open !== false ? 'open' : ''} style="padding:10px;margin:0">
+        <summary style="cursor:pointer;font-weight:600;font-size:0.85rem"><i class="bi bi-${icon}"></i> ${title}</summary>
+        <div style="margin-top:8px;font-size:0.82rem">${body}</div>
+      </details>`;
+
     el.innerHTML = `
-      <div class="card mb-sm">
-        <div class="card-title" style="font-size:0.7rem">CAN-bus node scan (Klipper + Katapult)</div>
-        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-          <input class="form-input" id="vd-canbus-iface" value="can0" style="width:90px" placeholder="can0">
-          <button class="form-btn form-btn-sm" onclick="_vd2026.canbusScan()">Scan</button>
-          <span id="vd-canbus-result" style="font-size:0.8rem">${renderCanbus()}</span>
+      <!-- Quick actions — most-used buttons always visible at the top -->
+      <div class="card" style="padding:10px;margin-bottom:10px">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:0.82rem">
+          <strong style="margin-right:6px">Quick actions:</strong>
+          <button class="form-btn form-btn-sm" onclick="_vd2026.updateRefresh()" title="Refresh Moonraker update-manager status">
+            <i class="bi bi-arrow-clockwise"></i> Refresh updates
+          </button>
+          <button class="form-btn form-btn-sm" onclick="_vd2026.shaperMeasure()" title="MEASURE_AXES_NOISE — captures baseline noise on each axis">
+            <i class="bi bi-soundwave"></i> Measure axes noise
+          </button>
+          <button class="form-btn form-btn-sm form-btn-danger" onclick="_vd2026.updateFull()" title="Run klipper + moonraker + system + web update; reboots services">
+            <i class="bi bi-cloud-download"></i> Run full update
+          </button>
+          <button class="form-btn form-btn-sm form-btn-danger" onclick="_vd2026.historyResetTotals()" title="Reset lifetime filament/time totals — irreversible">
+            <i class="bi bi-eraser"></i> Reset history totals
+          </button>
         </div>
       </div>
 
-      <div class="card mb-sm">
-        <div class="card-title" style="font-size:0.7rem">Input shaper tuning</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="form-btn form-btn-sm" onclick="_vd2026.shaperMeasure()">MEASURE_AXES_NOISE</button>
-          <button class="form-btn form-btn-sm" onclick="_vd2026.shaperCalibrate('X')">Calibrate X</button>
-          <button class="form-btn form-btn-sm" onclick="_vd2026.shaperCalibrate('Y')">Calibrate Y</button>
-          <button class="form-btn form-btn-sm" onclick="_vd2026.shaperTest('X')">TEST_RESONANCES X</button>
-          <button class="form-btn form-btn-sm" onclick="_vd2026.shaperTest('Y')">TEST_RESONANCES Y</button>
-        </div>
-        <small class="text-muted" style="font-size:0.7rem">Results land in /tmp/resonances_*.csv on the printer host.</small>
-      </div>
+      <!-- 2-column auto-grid for the rest -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:10px">
 
-      <div class="card mb-sm">
-        <div class="card-title" style="font-size:0.7rem">Moonraker update manager</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="form-btn form-btn-sm" onclick="_vd2026.updateRefresh()">Refresh status</button>
-          <button class="form-btn form-btn-sm form-btn-danger" onclick="_vd2026.updateFull()">Run full update</button>
-        </div>
-        <small class="text-muted" style="font-size:0.7rem">Full update installs klipper + moonraker + system + web-client updates.</small>
-      </div>
+        ${card('soundwave', 'Input shaper tuning', `
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px">
+            <button class="form-btn form-btn-sm" onclick="_vd2026.shaperCalibrate('X')">Calibrate X</button>
+            <button class="form-btn form-btn-sm" onclick="_vd2026.shaperCalibrate('Y')">Calibrate Y</button>
+            <button class="form-btn form-btn-sm" onclick="_vd2026.shaperTest('X')">TEST_RESONANCES X</button>
+            <button class="form-btn form-btn-sm" onclick="_vd2026.shaperTest('Y')">TEST_RESONANCES Y</button>
+          </div>
+          <small class="text-muted" style="display:block;margin-top:6px;font-size:0.7rem">Results saved to <code>/tmp/resonances_*.csv</code> on the printer host.</small>`)}
 
-      <div class="card mb-sm">
-        <div class="card-title" style="font-size:0.7rem">Moonraker history</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input class="form-input" id="vd-history-uid" placeholder="Job UID" style="width:160px">
-          <button class="form-btn form-btn-sm" onclick="_vd2026.historyDelete()">Delete job</button>
-          <button class="form-btn form-btn-sm form-btn-danger" onclick="_vd2026.historyResetTotals()">Reset lifetime totals</button>
-        </div>
-      </div>
+        ${card('hdd-network', 'CAN-bus node scan', `
+          <p class="text-muted" style="font-size:0.78rem;margin:0 0 6px">Detect unassigned Klipper + Katapult nodes on a CAN interface.</p>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <input class="form-input" id="vd-canbus-iface" value="can0" placeholder="can0" style="flex:1;min-width:80px;max-width:120px">
+            <button class="form-btn form-btn-sm" onclick="_vd2026.canbusScan()">Scan</button>
+          </div>
+          <div id="vd-canbus-result" style="margin-top:8px">${renderCanbus()}</div>`)}
 
-      <div class="card mb-sm">
-        <div class="card-title" style="font-size:0.7rem">Notifier test</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input class="form-input" id="vd-notifier-name" placeholder="Notifier name (from moonraker.conf)" style="width:250px">
-          <button class="form-btn form-btn-sm" onclick="_vd2026.notifierTest()">Send test</button>
-        </div>
-      </div>
+        ${card('clock-history', 'Moonraker history', `
+          <p class="text-muted" style="font-size:0.78rem;margin:0 0 6px">Delete a single job by UID. Lifetime totals are reset from the Quick actions bar.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input class="form-input" id="vd-history-uid" placeholder="Job UID" style="flex:1;min-width:120px">
+            <button class="form-btn form-btn-sm" onclick="_vd2026.historyDelete()">Delete job</button>
+          </div>`)}
 
-      <div class="card mb-sm">
-        <div class="card-title" style="font-size:0.7rem">TigerTag NFC lookup</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input class="form-input" id="vd-tigertag-uid" placeholder="Tag UID (hex, e.g. DEAD:BEEF:01:02)" style="width:260px">
-          <button class="form-btn form-btn-sm" onclick="_vd2026.tigertagLookup()">Look up</button>
-        </div>
-        <div id="vd-tigertag-result" style="margin-top:6px;font-size:0.8rem">${renderTigerTag()}</div>
+        ${card('bell', 'Notifier test', `
+          <p class="text-muted" style="font-size:0.78rem;margin:0 0 6px">Sends a synthetic notification through a notifier defined in <code>moonraker.conf</code>.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input class="form-input" id="vd-notifier-name" placeholder="Notifier name" style="flex:1;min-width:140px">
+            <button class="form-btn form-btn-sm" onclick="_vd2026.notifierTest()">Send test</button>
+          </div>`)}
+
+        ${card('tag', 'TigerTag NFC lookup', `
+          <p class="text-muted" style="font-size:0.78rem;margin:0 0 6px">Resolve a filament NFC tag UID against the offline DB + online TigerTag lookup.</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <input class="form-input" id="vd-tigertag-uid" placeholder="Tag UID (DEAD:BEEF:01:02)" style="flex:1;min-width:160px">
+            <button class="form-btn form-btn-sm" onclick="_vd2026.tigertagLookup()">Look up</button>
+          </div>
+          <div id="vd-tigertag-result" style="margin-top:6px">${renderTigerTag()}</div>`)}
       </div>
     `;
   }

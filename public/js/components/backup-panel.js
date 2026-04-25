@@ -262,7 +262,6 @@
           display: flex; justify-content: space-between; align-items: center;
           padding: 0.6rem 0.75rem; border-radius: var(--radius);
           background: var(--bg-secondary); border: 1px solid var(--border-color);
-          margin-bottom: 0.5rem;
         }
         .backup-item-info { flex: 1; min-width: 0; }
         .backup-item-name {
@@ -296,31 +295,26 @@
       </style>
 
       <div class="backup-panel">
-        <!-- Actions -->
-        <div class="backup-section">
+        <!-- Unified action bar — create, upload + history exports always visible -->
+        <div class="backup-section" style="margin-bottom:1rem">
           <div class="backup-section-title">${t('backup.title')}</div>
           <div class="backup-actions">
             <button class="backup-btn backup-btn--create" id="backup-create-btn">${t('backup.create')}</button>
             <button class="backup-btn backup-btn--upload" id="backup-upload-btn" onclick="document.getElementById('backup-file-input').click()">${t('backup.upload')}</button>
             <input type="file" id="backup-file-input" class="backup-file-input" accept=".db">
+            <span style="border-left:1px solid var(--border-color);height:24px;margin:0 4px"></span>
+            <span style="font-size:0.78rem;opacity:0.7">${t('backup.export_title')}:</span>
+            <a href="/api/history/export?format=csv" class="backup-btn backup-btn--download" download>${t('backup.export_csv')}</a>
+            <a href="/api/history/export?format=json" class="backup-btn backup-btn--download" download>${t('backup.export_json')}</a>
           </div>
           <div class="backup-status" id="backup-status"></div>
         </div>
 
-        <!-- Backup list -->
+        <!-- Backup list (auto-fits 1 or 2 columns based on viewport width) -->
         <div class="backup-section">
           <div class="backup-section-title">${t('backup.list_title')}</div>
-          <div id="backup-list">
+          <div id="backup-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:0.5rem;align-items:start">
             <div class="backup-empty"><span class="backup-spinner"></span></div>
-          </div>
-        </div>
-
-        <!-- Export -->
-        <div class="backup-section">
-          <div class="backup-section-title">${t('backup.export_title')}</div>
-          <div class="backup-export-links">
-            <a href="/api/history/export?format=csv" class="backup-btn backup-btn--download" download>${t('backup.export_csv')}</a>
-            <a href="/api/history/export?format=json" class="backup-btn backup-btn--download" download>${t('backup.export_json')}</a>
           </div>
         </div>
       </div>`;
