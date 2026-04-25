@@ -6476,6 +6476,119 @@ export async function handleApiRequest(req, res) {
       return sendJson(res, { generators: listGenerators() });
     }
 
+    // ── Scene Composer: persistent scenes ──
+    if (method === 'GET' && path === '/api/ai-forge/scenes') {
+      const { listScenes } = await import('./db/ai-forge-scenes.js');
+      return sendJson(res, { scenes: listScenes({ limit: parseInt(url.searchParams.get('limit'), 10) || 100 }) });
+    }
+
+    if (method === 'POST' && path === '/api/ai-forge/scenes') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { createScene } = await import('./db/ai-forge-scenes.js');
+          const { validateScene } = await import('./scene-builder.js');
+          if (!body.scene) return sendJson(res, { error: 'scene required' }, 400);
+          validateScene(body.scene);
+          const row = createScene({
+            name: body.scene.name || 'Untitled',
+            scene_json: JSON.stringify(body.scene),
+            shape_count: (body.scene.shapes || []).length,
+          });
+          return sendJson(res, row, 201);
+        } catch (e) { return sendJson(res, { error: e.message }, 400); }
+      });
+    }
+
+    const sceneIdMatch = path.match(/^\/api\/ai-forge\/scenes\/(\d+)$/);
+    if (sceneIdMatch && method === 'GET') {
+      const { getScene } = await import('./db/ai-forge-scenes.js');
+      const row = getScene(parseInt(sceneIdMatch[1], 10));
+      if (!row) return sendJson(res, { error: 'not found' }, 404);
+      return sendJson(res, row);
+    }
+
+    if (sceneIdMatch && method === 'PUT') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { updateScene, getScene } = await import('./db/ai-forge-scenes.js');
+          const { validateScene } = await import('./scene-builder.js');
+          const id = parseInt(sceneIdMatch[1], 10);
+          if (!getScene(id)) return sendJson(res, { error: 'not found' }, 404);
+          if (body.scene) validateScene(body.scene);
+          const row = updateScene(id, {
+            name: body.scene?.name,
+            scene_json: body.scene ? JSON.stringify(body.scene) : undefined,
+            shape_count: body.scene ? (body.scene.shapes || []).length : undefined,
+          });
+          return sendJson(res, row);
+        } catch (e) { return sendJson(res, { error: e.message }, 400); }
+      });
+    }
+
+    if (sceneIdMatch && method === 'DELETE') {
+      const { deleteScene } = await import('./db/ai-forge-scenes.js');
+      const ok = deleteScene(parseInt(sceneIdMatch[1], 10));
+      return sendJson(res, { ok }, ok ? 200 : 404);
+    }
+
+    const sceneRenderMatch = path.match(/^\/api\/ai-forge\/scenes\/(\d+)\/render$/);
+    if (sceneRenderMatch && method === 'POST') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { getScene } = await import('./db/ai-forge-scenes.js');
+          const { buildScene } = await import('./scene-builder.js');
+          const { generateAndSave } = await import('./ai-forge.js');
+          const { recordAiForgeJob } = await import('./db/ai-forge-jobs.js');
+
+          const row = getScene(parseInt(sceneRenderMatch[1], 10));
+          if (!row) return sendJson(res, { error: 'scene not found' }, 404);
+          const scene = JSON.parse(row.scene_json);
+          const mesh = buildScene(scene);
+          const format = (body?.format || 'stl').toLowerCase();
+          const repair = body?.repair !== false;
+          const result = await generateAndSave({
+            jobType: 'compose',
+            prompt: `scene:${scene.name || row.name}`,
+            params: { sceneId: row.id, scene },
+            mesh, format, repair,
+          });
+          const jobRow = recordAiForgeJob(result);
+          return sendJson(res, {
+            job: jobRow,
+            stats: result.stats,
+            analysis: result.analysis,
+          }, 201);
+        } catch (e) { return sendJson(res, { error: e.message }, 400); }
+      });
+    }
+
+    // Render an in-memory scene without persisting it (preview / quick export).
+    if (method === 'POST' && path === '/api/ai-forge/scenes/render') {
+      return readBody(req, res, async (body) => {
+        try {
+          const { buildScene } = await import('./scene-builder.js');
+          const { generateAndSave } = await import('./ai-forge.js');
+          const { recordAiForgeJob } = await import('./db/ai-forge-jobs.js');
+          if (!body.scene) return sendJson(res, { error: 'scene required' }, 400);
+          const mesh = buildScene(body.scene);
+          const format = (body.format || 'stl').toLowerCase();
+          const repair = body.repair !== false;
+          const result = await generateAndSave({
+            jobType: 'compose',
+            prompt: `scene:${body.scene.name || 'untitled'}`,
+            params: { scene: body.scene },
+            mesh, format, repair,
+          });
+          const jobRow = recordAiForgeJob(result);
+          return sendJson(res, {
+            job: jobRow,
+            stats: result.stats,
+            analysis: result.analysis,
+          }, 201);
+        } catch (e) { return sendJson(res, { error: e.message }, 400); }
+      });
+    }
+
     if (method === 'POST' && path === '/api/ai-forge/image') {
       const chunks = [];
       let total = 0;

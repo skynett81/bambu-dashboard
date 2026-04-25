@@ -1430,6 +1430,21 @@ export function runMigrations() {
       }
     }},
 
+    // v134: Scene Composer projects
+    { version: 134, up: (db) => {
+      db.exec(`CREATE TABLE IF NOT EXISTS ai_forge_scenes (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        name TEXT NOT NULL,
+        scene_json TEXT NOT NULL,
+        thumbnail_path TEXT,
+        shape_count INTEGER DEFAULT 0,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      )`);
+      db.exec(`CREATE INDEX IF NOT EXISTS idx_ai_forge_scenes_name ON ai_forge_scenes(name)`);
+      db.exec(`CREATE INDEX IF NOT EXISTS idx_ai_forge_scenes_updated ON ai_forge_scenes(updated_at DESC)`);
+    }},
+
     // v133: AI Model Forge job tracking
     { version: 133, up: (db) => {
       db.exec(`CREATE TABLE IF NOT EXISTS ai_forge_jobs (
