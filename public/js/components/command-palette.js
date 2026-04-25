@@ -49,7 +49,34 @@
     printermatrix: 'Printer Matrix',
     timetracker: 'Time Analysis',
     activity: t('tabs.activity') || 'Activity',
-    gallery: 'Gallery'
+    gallery: 'Gallery',
+    // 2026 additions — every panel registered in PANEL_TITLES should be
+    // searchable from the Ctrl+K palette so users can jump straight in.
+    'ai-forge':         'AI Model Forge',
+    'mesh-repair':      'Mesh Repair Toolkit',
+    'scene-composer':   'Scene Composer',
+    'gcode-studio':     'G-code Studio',
+    'gcode-reference':  'G-code Reference & Estimator',
+    'calibration':      'Calibration & Tuning',
+    'preflight':        'Pre-print Analysis',
+    'analysis':         'Analysis',
+    'analytics':        'Analytics',
+    'firmware-updates': 'Firmware Updates',
+    'admin-diagnostics':'Diagnostics & Tuning (admin)',
+    'admin-inventory':  'Inventory Admin',
+    'admin-kb':         'Knowledge Base Admin',
+    'modelforge':       'Model Forge',
+    'signmaker':        'Sign Maker',
+    'jscad':            'JSCAD Studio',
+    'octoprint':        'OctoPrint Bridge',
+    'resources':        'Vendor Resources',
+    'logs':             'Server Logs',
+    'filamentanalytics':'Filament Analytics',
+    'crm-dashboard':    'CRM Dashboard',
+    'crm-customers':    'CRM Customers',
+    'crm-orders':       'CRM Orders',
+    'crm-invoices':     'CRM Invoices',
+    'crm-settings':     'CRM Settings',
   };
 
   /* ---- SVG Icons (16x16) ---- */
