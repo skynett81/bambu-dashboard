@@ -327,6 +327,9 @@ function getRoutePermission(method, path) {
   // Push subscriptions — allow for all authenticated users
   if (path.startsWith('/api/push')) return 'view';
 
+  // Mesh repair toolkit — local utility, no printer-state mutation
+  if (path.startsWith('/api/mesh/')) return 'view';
+
   // Default: require view for GET, admin for everything else
   return method === 'GET' ? 'view' : 'admin';
 }
@@ -6440,6 +6443,169 @@ export async function handleApiRequest(req, res) {
         printerId: url.searchParams.get('printer_id') || undefined,
         days: url.searchParams.get('days') ? parseInt(url.searchParams.get('days'), 10) : undefined,
       }));
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // MESH REPAIR & TRANSFORM TOOLKIT
+    // ──────────────────────────────────────────────────────────────────
+
+    if ((method === 'POST') && (
+      path === '/api/mesh/analyze' ||
+      path === '/api/mesh/repair'  ||
+      path === '/api/mesh/transform' ||
+      path === '/api/mesh/convert' ||
+      path === '/api/mesh/split'
+    )) {
+      // Streaming binary upload (any of stl|obj|3mf), capped at 50 MB.
+      const chunks = [];
+      let total = 0;
+      const limit = 50 * 1024 * 1024;
+      let aborted = false;
+      req.on('data', (c) => {
+        total += c.length;
+        if (total > limit) { aborted = true; req.destroy(); return; }
+        chunks.push(c);
+      });
+      req.on('end', async () => {
+        if (aborted) return sendJson(res, { error: 'mesh too large (max 50 MB)' }, 413);
+        try {
+          const buf = Buffer.concat(chunks);
+          const filename = url.searchParams.get('filename') || '';
+          const targetFormat = (url.searchParams.get('format') || 'stl').toLowerCase();
+
+          const { bufferToMesh, meshToBuffer, detectFormat } = await import('./format-converter.js');
+
+          const sourceFormat = detectFormat(buf, filename);
+          if (sourceFormat === 'unknown') return sendJson(res, { error: 'unsupported source format' }, 400);
+
+          let mesh;
+          try {
+            mesh = await bufferToMesh(buf, filename);
+          } catch (e) {
+            return sendJson(res, { error: `parse failed: ${e.message}` }, 400);
+          }
+
+          if (path === '/api/mesh/analyze') {
+            const { analyzeMesh } = await import('./mesh-repair.js');
+            const { meshStats } = await import('./mesh-transforms.js');
+            return sendJson(res, {
+              source_format: sourceFormat,
+              stats: meshStats(mesh),
+              analysis: analyzeMesh(mesh),
+            });
+          }
+
+          if (path === '/api/mesh/repair') {
+            const { autoRepair } = await import('./mesh-repair.js');
+            const ops = (url.searchParams.get('ops') || 'all').split(',').map(s => s.trim().toLowerCase());
+            const result = autoRepair(mesh, { ops });
+            const outBuf = await meshToBuffer(result.mesh, targetFormat);
+            res.writeHead(200, {
+              'Content-Type': 'application/octet-stream',
+              'X-Mesh-Format': targetFormat,
+              'X-Mesh-Report': encodeURIComponent(JSON.stringify(result.report)),
+            });
+            return res.end(outBuf);
+          }
+
+          if (path === '/api/mesh/transform') {
+            const op = (url.searchParams.get('op') || '').toLowerCase();
+            const transforms = await import('./mesh-transforms.js');
+            let result;
+            if (op === 'decimate') {
+              result = transforms.decimate(mesh, parseFloat(url.searchParams.get('ratio')) || 0.5);
+            } else if (op === 'smooth') {
+              result = transforms.smooth(mesh,
+                parseInt(url.searchParams.get('iterations'), 10) || 1,
+                parseFloat(url.searchParams.get('lambda')) || 0.5);
+            } else if (op === 'hollow') {
+              result = transforms.hollow(mesh, parseFloat(url.searchParams.get('wall')) || 0.1);
+            } else if (op === 'scale') {
+              const sx = parseFloat(url.searchParams.get('sx')) || 1;
+              const sy = parseFloat(url.searchParams.get('sy')) || sx;
+              const sz = parseFloat(url.searchParams.get('sz')) || sx;
+              result = transforms.scale(mesh, [sx, sy, sz]);
+            } else if (op === 'recenter') {
+              result = transforms.recenterToOrigin(mesh);
+            } else {
+              return sendJson(res, { error: `unknown transform op: ${op}` }, 400);
+            }
+            const outBuf = await meshToBuffer(result.mesh, targetFormat);
+            res.writeHead(200, {
+              'Content-Type': 'application/octet-stream',
+              'X-Mesh-Format': targetFormat,
+              'X-Mesh-Report': encodeURIComponent(JSON.stringify(result.report)),
+            });
+            return res.end(outBuf);
+          }
+
+          if (path === '/api/mesh/convert') {
+            const outBuf = await meshToBuffer(mesh, targetFormat);
+            res.writeHead(200, {
+              'Content-Type': 'application/octet-stream',
+              'X-Mesh-Format': targetFormat,
+              'X-Mesh-Source-Format': sourceFormat,
+            });
+            return res.end(outBuf);
+          }
+
+          if (path === '/api/mesh/split') {
+            const { splitComponents, meshStats } = await import('./mesh-transforms.js');
+            const result = splitComponents(mesh);
+            const components = [];
+            for (let i = 0; i < result.meshes.length; i++) {
+              components.push({
+                index: i,
+                stats: meshStats(result.meshes[i]),
+              });
+            }
+            return sendJson(res, { report: result.report, components });
+          }
+        } catch (e) {
+          return sendJson(res, { error: e.message }, 500);
+        }
+      });
+      return;
+    }
+
+    // Split-and-download a single component as binary (used after /split)
+    if (method === 'POST' && path === '/api/mesh/split/component') {
+      const chunks = [];
+      let total = 0;
+      const limit = 50 * 1024 * 1024;
+      let aborted = false;
+      req.on('data', (c) => {
+        total += c.length;
+        if (total > limit) { aborted = true; req.destroy(); return; }
+        chunks.push(c);
+      });
+      req.on('end', async () => {
+        if (aborted) return sendJson(res, { error: 'mesh too large (max 50 MB)' }, 413);
+        try {
+          const buf = Buffer.concat(chunks);
+          const filename = url.searchParams.get('filename') || '';
+          const targetFormat = (url.searchParams.get('format') || 'stl').toLowerCase();
+          const componentIndex = parseInt(url.searchParams.get('index'), 10) || 0;
+          const { bufferToMesh, meshToBuffer } = await import('./format-converter.js');
+          const { splitComponents } = await import('./mesh-transforms.js');
+          const mesh = await bufferToMesh(buf, filename);
+          const result = splitComponents(mesh);
+          if (componentIndex < 0 || componentIndex >= result.meshes.length) {
+            return sendJson(res, { error: 'component index out of range' }, 400);
+          }
+          const outBuf = await meshToBuffer(result.meshes[componentIndex], targetFormat);
+          res.writeHead(200, {
+            'Content-Type': 'application/octet-stream',
+            'X-Mesh-Format': targetFormat,
+            'X-Component-Index': String(componentIndex),
+            'X-Component-Count': String(result.report.components),
+          });
+          return res.end(outBuf);
+        } catch (e) {
+          return sendJson(res, { error: e.message }, 500);
+        }
+      });
+      return;
     }
 
     // ──────────────────────────────────────────────────────────────────
