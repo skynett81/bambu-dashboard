@@ -149,4 +149,62 @@ describe('MoonrakerClient _guessBrand() — new model patterns', () => {
     c._printerModel = 'V-Minion';
     assert.equal(c._guessBrand(), 'ratrig');
   });
+
+  it('detects Sovol from SV08 / SV07 / SV06', () => {
+    const c = makeClient();
+    c._printerModel = 'SV08'; assert.equal(c._guessBrand(), 'sovol');
+    c._printerModel = 'Sovol SV07'; assert.equal(c._guessBrand(), 'sovol');
+    c._printerModel = 'SV06 Plus'; assert.equal(c._guessBrand(), 'sovol');
+  });
+
+  it('detects FlashForge from Adventurer 5M / AD5X / Creator 4', () => {
+    const c = makeClient();
+    c._printerModel = 'Adventurer 5M Pro'; assert.equal(c._guessBrand(), 'flashforge');
+    c._printerModel = 'AD5X'; assert.equal(c._guessBrand(), 'flashforge');
+    c._printerModel = 'Creator 4'; assert.equal(c._guessBrand(), 'flashforge');
+  });
+
+  it('detects BIQU Hurakan / B1 SE', () => {
+    const c = makeClient();
+    c._printerModel = 'Hurakan'; assert.equal(c._guessBrand(), 'biqu');
+    c._printerModel = 'B1 SE Plus'; assert.equal(c._guessBrand(), 'biqu');
+  });
+
+  it('detects Two Trees SK-1 / Sapphire', () => {
+    const c = makeClient();
+    c._printerModel = 'SK-1'; assert.equal(c._guessBrand(), 'twotrees');
+    c._printerModel = 'Sapphire Pro'; assert.equal(c._guessBrand(), 'twotrees');
+  });
+
+  it('detects Tronxy / Mingda / Kywoo', () => {
+    const c = makeClient();
+    c._printerModel = 'CRUX1'; assert.equal(c._guessBrand(), 'tronxy');
+    c._printerModel = 'Magician X2'; assert.equal(c._guessBrand(), 'mingda');
+    c._printerModel = 'Tycoon Slim'; assert.equal(c._guessBrand(), 'kywoo');
+  });
+});
+
+describe('MoonrakerClient _resolveBrandRepo() — extended vendors', () => {
+  it('routes Sovol SV-series to dedicated repos', () => {
+    const c = makeClient();
+    assert.equal(c._resolveBrandRepo('sovol', 'SV08'),      'Sovol3D/Sovol-SV08');
+    assert.equal(c._resolveBrandRepo('sovol', 'SV07 Plus'), 'Sovol3D/Sovol-SV07');
+    assert.equal(c._resolveBrandRepo('sovol', 'SV06'),      'Sovol3D/Sovol-SV06');
+  });
+
+  it('routes FlashForge to Adventurer-5M open-source repo', () => {
+    const c = makeClient();
+    assert.equal(c._resolveBrandRepo('flashforge', 'Adventurer 5M'), 'FlashForge-Official/Adventurer-5M-Open-Source');
+    assert.equal(c._resolveBrandRepo('flash', 'AD5X'),               'FlashForge-Official/Adventurer-5M-Open-Source');
+  });
+
+  it('routes BIQU / Two Trees / Tronxy / Mingda / Kywoo to their repos', () => {
+    const c = makeClient();
+    assert.equal(c._resolveBrandRepo('biqu', 'Hurakan'),      'bigtreetech/BIQU-Hurakan');
+    assert.equal(c._resolveBrandRepo('bigtreetech', 'B1'),    'bigtreetech/BIQU-Hurakan');
+    assert.equal(c._resolveBrandRepo('twotrees', 'SK-1'),     'TwoTreesOfficial/SK-1');
+    assert.equal(c._resolveBrandRepo('tronxy', 'CRUX1'),      'tronxy/Klipper-firmware');
+    assert.equal(c._resolveBrandRepo('mingda', 'Magician X2'),'MingdaOfficial/Magician-Klipper');
+    assert.equal(c._resolveBrandRepo('kywoo', 'Tycoon Slim'), 'kywoo3d/Klipper-Firmware');
+  });
 });

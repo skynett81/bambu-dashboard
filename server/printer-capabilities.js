@@ -270,6 +270,44 @@ const MODEL_OVERRIDES = {
   'Anycubic Kobra 3 Combo': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 250, 260], features: { ai: true, multiColor: true } },
   'Anycubic Kobra S1': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 250, 250], features: { enclosure: true, ai: true } }, // 2024 flagship
   'Anycubic Kobra S1 Combo': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 250, 250], features: { enclosure: true, ai: true, multiColor: true } },
+
+  // Sovol (Klipper/Moonraker — community-modified Creality variants)
+  'Sovol SV06': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 250] },
+  'Sovol SV06 Plus': { camera: { modes: ['http-snapshot'] }, buildVolume: [300, 300, 340] },
+  'Sovol SV07': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 250] }, // 2023 Klipper
+  'Sovol SV07 Plus': { camera: { modes: ['http-snapshot'] }, buildVolume: [300, 300, 340] },
+  'Sovol SV08': { camera: { modes: ['http-snapshot'] }, buildVolume: [350, 350, 345], features: { coreXY: true, enclosure: true } }, // 2024 Voron 2.4 clone
+  'Sovol Zero': { camera: { modes: ['http-snapshot'] }, buildVolume: [140, 140, 140] }, // 2024 compact
+
+  // FlashForge (proprietary FNet protocol — works via OctoPrint w/ klipper-mod or Moonraker if user-installed)
+  'FlashForge Adventurer 5M': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 220], features: { enclosure: true, ai: true } }, // 2024
+  'FlashForge Adventurer 5M Pro': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 220], features: { enclosure: true, ai: true, hardenedHotend: true } },
+  'FlashForge AD5X': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 220], features: { enclosure: true, ai: true, multiColor: true, ifs: true } }, // 2024 IFS multi-color
+  'FlashForge Creator 4': { camera: { modes: ['http-snapshot'] }, buildVolume: [400, 350, 500], features: { enclosure: true, chamber: true, dualNozzle: true, idex: true } }, // industrial IDEX
+  'FlashForge Guider 3 Plus': { camera: { modes: ['http-snapshot'] }, buildVolume: [350, 350, 600], features: { enclosure: true, chamber: true } },
+
+  // BIQU / BigTreeTech (Klipper-first community brand)
+  'BIQU Hurakan': { camera: { modes: ['http-snapshot'] }, buildVolume: [235, 235, 270] }, // Klipper-out-of-box
+  'BIQU B1 SE Plus': { camera: { modes: ['http-snapshot'] }, buildVolume: [235, 235, 270] },
+
+  // Two Trees (Klipper)
+  'Two Trees SK-1': { camera: { modes: ['http-snapshot'] }, buildVolume: [256, 256, 256], features: { coreXY: true, enclosure: true } }, // 2024 enclosed CoreXY
+  'Two Trees SK-1 Pro': { camera: { modes: ['http-snapshot'] }, buildVolume: [256, 256, 256], features: { coreXY: true, enclosure: true, ai: true } },
+  'Two Trees Sapphire Pro': { camera: { modes: ['http-snapshot'] }, buildVolume: [235, 235, 235], features: { coreXY: true } },
+
+  // Tronxy (Klipper-converted)
+  'Tronxy CRUX1': { camera: { modes: ['http-snapshot'] }, buildVolume: [180, 180, 180], features: { coreXY: true, enclosure: true } }, // 2023 Klipper
+  'Tronxy Veho 600': { camera: { modes: ['http-snapshot'] }, buildVolume: [600, 600, 600] },
+
+  // Mingda (Klipper)
+  'Mingda Magician X2': { camera: { modes: ['http-snapshot'] }, buildVolume: [230, 230, 260] },
+  'Mingda Magician Pro': { camera: { modes: ['http-snapshot'] }, buildVolume: [400, 400, 400] },
+  'Mingda Magician Max': { camera: { modes: ['http-snapshot'] }, buildVolume: [400, 400, 400] },
+
+  // Kywoo (Klipper community)
+  'Kywoo Tycoon Slim': { camera: { modes: ['http-snapshot'] }, buildVolume: [240, 240, 230] },
+  'Kywoo Tycoon': { camera: { modes: ['http-snapshot'] }, buildVolume: [240, 240, 230] },
+  'Kywoo Tycoon Max': { camera: { modes: ['http-snapshot'] }, buildVolume: [300, 300, 300] },
 };
 
 /**

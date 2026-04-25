@@ -2442,6 +2442,34 @@ export class MoonrakerClient {
       case 'prusa':
         // Prusa Buddy firmware (MK4 / MK4S / MK3.9 / Mini / XL / CORE One / HT90)
         return 'prusa3d/Prusa-Firmware-Buddy';
+      case 'sovol':
+        // Sovol publishes Klipper builds for the SV-series; SV08 in
+        // particular is community-popular and gets active updates.
+        if (/sv0?8/.test(m)) return 'Sovol3D/Sovol-SV08';
+        if (/sv0?7/.test(m)) return 'Sovol3D/Sovol-SV07';
+        if (/sv0?6/.test(m)) return 'Sovol3D/Sovol-SV06';
+        return 'Sovol3D/Sovol-SV08';
+      case 'flashforge':
+      case 'flash':
+        // FlashForge open-source-firmware is concentrated in the AD5X / 5M
+        // repos; older Creator-series uses a different stack but the
+        // Adventurer-5M code-base is the most active.
+        return 'FlashForge-Official/Adventurer-5M-Open-Source';
+      case 'biqu':
+      case 'bigtreetech':
+        // BIQU/BigTreeTech printer firmware (Hurakan / B1) ships from
+        // their main GitHub org.
+        return 'bigtreetech/BIQU-Hurakan';
+      case 'twotrees':
+      case 'two-trees':
+      case 'two trees':
+        return 'TwoTreesOfficial/SK-1';
+      case 'tronxy':
+        return 'tronxy/Klipper-firmware';
+      case 'mingda':
+        return 'MingdaOfficial/Magician-Klipper';
+      case 'kywoo':
+        return 'kywoo3d/Klipper-Firmware';
       default: return null;
     }
   }
@@ -2451,9 +2479,20 @@ export class MoonrakerClient {
     const model = (this._printerModel || '').toLowerCase();
     const swVer = (this.state?._klipper_state?.state_message || '').toLowerCase();
     const combined = `${model} ${swVer}`;
+    // Brand-specific detections first (Sovol's "SV06" would otherwise be
+    // caught by the broad Voron `v0` rule; Two Trees' SK-1 by sk-anything;
+    // BIQU `b1` by random word starts). Check most-specific patterns first.
+    if (/sovol|sv0[678]/i.test(combined)) return 'sovol';
+    if (/flashforge|adventurer 5m|ad5x|guider 3|creator 4/i.test(combined)) return 'flashforge';
+    if (/biqu|hurakan|\bb1 se/i.test(combined)) return 'biqu';
+    if (/two ?trees|\bsk-1\b|sapphire/i.test(combined)) return 'twotrees';
+    if (/tronxy|crux1?|veho/i.test(combined)) return 'tronxy';
+    if (/mingda|magician/i.test(combined)) return 'mingda';
+    if (/kywoo|tycoon/i.test(combined)) return 'kywoo';
+
     if (/creality|k1|k2|ender|^hi\b|hi combo/i.test(combined)) return 'creality';
     if (/elegoo|neptune|centauri/i.test(combined)) return 'elegoo';
-    if (/voron|v0|v1|v2\.4|trident|phoenix|switchwire/i.test(combined)) return 'voron';
+    if (/voron|trident|phoenix|switchwire|\bv2\.4\b|\bv0\.[12]\b|\bv0\b/i.test(combined)) return 'voron';
     if (/ankermake|^anker|m5c?\b/i.test(combined)) return 'anker';
     if (/qidi|x-plus|x-max|q1 pro|x-cf/i.test(combined)) return 'qidi';
     if (/ratrig|ratos|v-core|v-minion/i.test(combined)) return 'ratrig';

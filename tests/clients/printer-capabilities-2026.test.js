@@ -157,6 +157,72 @@ describe('Anycubic Kobra series', () => {
   });
 });
 
+describe('Sovol Klipper printers', () => {
+  it('SV08 is a Voron 2.4 clone with CoreXY + enclosure', () => {
+    const c = caps('Sovol SV08', 'moonraker');
+    assert.deepEqual(c.buildVolume, [350, 350, 345]);
+    assert.equal(c.features?.coreXY, true);
+    assert.equal(c.features?.enclosure, true);
+  });
+
+  it('SV06 Plus has 300×300×340 build volume', () => {
+    const c = caps('Sovol SV06 Plus', 'moonraker');
+    assert.deepEqual(c.buildVolume, [300, 300, 340]);
+  });
+});
+
+describe('FlashForge 2024 line-up', () => {
+  it('AD5X has IFS multi-color', () => {
+    const c = caps('FlashForge AD5X', 'moonraker');
+    assert.deepEqual(c.buildVolume, [220, 220, 220]);
+    assert.equal(c.features?.ifs, true);
+    assert.equal(c.features?.multiColor, true);
+  });
+
+  it('Adventurer 5M Pro has hardened hotend', () => {
+    const c = caps('FlashForge Adventurer 5M Pro', 'moonraker');
+    assert.equal(c.features?.hardenedHotend, true);
+    assert.equal(c.features?.enclosure, true);
+  });
+
+  it('Creator 4 is industrial IDEX with chamber', () => {
+    const c = caps('FlashForge Creator 4', 'moonraker');
+    assert.deepEqual(c.buildVolume, [400, 350, 500]);
+    assert.equal(c.features?.idex, true);
+    assert.equal(c.features?.chamber, true);
+  });
+});
+
+describe('BIQU / Two Trees / Tronxy / Mingda / Kywoo', () => {
+  it('BIQU Hurakan is registered', () => {
+    const c = caps('BIQU Hurakan', 'moonraker');
+    assert.deepEqual(c.buildVolume, [235, 235, 270]);
+  });
+
+  it('Two Trees SK-1 Pro has CoreXY + enclosure + AI', () => {
+    const c = caps('Two Trees SK-1 Pro', 'moonraker');
+    assert.deepEqual(c.buildVolume, [256, 256, 256]);
+    assert.equal(c.features?.coreXY, true);
+    assert.equal(c.features?.ai, true);
+  });
+
+  it('Tronxy CRUX1 is a small CoreXY enclosed printer', () => {
+    const c = caps('Tronxy CRUX1', 'moonraker');
+    assert.equal(c.features?.coreXY, true);
+    assert.equal(c.features?.enclosure, true);
+  });
+
+  it('Mingda Magician Pro is a 400³ printer', () => {
+    const c = caps('Mingda Magician Pro', 'moonraker');
+    assert.deepEqual(c.buildVolume, [400, 400, 400]);
+  });
+
+  it('Kywoo Tycoon Max has 300³ build', () => {
+    const c = caps('Kywoo Tycoon Max', 'moonraker');
+    assert.deepEqual(c.buildVolume, [300, 300, 300]);
+  });
+});
+
 describe('hasFeature helper integration', () => {
   it('hasFeature returns true for printers that opt into chamber feature', () => {
     assert.equal(hasFeature({ model: 'H2D', type: 'bambu' }, 'chamber'), true);
