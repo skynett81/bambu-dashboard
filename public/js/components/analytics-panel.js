@@ -51,10 +51,10 @@
       const onlinePrinters = Object.keys(window.printerState?.printers || {}).length;
       const totalPrinters = _printers.length;
 
-      let html = '<div class="analytics-layout" style="display:flex;flex-direction:column;gap:14px">';
+      let html = '<div class="analytics-layout" style="display:flex;flex-direction:column;gap:12px">';
 
-      // ── Overview Cards — Print Farm Stats ──
-      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px">';
+      // ── Overview Cards — Print Farm Stats (tighter min width) ──
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px">';
       html += _statCard('Total Prints', totalPrints, '🖨️');
       html += _statCard('Success Rate', successRate + '%', '✅', successRate > 80 ? 'var(--accent-green)' : successRate > 50 ? 'var(--accent-orange)' : 'var(--accent-red)');
       html += _statCard('Failed', failedPrints, '❌', failedPrints > 0 ? 'var(--accent-red)' : '');
@@ -83,9 +83,21 @@
         </div>`;
       }
 
-      // ── Print Success/Failure Chart ──
+      // ── Single auto-fit grid for ALL detail cards ──
+      // (was: 4 stacked full-width cards + a separate 280px-min detail grid).
+      // Wide cards that need horizontal room (Hourly chart, Print history bar)
+      // get grid-column: 1/-1 so they span the entire row regardless of column count.
+      html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px">';
+
+      // ── Requests per Hour Chart (full-width) ──
+      html += `<div class="settings-card" style="overflow:hidden;grid-column:1/-1">
+        <div class="card-title">Requests per Hour (7 days)</div>
+        <canvas id="analytics-hourly-chart" width="400" height="160" style="width:100%;height:160px;display:block"></canvas>
+      </div>`;
+
+      // ── Print Success/Failure Chart (full-width — needs wide bar) ──
       if (_history.length > 0) {
-        html += `<div class="settings-card" style="overflow:hidden">
+        html += `<div class="settings-card" style="overflow:hidden;grid-column:1/-1">
           <div class="card-title">Print History — Last ${totalPrints} prints</div>
           <div style="display:flex;gap:2px;height:30px;border-radius:4px;overflow:hidden">
             ${_history.slice(0, 50).map(h => {
@@ -163,15 +175,6 @@
           </div>
         </div>`;
       }
-
-      // ── Requests per Hour Chart ──
-      html += `<div class="settings-card" style="overflow:hidden">
-        <div class="card-title">Requests per Hour (7 days)</div>
-        <canvas id="analytics-hourly-chart" width="400" height="160" style="width:100%;height:160px;display:block"></canvas>
-      </div>`;
-
-      // ── Grid for details ──
-      html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">';
 
       // ── Top Endpoints ──
       html += `<div class="settings-card" style="overflow:hidden">

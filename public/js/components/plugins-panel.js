@@ -104,6 +104,11 @@
       </div>`;
     }
 
+    // Wrap all info sections (hooks list, state viewer, logs, API ref,
+    // generator, full example, creation guide) in a 2-column auto-fit grid.
+    // Wide-content sections (API ref + Full example) span both columns.
+    html += `<div class="plg-info-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:12px;align-items:start">`;
+
     // Available hooks
     html += `<div class="card plg-info-section">
       <details>
@@ -154,8 +159,8 @@
       </details>
     </div>`;
 
-    // Plugin API documentation
-    html += `<div class="card plg-info-section">
+    // Plugin API documentation (full-width — table is wide)
+    html += `<div class="card plg-info-section" style="grid-column:1/-1">
       <details>
         <summary class="plg-details-summary">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
@@ -211,8 +216,8 @@
       </details>
     </div>`;
 
-    // Updated creation guide with new API
-    html += `<div class="card plg-info-section">
+    // Updated creation guide with new API (full-width — code blocks)
+    html += `<div class="card plg-info-section" style="grid-column:1/-1">
       <details>
         <summary class="plg-details-summary">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
@@ -267,7 +272,8 @@ export function destroy(api) {
       </details>
     </div>`;
 
-    html += '</div>';
+    html += '</div>'; // close .plg-info-grid
+    html += '</div>'; // close .plg-panel
     container.innerHTML = html;
   }
 

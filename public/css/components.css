@@ -4894,6 +4894,40 @@
   gap: 8px;
 }
 
+/* Settings sub-tab content — auto-fit multi-column layout for stacked
+   `settings-card` siblings. Cards needing wider room (printer-list-grid,
+   forms with horizontal toolbars) can override with grid-column:1/-1. */
+#printer-sub-content,
+#general-sub-content,
+#appearance-sub-content,
+#notif-sub-content,
+#system-sub-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+
+/* Direct children that aren't settings-cards (toolbars, button rows,
+   form areas, status divs) should always span the full width. */
+#printer-sub-content > div:not(.settings-card),
+#general-sub-content > div:not(.settings-card),
+#appearance-sub-content > div:not(.settings-card),
+#notif-sub-content > div:not(.settings-card),
+#system-sub-content > div:not(.settings-card) {
+  grid-column: 1 / -1;
+}
+
+/* Some cards are intrinsically wide — let them claim a full row. */
+#printer-sub-content .settings-card.full-width,
+#general-sub-content .settings-card.full-width,
+#appearance-sub-content .settings-card.full-width,
+#notif-sub-content .settings-card.full-width,
+#system-sub-content .settings-card.full-width,
+.settings-card.full-width {
+  grid-column: 1 / -1;
+}
+
 @media (max-width: 768px) {
   /* settings-grid and printer-list-grid use auto-fill */
   .settings-tab { padding: 8px 12px; font-size: 0.8rem; }
@@ -11608,8 +11642,14 @@ input[type="range"]::-webkit-slider-thumb:active {
 .wear-printer-cost span:last-child { font-weight: 700; }
 
 /* ═══ Plugins Panel ═══ */
-.plg-panel { max-width: 900px; }
-.plg-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.plg-panel { max-width: none; }
+.plg-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: start;
+}
 
 .plg-card { padding: 0 !important; overflow: hidden; transition: opacity 0.2s; }
 .plg-card--disabled { opacity: 0.5; }
