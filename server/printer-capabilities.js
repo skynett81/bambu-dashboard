@@ -205,24 +205,71 @@ const MODEL_OVERRIDES = {
 
   // Prusa models (PrusaLink)
   'Prusa MK4': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 210, 220] },
+  'Prusa MK4S': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 210, 220], features: { firmware: 'Buddy' } }, // 2024 refresh w/ improved hotend + Nextruder
   'Prusa MK3.9': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 210, 210] },
   'Prusa Mini': { camera: { modes: ['http-snapshot'] }, buildVolume: [180, 180, 180] },
-  'Prusa XL': { camera: { modes: ['http-snapshot'] }, buildVolume: [360, 360, 360] },
+  'Prusa Mini+': { camera: { modes: ['http-snapshot'] }, buildVolume: [180, 180, 180] },
+  'Prusa XL': { camera: { modes: ['http-snapshot'] }, buildVolume: [360, 360, 360], features: { multiExtruder: true, toolheads: 5, idex: false } }, // up to 5 toolheads
+  'Prusa CORE One': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 220, 270], features: { enclosure: true, chamber: true, coreXY: true } }, // 2024/2025 enclosed CoreXY
+  'Prusa HT90': { camera: { modes: ['http-snapshot'] }, buildVolume: [400, 400, 420], features: { enclosure: true, chamber: true, chamberHeated: true, highTempBed: true, ai: true } }, // industrial high-temp
+  'Prusa Pro HT90': { camera: { modes: ['http-snapshot'] }, buildVolume: [400, 400, 420], features: { enclosure: true, chamber: true, chamberHeated: true, highTempBed: true, ai: true } },
 
   // Creality models (Klipper/Moonraker)
   'Creality K1': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 250] },
+  'Creality K1C': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 250], features: { enclosure: true, ai: true, hardenedHotend: true } }, // 2024 carbon-fiber-ready
   'Creality K1 Max': { camera: { modes: ['http-snapshot'] }, buildVolume: [300, 300, 300] },
+  'Creality K1 SE': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 250] },
+  'Creality K2 Plus': { camera: { modes: ['http-snapshot'] }, buildVolume: [350, 350, 350], features: { enclosure: true, chamber: true, chamberHeated: true, ai: true, multiColor: true, cfs: true } }, // 2024 large CoreXY w/ CFS
+  'Creality K2 Plus Combo': { camera: { modes: ['http-snapshot'] }, buildVolume: [350, 350, 350], features: { enclosure: true, chamber: true, chamberHeated: true, ai: true, multiColor: true, cfs: true } },
+  'Creality Hi': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 250], features: { ai: true } }, // 2025 budget Klipper
+  'Creality Hi Combo': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 250], features: { ai: true, multiColor: true, cfs: true } },
   'Creality Ender-3 V3': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 250] },
+  'Creality Ender-3 V3 SE': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 250] },
+  'Creality Ender-3 V3 KE': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 240] },
+  'Creality Ender-3 V3 Plus': { camera: { modes: ['http-snapshot'] }, buildVolume: [300, 300, 330] },
+  'Creality CR-10 SE': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 265] },
 
   // Elegoo models (Klipper/Moonraker)
   'Elegoo Neptune 4': { camera: { modes: ['http-snapshot'] }, buildVolume: [225, 225, 265] },
   'Elegoo Neptune 4 Pro': { camera: { modes: ['http-snapshot'] }, buildVolume: [225, 225, 265] },
+  'Elegoo Neptune 4 Plus': { camera: { modes: ['http-snapshot'] }, buildVolume: [320, 320, 385] }, // 2024 mid-size
   'Elegoo Neptune 4 Max': { camera: { modes: ['http-snapshot'] }, buildVolume: [420, 420, 480] },
+  'Elegoo Centauri': { camera: { modes: ['http-snapshot'] }, buildVolume: [256, 256, 256], features: { enclosure: true } }, // 2024 enclosed
+  'Elegoo Centauri Carbon': { camera: { modes: ['http-snapshot'] }, buildVolume: [256, 256, 256], features: { enclosure: true, ai: true, hardenedHotend: true } }, // 2024 carbon-ready
 
-  // Voron (Klipper/Moonraker)
+  // Voron (community Klipper/Moonraker)
+  'Voron 0.1': { camera: { modes: ['http-snapshot'] }, buildVolume: [120, 120, 120] },
   'Voron 0.2': { camera: { modes: ['http-snapshot'] }, buildVolume: [120, 120, 120] },
-  'Voron 2.4': { camera: { modes: ['http-snapshot'] }, buildVolume: [350, 350, 350] },
-  'Voron Trident': { camera: { modes: ['http-snapshot'] }, buildVolume: [350, 350, 250] },
+  'Voron 2.4': { camera: { modes: ['http-snapshot'] }, buildVolume: [350, 350, 350], features: { enclosure: true, coreXY: true } },
+  'Voron Trident': { camera: { modes: ['http-snapshot'] }, buildVolume: [350, 350, 250], features: { enclosure: true, coreXY: true } },
+  'Voron Switchwire': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 210, 250], features: { coreXZ: true } },
+  'Voron Phoenix': { camera: { modes: ['http-snapshot'] }, buildVolume: [350, 350, 350], features: { coreXY: true } },
+
+  // RatRig (Klipper/Moonraker — RatOS)
+  'RatRig V-Core 3': { camera: { modes: ['http-snapshot'] }, buildVolume: [300, 300, 300], features: { coreXY: true } },
+  'RatRig V-Core 3 Pro': { camera: { modes: ['http-snapshot'] }, buildVolume: [300, 300, 300], features: { coreXY: true } },
+  'RatRig V-Core 3.1': { camera: { modes: ['http-snapshot'] }, buildVolume: [400, 400, 400], features: { coreXY: true } },
+  'RatRig V-Core 4': { camera: { modes: ['http-snapshot'] }, buildVolume: [400, 400, 400], features: { coreXY: true, enclosure: true } }, // 2025 release
+  'RatRig V-Minion': { camera: { modes: ['http-snapshot'] }, buildVolume: [180, 180, 180], features: { coreXY: true } },
+
+  // AnkerMake (MQTT + REST hybrid via Moonraker bridge)
+  'AnkerMake M5': { camera: { modes: ['rtsp', 'http-snapshot'] }, buildVolume: [235, 235, 250], features: { ai: true } },
+  'AnkerMake M5C': { camera: { modes: ['http-snapshot'] }, buildVolume: [220, 220, 250], features: { ai: true } }, // 2024 budget
+
+  // QIDI (Klipper/Moonraker)
+  'QIDI X-Plus 3': { camera: { modes: ['http-snapshot'] }, buildVolume: [280, 280, 270], features: { enclosure: true, chamber: true, chamberHeated: true } },
+  'QIDI X-Plus 4': { camera: { modes: ['http-snapshot'] }, buildVolume: [305, 305, 305], features: { enclosure: true, chamber: true, chamberHeated: true, ai: true } }, // 2024
+  'QIDI X-Max 3': { camera: { modes: ['http-snapshot'] }, buildVolume: [325, 325, 315], features: { enclosure: true, chamber: true, chamberHeated: true } },
+  'QIDI X-Max 4': { camera: { modes: ['http-snapshot'] }, buildVolume: [325, 325, 315], features: { enclosure: true, chamber: true, chamberHeated: true, ai: true } }, // 2024
+  'QIDI Q1 Pro': { camera: { modes: ['http-snapshot'] }, buildVolume: [245, 245, 240], features: { enclosure: true, chamber: true, chamberHeated: true } }, // 2024 mid-range
+  'QIDI X-CF Pro': { camera: { modes: ['http-snapshot'] }, buildVolume: [300, 250, 300], features: { enclosure: true, chamber: true, chamberHeated: true, hardenedHotend: true } },
+  'QIDI Plus4': { camera: { modes: ['http-snapshot'] }, buildVolume: [305, 305, 305], features: { enclosure: true, chamber: true, chamberHeated: true, ai: true } }, // alias
+
+  // Anycubic (Klipper/Moonraker — Kobra series)
+  'Anycubic Kobra 3': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 250, 260], features: { ai: true } }, // 2024
+  'Anycubic Kobra 3 Combo': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 250, 260], features: { ai: true, multiColor: true } },
+  'Anycubic Kobra S1': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 250, 250], features: { enclosure: true, ai: true } }, // 2024 flagship
+  'Anycubic Kobra S1 Combo': { camera: { modes: ['http-snapshot'] }, buildVolume: [250, 250, 250], features: { enclosure: true, ai: true, multiColor: true } },
 };
 
 /**

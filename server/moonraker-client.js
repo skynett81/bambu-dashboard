@@ -2411,21 +2411,37 @@ export class MoonrakerClient {
   _resolveBrandRepo(brand, model) {
     const m = (model || '').toLowerCase();
     switch (brand) {
-      case 'creality': return 'CrealityOfficial/Creality-Wiki';
+      case 'creality':
+        // The K-series Klipper firmware lives in dedicated source-code
+        // repos. Other Creality models share the brand wiki repo (which
+        // tracks their Marlin/non-Klipper machines).
+        if (/k2.?plus/.test(m)) return 'CrealityOfficial/K2_Plus_Source_Code';
+        if (/k1.?max/.test(m))  return 'CrealityOfficial/K1_Max_Source_Code';
+        if (/k1\b/.test(m))     return 'CrealityOfficial/K1_Source_Code';
+        return 'CrealityOfficial/Creality-Wiki';
       case 'elegoo':
         if (/centauri/.test(m)) return 'elegooofficial/CentauriCarbon';
         return 'Elegoo3DPrinters/Neptune-4';
       case 'voron': return 'VoronDesign/Voron-2';
       case 'anker':
-      case 'ankermake': return 'Ankermgmt/ankermake-m5-protocol';
+      case 'ankermake':
+        // M5 vs M5C share the same protocol repo for now.
+        return 'Ankermgmt/ankermake-m5-protocol';
       case 'qidi':
         if (/max.?4/.test(m)) return 'QIDITECH/QIDI_MAX4';
         if (/plus.?4|x-plus.?4/.test(m)) return 'QIDITECH/QIDI_PLUS4';
         if (/max.?3|x-max.?3/.test(m)) return 'QIDITECH/QIDI_MAX3';
         if (/plus.?3|x-plus.?3/.test(m)) return 'QIDITECH/QIDI_PLUS3';
         if (/q1.?pro/.test(m)) return 'QIDITECH/Q1_PRO';
+        if (/x-cf.?pro/.test(m)) return 'QIDITECH/QIDI_X-CF_Pro';
         return 'QIDITECH/QIDI_PLUS4';
       case 'ratrig': return 'RatOS/RatOS';
+      case 'anycubic':
+        // Kobra 3 / Kobra S1 firmware lives in the official repo.
+        return 'ANYCUBIC-3D/anycubic-kobra-3-source';
+      case 'prusa':
+        // Prusa Buddy firmware (MK4 / MK4S / MK3.9 / Mini / XL / CORE One / HT90)
+        return 'prusa3d/Prusa-Firmware-Buddy';
       default: return null;
     }
   }
@@ -2435,12 +2451,14 @@ export class MoonrakerClient {
     const model = (this._printerModel || '').toLowerCase();
     const swVer = (this.state?._klipper_state?.state_message || '').toLowerCase();
     const combined = `${model} ${swVer}`;
-    if (/creality|k1|k2|ender/i.test(combined)) return 'creality';
-    if (/elegoo|neptune/i.test(combined)) return 'elegoo';
+    if (/creality|k1|k2|ender|^hi\b|hi combo/i.test(combined)) return 'creality';
+    if (/elegoo|neptune|centauri/i.test(combined)) return 'elegoo';
     if (/voron|v0|v1|v2\.4|trident|phoenix|switchwire/i.test(combined)) return 'voron';
-    if (/anker|m5/i.test(combined)) return 'anker';
-    if (/qidi|x-plus|x-max|q1 pro/i.test(combined)) return 'qidi';
-    if (/ratrig|ratos|v-core/i.test(combined)) return 'ratrig';
+    if (/ankermake|^anker|m5c?\b/i.test(combined)) return 'anker';
+    if (/qidi|x-plus|x-max|q1 pro|x-cf/i.test(combined)) return 'qidi';
+    if (/ratrig|ratos|v-core|v-minion/i.test(combined)) return 'ratrig';
+    if (/anycubic|kobra/i.test(combined)) return 'anycubic';
+    if (/prusa|mk4|mk3\.9|core one|ht90|mini\+/i.test(combined)) return 'prusa';
     return null;
   }
 
