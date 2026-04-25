@@ -13,7 +13,9 @@
 
   function formatCurrency(val, currency) {
     if (val === null || val === undefined) return '--';
-    return val.toFixed(2) + ' ' + (currency || 'NOK');
+    if (currency && typeof window.currency !== 'undefined') return window.currency.format(Number(val), currency);
+    if (typeof window.formatCurrency === 'function') return window.formatCurrency(Number(val));
+    return Number(val).toFixed(2);
   }
 
   function formatTime(minutes) {

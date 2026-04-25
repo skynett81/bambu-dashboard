@@ -69,10 +69,23 @@
   }
 
   function _getCurrency() {
+    // The user's explicit currency choice (Settings → General → Preferences)
+    // wins over the locale-default. Falls back to LOCALE_CURRENCY only when
+    // the currency utility hasn't bootstrapped yet.
+    if (typeof window.currency !== 'undefined' && window.currency.active) {
+      return window.currency.active;
+    }
     return LOCALE_CURRENCY[_locale] || 'USD';
   }
 
   function _getTag() {
+    // Match the active currency's locale when known, so 1234 NOK shows as
+    // "1 234,00 kr" not "$1,234.00 (NOK)" or similar mismatch.
+    if (typeof window.currency !== 'undefined' && window.currency.active) {
+      const list = window.currency.list ? window.currency.list() : [];
+      const cur = list.find(c => c.code === window.currency.active);
+      if (cur?.locale) return cur.locale;
+    }
     return LOCALE_TAG[_locale] || 'en-US';
   }
 

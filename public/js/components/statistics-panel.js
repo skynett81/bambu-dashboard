@@ -7,7 +7,12 @@
   function rateClr(r) { return r >= 80 ? 'var(--accent-green)' : r >= 50 ? 'var(--accent-orange)' : 'var(--accent-red)'; }
   function sRow(lbl, val, clr) { return `<div class="stats-detail-item"><span class="stats-detail-item-label">${lbl}</span><span class="stats-detail-item-value"${clr?` style="color:${clr}"` : ''}>${val}</span></div>`; }
   function barRow(lbl, pct, clr, val) { return `<div class="chart-bar-row"><span class="chart-bar-label">${lbl}</span><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${pct}%;background:${clr}"></div></div><span class="chart-bar-value">${val}</span></div>`; }
-  function formatCurrency(val, currency) { if (val === null || val === undefined) return '--'; return val.toFixed(2) + ' ' + (currency || 'NOK'); }
+  function formatCurrency(val, currency) {
+    if (val === null || val === undefined) return '--';
+    if (currency && typeof window.currency !== 'undefined') return window.currency.format(Number(val), currency);
+    if (typeof window.formatCurrency === 'function') return window.formatCurrency(Number(val));
+    return Number(val).toFixed(2);
+  }
 
   const TYPE_COLORS = { 'PLA':'#00e676','PETG':'#f0883e','TPU':'#9b4dff','ABS':'#ff5252','ASA':'#1279ff','PA':'#e3b341','PLA+':'#00c853','PA-CF':'#d2a8ff','PET-CF':'#f778ba','PLA-CF':'#79c0ff','PC':'#8b949e' };
   const SPEED_MAP = { 1:'speed.silent', 2:'speed.standard', 3:'speed.sport', 4:'speed.ludicrous' };

@@ -56,6 +56,20 @@
     if (!res.ok) throw new Error('set currency failed');
     cache.active = code;
     window.dispatchEvent(new CustomEvent('currency-changed', { detail: { code } }));
+    // Best-effort refresh: reopen the active overlay panel and update the
+    // active dashboard so existing price-rendering code re-runs through
+    // the new active currency.
+    try {
+      if (window._activePanel && typeof window.openPanel === 'function') {
+        window.openPanel(window._activePanel, true);
+      }
+      if (typeof window.updateDashboard === 'function') {
+        const ps = window.printerState;
+        const pid = ps?.getActivePrinterId?.();
+        const st = pid ? ps?._printers?.[pid] : null;
+        if (st) window.updateDashboard(st.print || st);
+      }
+    } catch {}
   }
 
   window.currency = {

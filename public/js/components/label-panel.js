@@ -207,7 +207,7 @@
             ${p.nozzle_temp_min || p.nozzle_temp_max ? `<div class="lbl-detail"><span class="lbl-detail-label">Dyse</span><span class="lbl-detail-value">${p.nozzle_temp_min || '?'}&ndash;${p.nozzle_temp_max || '?'}&deg;C</span></div>` : ''}
             ${p.bed_temp_min || p.bed_temp_max ? `<div class="lbl-detail"><span class="lbl-detail-label">Seng</span><span class="lbl-detail-value">${p.bed_temp_min || '?'}&ndash;${p.bed_temp_max || '?'}&deg;C</span></div>` : ''}
             <div class="lbl-detail"><span class="lbl-detail-label">Spolvekt</span><span class="lbl-detail-value">${_fmtW(p.spool_weight_g)}</span></div>
-            ${p.price ? `<div class="lbl-detail"><span class="lbl-detail-label">Pris</span><span class="lbl-detail-value">${Math.round(p.price)} kr</span></div>` : ''}
+            ${p.price ? `<div class="lbl-detail"><span class="lbl-detail-label">Pris</span><span class="lbl-detail-value">${typeof window.formatCurrency === 'function' ? window.formatCurrency(p.price) : Math.round(p.price)}</span></div>` : ''}
             ${p.ral_code ? `<div class="lbl-detail"><span class="lbl-detail-label">RAL</span><span class="lbl-detail-value">${_esc(p.ral_code)}</span></div>` : ''}
             ${p.article_number ? `<div class="lbl-detail"><span class="lbl-detail-label">Art.nr</span><span class="lbl-detail-value lbl-detail-mono">${_esc(p.article_number)}</span></div>` : ''}
             ${p.finish ? `<div class="lbl-detail"><span class="lbl-detail-label">Finish</span><span class="lbl-detail-value">${_esc(p.finish)}</span></div>` : ''}

@@ -13,7 +13,14 @@
 
   function formatCurrency(val, currency) {
     if (val === null || val === undefined) return '--';
-    return Number(val).toFixed(2) + ' ' + (currency || 'NOK');
+    // Prefer the global currency formatter (Settings → Preferences) so
+    // explicit per-row overrides still work but the default follows the
+    // user's chosen display currency.
+    if (currency && typeof window.currency !== 'undefined') {
+      return window.currency.format(Number(val), currency);
+    }
+    if (typeof window.formatCurrency === 'function') return window.formatCurrency(Number(val));
+    return Number(val).toFixed(2);
   }
   function formatDate(iso) {
     if (!iso) return '--';
