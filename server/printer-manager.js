@@ -112,8 +112,13 @@ export class PrinterManager {
     if (printerConf.type === 'sacp') return 'sacp';
     if (printerConf.type === 'ankermake') return 'ankermake';
     if (printerConf.type === 'snapmaker-http' || printerConf.type === 'sm-http') return 'snapmaker-http';
-    // Klipper-based brands → Moonraker connector
-    if (['creality', 'elegoo', 'anker', 'voron', 'ratrig', 'qidi'].includes(printerConf.type)) return 'moonraker';
+    // New 2026 protocol clients
+    if (printerConf.type === 'duet' || printerConf.type === 'reprapfirmware' || printerConf.type === 'rrf') return 'duet';
+    if (printerConf.type === 'flashforge' || printerConf.type === 'fnet') return 'flashforge';
+    if (printerConf.type === 'repetier' || printerConf.type === 'repetier-server') return 'repetier';
+    // Klipper-based brands → Moonraker connector (extended 2024-2026 list)
+    if (['creality', 'elegoo', 'anker', 'voron', 'ratrig', 'qidi', 'anycubic',
+         'sovol', 'biqu', 'bigtreetech', 'twotrees', 'tronxy', 'mingda', 'kywoo'].includes(printerConf.type)) return 'moonraker';
     // Auto-detect: Bambu printers use serial + accessCode, Moonraker printers don't need serial
     if (printerConf.serial && printerConf.accessCode) return 'bambu';
     if (printerConf.ip && !printerConf.serial) return 'moonraker';
@@ -196,6 +201,21 @@ export class PrinterManager {
       client = new MoonrakerClient({ printer: printerConf }, connectorHub);
       client._buildCommand = buildMoonrakerCommand;
       log.info(`Using Moonraker connector for ${printerConf.name}`);
+    } else if (connectorType === 'duet') {
+      const { DuetClient, buildDuetCommand } = await import('./duet-client.js');
+      client = new DuetClient({ printer: printerConf }, connectorHub);
+      client._buildCommand = buildDuetCommand;
+      log.info(`Using Duet/RepRapFirmware connector for ${printerConf.name}`);
+    } else if (connectorType === 'flashforge') {
+      const { FlashForgeClient, buildFlashForgeCommand } = await import('./flashforge-client.js');
+      client = new FlashForgeClient({ printer: printerConf }, connectorHub);
+      client._buildCommand = buildFlashForgeCommand;
+      log.info(`Using FlashForge FNet connector for ${printerConf.name}`);
+    } else if (connectorType === 'repetier') {
+      const { RepetierClient, buildRepetierCommand } = await import('./repetier-client.js');
+      client = new RepetierClient({ printer: printerConf }, connectorHub);
+      client._buildCommand = buildRepetierCommand;
+      log.info(`Using Repetier-Server connector for ${printerConf.name}`);
     } else {
       const { BambuMqttClient } = await import('./mqtt-client.js');
       const { buildCommandFromClientMessage } = await import('./mqtt-commands.js');
@@ -308,6 +328,14 @@ export class PrinterManager {
   _canConnect(printerConf) {
     const type = this._getConnectorType(printerConf);
     if (type === 'moonraker') return !!printerConf.ip;
+    if (type === 'duet')       return !!printerConf.ip;            // optional password
+    if (type === 'flashforge') return !!printerConf.ip;            // FNet TCP, no auth
+    if (type === 'repetier')   return !!(printerConf.ip && printerConf.accessCode); // requires apikey
+    if (type === 'octoprint' || type === 'prusalink')
+      return !!(printerConf.ip && printerConf.accessCode);
+    if (type === 'snapmaker-http' || type === 'sacp') return !!printerConf.ip;
+    if (type === 'ankermake') return !!printerConf.ip;
+    // Bambu MQTT: needs serial + accessCode
     return !!(printerConf.ip && printerConf.serial && printerConf.accessCode);
   }
 
