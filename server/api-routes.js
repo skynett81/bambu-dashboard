@@ -6536,14 +6536,14 @@ export async function handleApiRequest(req, res) {
       return readBody(req, res, async (body) => {
         try {
           const { getScene } = await import('./db/ai-forge-scenes.js');
-          const { buildScene } = await import('./scene-builder.js');
+          const { buildSceneAsync } = await import('./scene-builder.js');
           const { generateAndSave } = await import('./ai-forge.js');
           const { recordAiForgeJob } = await import('./db/ai-forge-jobs.js');
 
           const row = getScene(parseInt(sceneRenderMatch[1], 10));
           if (!row) return sendJson(res, { error: 'scene not found' }, 404);
           const scene = JSON.parse(row.scene_json);
-          const mesh = buildScene(scene);
+          const mesh = await buildSceneAsync(scene, { useCsg: body?.useCsg !== false });
           const format = (body?.format || 'stl').toLowerCase();
           const repair = body?.repair !== false;
           const result = await generateAndSave({
@@ -6562,15 +6562,54 @@ export async function handleApiRequest(req, res) {
       });
     }
 
+    // Upload a mesh file (STL/OBJ/3MF) to be referenced as a scene shape.
+    if (method === 'POST' && path === '/api/ai-forge/scenes/upload-mesh') {
+      const chunks = [];
+      let total = 0;
+      const limit = 50 * 1024 * 1024;
+      let aborted = false;
+      req.on('data', (c) => {
+        total += c.length;
+        if (total > limit) { aborted = true; req.destroy(); return; }
+        chunks.push(c);
+      });
+      req.on('end', async () => {
+        if (aborted) return sendJson(res, { error: 'mesh too large (max 50 MB)' }, 413);
+        try {
+          const buf = Buffer.concat(chunks);
+          const filename = url.searchParams.get('filename') || 'upload.stl';
+          const safe = filename.replace(/[^a-zA-Z0-9_.-]/g, '_');
+          const stamped = `${Date.now()}_${safe}`;
+          const { bufferToMesh } = await import('./format-converter.js');
+          const { sceneMeshDir } = await import('./scene-builder.js');
+          const { meshStats } = await import('./mesh-transforms.js');
+          const mesh = await bufferToMesh(buf, filename);
+          const stats = meshStats(mesh);
+          const { writeFileSync } = await import('node:fs');
+          const { join } = await import('node:path');
+          writeFileSync(join(sceneMeshDir(), stamped), buf);
+          return sendJson(res, {
+            meshFile: stamped,
+            originalFilename: filename,
+            sizeBytes: buf.length,
+            stats,
+          }, 201);
+        } catch (e) {
+          return sendJson(res, { error: e.message }, 400);
+        }
+      });
+      return;
+    }
+
     // Render an in-memory scene without persisting it (preview / quick export).
     if (method === 'POST' && path === '/api/ai-forge/scenes/render') {
       return readBody(req, res, async (body) => {
         try {
-          const { buildScene } = await import('./scene-builder.js');
+          const { buildSceneAsync } = await import('./scene-builder.js');
           const { generateAndSave } = await import('./ai-forge.js');
           const { recordAiForgeJob } = await import('./db/ai-forge-jobs.js');
           if (!body.scene) return sendJson(res, { error: 'scene required' }, 400);
-          const mesh = buildScene(body.scene);
+          const mesh = await buildSceneAsync(body.scene, { useCsg: body.useCsg !== false });
           const format = (body.format || 'stl').toLowerCase();
           const repair = body.repair !== false;
           const result = await generateAndSave({

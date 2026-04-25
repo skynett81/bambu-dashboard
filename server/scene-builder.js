@@ -27,9 +27,19 @@
  * Returns the indexed mesh ready for repair / format-converter / export.
  */
 
+import { existsSync, readFileSync, mkdirSync } from 'node:fs';
+import { join } from 'node:path';
+
 import {
   box, sphere, cylinder, cone, torus, prism, pyramid, unionMeshes,
 } from './mesh-primitives.js';
+import { unionMesh as csgUnion, subtractMesh as csgSubtract } from './csg-bsp.js';
+
+const DATA_DIR = process.env.DATA_DIR || join(import.meta.dirname, '..', 'data');
+const SCENE_MESH_DIR = join(DATA_DIR, 'scene-meshes');
+if (!existsSync(SCENE_MESH_DIR)) mkdirSync(SCENE_MESH_DIR, { recursive: true });
+
+export function sceneMeshDir() { return SCENE_MESH_DIR; }
 
 // ── Transform helpers ─────────────────────────────────────────────────
 
@@ -85,8 +95,26 @@ function _buildShape(type, p = {}) {
     case 'torus':    return torus(p.R || 15, p.r || 5, p.ringSegs || 32, p.tubeSegs || 16);
     case 'prism':    return prism(p.sides || 6, p.r || 10, p.h || 20);
     case 'pyramid':  return pyramid(p.w || 20, p.h || 20);
+    case 'mesh':     return _loadMeshShape(p);
     default: throw new Error(`scene-builder: unsupported primitive type '${type}'`);
   }
+}
+
+/**
+ * Load a previously uploaded mesh file as a scene shape. The shape's
+ * params must include `meshFile` (filename inside scene-meshes/).
+ */
+function _loadMeshShape(p) {
+  if (!p.meshFile) throw new Error("mesh-shape requires params.meshFile");
+  const safe = String(p.meshFile).replace(/[^a-zA-Z0-9_.-]/g, '_');
+  const fullPath = join(SCENE_MESH_DIR, safe);
+  if (!existsSync(fullPath)) throw new Error(`mesh file missing: ${safe}`);
+  const buf = readFileSync(fullPath);
+  // Lazily import format converter to avoid circular load.
+  // bufferToMesh is async; this _loadMeshShape stays sync to keep the
+  // caller signature uniform — callers that include mesh-shapes should
+  // use buildSceneAsync().
+  throw new Error('mesh-shape requires buildSceneAsync()');
 }
 
 // ── Public API ────────────────────────────────────────────────────────
@@ -102,8 +130,11 @@ export function validateScene(scene) {
   if (scene.shapes.length === 0) throw new Error('scene must contain at least one shape');
   for (const s of scene.shapes) {
     if (!s.type) throw new Error('shape.type required');
-    if (!['box', 'sphere', 'cylinder', 'cone', 'torus', 'prism', 'pyramid'].includes(s.type)) {
+    if (!['box', 'sphere', 'cylinder', 'cone', 'torus', 'prism', 'pyramid', 'mesh'].includes(s.type)) {
       throw new Error(`unsupported shape.type '${s.type}'`);
+    }
+    if (s.type === 'mesh' && !s.params?.meshFile) {
+      throw new Error('mesh-shape requires params.meshFile');
     }
   }
   return true;
@@ -123,6 +154,9 @@ export function buildScene(scene, opts = {}) {
   const meshes = [];
   for (const s of scene.shapes) {
     if (!includeHoles && s.hole) continue;
+    if (s.type === 'mesh') {
+      throw new Error('scene contains mesh-shapes — use buildSceneAsync()');
+    }
     const base = _buildShape(s.type, s.params || {});
     const transformed = _applyTransform(base, s.transform);
     meshes.push(transformed);
@@ -131,6 +165,56 @@ export function buildScene(scene, opts = {}) {
     throw new Error('scene yielded no visible shapes (all marked as holes?)');
   }
   return unionMeshes(meshes);
+}
+
+/**
+ * Async scene compose with full CSG support. Solids are concatenated
+ * via unionMeshes (slicer-tolerant), then each hole is *subtracted*
+ * from the combined solid mesh via the BSP-tree CSG engine.
+ *
+ * Mesh-type shapes (uploaded STL/OBJ/3MF) are loaded and parsed before
+ * they enter the pipeline.
+ *
+ * @param {object} scene
+ * @param {object} [opts] - { useCsg: true } - when true (default) holes
+ *   are subtracted via real CSG. Set to false to fall back to the cheap
+ *   skip-hole behaviour (much faster, no clean cuts).
+ */
+export async function buildSceneAsync(scene, opts = {}) {
+  validateScene(scene);
+  const useCsg = opts.useCsg !== false;
+
+  const solids = [];
+  const holes = [];
+
+  for (const s of scene.shapes) {
+    let base;
+    if (s.type === 'mesh') {
+      const safe = String(s.params?.meshFile || '').replace(/[^a-zA-Z0-9_.-]/g, '_');
+      const fullPath = join(SCENE_MESH_DIR, safe);
+      if (!existsSync(fullPath)) throw new Error(`mesh file missing: ${safe}`);
+      const buf = readFileSync(fullPath);
+      const { bufferToMesh } = await import('./format-converter.js');
+      base = await bufferToMesh(buf, safe);
+    } else {
+      base = _buildShape(s.type, s.params || {});
+    }
+    const transformed = _applyTransform(base, s.transform);
+    if (s.hole) holes.push(transformed);
+    else solids.push(transformed);
+  }
+
+  if (solids.length === 0) {
+    throw new Error('scene yielded no solid shapes (all marked as holes?)');
+  }
+  let combined = solids.length === 1 ? solids[0] : unionMeshes(solids);
+
+  if (useCsg && holes.length > 0) {
+    for (const hole of holes) {
+      combined = csgSubtract(combined, hole);
+    }
+  }
+  return combined;
 }
 
 /**

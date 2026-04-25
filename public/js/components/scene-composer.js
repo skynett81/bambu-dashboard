@@ -18,15 +18,54 @@
   const _state = {
     scene: null,
     sceneId: null,
-    selectedId: null,
+    selectedIds: new Set(),  // multi-select
     THREE: null,
     renderer: null, scene3: null, camera: null, controls: null,
     grid: null,
-    meshNodes: new Map(),     // shapeId → THREE.Mesh
+    meshNodes: new Map(),    // shapeId → THREE.Mesh
     raycaster: null,
     mouse: null,
     saved: true,
+    undoStack: [],
+    redoStack: [],
+    keyHandler: null,
   };
+
+  const MAX_HISTORY = 50;
+
+  function _snapshot() {
+    return JSON.stringify({
+      scene: _state.scene,
+      selectedIds: Array.from(_state.selectedIds),
+    });
+  }
+
+  function _restoreFromSnapshot(snap) {
+    if (!snap) return;
+    const { scene, selectedIds } = JSON.parse(snap);
+    _state.scene = scene;
+    _state.selectedIds = new Set(selectedIds || []);
+  }
+
+  function _pushUndo() {
+    _state.undoStack.push(_snapshot());
+    if (_state.undoStack.length > MAX_HISTORY) _state.undoStack.shift();
+    _state.redoStack.length = 0; // new action invalidates redo
+  }
+
+  function _undo() {
+    if (_state.undoStack.length === 0) return _toast('Nothing to undo', 'info');
+    _state.redoStack.push(_snapshot());
+    _restoreFromSnapshot(_state.undoStack.pop());
+    _markDirty(); _renderSidePanel(); _rebuildViewport();
+  }
+
+  function _redo() {
+    if (_state.redoStack.length === 0) return _toast('Nothing to redo', 'info');
+    _state.undoStack.push(_snapshot());
+    _restoreFromSnapshot(_state.redoStack.pop());
+    _markDirty(); _renderSidePanel(); _rebuildViewport();
+  }
 
   function _esc(s) { const d = document.createElement('div'); d.textContent = s ?? ''; return d.innerHTML; }
   function _toast(m, t = 'info') { if (typeof showToast === 'function') showToast(m, t, 3000); }
@@ -74,8 +113,26 @@
             <button class="form-btn" id="sc-new">New</button>
             <button class="form-btn" id="sc-open">Open…</button>
             <button class="form-btn" id="sc-save">Save</button>
-            <button class="form-btn primary" id="sc-render">Render &amp; Download</button>
-            <span style="margin-left:auto;font-size:0.85rem;opacity:0.7" id="sc-saved-status">●</span>
+            <button class="form-btn" id="sc-import-stl" title="Import STL/OBJ/3MF as a scene shape">Import…</button>
+            <input type="file" id="sc-import-file" accept=".stl,.obj,.3mf" style="display:none">
+            <span style="border-left:1px solid var(--border-color);height:24px;margin:0 4px"></span>
+            <button class="form-btn" id="sc-undo" title="Undo (Ctrl+Z)">↶</button>
+            <button class="form-btn" id="sc-redo" title="Redo (Ctrl+Y)">↷</button>
+            <button class="form-btn" id="sc-duplicate" title="Duplicate (Ctrl+D)">Duplicate</button>
+            <button class="form-btn" id="sc-delete" title="Delete (Del)">Delete</button>
+            <span style="border-left:1px solid var(--border-color);height:24px;margin:0 4px"></span>
+            <span style="font-size:0.78rem;opacity:0.7">Mirror:</span>
+            <button class="form-btn" data-mirror="x" title="Mirror across X plane">X</button>
+            <button class="form-btn" data-mirror="y" title="Mirror across Y plane">Y</button>
+            <button class="form-btn" data-mirror="z" title="Mirror across Z plane">Z</button>
+            <span style="font-size:0.78rem;opacity:0.7">Align:</span>
+            <button class="form-btn" data-align="x-center">centerX</button>
+            <button class="form-btn" data-align="y-center">centerY</button>
+            <button class="form-btn" data-align="z-min">groundZ</button>
+            <span style="border-left:1px solid var(--border-color);height:24px;margin:0 4px"></span>
+            <label style="font-size:0.78rem"><input type="checkbox" id="sc-csg" checked> CSG holes</label>
+            <button class="form-btn primary" id="sc-render" style="margin-left:auto">Render &amp; Download</button>
+            <span style="font-size:0.85rem;opacity:0.7;margin-left:8px" id="sc-saved-status">●</span>
           </div>
           <div style="display:grid;grid-template-columns:160px 1fr 280px;gap:8px;min-height:540px">
             <div id="sc-palette" style="border:1px solid var(--border-color);border-radius:6px;padding:8px;overflow:auto"></div>
@@ -93,8 +150,33 @@
     document.getElementById('sc-open').onclick = _onOpen;
     document.getElementById('sc-save').onclick = _onSave;
     document.getElementById('sc-render').onclick = _onRender;
+    document.getElementById('sc-undo').onclick = _undo;
+    document.getElementById('sc-redo').onclick = _redo;
+    document.getElementById('sc-duplicate').onclick = _duplicateSelected;
+    document.getElementById('sc-delete').onclick = _deleteSelected;
+    document.getElementById('sc-import-stl').onclick = () => document.getElementById('sc-import-file').click();
+    document.getElementById('sc-import-file').onchange = (e) => _importStl(e.target.files[0]);
+    document.querySelectorAll('[data-mirror]').forEach(b => b.onclick = () => _mirrorSelected(b.dataset.mirror));
+    document.querySelectorAll('[data-align]').forEach(b => b.onclick = () => _alignSelected(b.dataset.align));
+
+    // Keyboard shortcuts (only while panel is active).
+    if (_state.keyHandler) document.removeEventListener('keydown', _state.keyHandler);
+    _state.keyHandler = (e) => {
+      if (window._activePanel !== 'scene-composer') return;
+      // Skip if typing in an input.
+      const target = e.target;
+      if (target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable)) return;
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z') { e.preventDefault(); _undo(); }
+      else if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'Z'))) { e.preventDefault(); _redo(); }
+      else if ((e.ctrlKey || e.metaKey) && e.key === 'd') { e.preventDefault(); _duplicateSelected(); }
+      else if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); _deleteSelected(); }
+    };
+    document.addEventListener('keydown', _state.keyHandler);
 
     if (!_state.scene) _state.scene = _defaultScene();
+    if (_state.selectedIds.size === 0 && _state.scene.shapes.length) {
+      _state.selectedIds.add(_state.scene.shapes[0].id);
+    }
 
     _renderPalette();
     _renderSidePanel();
@@ -126,6 +208,7 @@
   }
 
   function _addShape(type) {
+    _pushUndo();
     const id = `s${Date.now().toString(36)}_${Math.floor(Math.random() * 1000)}`;
     _state.scene.shapes.push({
       id,
@@ -136,10 +219,146 @@
       color: _randomColor(),
       hole: false,
     });
-    _state.selectedId = id;
+    _state.selectedIds.clear();
+    _state.selectedIds.add(id);
     _markDirty();
     _renderSidePanel();
     _rebuildViewport();
+  }
+
+  // ── Multi-select operations ─────────────────────────────────────────
+
+  function _duplicateSelected() {
+    if (_state.selectedIds.size === 0) return _toast('Nothing selected', 'info');
+    _pushUndo();
+    const newIds = [];
+    for (const id of _state.selectedIds) {
+      const s = _state.scene.shapes.find(sh => sh.id === id);
+      if (!s) continue;
+      const newId = `s${Date.now().toString(36)}_${Math.floor(Math.random() * 1000)}`;
+      const copy = JSON.parse(JSON.stringify(s));
+      copy.id = newId;
+      copy.name = `${s.name} (copy)`;
+      copy.transform.px = (copy.transform.px || 0) + 25;
+      _state.scene.shapes.push(copy);
+      newIds.push(newId);
+    }
+    _state.selectedIds = new Set(newIds);
+    _markDirty(); _renderSidePanel(); _rebuildViewport();
+  }
+
+  function _deleteSelected() {
+    if (_state.selectedIds.size === 0) return _toast('Nothing selected', 'info');
+    _pushUndo();
+    _state.scene.shapes = _state.scene.shapes.filter(s => !_state.selectedIds.has(s.id));
+    _state.selectedIds.clear();
+    if (_state.scene.shapes.length === 0) {
+      // Don't allow truly empty scene — auto-add a placeholder.
+      const ph = _defaultScene().shapes[0];
+      _state.scene.shapes.push(ph);
+      _state.selectedIds.add(ph.id);
+    } else {
+      _state.selectedIds.add(_state.scene.shapes[0].id);
+    }
+    _markDirty(); _renderSidePanel(); _rebuildViewport();
+  }
+
+  function _mirrorSelected(axis) {
+    if (_state.selectedIds.size === 0) return _toast('Nothing selected', 'info');
+    _pushUndo();
+    const key = `s${axis}`;
+    for (const id of _state.selectedIds) {
+      const s = _state.scene.shapes.find(sh => sh.id === id);
+      if (!s) continue;
+      s.transform[key] = -(s.transform[key] || 1);
+    }
+    _markDirty(); _renderSidePanel(); _rebuildViewport();
+  }
+
+  function _alignSelected(mode) {
+    if (_state.selectedIds.size < 2) return _toast('Select 2+ shapes to align', 'info');
+    _pushUndo();
+    const selected = _state.scene.shapes.filter(s => _state.selectedIds.has(s.id));
+    if (mode === 'x-center') {
+      const avg = selected.reduce((s, sh) => s + (sh.transform.px || 0), 0) / selected.length;
+      for (const s of selected) s.transform.px = avg;
+    } else if (mode === 'y-center') {
+      const avg = selected.reduce((s, sh) => s + (sh.transform.py || 0), 0) / selected.length;
+      for (const s of selected) s.transform.py = avg;
+    } else if (mode === 'z-min') {
+      const min = Math.min(...selected.map(sh => sh.transform.pz || 0));
+      for (const s of selected) s.transform.pz = min;
+    }
+    _markDirty(); _renderSidePanel(); _rebuildViewport();
+  }
+
+  async function _importStl(file) {
+    if (!file) return;
+    if (file.size > 50 * 1024 * 1024) { _toast('File too large (max 50 MB)', 'error'); return; }
+    try {
+      const buf = await file.arrayBuffer();
+      const r = await fetch(`/api/ai-forge/scenes/upload-mesh?filename=${encodeURIComponent(file.name)}`, {
+        method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: buf,
+      });
+      const data = await r.json();
+      if (!r.ok) { _toast(`Import failed: ${data.error || r.statusText}`, 'error'); return; }
+      _pushUndo();
+      const id = `s${Date.now().toString(36)}_${Math.floor(Math.random() * 1000)}`;
+      _state.scene.shapes.push({
+        id,
+        name: file.name.replace(/\.[^.]+$/, ''),
+        type: 'mesh',
+        params: { meshFile: data.meshFile },
+        transform: _defaultTransform(),
+        color: _randomColor(),
+        hole: false,
+      });
+      _state.selectedIds.clear(); _state.selectedIds.add(id);
+      _markDirty(); _renderSidePanel(); _rebuildViewport();
+      _toast(`Imported ${file.name} (${data.stats.vertices} vertices)`, 'success');
+      // Try to fetch and add to viewport via Three.js loader.
+      _loadImportedMeshIntoViewport(id, file.name, buf);
+    } catch (e) { _toast(`Import failed: ${e.message}`, 'error'); }
+  }
+
+  async function _loadImportedMeshIntoViewport(shapeId, filename, arrayBuffer) {
+    if (!_state.THREE) return;
+    const THREE = _state.THREE;
+    // Parse STL (binary) client-side for live preview.
+    try {
+      const dv = new DataView(arrayBuffer);
+      // Detect binary STL by header + tri-count length match.
+      const triCount = dv.getUint32(80, true);
+      const expectedSize = 84 + triCount * 50;
+      if (expectedSize !== arrayBuffer.byteLength) {
+        // Not binary STL — skip live preview, server still has it.
+        return;
+      }
+      const positions = new Float32Array(triCount * 9);
+      let off = 84;
+      for (let i = 0; i < triCount; i++) {
+        off += 12; // skip normal
+        for (let v = 0; v < 9; v++) {
+          positions[i * 9 + v] = dv.getFloat32(off, true);
+          off += 4;
+        }
+        off += 2; // attribute byte count
+      }
+      const geom = new THREE.BufferGeometry();
+      geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geom.computeVertexNormals();
+      const s = _state.scene.shapes.find(sh => sh.id === shapeId);
+      if (!s) return;
+      const mat = new THREE.MeshLambertMaterial({ color: new THREE.Color(s.color || '#3b82f6') });
+      const mesh = new THREE.Mesh(geom, mat);
+      mesh.userData.shapeId = s.id;
+      _applyTransform(mesh, s.transform);
+      // Replace the placeholder mesh that _rebuildViewport puts in.
+      const existing = _state.meshNodes.get(s.id);
+      if (existing) _state.scene3.remove(existing);
+      _state.scene3.add(mesh);
+      _state.meshNodes.set(s.id, mesh);
+    } catch (_) { /* preview is best-effort */ }
   }
 
   function _randomColor() {
@@ -150,12 +369,13 @@
   // ── Side panel: scene tree + selected properties ───────────────────
 
   function _renderSidePanel() {
-    const sel = _state.scene.shapes.find(s => s.id === _state.selectedId);
+    const onlyId = _state.selectedIds.size === 1 ? Array.from(_state.selectedIds)[0] : null;
+    const sel = onlyId ? _state.scene.shapes.find(s => s.id === onlyId) : null;
     const tree = `
-      <div style="font-size:0.78rem;font-weight:600;margin-bottom:6px;opacity:0.7">Scene Tree (${_state.scene.shapes.length})</div>
+      <div style="font-size:0.78rem;font-weight:600;margin-bottom:6px;opacity:0.7">Scene Tree (${_state.scene.shapes.length}) <small style="font-weight:normal">— Ctrl+click for multi-select</small></div>
       <div style="margin-bottom:12px">
         ${_state.scene.shapes.map(s => `
-          <div style="display:flex;align-items:center;gap:4px;padding:3px 4px;border-radius:3px;cursor:pointer;background:${s.id === _state.selectedId ? 'rgba(59,130,246,0.15)' : 'transparent'}"
+          <div style="display:flex;align-items:center;gap:4px;padding:3px 4px;border-radius:3px;cursor:pointer;background:${_state.selectedIds.has(s.id) ? 'rgba(59,130,246,0.15)' : 'transparent'}"
                data-shape-id="${_esc(s.id)}">
             <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:${_esc(s.color)}"></span>
             <span style="flex:1;font-size:0.78rem">${_esc(s.name)}</span>
@@ -165,13 +385,27 @@
         `).join('')}
       </div>
     `;
-    const props = sel ? _renderProperties(sel) : '<em style="font-size:0.78rem;opacity:0.6">No shape selected</em>';
+    let props;
+    if (sel) {
+      props = _renderProperties(sel);
+    } else if (_state.selectedIds.size > 1) {
+      props = `<em style="font-size:0.78rem;opacity:0.6">${_state.selectedIds.size} shapes selected — use toolbar buttons (Mirror, Align, Duplicate, Delete) for bulk ops.</em>`;
+    } else {
+      props = '<em style="font-size:0.78rem;opacity:0.6">No shape selected</em>';
+    }
     document.getElementById('sc-side').innerHTML = tree + props;
-    // Wire tree clicks.
+    // Wire tree clicks (Ctrl/Shift for multi-select).
     document.querySelectorAll('[data-shape-id]').forEach(el => {
       el.onclick = (e) => {
         if (e.target.dataset.delShape) return;
-        _state.selectedId = el.dataset.shapeId;
+        const id = el.dataset.shapeId;
+        if (e.ctrlKey || e.metaKey || e.shiftKey) {
+          if (_state.selectedIds.has(id)) _state.selectedIds.delete(id);
+          else _state.selectedIds.add(id);
+        } else {
+          _state.selectedIds.clear();
+          _state.selectedIds.add(id);
+        }
         _renderSidePanel();
         _highlightSelected();
       };
@@ -179,10 +413,24 @@
     document.querySelectorAll('[data-del-shape]').forEach(b => {
       b.onclick = (e) => {
         e.stopPropagation();
-        _deleteShape(b.dataset.delShape);
+        _deleteSingleShape(b.dataset.delShape);
       };
     });
     if (sel) _wireProperties(sel);
+  }
+
+  function _deleteSingleShape(id) {
+    _pushUndo();
+    _state.scene.shapes = _state.scene.shapes.filter(s => s.id !== id);
+    _state.selectedIds.delete(id);
+    if (_state.scene.shapes.length === 0) {
+      const ph = _defaultScene().shapes[0];
+      _state.scene.shapes.push(ph);
+      _state.selectedIds.add(ph.id);
+    } else if (_state.selectedIds.size === 0) {
+      _state.selectedIds.add(_state.scene.shapes[0].id);
+    }
+    _markDirty(); _renderSidePanel(); _rebuildViewport();
   }
 
   function _renderProperties(s) {
@@ -230,9 +478,10 @@
 
     document.getElementById('sp-name').oninput = (e) => { s.name = e.target.value; _markDirty(); };
     document.getElementById('sp-color').oninput = (e) => { s.color = e.target.value; _markDirty(); _rebuildViewport(); };
-    document.getElementById('sp-hole').onchange = (e) => { s.hole = e.target.checked; onChange(); };
+    document.getElementById('sp-hole').onchange = (e) => { _pushUndo(); s.hole = e.target.checked; onChange(); };
     document.querySelectorAll('.sp-tf').forEach(input => {
       input.onchange = (e) => {
+        _pushUndo();
         const k = input.dataset.key;
         let val = parseFloat(e.target.value) || 0;
         if (k.startsWith('r')) val = val * Math.PI / 180;
@@ -242,18 +491,11 @@
     });
     document.querySelectorAll('.sp-param').forEach(input => {
       input.onchange = (e) => {
+        _pushUndo();
         s.params[input.dataset.key] = parseFloat(e.target.value) || 0;
         _markDirty(); _rebuildViewport();
       };
     });
-  }
-
-  function _deleteShape(id) {
-    _state.scene.shapes = _state.scene.shapes.filter(s => s.id !== id);
-    if (_state.selectedId === id) _state.selectedId = _state.scene.shapes[0]?.id || null;
-    _markDirty();
-    _renderSidePanel();
-    _rebuildViewport();
   }
 
   // ── Three.js viewport ──────────────────────────────────────────────
@@ -389,7 +631,14 @@
     if (hits.length > 0) {
       const id = hits[0].object.userData.shapeId;
       if (id) {
-        _state.selectedId = id;
+        // Ctrl/Shift + click = toggle in selection set; plain click = replace.
+        if (e.ctrlKey || e.metaKey || e.shiftKey) {
+          if (_state.selectedIds.has(id)) _state.selectedIds.delete(id);
+          else _state.selectedIds.add(id);
+        } else {
+          _state.selectedIds.clear();
+          _state.selectedIds.add(id);
+        }
         _renderSidePanel();
         _highlightSelected();
       }
@@ -399,7 +648,7 @@
   function _highlightSelected() {
     if (!_state.scene3) return;
     for (const [id, mesh] of _state.meshNodes) {
-      const isSel = id === _state.selectedId;
+      const isSel = _state.selectedIds.has(id);
       mesh.material.emissive = mesh.material.emissive || new _state.THREE.Color(0x000000);
       mesh.material.emissive.set(isSel ? 0x444444 : 0x000000);
     }
@@ -414,7 +663,10 @@
     if (!_state.saved && !confirm('Discard unsaved changes?')) return;
     _state.scene = _defaultScene();
     _state.sceneId = null;
-    _state.selectedId = _state.scene.shapes[0]?.id || null;
+    _state.selectedIds.clear();
+    if (_state.scene.shapes[0]) _state.selectedIds.add(_state.scene.shapes[0].id);
+    _state.undoStack.length = 0;
+    _state.redoStack.length = 0;
     _renderSidePanel();
     _rebuildViewport();
     _markSaved();
@@ -433,7 +685,10 @@
       const sel = scenes[idx - 1];
       _state.scene = JSON.parse(sel.scene_json);
       _state.sceneId = sel.id;
-      _state.selectedId = _state.scene.shapes[0]?.id || null;
+      _state.selectedIds.clear();
+      if (_state.scene.shapes[0]) _state.selectedIds.add(_state.scene.shapes[0].id);
+      _state.undoStack.length = 0;
+      _state.redoStack.length = 0;
       _renderSidePanel();
       _rebuildViewport();
       _markSaved();
@@ -466,9 +721,10 @@
       const url = _state.sceneId
         ? `/api/ai-forge/scenes/${_state.sceneId}/render`
         : `/api/ai-forge/scenes/render`;
+      const useCsg = document.getElementById('sc-csg')?.checked !== false;
       const r = await fetch(url, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ scene: _state.scene, format }),
+        body: JSON.stringify({ scene: _state.scene, format, useCsg }),
       });
       const data = await r.json();
       if (!r.ok) {
