@@ -1513,13 +1513,16 @@
         <div class="form-group">
           <label class="form-label">Connection type</label>
           <select class="form-input" id="pf-type" onchange="window._togglePrinterTypeFields()">
-            <option value="bambu" ${curType === 'bambu' ? 'selected' : ''}>Bambu Lab (MQTT)</option>
-            <option value="moonraker" ${curType === 'moonraker' ? 'selected' : ''}>Moonraker / Klipper (Snapmaker, Voron, Creality, etc.)</option>
-            <option value="prusalink" ${curType === 'prusalink' ? 'selected' : ''}>PrusaLink (Prusa MK4, Mini+, XL)</option>
+            <option value="bambu" ${curType === 'bambu' ? 'selected' : ''}>Bambu Lab (MQTT — P/A/X/H series + H2D/H2D Pro/H2C/H2S)</option>
+            <option value="moonraker" ${curType === 'moonraker' ? 'selected' : ''}>Moonraker / Klipper (Sovol, Voron, Creality K-series, BIQU, Two Trees, Tronxy, Mingda, Kywoo, RatRig, Anycubic, QIDI, Snapmaker U1)</option>
+            <option value="prusalink" ${curType === 'prusalink' ? 'selected' : ''}>PrusaLink (Prusa MK4, MK4S, Mini+, XL, CORE One, HT90)</option>
             <option value="octoprint" ${curType === 'octoprint' ? 'selected' : ''}>OctoPrint (Ender 3, Prusa MK3, Anycubic, etc.)</option>
             <option value="sacp" ${curType === 'sacp' ? 'selected' : ''}>Snapmaker SACP (J1, J1s, Artisan, Ray)</option>
             <option value="ankermake" ${curType === 'ankermake' ? 'selected' : ''}>AnkerMake (via ankerctl — M5, M5C)</option>
             <option value="snapmaker-http" ${curType === 'snapmaker-http' ? 'selected' : ''}>Snapmaker 2.0 HTTP (A150, A250, A350)</option>
+            <option value="duet" ${curType === 'duet' ? 'selected' : ''}>Duet / RepRapFirmware (Duet 2/3, E3D Toolchanger)</option>
+            <option value="flashforge" ${curType === 'flashforge' ? 'selected' : ''}>FlashForge FNet (Adventurer 5M / 5M Pro / AD5X / Creator 4 / Guider 3)</option>
+            <option value="repetier" ${curType === 'repetier' ? 'selected' : ''}>Repetier-Server (multi-printer print farms)</option>
           </select>
         </div>
         <div class="form-group">
@@ -1710,6 +1713,36 @@
         </div>`;
     }
 
+    if (type === 'duet') {
+      h += `
+        <div class="form-group"><label class="form-label">Port</label>
+          <div class="input-group input-group-sm"><input class="form-input form-control" id="pf-port" type="number" value="${p.port || 80}" placeholder="80"><span class="input-group-text">HTTP</span></div></div>
+        <div class="alert alert-info" style="font-size:0.75rem;margin-top:6px">
+          <strong>RepRapFirmware:</strong> If you've set a password on Duet (System → Set password), enter it as the access code above. Default is <code>reprap</code> (often empty on Duet 3 / RRF 3.5+). Tested against DWC 3 web interface.
+        </div>`;
+    }
+
+    if (type === 'flashforge') {
+      h += `
+        <div class="form-group"><label class="form-label">FNet Port</label>
+          <div class="input-group input-group-sm"><input class="form-input form-control" id="pf-port" type="number" value="${p.port || 8899}" placeholder="8899"><span class="input-group-text">TCP</span></div></div>
+        <div class="alert alert-info" style="font-size:0.75rem;margin-top:6px">
+          <strong>FlashForge native protocol:</strong> No access code needed. The printer must be on the same LAN. Compatible with Adventurer 5M / 5M Pro / AD5X / Creator 4 / Guider 3 Plus running official firmware (no Klipper mod required).
+        </div>`;
+    }
+
+    if (type === 'repetier') {
+      h += `
+        <div class="form-group"><label class="form-label">Port</label>
+          <div class="input-group input-group-sm"><input class="form-input form-control" id="pf-port" type="number" value="${p.port || 3344}" placeholder="3344"><span class="input-group-text">HTTP</span></div></div>
+        <div class="form-group"><label class="form-label">Printer slug</label>
+          <input class="form-input" id="pf-slug" value="${p.slug || ''}" placeholder="e.g. mk3 (visible in Repetier-Server URL bar)">
+          <small class="text-muted" style="display:block;font-size:0.7rem">The slug identifies which physical printer behind the Repetier-Server instance. Find it in the Repetier-Server web UI URL: <code>/printer/&lt;slug&gt;</code>.</small></div>
+        <div class="alert alert-info" style="font-size:0.75rem;margin-top:6px">
+          <strong>Repetier-Server:</strong> Generate an API key under <em>Global Settings → API keys</em> and paste it as the access code above.
+        </div>`;
+    }
+
     return h;
   }
 
@@ -1729,12 +1762,16 @@
       else if (isPrusalink) accessLabel.textContent = 'API Key';
       else if (type === 'ankermake') accessLabel.textContent = 'Not required';
       else if (type === 'sacp' || type === 'snapmaker-http') accessLabel.textContent = 'Not required';
+      else if (type === 'duet') accessLabel.textContent = 'Password (optional, default: reprap)';
+      else if (type === 'flashforge') accessLabel.textContent = 'Not required';
+      else if (type === 'repetier') accessLabel.textContent = 'API Key (Global Settings → API keys)';
       else accessLabel.textContent = t('settings.access_code');
     }
-    // Hide access code for types that don't need it
+    // Hide access code only when truly unused
     const accessGroup = document.getElementById('pf-access')?.closest('.form-group');
     if (accessGroup) {
-      accessGroup.style.display = (type === 'ankermake' || type === 'sacp' || type === 'snapmaker-http') ? 'none' : '';
+      const hidden = ['ankermake', 'sacp', 'snapmaker-http', 'flashforge'].includes(type);
+      accessGroup.style.display = hidden ? 'none' : '';
     }
     // Re-render type-specific config
     const configEl = document.getElementById('pf-type-config');
@@ -1821,6 +1858,10 @@
     }
     if (type === 'sacp') {
       body.transport = document.getElementById('pf-transport')?.value || 'tcp';
+    }
+    if (type === 'repetier') {
+      const slug = document.getElementById('pf-slug')?.value.trim();
+      if (slug) body.slug = slug;
     }
 
     try {
