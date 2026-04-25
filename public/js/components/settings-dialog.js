@@ -518,6 +518,14 @@
       // Auto-refresh
       h += '<div class="prefs-row"><span class="prefs-label">Auto-refresh' + '</span><select class="form-input prefs-input" id="auto-refresh-select" onchange="if(typeof window.setAutoRefresh===\'function\')window.setAutoRefresh(this.value)">';
       h += '<option value="0"' + (_arVal === 0 ? ' selected' : '') + '>Off</option><option value="10000"' + (_arVal === 10000 ? ' selected' : '') + '>10s</option><option value="30000"' + (_arVal === 30000 ? ' selected' : '') + '>30s</option><option value="60000"' + (_arVal === 60000 ? ' selected' : '') + '>60s</option><option value="300000"' + (_arVal === 300000 ? ' selected' : '') + '>5min</option></select></div>';
+      // Currency selector — drives price display across the app.
+      const curList = (typeof window.currency !== 'undefined') ? window.currency.list() : [{ code: 'USD', name: 'US Dollar' }];
+      const curActive = (typeof window.currency !== 'undefined') ? window.currency.active : 'USD';
+      h += '<div class="prefs-row"><span class="prefs-label">Valuta / Currency</span><select class="form-input prefs-input" id="currency-select" onchange="window.currency?.set(this.value).then(()=>showToast?.(\'Currency set to \'+this.value,\'success\',2000))">';
+      for (const c of curList) {
+        h += '<option value="' + c.code + '"' + (c.code === curActive ? ' selected' : '') + '>' + c.code + ' — ' + c.name + '</option>';
+      }
+      h += '</select></div>';
       // Server info
       h += '<div class="prefs-row"><span class="prefs-label">' + t('settings.server_title') + '</span><span class="text-muted">Port ' + (location.port || '3000') + ' · ' + p.length + ' ' + t('settings.printers_title') + '</span></div>';
       // Tour
@@ -1608,7 +1616,9 @@
             <option value="480p" ${p.cameraResolution === '480p' ? 'selected' : ''}>480p</option>
           </select></div>
         <div class="form-group"><label class="form-label"><input type="checkbox" id="pf-cloud-sync" ${p.cloudSync !== false ? 'checked' : ''}> Enable Bambu Cloud sync</label></div>
-        <div class="form-group"><label class="form-label"><input type="checkbox" id="pf-auto-ams" ${p.autoAmsSync !== false ? 'checked' : ''}> Auto-sync AMS filament to inventory</label></div>`;
+        <div class="form-group"><label class="form-label"><input type="checkbox" id="pf-auto-ams" ${p.autoAmsSync !== false ? 'checked' : ''}> Auto-sync AMS filament to inventory</label></div>
+        <div class="form-group"><label class="form-label"><input type="checkbox" id="pf-developer-mode" ${p.developerMode ? 'checked' : ''}> LAN Developer Mode enabled on printer</label>
+          <small class="text-muted" style="display:block;font-size:0.7rem">Required since 2025 for full third-party control. Enable on printer: Settings → General → LAN Only → Developer Mode.</small></div>`;
     }
 
     if (type === 'moonraker') {
@@ -1630,6 +1640,8 @@
           </select></div>
         <div class="form-group"><label class="form-label">API Key (optional)</label>
           <input class="form-input" id="pf-moonraker-key" value="${p.moonrakerApiKey || ''}" placeholder="Only if Moonraker requires authentication"></div>
+        <div class="form-group"><label class="form-label">JWT Token (alternative to API key)</label>
+          <input class="form-input" type="password" id="pf-moonraker-token" value="${p.token || ''}" placeholder="Bearer token from /access/login — preferred over API key in Moonraker 0.9+"></div>
         <div class="form-group"><label class="form-label"><input type="checkbox" id="pf-power-device" ${p.powerDevice ? 'checked' : ''}> Has smart plug / PSU relay</label></div>
         <div class="form-group" id="pf-power-name-group" style="${p.powerDevice ? '' : 'display:none'}"><label class="form-label">Power device name</label>
           <input class="form-input" id="pf-power-name" value="${p.powerDeviceName || ''}" placeholder="e.g. printer_psu"></div>`;
@@ -1641,7 +1653,17 @@
           <div class="input-group input-group-sm"><input class="form-input form-control" id="pf-port" type="number" value="${p.port || 80}" placeholder="80"><span class="input-group-text">HTTP</span></div></div>
         <div class="form-group"><label class="form-label">Username (for Digest Auth)</label>
           <input class="form-input" id="pf-username" value="${p.username || 'maker'}" placeholder="maker"></div>
-        <div class="form-group"><label class="form-label"><input type="checkbox" id="pf-prusa-connect" ${p.prusaConnect ? 'checked' : ''}> PrusaConnect cloud enabled</label></div>`;
+        <div class="form-group"><label class="form-label">Password</label>
+          <input class="form-input" type="password" id="pf-password" value="${p.password || ''}" placeholder="PrusaLink 1.8+ requires password, API-key no longer sufficient"></div>
+        <div class="form-group"><label class="form-label"><input type="checkbox" id="pf-prusa-connect" ${p.prusaConnect ? 'checked' : ''}> PrusaConnect cloud camera relay enabled</label></div>
+        <div class="form-group pf-pc-fields" style="${p.prusaConnect ? '' : 'display:none'}">
+          <label class="form-label">PrusaConnect Camera Token</label>
+          <input class="form-input" type="password" id="pf-pc-token" value="${p.prusaConnectToken || ''}" placeholder="Token from connect.prusa3d.com camera registration">
+        </div>
+        <div class="form-group pf-pc-fields" style="${p.prusaConnect ? '' : 'display:none'}">
+          <label class="form-label">PrusaConnect Fingerprint (16–64 chars)</label>
+          <input class="form-input" id="pf-pc-fingerprint" value="${p.prusaConnectFingerprint || ''}" placeholder="e.g. 3dprintforge-&lt;printer-id&gt;">
+        </div>`;
     }
 
     if (type === 'octoprint') {
@@ -1768,18 +1790,29 @@
       body.cameraResolution = document.getElementById('pf-camera-res')?.value || '720p';
       body.cloudSync = document.getElementById('pf-cloud-sync')?.checked !== false;
       body.autoAmsSync = document.getElementById('pf-auto-ams')?.checked !== false;
+      body.developerMode = document.getElementById('pf-developer-mode')?.checked || false;
     }
     if (type === 'moonraker') {
       const brandHint = document.getElementById('pf-brand-hint')?.value;
       if (brandHint) body.brandHint = brandHint;
       const moonKey = document.getElementById('pf-moonraker-key')?.value.trim();
       if (moonKey) body.moonrakerApiKey = moonKey;
+      const moonToken = document.getElementById('pf-moonraker-token')?.value.trim();
+      if (moonToken) body.token = moonToken;
       body.powerDevice = document.getElementById('pf-power-device')?.checked || false;
       if (body.powerDevice) body.powerDeviceName = document.getElementById('pf-power-name')?.value.trim() || '';
     }
     if (type === 'prusalink') {
       body.username = document.getElementById('pf-username')?.value.trim() || 'maker';
+      const pwd = document.getElementById('pf-password')?.value;
+      if (pwd) body.password = pwd;
       body.prusaConnect = document.getElementById('pf-prusa-connect')?.checked || false;
+      if (body.prusaConnect) {
+        const pcToken = document.getElementById('pf-pc-token')?.value.trim();
+        const pcFp = document.getElementById('pf-pc-fingerprint')?.value.trim();
+        if (pcToken) body.prusaConnectToken = pcToken;
+        if (pcFp) body.prusaConnectFingerprint = pcFp;
+      }
     }
     if (type === 'octoprint') {
       body.pluginPsu = document.getElementById('pf-plugin-psu')?.checked || false;
@@ -2461,6 +2494,24 @@
         <input type="time" id="notif-quiet-end" value="${nc.quietHours?.end || '07:00'}">
       </div>
 
+      <div class="card-title mt-md" style="font-size:0.7rem">Incoming webhook integrations</div>
+      <p class="text-muted" style="font-size:0.75rem;margin-bottom:4px">Paste one of these URLs into the corresponding service's webhook-settings UI. The shared secret authenticates the remote service.</p>
+      <div class="notif-quiet-row" style="flex-wrap:wrap;gap:8px">
+        <label class="form-label" style="min-width:120px">OctoEverywhere secret</label>
+        <input class="form-input" type="password" id="notif-oe-secret" value="${nc.incoming_webhooks?.octoeverywhere_secret || ''}" placeholder="Shared SecretKey set in OctoEverywhere UI" style="flex:1;min-width:200px">
+        <small class="text-muted" style="flex:1 1 100%;font-size:0.7rem">URL: <code>/api/webhook/octoeverywhere</code></small>
+      </div>
+      <div class="notif-quiet-row" style="flex-wrap:wrap;gap:8px">
+        <label class="form-label" style="min-width:120px">Obico secret</label>
+        <input class="form-input" type="password" id="notif-obico-secret" value="${nc.incoming_webhooks?.obico_secret || ''}" placeholder="HMAC-SHA256 signing key from Obico UI" style="flex:1;min-width:200px">
+        <small class="text-muted" style="flex:1 1 100%;font-size:0.7rem">URL: <code>/api/webhook/obico</code> &middot; Header: <code>X-Obico-Signature</code></small>
+      </div>
+      <div class="notif-quiet-row" style="flex-wrap:wrap;gap:8px">
+        <label class="form-label" style="min-width:120px">SimplyPrint secret</label>
+        <input class="form-input" type="password" id="notif-sp-secret" value="${nc.incoming_webhooks?.simplyprint_secret || ''}" placeholder="HMAC-SHA256 signing key from SimplyPrint UI" style="flex:1;min-width:200px">
+        <small class="text-muted" style="flex:1 1 100%;font-size:0.7rem">URL: <code>/api/webhook/simplyprint</code> &middot; Headers: <code>X-SimplyPrint-Signature</code>, <code>X-SimplyPrint-Timestamp</code></small>
+      </div>
+
       <div class="notif-save-row">
         <button class="form-btn" id="notif-save-btn" data-ripple onclick="saveNotifSettings()">${t('settings.notif_save')}</button>
         <span class="notif-save-status" id="notif-save-status"></span>
@@ -2557,7 +2608,12 @@
         start: document.getElementById('notif-quiet-start')?.value || '23:00',
         end: document.getElementById('notif-quiet-end')?.value || '07:00'
       },
-      bedCooledThreshold: parseInt(document.getElementById('notif-bed-threshold')?.value) || 30
+      bedCooledThreshold: parseInt(document.getElementById('notif-bed-threshold')?.value) || 30,
+      incoming_webhooks: {
+        octoeverywhere_secret: document.getElementById('notif-oe-secret')?.value || '',
+        obico_secret: document.getElementById('notif-obico-secret')?.value || '',
+        simplyprint_secret: document.getElementById('notif-sp-secret')?.value || '',
+      },
     };
 
     try {

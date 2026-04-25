@@ -6375,6 +6375,105 @@ export async function handleApiRequest(req, res) {
     }
 
     // ──────────────────────────────────────────────────────────────────
+    // PRE-PRINT ANALYSIS SUITE
+    // ──────────────────────────────────────────────────────────────────
+
+    if (method === 'POST' && path === '/api/preflight/stl/analyze') {
+      // Accept raw STL body (binary or ASCII) up to 50 MB.
+      const chunks = [];
+      let total = 0;
+      const limit = 50 * 1024 * 1024;
+      req.on('data', (c) => {
+        total += c.length;
+        if (total > limit) { req.destroy(); }
+        chunks.push(c);
+      });
+      req.on('end', async () => {
+        try {
+          const buf = Buffer.concat(chunks);
+          const { analyzeStl } = await import('./stl-analyzer.js');
+          const opts = {};
+          const oh = url.searchParams.get('overhang_threshold');
+          if (oh) opts.overhangThreshold = parseFloat(oh);
+          const dens = url.searchParams.get('density');
+          if (dens) opts.materialDensity = parseFloat(dens);
+          return sendJson(res, analyzeStl(buf, opts));
+        } catch (e) { return sendJson(res, { error: e.message }, 400); }
+      });
+      return;
+    }
+
+    if (method === 'GET' && path === '/api/preflight/test-prints') {
+      const { listTestPrints, listTags, listPurposes } = await import('./test-print-library.js');
+      return sendJson(res, {
+        prints: listTestPrints({ tag: url.searchParams.get('tag'), purpose: url.searchParams.get('purpose') }),
+        tags: listTags(),
+        purposes: listPurposes(),
+      });
+    }
+
+    const testPrintMatch = path.match(/^\/api\/preflight\/test-prints\/([a-z0-9-]+)$/);
+    if (testPrintMatch && method === 'GET') {
+      const { getTestPrint } = await import('./test-print-library.js');
+      const p = getTestPrint(testPrintMatch[1]);
+      if (!p) return sendJson(res, { error: 'not found' }, 404);
+      return sendJson(res, p);
+    }
+
+    if (method === 'POST' && path === '/api/preflight/check') {
+      return readBody(req, res, async (body) => {
+        const { runPreflight } = await import('./preflight-checks.js');
+        // Inject live printer state for online/busy check
+        const states = {};
+        if (_printerManager?.printers) {
+          for (const [pid, entry] of _printerManager.printers) {
+            states[pid] = entry.client?.state || null;
+          }
+        }
+        return sendJson(res, runPreflight({ ...body, _printerStates: states }));
+      });
+    }
+
+    if (method === 'GET' && path === '/api/preflight/quality-metrics') {
+      const { getDashboardMetrics } = await import('./quality-metrics.js');
+      return sendJson(res, getDashboardMetrics({
+        printerId: url.searchParams.get('printer_id') || undefined,
+        days: url.searchParams.get('days') ? parseInt(url.searchParams.get('days'), 10) : undefined,
+      }));
+    }
+
+    // ──────────────────────────────────────────────────────────────────
+    // CURRENCY (multi-locale price display)
+    // ──────────────────────────────────────────────────────────────────
+
+    if (method === 'GET' && path === '/api/currency') {
+      const { getCurrencyState } = await import('./currency.js');
+      return sendJson(res, getCurrencyState());
+    }
+
+    if (method === 'POST' && path === '/api/currency/active') {
+      return readBody(req, res, async (body) => {
+        const { setActiveCurrency } = await import('./currency.js');
+        try { return sendJson(res, setActiveCurrency(body.code)); }
+        catch (e) { return sendJson(res, { error: e.message }, 400); }
+      });
+    }
+
+    if (method === 'POST' && path === '/api/currency/refresh-rates') {
+      const { refreshRates } = await import('./currency.js');
+      const result = await refreshRates();
+      return sendJson(res, result);
+    }
+
+    if (method === 'POST' && path === '/api/currency/convert') {
+      return readBody(req, res, async (body) => {
+        const { convert, format } = await import('./currency.js');
+        const out = convert(Number(body.amount), body.from || 'USD', body.to || 'USD');
+        return sendJson(res, { amount: out, formatted: format(out, body.to || 'USD') });
+      });
+    }
+
+    // ──────────────────────────────────────────────────────────────────
     // CALIBRATION & TUNING SUITE
     // ──────────────────────────────────────────────────────────────────
 

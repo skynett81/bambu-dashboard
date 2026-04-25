@@ -275,7 +275,7 @@
               <p>
                 <span data-i18n-key="sidebar.section_library">Library</span>
                 <i class="nav-arrow bi bi-chevron-right"></i>
-                <span class="badge text-bg-secondary sidebar-section-count">6</span>
+                <span class="badge text-bg-secondary sidebar-section-count">7</span>
               </p>
             </a>
             <ul class="nav nav-treeview">
@@ -295,6 +295,12 @@
                 <a href="#" class="nav-link sidebar-btn" data-panel="calibration" onclick="openPanel('calibration'); return false;" data-ripple>
                   <i class="nav-icon bi bi-rulers"></i>
                   <p>Calibration &amp; Tuning</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#" class="nav-link sidebar-btn" data-panel="preflight" onclick="openPanel('preflight'); return false;" data-ripple>
+                  <i class="nav-icon bi bi-clipboard-check"></i>
+                  <p>Pre-print Analysis</p>
                 </a>
               </li>
               <li class="nav-item">
@@ -1054,6 +1060,8 @@
   <script src="/js/components/kb-viewer-2026.js"></script>
   <script src="/js/components/gcode-studio.js"></script>
   <script src="/js/components/calibration-suite.js"></script>
+  <script src="/js/components/preflight-suite.js"></script>
+  <script src="/js/utils/currency.js"></script>
   <script src="/js/interactions.js"></script>
   <script src="/js/permissions.js"></script>
   <script src="/js/app.js"></script>
