@@ -4,7 +4,7 @@
     "version": "PTDL_v2",
     "update_url": null
   },
-  "exported_at": "2026-04-26T00:00:00+00:00",
+  "exported_at": "2026-04-26T19:58:07+00:00",
   "name": "3DPrintForge",
   "author": "skynett81@github.com",
   "description": "Self-hosted dashboard for 17 printer brands (Bambu Lab, Snapmaker, Prusa, OctoPrint, Creality, Elegoo, Voron, AnkerMake, QIDI, RatRig, Duet/RRF, FlashForge, Repetier, and any Klipper/Moonraker printer). Includes native slicer, Slicer Studio with profiles, Scene Composer with CSG, AI Model Forge, Mesh Repair, real-time status, camera feeds, print history, print queue with load balancing, filament inventory, and 7 notification channels (Telegram, Discord, Email, Webhook, ntfy, Pushover, SMS).",
