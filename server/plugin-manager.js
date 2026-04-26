@@ -169,11 +169,13 @@ export class PluginManager {
 
   _createPluginApi(dbPlugin) {
     const self = this;
+    // Cache the logger once per plugin instead of allocating on every call.
+    const plog = createLogger('plugin:' + dbPlugin.name);
     return {
       name: dbPlugin.name,
-      log: (...args) => { const plog = createLogger('plugin:' + dbPlugin.name); plog.info(args.join(' ')); },
-      warn: (...args) => { const plog = createLogger('plugin:' + dbPlugin.name); plog.warn(args.join(' ')); },
-      error: (...args) => { const plog = createLogger('plugin:' + dbPlugin.name); plog.error(args.join(' ')); },
+      log: (...args) => plog.info(args.join(' ')),
+      warn: (...args) => plog.warn(args.join(' ')),
+      error: (...args) => plog.error(args.join(' ')),
 
       // State management (plugin-scoped)
       state: {

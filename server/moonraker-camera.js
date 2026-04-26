@@ -73,7 +73,7 @@ export class MoonrakerCamera {
 
   stop() {
     if (this._pollTimer) { clearInterval(this._pollTimer); this._pollTimer = null; }
-    if (this._retryTimer) { clearInterval(this._retryTimer); this._retryTimer = null; }
+    if (this._retryTimer) { clearTimeout(this._retryTimer); this._retryTimer = null; }
     this._closeSsh();
     this._activeSource = null;
     this._activeUrl = null;
@@ -123,7 +123,19 @@ export class MoonrakerCamera {
 
   _scheduleRetry() {
     if (this._retryTimer) return;
-    this._retryTimer = setInterval(() => this._retryFind(), this._retryInterval);
+    // Re-arming setTimeout instead of setInterval — _retryFind() is async
+    // and SSH probing can take longer than the interval; setInterval would
+    // stack concurrent invocations and start duplicate poll timers.
+    const tick = async () => {
+      this._retryTimer = null;
+      try { await this._retryFind(); }
+      catch (e) { log.warn('Camera retry failed: ' + e.message); }
+      // _retryFind clears _retryTimer on success; only re-arm if still nothing.
+      if (!this._retryTimer && !this._pollTimer) {
+        this._retryTimer = setTimeout(tick, this._retryInterval);
+      }
+    };
+    this._retryTimer = setTimeout(tick, this._retryInterval);
   }
 
   async _retryFind() {
@@ -143,7 +155,7 @@ export class MoonrakerCamera {
   }
 
   _clearRetry() {
-    if (this._retryTimer) { clearInterval(this._retryTimer); this._retryTimer = null; }
+    if (this._retryTimer) { clearTimeout(this._retryTimer); this._retryTimer = null; }
   }
 
   // ---- HTTP discovery ----

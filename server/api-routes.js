@@ -174,6 +174,12 @@ function checkTotpRate(key) {
   const now = Date.now();
   const entry = _totpAttempts.get(key);
   if (!entry || now - entry.firstAttempt > TOTP_WINDOW_MS) {
+    // Hard cap so a brute-force from many IPs can't OOM us between
+    // 5-minute cleanup ticks.
+    if (_totpAttempts.size >= 10000) {
+      const oldest = _totpAttempts.keys().next().value;
+      if (oldest !== undefined) _totpAttempts.delete(oldest);
+    }
     _totpAttempts.set(key, { count: 1, firstAttempt: now });
     return true;
   }

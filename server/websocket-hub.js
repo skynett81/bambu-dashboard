@@ -213,12 +213,20 @@ export class WebSocketHub {
     }
 
     let sent = 0;
+    const dead = [];
     for (const ws of this.clients) {
       if (ws.readyState === 1 && ws._authenticated) {
-        ws.send(msg);
+        // Send-error callback drops sockets whose write buffer is broken
+        // (TCP-stalled, half-closed without 'close' event, etc.)
+        ws.send(msg, (err) => { if (err) { try { ws.terminate(); } catch {} this.clients.delete(ws); } });
         sent++;
+      } else if (ws.readyState >= 2) {
+        // CLOSING (2) or CLOSED (3) — drop from set; 'close' may have been
+        // missed for various reasons (already-closed under TLS, etc.).
+        dead.push(ws);
       }
     }
+    for (const ws of dead) this.clients.delete(ws);
     // Track WS messages for analytics
     if (sent > 0) { try { recordWsMessage('out', msg.length * sent); } catch {} }
   }
