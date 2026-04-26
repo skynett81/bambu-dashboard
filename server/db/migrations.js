@@ -194,6 +194,8 @@ export function ensureBaseSchemaColumns(db) {
     ['ams_snapshots', 'nozzle_temp_max', 'INTEGER'],
     ['ams_snapshots', 'bed_temp_recommend', 'INTEGER'],
     ['ams_snapshots', 'k_value', 'REAL'],
+    ['ams_snapshots', 'tag_uid', 'TEXT'],
+    ['ams_snapshots', 'tray_sub_brands', 'TEXT'],
     // filament_profiles is migration-created but suffers the same drift —
     // spoolmandb-modular writes weight_g / source / external_id which were
     // never declared in earlier migrations.
