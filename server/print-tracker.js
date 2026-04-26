@@ -1410,12 +1410,25 @@ export class PrintTracker {
             trackConsumedSinceWeight(spool.id, filamentUsedG);
             log.info('Spool #' + spool.id + ' usage (Moonraker fallback): ' + filamentUsedG.toFixed(1) + 'g');
             spoolUpdated = true;
-          } else {
-            log.debug('Moonraker print finished but no spool linked to printer ' + this.printerId);
           }
         }
       } catch (e) {
         log.error('Moonraker spool usage update failed: ' + e.message);
+      }
+    }
+
+    // Final diagnostic — if we got here with usage but no spool was deducted,
+    // tell the user *why* in the log instead of failing silently.
+    if (!spoolUpdated && filamentUsedG > 0) {
+      try {
+        const totalSpools = getDb().prepare('SELECT COUNT(*) as c FROM spools WHERE printer_id = ?').get(this.printerId)?.c || 0;
+        const linkedToSlots = getDb().prepare('SELECT COUNT(*) as c FROM spools WHERE printer_id = ? AND ams_unit IS NOT NULL').get(this.printerId)?.c || 0;
+        let why = 'no Bambu/Moonraker matcher fired';
+        if (totalSpools === 0) why = `no spools registered for printer ${this.printerId} (Settings → Inventory → add a spool)`;
+        else if (linkedToSlots === 0) why = `${totalSpools} spool(s) exist for ${this.printerId} but none assigned to AMS slots (Settings → Inventory → Assign to slot)`;
+        log.warn('Print finished with ' + filamentUsedG.toFixed(1) + 'g used but spool weight NOT deducted — ' + why);
+      } catch {
+        log.warn('Print finished with ' + filamentUsedG.toFixed(1) + 'g used but spool weight NOT deducted (printer ' + this.printerId + ')');
       }
     }
   }
