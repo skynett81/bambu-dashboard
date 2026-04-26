@@ -1362,14 +1362,25 @@ export function runMigrations() {
     // (slug, locale) key, copy the data over, and index by (slug, locale).
     { version: 129, up: (db) => {
       const rebuild = (table, createSql) => {
-        // 1. Rename the original, 2. Recreate with locale + composite unique,
-        // 3. Copy all rows with locale='nb', 4. Drop the temp.
-        db.exec(`ALTER TABLE ${table} RENAME TO ${table}_old_v128`);
-        db.exec(createSql);
-        const cols = db.prepare(`PRAGMA table_info(${table}_old_v128)`).all().map(c => c.name);
+        // Idempotent: if a previous run crashed mid-rebuild, the new table
+        // may already exist alongside an _old_v128 backup. Resume from
+        // wherever we are.
+        const oldTable = `${table}_old_v128`;
+        const hasOrig = _tableExists(db, table);
+        const hasOld = _tableExists(db, oldTable);
+        if (hasOrig && !hasOld) {
+          db.exec(`ALTER TABLE ${table} RENAME TO ${oldTable}`);
+        } else if (!hasOrig && !hasOld) {
+          // Nothing to migrate — just create the new shape and exit.
+          db.exec(createSql);
+          return;
+        }
+        // At this point oldTable definitely exists.
+        if (!_tableExists(db, table)) db.exec(createSql);
+        const cols = db.prepare(`PRAGMA table_info(${oldTable})`).all().map(c => c.name);
         const colList = cols.join(', ');
-        db.exec(`INSERT INTO ${table} (${colList}, locale) SELECT ${colList}, 'nb' FROM ${table}_old_v128`);
-        db.exec(`DROP TABLE ${table}_old_v128`);
+        db.exec(`INSERT INTO ${table} (${colList}, locale) SELECT ${colList}, 'nb' FROM ${oldTable}`);
+        db.exec(`DROP TABLE ${oldTable}`);
       };
 
       rebuild('kb_build_plates', `CREATE TABLE kb_build_plates (
@@ -4730,12 +4741,22 @@ function _mig055_knowledge_base(db) {
 
 
 function _mig057_favorites_multiprint(db) {
-  db.exec(`ALTER TABLE spools ADD COLUMN is_favorite INTEGER DEFAULT 0`);
-  db.exec(`ALTER TABLE queue_items ADD COLUMN target_printers TEXT`);
+  if (_tableExists(db, 'spools')) {
+    try { db.exec(`ALTER TABLE spools ADD COLUMN is_favorite INTEGER DEFAULT 0`); } catch (e) { if (!/duplicate column/i.test(e.message)) throw e; }
+  }
+  if (_tableExists(db, 'queue_items')) {
+    try { db.exec(`ALTER TABLE queue_items ADD COLUMN target_printers TEXT`); } catch (e) { if (!/duplicate column/i.test(e.message)) throw e; }
+  }
 }
 
 function _mig059_transmission_distance(db) {
-  db.exec(`ALTER TABLE filament_profiles ADD COLUMN transmission_distance REAL`);
+  if (!_tableExists(db, 'filament_profiles')) return;
+  try { db.exec(`ALTER TABLE filament_profiles ADD COLUMN transmission_distance REAL`); }
+  catch (e) { if (!/duplicate column/i.test(e.message)) throw e; }
+}
+
+function _tableExists(db, name) {
+  return !!db.prepare("SELECT 1 FROM sqlite_master WHERE type='table' AND name=?").get(name);
 }
 
 function _mig060_slicer_jobs(db) {
@@ -5806,7 +5827,7 @@ function _mig100_bambu_rfid_library(db) {
   `);
 
   // Seed from RFID Library data (async, after DB init)
-  _seedBambuVariantsAsync(db);
+  _seedBambuVariantsAsync(db).catch(e => log.warn('Bambu RFID seed failed: ' + e.message));
 }
 
 async function _seedBambuVariantsAsync(db) {

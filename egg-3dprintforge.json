@@ -118,6 +118,16 @@
       "user_editable": true,
       "rules": "required|string|in:true,false",
       "field_type": "text"
+    },
+    {
+      "name": "Public Host",
+      "description": "Public hostname users connect to (e.g. node2.geektech.no). Shown in the startup banner instead of the internal container IP. Leave blank to auto-detect.",
+      "env_variable": "PUBLIC_HOST",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:255",
+      "field_type": "text"
     }
   ]
 }

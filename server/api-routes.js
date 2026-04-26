@@ -201,11 +201,24 @@ function checkApiRate(ip) {
   const now = Date.now();
   const entry = _apiRates.get(ip);
   if (!entry || now - entry.windowStart > API_RATE_WINDOW_MS) {
+    // Hard cap to prevent unbounded growth from a flood of unique IPs.
+    if (_apiRates.size >= 10000) {
+      const oldest = _apiRates.keys().next().value;
+      if (oldest !== undefined) _apiRates.delete(oldest);
+    }
     _apiRates.set(ip, { count: 1, windowStart: now });
     return true;
   }
   entry.count++;
   return entry.count <= API_RATE_MAX;
+}
+
+// RFC 5987-safe Content-Disposition for user-supplied filenames. Strips
+// CR/LF/quote chars (HTTP response splitting) and falls back to a generic
+// filename if the result is empty.
+function contentDispositionAttachment(filename) {
+  const safe = String(filename || '').replace(/[\r\n"\\]/g, '').replace(/[\x00-\x1F\x7F]/g, '').trim() || 'download';
+  return `attachment; filename="${safe}"; filename*=UTF-8''${encodeURIComponent(safe)}`;
 }
 
 function getApiRateHeaders(ip) {
@@ -465,6 +478,15 @@ export async function handleAuthApiRequest(req, res) {
   const path = url.pathname;
   const method = req.method;
 
+  // Apply general API rate limit to auth endpoints too — they were
+  // previously routed before the global limiter and effectively unthrottled.
+  const _ip = _getClientIp(req);
+  if (!checkApiRate(_ip)) {
+    return sendJson(res, { error: 'Too many requests. Slow down.' }, 429);
+  }
+  // Tight body cap for auth — login/totp/etc. payloads are tiny.
+  const readAuthBody = (cb) => readBody(req, res, cb, MAX_AUTH_BODY_SIZE);
+
   try {
     // GET /api/auth/status
     if (method === 'GET' && path === '/api/auth/status') {
@@ -496,7 +518,7 @@ export async function handleAuthApiRequest(req, res) {
       if (!checkLoginRate(clientIp)) {
         return sendJson(res, { error: 'Too many login attempts. Try again later.' }, 429);
       }
-      return readBody(req, res, (body) => {
+      return readAuthBody((body) => {
         const { password, username } = body;
         // Try DB-backed auth first (returns user object with role/permissions)
         const dbUser = validateCredentialsDB(username, password);
@@ -4290,7 +4312,7 @@ export async function handleApiRequest(req, res) {
       const stat = statSync(backupPath);
       res.writeHead(200, {
         'Content-Type': 'application/octet-stream',
-        'Content-Disposition': `attachment; filename="${backupDlMatch[1]}"`,
+        'Content-Disposition': contentDispositionAttachment(backupDlMatch[1]),
         'Content-Length': stat.size
       });
       return createReadStream(backupPath).pipe(res);
@@ -6212,7 +6234,7 @@ export async function handleApiRequest(req, res) {
           const filename = (body.title || 'sign').replace(/[^a-zA-Z0-9_-]/g, '_') + '.3mf';
           res.writeHead(200, {
             'Content-Type': 'application/octet-stream',
-            'Content-Disposition': `attachment; filename="${filename}"`,
+            'Content-Disposition': contentDispositionAttachment(filename),
             'Content-Length': buf.length
           });
           res.end(buf);
@@ -6855,7 +6877,7 @@ export async function handleApiRequest(req, res) {
       const buf = readFileSync(full);
       res.writeHead(200, {
         'Content-Type': 'application/octet-stream',
-        'Content-Disposition': `attachment; filename="${job.result_path}"`,
+        'Content-Disposition': contentDispositionAttachment(job.result_path),
         'Content-Length': buf.length,
       });
       return res.end(buf);
@@ -7003,7 +7025,7 @@ export async function handleApiRequest(req, res) {
           // Return G-code as binary with metadata in headers.
           res.writeHead(200, {
             'Content-Type': 'application/octet-stream',
-            'Content-Disposition': `attachment; filename="${result.gcodeFilename}"`,
+            'Content-Disposition': contentDispositionAttachment(result.gcodeFilename),
             'X-Slicer': result.slicer,
             'X-Slice-Duration-Ms': String(result.durationMs),
             'X-GCode-Filename': result.gcodeFilename,
@@ -7117,7 +7139,7 @@ export async function handleApiRequest(req, res) {
           const outName = filename.replace(/\.[^.]+$/, '') + '.gcode';
           res.writeHead(200, {
             'Content-Type': 'application/octet-stream',
-            'Content-Disposition': `attachment; filename="${outName}"`,
+            'Content-Disposition': contentDispositionAttachment(outName),
             'X-Slicer': 'native',
             'X-Slice-Duration-Ms': String(elapsed),
             'X-Layer-Count': String(result.layers),
@@ -8615,7 +8637,7 @@ export async function handleApiRequest(req, res) {
           const { generateKeychain3MF } = await import('./generators/keychain-generator.js');
           const buf = await generateKeychain3MF(body);
           const name = (body.text || 'keychain').replace(/[^a-zA-Z0-9_-]/g, '_');
-          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': `attachment; filename="${name}.3mf"`, 'Content-Length': buf.length });
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': contentDispositionAttachment(`${name}.3mf`), 'Content-Length': buf.length });
           res.end(buf);
         } catch (e) { sendJson(res, { error: 'Keychain generation failed: ' + e.message }, 500); }
       });
@@ -8761,7 +8783,7 @@ export async function handleApiRequest(req, res) {
           const { generateThread3MF } = await import('./generators/thread-generator.js');
           const buf = await generateThread3MF(body);
           const name = (body.type || 'bolt') + '_' + (body.standard || 'M6');
-          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': `attachment; filename="${name}.3mf"`, 'Content-Length': buf.length });
+          res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': contentDispositionAttachment(`${name}.3mf`), 'Content-Length': buf.length });
           res.end(buf);
         } catch (e) { sendJson(res, { error: 'Thread generation failed: ' + e.message }, 500); }
       });
@@ -8904,7 +8926,9 @@ export async function handleApiRequest(req, res) {
       const histId = parseInt(histModelMatch[1]);
       const hist = getHistoryById(histId);
       if (!hist?.linked_3mf) return sendJson(res, { error: 'No linked 3MF' }, 404);
-      const fp = join(DATA_DIR, 'history-models', hist.linked_3mf);
+      const histRoot = join(DATA_DIR, 'history-models');
+      const fp = join(histRoot, hist.linked_3mf);
+      if (!fp.startsWith(histRoot + '/') && fp !== histRoot) return sendJson(res, { error: 'Invalid path' }, 400);
       if (!existsSync(fp)) return sendJson(res, { error: 'File missing' }, 404);
       res.writeHead(200, { 'Content-Type': 'application/octet-stream' });
       createReadStream(fp).pipe(res);
@@ -8914,7 +8938,11 @@ export async function handleApiRequest(req, res) {
       const histId = parseInt(histModelMatch[1]);
       const hist = getHistoryById(histId);
       if (hist?.linked_3mf) {
-        try { unlinkSync(join(DATA_DIR, 'history-models', hist.linked_3mf)); } catch {}
+        const histRoot = join(DATA_DIR, 'history-models');
+        const fp = join(histRoot, hist.linked_3mf);
+        if (fp.startsWith(histRoot + '/')) {
+          try { unlinkSync(fp); } catch {}
+        }
         const db = (await import('./db/connection.js')).getDb();
         db.prepare('UPDATE print_history SET linked_3mf = NULL WHERE id = ?').run(histId);
       }
@@ -9211,7 +9239,7 @@ export async function handleApiRequest(req, res) {
       if (!item) return sendJson(res, { error: 'Not found' }, 404);
       const filePath = join(DATA_DIR, 'library', item.filename);
       if (!existsSync(filePath)) return sendJson(res, { error: 'File not found' }, 404);
-      res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': `attachment; filename="${item.original_name}"` });
+      res.writeHead(200, { 'Content-Type': 'application/octet-stream', 'Content-Disposition': contentDispositionAttachment(item.original_name) });
       createReadStream(filePath).pipe(res);
       return;
     }
@@ -12912,20 +12940,21 @@ function sendJson(res, data, status = 200) {
 }
 
 const MAX_BODY_SIZE = 10 * 1024 * 1024; // 10 MB (screenshots can be large)
+const MAX_AUTH_BODY_SIZE = 8 * 1024;     // 8 KB is plenty for login/totp/etc.
 
-function readBody(req, res, callback) {
+function readBody(req, res, callback, maxSize = MAX_BODY_SIZE) {
   let body = '';
   let size = 0;
   req.on('data', chunk => {
     size += chunk.length;
-    if (size > MAX_BODY_SIZE) {
+    if (size > maxSize) {
       req.destroy();
       return;
     }
     body += chunk;
   });
   req.on('end', () => {
-    if (size > MAX_BODY_SIZE) return;
+    if (size > maxSize) return;
     let parsed;
     try {
       parsed = JSON.parse(body);

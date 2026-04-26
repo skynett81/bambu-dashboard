@@ -729,11 +729,13 @@ initPowerMonitor();
 // Report Service (weekly/monthly)
 initReportService();
 
-// Home Assistant MQTT Discovery
-initHaDiscovery(hub);
+// Home Assistant MQTT Discovery — boot-resilient: if migrations didn't reach
+// the schema versions these services depend on, log and continue rather than
+// crashing the whole server.
+try { initHaDiscovery(hub); } catch (e) { log.error('initHaDiscovery failed (continuing): ' + e.message); }
 
 // Remote Node Linking
-initRemoteNodes(hub, broadcastAll);
+try { initRemoteNodes(hub, broadcastAll); } catch (e) { log.error('initRemoteNodes failed (continuing): ' + e.message); }
 
 // E-Commerce License Manager
 const ecomLicense = new EcomLicenseManager();
@@ -1252,6 +1254,16 @@ function shutdown() {
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
 
+// Catch-all so a stray unhandled async rejection doesn't terminate the
+// long-running server (Node 22 default behaviour).
+process.on('unhandledRejection', (reason) => {
+  const msg = reason instanceof Error ? (reason.stack || reason.message) : String(reason);
+  log.error('Unhandled promise rejection: ' + msg);
+});
+process.on('uncaughtException', (err) => {
+  log.error('Uncaught exception: ' + (err.stack || err.message));
+});
+
 // Start servers — retry if port is still held by the previous process
 function listenWithRetry(server, port, label, cb) {
   let attempts = 0;
@@ -1271,8 +1283,13 @@ function listenWithRetry(server, port, label, cb) {
 function printStartupBanner() {
   const printerCount = manager.getPrinterIds().length + (IS_DEMO ? demoMockPrinters.length : 0);
   const { ips, names } = getLocalAddresses();
+  // PUBLIC_HOST overrides banner output for panel/proxy hosts where the
+  // internal container hostname/IP isn't reachable from users.
+  const publicHost = process.env.PUBLIC_HOST?.trim();
   // Filter out IPv6 for display (too long for banner), keep IPv4 + hostnames
-  const allHosts = [...new Set([...names, ...ips.filter(ip => !ip.includes(':'))])];
+  const allHosts = publicHost
+    ? [publicHost]
+    : [...new Set([...names, ...ips.filter(ip => !ip.includes(':'))])];
   console.log('');
   console.log('  ╔══════════════════════════════════════════════════╗');
   console.log(`  ║   3DPrintForge v${updater.currentVersion.padEnd(30)}║`);

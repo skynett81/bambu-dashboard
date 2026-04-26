@@ -50,8 +50,10 @@ export function generateInvoiceHtml(order, customer, items, invoice, companySett
 
   const settings = companySettings || {};
   const currency = invoice.currency || order?.currency || 'NOK';
-  const taxPct = invoice.tax_pct ?? order?.tax_pct ?? 25;
-  const discountPct = invoice.discount_pct ?? order?.discount_pct ?? 0;
+  // Coerce to numbers — DB values may have been written as strings; raw
+  // interpolation would both produce NaN totals and allow HTML injection.
+  const taxPct = Number(invoice.tax_pct ?? order?.tax_pct ?? 25) || 0;
+  const discountPct = Number(invoice.discount_pct ?? order?.discount_pct ?? 0) || 0;
 
   const companyName = settings.crm_company_name || '';
   const companyAddress = settings.crm_company_address || '';
