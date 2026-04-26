@@ -83,6 +83,14 @@ function getAggregateStats() {
     const profiles = getFilamentProfiles({});
     const language = getInventorySetting('language');
 
+    // Legacy filament_inventory rows (pre-spools migration). Counted
+    // alongside `spools` so total reflects everything the user has, not
+    // just the new inventory.
+    let legacyFilamentRows = 0;
+    try {
+      legacyFilamentRows = db.prepare('SELECT COUNT(*) as c FROM filament_inventory').get()?.c || 0;
+    } catch {}
+
     // Printer models + brand/connector type breakdown + cloud usage
     const models = {};
     const connectors = {};
@@ -171,7 +179,9 @@ function getAggregateStats() {
       printerModels: models,
       printerConnectors: connectors,
       cloudPrinters,
-      totalSpools: spools.length || 0,
+      totalSpools: (spools.length || 0) + legacyFilamentRows,
+      totalSpoolsNew: spools.length || 0,
+      totalSpoolsLegacy: legacyFilamentRows,
       totalProfiles: profiles.length || 0,
       totalPrints: printStats.total,
       completedPrints: printStats.completed,
