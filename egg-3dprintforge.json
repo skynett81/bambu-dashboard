@@ -4,10 +4,10 @@
     "version": "PTDL_v2",
     "update_url": null
   },
-  "exported_at": "2026-03-19T00:00:00+00:00",
+  "exported_at": "2026-04-26T00:00:00+00:00",
   "name": "3DPrintForge",
   "author": "skynett81@github.com",
-  "description": "Self-hosted dashboard for monitoring and controlling 3D printers. Real-time status, camera feeds, print history, print queue with load balancing, filament inventory, cloud slicer integration, and 7 notification channels (Telegram, Discord, Email, Webhook, ntfy, Pushover, SMS) via MQTT.",
+  "description": "Self-hosted dashboard for 17 printer brands (Bambu Lab, Snapmaker, Prusa, OctoPrint, Creality, Elegoo, Voron, AnkerMake, QIDI, RatRig, Duet/RRF, FlashForge, Repetier, and any Klipper/Moonraker printer). Includes native slicer, Slicer Studio with profiles, Scene Composer with CSG, AI Model Forge, Mesh Repair, real-time status, camera feeds, print history, print queue with load balancing, filament inventory, and 7 notification channels (Telegram, Discord, Email, Webhook, ntfy, Pushover, SMS).",
   "features": null,
   "docker_images": {
     "Node.js 22": "ghcr.io/parkervcp/yolks:nodejs_22"
@@ -22,7 +22,7 @@
   },
   "scripts": {
     "installation": {
-      "script": "#!/bin/bash\napt-get update -qq\napt-get install -y --no-install-recommends git ffmpeg ca-certificates openssl\n\ncd /mnt/server\n\nif [ -d .git ]; then\n  git pull\nelse\n  git clone https://github.com/skynett81/3dprintforge.git .\nfi\n\nnpm install --omit=dev\n\nmkdir -p data data/uploads certs\n\necho \"Installation complete\"",
+      "script": "#!/bin/bash\napt-get update -qq\napt-get install -y --no-install-recommends git ffmpeg ca-certificates openssl\n\ncd /mnt/server\n\nif [ -d .git ]; then\n  git pull\nelse\n  git clone https://github.com/skynett81/3dprintforge.git .\nfi\n\nnpm install --omit=dev\n\nmkdir -p data data/uploads data/library data/model-cache data/history-models data/toolpath-cache data/printer-images certs\n\necho \"Installation complete\"",
       "container": "ghcr.io/parkervcp/installers:debian",
       "entrypoint": "bash"
     }
@@ -99,16 +99,6 @@
       "field_type": "text"
     },
     {
-      "name": "Spoolman URL",
-      "description": "URL of your Spoolman instance for filament inventory sync. Leave empty to disable.",
-      "env_variable": "SPOOLMAN_URL",
-      "default_value": "",
-      "user_viewable": true,
-      "user_editable": true,
-      "rules": "nullable|string|max:256",
-      "field_type": "text"
-    },
-    {
       "name": "GitHub Token",
       "description": "GitHub personal access token for auto-update checks. Only needed for private repositories or to avoid rate limits.",
       "env_variable": "GITHUB_TOKEN",
@@ -116,6 +106,26 @@
       "user_viewable": true,
       "user_editable": true,
       "rules": "nullable|string|max:256",
+      "field_type": "text"
+    },
+    {
+      "name": "Slicer Path",
+      "description": "Optional absolute path to OrcaSlicer/PrusaSlicer/BambuStudio/SnapmakerOrca CLI for the Slicer Bridge. Auto-detected if installed via Flatpak or AppImage.",
+      "env_variable": "SLICER_PATH",
+      "default_value": "",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "nullable|string|max:512",
+      "field_type": "text"
+    },
+    {
+      "name": "Require Auth",
+      "description": "Set to true to require authentication on all dashboard requests. Use with Auth Password.",
+      "env_variable": "REQUIRE_AUTH",
+      "default_value": "false",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|in:true,false",
       "field_type": "text"
     }
   ]
