@@ -14,6 +14,7 @@ const __dirname_db = dirname(dirname(__filename_db));
 
 export function runMigrations() {
   const db = getDb();
+  db.exec('CREATE TABLE IF NOT EXISTS schema_version (version INTEGER PRIMARY KEY)');
   const row = db.prepare('SELECT MAX(version) as v FROM schema_version').get();
   const currentVersion = row?.v || 0;
 
