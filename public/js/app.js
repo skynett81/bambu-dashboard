@@ -52,6 +52,7 @@ function connect() {
           updatePrinterSelector();
         }
         updateConnectionBadge();
+        scheduleInfoBoxRefresh(50);
 
         // If active printer was deleted, update dashboard for the new active
         if (state.getActivePrinterId()) {
@@ -79,6 +80,7 @@ function connect() {
 
         updatePrinterSelector();
         updateConnectionBadge('connected');
+        scheduleInfoBoxRefresh(50);
 
         // Trigger initial dashboard update
         const activeState = state.getActivePrinterState();
@@ -101,7 +103,11 @@ function connect() {
         if (printerId) {
           // Ignore status from printers not in our meta (deleted)
           if (!state.printerMeta[printerId]) return;
+          const wasEmpty = !state.printers[printerId] || Object.keys(state.printers[printerId]).length === 0;
           state.updatePrinter(printerId, msg.data);
+          // First status arrival flips an empty entry into "online" — refresh
+          // the info-box counter immediately instead of waiting 30s.
+          if (wasEmpty) scheduleInfoBoxRefresh(50);
 
           // Read full merged state (not delta) for dashboard updates
           const fullState = state.printers[printerId] || {};
@@ -198,6 +204,17 @@ function updateConnectionBadge(status) {
 }
 
 // ---- Info Box Stats ----
+// Debounced trigger so multiple WS messages in flight only fire one refresh.
+let _infoBoxRefreshTimer = null;
+function scheduleInfoBoxRefresh(delay = 250) {
+  if (_infoBoxRefreshTimer) return;
+  _infoBoxRefreshTimer = setTimeout(() => {
+    _infoBoxRefreshTimer = null;
+    updateInfoBoxes();
+  }, delay);
+}
+window.scheduleInfoBoxRefresh = scheduleInfoBoxRefresh;
+
 async function updateInfoBoxes() {
   try {
     const [printers, queue, filament, spools] = await Promise.all([
