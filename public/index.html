@@ -78,6 +78,11 @@
         <!-- Connection & system info badges -->
         <span id="connection-badge" class="badge badge-disconnected" data-i18n-key="header.connecting">Connecting...</span>
         <span id="system-info-badge" class="system-info-badge" style="cursor:pointer;font-size:0.7rem;color:var(--text-muted);margin-left:8px" title="System info"></span>
+        <button id="camera-header-toggle" onclick="toggleCameraVisibility()" title="Toggle camera visibility"
+          style="margin-left:10px;background:transparent;border:1px solid rgba(255,255,255,0.18);border-radius:6px;padding:4px 9px;cursor:pointer;color:inherit;font-size:0.72rem;display:none;align-items:center;gap:5px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="15" height="12" rx="2"/><path d="M17 10l4-2v8l-4-2z"/></svg>
+          <span id="camera-header-toggle-label">Camera</span>
+        </button>
       </div>
     </nav>
 

@@ -214,9 +214,16 @@ async function applyCameraVisibility() {
   const card = document.getElementById('camera-card');
   const btn = document.getElementById('camera-toggle-btn');
   const label = document.getElementById('camera-toggle-label');
+  const headerBtn = document.getElementById('camera-header-toggle');
+  const headerLabel = document.getElementById('camera-header-toggle-label');
   if (!card) return;
   const printerId = state.getActivePrinterId();
-  if (!printerId) { card.style.display = ''; if (btn) btn.style.display = 'none'; return; }
+  if (!printerId) {
+    card.style.display = '';
+    if (btn) btn.style.display = 'none';
+    if (headerBtn) headerBtn.style.display = 'none';
+    return;
+  }
   // Look up printer config to decide auto-default
   let cfg = null;
   try {
@@ -226,13 +233,18 @@ async function applyCameraVisibility() {
   const isLan = !!(cfg?.ip);
   const isCloud = !!(cfg?.cloudMode);
   const autoVisible = isLan && !isCloud;
-  // User override beats auto
   const stored = localStorage.getItem(_cameraPrefKey(printerId));
   const visible = stored === null ? autoVisible : stored === 'true';
   card.style.display = visible ? '' : 'none';
   if (btn) {
     btn.style.display = '';
     if (label) label.textContent = visible ? 'Hide' : 'Show';
+  }
+  if (headerBtn) {
+    headerBtn.style.display = 'inline-flex';
+    headerBtn.style.opacity = visible ? '1' : '0.55';
+    headerBtn.style.borderColor = visible ? 'rgba(0,212,255,0.5)' : 'rgba(255,255,255,0.18)';
+    if (headerLabel) headerLabel.textContent = visible ? 'Camera: ON' : 'Camera: OFF';
   }
 }
 window.applyCameraVisibility = applyCameraVisibility;
@@ -245,9 +257,8 @@ window.toggleCameraVisibility = function() {
   const wasVisible = card.style.display !== 'none';
   const newVisible = !wasVisible;
   localStorage.setItem(key, String(newVisible));
-  card.style.display = newVisible ? '' : 'none';
-  const label = document.getElementById('camera-toggle-label');
-  if (label) label.textContent = newVisible ? 'Hide' : 'Show';
+  // Re-apply so both card display, in-card button, and header chip stay in sync.
+  applyCameraVisibility();
 };
 
 // ---- Info Box Stats ----
