@@ -46,15 +46,15 @@
     "@jscad/stl-serializer": "^2.1.23",
     "@snapmaker/snapmaker-sacp-sdk": "^0.1.1",
     "admin-lte": "^4.0.0-rc7",
-    "basic-ftp": "^5.2.0",
+    "basic-ftp": "^5.3.0",
     "bootstrap": "^5.3.8",
-    "mqtt": "^5.10.0",
+    "mqtt": "^5.15.1",
     "qrcode": "^1.5.4",
     "ssh2": "^1.17.0",
-    "ws": "^8.18.0"
+    "ws": "^8.20.0"
   },
   "devDependencies": {
-    "electron": "^41.2.0",
+    "electron": "^41.3.0",
     "electron-builder": "^26.8.1",
     "electron-updater": "^6.8.3"
   },
@@ -143,7 +143,10 @@
       ]
     },
     "win": {
-      "target": ["nsis", "portable"],
+      "target": [
+        "nsis",
+        "portable"
+      ],
       "icon": "electron/assets/icon.png",
       "verifyUpdateCodeSignature": false,
       "requestedExecutionLevel": "asInvoker",
@@ -153,12 +156,27 @@
       }
     },
     "fileAssociations": [
-      { "ext": "3mf", "name": "3D Manufacturing Format", "description": "Open in 3DPrintForge" },
-      { "ext": "stl", "name": "STL 3D Model", "description": "Open in 3DPrintForge" },
-      { "ext": "gcode", "name": "G-code Print File", "description": "Open in 3DPrintForge" }
+      {
+        "ext": "3mf",
+        "name": "3D Manufacturing Format",
+        "description": "Open in 3DPrintForge"
+      },
+      {
+        "ext": "stl",
+        "name": "STL 3D Model",
+        "description": "Open in 3DPrintForge"
+      },
+      {
+        "ext": "gcode",
+        "name": "G-code Print File",
+        "description": "Open in 3DPrintForge"
+      }
     ],
     "mac": {
-      "target": ["dmg", "zip"],
+      "target": [
+        "dmg",
+        "zip"
+      ],
       "category": "public.app-category.utilities",
       "icon": "electron/assets/icon.png"
     },
@@ -173,7 +191,10 @@
       "publisher": "CN=GeekTech",
       "publisherDisplayName": "GeekTech",
       "displayName": "3DPrintForge",
-      "languages": ["en-US", "nb-NO"],
+      "languages": [
+        "en-US",
+        "nb-NO"
+      ],
       "showNameOnTiles": true,
       "backgroundColor": "#1a1d21"
     },
@@ -192,7 +213,9 @@
     "protocols": [
       {
         "name": "3DPrintForge Protocol",
-        "schemes": ["3dprintforge"]
+        "schemes": [
+          "3dprintforge"
+        ]
       }
     ]
   }
