@@ -911,44 +911,32 @@ tr:hover td { background: rgba(18,121,255,0.05); }
         <svg class="hero-stat-hex" viewBox="0 0 100 100"><polygon points="50,5 93,28 93,72 50,95 7,72 7,28" fill="none" stroke="#00d4ff" stroke-width="1.5"/><polygon points="50,15 85,33 85,67 50,85 15,67 15,33" fill="none" stroke="#f97316" stroke-width="1"/></svg>
         <div class="hero-stat-label">Connected Printers</div>
         <div class="hero-stat-value">${s.total_printers}</div>
-        <div class="hero-stat-sub">${s.total_cloud_printers} via Bambu Cloud</div>
+        <div class="hero-stat-sub">${s.total_cloud_printers > 0 ? s.total_cloud_printers + ' via Bambu Cloud' : 'all LAN'}</div>
       </div>
     </div>
 
-    <div class="stats-grid">
-      <div class="g-card"><div class="g-card-inner">
-        <div class="g-card-value">${s.total}</div>
-        <div class="g-card-label">Total Installs</div>
-      </div></div>
-      <div class="g-card"><div class="g-card-inner">
-        <div class="g-card-value pink">${s.total_spools}</div>
-        <div class="g-card-label">Filament Spools</div>
-      </div></div>
-      <div class="g-card"><div class="g-card-inner">
-        <div class="g-card-value purple">${s.total_plugins}</div>
-        <div class="g-card-label">Active Plugins</div>
-      </div></div>
-      <div class="g-card"><div class="g-card-inner">
-        <div class="g-card-value green">${s.total_slicer_jobs}</div>
-        <div class="g-card-label">Slicer Jobs</div>
-      </div></div>
-      <div class="g-card"><div class="g-card-inner">
-        <div class="g-card-value orange">${s.queue_items}</div>
-        <div class="g-card-label">Pending Queue</div>
-      </div></div>
-      <div class="g-card"><div class="g-card-inner">
-        <div class="g-card-value blue">${s.total_profiles}</div>
-        <div class="g-card-label">Filament Profiles</div>
-      </div></div>
-      <div class="g-card"><div class="g-card-inner">
-        <div class="g-card-value blue">${s.avg_install_age_days}d</div>
-        <div class="g-card-label">Avg Install Age</div>
-      </div></div>
-      <div class="g-card"><div class="g-card-inner">
-        <div class="g-card-value purple">${s.ecom_active_count}</div>
-        <div class="g-card-label">E-commerce Active</div>
-      </div></div>
-    </div>
+    ${(() => {
+      const card = (value, label, color = '', display = null) => {
+        const num = typeof value === 'number' ? value : Number(value);
+        if (!num || num === 0) return '';
+        const shown = display !== null ? display : (typeof value === 'number' ? value.toLocaleString() : value);
+        return `<div class="g-card"><div class="g-card-inner">
+          <div class="g-card-value ${color}">${shown}</div>
+          <div class="g-card-label">${label}</div>
+        </div></div>`;
+      };
+      const cards = [
+        card(s.total, 'Total Installs'),
+        card(s.total_spools, 'Filament Spools', 'pink'),
+        card(s.total_plugins, 'Active Plugins', 'purple'),
+        card(s.total_slicer_jobs, 'Slicer Jobs', 'green'),
+        card(s.queue_items, 'Pending Queue', 'orange'),
+        card(s.total_profiles, 'Filament Profiles', 'blue'),
+        card(s.avg_install_age_days, 'Avg Install Age', 'blue', s.avg_install_age_days + 'd'),
+        card(s.ecom_active_count, 'E-commerce Active', 'purple'),
+      ].filter(Boolean);
+      return cards.length ? `<div class="stats-grid">${cards.join('')}</div>` : '';
+    })()}
   </div>
 </section>
 
