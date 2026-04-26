@@ -69,7 +69,12 @@ async function ensureSchema(env) {
     ['installations', 'total_waste_g', 'INTEGER DEFAULT 0'],
     ['installations', 'prime_tower_waste_g', 'INTEGER DEFAULT 0'],
     ['installations', 'total_color_changes', 'INTEGER DEFAULT 0'],
-    ['installations', 'multi_color_prints', 'INTEGER DEFAULT 0']
+    ['installations', 'multi_color_prints', 'INTEGER DEFAULT 0'],
+    // Achievements
+    ['installations', 'achievements_earned', 'INTEGER DEFAULT 0'],
+    ['installations', 'achievements_total', 'INTEGER DEFAULT 0'],
+    ['installations', 'achievements_by_category', 'TEXT'],
+    ['installations', 'achievements_earned_ids', 'TEXT']
   ];
   for (const [t, c, type] of cols) {
     try { await env.DB.prepare(`ALTER TABLE ${t} ADD COLUMN ${c} ${type}`).run(); }
@@ -131,6 +136,10 @@ async function handlePing(request, env) {
   const safePrimeTowerWasteG = parseInt(body.primeTowerWasteG) || 0;
   const safeTotalColorChanges = parseInt(body.totalColorChanges) || 0;
   const safeMultiColorPrints = parseInt(body.multiColorPrints) || 0;
+  const safeAchievementsEarned = parseInt(body.achievementsEarned) || 0;
+  const safeAchievementsTotal = parseInt(body.achievementsTotal) || 0;
+  const safeAchievementsByCategory = body.achievementsByCategory ? JSON.stringify(body.achievementsByCategory).substring(0, 500) : null;
+  const safeAchievementsEarnedIds = body.achievementsEarnedIds ? String(body.achievementsEarnedIds).substring(0, 4000) : null;
   const today = new Date().toISOString().split('T')[0];
 
   // Upsert installation
@@ -149,6 +158,7 @@ async function handlePing(request, env) {
        success_rate = ?, total_print_hours = ?, total_filament_kg = ?,
        queue_items = ?, install_age_days = ?, material_types = ?, ecom_active = ?,
        total_waste_g = ?, prime_tower_waste_g = ?, total_color_changes = ?, multi_color_prints = ?,
+       achievements_earned = ?, achievements_total = ?, achievements_by_category = ?, achievements_earned_ids = ?,
        features = ?, demo = ?, language = ?,
        last_seen = datetime('now'), ping_count = ping_count + 1 WHERE id = ?`
     ).bind(safeVersion, safePlatform, safeNode, safeArch, safeRam,
@@ -160,6 +170,7 @@ async function handlePing(request, env) {
       safeSuccessRate, safeTotalPrintHours, safeTotalFilamentKg,
       safeQueueItems, safeInstallAgeDays, safeMaterialTypes, safeEcomActive,
       safeTotalWasteG, safePrimeTowerWasteG, safeTotalColorChanges, safeMultiColorPrints,
+      safeAchievementsEarned, safeAchievementsTotal, safeAchievementsByCategory, safeAchievementsEarnedIds,
       safeFeatures, safeDemo, safeLanguage, safeId).run();
   } else {
     await env.DB.prepare(
@@ -172,8 +183,9 @@ async function handlePing(request, env) {
        success_rate, total_print_hours, total_filament_kg,
        queue_items, install_age_days, material_types, ecom_active,
        total_waste_g, prime_tower_waste_g, total_color_changes, multi_color_prints,
+       achievements_earned, achievements_total, achievements_by_category, achievements_earned_ids,
        features, demo, language)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).bind(safeId, safeVersion, safePlatform, safeNode, safeArch, safeRam,
       safeCpuCores, safeCpuModel,
       safePrinterCount, safePrinterModels, safePrinterConnectors, safePrinterBrands, safeCloudPrinters,
@@ -183,6 +195,7 @@ async function handlePing(request, env) {
       safeSuccessRate, safeTotalPrintHours, safeTotalFilamentKg,
       safeQueueItems, safeInstallAgeDays, safeMaterialTypes, safeEcomActive,
       safeTotalWasteG, safePrimeTowerWasteG, safeTotalColorChanges, safeMultiColorPrints,
+      safeAchievementsEarned, safeAchievementsTotal, safeAchievementsByCategory, safeAchievementsEarnedIds,
       safeFeatures, safeDemo, safeLanguage).run();
 
     // Increment new installs for today
@@ -929,6 +942,8 @@ tr:hover td { background: rgba(18,121,255,0.05); }
       };
       const cards = [
         card(s.total, 'Total Installs'),
+        card(s.achievements_earned_total, 'Achievements Earned', 'pink'),
+        card(s.achievements_avg_per_install, 'Avg Earned/Install', 'orange', s.achievements_max_total ? `${s.achievements_avg_per_install}/${s.achievements_max_total}` : s.achievements_avg_per_install),
         card(s.total_spools, 'Filament Spools', 'pink'),
         card(s.total_plugins, 'Active Plugins', 'purple'),
         card(s.total_slicer_jobs, 'Slicer Jobs', 'green'),
@@ -1031,6 +1046,14 @@ tr:hover td { background: rgba(18,121,255,0.05); }
           <tr><td>Color changes</td><td><strong>${s.total_color_changes.toLocaleString()}</strong></td></tr>
         </tbody></table>
       </div>` : ''}
+      ${s.top_achievements.length ? `<div class="data-section">
+        <div class="data-section-title">🏆 Most-Earned Achievements</div>
+        <table><thead><tr><th>ID</th><th>Earned by</th><th class="bar-cell"></th></tr></thead><tbody>${s.top_achievements.map(a => {
+          const maxA = s.top_achievements[0]?.count || 1;
+          const pct = Math.max(Math.round(a.count / maxA * 100), 5);
+          return `<tr><td><code style="font-family:var(--font-mono);font-size:0.7rem;color:var(--color-accent)">${esc(a.id)}</code></td><td>${a.count} install${a.count === 1 ? '' : 's'}</td><td class="bar-cell"><div class="bar" style="width:${pct}%;background:linear-gradient(90deg,var(--color-orange),var(--color-pink))"></div></td></tr>`;
+        }).join('')}</tbody></table>
+      </div>` : ''}
     </div>` : ''}
     <div class="three-col" style="margin-top:20px">
       ${s.features.length ? `<div class="data-section">
@@ -1117,7 +1140,7 @@ async function getStatsData(env) {
     versions, platforms, nodeVersions, archs, languages, daily, recent,
     totalPrinters, totalSpools, totalProfiles, demoCount, featureRows,
     totalCloudPrinters, totalPluginCount, totalSlicerJobs, connectorRows, brandRows,
-    printActivity, materialTypeRows, ageStats, ecomActiveCount] = await Promise.all([
+    printActivity, materialTypeRows, ageStats, ecomActiveCount, achievementStats, achievementIdRows] = await Promise.all([
     env.DB.prepare('SELECT COUNT(*) as count FROM installations').first(),
     env.DB.prepare(`SELECT COUNT(*) as count FROM installations WHERE last_seen >= datetime('now', '-1 day')`).first(),
     env.DB.prepare(`SELECT COUNT(*) as count FROM installations WHERE last_seen >= datetime('now', '-7 days')`).first(),
@@ -1145,6 +1168,8 @@ async function getStatsData(env) {
     env.DB.prepare('SELECT material_types FROM installations WHERE material_types IS NOT NULL AND material_types != \'\'').all(),
     env.DB.prepare('SELECT AVG(install_age_days) as avg, MAX(install_age_days) as max FROM installations WHERE install_age_days > 0').first(),
     env.DB.prepare('SELECT COUNT(*) as count FROM installations WHERE ecom_active = 1').first(),
+    env.DB.prepare('SELECT SUM(achievements_earned) as total, MAX(achievements_total) as max_total, AVG(achievements_earned) as avg FROM installations').first(),
+    env.DB.prepare('SELECT achievements_earned_ids FROM installations WHERE achievements_earned_ids IS NOT NULL AND achievements_earned_ids != \'\'').all(),
   ]);
 
   // Aggregate printer models across all installations
@@ -1227,6 +1252,21 @@ async function getStatsData(env) {
   const totalCompleted = printActivity?.completed || 0;
   const overallSuccessRate = totalAttempted > 0 ? Math.round(totalCompleted / totalAttempted * 100) : 0;
 
+  // Aggregate achievement IDs across installations
+  const achievementCounts = {};
+  for (const row of (achievementIdRows?.results || [])) {
+    if (row.achievements_earned_ids) {
+      for (const id of row.achievements_earned_ids.split(';')) {
+        const trimmed = id.trim();
+        if (trimmed) achievementCounts[trimmed] = (achievementCounts[trimmed] || 0) + 1;
+      }
+    }
+  }
+  const topAchievements = Object.entries(achievementCounts)
+    .map(([id, count]) => ({ id, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 30);
+
   return {
     total: total?.count || 0,
     active_24h: active24h?.count || 0,
@@ -1261,6 +1301,10 @@ async function getStatsData(env) {
     avg_install_age_days: Math.round(ageStats?.avg || 0),
     max_install_age_days: ageStats?.max || 0,
     ecom_active_count: ecomActiveCount?.count || 0,
+    achievements_earned_total: achievementStats?.total || 0,
+    achievements_max_total: achievementStats?.max_total || 0,
+    achievements_avg_per_install: Math.round(achievementStats?.avg || 0),
+    top_achievements: topAchievements,
     demo_count: demoCount?.count || 0,
     versions: versions?.results || [],
     platforms: platforms?.results || [],

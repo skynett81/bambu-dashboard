@@ -107,7 +107,7 @@ function _detectBrand(printer) {
   return 'Other';
 }
 
-function getAggregateStats() {
+async function getAggregateStats() {
   try {
     const db = getDb();
     const printers = getPrinters();
@@ -217,6 +217,39 @@ function getAggregateStats() {
       pluginCount = db.prepare("SELECT COUNT(*) as c FROM plugins WHERE enabled = 1").get()?.c || 0;
     } catch {}
 
+    // Achievements — earned count + per-category breakdown + earned IDs.
+    // Defensive: calculateAchievements() walks all history; on a huge install
+    // this can be slow, so wrap defensively. Sent fields:
+    //   achievementsEarned, achievementsTotal, achievementsByCategory,
+    //   achievementsEarnedIds (semicolon-joined for compact storage)
+    let achievementsEarned = 0, achievementsTotal = 0;
+    const achievementsByCategory = {};
+    let achievementsEarnedIds = '';
+    try {
+      const { calculateAchievements } = await import('./achievements-stats.js').catch(async () => {
+        // Fallback to api-routes export until a dedicated module exists.
+        const mod = await import('./api-routes.js');
+        return { calculateAchievements: mod.calculateAchievements };
+      });
+      const list = (typeof calculateAchievements === 'function') ? calculateAchievements() : [];
+      if (Array.isArray(list)) {
+        achievementsTotal = list.length;
+        const ids = [];
+        for (const a of list) {
+          if (a.earned) {
+            achievementsEarned++;
+            ids.push(a.id);
+            const cat = a.category || 'other';
+            achievementsByCategory[cat] = (achievementsByCategory[cat] || 0) + 1;
+          }
+        }
+        // Cap at 4000 chars to stay well within worker sanitize limit.
+        achievementsEarnedIds = ids.join(';').substring(0, 4000);
+      }
+    } catch (e) {
+      // ignore — achievements may not be available in test/demo
+    }
+
     // Slicer jobs handled
     let slicerJobs = 0;
     try {
@@ -248,6 +281,10 @@ function getAggregateStats() {
       queueItems,
       slicerJobs,
       pluginCount,
+      achievementsEarned,
+      achievementsTotal,
+      achievementsByCategory,
+      achievementsEarnedIds,
       ecomActive,
       dbVersion,
       installAgeDays,
@@ -258,12 +295,12 @@ function getAggregateStats() {
   }
 }
 
-export function sendTelemetryPing() {
+export async function sendTelemetryPing() {
   // Respect opt-out
   if (process.env.DISABLE_TELEMETRY === 'true' || config.telemetry?.disabled) return;
 
   const isDemo = process.env.BAMBU_DEMO === 'true';
-  const stats = getAggregateStats();
+  const stats = await getAggregateStats();
   const cpu = cpus();
 
   const payload = {

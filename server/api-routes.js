@@ -12621,7 +12621,7 @@ function _escHtml(s) {
 }
 
 // ---- Achievements calculator ----
-function calculateAchievements() {
+export function calculateAchievements() {
   const history = getHistory(9999, 0);
   const spools = getFilament();
 
