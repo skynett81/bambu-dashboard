@@ -47,6 +47,22 @@ description: A powerful, self-hosted dashboard for all your 3D printers
 - **English UI** — entire application in English, documentation available in English and Norwegian
 - **Self-hosted** — no cloud dependency, your data on your machine
 
+### New in v1.1.20
+
+- **Native slicer** — pure-JS slicing engine built from scratch (mesh→polygon→infill→G-code), runs without external dependencies
+- **Slicer Studio** — full standalone slicer program with Three.js viewport, profile system, and Send-to-Printer
+- **Slicer Bridge** — headless slicing via OrcaSlicer / BambuStudio / Snapmaker Orca CLI with auto-detection
+- **Scene Composer** — 3D scene editor with BSP-tree CSG (boolean mesh operations)
+- **AI Model Forge** — text-to-3D generator with intent parser (signs, lithophanes, holders, etc.)
+- **Mesh Repair Toolkit** — automatic repair of broken STL/3MF files
+- **G-code Reference & Estimator** — built-in G-code reference with time estimation
+- **17 brands / 75+ models** — expanded vendor coverage with Duet/RRF, FlashForge FNet, Repetier-Server
+- **Printer Image Service** — real product images from OrcaSlicer GitHub for fleet view
+- **23 slicer profiles seeded** — 12 printers, 7 filaments, 4 quality presets ready out of the box
+- **Universal multi-column UI** — optimised grid layout for large screens
+- **Command Palette fix** — Ctrl+K now shows all 25 panels correctly
+- **Sidebar fix** — Library badge updated from 11 to 12 after Slicer Bridge
+
 ### New in v1.1.19
 
 - **Model Forge 51 tools** — 34 new across 8 categories: Gridfinity (baseplate/bin/lid/tool holder), mechanical (gear/pulley/spring/hinge/snap-fit), printer (spool adapter/cable chain/first layer test/nozzle storage), home (wall hook/cable clip/plant pot/wall bracket), tech (phone stand/headphone stand/VESA mount/RPi case), creative (voronoi/topographic map/3D QR code/honeycomb/dice tower/miniature base)

@@ -18,14 +18,18 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 - **Print Queue** — multi-printer dispatch with load balancing and pre-print filament checks
 - **Filament Inventory** — favorites, color filters, bulk add, HueForge TD, CSV import, Spoolman sync
 - **Model Forge** — 51 parametric 3D generators across 8 categories: organization (Gridfinity, storage boxes, cable labels), mechanical (gears, pulleys, springs, hinges, snap-fits), printer (spool adapters, cable chains, first-layer tests, nozzle storage), home (hooks, clips, pots, organizers, wall plates, lidded boxes), tech (phone/headphone stands, VESA mounts, Raspberry Pi cases, battery holders), creative (voronoi, topographic maps, 3D QR, shapes, honeycomb, dice towers, miniature bases)
+- **Slicer Studio** — built-in pure-JS slicing engine + Slicer Bridge to OrcaSlicer/BambuStudio/Snapmaker Orca CLI, with profile system and Three.js viewport
+- **Scene Composer** — 3D scene editor with BSP-tree CSG (boolean mesh operations)
+- **AI Model Forge** — text-to-3D generator with intent parser
+- **Mesh Repair Toolkit** — automatic repair of broken STL/3MF files
 - **Cloud Slicer** — upload files, auto-slice with OrcaSlicer/PrusaSlicer, FTPS to printer
 - **7 notification channels** — Telegram, Discord, Email, Webhook, ntfy, Pushover, SMS
-- **Multi-brand** — Bambu Lab, Snapmaker, Prusa, OctoPrint, Creality, Elegoo, Voron, AnkerMake, QIDI, RatRig
+- **17 brands / 75+ models** — Bambu Lab, Snapmaker, Prusa, OctoPrint, Creality, Elegoo, Voron, AnkerMake, QIDI, RatRig, Duet/RRF, FlashForge, Repetier-Server, and any Klipper/Moonraker printer
 - **Security hardened** — CIS/NIS2 aligned: scrypt auth, CSRF, CSP, rate limiting, TOFU cert pinning, SSRF guards
 - **590+ API endpoints** — full REST API with OpenAPI docs at `/api/docs`
 - **English UI** — entire application in English, documentation site available in English and Norwegian
 - **Docusaurus documentation** — available at `/docs/` and on GitHub Pages
-- **Zero frameworks** — pure HTML/CSS/JS frontend, Node.js 22 backend with 9 npm packages
+- **Zero frameworks** — pure HTML/CSS/JS frontend, Node.js 22 backend with 11 npm packages
 - **Desktop app (Electron)** — optional native desktop build for Linux (AppImage, deb, rpm, Flatpak, tar.gz), Windows, macOS with system tray, native notifications, auto-updater, and auto-start at login
 
 ---

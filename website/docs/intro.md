@@ -45,6 +45,22 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 - **Engelsk UI** — hele applikasjonen pa engelsk, dokumentasjon tilgjengelig pa norsk og engelsk
 - **Selvdriftet** — ingen sky-avhengighet, dine data pa din maskin
 
+### Nytt i v1.1.20
+
+- **Egen sliser** — pure-JS slicing engine fra bunnen av (mesh→polygon→infill→G-code), kjører helt uten eksterne avhengigheter
+- **Slicer Studio** — full standalone slicer-program med Three.js viewport, profilsystem, og Send-til-printer
+- **Slicer Bridge** — headless slicing via OrcaSlicer / BambuStudio / Snapmaker Orca CLI med auto-deteksjon
+- **Scene Composer** — 3D scene editor med BSP-tre CSG (boolean mesh-operasjoner)
+- **AI Model Forge** — tekst-til-3D generator med intent parser (skilt, lithophane, holder, etc.)
+- **Mesh Repair Toolkit** — automatisk reparering av defekte STL/3MF-filer
+- **G-code Reference & Estimator** — innebygd G-code-referanse med tidsestimering
+- **17 merker / 75+ modeller** — utvidet vendor-dekning med Duet/RRF, FlashForge FNet, Repetier-Server
+- **Printer Image Service** — ekte produktbilder fra OrcaSlicer GitHub for fleet-visning
+- **23 slicer-profiler seedet** — 12 printere, 7 filamenter, 4 kvalitetsprofiler ferdig konfigurert
+- **Universal multi-column UI** — optimalisert grid-layout for store skjermer
+- **Command Palette fix** — Ctrl+K viser nå alle 25 paneler korrekt
+- **Sidebar fix** — Library-badge oppdatert fra 11 til 12 etter Slicer Bridge
+
 ### Nytt i v1.1.19
 
 - **Model Forge 51 verktøy** — 34 nye: Gridfinity (baseplate/bin/lid/tool holder), gir/pulley/fjær/hengsel/snapfit, spole-adapter/kabellkjede/førstelagtest/dyseoppbevaring, veggkrok/kabelklips/potteplante/veggbrakett, telefonholder/hodetelefonholder/VESA-feste/RaspberryPi-kabinett, voronoi/topografisk kart/3D QR-kode/honeycomb/terningttårn/miniatyrbase

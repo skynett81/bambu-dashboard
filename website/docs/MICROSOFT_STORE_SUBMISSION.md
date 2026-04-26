@@ -74,7 +74,7 @@ Output lands in `dist-electron/3DPrintForge-<version>.appx` (or `.msix`).
 - **Content**: sideload-install locally with `Add-AppxPackage` to verify it launches before uploading:
 
 ```powershell
-Add-AppxPackage -Path .\dist-electron\3DPrintForge-1.1.19.appx
+Add-AppxPackage -Path .\dist-electron\3DPrintForge-1.1.20.appx
 ```
 
 ---

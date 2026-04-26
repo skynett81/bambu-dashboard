@@ -151,7 +151,7 @@ We already provide:
 Verify file integrity manually:
 
 ```powershell
-Get-FileHash .\3DPrintForge-Setup-1.1.19.exe -Algorithm SHA256
+Get-FileHash .\3DPrintForge-Setup-1.1.20.exe -Algorithm SHA256
 ```
 
 ---
