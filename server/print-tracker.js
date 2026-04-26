@@ -945,11 +945,23 @@ export class PrintTracker {
             assignSpoolToSlot(matched.id, this.printerId, amsUnit, trayId);
             log.info('Auto-matched spool #' + matched.id + ' to AMS ' + amsUnit + ':' + trayId + ' by color+material');
           } else {
-            // Auto-create spool if setting enabled
-            const autoCreate = getInventorySetting('auto_create_from_ams');
-            if (autoCreate === 'true' || autoCreate === '1') {
-              const result = autoCreateSpoolFromTray(tray, this.printerId, amsUnit, trayId);
-              log.info('Auto-created spool #' + result.id + ' from AMS ' + amsUnit + ':' + trayId);
+            // Auto-create spool from AMS tray. Default ON so filament tracking
+            // works out of the box — explicitly opt out by setting
+            // auto_create_from_ams=false (Settings → Inventory) or
+            // AUTO_CREATE_SPOOLS_FROM_AMS=false (egg env var).
+            const setting = getInventorySetting('auto_create_from_ams');
+            const envOff = process.env.AUTO_CREATE_SPOOLS_FROM_AMS === 'false';
+            const settingOff = setting === 'false' || setting === '0';
+            const enabled = !envOff && !settingOff;
+            if (enabled) {
+              try {
+                const result = autoCreateSpoolFromTray(tray, this.printerId, amsUnit, trayId);
+                log.info('Auto-created spool #' + result.id + ' from AMS ' + amsUnit + ':' + trayId + ' (' + (tray.tray_type || '?') + ' / ' + (tray.tray_color || '?') + ')');
+              } catch (e) {
+                log.warn('Auto-create spool from AMS ' + amsUnit + ':' + trayId + ' failed: ' + e.message);
+              }
+            } else {
+              log.warn('AMS ' + amsUnit + ':' + trayId + ' has filament loaded but no spool linked, and auto-create is OFF — Settings → Inventory → enable Auto-create from AMS');
             }
           }
         }

@@ -4,7 +4,7 @@
     "version": "PTDL_v2",
     "update_url": null
   },
-  "exported_at": "2026-04-26T19:59:22+00:00",
+  "exported_at": "2026-04-26T20:06:24+00:00",
   "name": "3DPrintForge",
   "author": "skynett81@github.com",
   "description": "Self-hosted dashboard for 17 printer brands (Bambu Lab, Snapmaker, Prusa, OctoPrint, Creality, Elegoo, Voron, AnkerMake, QIDI, RatRig, Duet/RRF, FlashForge, Repetier, and any Klipper/Moonraker printer). Includes native slicer, Slicer Studio with profiles, Scene Composer with CSG, AI Model Forge, Mesh Repair, real-time status, camera feeds, print history, print queue with load balancing, filament inventory, and 7 notification channels (Telegram, Discord, Email, Webhook, ntfy, Pushover, SMS).",
@@ -183,6 +183,16 @@
       "name": "Auto Update",
       "description": "Pull latest code from GitHub on every restart (true) or freeze on the currently installed version (false). When true, restart in Wisp = update.",
       "env_variable": "AUTO_UPDATE",
+      "default_value": "true",
+      "user_viewable": true,
+      "user_editable": true,
+      "rules": "required|string|in:true,false",
+      "field_type": "text"
+    },
+    {
+      "name": "Auto-create Spools from AMS",
+      "description": "When AMS reports a loaded filament tray that isn't linked to a spool, automatically create one in Inventory. Default true so filament weight is tracked out of the box. Set false if you only want manually-managed spools.",
+      "env_variable": "AUTO_CREATE_SPOOLS_FROM_AMS",
       "default_value": "true",
       "user_viewable": true,
       "user_editable": true,
