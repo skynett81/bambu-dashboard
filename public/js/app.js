@@ -200,24 +200,32 @@ function updateConnectionBadge(status) {
 // ---- Info Box Stats ----
 async function updateInfoBoxes() {
   try {
-    const [printers, queue, filament] = await Promise.all([
+    const [printers, queue, filament, spools] = await Promise.all([
       fetch('/api/printers').then(r => r.json()).catch(() => []),
       fetch('/api/queue').then(r => r.json()).catch(() => []),
       fetch('/api/filament').then(r => r.json()).catch(() => []),
+      fetch('/api/inventory/spools').then(r => r.json()).catch(() => ({ rows: [] })),
     ]);
 
-    // Printers online (count those with active WS data)
+    // Printers online: a printer counts as online if it has actual MQTT/WS
+    // state data (not just a meta entry). Use the public StateStore getter.
     const totalPrinters = Array.isArray(printers) ? printers.length : 0;
-    const onlinePrinters = Object.keys(window.printerState?.printers || {}).length;
+    const livePrinters = window.printerState?.printers || {};
+    let onlinePrinters = 0;
+    for (const id of Object.keys(livePrinters)) {
+      const s = livePrinters[id];
+      // A printer is "online" if its state object has any meaningful data
+      // (gcode_state, nozzle_temper, or any incoming MQTT key).
+      if (s && Object.keys(s).length > 0) onlinePrinters++;
+    }
     const printersEl = document.getElementById('info-printers-count');
     if (printersEl) printersEl.textContent = `${onlinePrinters}/${totalPrinters}`;
 
     // Active prints (printers currently printing)
     let activePrints = 0;
-    const printerStates = window.printerState?.printers || {};
-    for (const id of Object.keys(printerStates)) {
-      const s = printerStates[id];
-      if (s && s.gcode_state === 'RUNNING') activePrints++;
+    for (const id of Object.keys(livePrinters)) {
+      const s = livePrinters[id];
+      if (s && (s.gcode_state === 'RUNNING' || s.print?.gcode_state === 'RUNNING')) activePrints++;
     }
     const printsEl = document.getElementById('info-prints-count');
     if (printsEl) printsEl.textContent = activePrints;
@@ -227,8 +235,13 @@ async function updateInfoBoxes() {
     const queueEl = document.getElementById('info-queue-count');
     if (queueEl) queueEl.textContent = queueCount;
 
-    // Filament spools
-    const spoolCount = Array.isArray(filament) ? filament.length : 0;
+    // Filament spools — count from BOTH the new spools table and the
+    // legacy filament_inventory table (some older installs use only one).
+    const newSpoolCount = (spools && typeof spools === 'object' && Array.isArray(spools.rows))
+      ? spools.rows.length
+      : (Array.isArray(spools) ? spools.length : 0);
+    const legacyCount = Array.isArray(filament) ? filament.length : 0;
+    const spoolCount = newSpoolCount + legacyCount;
     const filamentEl = document.getElementById('info-filament-count');
     if (filamentEl) filamentEl.textContent = spoolCount;
   } catch (_) { /* non-critical */ }
@@ -239,7 +252,8 @@ function updateDashboard(data) {
   let activePrints = 0;
   const printerStates = window.printerState?.printers || {};
   for (const id of Object.keys(printerStates)) {
-    if (printerStates[id]?.gcode_state === 'RUNNING') activePrints++;
+    const s = printerStates[id];
+    if (s?.gcode_state === 'RUNNING' || s?.print?.gcode_state === 'RUNNING') activePrints++;
   }
   const printsEl = document.getElementById('info-prints-count');
   if (printsEl) printsEl.textContent = activePrints;
