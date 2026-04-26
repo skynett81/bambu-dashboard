@@ -8,17 +8,18 @@
   "name": "3DPrintForge",
   "author": "skynett81@github.com",
   "description": "Self-hosted dashboard for 17 printer brands (Bambu Lab, Snapmaker, Prusa, OctoPrint, Creality, Elegoo, Voron, AnkerMake, QIDI, RatRig, Duet/RRF, FlashForge, Repetier, and any Klipper/Moonraker printer). Includes native slicer, Slicer Studio with profiles, Scene Composer with CSG, AI Model Forge, Mesh Repair, real-time status, camera feeds, print history, print queue with load balancing, filament inventory, and 7 notification channels (Telegram, Discord, Email, Webhook, ntfy, Pushover, SMS).",
-  "features": null,
+  "features": [],
   "docker_images": {
-    "Node.js 22": "ghcr.io/parkervcp/yolks:nodejs_22"
+    "nodejs_22": "ghcr.io/parkervcp/yolks:nodejs_22"
   },
   "file_denylist": [],
+  "file_blacklist": [],
   "startup": "NODE_ENV=production node server/index.js",
   "config": {
     "files": "{}",
     "startup": "{\"done\": [\"3DPrintForge v\"]}",
     "logs": "{}",
-    "stop": "^^C"
+    "stop": "^C"
   },
   "scripts": {
     "installation": {
@@ -28,16 +29,6 @@
     }
   },
   "variables": [
-    {
-      "name": "Server Port",
-      "description": "The port the dashboard will listen on. Must match the allocation port.",
-      "env_variable": "SERVER_PORT",
-      "default_value": "3000",
-      "user_viewable": true,
-      "user_editable": true,
-      "rules": "required|integer|between:1024,65535",
-      "field_type": "text"
-    },
     {
       "name": "Auth Password",
       "description": "Set a password to enable authentication. Leave empty to disable auth.",
