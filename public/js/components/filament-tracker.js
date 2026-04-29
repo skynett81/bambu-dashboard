@@ -626,11 +626,30 @@
       const total = (spools || _spools || []).filter(s => !s.archived).length;
       const placed = (spools || _spools || []).filter(s => !s.archived && (s.location || s.location_id)).length;
       const unplaced = total - placed;
-      h += `<div class="stats-strip" style="margin-bottom:12px">
-        <div class="strip-stat"><span class="strip-stat-value">${_locations.length}</span><span class="strip-stat-label">${t('filament.locations_count', 'Locations')}</span></div>
-        <div class="strip-stat"><span class="strip-stat-value">${placed}</span><span class="strip-stat-label">${t('filament.spools_placed', 'Placed')}</span></div>
-        <div class="strip-stat" style="${unplaced > 0 ? 'color:var(--accent-orange)' : ''}"><span class="strip-stat-value">${unplaced}</span><span class="strip-stat-label">${t('filament.spools_unplaced', 'Without location')}</span></div>
+
+      const card = (value, label, accent) => `
+        <div style="flex:1 1 140px;min-width:140px;background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-sm,8px);padding:12px 14px;display:flex;flex-direction:column;gap:4px;${accent ? 'border-left:3px solid ' + accent : ''}">
+          <span style="font-size:1.6rem;font-weight:700;line-height:1;${accent ? 'color:' + accent : ''}">${value}</span>
+          <span style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em">${label}</span>
+        </div>`;
+
+      h += `<div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+        ${card(_locations.length, t('filament.locations_count', 'Locations'))}
+        ${card(placed, t('filament.spools_placed', 'Placed'), 'var(--accent-green)')}
+        ${card(unplaced, t('filament.spools_unplaced', 'Without location'), unplaced > 0 ? 'var(--accent-orange)' : null)}
       </div>`;
+
+      // Empty state when no locations yet — show a friendly callout instead
+      // of an empty list, so first-time users know what to do.
+      if (_locations.length === 0) {
+        h += `<div style="background:var(--bg-card);border:1px dashed var(--border-color);border-radius:var(--radius-sm,8px);padding:24px;text-align:center;margin-bottom:12px">
+          <div style="font-size:2rem;margin-bottom:8px">📍</div>
+          <div style="font-weight:600;margin-bottom:4px">${t('filament.no_locations_title', 'No storage locations yet')}</div>
+          <div style="color:var(--text-muted);font-size:0.85rem;margin-bottom:12px">${t('filament.no_locations_hint', 'Create locations like "Dry box 1", "Shelf B", "Cellar" to organize where each spool is stored.')}</div>
+          <button class="form-btn" data-ripple onclick="window.showAddLocationForm && window.showAddLocationForm()">+ ${t('filament.location_add', 'Add location')}</button>
+        </div>`;
+      }
+
       h += '<div id="storage-tab-content"></div>';
       // Defer render so the DOM exists when _renderLocationsList queries it.
       setTimeout(() => {

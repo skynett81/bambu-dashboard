@@ -243,6 +243,8 @@
     "locations_count": "Plasseringer",
     "spools_placed": "Plassert",
     "spools_unplaced": "Uten plassering",
+    "no_locations_title": "Ingen plasseringer ennå",
+    "no_locations_hint": "Lag plasseringer som «Tørrboks 1», «Hylle B», «Kjeller» for å organisere hvor hver spole oppbevares.",
     "vendors_title": "Produsenter",
     "vendor_name": "Produsentnavn",
     "vendor_website": "Nettside",

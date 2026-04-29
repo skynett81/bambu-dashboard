@@ -249,6 +249,8 @@
     "locations_count": "Locations",
     "spools_placed": "Placed",
     "spools_unplaced": "Without location",
+    "no_locations_title": "No storage locations yet",
+    "no_locations_hint": "Create locations like \"Dry box 1\", \"Shelf B\", \"Cellar\" to organize where each spool is stored.",
     "vendors_title": "Vendors",
     "vendor_name": "Vendor name",
     "vendor_website": "Website",
