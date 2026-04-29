@@ -46,16 +46,19 @@
     // Look up the spool's *own* printer, not the active dashboard one.
     const printerData = window.printerState?.printers?.[s.printer_id];
     if (!printerData) return { rt: null, init, rem };
+    // The Moonraker client broadcasts state nested under .print, the Bambu
+    // client puts it at the root. Look in both.
     const print = printerData.print || printerData;
-    // Determine active tool: Bambu uses ams.tray_now, Moonraker/U1 uses
-    // _active_extruder ('extruder', 'extruder1', ...).
     let activeIdx = -1;
     const ams = print?.ams || printerData?.ams;
     if (ams?.tray_now != null) {
       activeIdx = parseInt(ams.tray_now);
-    } else if (printerData?._active_extruder) {
-      const m = String(printerData._active_extruder).match(/extruder(\d*)$/);
-      if (m) activeIdx = m[1] === '' ? 0 : parseInt(m[1]);
+    } else {
+      const ae = print?._active_extruder || printerData?._active_extruder;
+      if (ae) {
+        const m = String(ae).match(/extruder(\d*)$/);
+        if (m) activeIdx = m[1] === '' ? 0 : parseInt(m[1]);
+      }
     }
     const spoolIdx = (s.ams_unit ?? 0) * 4 + s.ams_tray;
     const isActive = spoolIdx === activeIdx;
