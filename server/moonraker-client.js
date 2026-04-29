@@ -534,15 +534,33 @@ export class MoonrakerClient {
     if (ps.total_duration !== undefined) {
       this.state.total_duration_seconds = Math.round(ps.total_duration || 0);
     }
-    // Remaining time: use slicer estimate if available, else calculate from progress
-    if (this.state._slicer_estimated_time && this.state.print_duration_seconds !== undefined) {
-      // Slicer estimate is most accurate
-      const remaining = Math.max(0, this.state._slicer_estimated_time - this.state.print_duration_seconds);
-      this.state.mc_remaining_time = Math.round(remaining / 60);
-    } else if (this.state.mc_percent > 2 && this.state.print_duration_seconds > 60) {
-      // Only estimate from progress when >2% and >1min (avoids wild early estimates)
-      const totalEstimate = this.state.print_duration_seconds / (this.state.mc_percent / 100);
-      this.state.mc_remaining_time = Math.round((totalEstimate - this.state.print_duration_seconds) / 60);
+    // Remaining time: prefer slicer estimate while it's still ahead of
+    // elapsed time. Once the print runs *over* the slicer estimate,
+    // clamping to 0 leaves the countdown stuck at "Done" while the print
+    // is still going. Fall back to a progress-based projection in that
+    // case so the timer keeps moving. Final fallback: keep ticking down
+    // by 1 second of wall-clock so the UI never freezes.
+    if (this.state.print_duration_seconds !== undefined && this.state.print_duration_seconds >= 0) {
+      let remainingSec = null;
+      const slicerEst = this.state._slicer_estimated_time || 0;
+      const elapsed = this.state.print_duration_seconds;
+      const pct = (this.state.mc_percent || 0) / 100;
+      if (slicerEst > 0 && elapsed < slicerEst) {
+        remainingSec = slicerEst - elapsed;
+      } else if (pct > 0.02 && pct < 1 && elapsed > 60) {
+        // Project total = elapsed / pct, then remaining = total - elapsed.
+        // Works whether the slicer estimate exists or not.
+        const totalEstimate = elapsed / pct;
+        remainingSec = Math.max(0, totalEstimate - elapsed);
+      } else if (slicerEst > 0) {
+        // Past the slicer estimate but progress is still <2% (rare —
+        // would mean a stalled-at-start situation). Keep showing a
+        // small remaining so the UI doesn't read "Done".
+        remainingSec = 60;
+      }
+      if (remainingSec !== null) {
+        this.state.mc_remaining_time = Math.round(remainingSec / 60);
+      }
     }
 
     // Layers
