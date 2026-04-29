@@ -1054,7 +1054,12 @@
     ].filter(Boolean).join(' ');
 
     return `
-      <div class="filament-card inv-spool-card ${lowClass} ${archivedClass}" data-spool-id="${s.id}" onclick="if(!event.target.closest('button,input,a,.fil-spool-actions'))window._showSpoolDetail(${s.id})" style="cursor:pointer">
+      <div class="filament-card inv-spool-card ${lowClass} ${archivedClass}" data-spool-id="${s.id}" draggable="true"
+        ondragstart="event.dataTransfer.setData('text/plain','${s.id}');this.style.opacity='0.5'"
+        ondragend="this.style.opacity=''"
+        onclick="if(!event.target.closest('button,input,a,.fil-spool-actions'))window._showSpoolDetail(${s.id})"
+        title="${t('filament.card_drag_hint', 'Click to view · drag to assign to a slot or location')}"
+        style="cursor:pointer">
         <div class="fil-spool-top">
           <div class="fil-spool-identity">
             <input type="checkbox" class="fil-bulk-check" onclick="toggleSpoolSelect(${s.id}, this)" ${_selectedSpools.has(s.id) ? 'checked' : ''} title="${t('filament.bulk_select')}">
@@ -1598,7 +1603,10 @@
       const pct = spoolPct(s);
       const color = hexToRgb(s.color_hex);
       const name = _cleanProfileName(s);
-      h += `<tr data-spool-id="${s.id}" class="${s.archived ? 'filament-card-archived' : ''}" onclick="if(!event.target.closest('button,input,a'))window._showSpoolDetail(${s.id})" style="cursor:pointer">
+      h += `<tr data-spool-id="${s.id}" class="${s.archived ? 'filament-card-archived' : ''}" draggable="true"
+        ondragstart="event.dataTransfer.setData('text/plain','${s.id}');this.style.opacity='0.5'"
+        ondragend="this.style.opacity=''"
+        onclick="if(!event.target.closest('button,input,a'))window._showSpoolDetail(${s.id})" style="cursor:pointer">
         <td>${miniSpool(color, 12, pct)}</td>
         <td><strong>${esc(name)}</strong>${s.is_favorite ? ' <span style="color:#e53935">♥</span>' : ''}</td>
         <td>${s.material || '--'}</td>
@@ -1682,7 +1690,18 @@
             const brand = tray.tray_sub_brands || '';
             const slotLabel = amsData.ams.length > 1 ? `AMS${u+1}:${i+1}` : `${i+1}`;
             const remColor = remain < 20 ? 'var(--accent-orange)' : 'var(--accent-green)';
-            html += `<div class="fil-ams-tray ${isActive ? 'fil-ams-tray-active' : ''}">
+            // Slot-level DnD: drop a spool here to assign it to this AMS
+            // tray, or drag the linked spool away to detach it.
+            const dropAttrs = `
+              ondragover="event.preventDefault();this.classList.add('inv-dnd-over')"
+              ondragleave="this.classList.remove('inv-dnd-over')"
+              ondrop="window._slotDrop(event,'${esc(id)}',${u * 4 + i})"
+              data-slot-printer="${esc(id)}" data-slot-tray="${u * 4 + i}"`;
+            const dragAttrs = linkedSpool ? `draggable="true" data-spool-id="${linkedSpool.id}"
+              ondragstart="event.dataTransfer.setData('text/plain','${linkedSpool.id}');this.style.opacity='0.5'"
+              ondragend="this.style.opacity=''"
+              style="cursor:grab"` : '';
+            html += `<div class="fil-ams-tray ${isActive ? 'fil-ams-tray-active' : ''}" ${dropAttrs} ${dragAttrs} title="${linkedSpool ? t('filament.slot_drag_hint', 'Drag to move spool') : t('filament.slot_drop_hint', 'Drop a spool here to assign')}">
               <div class="fil-ams-color">${miniSpool(color, 18, remain)}</div>
               <div class="fil-ams-info">
                 <span class="fil-ams-type">${tray.tray_type}${brand ? ' · ' + brand : ''}</span>
@@ -1719,6 +1738,15 @@
       const linked = _spools.find(sp => sp.printer_id === printerId && sp.ams_tray === i && !sp.archived);
       const slotName = _slotName(model, i);
       const isEmpty = linked && (linked.remaining_weight_g != null && linked.remaining_weight_g <= 5);
+      // Common drop-zone handlers — every slot accepts dropped spools and
+      // dispatches to _slotDrop(printerId, trayIndex). Filled slots are
+      // also draggable so the user can drag a spool away to free up the
+      // slot or move it to another toolhead.
+      const dropAttrs = `
+        ondragover="event.preventDefault();this.classList.add('inv-dnd-over')"
+        ondragleave="this.classList.remove('inv-dnd-over')"
+        ondrop="window._slotDrop(event,'${esc(printerId)}',${i})"
+        data-slot-printer="${esc(printerId)}" data-slot-tray="${i}"`;
       if (linked && !isEmpty) {
         const color = hexToRgbColor(linked.color_hex);
         // Use the shared spool-utils helpers — they pick the right printer
@@ -1733,7 +1761,11 @@
         const liveBadge = usedThisPrintG > 1
           ? `<span style="color:var(--accent-orange);font-size:0.6rem">−${usedThisPrintG.toFixed(1)}g live</span>`
           : '';
-        inner += `<div class="fil-ams-tray" onclick="showEditSpoolForm(${linked.id})" style="cursor:pointer" title="${t('settings.edit')}">
+        inner += `<div class="fil-ams-tray" draggable="true" data-spool-id="${linked.id}"
+          ${dropAttrs}
+          ondragstart="event.dataTransfer.setData('text/plain','${linked.id}');this.style.opacity='0.5'"
+          ondragend="this.style.opacity=''"
+          onclick="showEditSpoolForm(${linked.id})" style="cursor:grab" title="${t('filament.slot_drag_hint', 'Click to edit · drag to move')}">
           <div class="fil-ams-color">${miniSpool(color, 18, remPct)}</div>
           <div class="fil-ams-info">
             <span class="fil-ams-type">${profileText}</span>
@@ -1746,7 +1778,11 @@
           <span class="fil-ams-slot">${esc(slotName)}</span>
         </div>`;
       } else if (isEmpty) {
-        inner += `<div class="fil-ams-tray" style="cursor:pointer;border-color:var(--accent-orange)" onclick="window._replaceEmptySlot(${linked.id}, '${esc(printerId)}', ${i})" title="${t('filament.replace_empty') || 'Spool is empty — click to replace'}">
+        inner += `<div class="fil-ams-tray" draggable="true" data-spool-id="${linked.id}"
+          ${dropAttrs}
+          ondragstart="event.dataTransfer.setData('text/plain','${linked.id}');this.style.opacity='0.5'"
+          ondragend="this.style.opacity=''"
+          style="cursor:grab;border-color:var(--accent-orange)" onclick="window._replaceEmptySlot(${linked.id}, '${esc(printerId)}', ${i})" title="${t('filament.replace_empty') || 'Spool is empty — click to replace, drag to move'}">
           <div class="fil-ams-color">${miniSpool(hexToRgbColor(linked.color_hex), 18, 0)}</div>
           <div class="fil-ams-info">
             <span class="fil-ams-type" style="color:var(--accent-orange)">${t('common.empty') || 'Empty'}</span>
@@ -1755,11 +1791,13 @@
           <span class="fil-ams-slot">${esc(slotName)}</span>
         </div>`;
       } else {
-        inner += `<div class="fil-ams-tray" onclick="window._assignSlot('${esc(printerId)}', ${i})" style="cursor:pointer;opacity:0.6;border-style:dashed" title="${t('filament.add_spool') || 'Assign spool'}">
+        inner += `<div class="fil-ams-tray"
+          ${dropAttrs}
+          onclick="window._assignSlot('${esc(printerId)}', ${i})" style="cursor:pointer;opacity:0.6;border-style:dashed" title="${t('filament.add_spool') || 'Assign spool — click or drag a spool here'}">
           <div class="fil-ams-color">${miniSpool('#444', 18, 0)}</div>
           <div class="fil-ams-info">
             <span class="fil-ams-type text-muted">${t('common.empty') || 'Empty'}</span>
-            <span class="fil-ams-linked text-muted" style="font-size:0.65rem">+ ${t('filament.add_spool') || 'Assign spool'}</span>
+            <span class="fil-ams-linked text-muted" style="font-size:0.65rem">+ ${t('filament.add_spool') || 'Drop or click'}</span>
           </div>
           <span class="fil-ams-slot">${esc(slotName)}</span>
         </div>`;
@@ -1770,6 +1808,49 @@
       <div class="fil-ams-trays">${inner}</div>
     </div>`;
   }
+
+  // Drop a spool onto a printer toolhead / AMS slot. Whether the slot
+  // was empty or already filled, the dropped spool becomes the linked
+  // one; any spool that was previously here gets unlinked. Mirrors the
+  // Storage tab's column DnD so the user gets one consistent gesture
+  // for moving spools between containers.
+  window._slotDrop = async function(e, printerId, trayIndex) {
+    e.preventDefault();
+    if (e.currentTarget?.classList) e.currentTarget.classList.remove('inv-dnd-over');
+    const spoolId = parseInt(e.dataTransfer.getData('text/plain'));
+    if (!spoolId) return;
+    const spool = _spools.find(s => s.id === spoolId);
+    if (!spool) return;
+    // No-op: already at this slot
+    if (spool.printer_id === printerId && spool.ams_tray === trayIndex) return;
+    try {
+      // Detach whatever is currently in the slot so the unique mapping
+      // holds (also aligns with how _assignSlot behaves on click).
+      const existing = _spools.find(sp =>
+        sp.id !== spoolId && sp.printer_id === printerId
+        && (sp.ams_unit ?? 0) === Math.floor(trayIndex / 4)
+        && sp.ams_tray === (trayIndex % 4) && !sp.archived
+      );
+      if (existing) {
+        await fetch(`/api/inventory/spools/${existing.id}`, {
+          method: 'PUT', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...existing, printer_id: null, ams_unit: null, ams_tray: null }),
+        });
+      }
+      await fetch(`/api/inventory/spools/${spoolId}`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...spool,
+          printer_id: printerId,
+          ams_unit: Math.floor(trayIndex / 4),
+          ams_tray: trayIndex % 4,
+        }),
+      });
+      showToast(t('filament.spool_added'), 'success');
+      loadFilament();
+      window.refreshInventorySpools && window.refreshInventorySpools();
+    } catch { showToast(t('filament.save_failed'), 'error'); }
+  };
 
   // Click handler for an empty toolhead slot — opens a small picker so the
   // user can attach an unassigned spool to this printer + slot directly,
