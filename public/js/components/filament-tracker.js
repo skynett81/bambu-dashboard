@@ -2080,7 +2080,13 @@
         }
       }, { once: true });
     } catch (e) {
-      panel.innerHTML = `<p class="text-muted">${t('filament.load_failed')}</p>`;
+      // Surface the underlying failure to the console so a regression in
+      // any sub-renderer doesn't just blank out the whole inventory tab
+      // with a generic "load failed" message.
+      // eslint-disable-next-line no-console
+      console.error('[filament] loadFilament failed:', e);
+      panel.innerHTML = `<p class="text-muted">${t('filament.load_failed')}</p>
+        <pre style="font-size:0.7rem;color:var(--accent-red);overflow:auto;max-width:100%;white-space:pre-wrap;margin-top:8px">${esc(e?.stack || e?.message || String(e))}</pre>`;
     }
   }
 
