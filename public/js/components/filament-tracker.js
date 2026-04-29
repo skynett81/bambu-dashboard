@@ -1807,11 +1807,13 @@
     }
 
     try {
-      // Fetch all data in parallel — filter spools by active printer
-      const _activePid = window.printerState?.getActivePrinterId?.() || '';
-      const _spoolQuery = _activePid ? `?printer_id=${encodeURIComponent(_activePid)}` : '';
+      // Always fetch every spool — filtering happens in the frontend via
+      // _filterPrinter and _showArchived. Filtering by printer_id at the
+      // API layer would also exclude archived/detached spools (printer_id
+      // becomes NULL on archive), so the "Show archived" toggle would
+      // appear to do nothing for them.
       const [spoolsRes, vendorsRes, profilesRes, locationsRes, dryingActiveRes, dryingPresetsRes, dryingStatusRes, tagsRes, alertsRes, settingsRes] = await Promise.all([
-        fetch(`/api/inventory/spools${_spoolQuery}`),
+        fetch('/api/inventory/spools'),
         fetch('/api/inventory/vendors'),
         fetch('/api/inventory/filaments'),
         fetch('/api/inventory/locations'),
@@ -1902,9 +1904,13 @@
         html += '</div>';
       }
 
-      // Filter spools by selected printer
+      // Filter spools by selected printer. Archived spools are
+      // typically detached (printer_id NULL) so they would never match a
+      // specific printer filter — surface them whenever "Show archived"
+      // is on, regardless of which printer tab is selected.
       const filteredSpools = _filterPrinter === 'all'
-        ? _spools : _spools.filter(s => s.printer_id === _filterPrinter);
+        ? _spools
+        : _spools.filter(s => s.printer_id === _filterPrinter || (_showArchived && s.archived));
 
       // ── Tab bar (sorted alphabetically, inventory first) ──
       html += '<div class="tabs">';
