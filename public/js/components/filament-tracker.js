@@ -146,6 +146,7 @@
   // ═══ Tab config (alphabetically sorted by translated label at render time) ═══
   const TAB_CONFIG_UNSORTED = {
     inventory: { label: 'filament.tab_inventory', modules: ['spool-summary', 'active-filament', 'low-stock-alert', 'spool-grid'], order: 0 },
+    storage:   { label: 'filament.tab_storage',   modules: ['storage-dashboard'] },
     database:  { label: 'filament.tab_database',  modules: ['db-hero', 'db-browser'] },
     drying:    { label: 'filament.tab_drying',    modules: ['drying-dashboard'] },
     multicolor:{ label: 'tabs.multicolor',        modules: ['multicolor-panel'], external: true },
@@ -172,6 +173,7 @@
     'drying-dashboard': 'full',
     'tools-dashboard': 'full',
     'manage-dashboard': 'full',
+    'storage-dashboard': 'full',
     'type-breakdown': 'half', 'brand-breakdown': 'half',
     'cost-summary': 'half', 'stock-health': 'half',
     'restock-suggestions': 'full', 'usage-predictions': 'full', 'cost-estimation': 'full', 'usage-history': 'full'
@@ -612,6 +614,32 @@
     // ── Manage tab modules ──
 
     // ── Manage dashboard (unified) ──
+    'storage-dashboard': (spools) => {
+      // Top-level Storage tab — surfaces every storage location in one
+      // place with the spools currently parked in each, plus the manager
+      // controls (add / edit / delete location) inline. No need to dive
+      // into Manage → Locations or open a spool to see/manage storage.
+      let h = `<div class="ctrl-card-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="12" r="3"/></svg>
+        ${t('filament.locations_title', 'Storage locations')}
+      </div>`;
+      const total = (spools || _spools || []).filter(s => !s.archived).length;
+      const placed = (spools || _spools || []).filter(s => !s.archived && (s.location || s.location_id)).length;
+      const unplaced = total - placed;
+      h += `<div class="stats-strip" style="margin-bottom:12px">
+        <div class="strip-stat"><span class="strip-stat-value">${_locations.length}</span><span class="strip-stat-label">${t('filament.locations_count', 'Locations')}</span></div>
+        <div class="strip-stat"><span class="strip-stat-value">${placed}</span><span class="strip-stat-label">${t('filament.spools_placed', 'Placed')}</span></div>
+        <div class="strip-stat" style="${unplaced > 0 ? 'color:var(--accent-orange)' : ''}"><span class="strip-stat-value">${unplaced}</span><span class="strip-stat-label">${t('filament.spools_unplaced', 'Without location')}</span></div>
+      </div>`;
+      h += '<div id="storage-tab-content"></div>';
+      // Defer render so the DOM exists when _renderLocationsList queries it.
+      setTimeout(() => {
+        const c = document.getElementById('storage-tab-content');
+        if (c) c.innerHTML = _renderLocationsList() + _renderLocationsDnd(spools || _spools);
+      }, 0);
+      return h;
+    },
+
     'manage-dashboard': (spools) => {
       const tabs = [
         { id: 'profiles', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', label: t('filament.profiles_title') },
