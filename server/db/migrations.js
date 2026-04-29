@@ -1878,6 +1878,22 @@ export function runMigrations() {
       if (added > 0) log.info('Seeded ' + added + ' eSUN filament profiles');
     }},
 
+    { version: 141, up: (db) => {
+      // Material misclassifications surfaced from Stats: 'Rapid' isn't a
+      // material category, it's a product line (Elegoo Rapid PETG /
+      // Rapid PLA+). Same with 'PLA-Basic' which is a sub-variant of
+      // standard PLA. These splintered the type-breakdown into bogus
+      // categories. Normalise to base materials.
+      // (PLA Silk / PLA Matte / PLA-CF kept separate — they have
+      // distinct properties users genuinely filter by.)
+      try {
+        db.exec(`UPDATE filament_profiles SET material = 'PETG' WHERE material = 'Rapid' AND name LIKE '%PETG%'`);
+        db.exec(`UPDATE filament_profiles SET material = 'PLA+' WHERE material = 'Rapid' AND name LIKE '%PLA+%'`);
+        db.exec(`UPDATE filament_profiles SET material = 'PLA' WHERE material = 'Rapid' AND name LIKE '%PLA%' AND name NOT LIKE '%PLA+%'`);
+        db.exec(`UPDATE filament_profiles SET material = 'PLA' WHERE material IN ('PLA-Basic', 'PLA Basic')`);
+      } catch (e) { /* ignore */ }
+    }},
+
     { version: 140, up: (db) => {
       // Fill gaps across the rest of the consumer-brand catalogue. Many
       // popular vendors (Prusament, Hatchbox, AmazonBasics, Anycubic,

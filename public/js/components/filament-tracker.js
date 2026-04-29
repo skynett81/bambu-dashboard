@@ -1958,6 +1958,7 @@
 
   // ═══ Tab switching ═══
   function switchTab(tabId) {
+    const wasTab = _activeTab;
     _activeTab = tabId;
     document.querySelectorAll('.filament-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
     document.querySelectorAll('.filament-tab-panel').forEach(p => {
@@ -1973,6 +1974,17 @@
     _loadExternalTab(tabId);
     const slug = tabId === 'inventory' ? 'filament' : `filament/${tabId}`;
     if (location.hash !== '#' + slug) history.replaceState(null, '', '#' + slug);
+
+    // Aggregate-style tabs (Stats, Storage, Forecast, Database) need
+    // fresh data when the user lands on them — switchTab originally only
+    // toggled CSS, so they showed whatever snapshot loadFilament() built
+    // on the *previous* visit. After CRUD on the Inventory tab the
+    // numbers were stale. Trigger a reload only when actually changing
+    // tabs to avoid hammering the API on the same tab refresh.
+    const AGGREGATE_TABS = new Set(['stats', 'storage', 'forecast', 'database']);
+    if (wasTab !== tabId && AGGREGATE_TABS.has(tabId)) {
+      loadFilament();
+    }
   }
 
   function _loadExternalTab(tabId) {
