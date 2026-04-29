@@ -1268,9 +1268,33 @@
               <span class="ph-detail-label">${t('filament.location', 'Plassering')}</span>
               <span class="ph-detail-value">${esc(s.location)}</span>
             </div>` : ''}
+            ${s.storage_method ? `<div class="ph-detail-field">
+              <span class="ph-detail-label">${t('filament.storage_method', 'Storage')}</span>
+              <span class="ph-detail-value">${
+                s.storage_method === 'dry_box' ? '📦 ' + t('filament.storage_dry_box', 'Dry box') :
+                s.storage_method === 'vacuum_bag' ? '🫙 ' + t('filament.storage_vacuum', 'Vacuum bag') :
+                s.storage_method === 'open_air' ? '🌬 ' + t('filament.storage_open_air', 'Open air') :
+                esc(s.storage_method)
+              }</span>
+            </div>` : ''}
+            ${s.last_dried_at ? `<div class="ph-detail-field">
+              <span class="ph-detail-label">${t('filament.last_dried', 'Last dried')}</span>
+              <span class="ph-detail-value">${(() => {
+                const days = Math.floor((Date.now() - new Date(s.last_dried_at).getTime()) / 86400000);
+                return days < 1 ? t('filament.today', 'Today') : days + ' ' + t('filament.days_ago', 'days ago');
+              })()}</span>
+            </div>` : ''}
+            ${s.spool_weight ? `<div class="ph-detail-field">
+              <span class="ph-detail-label">${t('filament.spool_tare_weight', 'Spool tare')}</span>
+              <span class="ph-detail-value">${Math.round(s.spool_weight)}g</span>
+            </div>` : ''}
             ${s.lot_number ? `<div class="ph-detail-field">
               <span class="ph-detail-label">${t('filament.lot_number', 'Lot-nummer')}</span>
               <span class="ph-detail-value">${esc(s.lot_number)}</span>
+            </div>` : ''}
+            ${s.purchase_date ? `<div class="ph-detail-field">
+              <span class="ph-detail-label">${t('filament.purchase_date', 'Purchased')}</span>
+              <span class="ph-detail-value">${esc(s.purchase_date)}</span>
             </div>` : ''}
           </div>
           ${ps && ps.total_prints > 0 ? `
