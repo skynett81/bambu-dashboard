@@ -5114,17 +5114,16 @@
         container.innerHTML = `<p class="text-muted text-sm">${t('filament.no_usage_data')}</p>`;
         return;
       }
-      const active = data.per_spool.filter(s => s.avg_daily_g > 0);
-      if (active.length === 0) {
-        container.innerHTML = `<p class="text-muted text-sm">${t('filament.no_usage_data')}</p>`;
-        return;
-      }
+      // Show every spool in stock — not just the ones that have been
+      // used recently. Spools with 0 daily usage display as 'Unused' so
+      // the user sees their full inventory in one place.
+      const allSpools = data.per_spool;
+      const active = allSpools.filter(s => s.avg_daily_g > 0);
 
       // Hero summary
-      const totalRemaining = active.reduce((s, d) => s + d.remaining_weight_g, 0);
-      const totalDailyUsage = data.by_material?.reduce((s, m) => s + m.avg_daily_g, 0) || 0;
+      const totalRemaining = allSpools.reduce((s, d) => s + d.remaining_weight_g, 0);
+      const totalDailyUsage = data.by_material?.reduce((s, m) => s + (m.avg_daily_g || 0), 0) || 0;
       const needsReorder = active.filter(s => s.needs_reorder).length;
-      const avgDaysLeft = active.length > 0 ? Math.round(active.reduce((s, d) => s + (d.days_until_empty || 0), 0) / active.length) : 0;
       const closestEmpty = active.reduce((min, s) => s.days_until_empty != null && s.days_until_empty < min ? s.days_until_empty : min, 999);
 
       let h = '<div class="fil-hero-grid" style="margin-bottom:12px">';
@@ -5132,7 +5131,7 @@
       h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', closestEmpty < 999 ? closestEmpty + 'd' : '--', t('filament.next_empty') || 'Tidligst tom', closestEmpty <= 7 ? '#f85149' : closestEmpty <= 14 ? '#f0883e' : '#00e676');
       h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>', Math.round(totalRemaining) + 'g', t('filament.total_remaining') || 'Totalt igjen', '#00e676');
       h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', needsReorder, t('filament.needs_reorder_count') || 'Trenger bestilling', needsReorder > 0 ? '#f0883e' : '#8b949e');
-      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>', active.length, t('filament.active_spools') || 'Active spools', '#a371f7');
+      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>', allSpools.length + (active.length < allSpools.length ? ` <span style="font-size:0.65rem;opacity:0.7">(${active.length} ${t('filament.in_use', 'used')})</span>` : ''), t('filament.spools_in_stock', 'Spools in stock'), '#a371f7');
       h += '</div>';
 
       // Material usage summary cards
@@ -5164,14 +5163,21 @@
         <th>${t('filament.days_until_empty')}</th>
         <th></th>
       </tr></thead><tbody>`;
-      for (const s of active) {
+      const maxW = Math.max(1, ...allSpools.map(a => a.remaining_weight_g));
+      // Sort: used spools first (by urgency), unused at bottom
+      const sortedRows = [...allSpools].sort((a, b) => {
+        if (a.avg_daily_g > 0 && b.avg_daily_g === 0) return -1;
+        if (a.avg_daily_g === 0 && b.avg_daily_g > 0) return 1;
+        return (a.days_until_empty ?? Infinity) - (b.days_until_empty ?? Infinity);
+      });
+      for (const s of sortedRows) {
+        const isUnused = !(s.avg_daily_g > 0);
         const daysColor = s.days_until_empty != null && s.days_until_empty <= 7 ? '#f85149' : s.days_until_empty != null && s.days_until_empty <= 14 ? '#f0883e' : '';
         const reorderBadge = s.needs_reorder ? `<span style="background:${s.days_until_empty <= 7 ? '#f85149' : '#f0883e'};color:#fff;padding:1px 6px;border-radius:4px;font-size:0.7rem">${s.days_until_empty <= 7 ? (t('filament.urgency_critical') || 'Kritisk') : (t('filament.needs_reorder') || 'Bestill')}</span>` : '';
+        const unusedBadge = isUnused ? `<span style="background:var(--bg-tertiary);color:var(--text-muted);padding:1px 6px;border-radius:4px;font-size:0.7rem">${t('filament.unused', 'Unused')}</span>` : '';
         const colorDot = s.color_hex ? `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#${s.color_hex};border:1px solid var(--border-color)"></span>` : '';
-        // Weight bar
-        const maxW = Math.max(...active.map(a => a.remaining_weight_g));
         const wPct = Math.round(s.remaining_weight_g / maxW * 100);
-        h += `<tr>
+        h += `<tr style="${isUnused ? 'opacity:0.7' : ''}">
           <td>${colorDot}</td>
           <td>${esc(s.profile_name || '?')} ${s.vendor_name ? '<span class="text-muted">(' + esc(s.vendor_name) + ')</span>' : ''}</td>
           <td>${esc(s.material || '')}</td>
@@ -5179,9 +5185,9 @@
             <div style="font-size:0.78rem">${Math.round(s.remaining_weight_g)}g</div>
             <div style="width:50px;height:3px;background:var(--bg-tertiary);border-radius:2px;margin-top:2px"><div style="width:${wPct}%;height:100%;background:var(--accent-blue);border-radius:2px"></div></div>
           </td>
-          <td style="font-weight:600">${s.avg_daily_g}g/d</td>
-          <td style="color:${daysColor};font-weight:${s.needs_reorder ? '700' : '400'}">${s.days_until_empty != null ? s.days_until_empty + 'd' : '-'}</td>
-          <td>${reorderBadge}</td>
+          <td style="font-weight:600">${isUnused ? '<span class="text-muted">—</span>' : s.avg_daily_g + 'g/d'}</td>
+          <td style="color:${daysColor};font-weight:${s.needs_reorder ? '700' : '400'}">${s.days_until_empty != null ? s.days_until_empty + 'd' : '<span class="text-muted">—</span>'}</td>
+          <td>${reorderBadge || unusedBadge}</td>
         </tr>`;
       }
       h += '</tbody></table>';

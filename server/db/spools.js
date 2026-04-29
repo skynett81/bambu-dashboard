@@ -1453,17 +1453,40 @@ export function deleteDryingPreset(material) {
 
 export function getUsagePredictions() {
   const db = getDb();
+  // Combine usage-derived stats (last 90 days) with inventory-only
+  // materials so the panel reflects every material in stock — not just
+  // ones that have been used recently. Unused materials get
+  // active_days=0 / avg_daily_g=0 / total_used_g=0 but still appear so
+  // the user can see "I have TPU but haven't used it yet" instead of it
+  // being silently hidden.
   const byMaterial = db.prepare(`
-    SELECT fp.material,
-      SUM(sul.used_weight_g) AS total_used_g,
-      COUNT(DISTINCT DATE(sul.timestamp)) AS active_days,
-      ROUND(SUM(sul.used_weight_g) / MAX(1, COUNT(DISTINCT DATE(sul.timestamp))), 2) AS avg_daily_g
-    FROM spool_usage_log sul
-    LEFT JOIN spools s ON sul.spool_id = s.id
-    LEFT JOIN filament_profiles fp ON s.filament_profile_id = fp.id
-    WHERE sul.timestamp >= datetime('now', '-90 days')
-    GROUP BY fp.material
-    ORDER BY total_used_g DESC
+    SELECT material, SUM(total_used_g) AS total_used_g,
+           MAX(active_days) AS active_days,
+           SUM(avg_daily_g) AS avg_daily_g,
+           SUM(in_stock_g) AS in_stock_g,
+           SUM(spool_count) AS spool_count
+    FROM (
+      SELECT fp.material,
+        SUM(sul.used_weight_g) AS total_used_g,
+        COUNT(DISTINCT DATE(sul.timestamp)) AS active_days,
+        ROUND(SUM(sul.used_weight_g) / MAX(1, COUNT(DISTINCT DATE(sul.timestamp))), 2) AS avg_daily_g,
+        0 AS in_stock_g, 0 AS spool_count
+      FROM spool_usage_log sul
+      LEFT JOIN spools s ON sul.spool_id = s.id
+      LEFT JOIN filament_profiles fp ON s.filament_profile_id = fp.id
+      WHERE sul.timestamp >= datetime('now', '-90 days') AND fp.material IS NOT NULL
+      GROUP BY fp.material
+      UNION ALL
+      SELECT fp.material, 0, 0, 0,
+        SUM(s.remaining_weight_g) AS in_stock_g,
+        COUNT(*) AS spool_count
+      FROM spools s
+      LEFT JOIN filament_profiles fp ON s.filament_profile_id = fp.id
+      WHERE s.archived = 0 AND fp.material IS NOT NULL
+      GROUP BY fp.material
+    )
+    GROUP BY material
+    ORDER BY total_used_g DESC, in_stock_g DESC
   `).all();
 
   const perSpool = db.prepare(`
