@@ -575,10 +575,17 @@ export function getMaterialByName(name) {
   if (!name) return null;
   const key = name.toLowerCase().trim();
   if (BY_NAME[key]) return BY_NAME[key];
-  // Try stripping common suffixes/prefixes
   const stripped = key.replace(/[() ]/g, '');
   if (BY_NAME[stripped]) return BY_NAME[stripped];
-  // Partial match: find first material whose name starts with input
+  // Compound names like "Rapid PETG" or "Bambu PLA Basic" — try each token,
+  // then check if any known material name appears as a substring.
+  for (const tok of key.split(/[\s/_-]+/)) {
+    if (BY_NAME[tok]) return BY_NAME[tok];
+  }
+  for (const m of MATERIALS) {
+    const mn = m.name.toLowerCase();
+    if (key.includes(mn)) return m;
+  }
   return MATERIALS.find(m => m.name.toLowerCase().startsWith(key)) || null;
 }
 

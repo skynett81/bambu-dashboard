@@ -1891,6 +1891,68 @@
     return opts;
   }
 
+  // Number of slots / toolheads available on a given model. Used to render
+  // the "Toolhead" / "AMS slot" selector in the spool form.
+  function _slotCountForModel(model) {
+    if (!model) return 0;
+    const m = model.toLowerCase();
+    if (m.includes('snapmaker u1')) return 4;            // 4-tool changer
+    if (m.includes('snapmaker j1')) return 2;            // IDEX dual
+    if (m.includes('artisan')) return 2;                 // dual extruder
+    if (m.includes('prusa xl')) return 5;                // up to 5 toolheads
+    if (m.includes('h2d') || m.includes('h2c')) return 4; // Bambu H series
+    if (/^p[12]s|^x1|^a1\b|^a1 mini\b|^p1[ps]\b/.test(m)) return 4; // AMS-capable Bambu
+    return 0;                                            // single-extruder
+  }
+
+  function _slotLabel(model) {
+    if (!model) return 'Slot';
+    const m = model.toLowerCase();
+    if (m.includes('snapmaker u1') || m.includes('prusa xl')) return 'Toolhead';
+    if (m.includes('snapmaker j1') || m.includes('artisan')) return 'Extruder';
+    return 'AMS slot';
+  }
+
+  function _slotName(model, index) {
+    const m = (model || '').toLowerCase();
+    if (m.includes('snapmaker j1') || m.includes('artisan')) {
+      return index === 0 ? 'Left' : 'Right';
+    }
+    if (m.includes('snapmaker u1') || m.includes('prusa xl')) {
+      return `T${index}`;
+    }
+    return String(index + 1);
+  }
+
+  function renderToolheadSlot(formId, spool) {
+    const printerId = spool?.printer_id;
+    if (!printerId) return '';
+    const meta = window.printerState?.printerMeta?.[printerId] || {};
+    const model = meta.model;
+    const count = _slotCountForModel(model);
+    if (count <= 1) return '';
+    const label = _slotLabel(model);
+    const selectedTray = spool?.ams_tray;
+    let opts = `<option value="" ${selectedTray == null ? 'selected' : ''}>--</option>`;
+    for (let i = 0; i < count; i++) {
+      opts += `<option value="${i}" ${selectedTray === i ? 'selected' : ''}>${_slotName(model, i)}</option>`;
+    }
+    const isAms = label === 'AMS slot';
+    return `<div class="form-group" style="margin-bottom:0">
+      <label class="form-label">${label}</label>
+      <select class="form-input" id="sp-tray-${formId}">${opts}</select>
+      ${isAms ? `<input type="hidden" id="sp-unit-${formId}" value="${spool?.ams_unit ?? 0}">` : ''}
+    </div>`;
+  }
+
+  // Re-render the slot selector when the user picks a different printer.
+  window.onSpoolPrinterChange = function(formId) {
+    const printerId = document.getElementById(`sp-printer-${formId}`)?.value || null;
+    const wrapper = document.getElementById(`sp-slot-wrapper-${formId}`);
+    if (!wrapper) return;
+    wrapper.innerHTML = renderToolheadSlot(formId, { printer_id: printerId });
+  };
+
   // ═══ Global API ═══
   window.loadFilamentPanel = loadFilament;
   window.switchFilamentTab = switchTab;
@@ -2007,51 +2069,53 @@
   function renderSpoolForm(spool) {
     const isEdit = !!spool;
     const id = isEdit ? spool.id : 'new';
+    const slotsHtml = renderToolheadSlot(id, spool);
     return `
       <div class="settings-card" style="margin:8px 0">
-        <div class="settings-form">
-          <div class="flex gap-sm" style="flex-wrap:wrap">
-            <div class="form-group" style="flex:2;min-width:180px">
+        <div class="settings-form" style="max-width:none">
+          <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(160px, 1fr));gap:10px 12px;align-items:end">
+            <div class="form-group" style="grid-column:span 2;min-width:200px;margin-bottom:0">
               <label class="form-label">${t('filament.profile_select')}</label>
               <select class="form-input" id="sp-profile-${id}" onchange="onSpoolProfileChange('${id}')">${buildProfileSelect(spool?.filament_profile_id)}</select>
             </div>
-            <div class="form-group" style="width:100px">
+            <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.initial_weight')}</label>
               <input class="form-input" id="sp-initial-${id}" type="number" value="${spool?.initial_weight_g || 1000}">
             </div>
-            <div class="form-group" style="width:100px">
+            <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.used_g')}</label>
               <input class="form-input" id="sp-used-${id}" type="number" value="${spool?.used_weight_g || 0}">
             </div>
-            <div class="form-group" style="width:100px">
-              <label class="form-label">${t('filament.remaining_g') || 'Igjen (g)'}</label>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label">${t('filament.remaining_g') || 'Remaining (g)'}</label>
               <input class="form-input" id="sp-remaining-${id}" type="number" value="${spool?.remaining_weight_g ?? ''}" placeholder="Auto">
             </div>
-            <div class="form-group" style="width:80px">
+            <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.price')}</label>
               <input class="form-input" id="sp-cost-${id}" type="number" value="${spool?.cost || ''}" placeholder="219">
             </div>
-            <div class="form-group" style="width:100px">
+            <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.spool_tare_weight')}</label>
               <input class="form-input" id="sp-tare-${id}" type="number" value="${spool?.spool_weight || ''}" placeholder="Auto">
             </div>
-            <div class="form-group" style="width:100px">
+            <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.lot_number')}</label>
               <input class="form-input" id="sp-lot-${id}" value="${spool?.lot_number || ''}">
             </div>
-            <div class="form-group" style="width:130px">
+            <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.location')}</label>
               <select class="form-input" id="sp-location-${id}">${buildLocationSelect(spool?.location)}</select>
             </div>
-            <div class="form-group" style="width:130px">
+            <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('common.printer')}</label>
-              <select class="form-input" id="sp-printer-${id}">${buildPrinterOptions(spool?.printer_id)}</select>
+              <select class="form-input" id="sp-printer-${id}" onchange="onSpoolPrinterChange('${id}')">${buildPrinterOptions(spool?.printer_id)}</select>
             </div>
-            <div class="form-group" style="width:120px">
+            <div id="sp-slot-wrapper-${id}" style="display:contents">${slotsHtml}</div>
+            <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.purchase_date')}</label>
               <input class="form-input" id="sp-purchase-${id}" type="date" value="${spool?.purchase_date || ''}">
             </div>
-            <div class="form-group" style="width:110px">
+            <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.storage_method')}</label>
               <select class="form-input" id="sp-storage-${id}">
                 <option value="">${t('common.none')}</option>
@@ -2060,11 +2124,11 @@
                 <option value="open_air" ${spool?.storage_method === 'open_air' ? 'selected' : ''}>${t('filament.storage_open_air')}</option>
               </select>
             </div>
-            <div class="form-group" style="flex:1;min-width:120px">
+            <div class="form-group" style="grid-column:span 2;min-width:200px;margin-bottom:0">
               <label class="form-label">${t('filament.comment')}</label>
               <input class="form-input" id="sp-comment-${id}" value="${spool?.comment || ''}">
             </div>
-            ${!isEdit ? `<div class="form-group" style="width:80px">
+            ${!isEdit ? `<div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.bulk_quantity')}</label>
               <input class="form-input" id="sp-quantity-${id}" type="number" value="1" min="1" max="50" step="1">
             </div>` : ''}
@@ -2095,6 +2159,8 @@
   window.saveNewSpool = async function() {
     const profileId = parseInt(document.getElementById('sp-profile-new')?.value);
     if (!profileId) { showToast(t('filament.add_spool_select_profile'), 'warning'); return; }
+    const trayRaw = document.getElementById('sp-tray-new')?.value;
+    const unitRaw = document.getElementById('sp-unit-new')?.value;
     const data = {
       filament_profile_id: profileId,
       initial_weight_g: parseFloat(document.getElementById('sp-initial-new').value) || 1000,
@@ -2107,6 +2173,8 @@
       purchase_date: document.getElementById('sp-purchase-new').value || null,
       spool_weight: parseFloat(document.getElementById('sp-tare-new').value) || null,
       storage_method: document.getElementById('sp-storage-new').value || null,
+      ams_unit: unitRaw !== undefined && unitRaw !== '' ? parseInt(unitRaw) : (trayRaw !== undefined && trayRaw !== '' ? 0 : null),
+      ams_tray: trayRaw !== undefined && trayRaw !== '' ? parseInt(trayRaw) : null,
       extra_fields: _collectExtraFields('sp-new')
     };
     const manualRem = document.getElementById('sp-remaining-new')?.value;
@@ -2130,6 +2198,8 @@
   window.saveSpool = async function(spoolId) {
     const id = spoolId;
     const spool = _spools.find(s => s.id === spoolId);
+    const trayRaw = document.getElementById(`sp-tray-${id}`)?.value;
+    const unitRaw = document.getElementById(`sp-unit-${id}`)?.value;
     const data = {
       filament_profile_id: parseInt(document.getElementById(`sp-profile-${id}`)?.value) || spool?.filament_profile_id,
       initial_weight_g: parseFloat(document.getElementById(`sp-initial-${id}`).value) || 1000,
@@ -2143,6 +2213,8 @@
       archived: spool?.archived || 0,
       spool_weight: parseFloat(document.getElementById(`sp-tare-${id}`).value) || null,
       storage_method: document.getElementById(`sp-storage-${id}`).value || null,
+      ams_unit: unitRaw !== undefined && unitRaw !== '' ? parseInt(unitRaw) : (trayRaw !== undefined && trayRaw !== '' ? 0 : null),
+      ams_tray: trayRaw !== undefined && trayRaw !== '' ? parseInt(trayRaw) : null,
       extra_fields: _collectExtraFields(`sp-${id}`)
     };
     // Manual remaining takes priority, otherwise calculate from initial - used
