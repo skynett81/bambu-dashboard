@@ -5,7 +5,7 @@
   const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const DAYS = ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'];
 
-  function _tl(key, fb) { return (typeof t === 'function' ? t(key) : '') || fb; }
+  function _tl(key, fb) { if (typeof t === 'function') { const v = t(key); if (v && v !== key) return v; } return fb || key; }
   function _fmtDate(d) {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }

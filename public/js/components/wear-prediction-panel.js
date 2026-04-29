@@ -20,7 +20,7 @@
   };
 
   function _esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
-  function _tl(key, fb) { return (typeof t === 'function' ? t(key) : '') || fb; }
+  function _tl(key, fb) { if (typeof t === 'function') { const v = t(key); if (v && v !== key) return v; } return fb || key; }
 
   function formatDate(iso) {
     if (!iso) return '--';

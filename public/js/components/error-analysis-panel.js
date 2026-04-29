@@ -3,7 +3,7 @@
   'use strict';
   let _tab = 'overview';
 
-  function _t(k, fb) { return (typeof t === 'function' ? t(k) : '') || fb; }
+  function _t(k, fb) { if (typeof t === 'function') { const v = t(k); if (v && v !== k) return v; } return fb || k; }
   function _esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
   function _fmtDate(iso) {
     if (!iso) return '';

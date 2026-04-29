@@ -13,7 +13,7 @@
   let _viewMode = '3d';
   let _printerId = null;
 
-  function _t(k, fb) { return (typeof t === 'function' ? t(k) : '') || fb; }
+  function _t(k, fb) { if (typeof t === 'function') { const v = t(k); if (v && v !== k) return v; } return fb || k; }
 
   window.loadBedMeshPanel = function() {
     const el = document.getElementById('overlay-panel-body');

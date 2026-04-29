@@ -15,7 +15,7 @@
 
   function _tabBarHtml() {
     return '<div class="tabs _wrapper-tabs">' + TABS.map(tab => {
-      const label = (typeof t === 'function' ? t(tab.labelKey) : '') || tab.fallback;
+      const label = (typeof t === 'function' && t(tab.labelKey) !== tab.labelKey ? t(tab.labelKey) : tab.fallback);
       const active = _activeTab === tab.id ? ' active' : '';
       return `<button class="tab-btn${active}" onclick="_switchMaterialRecTab('${tab.id}')">${label}</button>`;
     }).join('') + '</div>';
@@ -30,7 +30,11 @@
   }
 
   function _tl(key, fb) {
-    return (typeof t === 'function' ? t(key) : '') || fb;
+    if (typeof t === 'function') {
+      const v = t(key);
+      if (v && v !== key) return v;
+    }
+    return fb || key;
   }
 
   function _rateClass(rate) {

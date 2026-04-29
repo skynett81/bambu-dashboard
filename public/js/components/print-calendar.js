@@ -2,7 +2,7 @@
 (function() {
   'use strict';
 
-  function _t(key, fb) { return (typeof t === 'function' ? t(key) : '') || fb; }
+  function _t(key, fb) { if (typeof t === 'function') { const v = t(key); if (v && v !== key) return v; } return fb || key; }
 
   const MONTHS_FB = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const DAYS_FB = ['Mon','','Wed','','Fri','','Sun'];

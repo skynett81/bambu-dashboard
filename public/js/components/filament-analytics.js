@@ -432,7 +432,7 @@
     let html = STYLE + '<div class="fa-container">';
     html += '<div class="panel-tabs" style="margin-bottom:16px">';
     for (const tab of TABS) {
-      const label = (typeof t === 'function' ? t(tab.labelKey) : '') || tab.fallback;
+      const label = (typeof t === 'function' && t(tab.labelKey) !== tab.labelKey ? t(tab.labelKey) : tab.fallback);
       html += `<button class="tab-btn${tab.id === _activeTab ? ' active' : ''}" onclick="window._switchFilamentAnalyticsTab('${tab.id}')">${label}</button>`;
     }
     html += '</div>';

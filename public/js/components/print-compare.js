@@ -64,7 +64,7 @@
       ]);
       _showCompareModal(r1, r2);
     } catch (err) {
-      if (typeof showToast === 'function') showToast((typeof t === 'function' ? t('history.compare_load_failed') : '') || 'Could not load print data', 'error', 3000);
+      if (typeof showToast === 'function') showToast((typeof t === 'function' && t('history.compare_load_failed') !== 'history.compare_load_failed' ? t('history.compare_load_failed') : 'Could not load print data'), 'error', 3000);
     }
   };
 
@@ -81,11 +81,11 @@
 
     let html = `<div class="modal-content" style="max-width:550px">
       <div class="modal-header">
-        <h3>${(typeof t === 'function' ? t('history.compare_prints') : '') || 'Compare prints'}</h3>
+        <h3>${(typeof t === 'function' && t('history.compare_prints') !== 'history.compare_prints' ? t('history.compare_prints') : 'Compare prints')}</h3>
         <button class="modal-close" onclick="document.getElementById('print-compare-modal')?.remove()">&times;</button>
       </div>
       <div class="modal-body">
-        <p class="text-muted" style="font-size:0.8rem;margin-bottom:10px">${(typeof t === 'function' ? t('history.compare_select_hint') : '') || 'Select exactly two prints, then click Compare.'}</p>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:10px">${(typeof t === 'function' && t('history.compare_select_hint') !== 'history.compare_select_hint' ? t('history.compare_select_hint') : 'Select exactly two prints, then click Compare.')}</p>
         <div class="compare-select-list">`;
 
     for (const p of prints) {
@@ -102,8 +102,8 @@
 
     html += `</div></div>
       <div class="modal-footer">
-        <button class="form-btn form-btn-secondary" onclick="document.getElementById('print-compare-modal')?.remove()">${(typeof t === 'function' ? t('common.cancel') : '') || 'Cancel'}</button>
-        <button class="form-btn form-btn-primary" id="compare-go-btn" disabled onclick="window._compareSelected()">${(typeof t === 'function' ? t('history.compare_btn') : '') || 'Compare'}</button>
+        <button class="form-btn form-btn-secondary" onclick="document.getElementById('print-compare-modal')?.remove()">${(typeof t === 'function' && t('common.cancel') !== 'common.cancel' ? t('common.cancel') : 'Cancel')}</button>
+        <button class="form-btn form-btn-primary" id="compare-go-btn" disabled onclick="window._compareSelected()">${(typeof t === 'function' && t('history.compare_btn') !== 'history.compare_btn' ? t('history.compare_btn') : 'Compare')}</button>
       </div>
     </div>`;
 
@@ -131,7 +131,7 @@
   function _showCompareModal(a, b) {
     const overlay = _createOverlay();
 
-    const _tl = (key, fallback) => (typeof t === 'function' ? t(key) : '') || fallback;
+    const _tl = (key, fallback) => { if (typeof t === 'function') { const v = t(key); if (v && v !== key) return v; } return fallback || key; };
     const fields = [
       { label: _tl('history.filename', 'Filnavn'), key: 'filename', fmt: v => _esc((v || '--').replace(/\.(3mf|gcode)$/i, '')) },
       { label: _tl('history.status', 'Status'), key: 'status', fmt: v => `<span style="color:${_statusColor(v)};font-weight:600">${_statusLabel(v)}</span>`, compare: 'status' },

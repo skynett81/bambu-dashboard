@@ -4,7 +4,7 @@
   let _data = null;
   let _selectedPrinter = null;
 
-  function _t(k, fb) { return (typeof t === 'function' ? t(k) : '') || fb; }
+  function _t(k, fb) { if (typeof t === 'function') { const v = t(k); if (v && v !== k) return v; } return fb || k; }
 
   window.loadHealthPanel = function() {
     const el = document.getElementById('overlay-panel-body');

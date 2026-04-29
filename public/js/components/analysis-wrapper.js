@@ -11,7 +11,7 @@
   ];
   function _tabBarHtml() {
     return '<div class="tabs _wrapper-tabs">' + TABS.map(tab => {
-      const label = (typeof t === 'function' ? t(tab.labelKey) : '') || tab.fallback;
+      const label = (typeof t === 'function' && t(tab.labelKey) !== tab.labelKey ? t(tab.labelKey) : tab.fallback);
       const active = _activeTab === tab.id ? ' active' : '';
       return `<button class="tab-btn${active}" onclick="_switchAnalysisTab('${tab.id}')">${label}</button>`;
     }).join('') + '</div>';

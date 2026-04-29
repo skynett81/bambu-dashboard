@@ -5,7 +5,7 @@
   const TOUR_KEY = 'onboarding-completed';
 
   function _getTourSteps() {
-    const _tl = (key, fallback) => (typeof t === 'function' ? t(key) : '') || fallback;
+    const _tl = (key, fallback) => { if (typeof t === 'function') { const v = t(key); if (v && v !== key) return v; } return fallback || key; };
     return [
       {
         target: '#sidebar',
@@ -78,10 +78,10 @@
       <div class="tour-title">${step.title}</div>
       <div class="tour-text">${step.text}</div>
       <div class="tour-actions">
-        <button class="form-btn form-btn-secondary tour-skip" onclick="endTour()">${(typeof t === 'function' ? t('tour.skip') : '') || 'Skip'}</button>
+        <button class="form-btn form-btn-secondary tour-skip" onclick="endTour()">${(typeof t === 'function' && t('tour.skip') !== 'tour.skip' ? t('tour.skip') : 'Skip')}</button>
         <div style="display:flex;gap:6px">
-          ${!isFirst ? `<button class="form-btn form-btn-secondary tour-prev" onclick="tourPrev()">${(typeof t === 'function' ? t('tour.back') : '') || 'Back'}</button>` : ''}
-          <button class="form-btn tour-next" onclick="${isLast ? 'endTour()' : 'tourNext()'}">${isLast ? ((typeof t === 'function' ? t('tour.finish') : '') || 'Finish') : ((typeof t === 'function' ? t('tour.next') : '') || 'Next')}</button>
+          ${!isFirst ? `<button class="form-btn form-btn-secondary tour-prev" onclick="tourPrev()">${(typeof t === 'function' && t('tour.back') !== 'tour.back' ? t('tour.back') : 'Back')}</button>` : ''}
+          <button class="form-btn tour-next" onclick="${isLast ? 'endTour()' : 'tourNext()'}">${isLast ? ((typeof t === 'function' && t('tour.finish') !== 'tour.finish' ? t('tour.finish') : 'Finish')) : ((typeof t === 'function' && t('tour.next') !== 'tour.next' ? t('tour.next') : 'Next'))}</button>
         </div>
       </div>
     `;

@@ -11,7 +11,7 @@
     const div = document.createElement('div');
     div.className = 'tabs';
     div.innerHTML = TABS.map(tab => {
-      const label = (typeof t === 'function' ? t(tab.labelKey) : '') || tab.fallback;
+      const label = (typeof t === 'function' && t(tab.labelKey) !== tab.labelKey ? t(tab.labelKey) : tab.fallback);
       const active = _activeTab === tab.id ? ' active' : '';
       return `<button class="tab-btn${active}" onclick="_switchStatsTab('${tab.id}')">${label}</button>`;
     }).join('');

@@ -3,7 +3,7 @@
   'use strict';
   let _activeTab = 'diagnostics';
 
-  function _t(k, fb) { return (typeof t === 'function' ? t(k) : '') || fb; }
+  function _t(k, fb) { if (typeof t === 'function') { const v = t(k); if (v && v !== k) return v; } return fb || k; }
   function _esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
   const TABS = [
@@ -15,7 +15,7 @@
 
   function _tabBarHtml() {
     return '<div class="tabs _wrapper-tabs">' + TABS.map(tab => {
-      const label = (typeof t === 'function' ? t(tab.labelKey) : '') || tab.fallback;
+      const label = (typeof t === 'function' && t(tab.labelKey) !== tab.labelKey ? t(tab.labelKey) : tab.fallback);
       const active = _activeTab === tab.id ? ' active' : '';
       return `<button class="tab-btn${active}" onclick="_switchDiagTab('${tab.id}')">${label}</button>`;
     }).join('') + '</div>';

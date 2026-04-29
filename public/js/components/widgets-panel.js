@@ -21,7 +21,7 @@
 
   let _widgets = [];
 
-  function _tl(key, fb) { return (typeof t === 'function' ? t(key) : '') || fb; }
+  function _tl(key, fb) { if (typeof t === 'function') { const v = t(key); if (v && v !== key) return v; } return fb || key; }
 
   function getDefaults() {
     return WIDGET_TYPES.map(w => ({ id: w.id, enabled: w.default }));
