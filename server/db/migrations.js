@@ -1859,17 +1859,7 @@ export function runMigrations() {
         ['eSUN Cleaning Filament', 'Cleaning', 1.05, 230, 260, 0, 0, 100],
       ];
 
-      const upsert = db.prepare(`INSERT INTO filament_profiles
-        (name, vendor_id, material, color_hex, color_name, density, diameter,
-         spool_weight_g, weight_g, nozzle_temp_min, nozzle_temp_max,
-         bed_temp_min, bed_temp_max, source, created_at)
-        VALUES (?, ?, ?, '', '', ?, 1.75, ?, ?, ?, ?, ?, ?, 'seed-esun-v139', datetime('now'))
-        ON CONFLICT(external_id) DO NOTHING`);
-
-      // Without external_id on these rows the ON CONFLICT clause won't
-      // match anything (partial index is WHERE external_id IS NOT NULL),
-      // so duplicates would still be possible. Guard against re-running:
-      // skip rows where (name, vendor_id) already exists.
+      // Idempotency: skip rows where (name, vendor_id) already exists.
       const exists = db.prepare('SELECT 1 FROM filament_profiles WHERE name = ? AND vendor_id = ? LIMIT 1');
       let added = 0;
       for (const [name, material, density, nMin, nMax, bMin, bMax, weight] of profiles) {
