@@ -1004,9 +1004,15 @@ export function toggleSpoolFavorite(id) {
 }
 
 export function batchAddSpools(data, count) {
+  // Only the first reel inherits the slot assignment (printer_id +
+  // ams_unit + ams_tray). Subsequent ones land unattached so they don't
+  // all show up linked to the same toolhead — the user can attach the
+  // remaining reels later from the slot picker. This matches the typical
+  // workflow: buying 5 of the same colour and only loading 1 right now.
   const ids = [];
   for (let i = 0; i < count; i++) {
-    const result = addSpool(data);
+    const payload = i === 0 ? data : { ...data, printer_id: null, ams_unit: null, ams_tray: null };
+    const result = addSpool(payload);
     ids.push(result.id);
   }
   return ids;

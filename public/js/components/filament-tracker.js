@@ -2314,6 +2314,10 @@
               <label class="form-label">${t('filament.profile_select')}</label>
               <select class="form-input" id="sp-profile-${id}" onchange="onSpoolProfileChange('${id}')">${buildProfileSelect(spool?.filament_profile_id)}</select>
             </div>
+            ${!isEdit ? `<div class="form-group" style="margin-bottom:0">
+              <label class="form-label" style="color:var(--accent-blue);font-weight:600">${t('filament.bulk_quantity')}</label>
+              <input class="form-input" id="sp-quantity-${id}" type="number" value="1" min="1" max="50" step="1" title="${t('filament.bulk_quantity_hint') || 'Number of spools to add (with the same profile, weight and price)'}" style="border-color:var(--accent-blue)">
+            </div>` : ''}
             <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.initial_weight')}</label>
               <input class="form-input" id="sp-initial-${id}" type="number" value="${spool?.initial_weight_g || 1000}">
@@ -2327,8 +2331,8 @@
               <input class="form-input" id="sp-remaining-${id}" type="number" value="${spool?.remaining_weight_g ?? ''}" placeholder="Auto">
             </div>
             <div class="form-group" style="margin-bottom:0">
-              <label class="form-label">${t('filament.price')}</label>
-              <input class="form-input" id="sp-cost-${id}" type="number" value="${spool?.cost || ''}" placeholder="219">
+              <label class="form-label">${t('filament.price_per_spool') || t('filament.price')}</label>
+              <input class="form-input" id="sp-cost-${id}" type="number" value="${spool?.cost || ''}" placeholder="219" title="${t('filament.price_per_spool_hint') || 'Price per spool — applied to every spool when quantity > 1'}">
             </div>
             <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.spool_tare_weight')}</label>
@@ -2371,10 +2375,6 @@
               <label class="form-label">${t('filament.comment')}</label>
               <input class="form-input" id="sp-comment-${id}" value="${spool?.comment || ''}">
             </div>
-            ${!isEdit ? `<div class="form-group" style="margin-bottom:0">
-              <label class="form-label">${t('filament.bulk_quantity')}</label>
-              <input class="form-input" id="sp-quantity-${id}" type="number" value="1" min="1" max="50" step="1">
-            </div>` : ''}
           </div>
           <div id="sp-${id}-extra-fields-section">
             <div style="font-size:0.8rem;margin:4px 0">${t('filament.extra_fields')}</div>
