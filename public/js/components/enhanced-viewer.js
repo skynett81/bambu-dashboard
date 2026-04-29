@@ -718,7 +718,7 @@
       <div class="lib-3d-content">
         <div class="lib-3d-canvas-wrap" id="_g3d-canvas">
           <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:0.9rem" id="_g3d-loading">
-            ${typeof t === 'function' ? t('library.loading_model') || 'Loading 3D model...' : 'Loading 3D model...'}
+            ${typeof t === 'function' ? t('library.loading_model', 'Loading 3D model...') : 'Loading 3D model...'}
           </div>
           <div id="_g3d-layer-scrubber" style="display:none;padding:4px 12px;background:var(--bg-tertiary,#1a1f3c);border-top:1px solid var(--border-color)">
             <div style="display:flex;align-items:center;gap:8px;font-size:0.7rem;color:var(--text-muted)">
@@ -729,7 +729,7 @@
           </div>
         </div>
         <div class="lib-3d-info" id="_g3d-info">
-          <h5>${typeof t === 'function' ? t('library.model_info') || 'Model information' : 'Model Info'}</h5>
+          <h5>${typeof t === 'function' ? t('library.model_info', 'Model information') : 'Model Info'}</h5>
           <div id="_g3d-info-body"></div>
           <div id="_g3d-parts-panel" style="display:none;margin-top:12px">
             <h5 style="margin:0 0 6px;font-size:0.8rem">Parts</h5>

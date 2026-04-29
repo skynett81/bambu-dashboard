@@ -42,14 +42,14 @@
 
       const categories = ['prints', 'filament', 'time', 'quality', 'exploration', 'dedication', 'milestones', 'collection'];
       const catNames = {
-        prints: t('achievements.cat_prints') || 'Prints',
-        filament: t('achievements.cat_filament') || 'Filament',
-        time: t('achievements.cat_time') || 'Time',
-        quality: t('achievements.cat_quality') || 'Quality',
-        exploration: t('achievements.cat_exploration') || 'Exploration',
-        dedication: t('achievements.cat_dedication') || 'Dedication',
-        milestones: t('achievements.cat_milestones') || 'Milestones',
-        collection: t('achievements.cat_collection') || 'Collection'
+        prints: t('achievements.cat_prints', 'Prints'),
+        filament: t('achievements.cat_filament', 'Filament'),
+        time: t('achievements.cat_time', 'Time'),
+        quality: t('achievements.cat_quality', 'Quality'),
+        exploration: t('achievements.cat_exploration', 'Exploration'),
+        dedication: t('achievements.cat_dedication', 'Dedication'),
+        milestones: t('achievements.cat_milestones', 'Milestones'),
+        collection: t('achievements.cat_collection', 'Collection')
       };
 
       // Per-category stats
@@ -144,27 +144,27 @@
         <div class="ach-level-badge">${level}</div>
         <div class="ach-level-info">
           <div class="ach-level-title">${esc(levelTitle)}</div>
-          <div class="ach-level-sub">${totalXP} XP \u2022 ${t('achievements.earned') || 'Earned'}: ${earned.length}/${achievements.length}</div>
+          <div class="ach-level-sub">${totalXP} XP \u2022 ${t('achievements.earned', 'Earned')}: ${earned.length}/${achievements.length}</div>
           <div class="ach-xp-bar"><div class="ach-xp-fill" style="width:${(levelXP / 500) * 100}%"></div></div>
         </div>
         <div style="text-align:center">
           <div style="font-size:1.4rem;font-weight:800;color:var(--accent-green)">${completionPct}%</div>
-          <div style="font-size:0.6rem;color:var(--text-muted)">${t('achievements.completion') || 'Completion'}</div>
+          <div style="font-size:0.6rem;color:var(--text-muted)">${t('achievements.completion', 'Completion')}</div>
         </div>
       </div>`;
 
       // Summary cards
       h += '<div class="ach-summary">';
-      h += `<div class="ach-summary-card"><div class="ach-summary-num" style="color:var(--accent-green)">${earned.length}</div><div class="ach-summary-label">${t('achievements.earned') || 'Earned'}</div></div>`;
-      h += `<div class="ach-summary-card"><div class="ach-summary-num" style="color:var(--accent-blue)">${inProgress.length}</div><div class="ach-summary-label">${t('achievements.in_progress') || 'In Progress'}</div></div>`;
-      h += `<div class="ach-summary-card"><div class="ach-summary-num" style="color:var(--text-muted)">${locked.length}</div><div class="ach-summary-label">${t('achievements.locked') || 'Locked'}</div></div>`;
+      h += `<div class="ach-summary-card"><div class="ach-summary-num" style="color:var(--accent-green)">${earned.length}</div><div class="ach-summary-label">${t('achievements.earned', 'Earned')}</div></div>`;
+      h += `<div class="ach-summary-card"><div class="ach-summary-num" style="color:var(--accent-blue)">${inProgress.length}</div><div class="ach-summary-label">${t('achievements.in_progress', 'In Progress')}</div></div>`;
+      h += `<div class="ach-summary-card"><div class="ach-summary-num" style="color:var(--text-muted)">${locked.length}</div><div class="ach-summary-label">${t('achievements.locked', 'Locked')}</div></div>`;
       h += `<div class="ach-summary-card"><div class="ach-summary-num" style="color:var(--accent-purple, #8b5cf6)">${totalXP}</div><div class="ach-summary-label">XP</div></div>`;
       h += '</div>';
 
       // Almost there — achievements close to completion
       const almostThere = inProgress.filter(a => a.progress >= 0.7).sort((a, b) => b.progress - a.progress).slice(0, 6);
       if (almostThere.length > 0) {
-        h += `<div class="ach-section-title">\u{1F525} ${t('achievements.almost_there') || 'Almost There!'}</div>`;
+        h += `<div class="ach-section-title">\u{1F525} ${t('achievements.almost_there', 'Almost There!')}</div>`;
         h += '<div class="ach-close-to">';
         for (const a of almostThere) {
           h += `<div class="ach-close-card">
@@ -183,7 +183,7 @@
       h += '<div class="ach-cat-grid">';
       h += `<div class="ach-cat-card active" onclick="filterAchievements('all', this)">
         <div class="ach-cat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg></div>
-        <div class="ach-cat-info"><div class="ach-cat-name">${t('common.all') || 'All'}</div><div class="ach-cat-count">${earned.length} / ${achievements.length}</div>
+        <div class="ach-cat-info"><div class="ach-cat-name">${t('common.all', 'All')}</div><div class="ach-cat-count">${earned.length} / ${achievements.length}</div>
           <div class="ach-cat-bar"><div class="ach-cat-fill" style="width:${completionPct}%"></div></div>
         </div>
       </div>`;
@@ -215,28 +215,28 @@
           card += `<div class="ach-bar"><div class="ach-bar-fill" style="width:${a.progress * 100}%"></div></div>`;
           card += `<div class="ach-bar-label">${a.current} / ${a.target} (${Math.round(a.progress * 100)}%)</div>`;
         } else {
-          card += `<div class="ach-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> ${t('achievements.earned') || 'Earned'}</div>`;
+          card += `<div class="ach-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> ${t('achievements.earned', 'Earned')}</div>`;
         }
         card += '</div></div>';
         return card;
       }
 
       if (earned.length > 0) {
-        h += `<div class="ach-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ${t('achievements.earned') || 'Earned'} <span class="ach-section-count">(${earned.length})</span></div>`;
+        h += `<div class="ach-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> ${t('achievements.earned', 'Earned')} <span class="ach-section-count">(${earned.length})</span></div>`;
         h += '<div class="ach-grid" id="ach-grid-earned">';
         for (const a of earned) h += renderCard(a);
         h += '</div>';
       }
 
       if (inProgress.length > 0) {
-        h += `<div class="ach-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${t('achievements.in_progress') || 'In Progress'} <span class="ach-section-count">(${inProgress.length})</span></div>`;
+        h += `<div class="ach-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--accent-blue)" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${t('achievements.in_progress', 'In Progress')} <span class="ach-section-count">(${inProgress.length})</span></div>`;
         h += '<div class="ach-grid" id="ach-grid-progress">';
         for (const a of inProgress.sort((a, b) => b.progress - a.progress)) h += renderCard(a);
         h += '</div>';
       }
 
       if (locked.length > 0) {
-        h += `<div class="ach-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> ${t('achievements.locked') || 'Locked'} <span class="ach-section-count">(${locked.length})</span></div>`;
+        h += `<div class="ach-section-title"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg> ${t('achievements.locked', 'Locked')} <span class="ach-section-count">(${locked.length})</span></div>`;
         h += '<div class="ach-grid" id="ach-grid-locked">';
         for (const a of locked) h += renderCard(a);
         h += '</div>';
@@ -258,14 +258,14 @@
 
     const pct = Math.round((a.progress || 0) * 100);
     const catName = {
-      prints: t('achievements.cat_prints') || 'Prints',
-      filament: t('achievements.cat_filament') || 'Filament',
-      time: t('achievements.cat_time') || 'Time',
-      quality: t('achievements.cat_quality') || 'Quality',
-      exploration: t('achievements.cat_exploration') || 'Exploration',
-      dedication: t('achievements.cat_dedication') || 'Dedication',
-      milestones: t('achievements.cat_milestones') || 'Milestones',
-      collection: t('achievements.cat_collection') || 'Collection'
+      prints: t('achievements.cat_prints', 'Prints'),
+      filament: t('achievements.cat_filament', 'Filament'),
+      time: t('achievements.cat_time', 'Time'),
+      quality: t('achievements.cat_quality', 'Quality'),
+      exploration: t('achievements.cat_exploration', 'Exploration'),
+      dedication: t('achievements.cat_dedication', 'Dedication'),
+      milestones: t('achievements.cat_milestones', 'Milestones'),
+      collection: t('achievements.cat_collection', 'Collection')
     }[a.category] || a.category;
 
     const popup = document.createElement('div');
@@ -283,16 +283,16 @@
       <div class="ach-detail-progress-section">
         <div class="ach-detail-bar"><div class="ach-detail-bar-fill" style="width:${pct}%;background:${a.earned ? 'var(--accent-green)' : a.rarityColor}"></div></div>
         <div class="ach-detail-stats">
-          <span>${a.earned ? '✓ ' + (t('achievements.earned') || 'Earned') : pct + '%'}</span>
+          <span>${a.earned ? '✓ ' + (t('achievements.earned', 'Earned')) : pct + '%'}</span>
           <span>${a.current || 0} / ${a.target || '?'}</span>
         </div>
       </div>
       <div class="ach-detail-grid">
         <div class="ach-detail-stat"><span class="ach-detail-val">${a.xp || 0}</span><span class="ach-detail-lbl">XP</span></div>
-        <div class="ach-detail-stat"><span class="ach-detail-val" style="color:${a.rarityColor}">${a.rarity}</span><span class="ach-detail-lbl">${t('achievements.rarity') || 'Rarity'}</span></div>
-        <div class="ach-detail-stat"><span class="ach-detail-val">${catName}</span><span class="ach-detail-lbl">${t('achievements.category') || 'Category'}</span></div>
+        <div class="ach-detail-stat"><span class="ach-detail-val" style="color:${a.rarityColor}">${a.rarity}</span><span class="ach-detail-lbl">${t('achievements.rarity', 'Rarity')}</span></div>
+        <div class="ach-detail-stat"><span class="ach-detail-val">${catName}</span><span class="ach-detail-lbl">${t('achievements.category', 'Category')}</span></div>
       </div>
-      ${!a.earned ? `<div class="ach-detail-hint">${t('achievements.keep_going') || 'Keep going! You are ' + pct + '% there.'}</div>` : `<div class="ach-detail-hint" style="color:var(--accent-green)">${t('achievements.completed_msg') || 'Congratulations! Achievement unlocked!'}</div>`}
+      ${!a.earned ? `<div class="ach-detail-hint">${t('achievements.keep_going', 'Keep going! You are ') + pct + '% there.'}</div>` : `<div class="ach-detail-hint" style="color:var(--accent-green)">${t('achievements.completed_msg', 'Congratulations! Achievement unlocked!')}</div>`}
     `;
 
     document.body.appendChild(popup);

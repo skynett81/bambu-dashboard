@@ -116,7 +116,7 @@
             <div class="filament-usage-bar"><div class="filament-usage-bar-fill" style="width:${pct}%;background:${color}"></div></div>
           </div>
           <div class="filament-after-print-row">
-            <span class="filament-after-label">${t('filament.after_print') || 'Etter print'}</span>
+            <span class="filament-after-label">${t('filament.after_print', 'Etter print')}</span>
             <span class="filament-after-value">${afterPrint}% · ${afterPrintG}g</span>
           </div>`;
       }

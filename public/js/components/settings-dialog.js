@@ -216,7 +216,7 @@
           { id: 'preferences', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>', label: t('settings.settings_sub_preferences') },
           { id: 'auth', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>', label: t('settings.settings_sub_auth') },
           { id: 'obs', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>', label: t('settings.settings_sub_obs') },
-          { id: 'network', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>', label: t('settings.settings_sub_network') || 'Network' }
+          { id: 'network', icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>', label: t('settings.settings_sub_network', 'Network') }
         ];
         html += '<div class="drying-sub-tabs">';
         for (const tab of gtabs) html += `<button class="drying-sub-tab${_generalSubTab === tab.id ? ' active' : ''}" data-general-tab="${tab.id}" onclick="window._switchGeneralSubTab('${tab.id}')" style="display:flex;align-items:center;gap:4px">${tab.icon} ${tab.label}</button>`;
@@ -458,23 +458,23 @@
       h += '</div>';
       h += `<div class="settings-card mt-md"><div class="card-title">${t('settings.theme_radius')}</div><div class="theme-radius-row"><span class="text-muted" style="font-size:0.8rem">${t('settings.theme_radius_sharp')}</span><input type="range" class="theme-radius-slider" id="theme-radius-slider" min="0" max="20" step="1" value="${currentRadius}" oninput="setThemeRadius(this.value)"><span class="text-muted" style="font-size:0.8rem">${t('settings.theme_radius_round')}</span><span class="theme-radius-value" id="theme-radius-value">${currentRadius}px</span></div></div>`;
       h += '<div class="settings-card mt-md"><div class="settings-row">';
-      h += '<div class="settings-label">' + (t('settings.compact_mode') || 'Compact Mode') + '</div>';
+      h += '<div class="settings-label">' + (t('settings.compact_mode', 'Compact Mode')) + '</div>';
       h += '<div class="settings-control">';
       h += '<label class="toggle-switch"><input type="checkbox" id="compact-mode-toggle" ' + (document.body.classList.contains('compact-mode') ? 'checked' : '') + ' onchange="toggleCompactMode()"><span class="toggle-slider"></span></label>';
-      h += '<span style="font-size:0.75rem;color:var(--text-muted);margin-left:8px">' + (t('settings.compact_mode_desc') || 'Denser layout with smaller spacing') + '</span>';
+      h += '<span style="font-size:0.75rem;color:var(--text-muted);margin-left:8px">' + (t('settings.compact_mode_desc', 'Denser layout with smaller spacing')) + '</span>';
       h += '</div></div></div>';
 
       // Dashboard columns selector
       const curCols = typeof getDashboardColumns === 'function' ? getDashboardColumns() : 3;
       h += '<div class="settings-card mt-md">';
-      h += '<div class="card-title">' + (t('settings.dashboard_columns') || 'Dashboard Columns') + '</div>';
+      h += '<div class="card-title">' + (t('settings.dashboard_columns', 'Dashboard Columns')) + '</div>';
       h += '<div class="dashboard-cols-selector">';
       h += '<button class="dashboard-cols-btn' + (curCols === 2 ? ' active' : '') + '" onclick="setDashboardColumns(2);document.querySelectorAll(\'.dashboard-cols-btn\').forEach(b=>b.classList.remove(\'active\'));this.classList.add(\'active\')">';
       h += '<svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="12" height="18" rx="2"/><rect x="15" y="1" width="12" height="18" rx="2"/></svg>';
-      h += '<span>2 ' + (t('settings.columns') || 'kolonner') + '</span></button>';
+      h += '<span>2 ' + (t('settings.columns', 'kolonner')) + '</span></button>';
       h += '<button class="dashboard-cols-btn' + (curCols === 3 ? ' active' : '') + '" onclick="setDashboardColumns(3);document.querySelectorAll(\'.dashboard-cols-btn\').forEach(b=>b.classList.remove(\'active\'));this.classList.add(\'active\')">';
       h += '<svg width="28" height="20" viewBox="0 0 28 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="7.3" height="18" rx="1.5"/><rect x="10.3" y="1" width="7.3" height="18" rx="1.5"/><rect x="19.7" y="1" width="7.3" height="18" rx="1.5"/></svg>';
-      h += '<span>3 ' + (t('settings.columns') || 'kolonner') + '</span></button>';
+      h += '<span>3 ' + (t('settings.columns', 'kolonner')) + '</span></button>';
       h += '</div></div>';
 
       el.innerHTML = h;
@@ -511,7 +511,7 @@
 
       // ── General Settings — compact inline rows ──
       h += '<div class="settings-card">';
-      h += '<div class="card-title">' + (t('settings.general') || 'General') + '</div>';
+      h += '<div class="card-title">' + (t('settings.general', 'General')) + '</div>';
       h += '<div class="prefs-compact-grid">';
       // Browser notifications
       h += '<div class="prefs-row"><span class="prefs-label">' + t('settings.notifications_title') + '</span><label class="settings-checkbox"><input type="checkbox" id="notify-toggle" ' + (_notifGranted ? 'checked' : '') + ' onchange="toggleNotificationsPerm(this.checked)"><span>' + t('settings.notifications_browser') + '</span></label></div>';
@@ -529,16 +529,16 @@
       // Server info
       h += '<div class="prefs-row"><span class="prefs-label">' + t('settings.server_title') + '</span><span class="text-muted">Port ' + (location.port || '3000') + ' · ' + p.length + ' ' + t('settings.printers_title') + '</span></div>';
       // Tour
-      h += '<div class="prefs-row"><span class="prefs-label">' + (t('settings.onboarding_tour') || 'Guided Tour') + '</span><button class="form-btn form-btn-sm" onclick="localStorage.removeItem(\'onboarding-completed\'); startTour(); document.querySelector(\'.ix-modal-overlay\')?.remove();">' + (t('settings.restart_tour') || 'Restart') + '</button></div>';
+      h += '<div class="prefs-row"><span class="prefs-label">' + (t('settings.onboarding_tour', 'Guided Tour')) + '</span><button class="form-btn form-btn-sm" onclick="localStorage.removeItem(\'onboarding-completed\'); startTour(); document.querySelector(\'.ix-modal-overlay\')?.remove();">' + (t('settings.restart_tour', 'Restart')) + '</button></div>';
       h += '</div></div>';
 
       // ── Sound Notifications + Buzzer — 2-column card ──
       h += '<div class="settings-card mt-sm">';
       h += '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:10px">';
-      h += '<div class="card-title" style="margin:0">' + (t('settings.sound_title') || 'Sound Notifications') + '</div>';
+      h += '<div class="card-title" style="margin:0">' + (t('settings.sound_title', 'Sound Notifications')) + '</div>';
       if (_hasSound) {
         h += '<div style="display:flex;align-items:center;gap:8px">';
-        h += '<label class="settings-checkbox"><input type="checkbox" id="sound-toggle" ' + (ns.isEnabled() ? 'checked' : '') + ' onchange="notificationSound.setEnabled(this.checked);if(this.checked)notificationSound.play(\'print_started\')"><span>' + (t('settings.sound_enable') || 'On') + '</span></label>';
+        h += '<label class="settings-checkbox"><input type="checkbox" id="sound-toggle" ' + (ns.isEnabled() ? 'checked' : '') + ' onchange="notificationSound.setEnabled(this.checked);if(this.checked)notificationSound.play(\'print_started\')"><span>' + (t('settings.sound_enable', 'On')) + '</span></label>';
         h += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/></svg>';
         h += '<input type="range" id="sound-volume" min="0" max="100" value="' + Math.round(ns.getVolume() * 100) + '" style="width:100px;accent-color:var(--accent-green)" oninput="notificationSound.setVolume(this.value/100);document.getElementById(\'vol-pct\').textContent=this.value+\'%\'">';
         h += '<span id="vol-pct" style="font-size:0.75rem;opacity:0.6;min-width:30px">' + Math.round(ns.getVolume() * 100) + '%</span>';
@@ -560,22 +560,22 @@
             h += '<button class="sound-action-btn sound-action-remove" onclick="notificationSound.removeCustomSound(\'' + event + '\');loadSettings()" title="Remove">✕</button>';
           }
           h += '<button class="sound-action-btn" onclick="notificationSound.play(\'' + event + '\')" title="Test">▶</button>';
-          h += '<button class="sound-action-btn sound-action-upload" onclick="document.getElementById(\'snd-file-' + event + '\').click()" title="' + (t('settings.sound_upload') || 'Upload sound') + '">♪</button>';
+          h += '<button class="sound-action-btn sound-action-upload" onclick="document.getElementById(\'snd-file-' + event + '\').click()" title="' + (t('settings.sound_upload', 'Upload sound')) + '">♪</button>';
           h += '<input type="file" id="snd-file-' + event + '" accept="audio/*" style="display:none" onchange="uploadEventSound(\'' + event + '\',this.files[0])">';
           h += '</div></div>';
         }
         h += '</div>';
-        h += '<div class="text-muted" style="font-size:0.7rem;margin-top:8px">' + (t('settings.sound_hint') || 'MP3/OGG/WAV max 10s 500KB. ▶ test · ♪ upload') + '</div>';
+        h += '<div class="text-muted" style="font-size:0.7rem;margin-top:8px">' + (t('settings.sound_hint', 'MP3/OGG/WAV max 10s 500KB. ▶ test · ♪ upload')) + '</div>';
       } else {
-        h += '<div class="text-muted">' + (t('settings.sound_unsupported') || 'Audio not supported') + '</div>';
+        h += '<div class="text-muted">' + (t('settings.sound_unsupported', 'Audio not supported')) + '</div>';
       }
 
       // Buzzer row at bottom of sound card
       h += '<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border-color);display:flex;align-items:center;gap:10px;flex-wrap:wrap">';
-      h += '<span style="font-weight:600;font-size:0.85rem">' + (t('settings.buzzer_title') || 'Printer Speaker') + '</span>';
-      h += '<label class="settings-checkbox"><input type="checkbox" id="buzzer-enabled" onchange="window._toggleBuzzer(this.checked)"><span>' + (t('settings.buzzer_enable') || 'Play on printer') + '</span></label>';
-      h += '<button class="form-btn form-btn-sm" onclick="window._testBuzzer()" style="margin-left:auto">' + (t('settings.buzzer_test') || 'Test') + '</button>';
-      h += '<span class="text-muted" style="font-size:0.7rem;flex-basis:100%">' + (t('settings.buzzer_desc') || 'M300 G-code melodies on printer buzzer') + '</span>';
+      h += '<span style="font-weight:600;font-size:0.85rem">' + (t('settings.buzzer_title', 'Printer Speaker')) + '</span>';
+      h += '<label class="settings-checkbox"><input type="checkbox" id="buzzer-enabled" onchange="window._toggleBuzzer(this.checked)"><span>' + (t('settings.buzzer_enable', 'Play on printer')) + '</span></label>';
+      h += '<button class="form-btn form-btn-sm" onclick="window._testBuzzer()" style="margin-left:auto">' + (t('settings.buzzer_test', 'Test')) + '</button>';
+      h += '<span class="text-muted" style="font-size:0.7rem;flex-basis:100%">' + (t('settings.buzzer_desc', 'M300 G-code melodies on printer buzzer')) + '</span>';
       h += '</div>';
 
       h += '</div>';
@@ -700,7 +700,7 @@
       });
 
     } else if (_generalSubTab === 'network') {
-      el.innerHTML = '<div id="network-settings-section"><div class="settings-card"><div class="text-muted" style="font-size:0.8rem">' + (t('common.loading') || 'Loading') + '...</div></div></div>';
+      el.innerHTML = '<div id="network-settings-section"><div class="settings-card"><div class="text-muted" style="font-size:0.8rem">' + (t('common.loading', 'Loading')) + '...</div></div></div>';
       loadNetworkSettings();
     }
   }
@@ -1159,7 +1159,7 @@
           <span class="premium-badge" id="orders-premium-badge">${t('settings.ecom_premium')}</span>
           <div class="card-title" style="margin:0">${t('orders.title')}</div>
         </div>
-        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.orders_desc') || 'Order management, kanban board, invoicing and project management.'}</p>
+        <p class="text-muted" style="font-size:0.8rem;margin-bottom:8px">${t('settings.orders_desc', 'Order management, kanban board, invoicing and project management.')}</p>
         <div id="orders-license-area"><div class="text-muted" style="font-size:0.8rem">${t('settings.ecom_license_checking')}</div></div>
         <button class="form-btn form-btn-primary mt-sm" id="orders-open-btn" style="display:none" data-ripple onclick="openPanel('orders')">${t('orders.title')} →</button>
       </div>`;
@@ -3307,15 +3307,15 @@
       const lic = await res.json();
       if (lic.active) {
         if (badge) { badge.classList.add('active'); badge.textContent = t('settings.ecom_premium') + ' \u2713'; }
-        licArea.innerHTML = `<div style="font-size:0.85rem;color:var(--accent-green)">${t('settings.orders_license_active') || 'Lisens aktiv — ordrebehandling tilgjengelig.'}</div>`;
+        licArea.innerHTML = `<div style="font-size:0.85rem;color:var(--accent-green)">${t('settings.orders_license_active', 'Lisens aktiv — ordrebehandling tilgjengelig.')}</div>`;
         if (openBtn) openBtn.style.display = '';
       } else {
         if (badge) { badge.classList.remove('active'); }
-        licArea.innerHTML = `<div style="font-size:0.85rem;color:var(--text-muted)">${t('settings.orders_license_required') || 'Requires an active e-commerce license. Activate above to use order management.'}</div>`;
+        licArea.innerHTML = `<div style="font-size:0.85rem;color:var(--text-muted)">${t('settings.orders_license_required', 'Requires an active e-commerce license. Activate above to use order management.')}</div>`;
         if (openBtn) openBtn.style.display = 'none';
       }
     } catch {
-      licArea.innerHTML = `<span class="text-muted" style="font-size:0.8rem">${t('settings.orders_license_error') || 'Could not verify license.'}</span>`;
+      licArea.innerHTML = `<span class="text-muted" style="font-size:0.8rem">${t('settings.orders_license_error', 'Could not verify license.')}</span>`;
     }
   }
 
@@ -3376,7 +3376,7 @@
                 <input class="form-input" id="ecom-license-key" placeholder="32-char hex key" style="font-family:monospace">
               </div>
               <div class="form-group" style="margin-bottom:0.4rem">
-                <label class="form-label">${t('settings.ecom_license_email') || 'Email'} *</label>
+                <label class="form-label">${t('settings.ecom_license_email', 'Email')} *</label>
                 <input class="form-input" id="ecom-license-email" type="email" placeholder="you@email.com">
               </div>
               <div class="form-group" style="margin-bottom:0.4rem">

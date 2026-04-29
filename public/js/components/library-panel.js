@@ -80,16 +80,16 @@
         <option value="step">STEP</option>
       </select>
       <button class="lib-upload-btn" onclick="_libShowUpload()">+ ${t('library.upload')}</button>
-      <button class="form-btn form-btn-secondary" onclick="_toggleFileSelectMode()" id="file-select-toggle" style="padding:4px 10px;font-size:0.75rem">${_fileSelectMode ? '\u2713 Done' : '\u2610 ' + (t('library.select') || 'Select')}</button>
+      <button class="form-btn form-btn-secondary" onclick="_toggleFileSelectMode()" id="file-select-toggle" style="padding:4px 10px;font-size:0.75rem">${_fileSelectMode ? '\u2713 Done' : '\u2610 ' + (t('library.select', 'Select'))}</button>
     </div>
     <div class="lib-cat-pills" id="lib-cats"></div>
     <div class="lib-grid" id="lib-grid"></div>
     <div id="lib-load-more-wrap"></div>
     <div class="batch-bar" id="file-batch-bar" style="display:none">
       <span id="file-batch-count">0 selected</span>
-      <button class="form-btn form-btn-secondary" onclick="_batchAddToQueue()" style="padding:4px 10px;font-size:0.75rem">${t('library.add_to_queue') || 'Add to queue'}</button>
-      <button class="form-btn form-btn-danger" onclick="_batchDeleteFiles()" style="padding:4px 10px;font-size:0.75rem">${t('common.delete') || 'Delete'}</button>
-      <button class="form-btn form-btn-secondary" onclick="_clearFileSelection()" style="padding:4px 10px;font-size:0.75rem">${t('library.clear') || 'Clear'}</button>
+      <button class="form-btn form-btn-secondary" onclick="_batchAddToQueue()" style="padding:4px 10px;font-size:0.75rem">${t('library.add_to_queue', 'Add to queue')}</button>
+      <button class="form-btn form-btn-danger" onclick="_batchDeleteFiles()" style="padding:4px 10px;font-size:0.75rem">${t('common.delete', 'Delete')}</button>
+      <button class="form-btn form-btn-secondary" onclick="_clearFileSelection()" style="padding:4px 10px;font-size:0.75rem">${t('library.clear', 'Clear')}</button>
     </div>`;
 
     _offset = 0;
@@ -167,7 +167,7 @@
           </div>
           ${f.category !== 'uncategorized' ? `<span class="lib-card-badge">${_esc(f.category)}</span>` : ''}
           ${tags ? `<div class="lib-card-tags">${tags}</div>` : ''}
-          ${f.file_type === '3mf' ? `<button class="lib-3d-btn" style="margin-top:6px" onclick="event.stopPropagation();_lib3DPreview(${f.id},'${_esc(f.original_name).replace(/'/g, "\\'")}')">&#x25B6; 3D ${t('library.preview') || 'Preview'}</button>` : ''}
+          ${f.file_type === '3mf' ? `<button class="lib-3d-btn" style="margin-top:6px" onclick="event.stopPropagation();_lib3DPreview(${f.id},'${_esc(f.original_name).replace(/'/g, "\\'")}')">&#x25B6; 3D ${t('library.preview', 'Preview')}</button>` : ''}
           <div style="display:flex;gap:3px;margin-top:4px">
             <button class="lib-3d-btn" style="background:var(--accent-cyan);font-size:0.6rem;padding:2px 6px" onclick="event.stopPropagation();_libSendToPrinter(${f.id},'${_esc(f.original_name).replace(/'/g, "\\'")}')">🖨️ Print</button>
             <button class="lib-3d-btn" style="font-size:0.6rem;padding:2px 6px" onclick="event.stopPropagation();_libAddToQueue(${f.id},'${_esc(f.original_name).replace(/'/g, "\\'")}')">📋 Queue</button>
@@ -464,7 +464,7 @@
     _renderGrid();
     _updateBatchBar();
     const toggle = document.getElementById('file-select-toggle');
-    if (toggle) toggle.textContent = _fileSelectMode ? '\u2713 Done' : '\u2610 ' + (t('library.select') || 'Select');
+    if (toggle) toggle.textContent = _fileSelectMode ? '\u2713 Done' : '\u2610 ' + (t('library.select', 'Select'));
   };
 
   window._toggleFileCheck = function(id) {
@@ -487,7 +487,7 @@
     const bar = document.getElementById('file-batch-bar');
     const count = document.getElementById('file-batch-count');
     if (bar) bar.style.display = (_fileSelectMode && _selectedFiles.size > 0) ? 'flex' : 'none';
-    if (count) count.textContent = `${_selectedFiles.size} ${t('library.selected') || 'valgt'}`;
+    if (count) count.textContent = `${_selectedFiles.size} ${t('library.selected', 'valgt')}`;
   }
 
   window._clearFileSelection = function() {
@@ -499,7 +499,7 @@
   window._batchDeleteFiles = function() {
     if (_selectedFiles.size === 0) return;
     if (typeof confirmAction === 'function') {
-      confirmAction(`${t('library.delete_confirm_prefix') || 'Delete'} ${_selectedFiles.size} ${_selectedFiles.size > 1 ? (t('library.files') || 'files') : (t('library.file') || 'file')}?`, async () => {
+      confirmAction(`${t('library.delete_confirm_prefix', 'Delete')} ${_selectedFiles.size} ${_selectedFiles.size > 1 ? (t('library.files', 'files')) : (t('library.file', 'file'))}?`, async () => {
         let deleted = 0;
         for (const fileId of _selectedFiles) {
           try {
@@ -507,11 +507,11 @@
             if (r.ok) deleted++;
           } catch (_) {}
         }
-        if (typeof showToast === 'function') showToast(`${t('library.deleted_prefix') || 'Deleted'} ${deleted} ${deleted > 1 ? (t('library.files') || 'files') : (t('library.file') || 'file')}`, 'success');
+        if (typeof showToast === 'function') showToast(`${t('library.deleted_prefix', 'Deleted')} ${deleted} ${deleted > 1 ? (t('library.files', 'files')) : (t('library.file', 'file'))}`, 'success');
         _selectedFiles.clear();
         _fileSelectMode = false;
         const toggle = document.getElementById('file-select-toggle');
-        if (toggle) toggle.textContent = '\u2610 ' + (t('library.select') || 'Select');
+        if (toggle) toggle.textContent = '\u2610 ' + (t('library.select', 'Select'));
         _loadFiles(true);
         _loadCategories();
       }, { danger: true });
@@ -550,11 +550,11 @@
       <div class="lib-3d-content">
         <div class="lib-3d-canvas-wrap" id="lib-3d-canvas-wrap">
           <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:0.9rem" id="lib-3d-loading">
-            ${t('library.loading_model') || 'Loading 3D model...'}
+            ${t('library.loading_model', 'Loading 3D model...')}
           </div>
         </div>
         <div class="lib-3d-info" id="lib-3d-info">
-          <h5>${t('library.model_info') || 'Modellinformasjon'}</h5>
+          <h5>${t('library.model_info', 'Modellinformasjon')}</h5>
           <div id="lib-3d-info-body"></div>
         </div>
       </div>
@@ -590,12 +590,12 @@
       const infoBody = document.getElementById('lib-3d-info-body');
       if (info && infoBody) {
         let html = '';
-        html += `<div class="lib-3d-info-row"><span class="lib-3d-info-label">${t('library.dimensions') || 'Dimensjoner'}</span><span class="lib-3d-info-value">${info.dimensions.x} × ${info.dimensions.y} × ${info.dimensions.z} mm</span></div>`;
-        html += `<div class="lib-3d-info-row"><span class="lib-3d-info-label">${t('library.triangles') || 'Trekanter'}</span><span class="lib-3d-info-value">${info.triangleCount.toLocaleString()}</span></div>`;
-        html += `<div class="lib-3d-info-row"><span class="lib-3d-info-label">${t('library.vertices') || 'Vertekser'}</span><span class="lib-3d-info-value">${info.vertexCount.toLocaleString()}</span></div>`;
-        html += `<div class="lib-3d-info-row"><span class="lib-3d-info-label">${t('library.mesh_count') || 'Mesh-deler'}</span><span class="lib-3d-info-value">${info.meshCount}</span></div>`;
+        html += `<div class="lib-3d-info-row"><span class="lib-3d-info-label">${t('library.dimensions', 'Dimensjoner')}</span><span class="lib-3d-info-value">${info.dimensions.x} × ${info.dimensions.y} × ${info.dimensions.z} mm</span></div>`;
+        html += `<div class="lib-3d-info-row"><span class="lib-3d-info-label">${t('library.triangles', 'Trekanter')}</span><span class="lib-3d-info-value">${info.triangleCount.toLocaleString()}</span></div>`;
+        html += `<div class="lib-3d-info-row"><span class="lib-3d-info-label">${t('library.vertices', 'Vertekser')}</span><span class="lib-3d-info-value">${info.vertexCount.toLocaleString()}</span></div>`;
+        html += `<div class="lib-3d-info-row"><span class="lib-3d-info-label">${t('library.mesh_count', 'Mesh-deler')}</span><span class="lib-3d-info-value">${info.meshCount}</span></div>`;
         if (info.meshNames.length > 1) {
-          html += `<h5 style="margin-top:12px">${t('library.mesh_list') || 'Mesh-liste'}</h5>`;
+          html += `<h5 style="margin-top:12px">${t('library.mesh_list', 'Mesh-liste')}</h5>`;
           for (const name of info.meshNames) {
             html += `<div style="color:var(--text-secondary);margin-bottom:3px;font-size:0.72rem">${_esc(name)}</div>`;
           }
@@ -649,8 +649,8 @@
   window._batchAddToQueue = function() {
     if (_selectedFiles.size === 0) return;
     if (typeof showToast === 'function') {
-      showToast(`${_selectedFiles.size} ${_selectedFiles.size > 1 ? (t('library.files') || 'files') : (t('library.file') || 'file')} ${t('library.ready_to_queue') || 'ready for queue \u2014 select a queue in the Queue panel'}`, 'info', 0, [
-        { label: t('library.open_queue') || 'Open queue', onClick: () => { if (typeof openPanel === 'function') openPanel('queue'); } }
+      showToast(`${_selectedFiles.size} ${_selectedFiles.size > 1 ? (t('library.files', 'files')) : (t('library.file', 'file'))} ${t('library.ready_to_queue', 'ready for queue \u2014 select a queue in the Queue panel')}`, 'info', 0, [
+        { label: t('library.open_queue', 'Open queue'), onClick: () => { if (typeof openPanel === 'function') openPanel('queue'); } }
       ]);
     }
   };

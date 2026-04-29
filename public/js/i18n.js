@@ -32,12 +32,23 @@
     return str.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] !== undefined ? vars[k] : `{{${k}}}`);
   }
 
-  // Core translation function - available globally
-  window.t = function(key, vars) {
+  // Core translation function - available globally.
+  // Second arg: object (interpolation vars) OR string (fallback when key
+  // missing). The string-fallback overload exists because hundreds of
+  // call sites in the codebase want a default when a translation hasn't
+  // been added to the lang files yet, and the previous
+  //   `t('foo.bar') || 'Fallback'`
+  // pattern was broken — t() returns the raw key string (truthy) when
+  // missing, so the || never fired and the literal key showed in the UI.
+  window.t = function(key, varsOrFallback) {
     let val = resolve(_translations, key);
     if (val == null) val = resolve(_fallback, key);
-    if (val == null) return key;
-    return interpolate(String(val), vars);
+    if (val == null) {
+      // Translation missing — if 2nd arg is a string, use as fallback.
+      if (typeof varsOrFallback === 'string') return varsOrFallback;
+      return key;
+    }
+    return interpolate(String(val), typeof varsOrFallback === 'object' && varsOrFallback ? varsOrFallback : null);
   };
 
   function translateStaticElements() {

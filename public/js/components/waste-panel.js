@@ -504,10 +504,10 @@
       let h = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
         <div class="card-title" style="margin:0">${t('waste.recent')}</div>
         <div style="display:flex;gap:4px;flex-wrap:wrap">
-          ${sortBtn('timestamp', t('waste.sort_date') || 'Dato')}
-          ${sortBtn('waste_g', t('waste.sort_waste') || 'Svinn')}
-          ${sortBtn('filament_used_g', t('waste.sort_used') || 'Brukt')}
-          ${sortBtn('duration_seconds', t('waste.sort_duration') || 'Varighet')}
+          ${sortBtn('timestamp', t('waste.sort_date', 'Dato'))}
+          ${sortBtn('waste_g', t('waste.sort_waste', 'Svinn'))}
+          ${sortBtn('filament_used_g', t('waste.sort_used', 'Brukt'))}
+          ${sortBtn('duration_seconds', t('waste.sort_duration', 'Varighet'))}
         </div>
       </div>`;
       h += '<div class="waste-recent-list">';

@@ -265,25 +265,25 @@
       // >60% = Bad (will cause print issues, change desiccant)
       let humidityRating, humidityColor, humidityTip;
       if (humidityRaw <= 15) {
-        humidityRating = t('ams.humidity_best') || 'Best';
+        humidityRating = t('ams.humidity_best', 'Best');
         humidityColor = 'var(--accent-green)';
-        humidityTip = t('ams.humidity_best_tip') || 'Ideal for all materials including PA and PVA';
+        humidityTip = t('ams.humidity_best_tip', 'Ideal for all materials including PA and PVA');
       } else if (humidityRaw <= 25) {
-        humidityRating = t('ams.humidity_good') || 'Good';
+        humidityRating = t('ams.humidity_good', 'Good');
         humidityColor = 'var(--accent-green)';
-        humidityTip = t('ams.humidity_good_tip') || 'Good for PLA, PETG, ABS. Monitor for PA/PVA';
+        humidityTip = t('ams.humidity_good_tip', 'Good for PLA, PETG, ABS. Monitor for PA/PVA');
       } else if (humidityRaw <= 40) {
-        humidityRating = t('ams.humidity_ok') || 'OK';
+        humidityRating = t('ams.humidity_ok', 'OK');
         humidityColor = 'var(--accent-orange)';
-        humidityTip = t('ams.humidity_ok_tip') || 'Acceptable for PLA/PETG. Dry PA/Nylon before use';
+        humidityTip = t('ams.humidity_ok_tip', 'Acceptable for PLA/PETG. Dry PA/Nylon before use');
       } else if (humidityRaw <= 60) {
-        humidityRating = t('ams.humidity_poor') || 'Poor';
+        humidityRating = t('ams.humidity_poor', 'Poor');
         humidityColor = 'var(--accent-orange)';
-        humidityTip = t('ams.humidity_poor_tip') || 'Dry all hygroscopic materials. Replace desiccant';
+        humidityTip = t('ams.humidity_poor_tip', 'Dry all hygroscopic materials. Replace desiccant');
       } else {
-        humidityRating = t('ams.humidity_bad') || 'Bad';
+        humidityRating = t('ams.humidity_bad', 'Bad');
         humidityColor = 'var(--accent-red)';
-        humidityTip = t('ams.humidity_bad_tip') || 'Too humid! Replace desiccant immediately';
+        humidityTip = t('ams.humidity_bad_tip', 'Too humid! Replace desiccant immediately');
       }
 
       // Temperature rating (AMS internal)
@@ -294,13 +294,13 @@
       if (amsTemp !== null) {
         if (amsTemp < 15) {
           tempColor = 'var(--accent-blue)';
-          tempTip = t('ams.temp_cold') || 'Cold — printing may be affected';
+          tempTip = t('ams.temp_cold', 'Cold — printing may be affected');
         } else if (amsTemp > 35) {
           tempColor = 'var(--accent-red)';
-          tempTip = t('ams.temp_hot') || 'Hot — filament may soften';
+          tempTip = t('ams.temp_hot', 'Hot — filament may soften');
         } else if (amsTemp >= 20 && amsTemp <= 28) {
           tempColor = 'var(--accent-green)';
-          tempTip = t('ams.temp_ideal') || 'Ideal temperature';
+          tempTip = t('ams.temp_ideal', 'Ideal temperature');
         }
       }
 
@@ -320,7 +320,7 @@
         <span style="color:${tempColor}" title="${tempTip}">${amsTemp !== null ? amsTemp.toFixed(1) + '°C' : '--'}</span>
         ${bblCount > 0 ? `<span class="ams-info-divider">·</span><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" style="opacity:0.6"><path d="M2 12C2 6.48 6.48 2 12 2s10 4.48 10 10"/><path d="M5 12c0-3.87 3.13-7 7-7s7 3.13 7 7"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg><span>RFID ${bblCount}/${totalTrays}</span>` : ''}
         <span class="ams-info-divider">·</span>
-        <span class="text-muted" style="font-size:0.65rem" title="${t('ams.humidity_recommended') || 'Recommended: <15% for PA/PVA, <30% for PLA/PETG'}">${t('ams.recommended') || 'Rec'}: &lt;15%</span>`;
+        <span class="text-muted" style="font-size:0.65rem" title="${t('ams.humidity_recommended', 'Recommended: <15% for PA/PVA, <30% for PLA/PETG')}">${t('ams.recommended', 'Rec')}: &lt;15%</span>`;
     }
 
     // --- Filament cards for selected unit ---
@@ -456,7 +456,7 @@
 
         // Click spool to calibrate
         card.style.cursor = 'pointer';
-        card.title = t('ams.click_to_calibrate') || 'Click to calibrate';
+        card.title = t('ams.click_to_calibrate', 'Click to calibrate');
         const trayIdx = i;
         const unitIdx = _selectedUnit;
         card.addEventListener('click', () => _showCalibrationDialog(printerId, unitIdx, trayIdx, tray, linkedSpool, remain, displayGrams));

@@ -141,7 +141,7 @@
           material: vt.tray_type,
           color_hex: color,
           remaining_weight_g: vtRemainG,
-          _label: t('multicolor.external') || 'External'
+          _label: t('multicolor.external', 'External')
         });
       }
     } catch (_) {}
@@ -323,7 +323,7 @@
 
     // AMS trays section
     if (_amsTrays.length > 0) {
-      items += `<div class="mc-picker-section">${t('multicolor.ams_loaded') || 'AMS'}</div>`;
+      items += `<div class="mc-picker-section">${t('multicolor.ams_loaded', 'AMS')}</div>`;
       for (let ai = 0; ai < _amsTrays.length; ai++) {
         const tr = _amsTrays[ai];
         const pct = tr.remaining_weight_g != null ? tr.remaining_weight_g : 80;
@@ -337,7 +337,7 @@
 
     // Inventory spools section
     if (_spools.length > 0) {
-      items += `<div class="mc-picker-section">${t('multicolor.inventory') || 'Inventory'}</div>`;
+      items += `<div class="mc-picker-section">${t('multicolor.inventory', 'Inventory')}</div>`;
       for (const sp of _spools) {
         const color = sp.color_hex || '#888';
         const pct = sp.initial_weight_g > 0 ? Math.round((sp.remaining_weight_g / sp.initial_weight_g) * 100) : 80;

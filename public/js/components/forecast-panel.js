@@ -92,7 +92,7 @@
         </div>
       </div>
       <div class="fc-section" id="fc-depletion-section" style="display:none">
-        <div class="fc-section-title">${t('forecast.depletion_timeline') || 'Depletion Timeline'}</div>
+        <div class="fc-section-title">${t('forecast.depletion_timeline', 'Depletion Timeline')}</div>
         <div class="fc-timeline" id="fc-depletion"></div>
       </div>
       <div class="fc-section">
@@ -100,7 +100,7 @@
         <div class="fc-materials" id="fc-by-type"></div>
       </div>
       <div class="fc-section" id="fc-cost-section" style="display:none">
-        <div class="fc-section-title">${t('forecast.cost_projection') || 'Cost Projection'}</div>
+        <div class="fc-section-title">${t('forecast.cost_projection', 'Cost Projection')}</div>
         <div class="fc-cost-grid" id="fc-cost"></div>
       </div>
     </div>`;
@@ -224,7 +224,7 @@
       document.getElementById('fc-heroes').innerHTML = `<div class="fc-empty" style="grid-column:1/-1">
         <div class="fc-empty-icon">\u{1F4CA}</div>
         <div class="fc-empty-text">${t('forecast.no_data')}</div>
-        <div class="fc-empty-sub">${t('forecast.no_data_sub') || 'Start printing to see usage forecasts'}</div>
+        <div class="fc-empty-sub">${t('forecast.no_data_sub', 'Start printing to see usage forecasts')}</div>
       </div>`;
       return;
     }
@@ -234,13 +234,13 @@
     if (heroEl) {
       const trendHtml = trend !== 'flat'
         ? `<div class="fc-hero-trend ${trend}">${trend === 'up' ? '\u2191' : '\u2193'} ${Math.abs(trendPct).toFixed(0)}%</div>`
-        : `<div class="fc-hero-trend flat">\u2192 ${t('forecast.stable') || 'Stable'}</div>`;
+        : `<div class="fc-hero-trend flat">\u2192 ${t('forecast.stable', 'Stable')}</div>`;
 
       heroEl.innerHTML = `
         <div class="fc-hero blue">
           <div class="fc-hero-label">${t('forecast.avg_monthly')}</div>
           <div class="fc-hero-value">${(avgMonthly/1000).toFixed(1)} kg</div>
-          <div class="fc-hero-sub">${avgDaily.toFixed(0)}g/${t('forecast.per_day') || 'day'}</div>
+          <div class="fc-hero-sub">${avgDaily.toFixed(0)}g/${t('forecast.per_day', 'day')}</div>
           ${trendHtml}
         </div>
         <div class="fc-hero ${weeksLeft < 4 ? 'red' : weeksLeft < 8 ? 'amber' : 'green'}">
@@ -251,10 +251,10 @@
         <div class="fc-hero green">
           <div class="fc-hero-label">${t('forecast.total_stock')}</div>
           <div class="fc-hero-value">${(totalStock/1000).toFixed(1)} kg</div>
-          <div class="fc-hero-sub">${activeSpools.length} ${t('forecast.spools')} \u00B7 ${Object.keys(stockByType).length} ${t('forecast.types') || 'types'}</div>
+          <div class="fc-hero-sub">${activeSpools.length} ${t('forecast.spools')} \u00B7 ${Object.keys(stockByType).length} ${t('forecast.types', 'types')}</div>
         </div>
         <div class="fc-hero purple">
-          <div class="fc-hero-label">${t('forecast.total_prints') || 'Total Prints'}</div>
+          <div class="fc-hero-label">${t('forecast.total_prints', 'Total Prints')}</div>
           <div class="fc-hero-value">${totalPrints}</div>
           <div class="fc-hero-sub">${t('forecast.last_6_months')}</div>
         </div>
@@ -264,9 +264,9 @@
           <div class="fc-hero-sub">${t('forecast.per_week')}</div>
         </div>
         ${avgCostPerKg > 0 ? `<div class="fc-hero blue">
-          <div class="fc-hero-label">${t('forecast.monthly_cost') || 'Monthly Cost'}</div>
+          <div class="fc-hero-label">${t('forecast.monthly_cost', 'Monthly Cost')}</div>
           <div class="fc-hero-value">${((avgMonthly / 1000) * avgCostPerKg).toFixed(0)} kr</div>
-          <div class="fc-hero-sub">${avgCostPerKg.toFixed(0)} kr/kg ${t('forecast.avg') || 'avg'}</div>
+          <div class="fc-hero-sub">${avgCostPerKg.toFixed(0)} kr/kg ${t('forecast.avg', 'avg')}</div>
         </div>` : ''}
       `;
     }
@@ -276,7 +276,7 @@
     if (alertsEl) {
       let html = '';
       if (weeksLeft < 2 && weeksLeft !== Infinity) {
-        html += `<div class="fc-alert critical"><span class="fc-alert-icon">\u{1F6A8}</span>${t('forecast.critical_stock') || 'Critical: Less than 2 weeks of filament remaining!'}</div>`;
+        html += `<div class="fc-alert critical"><span class="fc-alert-icon">\u{1F6A8}</span>${t('forecast.critical_stock', 'Critical: Less than 2 weeks of filament remaining!')}</div>`;
       } else if (weeksLeft < 4 && weeksLeft !== Infinity) {
         html += `<div class="fc-alert warning"><span class="fc-alert-icon">\u26A0\uFE0F</span>${t('forecast.low_stock_warning')}</div>`;
       }
@@ -286,10 +286,10 @@
         const stock = stockByType[type]?.weight || 0;
         const weeksForType = monthlyRate > 0 ? (stock / (monthlyRate / 4.33)) : Infinity;
         if (weeksForType < 4 && weeksForType !== Infinity && stock > 0) {
-          html += `<div class="fc-alert warning"><span class="fc-alert-icon">\u26A0\uFE0F</span><strong>${_esc(type)}</strong>: ~${Math.round(weeksForType)} ${t('forecast.weeks')} ${t('forecast.remaining') || 'remaining'} (${(stock/1000).toFixed(1)}kg ${t('forecast.in_stock') || 'in stock'})</div>`;
+          html += `<div class="fc-alert warning"><span class="fc-alert-icon">\u26A0\uFE0F</span><strong>${_esc(type)}</strong>: ~${Math.round(weeksForType)} ${t('forecast.weeks')} ${t('forecast.remaining', 'remaining')} (${(stock/1000).toFixed(1)}kg ${t('forecast.in_stock', 'in stock')})</div>`;
         }
         if (monthlyRate > 0 && stock === 0) {
-          html += `<div class="fc-alert critical"><span class="fc-alert-icon">\u{1F6A8}</span><strong>${_esc(type)}</strong>: ${t('forecast.no_stock') || 'No stock! You use'} ~${(monthlyRate/1000).toFixed(1)}kg/${t('forecast.month')}</div>`;
+          html += `<div class="fc-alert critical"><span class="fc-alert-icon">\u{1F6A8}</span><strong>${_esc(type)}</strong>: ${t('forecast.no_stock', 'No stock! You use')} ~${(monthlyRate/1000).toFixed(1)}kg/${t('forecast.month')}</div>`;
         }
       }
       alertsEl.innerHTML = html;
@@ -297,15 +297,15 @@
 
     // === CHART ===
     const monthCountEl = document.getElementById('fc-month-count');
-    if (monthCountEl) monthCountEl.textContent = `${monthKeys.length} ${t('forecast.months') || 'months'}`;
+    if (monthCountEl) monthCountEl.textContent = `${monthKeys.length} ${t('forecast.months', 'months')}`;
     _drawChart(monthly, avgMonthly, byType);
 
     // Legend
     const legendEl = document.getElementById('fc-chart-legend');
     if (legendEl) {
       legendEl.innerHTML = `
-        <div class="fc-chart-legend-item"><div class="fc-chart-legend-dot" style="background:rgba(18,121,255,0.7)"></div>${t('forecast.actual') || 'Actual'}</div>
-        <div class="fc-chart-legend-item"><div class="fc-chart-legend-dot" style="background:rgba(18,121,255,0.3);border:1px dashed var(--accent-blue,#1279ff)"></div>${t('forecast.projected') || 'Projected'}</div>
+        <div class="fc-chart-legend-item"><div class="fc-chart-legend-dot" style="background:rgba(18,121,255,0.7)"></div>${t('forecast.actual', 'Actual')}</div>
+        <div class="fc-chart-legend-item"><div class="fc-chart-legend-dot" style="background:rgba(18,121,255,0.3);border:1px dashed var(--accent-blue,#1279ff)"></div>${t('forecast.projected', 'Projected')}</div>
         <div class="fc-chart-legend-item"><div class="fc-chart-legend-dot" style="background:#f59e0b"></div>${t('forecast.avg')}</div>
       `;
     }
@@ -345,7 +345,7 @@
     // === MATERIAL CARDS ===
     const typeEl = document.getElementById('fc-by-type');
     const typeCountEl = document.getElementById('fc-type-count');
-    if (typeCountEl) typeCountEl.textContent = `${Object.keys(byType).length} ${t('forecast.types') || 'types'}`;
+    if (typeCountEl) typeCountEl.textContent = `${Object.keys(byType).length} ${t('forecast.types', 'types')}`;
 
     if (typeEl) {
       const allTypes = new Set([...Object.keys(byType), ...Object.keys(stockByType)]);
@@ -366,11 +366,11 @@
 
         // Status badge
         let badgeClass, badgeText;
-        if (stock.weight === 0 && monthlyRate > 0) { badgeClass = 'critical'; badgeText = t('forecast.out_of_stock') || 'Out of stock'; }
+        if (stock.weight === 0 && monthlyRate > 0) { badgeClass = 'critical'; badgeText = t('forecast.out_of_stock', 'Out of stock'); }
         else if (weeksForType < 4) { badgeClass = 'low'; badgeText = `~${Math.round(weeksForType)} ${t('forecast.weeks')}`; }
         else if (weeksForType < 8) { badgeClass = 'ok'; badgeText = `~${Math.round(weeksForType)} ${t('forecast.weeks')}`; }
-        else if (stock.weight > 0) { badgeClass = 'ok'; badgeText = t('forecast.good') || 'Good'; }
-        else { badgeClass = 'none'; badgeText = t('forecast.no_stock_short') || 'No stock'; }
+        else if (stock.weight > 0) { badgeClass = 'ok'; badgeText = t('forecast.good', 'Good'); }
+        else { badgeClass = 'none'; badgeText = t('forecast.no_stock_short', 'No stock'); }
 
         // Usage vs stock bar
         const maxBar = Math.max(data.total, stock.weight * (monthKeys.length || 1), 1);
@@ -388,8 +388,8 @@
           </div>
           <div class="fc-mat-rows">
             <div class="fc-mat-row"><span>${t('forecast.total_used')}</span><span>${(data.total/1000).toFixed(2)} kg</span></div>
-            <div class="fc-mat-row"><span>${t('forecast.in_stock') || 'In stock'}</span><span>${(stock.weight/1000).toFixed(2)} kg (${stock.count})</span></div>
-            <div class="fc-mat-row"><span>${t('forecast.monthly_rate') || 'Monthly rate'}</span><span>${monthlyRate > 0 ? (monthlyRate/1000).toFixed(2) + ' kg' : '-'}</span></div>
+            <div class="fc-mat-row"><span>${t('forecast.in_stock', 'In stock')}</span><span>${(stock.weight/1000).toFixed(2)} kg (${stock.count})</span></div>
+            <div class="fc-mat-row"><span>${t('forecast.monthly_rate', 'Monthly rate')}</span><span>${monthlyRate > 0 ? (monthlyRate/1000).toFixed(2) + ' kg' : '-'}</span></div>
             <div class="fc-mat-row"><span>${t('forecast.print_count')}</span><span>${data.count}</span></div>
           </div>
         </div>`;
@@ -406,22 +406,22 @@
         const monthlyCost = (avgMonthly / 1000) * avgCostPerKg;
         costEl.innerHTML = `
           <div class="fc-cost-card">
-            <div class="fc-cost-label">${t('forecast.monthly_est') || 'Monthly Est.'}</div>
+            <div class="fc-cost-label">${t('forecast.monthly_est', 'Monthly Est.')}</div>
             <div class="fc-cost-value">${monthlyCost.toFixed(0)} kr</div>
-            <div class="fc-cost-sub">${t('forecast.based_on_avg') || 'Based on avg usage'}</div>
+            <div class="fc-cost-sub">${t('forecast.based_on_avg', 'Based on avg usage')}</div>
           </div>
           <div class="fc-cost-card">
-            <div class="fc-cost-label">${t('forecast.quarterly_est') || 'Quarterly Est.'}</div>
+            <div class="fc-cost-label">${t('forecast.quarterly_est', 'Quarterly Est.')}</div>
             <div class="fc-cost-value">${(monthlyCost * 3).toFixed(0)} kr</div>
-            <div class="fc-cost-sub">3 ${t('forecast.months') || 'months'}</div>
+            <div class="fc-cost-sub">3 ${t('forecast.months', 'months')}</div>
           </div>
           <div class="fc-cost-card">
-            <div class="fc-cost-label">${t('forecast.yearly_est') || 'Yearly Est.'}</div>
+            <div class="fc-cost-label">${t('forecast.yearly_est', 'Yearly Est.')}</div>
             <div class="fc-cost-value">${(monthlyCost * 12).toFixed(0)} kr</div>
-            <div class="fc-cost-sub">12 ${t('forecast.months') || 'months'}</div>
+            <div class="fc-cost-sub">12 ${t('forecast.months', 'months')}</div>
           </div>
           <div class="fc-cost-card">
-            <div class="fc-cost-label">${t('forecast.stock_value') || 'Stock Value'}</div>
+            <div class="fc-cost-label">${t('forecast.stock_value', 'Stock Value')}</div>
             <div class="fc-cost-value">${((totalStock / 1000) * avgCostPerKg).toFixed(0)} kr</div>
             <div class="fc-cost-sub">${(totalStock/1000).toFixed(1)} kg</div>
           </div>

@@ -750,7 +750,7 @@
       if (days.length < 2) return '';
 
       const maxCount = Math.max(...days.map(d => d[1].count), 1);
-      let h = `<div class="card-title">${t('stats.print_timeline') || 'Printtidslinje'}</div>`;
+      let h = `<div class="card-title">${t('stats.print_timeline', 'Printtidslinje')}</div>`;
       h += `<div class="timeline-chart">`;
       for (const [day, d] of days) {
         const pct = (d.count / maxCount) * 100;
@@ -890,7 +890,7 @@
           </div>
           <div style="display:flex;gap:6px;margin-bottom:8px" id="ph-3d-actions-${row.id}">
             <button class="lib-3d-btn" style="flex:1;justify-content:center" onclick="event.stopPropagation();_historyOpen3D(${row.id},this)">&#x25B6; 3D</button>
-            <button class="lib-3d-btn" style="padding:3px 7px" onclick="event.stopPropagation();_historyUpload3mf(${row.id})" title="${t('library.upload') || 'Last opp'} / ${t('common.replace') || 'Erstatt'} 3MF">&#x21E7;</button>
+            <button class="lib-3d-btn" style="padding:3px 7px" onclick="event.stopPropagation();_historyUpload3mf(${row.id})" title="${t('library.upload', 'Last opp')} / ${t('common.replace', 'Erstatt')} 3MF">&#x21E7;</button>
             <button class="lib-3d-btn" style="padding:3px 7px;color:var(--accent-red);display:${row.linked_3mf ? '' : 'none'}" id="ph-del3mf-${row.id}" onclick="event.stopPropagation();_historyDelete3mf(${row.id})" title="${t('history.delete_saved_3mf')}">&#x2715;</button>
           </div>
           <div class="ph-detail-status-banner" style="background:${statusColor(row.status)}">
@@ -1126,7 +1126,7 @@
         panel.innerHTML = emptyState({
           icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>',
           title: t('history.no_records'),
-          desc: t('history.no_records_desc') || 'Your print history will appear here once you complete your first print.'
+          desc: t('history.no_records_desc', 'Your print history will appear here once you complete your first print.')
         });
         return;
       }
@@ -1156,13 +1156,13 @@
 
       // Mobile filter toggle button (visible only on small screens)
       html += `<button class="btn btn-sm btn-outline-secondary d-lg-none mb-2" type="button" data-bs-toggle="offcanvas" data-bs-target="#historyFiltersOffcanvas">
-        <i class="bi bi-funnel"></i> ${t('history.filters') || 'Filters'}
+        <i class="bi bi-funnel"></i> ${t('history.filters', 'Filters')}
       </button>`;
 
       // Offcanvas for mobile filters
       html += `<div class="offcanvas offcanvas-start" tabindex="-1" id="historyFiltersOffcanvas">
         <div class="offcanvas-header">
-          <h5 class="offcanvas-title">${t('history.filters') || 'Filters'}</h5>
+          <h5 class="offcanvas-title">${t('history.filters', 'Filters')}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
         </div>
         <div class="offcanvas-body">

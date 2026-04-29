@@ -145,7 +145,7 @@
         const live = window.printerState?.printers?.[p.id] || {};
         const gcState = live.gcode_state || 'IDLE';
         const isPrinting = ['RUNNING', 'PAUSE', 'PREPARE', 'HEATING'].includes(gcState);
-        const _stateMap = { RUNNING: t('state.running') || 'Printing', IDLE: t('state.idle') || 'Idle', PAUSE: t('state.pause') || 'Paused', FINISH: t('state.finish') || 'Completed', FAILED: t('state.failed') || 'Failed', PREPARE: t('state.prepare') || 'Preparing' };
+        const _stateMap = { RUNNING: t('state.running', 'Printing'), IDLE: t('state.idle', 'Idle'), PAUSE: t('state.pause', 'Paused'), FINISH: t('state.finish', 'Completed'), FAILED: t('state.failed', 'Failed'), PREPARE: t('state.prepare', 'Preparing') };
         const stateLabel = _stateMap[gcState] || gcState;
 
         h += `<div class="pp-printer-card">
@@ -301,21 +301,21 @@
         <div class="pp-log-actions">`;
 
       // Filter buttons
-      h += `<button class="form-btn form-btn-sm ${_logFilter === 'all' ? '' : 'form-btn-secondary'}" data-ripple onclick="_setLogFilter('all')">${t('protection.filter_all') || 'Alle'} (${total})</button>`;
-      h += `<button class="form-btn form-btn-sm ${_logFilter === 'active' ? '' : 'form-btn-secondary'}" data-ripple onclick="_setLogFilter('active')"${unresolved ? ' style="color:var(--accent-red)"' : ''}>${t('protection.filter_active') || 'Active'} (${unresolved})</button>`;
-      h += `<button class="form-btn form-btn-sm ${_logFilter === 'resolved' ? '' : 'form-btn-secondary'}" data-ripple onclick="_setLogFilter('resolved')">${t('protection.filter_resolved') || 'Resolved'} (${resolved})</button>`;
+      h += `<button class="form-btn form-btn-sm ${_logFilter === 'all' ? '' : 'form-btn-secondary'}" data-ripple onclick="_setLogFilter('all')">${t('protection.filter_all', 'Alle')} (${total})</button>`;
+      h += `<button class="form-btn form-btn-sm ${_logFilter === 'active' ? '' : 'form-btn-secondary'}" data-ripple onclick="_setLogFilter('active')"${unresolved ? ' style="color:var(--accent-red)"' : ''}>${t('protection.filter_active', 'Active')} (${unresolved})</button>`;
+      h += `<button class="form-btn form-btn-sm ${_logFilter === 'resolved' ? '' : 'form-btn-secondary'}" data-ripple onclick="_setLogFilter('resolved')">${t('protection.filter_resolved', 'Resolved')} (${resolved})</button>`;
 
       // Clear buttons
       if (resolved > 0) {
-        h += `<button class="form-btn form-btn-sm form-btn-secondary pp-clear-btn" data-ripple onclick="_clearProtectionLog(true)" title="${t('protection.clear_resolved') || 'Clear resolved'}">
+        h += `<button class="form-btn form-btn-sm form-btn-secondary pp-clear-btn" data-ripple onclick="_clearProtectionLog(true)" title="${t('protection.clear_resolved', 'Clear resolved')}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-          ${t('protection.clear_resolved') || 'Clear resolved'}
+          ${t('protection.clear_resolved', 'Clear resolved')}
         </button>`;
       }
       if (total > 0) {
-        h += `<button class="form-btn form-btn-sm form-btn-secondary pp-clear-all-btn" data-ripple onclick="_clearProtectionLog(false)" title="${t('protection.clear_all') || 'Clear all'}">
+        h += `<button class="form-btn form-btn-sm form-btn-secondary pp-clear-all-btn" data-ripple onclick="_clearProtectionLog(false)" title="${t('protection.clear_all', 'Clear all')}">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
-          ${t('protection.clear_all') || 'Clear all'}
+          ${t('protection.clear_all', 'Clear all')}
         </button>`;
       }
       h += '</div></div>';
@@ -344,7 +344,7 @@
       if (!filtered.length) {
         return h + `<div class="pp-log-empty">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-          <div>${t('protection.log_empty') || 'No events'}</div>
+          <div>${t('protection.log_empty', 'No events')}</div>
         </div>`;
       }
 
@@ -366,8 +366,8 @@
               <span class="protection-log-card-event">${evLabel}</span>
               <span class="pill ${actionPill}">${actLabel}</span>
               ${entry.resolved
-                ? `<span class="pill pill-completed pp-resolved-pill">${t('protection.resolved_label') || 'Resolved'}</span>`
-                : `<span class="pill pill-failed pp-active-pill">${t('protection.active_label') || 'Active'}</span>`}
+                ? `<span class="pill pill-completed pp-resolved-pill">${t('protection.resolved_label', 'Resolved')}</span>`
+                : `<span class="pill pill-failed pp-active-pill">${t('protection.active_label', 'Active')}</span>`}
             </div>
             <div class="protection-log-card-meta">
               <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="2" width="12" height="8" rx="1"/><rect x="2" y="14" width="20" height="8" rx="1"/><line x1="6" y1="18" x2="6" y2="18.01"/></svg> ${esc(printerName(entry.printer_id))}</span>
@@ -473,8 +473,8 @@
 
   window._clearProtectionLog = async function(resolvedOnly) {
     const msg = resolvedOnly
-      ? (t('protection.confirm_clear_resolved') || 'Clear all resolved events?')
-      : (t('protection.confirm_clear_all') || 'Clear the ENTIRE log? This cannot be undone.');
+      ? (t('protection.confirm_clear_resolved', 'Clear all resolved events?'))
+      : (t('protection.confirm_clear_all', 'Clear the ENTIRE log? This cannot be undone.'));
     if (!confirm(msg)) return;
     try {
       const qs = resolvedOnly ? '?resolved_only=1' : '';
@@ -482,7 +482,7 @@
       await loadData();
       render();
       updateBadge();
-      if (typeof showToast === 'function') showToast(t('protection.log_cleared') || 'Log cleared', 'success');
+      if (typeof showToast === 'function') showToast(t('protection.log_cleared', 'Log cleared'), 'success');
     } catch (e) {
       console.error('[protection] Clear log failed:', e);
     }

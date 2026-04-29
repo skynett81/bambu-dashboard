@@ -48,7 +48,7 @@
     orders: 'Orders',
     printermatrix: 'Printer Matrix',
     timetracker: 'Time Analysis',
-    activity: t('tabs.activity') || 'Activity',
+    activity: t('tabs.activity', 'Activity'),
     gallery: 'Gallery',
     // 2026 additions — every panel registered in PANEL_TITLES should be
     // searchable from the Ctrl+K palette so users can jump straight in.
@@ -213,8 +213,8 @@
 
     items.push({
       id: 'act-shortcuts',
-      label: t('command_palette.show_shortcuts') || 'Show shortcuts',
-      category: t('command_palette.actions') || 'Actions',
+      label: t('command_palette.show_shortcuts', 'Show shortcuts'),
+      category: t('command_palette.actions', 'Actions'),
       icon: ICONS.shortcuts,
       action: function() {
         if (typeof showShortcutsHelp === 'function') showShortcutsHelp();
@@ -230,7 +230,7 @@
       items.push({
         id: 'printer-' + pid,
         label: name,
-        category: t('command_palette.printers') || 'Printers',
+        category: t('command_palette.printers', 'Printers'),
         icon: ICONS.printer,
         action: (function(id) {
           return function() {
@@ -290,7 +290,7 @@
     if (!list) return;
 
     if (_filteredItems.length === 0) {
-      list.innerHTML = '<div class="cmd-palette-empty">' + (t('command_palette.no_results') || 'No results') + '</div>';
+      list.innerHTML = '<div class="cmd-palette-empty">' + (t('command_palette.no_results', 'No results')) + '</div>';
       return;
     }
 
@@ -335,14 +335,14 @@
       '<div class="cmd-palette">' +
         '<div class="cmd-palette-header">' +
           '<span class="cmd-palette-search-icon">' + ICONS.search + '</span>' +
-          '<input class="cmd-palette-input" type="text" placeholder="' + (t('command_palette.search_placeholder') || 'Search panels, actions, printers...') + '" autocomplete="off" spellcheck="false">' +
+          '<input class="cmd-palette-input" type="text" placeholder="' + (t('command_palette.search_placeholder', 'Search panels, actions, printers...')) + '" autocomplete="off" spellcheck="false">' +
           '<kbd class="cmd-palette-esc">Esc</kbd>' +
         '</div>' +
         '<div class="cmd-palette-results"></div>' +
         '<div class="cmd-palette-footer">' +
-          '<span><kbd>&uarr;</kbd><kbd>&darr;</kbd> ' + (t('command_palette.navigate') || 'navigate') + '</span>' +
-          '<span><kbd>Enter</kbd> ' + (t('command_palette.select') || 'velg') + '</span>' +
-          '<span><kbd>Esc</kbd> ' + (t('command_palette.close') || 'lukk') + '</span>' +
+          '<span><kbd>&uarr;</kbd><kbd>&darr;</kbd> ' + (t('command_palette.navigate', 'navigate')) + '</span>' +
+          '<span><kbd>Enter</kbd> ' + (t('command_palette.select', 'velg')) + '</span>' +
+          '<span><kbd>Esc</kbd> ' + (t('command_palette.close', 'lukk')) + '</span>' +
         '</div>' +
       '</div>';
 

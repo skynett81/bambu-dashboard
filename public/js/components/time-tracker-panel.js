@@ -205,12 +205,12 @@
       <div class="tt-card">
         <div class="tt-card-label">${_esc(t('timetracker.avg_accuracy'))}</div>
         <div class="tt-card-value" style="color:${accs.length > 0 ? accColor(avg) : 'var(--text-muted)'}">${accs.length > 0 ? avg.toFixed(1) + '%' : '--'}</div>
-        <div class="tt-card-sub">${withAcc.length} ${_esc(t('timetracker.prints'))} ${_esc(t('timetracker.with_estimate') || 'med estimat')}</div>
+        <div class="tt-card-sub">${withAcc.length} ${_esc(t('timetracker.prints'))} ${_esc(t('timetracker.with_estimate', 'med estimat'))}</div>
       </div>
       <div class="tt-card">
         <div class="tt-card-label">${_esc(t('timetracker.total_tracked'))}</div>
         <div class="tt-card-value" style="color:var(--accent-blue)">${data.length}</div>
-        <div class="tt-card-sub">${fmtTime(totalActual)} ${_esc(t('timetracker.total_print_time') || 'total')}</div>
+        <div class="tt-card-sub">${fmtTime(totalActual)} ${_esc(t('timetracker.total_print_time', 'total'))}</div>
       </div>
       <div class="tt-card">
         <div class="tt-card-label">${_esc(t('timetracker.best'))}</div>

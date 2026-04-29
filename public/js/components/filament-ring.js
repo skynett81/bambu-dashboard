@@ -534,8 +534,8 @@
     if (activeInfo.isPrinting) {
       const usePct = activeInfo.totalPrintG > 0 ? Math.round(activeInfo.usedG / activeInfo.totalPrintG * 100) : 0;
       html += '<div class="fr-print-stats">';
-      html += `<span>${t('filament.usage') || 'Usage'}: ${activeInfo.usedG}g / ${activeInfo.totalPrintG}g</span>`;
-      html += `<span>${t('filament.after_print') || 'After'}: ${activeInfo.afterPrint}% (${activeInfo.afterPrintG}g)</span>`;
+      html += `<span>${t('filament.usage', 'Usage')}: ${activeInfo.usedG}g / ${activeInfo.totalPrintG}g</span>`;
+      html += `<span>${t('filament.after_print', 'After')}: ${activeInfo.afterPrint}% (${activeInfo.afterPrintG}g)</span>`;
       html += `<div class="fr-usage-bar"><div class="fr-usage-bar-fill" style="width:${usePct}%;background:${activeColor}"></div></div>`;
       html += '</div>';
     }
@@ -633,21 +633,21 @@
       </div>
       ${remainBar}
       <div class="fr-detail-grid">
-        <div class="fr-detail-stat"><span class="fr-detail-stat-val">${remainPct}%</span><span class="fr-detail-stat-lbl">${t('filament.remaining') || 'Remaining'}</span></div>
-        <div class="fr-detail-stat"><span class="fr-detail-stat-val">${d.weightG || '--'}g</span><span class="fr-detail-stat-lbl">${t('filament.weight') || 'Weight'}</span></div>
-        <div class="fr-detail-stat"><span class="fr-detail-stat-val">${d.totalG || '--'}g</span><span class="fr-detail-stat-lbl">${t('filament.total') || 'Total'}</span></div>
+        <div class="fr-detail-stat"><span class="fr-detail-stat-val">${remainPct}%</span><span class="fr-detail-stat-lbl">${t('filament.remaining', 'Remaining')}</span></div>
+        <div class="fr-detail-stat"><span class="fr-detail-stat-val">${d.weightG || '--'}g</span><span class="fr-detail-stat-lbl">${t('filament.weight', 'Weight')}</span></div>
+        <div class="fr-detail-stat"><span class="fr-detail-stat-val">${d.totalG || '--'}g</span><span class="fr-detail-stat-lbl">${t('filament.total', 'Total')}</span></div>
       </div>`;
 
     // Extra info rows
     html += '<div class="fr-detail-rows">';
-    if (d.nozzle) html += `<div class="fr-detail-row"><span>${t('filament.nozzle_temp') || 'Nozzle'}</span><span>${d.nozzle}</span></div>`;
-    if (d.dryingTemp) html += `<div class="fr-detail-row"><span>${t('filament.drying') || 'Drying'}</span><span>${d.dryingTemp}°C / ${d.dryingTime || '?'}h</span></div>`;
+    if (d.nozzle) html += `<div class="fr-detail-row"><span>${t('filament.nozzle_temp', 'Nozzle')}</span><span>${d.nozzle}</span></div>`;
+    if (d.dryingTemp) html += `<div class="fr-detail-row"><span>${t('filament.drying', 'Drying')}</span><span>${d.dryingTemp}°C / ${d.dryingTime || '?'}h</span></div>`;
     if (d.rfid) html += `<div class="fr-detail-row"><span>RFID</span><span>${d.idName || 'Bambu Lab'} ✓</span></div>`;
-    html += `<div class="fr-detail-row"><span>${t('filament.diameter') || 'Diameter'}</span><span>1.75mm</span></div>`;
+    html += `<div class="fr-detail-row"><span>${t('filament.diameter', 'Diameter')}</span><span>1.75mm</span></div>`;
     html += '</div>';
 
     // Material info button
-    html += `<button class="form-btn form-btn-sm" style="width:100%;margin-top:8px" onclick="location.hash='#filament/inventory'">${t('filament.view_inventory') || 'View in Inventory'}</button>`;
+    html += `<button class="form-btn form-btn-sm" style="width:100%;margin-top:8px" onclick="location.hash='#filament/inventory'">${t('filament.view_inventory', 'View in Inventory')}</button>`;
 
     // Render material info card if available
     html += `<div id="fr-material-info-${d.slot}"></div>`;

@@ -28,8 +28,8 @@
 
   function _panelSwitcher() {
     return '<div class="tabs" style="margin-bottom:12px">' +
-      '<button class="tab-btn" onclick="openPanel(\'queue\')">' + (t('queue.title') || 'Print Queue') + '</button>' +
-      '<button class="tab-btn active" onclick="openPanel(\'scheduler\')">' + (t('tabs.scheduler') || 'Scheduler') + '</button>' +
+      '<button class="tab-btn" onclick="openPanel(\'queue\')">' + (t('queue.title', 'Print Queue')) + '</button>' +
+      '<button class="tab-btn active" onclick="openPanel(\'scheduler\')">' + (t('tabs.scheduler', 'Scheduler')) + '</button>' +
       '</div>';
   }
 
@@ -213,7 +213,7 @@
         const remaining = q.item_count - q.completed_count - q.printing_count;
         pendingEvents.push({
           id: 'q_pending_' + q.id,
-          title: q.name + ' — ' + remaining + ' ' + (t('scheduler.pending') || 'ventende'),
+          title: q.name + ' — ' + remaining + ' ' + (t('scheduler.pending', 'ventende')),
           scheduled_at: now,
           status: 'pending',
           color: '#1279ff',
@@ -403,11 +403,11 @@
     const locale = (window.i18n?.getLocale() || 'nb').replace('_', '-');
     const dateLabel = new Date(dateStr + 'T12:00:00').toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     const statusLabels = {
-      completed: t('scheduler.completed') || 'Completed',
-      failed: t('scheduler.failed') || 'Failed',
-      running: t('scheduler.in_progress') || 'Running',
-      paused: t('scheduler.paused') || 'Paused',
-      pending: t('scheduler.pending') || 'Pending'
+      completed: t('scheduler.completed', 'Completed'),
+      failed: t('scheduler.failed', 'Failed'),
+      running: t('scheduler.in_progress', 'Running'),
+      paused: t('scheduler.paused', 'Paused'),
+      pending: t('scheduler.pending', 'Pending')
     };
 
     let listHtml = dayEvents.map(ev => {
@@ -448,9 +448,9 @@
       </div>
       ${listHtml}
       <div class="sched-dialog-actions" style="margin-top:12px">
-        <button class="form-btn form-btn-sm" onclick="this.closest('.sched-dialog-overlay').remove();_schedShowAdd('${dateStr}')">+ ${t('scheduler.add_event') || 'Ny hendelse'}</button>
+        <button class="form-btn form-btn-sm" onclick="this.closest('.sched-dialog-overlay').remove();_schedShowAdd('${dateStr}')">+ ${t('scheduler.add_event', 'Ny hendelse')}</button>
         <div style="flex:1"></div>
-        <button class="form-btn form-btn-secondary form-btn-sm" onclick="this.closest('.sched-dialog-overlay').remove()">${t('scheduler.close') || 'Close'}</button>
+        <button class="form-btn form-btn-secondary form-btn-sm" onclick="this.closest('.sched-dialog-overlay').remove()">${t('scheduler.close', 'Close')}</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
@@ -479,11 +479,11 @@
     overlay.onclick = (e) => { if (e.target === overlay) overlay.remove(); };
 
     const statusMap = {
-      completed: { label: t('scheduler.completed') || 'Completed', color: '#00ae42' },
-      failed: { label: t('scheduler.failed') || 'Failed', color: '#e53935' },
-      running: { label: t('scheduler.in_progress') || 'Running', color: '#f59e0b' },
-      paused: { label: t('scheduler.paused') || 'Paused', color: '#f59e0b' },
-      pending: { label: t('scheduler.pending') || 'Pending', color: '#1279ff' }
+      completed: { label: t('scheduler.completed', 'Completed'), color: '#00ae42' },
+      failed: { label: t('scheduler.failed', 'Failed'), color: '#e53935' },
+      running: { label: t('scheduler.in_progress', 'Running'), color: '#f59e0b' },
+      paused: { label: t('scheduler.paused', 'Paused'), color: '#f59e0b' },
+      pending: { label: t('scheduler.pending', 'Pending'), color: '#1279ff' }
     };
     const st = statusMap[ev.status] || { label: ev.status, color: 'var(--text-muted)' };
     const dur = ev.duration_seconds ? _fmtDuration(ev.duration_seconds) : null;
@@ -500,14 +500,14 @@
     }
 
     let fields = '';
-    fields += `<div class="sched-field"><label>${t('history.status') || 'Status'}</label><div style="color:${st.color};font-weight:600">${st.label}${ev._progress != null ? ' — ' + ev._progress + '%' : ''}</div></div>`;
+    fields += `<div class="sched-field"><label>${t('history.status', 'Status')}</label><div style="color:${st.color};font-weight:600">${st.label}${ev._progress != null ? ' — ' + ev._progress + '%' : ''}</div></div>`;
     if (ev._fromLive && ev._progress != null) {
-      fields += `<div class="sched-field"><label>${t('scheduler.progress') || 'Fremdrift'}</label><div style="margin-top:4px"><div style="background:var(--bg-tertiary);border-radius:4px;height:8px;overflow:hidden"><div style="background:${st.color};height:100%;width:${ev._progress}%;transition:width 0.3s"></div></div></div></div>`;
+      fields += `<div class="sched-field"><label>${t('scheduler.progress', 'Fremdrift')}</label><div style="margin-top:4px"><div style="background:var(--bg-tertiary);border-radius:4px;height:8px;overflow:hidden"><div style="background:${st.color};height:100%;width:${ev._progress}%;transition:width 0.3s"></div></div></div></div>`;
     }
-    if (printerLabel) fields += `<div class="sched-field"><label>${t('scheduler.printer') || 'Printer'}</label><div>${_esc(printerLabel)}</div></div>`;
-    fields += `<div class="sched-field"><label>${t('scheduler.started') || 'Startet'}</label><div>${startTime}</div></div>`;
-    if (endTime) fields += `<div class="sched-field"><label>${t('scheduler.finished') || 'Done'}</label><div>${endTime}</div></div>`;
-    if (dur) fields += `<div class="sched-field"><label>${t('scheduler.duration') || 'Varighet'}</label><div>${dur}</div></div>`;
+    if (printerLabel) fields += `<div class="sched-field"><label>${t('scheduler.printer', 'Printer')}</label><div>${_esc(printerLabel)}</div></div>`;
+    fields += `<div class="sched-field"><label>${t('scheduler.started', 'Startet')}</label><div>${startTime}</div></div>`;
+    if (endTime) fields += `<div class="sched-field"><label>${t('scheduler.finished', 'Done')}</label><div>${endTime}</div></div>`;
+    if (dur) fields += `<div class="sched-field"><label>${t('scheduler.duration', 'Varighet')}</label><div>${dur}</div></div>`;
 
     // Filament info with color swatch
     if (ev.filament_type || ev.filament_brand || ev.filament_used_g) {
@@ -519,10 +519,10 @@
       if (ev.filament_brand) filInfo += _esc(ev.filament_brand);
       else if (ev.filament_type) filInfo += _esc(ev.filament_type);
       if (ev.filament_used_g) filInfo += ` — ${ev.filament_used_g}g`;
-      fields += `<div class="sched-field"><label>${t('history.filament') || 'Filament'}</label><div>${filInfo}</div></div>`;
+      fields += `<div class="sched-field"><label>${t('history.filament', 'Filament')}</label><div>${filInfo}</div></div>`;
     }
-    if (ev.layer_count) fields += `<div class="sched-field"><label>${t('history.layers') || 'Lag'}</label><div>${ev.layer_count}</div></div>`;
-    if (ev.notes) fields += `<div class="sched-field"><label>${t('scheduler.notes') || 'Notater'}</label><div style="font-size:0.8rem;color:var(--text-muted)">${_esc(ev.notes)}</div></div>`;
+    if (ev.layer_count) fields += `<div class="sched-field"><label>${t('history.layers', 'Lag')}</label><div>${ev.layer_count}</div></div>`;
+    if (ev.notes) fields += `<div class="sched-field"><label>${t('scheduler.notes', 'Notater')}</label><div style="font-size:0.8rem;color:var(--text-muted)">${_esc(ev.notes)}</div></div>`;
 
     // MakerWorld model link
     let modelHtml = '';
@@ -573,10 +573,10 @@
       ${fields}
       ${reviewHtml}
       <div class="sched-dialog-actions">
-        ${ev._fromHistory ? `<button class="form-btn form-btn-sm" onclick="this.closest('.sched-dialog-overlay').remove();location.hash='#history'">${t('history.view') || 'Vis historikk'}</button>` : ''}
-        ${ev._fromQueue ? `<button class="form-btn form-btn-sm" onclick="this.closest('.sched-dialog-overlay').remove();location.hash='#queue'">${t('queue.title') || 'Vis ko'}</button>` : ''}
+        ${ev._fromHistory ? `<button class="form-btn form-btn-sm" onclick="this.closest('.sched-dialog-overlay').remove();location.hash='#history'">${t('history.view', 'Vis historikk')}</button>` : ''}
+        ${ev._fromQueue ? `<button class="form-btn form-btn-sm" onclick="this.closest('.sched-dialog-overlay').remove();location.hash='#queue'">${t('queue.title', 'Vis ko')}</button>` : ''}
         <div style="flex:1"></div>
-        <button class="form-btn form-btn-secondary form-btn-sm" onclick="this.closest('.sched-dialog-overlay').remove()">${t('scheduler.close') || 'Close'}</button>
+        <button class="form-btn form-btn-secondary form-btn-sm" onclick="this.closest('.sched-dialog-overlay').remove()">${t('scheduler.close', 'Close')}</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);

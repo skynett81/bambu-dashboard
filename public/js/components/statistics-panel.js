@@ -634,9 +634,9 @@
       const nozzleTemps = hist.filter(r => r.max_nozzle_temp > 100).map(r => r.max_nozzle_temp);
       const bedTemps = hist.filter(r => r.max_bed_temp > 0).map(r => r.max_bed_temp);
       if (nozzleTemps.length || bedTemps.length) {
-        h += `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border-color)"><div class="waste-compact-heading">${t('stats.temperatures') || 'Temperaturer'}</div><div class="stats-detail-list">`;
-        if (nozzleTemps.length) { const avg = Math.round(nozzleTemps.reduce((a, b) => a + b, 0) / nozzleTemps.length); h += sRow(t('stats.nozzle_avg_max') || 'Nozzle avg / max', `${avg}\u00B0C / ${Math.max(...nozzleTemps)}\u00B0C`); }
-        if (bedTemps.length) { const avg = Math.round(bedTemps.reduce((a, b) => a + b, 0) / bedTemps.length); h += sRow(t('stats.bed_avg_max') || 'Bed avg / max', `${avg}\u00B0C / ${Math.max(...bedTemps)}\u00B0C`); }
+        h += `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border-color)"><div class="waste-compact-heading">${t('stats.temperatures', 'Temperaturer')}</div><div class="stats-detail-list">`;
+        if (nozzleTemps.length) { const avg = Math.round(nozzleTemps.reduce((a, b) => a + b, 0) / nozzleTemps.length); h += sRow(t('stats.nozzle_avg_max', 'Nozzle avg / max'), `${avg}\u00B0C / ${Math.max(...nozzleTemps)}\u00B0C`); }
+        if (bedTemps.length) { const avg = Math.round(bedTemps.reduce((a, b) => a + b, 0) / bedTemps.length); h += sRow(t('stats.bed_avg_max', 'Bed avg / max'), `${avg}\u00B0C / ${Math.max(...bedTemps)}\u00B0C`); }
         h += `</div></div>`;
       }
       const byNozzle = {}; let totalLayers = 0;
@@ -647,7 +647,7 @@
       }
       const sortedNozzles = Object.entries(byNozzle).sort((a, b) => b[1].count - a[1].count);
       if (sortedNozzles.length) {
-        h += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border-color)"><div class="waste-compact-heading">${t('stats.nozzle_speed') || 'Nozzle & speed'}</div>`;
+        h += `<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border-color)"><div class="waste-compact-heading">${t('stats.nozzle_speed', 'Nozzle & speed')}</div>`;
         const mxN = sortedNozzles[0][1].count;
         for (const [nz, d] of sortedNozzles) h += barRow(esc(nz), (d.count / mxN) * 100, 'var(--accent-orange)', `${d.count}\u00D7 \u00B7 ${_fmtDurLong(d.time)}`);
         h += `<div class="stats-detail-list" style="margin-top:6px">`;
@@ -655,9 +655,9 @@
         const speedLevels = hist.filter(r => r.speed_level != null);
         if (speedLevels.length > 0) {
           const bySp = {};
-          for (const r of speedLevels) { const name = (SPEED_MAP[r.speed_level] ? t(SPEED_MAP[r.speed_level]) : `${t('stats.level') || 'Level'} ${r.speed_level}`); bySp[name] = (bySp[name] || 0) + 1; }
+          for (const r of speedLevels) { const name = (SPEED_MAP[r.speed_level] ? t(SPEED_MAP[r.speed_level]) : `${t('stats.level', 'Level')} ${r.speed_level}`); bySp[name] = (bySp[name] || 0) + 1; }
           const topSpeed = Object.entries(bySp).sort((a, b) => b[1] - a[1]);
-          h += sRow(t('stats.most_used') || 'Mest brukte', topSpeed[0] ? `${topSpeed[0][0]} (${topSpeed[0][1]}\u00D7)` : '--');
+          h += sRow(t('stats.most_used', 'Mest brukte'), topSpeed[0] ? `${topSpeed[0][0]} (${topSpeed[0][1]}\u00D7)` : '--');
         }
         h += `</div></div>`;
       }
@@ -687,7 +687,7 @@
       h += '<div class="filament-breakdown-col">';
       const sortedTypes = Object.entries(byType).sort((a, b) => b[1].count - a[1].count);
       const mxT = sortedTypes[0]?.[1].count || 1;
-      h += `<div class="card-subtitle">${t('stats.per_type') || 'Per type'}</div><div class="chart-bars">`;
+      h += `<div class="card-subtitle">${t('stats.per_type', 'Per type')}</div><div class="chart-bars">`;
       for (const [tp, d] of sortedTypes) {
         const swatches = [...d.colors].map(cc => typeof miniSpool === 'function' ? miniSpool('#' + cc, 12) : `<span class="color-dot" style="background:#${cc}"></span>`).join('');
         h += `<div class="chart-bar-row"><span class="chart-bar-label">${swatches} ${esc(tp)}</span><div class="chart-bar-track"><div class="chart-bar-fill" style="width:${(d.count/mxT)*100}%;background:var(--accent-blue)"></div></div><span class="chart-bar-value">${d.count} \u00B7 ${fmtW(d.weight)}</span></div>`;
@@ -696,14 +696,14 @@
       const sortedBrands = Object.entries(byBrand).sort((a, b) => b[1].weight - a[1].weight);
       if (sortedBrands.length > 1 || (sortedBrands.length === 1 && sortedBrands[0][0] !== 'Unknown')) {
         const mxB = sortedBrands[0]?.[1].weight || 1;
-        h += `<div class="card-subtitle" style="margin-top:12px">${t('stats.per_brand') || 'Per merke'}</div><div class="chart-bars">`;
+        h += `<div class="card-subtitle" style="margin-top:12px">${t('stats.per_brand', 'Per merke')}</div><div class="chart-bars">`;
         for (const [brand, d] of sortedBrands) h += barRow(esc(brand), (d.weight/mxB)*100, 'var(--accent-purple)', `${d.count}\u00D7 \u00B7 ${fmtW(d.weight)}`);
         h += '</div>';
       }
       h += '</div>';
       const sortedColors = Object.entries(byColor).filter(([k]) => k !== 'none').sort((a, b) => b[1].count - a[1].count);
       if (sortedColors.length > 0) {
-        h += `<div class="filament-breakdown-col"><div class="card-subtitle">${t('stats.colors_used') || 'Farger brukt'}</div><div class="filament-color-grid">`;
+        h += `<div class="filament-breakdown-col"><div class="card-subtitle">${t('stats.colors_used', 'Farger brukt')}</div><div class="filament-color-grid">`;
         for (const [hex, d] of sortedColors) {
           const cc = '#' + hex, rv = parseInt(hex.substring(0,2),16), gv = parseInt(hex.substring(2,4),16), bv = parseInt(hex.substring(4,6),16);
           const light = (rv*299+gv*587+bv*114)/1000 > 160;
@@ -728,7 +728,7 @@
       const sorted = Object.entries(byModel).sort((a, b) => b[1].count - a[1].count).slice(0, 8);
       if (!sorted.length) return '';
       const mx = sorted[0]?.[1].count || 1;
-      let h = `<div class="card-title">${t('stats.most_printed') || 'Mest printede modeller'}</div><div class="chart-bars">`;
+      let h = `<div class="card-title">${t('stats.most_printed', 'Mest printede modeller')}</div><div class="chart-bars">`;
       for (const [name, d] of sorted) {
         const failTag = d.fail > 0 ? ` <span style="color:var(--accent-red);font-size:0.65rem">(${d.fail} ${t('history.failed')})</span>` : '';
         h += barRow(esc(name.length > 35 ? name.substring(0, 33) + '\u2026' : name), (d.count / mx) * 100, 'var(--accent-green)', `${d.count}\u00D7${failTag}`);
@@ -750,7 +750,7 @@
       const days = Object.entries(byDay).sort((a, b) => a[0].localeCompare(b[0]));
       if (days.length < 2) return '';
       const maxCount = Math.max(...days.map(d => d[1].count), 1);
-      let h = `<div class="card-title">${t('stats.print_timeline') || 'Printtidslinje'}</div><div class="timeline-chart">`;
+      let h = `<div class="card-title">${t('stats.print_timeline', 'Printtidslinje')}</div><div class="timeline-chart">`;
       for (const [day, d] of days) {
         const pct = (d.count / maxCount) * 100;
         const dateLabel = day.substring(8) + '.' + day.substring(5, 7);
@@ -768,11 +768,11 @@
       const maxHour = Math.max(...byHour, 1);
       h += `<div style="display:flex;gap:16px;margin-top:10px;flex-wrap:wrap">`;
       h += `<div style="flex:1;min-width:180px"><div class="stats-detail-list">`;
-      h += sRow(t('stats.active_days') || 'Active print days', `${totalDays} ${t('stats.of') || 'of'} ${span} ${t('stats.days') || 'days'} (${activePct}%)`);
-      h += sRow(t('stats.prints_per_day') || 'Prints per dag (snitt)', (hist.length / totalDays).toFixed(1));
-      h += sRow(t('stats.peak_hour') || 'Mest aktive time', `${String(peakHour).padStart(2,'0')}:00 – ${String(peakHour+1).padStart(2,'0')}:00 (${byHour[peakHour]} prints)`);
+      h += sRow(t('stats.active_days', 'Active print days'), `${totalDays} ${t('stats.of', 'of')} ${span} ${t('stats.days', 'days')} (${activePct}%)`);
+      h += sRow(t('stats.prints_per_day', 'Prints per dag (snitt)'), (hist.length / totalDays).toFixed(1));
+      h += sRow(t('stats.peak_hour', 'Mest aktive time'), `${String(peakHour).padStart(2,'0')}:00 – ${String(peakHour+1).padStart(2,'0')}:00 (${byHour[peakHour]} prints)`);
       h += `</div></div>`;
-      h += `<div style="flex:1;min-width:200px"><div class="waste-compact-heading">${t('stats.hourly_activity') || 'Hourly activity'}</div>`;
+      h += `<div style="flex:1;min-width:200px"><div class="waste-compact-heading">${t('stats.hourly_activity', 'Hourly activity')}</div>`;
       h += `<div style="display:flex;gap:2px;align-items:flex-end;height:36px">`;
       for (let i = 0; i < 24; i++) {
         const v = byHour[i], ht = maxHour > 0 ? Math.max((v / maxHour) * 100, v > 0 ? 8 : 2) : 2;

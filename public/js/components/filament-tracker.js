@@ -488,9 +488,9 @@
           <input type="checkbox" ${_showArchived ? 'checked' : ''} onchange="window._invToggleArchived(this.checked)">
           <span>${t('filament.show_archived')}</span>
         </label>
-        <button class="inv-filter-chip" onclick="window._archiveEmptySpools()" title="${t('filament.archive_empty_tooltip') || 'Archive all spools that are empty (≤ 5g)'}">
+        <button class="inv-filter-chip" onclick="window._archiveEmptySpools()" title="${t('filament.archive_empty_tooltip', 'Archive all spools that are empty (≤ 5g)')}">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8M1 3h22v5H1zM10 12h4"/></svg>
-          ${t('filament.archive_empty') || 'Archive empty'}
+          ${t('filament.archive_empty', 'Archive empty')}
         </button>
         <div class="inv-view-toggle">
           <button class="inv-view-btn ${_viewMode === 'grid' ? 'active' : ''}" onclick="window._invViewMode('grid')" title="${t('filament.view_grid')}">
@@ -584,8 +584,8 @@
         h += emptyState({
           icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>',
           title: _searchQuery ? t('filament.no_search_results') : t('filament.no_spools'),
-          desc: _searchQuery ? '' : (t('filament.no_spools_desc') || 'Add your first spool to start tracking filament usage.'),
-          actionLabel: _searchQuery ? '' : (t('filament.add_spool') || 'Add Spool'),
+          desc: _searchQuery ? '' : (t('filament.no_spools_desc', 'Add your first spool to start tracking filament usage.')),
+          actionLabel: _searchQuery ? '' : (t('filament.add_spool', 'Add Spool')),
           actionOnClick: _searchQuery ? '' : 'document.querySelector(\'.fil-add-btn\')?.click()'
         });
       } else if (_viewMode === 'groups') {
@@ -908,9 +908,9 @@
         ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>', _dbStats.materials.toLocaleString(), t('filament.db_materials'), '#f0883e')}
         ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>', _dbStats.with_k_value.toLocaleString(), t('filament.db_with_k'), '#9b4dff')}
         ${heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/></svg>', _dbStats.with_td.toLocaleString(), t('filament.db_with_td'), '#e3b341')}
-        ${_dbStats.translucent ? heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10"/></svg>', _dbStats.translucent.toLocaleString(), t('filament.translucent') || 'Transparent', '#67e8f9') : ''}
-        ${_dbStats.glow_in_dark ? heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 009 9 9 9 0 11-9-9z"/></svg>', _dbStats.glow_in_dark.toLocaleString(), t('filament.glow') || 'Glow', '#bef264') : ''}
-        ${_dbStats.multi_color ? heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="6"/><circle cx="15" cy="15" r="6"/></svg>', _dbStats.multi_color.toLocaleString(), t('filament.multi_color') || 'Multi-color', '#f9a8d4') : ''}
+        ${_dbStats.translucent ? heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10"/></svg>', _dbStats.translucent.toLocaleString(), t('filament.translucent', 'Transparent'), '#67e8f9') : ''}
+        ${_dbStats.glow_in_dark ? heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 009 9 9 9 0 11-9-9z"/></svg>', _dbStats.glow_in_dark.toLocaleString(), t('filament.glow', 'Glow'), '#bef264') : ''}
+        ${_dbStats.multi_color ? heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="9" r="6"/><circle cx="15" cy="15" r="6"/></svg>', _dbStats.multi_color.toLocaleString(), t('filament.multi_color', 'Multi-color'), '#f9a8d4') : ''}
       </div>`;
       return h;
     },
@@ -937,9 +937,9 @@
       h += '</select>';
       h += `<label class="db-filter-check"><input type="checkbox" ${_dbFilterHasK?'checked':''} onchange="window._dbToggleK(this.checked)"> K-Value</label>`;
       h += `<label class="db-filter-check"><input type="checkbox" ${_dbFilterHasTd?'checked':''} onchange="window._dbToggleTd(this.checked)"> TD</label>`;
-      h += `<label class="db-filter-check"><input type="checkbox" ${_dbFilterTranslucent?'checked':''} onchange="window._dbToggleTranslucent(this.checked)"> ${t('filament.translucent') || 'Transparent'}</label>`;
-      h += `<label class="db-filter-check"><input type="checkbox" ${_dbFilterGlow?'checked':''} onchange="window._dbToggleGlow(this.checked)"> ${t('filament.glow') || 'Glow'}</label>`;
-      h += `<label class="db-filter-check"><input type="checkbox" ${_dbFilterMultiColor?'checked':''} onchange="window._dbToggleMultiColor(this.checked)"> ${t('filament.multi_color') || 'Multi'}</label>`;
+      h += `<label class="db-filter-check"><input type="checkbox" ${_dbFilterTranslucent?'checked':''} onchange="window._dbToggleTranslucent(this.checked)"> ${t('filament.translucent', 'Transparent')}</label>`;
+      h += `<label class="db-filter-check"><input type="checkbox" ${_dbFilterGlow?'checked':''} onchange="window._dbToggleGlow(this.checked)"> ${t('filament.glow', 'Glow')}</label>`;
+      h += `<label class="db-filter-check"><input type="checkbox" ${_dbFilterMultiColor?'checked':''} onchange="window._dbToggleMultiColor(this.checked)"> ${t('filament.multi_color', 'Multi')}</label>`;
       h += '</div>';
       // Toolbar
       h += '<div class="db-toolbar">';
@@ -1444,9 +1444,9 @@
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
               QR
             </button>
-            ${!s.archived ? `<button class="form-btn form-btn-sm" data-ripple onclick="window._addAnotherFromSpool(${s.id})" style="background:var(--accent-blue);color:#fff" title="${t('filament.add_another_hint') || 'Register another reel of this same filament — pre-fills profile, colour, weight and price'}">
+            ${!s.archived ? `<button class="form-btn form-btn-sm" data-ripple onclick="window._addAnotherFromSpool(${s.id})" style="background:var(--accent-blue);color:#fff" title="${t('filament.add_another_hint', 'Register another reel of this same filament — pre-fills profile, colour, weight and price')}">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              ${t('filament.add_another') || 'Add another'}
+              ${t('filament.add_another', 'Add another')}
             </button>` : ''}
             ${s.archived ? `<button class="form-btn form-btn-sm" data-ripple onclick="this.closest('.ph-detail-overlay').remove();unarchiveSpoolItem(${s.id})">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 00-4-4H4"/></svg>
@@ -1790,22 +1790,22 @@
           ${dropAttrs}
           ondragstart="event.dataTransfer.setData('text/plain','${linked.id}');this.style.opacity='0.5'"
           ondragend="this.style.opacity=''"
-          style="cursor:grab;border-color:var(--accent-orange)" onclick="window._replaceEmptySlot(${linked.id}, '${esc(printerId)}', ${i})" title="${t('filament.replace_empty') || 'Spool is empty — click to replace, drag to move'}">
+          style="cursor:grab;border-color:var(--accent-orange)" onclick="window._replaceEmptySlot(${linked.id}, '${esc(printerId)}', ${i})" title="${t('filament.replace_empty', 'Spool is empty — click to replace, drag to move')}">
           <div class="fil-ams-color">${miniSpool(hexToRgbColor(linked.color_hex), 18, 0)}</div>
           <div class="fil-ams-info">
-            <span class="fil-ams-type" style="color:var(--accent-orange)">${t('common.empty') || 'Empty'}</span>
-            <span class="fil-ams-linked text-muted" style="font-size:0.65rem">${esc(_cleanProfileName(linked) || linked.profile_name || '')} · ${t('filament.replace_empty_short') || 'click to replace'}</span>
+            <span class="fil-ams-type" style="color:var(--accent-orange)">${t('common.empty', 'Empty')}</span>
+            <span class="fil-ams-linked text-muted" style="font-size:0.65rem">${esc(_cleanProfileName(linked) || linked.profile_name || '')} · ${t('filament.replace_empty_short', 'click to replace')}</span>
           </div>
           <span class="fil-ams-slot">${esc(slotName)}</span>
         </div>`;
       } else {
         inner += `<div class="fil-ams-tray"
           ${dropAttrs}
-          onclick="window._assignSlot('${esc(printerId)}', ${i})" style="cursor:pointer;opacity:0.6;border-style:dashed" title="${t('filament.add_spool') || 'Assign spool — click or drag a spool here'}">
+          onclick="window._assignSlot('${esc(printerId)}', ${i})" style="cursor:pointer;opacity:0.6;border-style:dashed" title="${t('filament.add_spool', 'Assign spool — click or drag a spool here')}">
           <div class="fil-ams-color">${miniSpool('#444', 18, 0)}</div>
           <div class="fil-ams-info">
-            <span class="fil-ams-type text-muted">${t('common.empty') || 'Empty'}</span>
-            <span class="fil-ams-linked text-muted" style="font-size:0.65rem">+ ${t('filament.add_spool') || 'Drop or click'}</span>
+            <span class="fil-ams-type text-muted">${t('common.empty', 'Empty')}</span>
+            <span class="fil-ams-linked text-muted" style="font-size:0.65rem">+ ${t('filament.add_spool', 'Drop or click')}</span>
           </div>
           <span class="fil-ams-slot">${esc(slotName)}</span>
         </div>`;
@@ -1883,7 +1883,7 @@
       && (!s.printer_id || (s.printer_id === printerId && s.ams_tray !== trayIndex))
     );
     if (candidates.length === 0) {
-      showToast(t('filament.no_spools_available') || 'No spools available — add one first', 'info');
+      showToast(t('filament.no_spools_available', 'No spools available — add one first'), 'info');
       return;
     }
     document.querySelector('.slot-pick-menu')?.remove();
@@ -1937,10 +1937,10 @@
   window._archiveEmptySpools = function() {
     const empties = _spools.filter(s => !s.archived && s.remaining_weight_g != null && s.remaining_weight_g <= 5);
     if (empties.length === 0) {
-      showToast(t('filament.no_empty_spools') || 'No empty spools to archive', 'info');
+      showToast(t('filament.no_empty_spools', 'No empty spools to archive'), 'info');
       return;
     }
-    const msg = (t('filament.archive_empty_confirm') || 'Archive {count} empty spool(s)?').replace('{count}', empties.length);
+    const msg = (t('filament.archive_empty_confirm', 'Archive {count} empty spool(s)?')).replace('{count}', empties.length);
     return confirmAction(msg, async () => {
       for (const s of empties) {
         try {
@@ -1951,7 +1951,7 @@
           });
         } catch { /* continue */ }
       }
-      showToast((t('filament.archived_count') || '{count} archived').replace('{count}', empties.length), 'success');
+      showToast((t('filament.archived_count', '{count} archived')).replace('{count}', empties.length), 'success');
       loadFilament();
     });
   };
@@ -2562,7 +2562,7 @@
             </div>
             ${!isEdit ? `<div class="form-group" style="margin-bottom:0">
               <label class="form-label" style="color:var(--accent-blue);font-weight:600">${t('filament.bulk_quantity')}</label>
-              <input class="form-input" id="sp-quantity-${id}" type="number" value="1" min="1" max="50" step="1" title="${t('filament.bulk_quantity_hint') || 'Number of spools to add (with the same profile, weight and price)'}" style="border-color:var(--accent-blue)">
+              <input class="form-input" id="sp-quantity-${id}" type="number" value="1" min="1" max="50" step="1" title="${t('filament.bulk_quantity_hint', 'Number of spools to add (with the same profile, weight and price)')}" style="border-color:var(--accent-blue)">
             </div>` : ''}
             <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.initial_weight')}</label>
@@ -2573,12 +2573,12 @@
               <input class="form-input" id="sp-used-${id}" type="number" value="${isEdit ? (spool?.used_weight_g || 0) : 0}">
             </div>
             <div class="form-group" style="margin-bottom:0">
-              <label class="form-label">${t('filament.remaining_g') || 'Remaining (g)'}</label>
+              <label class="form-label">${t('filament.remaining_g', 'Remaining (g)')}</label>
               <input class="form-input" id="sp-remaining-${id}" type="number" value="${isEdit ? (spool?.remaining_weight_g ?? '') : ''}" placeholder="Auto">
             </div>
             <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.price_per_spool') || t('filament.price')}</label>
-              <input class="form-input" id="sp-cost-${id}" type="number" value="${data?.cost || ''}" placeholder="219" title="${t('filament.price_per_spool_hint') || 'Price per spool — applied to every spool when quantity > 1'}">
+              <input class="form-input" id="sp-cost-${id}" type="number" value="${data?.cost || ''}" placeholder="219" title="${t('filament.price_per_spool_hint', 'Price per spool — applied to every spool when quantity > 1')}">
             </div>
             <div class="form-group" style="margin-bottom:0">
               <label class="form-label">${t('filament.spool_tare_weight')}</label>
@@ -2589,16 +2589,16 @@
               <input class="form-input" id="sp-lot-${id}" value="${data?.lot_number || ''}">
             </div>
             <div class="form-group" style="margin-bottom:0">
-              <label class="form-label">${t('filament.color') || 'Color'}</label>
+              <label class="form-label">${t('filament.color', 'Color')}</label>
               <div style="display:flex;gap:6px;align-items:center">
                 <input type="color" class="form-input" id="sp-color-hex-${id}" value="${data?.color_hex_override || (data?.color_hex ? '#' + String(data.color_hex).replace(/^#/, '') : '#cccccc')}" style="width:42px;padding:2px;flex:0 0 auto;cursor:pointer">
-                <input class="form-input" id="sp-color-name-${id}" value="${data?.color_name_override || data?.color_name || ''}" placeholder="${t('filament.color_name_placeholder') || 'White, Yellow, ...'}" style="flex:1 1 auto;min-width:0">
+                <input class="form-input" id="sp-color-name-${id}" value="${data?.color_name_override || data?.color_name || ''}" placeholder="${t('filament.color_name_placeholder', 'White, Yellow, ...')}" style="flex:1 1 auto;min-width:0">
               </div>
             </div>
             <div class="form-group" style="margin-bottom:0">
               <label class="form-label" style="display:flex;justify-content:space-between;align-items:center">
                 <span>${t('filament.location')}</span>
-                <a href="#filament/manage" onclick="setTimeout(()=>window._switchManageSubTab&&window._switchManageSubTab('locations'),100)" style="font-size:0.7rem;color:var(--accent-blue);text-decoration:none" title="${t('filament.manage_locations_hint') || 'Add or edit storage locations'}">${t('filament.manage_locations') || '+ Manage'}</a>
+                <a href="#filament/manage" onclick="setTimeout(()=>window._switchManageSubTab&&window._switchManageSubTab('locations'),100)" style="font-size:0.7rem;color:var(--accent-blue);text-decoration:none" title="${t('filament.manage_locations_hint', 'Add or edit storage locations')}">${t('filament.manage_locations', '+ Manage')}</a>
               </label>
               <select class="form-input" id="sp-location-${id}">${buildLocationSelect(data?.location)}</select>
             </div>
@@ -4584,19 +4584,19 @@
             <input class="form-input" id="set-labor-rate" type="number" step="0.01" value="${settings.labor_rate_hourly || ''}" placeholder="0.00">
           </div>
           <div class="form-group">
-            <label class="form-label">${t('filament.setup_time') || 'Setup time per print (min)'}</label>
+            <label class="form-label">${t('filament.setup_time', 'Setup time per print (min)')}</label>
             <input class="form-input" id="set-setup-minutes" type="number" step="1" value="${settings.labor_setup_minutes || ''}" placeholder="5">
           </div>
           <div class="form-group">
-            <label class="form-label">${t('filament.markup_pct') || 'Markup / profit margin (%)'}</label>
+            <label class="form-label">${t('filament.markup_pct', 'Markup / profit margin (%)')}</label>
             <input class="form-input" id="set-markup-pct" type="number" step="0.1" value="${settings.markup_pct || ''}" placeholder="0">
           </div>
           <div class="form-group">
-            <label class="form-label">${t('filament.nozzle_cost_hour') || 'Nozzle cost per hour'}</label>
+            <label class="form-label">${t('filament.nozzle_cost_hour', 'Nozzle cost per hour')}</label>
             <input class="form-input" id="set-nozzle-cost" type="number" step="0.01" value="${settings.nozzle_cost_per_hour || ''}" placeholder="0.05">
           </div>
           <div class="form-group">
-            <label class="form-label">${t('filament.waste_factor') || 'Avfallsfaktor (f.eks. 1.1 = 10% ekstra)'}</label>
+            <label class="form-label">${t('filament.waste_factor', 'Avfallsfaktor (f.eks. 1.1 = 10% ekstra)')}</label>
             <input class="form-input" id="set-waste-factor" type="number" step="0.01" value="${settings.material_waste_factor || '1.1'}" placeholder="1.1">
           </div>
         </div>
@@ -5063,11 +5063,11 @@
       const totalSpools = data.reduce((s, d) => s + (d.spools_to_order || 0), 0);
 
       let h = '<div class="fil-hero-grid" style="margin-bottom:12px">';
-      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', critical, t('filament.restock_critical') || 'Kritisk', '#f85149');
-      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>', high, t('filament.restock_high') || 'Haster', '#f0883e');
-      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', medium, t('filament.restock_medium') || 'Middels', '#d29922');
-      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>', totalSpools + ' ' + (t('filament.spools') || 'spoler'), t('filament.restock_to_order') || 'Bestilles', '#58a6ff');
-      if (totalCost > 0) h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>', '~' + Math.round(totalCost), t('filament.restock_est_cost') || 'Est. kostnad', '#a371f7');
+      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', critical, t('filament.restock_critical', 'Kritisk'), '#f85149');
+      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>', high, t('filament.restock_high', 'Haster'), '#f0883e');
+      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', medium, t('filament.restock_medium', 'Middels'), '#d29922');
+      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>', totalSpools + ' ' + (t('filament.spools', 'spoler')), t('filament.restock_to_order', 'Bestilles'), '#58a6ff');
+      if (totalCost > 0) h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>', '~' + Math.round(totalCost), t('filament.restock_est_cost', 'Est. kostnad'), '#a371f7');
       h += '</div>';
 
       h += `<table class="fil-drying-presets-table"><thead><tr>
@@ -5095,7 +5095,7 @@
             <div style="width:60px;height:4px;background:var(--bg-tertiary);border-radius:2px;margin-top:2px"><div style="width:${stockPct}%;height:100%;background:${barColor};border-radius:2px"></div></div>
           </td>
           <td style="color:${s.days_until_out != null && s.days_until_out <= 14 ? uColor : ''};font-weight:${s.days_until_out != null && s.days_until_out <= 7 ? '700' : '400'}">${s.days_until_out != null ? s.days_until_out + 'd' : '-'}</td>
-          <td>${s.spools_to_order > 0 ? `<strong>${s.spools_to_order}</strong> ${t('filament.spools') || 'spoler'}${s.est_cost ? ` <span class="text-muted">(~${Math.round(s.est_cost)})</span>` : ''}` : '-'}</td>
+          <td>${s.spools_to_order > 0 ? `<strong>${s.spools_to_order}</strong> ${t('filament.spools', 'spoler')}${s.est_cost ? ` <span class="text-muted">(~${Math.round(s.est_cost)})</span>` : ''}` : '-'}</td>
           <td><span style="background:${uColor};color:#fff;padding:1px 8px;border-radius:4px;font-size:0.7rem;text-transform:uppercase">${t('filament.urgency_' + s.urgency) || s.urgency}</span></td>
         </tr>`;
       }
@@ -5141,11 +5141,11 @@
       const tightestMaterial = materialRunways[0] || null;
 
       let h = '<div class="fil-hero-grid" style="margin-bottom:12px">';
-      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>', Math.round(totalDailyUsage) + 'g/d', t('filament.daily_usage') || 'Daglig forbruk', '#1279ff');
+      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>', Math.round(totalDailyUsage) + 'g/d', t('filament.daily_usage', 'Daglig forbruk'), '#1279ff');
       h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>', totalRunwayDays != null ? totalRunwayDays + 'd' : '--', t('filament.total_runway', 'Total runway'), totalRunwayDays != null && totalRunwayDays <= 7 ? '#f85149' : totalRunwayDays != null && totalRunwayDays <= 30 ? '#f0883e' : '#00e676');
-      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>', Math.round(totalRemaining) + 'g', t('filament.total_remaining') || 'Totalt igjen', '#00e676');
+      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>', Math.round(totalRemaining) + 'g', t('filament.total_remaining', 'Totalt igjen'), '#00e676');
       h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', closestEmpty < Infinity ? closestEmpty + 'd' : '--', t('filament.first_spool_empty', 'First spool empty'), closestEmpty <= 7 ? '#f85149' : closestEmpty <= 14 ? '#f0883e' : '#00e676');
-      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', needsReorder, t('filament.needs_reorder_count') || 'Trenger bestilling', needsReorder > 0 ? '#f0883e' : '#8b949e');
+      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', needsReorder, t('filament.needs_reorder_count', 'Trenger bestilling'), needsReorder > 0 ? '#f0883e' : '#8b949e');
       h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>', allSpools.length + (active.length < allSpools.length ? ` <span style="font-size:0.65rem;opacity:0.7">(${active.length} ${t('filament.in_use', 'used')})</span>` : ''), t('filament.spools_in_stock', 'Spools in stock'), '#a371f7');
       h += '</div>';
 
@@ -5173,11 +5173,11 @@
           h += `<div style="background:var(--bg-secondary);border:1px solid var(--border-color);border-radius:var(--radius);padding:10px 14px;display:flex;align-items:center;justify-content:space-between">
             <div>
               <div style="font-weight:700;font-size:0.9rem;color:${matColor}">${esc(m.material)}</div>
-              <div class="text-muted" style="font-size:0.7rem">${m.active_days} ${t('filament.active_days') || 'active days'}</div>
+              <div class="text-muted" style="font-size:0.7rem">${m.active_days} ${t('filament.active_days', 'active days')}</div>
             </div>
             <div style="text-align:right">
               <div style="font-weight:700;font-size:0.9rem">${m.avg_daily_g}g/d</div>
-              <div class="text-muted" style="font-size:0.7rem">${Math.round(m.total_used_g)}g ${t('filament.total_used') || 'totalt brukt'}</div>
+              <div class="text-muted" style="font-size:0.7rem">${Math.round(m.total_used_g)}g ${t('filament.total_used', 'totalt brukt')}</div>
             </div>
           </div>`;
         }
@@ -5204,7 +5204,7 @@
       for (const s of sortedRows) {
         const isUnused = !(s.avg_daily_g > 0);
         const daysColor = s.days_until_empty != null && s.days_until_empty <= 7 ? '#f85149' : s.days_until_empty != null && s.days_until_empty <= 14 ? '#f0883e' : '';
-        const reorderBadge = s.needs_reorder ? `<span style="background:${s.days_until_empty <= 7 ? '#f85149' : '#f0883e'};color:#fff;padding:1px 6px;border-radius:4px;font-size:0.7rem">${s.days_until_empty <= 7 ? (t('filament.urgency_critical') || 'Kritisk') : (t('filament.needs_reorder') || 'Bestill')}</span>` : '';
+        const reorderBadge = s.needs_reorder ? `<span style="background:${s.days_until_empty <= 7 ? '#f85149' : '#f0883e'};color:#fff;padding:1px 6px;border-radius:4px;font-size:0.7rem">${s.days_until_empty <= 7 ? (t('filament.urgency_critical', 'Kritisk')) : (t('filament.needs_reorder', 'Bestill'))}</span>` : '';
         const unusedBadge = isUnused ? `<span style="background:var(--bg-tertiary);color:var(--text-muted);padding:1px 6px;border-radius:4px;font-size:0.7rem">${t('filament.unused', 'Unused')}</span>` : '';
         const colorDot = s.color_hex ? `<span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:#${s.color_hex};border:1px solid var(--border-color)"></span>` : '';
         const wPct = Math.round(s.remaining_weight_g / maxW * 100);
@@ -5225,7 +5225,7 @@
 
       // Forecast chart
       h += '<div class="card" style="margin-top:12px">';
-      h += `<div class="card-title">${t('forecast.chart_title') || '30-day forecast'}</div>`;
+      h += `<div class="card-title">${t('forecast.chart_title', '30-day forecast')}</div>`;
       h += '<div id="forecast-chart-container"></div>';
       h += '</div>';
 
@@ -5597,13 +5597,13 @@
       <div class="fil-matref-filter mb-sm">
         <select class="form-input form-input-sm" id="matref-category-filter" onchange="filterMaterials()">
           <option value="">${t('filament.filter_all')} kategorier</option>
-          <option value="standard">${t('filament.cat_standard') || 'Standard'}</option>
-          <option value="engineering">${t('filament.cat_engineering') || 'Engineering'}</option>
-          <option value="composite">${t('filament.cat_composite') || 'Composite'}</option>
-          <option value="flexible">${t('filament.cat_flexible') || 'Flexible'}</option>
-          <option value="specialty">${t('filament.cat_specialty') || 'Specialty'}</option>
-          <option value="support">${t('filament.cat_support') || 'Support material'}</option>
-          <option value="high-performance">${t('filament.cat_high_perf') || 'High performance'}</option>
+          <option value="standard">${t('filament.cat_standard', 'Standard')}</option>
+          <option value="engineering">${t('filament.cat_engineering', 'Engineering')}</option>
+          <option value="composite">${t('filament.cat_composite', 'Composite')}</option>
+          <option value="flexible">${t('filament.cat_flexible', 'Flexible')}</option>
+          <option value="specialty">${t('filament.cat_specialty', 'Specialty')}</option>
+          <option value="support">${t('filament.cat_support', 'Support material')}</option>
+          <option value="high-performance">${t('filament.cat_high_perf', 'High performance')}</option>
         </select>
       </div>
       <div id="matref-container"><span class="text-muted text-sm">${t('common.loading')}...</span></div>`;
@@ -7112,9 +7112,9 @@
       if (f.retraction_distance) badges.push(`<span class="fil-badge" style="background:#3a2a1a;color:#fcd34d;font-size:0.65rem">${t('filament.retraction')} ${f.retraction_distance}mm</span>`);
       // Visual properties
       if (f.finish) badges.push(`<span class="fil-badge" style="background:#2a2a3a;color:#a5b4fc;font-size:0.65rem">${f.finish}</span>`);
-      if (f.translucent) badges.push(`<span class="fil-badge" style="background:#1a2a3a;color:#67e8f9;font-size:0.65rem">${t('filament.translucent') || 'Transparent'}</span>`);
-      if (f.glow) badges.push(`<span class="fil-badge" style="background:#2a3a1a;color:#bef264;font-size:0.65rem">${t('filament.glow') || 'Glow'}</span>`);
-      if (f.multi_color_direction) badges.push(`<span class="fil-badge" style="background:#3a1a2a;color:#f9a8d4;font-size:0.65rem">${t('filament.multi_color') || 'Multi'}: ${f.multi_color_direction}</span>`);
+      if (f.translucent) badges.push(`<span class="fil-badge" style="background:#1a2a3a;color:#67e8f9;font-size:0.65rem">${t('filament.translucent', 'Transparent')}</span>`);
+      if (f.glow) badges.push(`<span class="fil-badge" style="background:#2a3a1a;color:#bef264;font-size:0.65rem">${t('filament.glow', 'Glow')}</span>`);
+      if (f.multi_color_direction) badges.push(`<span class="fil-badge" style="background:#3a1a2a;color:#f9a8d4;font-size:0.65rem">${t('filament.multi_color', 'Multi')}: ${f.multi_color_direction}</span>`);
       if (f.pattern) badges.push(`<span class="fil-badge" style="background:#2a3a2a;color:#86efac;font-size:0.65rem">${f.pattern}</span>`);
       // Rating
       const ratingAvg = f.rating_count > 0 ? (f.rating_sum / f.rating_count).toFixed(1) : null;
@@ -7200,15 +7200,15 @@
       [t('filament.db_retraction'), f.retraction_distance != null ? f.retraction_distance + ' mm' + (f.retraction_speed ? ' @ ' + f.retraction_speed + ' mm/s' : '') : '--'],
       ['Density', f.density ? f.density + ' g/cm\u00B3' : '--'],
       ['Diameter', f.diameter ? f.diameter + ' mm' : '1.75 mm'],
-      [t('filament.db_finish') || 'Finish', f.finish || '--'],
-      [t('filament.db_spool_type') || 'Spooltype', f.spool_type || '--'],
-      [t('filament.db_spool_weight') || 'Spool weight', f.spool_weight ? f.spool_weight + 'g' : '--'],
+      [t('filament.db_finish', 'Finish'), f.finish || '--'],
+      [t('filament.db_spool_type', 'Spooltype'), f.spool_type || '--'],
+      [t('filament.db_spool_weight', 'Spool weight'), f.spool_weight ? f.spool_weight + 'g' : '--'],
     ];
     // Only show visual properties if they have values
-    if (f.translucent) fields.push([t('filament.translucent') || 'Translucent', 'Yes']);
-    if (f.glow) fields.push([t('filament.glow') || 'Glow-in-dark', 'Yes']);
-    if (f.pattern) fields.push([t('filament.db_pattern') || 'Pattern', f.pattern]);
-    if (f.multi_color_direction) fields.push([t('filament.multi_color') || 'Multi-color', f.multi_color_direction]);
+    if (f.translucent) fields.push([t('filament.translucent', 'Translucent'), 'Yes']);
+    if (f.glow) fields.push([t('filament.glow', 'Glow-in-dark'), 'Yes']);
+    if (f.pattern) fields.push([t('filament.db_pattern', 'Pattern'), f.pattern]);
+    if (f.multi_color_direction) fields.push([t('filament.multi_color', 'Multi-color'), f.multi_color_direction]);
     fields.push(
       [t('filament.db_price'), f.price ? '$' + f.price + (f.price_currency && f.price_currency !== 'USD' ? ' ' + f.price_currency : '') : '--'],
       [t('filament.db_source'), f.source || '--']

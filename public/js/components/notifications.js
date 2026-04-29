@@ -54,7 +54,7 @@
       notify(key, t('notify.print_started'), t('notify.print_started_body', { name }));
       if (ns) ns.play('print_started');
     } else if (prev === 'RUNNING' && curr === 'PAUSE') {
-      notify(key, t('notify.print_paused') || 'Print paused', name);
+      notify(key, t('notify.print_paused', 'Print paused'), name);
       if (ns) ns.play('print_paused');
     }
 
@@ -151,7 +151,7 @@
       const alertType = lowTrays.some(t => t.pct <= 5) ? 'error' : 'warn';
       const el = document.createElement('div');
       el.className = 'global-alert-item global-alert-' + alertType + ' ga-filament';
-      el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>' + (t('ams.low_filament_alert') || 'Low filament') + ': ' + msg + '</span><span class="global-alert-item-dismiss" onclick="_filamentAlertDismissed=true;this.closest(\'.ga-filament\').remove();var b=document.getElementById(\'global-alert-bar\');if(b&&!b.children.length)b.style.display=\'none\'">×</span>';
+      el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>' + (t('ams.low_filament_alert', 'Low filament')) + ': ' + msg + '</span><span class="global-alert-item-dismiss" onclick="_filamentAlertDismissed=true;this.closest(\'.ga-filament\').remove();var b=document.getElementById(\'global-alert-bar\');if(b&&!b.children.length)b.style.display=\'none\'">×</span>';
       bar.appendChild(el);
       bar.style.display = 'flex';
     }

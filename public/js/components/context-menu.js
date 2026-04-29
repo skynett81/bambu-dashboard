@@ -103,19 +103,19 @@
     // Pause / Resume
     if (isRunning) {
       items.push({
-        label: typeof t === 'function' ? t('controls.pause') || 'Pause' : 'Pause',
+        label: typeof t === 'function' ? t('controls.pause', 'Pause') : 'Pause',
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>',
         onClick: () => sendCommand('pause', { printer_id: printerId })
       });
     } else if (isPaused) {
       items.push({
-        label: typeof t === 'function' ? t('controls.resume') || 'Resume' : 'Resume',
+        label: typeof t === 'function' ? t('controls.resume', 'Resume') : 'Resume',
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5,3 19,12 5,21"/></svg>',
         onClick: () => sendCommand('resume', { printer_id: printerId })
       });
     } else {
       items.push({
-        label: typeof t === 'function' ? t('controls.pause') || 'Pause' : 'Pause',
+        label: typeof t === 'function' ? t('controls.pause', 'Pause') : 'Pause',
         icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>',
         disabled: true
       });
@@ -123,7 +123,7 @@
 
     // Stop print
     items.push({
-      label: typeof t === 'function' ? t('controls.stop') || 'Stop print' : 'Stop print',
+      label: typeof t === 'function' ? t('controls.stop', 'Stop print') : 'Stop print',
       icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>',
       disabled: !isPrinting,
       danger: isPrinting,
@@ -138,7 +138,7 @@
 
     // Toggle light
     items.push({
-      label: typeof t === 'function' ? t('controls.light') || 'Toggle light' : 'Toggle light',
+      label: typeof t === 'function' ? t('controls.light', 'Toggle light') : 'Toggle light',
       icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>',
       onClick: () => {
         // Select printer first if needed, then toggle
@@ -151,7 +151,7 @@
 
     // Send G-code
     items.push({
-      label: typeof t === 'function' ? t('controls.send_gcode') || 'Send G-code...' : 'Send G-code...',
+      label: typeof t === 'function' ? t('controls.send_gcode', 'Send G-code...') : 'Send G-code...',
       icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16,18 22,12 16,6"/><polyline points="8,6 2,12 8,18"/></svg>',
       onClick: () => {
         if (state.getActivePrinterId() !== printerId) {
@@ -170,7 +170,7 @@
 
     // View controls
     items.push({
-      label: typeof t === 'function' ? t('nav.controls') || 'View controls' : 'View controls',
+      label: typeof t === 'function' ? t('nav.controls', 'View controls') : 'View controls',
       icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>',
       onClick: () => {
         if (state.getActivePrinterId() !== printerId) selectPrinter(printerId);
@@ -180,7 +180,7 @@
 
     // View diagnostics
     items.push({
-      label: typeof t === 'function' ? t('nav.diagnostics') || 'View diagnostics' : 'View diagnostics',
+      label: typeof t === 'function' ? t('nav.diagnostics', 'View diagnostics') : 'View diagnostics',
       icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
       onClick: () => {
         if (state.getActivePrinterId() !== printerId) selectPrinter(printerId);
@@ -190,7 +190,7 @@
 
     // View history
     items.push({
-      label: typeof t === 'function' ? t('nav.history') || 'View history' : 'View history',
+      label: typeof t === 'function' ? t('nav.history', 'View history') : 'View history',
       icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>',
       onClick: () => {
         if (state.getActivePrinterId() !== printerId) selectPrinter(printerId);
@@ -202,7 +202,7 @@
 
     // Edit printer
     items.push({
-      label: typeof t === 'function' ? t('settings.edit_printer') || 'Edit printer' : 'Edit printer',
+      label: typeof t === 'function' ? t('settings.edit_printer', 'Edit printer') : 'Edit printer',
       icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
       onClick: () => {
         if (typeof editPrinter === 'function') editPrinter(printerId);
@@ -211,7 +211,7 @@
 
     // Remove printer
     items.push({
-      label: typeof t === 'function' ? t('settings.remove_printer') || 'Remove printer' : 'Remove printer',
+      label: typeof t === 'function' ? t('settings.remove_printer', 'Remove printer') : 'Remove printer',
       icon: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
       danger: true,
       onClick: () => {

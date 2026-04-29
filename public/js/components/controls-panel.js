@@ -400,23 +400,23 @@
 
     // ===== CARD: Quick Commands =====
     const quickCmds = [
-      { label: t('controls.qc_home_all') || 'Home All', gcode: 'G28', group: 'motion' },
-      { label: t('controls.qc_home_x') || 'Home X', gcode: 'G28 X', group: 'motion' },
-      { label: t('controls.qc_home_y') || 'Home Y', gcode: 'G28 Y', group: 'motion' },
-      { label: t('controls.qc_home_z') || 'Home Z', gcode: 'G28 Z', group: 'motion' },
-      { label: t('controls.qc_auto_level') || 'Auto Level', gcode: 'G29', group: 'motion' },
-      { label: t('controls.qc_motors_off') || 'Motors Off', gcode: 'M18', group: 'motion' },
-      { label: t('controls.qc_fan_100') || 'Fan 100%', gcode: 'M106 S255', group: 'cooling' },
-      { label: t('controls.qc_fan_50') || 'Fan 50%', gcode: 'M106 S127', group: 'cooling' },
-      { label: t('controls.qc_fan_off') || 'Fan Off', gcode: 'M107', group: 'cooling' },
-      { label: t('controls.qc_pla_preheat') || 'PLA Preheat', gcode: 'M104 S200\\nM140 S60', group: 'temp' },
-      { label: t('controls.qc_petg_preheat') || 'PETG Preheat', gcode: 'M104 S240\\nM140 S80', group: 'temp' },
-      { label: t('controls.qc_abs_preheat') || 'ABS Preheat', gcode: 'M104 S250\\nM140 S100', group: 'temp' },
-      { label: t('controls.cooldown') || 'Cooldown', gcode: 'M104 S0\\nM140 S0', group: 'temp' },
+      { label: t('controls.qc_home_all', 'Home All'), gcode: 'G28', group: 'motion' },
+      { label: t('controls.qc_home_x', 'Home X'), gcode: 'G28 X', group: 'motion' },
+      { label: t('controls.qc_home_y', 'Home Y'), gcode: 'G28 Y', group: 'motion' },
+      { label: t('controls.qc_home_z', 'Home Z'), gcode: 'G28 Z', group: 'motion' },
+      { label: t('controls.qc_auto_level', 'Auto Level'), gcode: 'G29', group: 'motion' },
+      { label: t('controls.qc_motors_off', 'Motors Off'), gcode: 'M18', group: 'motion' },
+      { label: t('controls.qc_fan_100', 'Fan 100%'), gcode: 'M106 S255', group: 'cooling' },
+      { label: t('controls.qc_fan_50', 'Fan 50%'), gcode: 'M106 S127', group: 'cooling' },
+      { label: t('controls.qc_fan_off', 'Fan Off'), gcode: 'M107', group: 'cooling' },
+      { label: t('controls.qc_pla_preheat', 'PLA Preheat'), gcode: 'M104 S200\\nM140 S60', group: 'temp' },
+      { label: t('controls.qc_petg_preheat', 'PETG Preheat'), gcode: 'M104 S240\\nM140 S80', group: 'temp' },
+      { label: t('controls.qc_abs_preheat', 'ABS Preheat'), gcode: 'M104 S250\\nM140 S100', group: 'temp' },
+      { label: t('controls.cooldown', 'Cooldown'), gcode: 'M104 S0\\nM140 S0', group: 'temp' },
       { label: t('controls.extrude') + ' 10mm', gcode: 'G91\\nG1 E10 F300\\nG90', group: 'filament' },
       { label: t('controls.retract') + ' 10mm', gcode: 'G91\\nG1 E-10 F300\\nG90', group: 'filament' },
-      { label: t('controls.qc_report_temps') || 'Report Temps', gcode: 'M105', group: 'info' },
-      { label: t('controls.qc_report_pos') || 'Report Position', gcode: 'M114', group: 'info' },
+      { label: t('controls.qc_report_temps', 'Report Temps'), gcode: 'M105', group: 'info' },
+      { label: t('controls.qc_report_pos', 'Report Position'), gcode: 'M114', group: 'info' },
     ];
 
     const cmdGroups = {};
@@ -424,12 +424,12 @@
       if (!cmdGroups[cmd.group]) cmdGroups[cmd.group] = [];
       cmdGroups[cmd.group].push(cmd);
     }
-    const groupLabels = { motion: t('controls.motion'), cooling: t('controls.fans'), temp: t('controls.temperature'), filament: t('controls.filament_change'), info: t('controls.qc_info') || 'Info' };
+    const groupLabels = { motion: t('controls.motion'), cooling: t('controls.fans'), temp: t('controls.temperature'), filament: t('controls.filament_change'), info: t('controls.qc_info', 'Info') };
 
     html += `<div class="ctrl-card ctrl-area-quickcmds">
       <div class="ctrl-card-title">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
-        ${t('controls.quick_commands') || 'Quick Commands'}
+        ${t('controls.quick_commands', 'Quick Commands')}
       </div>
       <div class="ctrl-quickcmds-groups">`;
 

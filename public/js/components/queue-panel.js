@@ -40,7 +40,7 @@
           </div>
           <div class="q-hero-stat">
             <div class="q-hero-val" style="color:var(--accent-orange)">${pending}</div>
-            <div class="q-hero-label">${t('queue.pending') || 'Waiting'}</div>
+            <div class="q-hero-label">${t('queue.pending', 'Waiting')}</div>
           </div>
           <div class="q-hero-stat">
             <div class="q-hero-val">${total}</div>
@@ -65,7 +65,7 @@
       if (activeQueues.length === 0) return emptyState({
         icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>',
         title: t('queue.no_queues'),
-        desc: t('queue.no_queues_desc') || 'Create a print queue to manage and schedule your print jobs.'
+        desc: t('queue.no_queues_desc', 'Create a print queue to manage and schedule your print jobs.')
       });
 
       return `<div class="q-grid">${activeQueues.map(q => {
@@ -121,7 +121,7 @@
         return emptyState({
           icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>',
           title: t('queue.no_queues'),
-          desc: t('queue.no_queues_desc') || 'Create a queue first to change settings.'
+          desc: t('queue.no_queues_desc', 'Create a queue first to change settings.')
         });
       }
       return _queues.map(q => _renderQueueSettings(q)).join('');
@@ -143,7 +143,7 @@
         container.innerHTML = emptyState({
           icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
           title: t('queue.no_items'),
-          desc: t('queue.no_items_desc') || 'No items in this queue yet. Add files to start printing.'
+          desc: t('queue.no_items_desc', 'No items in this queue yet. Add files to start printing.')
         });
         return;
       }
@@ -209,7 +209,7 @@
         container.innerHTML = emptyState({
           icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
           title: t('queue.no_history'),
-          desc: t('queue.no_history_desc') || 'Completed queue events are shown here.'
+          desc: t('queue.no_history_desc', 'Completed queue events are shown here.')
         });
         return;
       }
@@ -362,8 +362,8 @@
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
         <strong style="font-size:0.95rem">${q.name}</strong>
         <div style="display:flex;gap:6px">
-          <button class="form-btn form-btn-sm" onclick="window._queueSaveSettings(${q.id})">${t('common.save') || 'Save'}</button>
-          <button class="form-btn form-btn-danger form-btn-sm" onclick="window._queueDelete(${q.id})">${t('common.delete') || 'Delete'}</button>
+          <button class="form-btn form-btn-sm" onclick="window._queueSaveSettings(${q.id})">${t('common.save', 'Save')}</button>
+          <button class="form-btn form-btn-danger form-btn-sm" onclick="window._queueDelete(${q.id})">${t('common.delete', 'Delete')}</button>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -420,18 +420,18 @@
     };
     try {
       await fetch(`/api/queue/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-      if (typeof showToast === 'function') showToast(t('common.saved') || 'Saved', 'success');
+      if (typeof showToast === 'function') showToast(t('common.saved', 'Saved'), 'success');
       _reload();
     } catch (e) {
-      if (typeof showToast === 'function') showToast(t('common.save_error') || 'Error saving', 'error');
+      if (typeof showToast === 'function') showToast(t('common.save_error', 'Error saving'), 'error');
     }
   };
 
   window._queueDelete = async function(id) {
     if (typeof confirmAction === 'function') {
-      confirmAction(t('queue.delete_confirm') || 'Delete this queue?', async () => {
+      confirmAction(t('queue.delete_confirm', 'Delete this queue?'), async () => {
         await fetch(`/api/queue/${id}`, { method: 'DELETE' });
-        if (typeof showToast === 'function') showToast(t('common.deleted') || 'Deleted', 'success');
+        if (typeof showToast === 'function') showToast(t('common.deleted', 'Deleted'), 'success');
         _reload();
       }, { danger: true });
     }
@@ -448,7 +448,7 @@
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `<div class="modal-content" style="max-width:500px">
-      <h3>${t('common.edit') || 'Edit'} — ${q.name}</h3>
+      <h3>${t('common.edit', 'Edit')} — ${q.name}</h3>
       <div class="form-group"><label class="form-label">${t('queue.name')}</label><input class="form-input" id="qe-name" value="${q.name || ''}" /></div>
       <div class="form-group"><label class="form-label">${t('queue.description')}</label><input class="form-input" id="qe-desc" value="${q.description || ''}" /></div>
       <div style="display:flex;gap:12px">
@@ -466,8 +466,8 @@
       </div>
       <div class="form-group"><label class="form-label">${t('queue.bed_clear_gcode')}</label><textarea class="form-input" id="qe-gcode" rows="3" placeholder="G28\nG1 Z50">${q.bed_clear_gcode || ''}</textarea></div>
       <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-        <button class="form-btn form-btn-secondary" onclick="this.closest('.modal-overlay').remove()">${t('common.cancel') || 'Cancel'}</button>
-        <button class="form-btn" onclick="window._queueDoEdit(${q.id})">${t('common.save') || 'Save'}</button>
+        <button class="form-btn form-btn-secondary" onclick="this.closest('.modal-overlay').remove()">${t('common.cancel', 'Cancel')}</button>
+        <button class="form-btn" onclick="window._queueDoEdit(${q.id})">${t('common.save', 'Save')}</button>
       </div>
     </div>`;
     document.body.appendChild(overlay);
@@ -487,7 +487,7 @@
     };
     await fetch(`/api/queue/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
     document.querySelector('.modal-overlay')?.remove();
-    if (typeof showToast === 'function') showToast(t('common.saved') || 'Saved', 'success');
+    if (typeof showToast === 'function') showToast(t('common.saved', 'Saved'), 'success');
     _reload();
   };
 
@@ -522,8 +522,8 @@
     if (!panel) return;
 
     const switcherHtml = '<div class="tabs" style="margin-bottom:12px">' +
-      '<button class="tab-btn active" onclick="openPanel(\'queue\')">' + (t('queue.title') || 'Print Queue') + '</button>' +
-      '<button class="tab-btn" onclick="openPanel(\'scheduler\')">' + (t('tabs.scheduler') || 'Scheduler') + '</button>' +
+      '<button class="tab-btn active" onclick="openPanel(\'queue\')">' + (t('queue.title', 'Print Queue')) + '</button>' +
+      '<button class="tab-btn" onclick="openPanel(\'scheduler\')">' + (t('tabs.scheduler', 'Scheduler')) + '</button>' +
       '</div>';
 
     // Hero
@@ -545,7 +545,7 @@
       <div class="q-section">
         <div class="q-section-title">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/></svg>
-          ${t('queue.mod_queue_list') || 'Queues'}
+          ${t('queue.mod_queue_list', 'Queues')}
         </div>
         <div class="q-section-body">${listContent}</div>
       </div>
@@ -554,7 +554,7 @@
         <div class="q-section-title q-section-toggle" id="q-toggle-settings">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform 0.2s;${_settingsOpen ? 'transform:rotate(90deg)' : ''}"><polyline points="9 18 15 12 9 6"/></svg>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          ${t('queue.tab_settings') || 'Settings'}
+          ${t('queue.tab_settings', 'Settings')}
         </div>
         <div class="q-section-body" id="q-settings-body" style="${_settingsOpen ? '' : 'display:none'}">
           ${BUILDERS['queue-settings']()}
@@ -567,11 +567,11 @@
       <div class="q-section">
         <div class="q-section-title">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          ${t('queue.mod_active_jobs') || 'Queue items'}
+          ${t('queue.mod_active_jobs', 'Queue items')}
         </div>
         <div class="q-section-body">${jobsContent || `<div class="q-empty-hint">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          <span>${t('queue.select_queue_hint') || 'Select a queue to see items'}</span>
+          <span>${t('queue.select_queue_hint', 'Select a queue to see items')}</span>
         </div>`}</div>
       </div>
 
@@ -579,7 +579,7 @@
         <div class="q-section-title q-section-toggle" id="q-toggle-history">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform 0.2s;${_historyOpen ? 'transform:rotate(90deg)' : ''}"><polyline points="9 18 15 12 9 6"/></svg>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          ${t('queue.tab_history') || 'History'}
+          ${t('queue.tab_history', 'History')}
         </div>
         <div class="q-section-body" id="q-history-body" style="${_historyOpen ? '' : 'display:none'}">
           <div id="queue-completed-container"><div class="stats-empty">${t('queue.loading')}</div></div>

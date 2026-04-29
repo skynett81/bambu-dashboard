@@ -99,7 +99,7 @@
   window._logViewerTogglePause = function() {
     _paused = !_paused;
     const btn = document.getElementById('log-pause-btn');
-    if (btn) btn.textContent = _paused ? (t('controls.resume') || 'Fortsett') : (t('controls.pause') || 'Pause');
+    if (btn) btn.textContent = _paused ? (t('controls.resume', 'Fortsett')) : (t('controls.pause', 'Pause'));
     if (!_paused) {
       _renderAll();
     }
@@ -125,7 +125,7 @@
     const container = document.getElementById('activity-log-content');
     if (!container) return;
     if (_activityData !== null && !forceRefresh) { _renderActivity(); return; }
-    container.innerHTML = '<div class="text-muted" style="padding:1rem">' + (t('common.loading') || 'Loading...') + '</div>';
+    container.innerHTML = '<div class="text-muted" style="padding:1rem">' + (t('common.loading', 'Loading...')) + '</div>';
     fetch(`/api/activity-log?limit=200&printer_id=${window.printerState?.getActivePrinterId?.() || ''}`)
       .then(function(res) { return res.json(); })
       .then(function(data) {
@@ -135,7 +135,7 @@
       })
       .catch(function(e) {
         console.error('[activity-log] fetch failed:', e);
-        container.innerHTML = '<div class="text-muted" style="padding:1rem;color:var(--accent-red)">' + (t('errors.load_failed') || 'Failed to load') + ': ' + (e.message || '') + '</div>';
+        container.innerHTML = '<div class="text-muted" style="padding:1rem;color:var(--accent-red)">' + (t('errors.load_failed', 'Failed to load')) + ': ' + (e.message || '') + '</div>';
       });
   }
 
@@ -149,7 +149,7 @@
     else if (_activityFilter === 'other') filtered = filtered.filter(e => !['print','error','maintenance'].includes(e.type));
 
     if (!filtered.length) {
-      container.innerHTML = '<div class="text-muted" style="padding:1rem;text-align:center">' + (t('errors.no_activity') || 'No activity yet') + '</div>';
+      container.innerHTML = '<div class="text-muted" style="padding:1rem;text-align:center">' + (t('errors.no_activity', 'No activity yet')) + '</div>';
       return;
     }
 
@@ -200,14 +200,14 @@
     // Tab bar
     body.innerHTML = `
       <div class="tabs" style="margin-bottom:10px">
-        <button class="tab-btn ${_activeLogTab === 'realtime' ? 'active' : ''}" onclick="window._switchLogTab('realtime')">${t('logs.realtime') || 'Live'}</button>
-        <button class="tab-btn ${_activeLogTab === 'activity' ? 'active' : ''}" onclick="window._switchLogTab('activity')">${t('errors.tab_activity') || 'Activity'}</button>
+        <button class="tab-btn ${_activeLogTab === 'realtime' ? 'active' : ''}" onclick="window._switchLogTab('realtime')">${t('logs.realtime', 'Live')}</button>
+        <button class="tab-btn ${_activeLogTab === 'activity' ? 'active' : ''}" onclick="window._switchLogTab('activity')">${t('errors.tab_activity', 'Activity')}</button>
       </div>
       <div id="log-tab-realtime" style="display:${_activeLogTab === 'realtime' ? '' : 'none'}">
         <div class="log-viewer">
           <div class="log-toolbar">
-            <button class="form-btn form-btn-secondary form-btn-sm" onclick="_logViewerClear()">${t('logs.clear') || 'Clear'}</button>
-            <button class="form-btn form-btn-secondary form-btn-sm" id="log-pause-btn" onclick="_logViewerTogglePause()">${t('controls.pause') || 'Pause'}</button>
+            <button class="form-btn form-btn-secondary form-btn-sm" onclick="_logViewerClear()">${t('logs.clear', 'Clear')}</button>
+            <button class="form-btn form-btn-secondary form-btn-sm" id="log-pause-btn" onclick="_logViewerTogglePause()">${t('controls.pause', 'Pause')}</button>
             <label style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:var(--text-secondary)">
               <input type="checkbox" id="log-filter-info" checked> <span style="color:#00d4ff">info</span>
             </label>
@@ -217,19 +217,19 @@
             <label style="display:flex;align-items:center;gap:3px;font-size:0.75rem;color:var(--text-secondary)">
               <input type="checkbox" id="log-filter-error" checked> <span style="color:#ff4444">error</span>
             </label>
-            <input type="text" class="log-filter-input" placeholder="${t('logs.filter_prefix') || 'Filter prefix...'}" id="log-prefix-filter">
+            <input type="text" class="log-filter-input" placeholder="${t('logs.filter_prefix', 'Filter prefix...')}" id="log-prefix-filter">
           </div>
           <div class="log-output" id="log-output"></div>
         </div>
       </div>
       <div id="log-tab-activity" style="display:${_activeLogTab === 'activity' ? '' : 'none'}">
         <div style="display:flex;gap:4px;margin-bottom:8px;flex-wrap:wrap">
-          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'all' ? 'active' : ''}" data-filter="all" onclick="_logFilterActivity('all')">${t('errors.filter_all') || 'All'}</button>
-          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'prints' ? 'active' : ''}" data-filter="prints" onclick="_logFilterActivity('prints')">${t('errors.filter_prints') || 'Prints'}</button>
-          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'errors' ? 'active' : ''}" data-filter="errors" onclick="_logFilterActivity('errors')">${t('errors.filter_errors') || 'Errors'}</button>
-          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'maintenance' ? 'active' : ''}" data-filter="maintenance" onclick="_logFilterActivity('maintenance')">${t('errors.filter_maintenance') || 'Maintenance'}</button>
-          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'other' ? 'active' : ''}" data-filter="other" onclick="_logFilterActivity('other')">${t('errors.filter_other') || 'Other'}</button>
-          <button class="form-btn form-btn-sm" style="margin-left:auto" onclick="_loadActivity(true)">${t('common.refresh') || 'Refresh'}</button>
+          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'all' ? 'active' : ''}" data-filter="all" onclick="_logFilterActivity('all')">${t('errors.filter_all', 'All')}</button>
+          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'prints' ? 'active' : ''}" data-filter="prints" onclick="_logFilterActivity('prints')">${t('errors.filter_prints', 'Prints')}</button>
+          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'errors' ? 'active' : ''}" data-filter="errors" onclick="_logFilterActivity('errors')">${t('errors.filter_errors', 'Errors')}</button>
+          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'maintenance' ? 'active' : ''}" data-filter="maintenance" onclick="_logFilterActivity('maintenance')">${t('errors.filter_maintenance', 'Maintenance')}</button>
+          <button class="form-btn form-btn-sm activity-filter-btn ${_activityFilter === 'other' ? 'active' : ''}" data-filter="other" onclick="_logFilterActivity('other')">${t('errors.filter_other', 'Other')}</button>
+          <button class="form-btn form-btn-sm" style="margin-left:auto" onclick="_loadActivity(true)">${t('common.refresh', 'Refresh')}</button>
         </div>
         <div id="activity-log-content" style="max-height:calc(100vh - 250px);overflow-y:auto"></div>
       </div>

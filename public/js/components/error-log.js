@@ -56,7 +56,7 @@
   }
 
   function stateLabel(state) {
-    const map = { RUNNING: t('state.running') || 'Printing', IDLE: t('state.idle') || 'Idle', PAUSE: t('state.pause') || 'Paused', FINISH: t('state.finish') || 'Completed', FAILED: t('state.failed') || 'Failed', PREPARE: t('state.prepare') || 'Preparing' };
+    const map = { RUNNING: t('state.running', 'Printing'), IDLE: t('state.idle', 'Idle'), PAUSE: t('state.pause', 'Paused'), FINISH: t('state.finish', 'Completed'), FAILED: t('state.failed', 'Failed'), PREPARE: t('state.prepare', 'Preparing') };
     return map[state] || state || '--';
   }
 
@@ -312,7 +312,7 @@
     if (!filtered.length) {
       container.innerHTML = emptyState({
         icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
-        title: t('errors.no_activity') || 'No activity found',
+        title: t('errors.no_activity', 'No activity found'),
         desc: ''
       });
       return;
@@ -515,7 +515,7 @@
       container.innerHTML = emptyState({
         icon: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
         title: t('errors.no_match'),
-        desc: t('errors.no_match_desc') || 'No errors found matching your filters. That\'s a good thing!'
+        desc: t('errors.no_match_desc', "No errors found matching your filters. That's a good thing!")
       });
       return;
     }

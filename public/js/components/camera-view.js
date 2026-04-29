@@ -48,7 +48,7 @@
     if (overlay) return;
     overlay = document.createElement('div');
     overlay.className = 'camera-reconnect-overlay';
-    overlay.innerHTML = `<div class="camera-reconnect-pulse"></div><span>${t('camera.reconnecting') || 'Reconnecting...'}</span>`;
+    overlay.innerHTML = `<div class="camera-reconnect-pulse"></div><span>${t('camera.reconnecting', 'Reconnecting...')}</span>`;
     container.appendChild(overlay);
   }
 
@@ -538,8 +538,8 @@
       if (copyBtn) {
         copyBtn.onclick = () => {
           navigator.clipboard.writeText(streamUrl).then(() => {
-            copyBtn.textContent = t('camera.copied') || 'Kopiert!';
-            setTimeout(() => { copyBtn.textContent = t('camera.copy') || 'Kopier'; }, 1500);
+            copyBtn.textContent = t('camera.copied', 'Kopiert!');
+            setTimeout(() => { copyBtn.textContent = t('camera.copy', 'Kopier'); }, 1500);
           });
         };
       }

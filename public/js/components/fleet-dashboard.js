@@ -100,7 +100,7 @@
   };
 
   window._fleetPauseAll = function() {
-    confirmAction(t('fleet.pause_all_confirm') || 'Pause all running printers?', () => {
+    confirmAction(t('fleet.pause_all_confirm', 'Pause all running printers?'), () => {
       const ids = window.printerState.getPrinterIds();
       for (const id of ids) {
         const s = window.printerState.printers[id] || {};
@@ -109,12 +109,12 @@
           sendCommand('pause', { printer_id: id });
         }
       }
-      showToast(t('fleet.pausing_all') || 'Pausing all printers...', 'info');
+      showToast(t('fleet.pausing_all', 'Pausing all printers...'), 'info');
     });
   };
 
   window._fleetResumeAll = function() {
-    confirmAction(t('fleet.resume_all_confirm') || 'Resume all paused printers?', () => {
+    confirmAction(t('fleet.resume_all_confirm', 'Resume all paused printers?'), () => {
       const ids = window.printerState.getPrinterIds();
       for (const id of ids) {
         const s = window.printerState.printers[id] || {};
@@ -123,7 +123,7 @@
           sendCommand('resume', { printer_id: id });
         }
       }
-      showToast(t('fleet.resuming_all') || 'Resuming all printers...', 'info');
+      showToast(t('fleet.resuming_all', 'Resuming all printers...'), 'info');
     });
   };
 
@@ -195,14 +195,14 @@
     </style>
     <div class="fleet-summary" id="fleet-summary"></div>
     <div style="display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap">
-      <span style="font-size:0.75rem;color:var(--text-muted)">${t('fleet.sort_by') || 'Sorter:'}</span>
-      <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_sortFleet('name')">${t('fleet.sort_name') || 'Name'}</button>
-      <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_sortFleet('status')">${t('fleet.sort_status') || 'Status'}</button>
-      <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_sortFleet('progress')">${t('fleet.sort_progress') || 'Fremdrift'}</button>
+      <span style="font-size:0.75rem;color:var(--text-muted)">${t('fleet.sort_by', 'Sorter:')}</span>
+      <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_sortFleet('name')">${t('fleet.sort_name', 'Name')}</button>
+      <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_sortFleet('status')">${t('fleet.sort_status', 'Status')}</button>
+      <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_sortFleet('progress')">${t('fleet.sort_progress', 'Fremdrift')}</button>
       <div class="fleet-layout-group">${_layoutButtons()}</div>
       <div style="display:flex;gap:8px;margin-left:auto">
-        <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_fleetPauseAll()" title="${t('fleet.pause_all_tip') || 'Pause alle som printer'}" data-bs-toggle="tooltip">${t('fleet.pause_all') || 'Pause alle'}</button>
-        <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_fleetResumeAll()" title="${t('fleet.resume_all_tip') || 'Fortsett alle pausede'}" data-bs-toggle="tooltip">${t('fleet.resume_all') || 'Fortsett alle'}</button>
+        <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_fleetPauseAll()" title="${t('fleet.pause_all_tip', 'Pause alle som printer')}" data-bs-toggle="tooltip">${t('fleet.pause_all', 'Pause alle')}</button>
+        <button class="form-btn form-btn-secondary" style="padding:3px 8px;font-size:0.7rem" onclick="_fleetResumeAll()" title="${t('fleet.resume_all_tip', 'Fortsett alle pausede')}" data-bs-toggle="tooltip">${t('fleet.resume_all', 'Fortsett alle')}</button>
       </div>
     </div>
     <div class="fleet-grid" id="fleet-grid"></div>`;
@@ -301,7 +301,7 @@
     const isMaintenance = meta.maintenance_mode === 1 || meta.maintenance_mode === true;
     const isPrinting = !isMaintenance && ['RUNNING', 'PREPARE', 'PAUSE'].includes(gcodeState);
     const badgeCls = isMaintenance ? 'fleet-badge-maintenance' : `fleet-badge-${gcodeState.toLowerCase()}`;
-    const badgeLabel = isMaintenance ? (t('fleet.maintenance') || 'Maintenance') : _stateLabel(gcodeState);
+    const badgeLabel = isMaintenance ? (t('fleet.maintenance', 'Maintenance')) : _stateLabel(gcodeState);
     const pct = isPrinting ? (parseInt(printState.mc_percent || ps.mc_percent) || 0) : 0;
     const remaining = isPrinting ? (parseInt(printState.mc_remaining_time || ps.mc_remaining_time) || 0) : 0;
     const file = isPrinting ? (printState.subtask_name || ps.subtask_name || '') : '';
