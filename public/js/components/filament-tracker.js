@@ -1191,7 +1191,11 @@
     const statusText = isEmpty ? t('filament.status_empty', 'Empty') : isLow ? t('filament.status_low', 'Low') : `${pct}%`;
     const tempInfo = (s.nozzle_temp_min && s.nozzle_temp_max) ? `🔥${s.nozzle_temp_min}–${s.nozzle_temp_max}°C` : '';
 
-    return `<div class="spool-vcard" onclick="window._showSpoolDetail(${s.id})">
+    return `<div class="spool-vcard" data-spool-id="${s.id}" draggable="true"
+      ondragstart="event.dataTransfer.setData('text/plain','${s.id}');this.style.opacity='0.5'"
+      ondragend="this.style.opacity=''"
+      title="${t('filament.card_drag_hint', 'Click to view · drag to assign to a slot or location')}"
+      onclick="window._showSpoolDetail(${s.id})">
       <div class="spool-vcard-thumb">
         ${_spoolSvg(s.color_hex, s.multi_color_hexes, s.multi_color_direction, pct, s.id)}
         <span class="spool-vcard-badge">${esc(s.material || '--')}</span>
@@ -1573,7 +1577,11 @@
       const color = hexToRgb(s.color_hex);
       const name = _cleanProfileName(s);
       const favIcon = s.is_favorite ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="#e53935" stroke="#e53935" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>' : '';
-      h += `<div class="inv-list-row" data-spool-id="${s.id}" onclick="if(!event.target.closest('button,input,a'))window._showSpoolDetail(${s.id})" style="cursor:pointer">
+      h += `<div class="inv-list-row" data-spool-id="${s.id}" draggable="true"
+        ondragstart="event.dataTransfer.setData('text/plain','${s.id}');this.style.opacity='0.5'"
+        ondragend="this.style.opacity=''"
+        title="${t('filament.card_drag_hint', 'Click to view · drag to assign to a slot or location')}"
+        onclick="if(!event.target.closest('button,input,a'))window._showSpoolDetail(${s.id})" style="cursor:pointer">
         ${miniSpool(color, 14, pct)}
         <span class="inv-list-name">${favIcon} <strong>${esc(name)}</strong> <span class="text-muted">${esc(s.vendor_name || '')}</span></span>
         <span class="inv-list-material">${s.material || '--'}</span>
