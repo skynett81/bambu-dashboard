@@ -2144,18 +2144,24 @@
       }
 
       // ── Tab panels ──
+      // Stats / Storage / Database aggregates should reflect the full
+      // inventory regardless of which printer the user has selected on
+      // the Inventory tab — otherwise Stats reads as "missing filament"
+      // any time the printer filter is set to a single printer.
+      const TABS_USE_FULL_INVENTORY = new Set(['stats', 'storage', 'database', 'forecast']);
       for (const [tabId, cfg] of _getSortedTabs()) {
         if (cfg.external) {
           // External tabs (multicolor) — render empty container, loaded after render
           html += `<div class="tab-panel filament-tab-panel" id="filament-tab-${tabId}" style="display:${tabId === _activeTab ? 'block' : 'none'}"></div>`;
           continue;
         }
+        const tabSpools = TABS_USE_FULL_INVENTORY.has(tabId) ? _spools : filteredSpools;
         const order = getOrder(tabId);
         html += `<div class="tab-panel filament-tab-panel stats-tab-panel ${tabId === _activeTab ? 'active' : ''}" id="filament-tab-${tabId}" style="display:${tabId === _activeTab ? 'grid' : 'none'}">`;
         for (const modId of order) {
           const builder = BUILDERS[modId];
           if (!builder) continue;
-          const content = builder(filteredSpools);
+          const content = builder(tabSpools);
           if (!content) continue;
           const isFull = (MODULE_SIZE[modId] || 'full') === 'full';
           html += `<div class="stats-module${isFull ? ' stats-module-full' : ''}" data-module-id="${modId}">`;
