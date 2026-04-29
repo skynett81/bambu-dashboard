@@ -1625,21 +1625,51 @@
     const name = printerName(printerId);
     const slotLabelKind = _slotLabel(model);
     let inner = '';
+    // Pull the printer's live state once so we can subtract running-print
+    // consumption from each slot's remaining weight (mirrors what the Bambu
+    // AMS panel already does via window.realtimeFilament).
+    const liveData = window.printerState?.printers?.[printerId];
+    const livePrint = liveData?.print || liveData;
+    const isPrinting = (livePrint?.gcode_state || liveData?._sm_state_label) &&
+      ['RUNNING', 'PAUSE', 'PRINTING', 'Printing'].some(s =>
+        String(livePrint?.gcode_state || '').toUpperCase() === s.toUpperCase()
+        || String(liveData?._sm_state_label || '').toUpperCase() === s.toUpperCase());
+
     for (let i = 0; i < count; i++) {
       const linked = _spools.find(sp => sp.printer_id === printerId && sp.ams_tray === i && !sp.archived);
       const slotName = _slotName(model, i);
       const isEmpty = linked && (linked.remaining_weight_g != null && linked.remaining_weight_g <= 5);
       if (linked && !isEmpty) {
         const color = hexToRgbColor(linked.color_hex);
+        // Subtract running-print consumption so the slot reflects what's
+        // actually left right now, not what was left when the print started.
+        let remG = linked.remaining_weight_g || 0;
+        let usedThisPrintG = 0;
+        if (isPrinting && typeof window.realtimeFilament === 'function') {
+          const rt = window.realtimeFilament({
+            remainG: linked.remaining_weight_g,
+            totalG: linked.initial_weight_g,
+            isActive: true,
+            data: livePrint,
+            toolIndex: i,
+          });
+          if (rt && rt.currentG != null) {
+            remG = rt.currentG;
+            usedThisPrintG = Math.max(0, (linked.remaining_weight_g || 0) - rt.currentG);
+          }
+        }
         const remPct = linked.initial_weight_g > 0
-          ? Math.max(0, Math.round((linked.remaining_weight_g / linked.initial_weight_g) * 100)) : 0;
+          ? Math.max(0, Math.round((remG / linked.initial_weight_g) * 100)) : 0;
         const remColor = remPct < 20 ? 'var(--accent-orange)' : 'var(--accent-green)';
         const profileText = esc(_cleanProfileName(linked) || linked.profile_name || '');
+        const liveBadge = usedThisPrintG > 1
+          ? `<span style="color:var(--accent-orange);font-size:0.6rem">−${usedThisPrintG.toFixed(1)}g live</span>`
+          : '';
         inner += `<div class="fil-ams-tray" onclick="showEditSpoolForm(${linked.id})" style="cursor:pointer" title="${t('settings.edit')}">
           <div class="fil-ams-color">${miniSpool(color, 18, remPct)}</div>
           <div class="fil-ams-info">
             <span class="fil-ams-type">${profileText}</span>
-            <span class="fil-ams-linked text-muted" style="font-size:0.65rem">${Math.round(linked.remaining_weight_g)}g / ${Math.round(linked.initial_weight_g)}g</span>
+            <span class="fil-ams-linked text-muted" style="font-size:0.65rem">${Math.round(remG)}g / ${Math.round(linked.initial_weight_g)}g ${liveBadge}</span>
             <div class="fil-ams-remain-row">
               <div class="fil-ams-remain-bar"><div class="fil-ams-remain-fill" style="width:${remPct}%;background:${remColor}"></div></div>
               <span class="fil-ams-remain-pct">${remPct}%</span>
