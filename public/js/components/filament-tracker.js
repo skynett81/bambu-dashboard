@@ -2819,9 +2819,12 @@
   function _renderLocationsDnd(spools) {
     const active = (spools || []).filter(s => !s.archived);
     if (active.length === 0 && _locations.length === 0) return '';
-    let h = `<div class="ctrl-card-title" style="margin-top:16px">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
-      ${t('filament.locations_dnd_title')}
+    let h = `<div class="ctrl-card-title" style="margin-top:16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+      <span style="display:flex;align-items:center;gap:6px">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        ${t('filament.locations_dnd_title', 'Drag spools between locations')}
+      </span>
+      <span class="text-muted" style="font-size:0.75rem;font-weight:normal">${t('filament.dnd_hint', '💡 Drag any spool tile onto a location card to move it there')}</span>
     </div>`;
     const byLoc = { '': [] };
     for (const l of _locations) byLoc[l.name] = [];
@@ -2832,14 +2835,28 @@
     }
     h += '<div class="inv-dnd-columns">';
     for (const [locName, locSpools] of Object.entries(byLoc)) {
-      const label = locName || t('filament.unassigned');
-      h += `<div class="inv-dnd-column" data-location="${esc(locName)}" ondragover="event.preventDefault();this.classList.add('inv-dnd-over')" ondragleave="this.classList.remove('inv-dnd-over')" ondrop="window._invDropSpool(event,this)">
-        <div class="inv-dnd-column-header">${esc(label)} <span class="text-muted">(${locSpools.length})</span></div>`;
+      const isUnassigned = !locName;
+      const label = locName || t('filament.unassigned', 'Without location');
+      const headerStyle = isUnassigned ? 'color:var(--accent-orange)' : '';
+      const colStyle = isUnassigned ? 'border-color:var(--accent-orange);border-style:solid' : '';
+      h += `<div class="inv-dnd-column" data-location="${esc(locName)}" style="${colStyle}"
+        ondragover="event.preventDefault();this.classList.add('inv-dnd-over')"
+        ondragleave="this.classList.remove('inv-dnd-over')"
+        ondrop="window._invDropSpool(event,this)">
+        <div class="inv-dnd-column-header" style="${headerStyle}">${isUnassigned ? '⚠ ' : '📍 '}${esc(label)} <span class="text-muted">(${locSpools.length})</span></div>`;
+      if (locSpools.length === 0) {
+        h += `<div style="padding:18px 8px;text-align:center;color:var(--text-muted);font-size:0.75rem;border:1px dashed var(--border-color);border-radius:5px;margin-top:4px">${t('filament.dnd_drop_here', 'Drop spools here')}</div>`;
+      }
       for (const s of locSpools) {
         const color = hexToRgb(s.color_hex);
-        h += `<div class="inv-dnd-spool" draggable="true" data-spool-id="${s.id}" ondragstart="event.dataTransfer.setData('text/plain','${s.id}')">
-          ${miniSpool(color, 10)}
-          <span>${esc(s.profile_name || s.material || '--')} · ${Math.round(s.remaining_weight_g)}g</span>
+        const profileText = esc(_cleanProfileName(s) || s.profile_name || s.material || '--');
+        h += `<div class="inv-dnd-spool" draggable="true" data-spool-id="${s.id}"
+          ondragstart="event.dataTransfer.setData('text/plain','${s.id}');this.style.opacity='0.5'"
+          ondragend="this.style.opacity=''"
+          title="${t('filament.dnd_drag_hint', 'Drag onto another location to move')}">
+          ${miniSpool(color, 12)}
+          <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${profileText}</span>
+          <span class="text-muted" style="font-size:0.7rem;flex-shrink:0">${Math.round(s.remaining_weight_g)}g</span>
         </div>`;
       }
       h += '</div>';
