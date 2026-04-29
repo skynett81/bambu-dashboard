@@ -114,6 +114,102 @@ export function getSpool(id) {
   return row;
 }
 
+// ── NFC slot sync (Snapmaker U1 — auto-attach NFC-detected spools) ──
+
+/**
+ * Sync a single NFC-detected channel to the spools table.
+ *  - If the channel reports vendor "NONE" or weight 0, unlink any spool
+ *    currently attached to that slot so the UI shows the slot as Empty.
+ *  - Else, find a non-archived spool whose lot_number matches the NFC SKU
+ *    and printer/slot is unassigned (or already this slot). Link it.
+ *  - If no such spool exists, auto-create one with the NFC profile so the
+ *    user sees the freshly inserted reel without having to type anything.
+ *
+ * Errors are logged and swallowed — telemetry must never crash on slot
+ * mapping issues.
+ *
+ * @param {string} printerId
+ * @param {number} channel  0-based extruder index (T0..T3 on U1)
+ * @param {object} nfc      NFC info as parsed by moonraker-client
+ */
+export function syncNfcSlot(printerId, channel, nfc) {
+  if (!printerId || channel == null) return;
+  const db = getDb();
+  try {
+    const isEmpty = !nfc || !nfc.vendor || nfc.vendor === 'NONE' || (nfc.weight ?? 0) <= 0;
+    const linked = db.prepare(
+      'SELECT * FROM spools WHERE printer_id = ? AND ams_unit = 0 AND ams_tray = ? AND archived = 0'
+    ).get(printerId, channel);
+
+    if (isEmpty) {
+      // Slot is physically empty — unlink whatever spool was there so the
+      // UI shows the slot in the empty state. We unlink rather than
+      // archive so the user can still see it under "All".
+      if (linked) {
+        db.prepare('UPDATE spools SET printer_id = NULL, ams_unit = NULL, ams_tray = NULL WHERE id = ?').run(linked.id);
+        try { addSpoolEvent(linked.id, 'unlinked', { reason: 'nfc_empty', channel }, null); } catch { /* ignore */ }
+      }
+      return;
+    }
+
+    const sku = nfc.sku ? String(nfc.sku) : null;
+    if (!sku) return; // can't reliably match without SKU
+
+    // If the linked spool already matches by SKU/lot, nothing to do.
+    if (linked && linked.lot_number === sku) return;
+
+    // Try to find an existing non-archived spool with the same SKU that
+    // isn't currently attached anywhere else (or is already at this slot).
+    const candidate = db.prepare(`SELECT * FROM spools
+      WHERE lot_number = ? AND archived = 0
+        AND (printer_id IS NULL OR (printer_id = ? AND ams_tray = ?))
+      ORDER BY id DESC LIMIT 1`).get(sku, printerId, channel);
+
+    if (candidate) {
+      // Detach whatever was on this slot first to avoid the unique-slot
+      // constraint, then attach the candidate.
+      if (linked && linked.id !== candidate.id) {
+        db.prepare('UPDATE spools SET printer_id = NULL, ams_unit = NULL, ams_tray = NULL WHERE id = ?').run(linked.id);
+      }
+      db.prepare('UPDATE spools SET printer_id = ?, ams_unit = 0, ams_tray = ? WHERE id = ?')
+        .run(printerId, channel, candidate.id);
+      try { addSpoolEvent(candidate.id, 'linked', { source: 'nfc', channel, sku }, null); } catch { /* ignore */ }
+      return;
+    }
+
+    // Nothing to attach — auto-create a new spool from the NFC profile and
+    // link it. Resolve filament_profile_id from a vendor+material+color
+    // match if possible; otherwise leave null and rely on inline metadata.
+    const matName = nfc.type || 'PLA';
+    const colorHex = nfc.color || null;
+    const vendor = nfc.vendor || 'Snapmaker';
+    let profileId = null;
+    try {
+      const prof = db.prepare(`SELECT fp.id FROM filament_profiles fp
+        LEFT JOIN vendors v ON v.id = fp.vendor_id
+        WHERE fp.material = ? AND (fp.color_hex = ? OR ? IS NULL)
+          AND (v.name = ? OR v.name IS NULL)
+        LIMIT 1`).get(matName, colorHex, colorHex, vendor);
+      if (prof) profileId = prof.id;
+    } catch { /* missing tables are fine */ }
+
+    const initial = nfc.weight ? Math.round(nfc.weight) : 1000;
+    if (linked) {
+      db.prepare('UPDATE spools SET printer_id = NULL, ams_unit = NULL, ams_tray = NULL WHERE id = ?').run(linked.id);
+    }
+    const shortId = _generateShortId();
+    const ins = db.prepare(`INSERT INTO spools
+      (filament_profile_id, remaining_weight_g, used_weight_g, initial_weight_g,
+       lot_number, printer_id, ams_unit, ams_tray, comment, short_id)
+      VALUES (?, ?, 0, ?, ?, ?, 0, ?, ?, ?)`).run(
+      profileId, initial, initial, sku, printerId, channel,
+      `Auto-detected via NFC — ${vendor} ${matName} ${nfc.subType || ''}`.trim(), shortId);
+    try { addSpoolEvent(Number(ins.lastInsertRowid), 'created', { source: 'nfc', channel, sku }, null); } catch { /* ignore */ }
+  } catch (e) {
+    log.warn(`NFC slot sync failed (printer=${printerId}, ch=${channel}): ${e.message}`);
+  }
+}
+
 export function addSpool(s) {
   const db = getDb();
   const shortId = _generateShortId();

@@ -705,25 +705,15 @@ export class MoonrakerClient {
           mfDate: ch.MF_DATE || null,
           cardUid: ch.CARD_UID || null,
         };
-        // Persist to DB cache + sync to main filament inventory (fire-and-forget)
+        // Persist to NFC cache (always) + sync slot mapping to spools table
+        // (fire-and-forget — slot sync is best-effort, never blocks).
         try {
           import('./db/snapmaker.js').then(({ upsertNfcFilament }) => {
             upsertNfcFilament(this._printerId, idx, data);
           }).catch(() => {});
 
-          // Auto-sync NFC spool to filament inventory
-          import('./db/index.js').then(({ getDb }) => {
-            const db = getDb();
-            const sku = data.sku || `nfc-${this._printerId}-ch${idx}`;
-            const existing = db.prepare('SELECT id FROM filament WHERE sku = ?').get(sku);
-            if (!existing) {
-              db.prepare(`INSERT INTO filament (name, material, vendor, color, color_hex, weight_total_g, sku, source, printer_id)
-                VALUES (?, ?, ?, ?, ?, ?, ?, 'nfc', ?)`).run(
-                `${data.vendor || 'Snapmaker'} ${data.type || 'PLA'} ${data.subType || ''}`.trim(),
-                data.type || 'PLA', data.vendor || 'Snapmaker', data.subType || '',
-                data.color || '#000000', data.weight || 1000, sku, this._printerId
-              );
-            }
+          import('./db/spools.js').then(({ syncNfcSlot }) => {
+            syncNfcSlot(this._printerId, idx, data);
           }).catch(() => {});
         } catch { /* ignore */ }
         return data;

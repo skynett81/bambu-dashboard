@@ -1617,7 +1617,8 @@
     for (let i = 0; i < count; i++) {
       const linked = _spools.find(sp => sp.printer_id === printerId && sp.ams_tray === i && !sp.archived);
       const slotName = _slotName(model, i);
-      if (linked) {
+      const isEmpty = linked && (linked.remaining_weight_g != null && linked.remaining_weight_g <= 5);
+      if (linked && !isEmpty) {
         const color = hexToRgbColor(linked.color_hex);
         const remPct = linked.initial_weight_g > 0
           ? Math.max(0, Math.round((linked.remaining_weight_g / linked.initial_weight_g) * 100)) : 0;
@@ -1632,6 +1633,15 @@
               <div class="fil-ams-remain-bar"><div class="fil-ams-remain-fill" style="width:${remPct}%;background:${remColor}"></div></div>
               <span class="fil-ams-remain-pct">${remPct}%</span>
             </div>
+          </div>
+          <span class="fil-ams-slot">${esc(slotName)}</span>
+        </div>`;
+      } else if (isEmpty) {
+        inner += `<div class="fil-ams-tray" style="cursor:pointer;border-color:var(--accent-orange)" onclick="window._replaceEmptySlot(${linked.id}, '${esc(printerId)}', ${i})" title="${t('filament.replace_empty') || 'Spool is empty — click to replace'}">
+          <div class="fil-ams-color">${miniSpool(hexToRgbColor(linked.color_hex), 18, 0)}</div>
+          <div class="fil-ams-info">
+            <span class="fil-ams-type" style="color:var(--accent-orange)">${t('common.empty') || 'Empty'}</span>
+            <span class="fil-ams-linked text-muted" style="font-size:0.65rem">${esc(_cleanProfileName(linked) || linked.profile_name || '')} · ${t('filament.replace_empty_short') || 'click to replace'}</span>
           </div>
           <span class="fil-ams-slot">${esc(slotName)}</span>
         </div>`;
@@ -1694,6 +1704,20 @@
     }
     document.body.appendChild(menu);
     setTimeout(() => document.addEventListener('click', () => menu.remove(), { once: true }), 10);
+  };
+
+  // Archive the empty spool currently in a slot, then open the picker so
+  // the user can attach the new reel they just inserted.
+  window._replaceEmptySlot = async function(emptySpoolId, printerId, trayIndex) {
+    try {
+      await fetch(`/api/inventory/spools/${emptySpoolId}/archive`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ archived: true }),
+      });
+    } catch { /* continue — picker still works */ }
+    await new Promise(r => setTimeout(r, 50));
+    await loadFilament();
+    window._assignSlot(printerId, trayIndex);
   };
 
   // Bulk-archive every spool whose remaining weight is at most 5g. Useful
