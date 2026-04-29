@@ -2388,7 +2388,10 @@
               </div>
             </div>
             <div class="form-group" style="margin-bottom:0">
-              <label class="form-label">${t('filament.location')}</label>
+              <label class="form-label" style="display:flex;justify-content:space-between;align-items:center">
+                <span>${t('filament.location')}</span>
+                <a href="#filament/manage" onclick="setTimeout(()=>window._switchManageSubTab&&window._switchManageSubTab('locations'),100)" style="font-size:0.7rem;color:var(--accent-blue);text-decoration:none" title="${t('filament.manage_locations_hint') || 'Add or edit storage locations'}">${t('filament.manage_locations') || '+ Manage'}</a>
+              </label>
               <select class="form-input" id="sp-location-${id}">${buildLocationSelect(data?.location)}</select>
             </div>
             <div class="form-group" style="margin-bottom:0">

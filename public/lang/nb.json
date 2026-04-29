@@ -717,6 +717,8 @@
     "price_per_spool_hint": "Pris per spole — gjelder hver enkelt spole når antall > 1",
     "add_another": "Legg til en til",
     "add_another_hint": "Registrer en ny spole av samme filament — fyller inn profil, farge, vekt og pris automatisk",
+    "manage_locations": "+ Administrer",
+    "manage_locations_hint": "Legg til eller rediger lagringsplasser",
     "bulk_added": "{{count}} spoler lagt til",
     "view_grid": "Rutenett",
     "view_list": "Listevisning",

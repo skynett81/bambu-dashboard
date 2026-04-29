@@ -712,6 +712,8 @@
     "price_per_spool_hint": "Cost per spool — applied to every reel when quantity > 1",
     "add_another": "Add another",
     "add_another_hint": "Register another reel of this same filament — pre-fills profile, colour, weight and price",
+    "manage_locations": "+ Manage",
+    "manage_locations_hint": "Add or edit storage locations",
     "bulk_added": "{{count}} spools added",
     "view_grid": "Grid view",
     "view_list": "List view",
