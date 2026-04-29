@@ -5124,15 +5124,46 @@
       const totalRemaining = allSpools.reduce((s, d) => s + d.remaining_weight_g, 0);
       const totalDailyUsage = data.by_material?.reduce((s, m) => s + (m.avg_daily_g || 0), 0) || 0;
       const needsReorder = active.filter(s => s.needs_reorder).length;
-      const closestEmpty = active.reduce((min, s) => s.days_until_empty != null && s.days_until_empty < min ? s.days_until_empty : min, 999);
+      // 'Next empty' is the soonest a single spool runs out — useful to
+      // know which reel to swap, but alarmist on its own when there are
+      // 4 more spools of the same colour sitting in stock. Pair it with
+      // a 'Total runway' that divides total stock by current daily rate
+      // so the user can see 'one spool dies in 1d, but you have 43d of
+      // PLA total'. Both numbers tell a different story.
+      const closestEmpty = active.reduce((min, s) => s.days_until_empty != null && s.days_until_empty < min ? s.days_until_empty : min, Infinity);
+      const totalRunwayDays = totalDailyUsage > 0 ? Math.round(totalRemaining / totalDailyUsage) : null;
+      // Per-material runway — flag any material whose total stock won't
+      // last long enough at current burn rate.
+      const materialRunways = (data.by_material || [])
+        .filter(m => m.avg_daily_g > 0 && m.in_stock_g > 0)
+        .map(m => ({ material: m.material, days: Math.round(m.in_stock_g / m.avg_daily_g) }))
+        .sort((a, b) => a.days - b.days);
+      const tightestMaterial = materialRunways[0] || null;
 
       let h = '<div class="fil-hero-grid" style="margin-bottom:12px">';
       h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>', Math.round(totalDailyUsage) + 'g/d', t('filament.daily_usage') || 'Daglig forbruk', '#1279ff');
-      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', closestEmpty < 999 ? closestEmpty + 'd' : '--', t('filament.next_empty') || 'Tidligst tom', closestEmpty <= 7 ? '#f85149' : closestEmpty <= 14 ? '#f0883e' : '#00e676');
+      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>', totalRunwayDays != null ? totalRunwayDays + 'd' : '--', t('filament.total_runway', 'Total runway'), totalRunwayDays != null && totalRunwayDays <= 7 ? '#f85149' : totalRunwayDays != null && totalRunwayDays <= 30 ? '#f0883e' : '#00e676');
       h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 118 2.83"/><path d="M22 12A10 10 0 0012 2v10z"/></svg>', Math.round(totalRemaining) + 'g', t('filament.total_remaining') || 'Totalt igjen', '#00e676');
+      h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>', closestEmpty < Infinity ? closestEmpty + 'd' : '--', t('filament.first_spool_empty', 'First spool empty'), closestEmpty <= 7 ? '#f85149' : closestEmpty <= 14 ? '#f0883e' : '#00e676');
       h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>', needsReorder, t('filament.needs_reorder_count') || 'Trenger bestilling', needsReorder > 0 ? '#f0883e' : '#8b949e');
       h += heroCard('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>', allSpools.length + (active.length < allSpools.length ? ` <span style="font-size:0.65rem;opacity:0.7">(${active.length} ${t('filament.in_use', 'used')})</span>` : ''), t('filament.spools_in_stock', 'Spools in stock'), '#a371f7');
       h += '</div>';
+
+      // Per-material runway summary so the user sees 'PLA: 12d, PETG:
+      // 87d, TPU: ∞' instead of just one alarmist number.
+      if (materialRunways.length > 0) {
+        h += `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;font-size:0.78rem">
+          <span class="text-muted">${t('filament.runway_by_material', 'Runway by material')}:</span>`;
+        for (const r of materialRunways) {
+          const matColor = r.material === 'PLA' ? '#4ade80' : r.material === 'PETG' ? '#60a5fa' : r.material === 'ABS' ? '#f97316' : r.material === 'TPU' ? '#c084fc' : '#8b949e';
+          const accent = r.days <= 7 ? '#f85149' : r.days <= 30 ? '#f0883e' : 'var(--text-primary)';
+          h += `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--bg-secondary);padding:3px 8px;border-radius:12px;border:1px solid var(--border-color)">
+            <strong style="color:${matColor}">${esc(r.material)}</strong>
+            <span style="color:${accent};font-weight:600">${r.days}d</span>
+          </span>`;
+        }
+        h += '</div>';
+      }
 
       // Material usage summary cards
       if (data.by_material && data.by_material.length > 0) {
