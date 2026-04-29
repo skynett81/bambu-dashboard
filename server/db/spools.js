@@ -155,29 +155,31 @@ export function syncNfcSlot(printerId, channel, nfc) {
     const sku = nfc.sku ? String(nfc.sku) : null;
     if (!sku) return; // can't reliably match without SKU
 
-    // If the linked spool already matches by SKU/lot, nothing to do.
-    if (linked && linked.lot_number === sku) return;
+    // Slot already has a spool — keep it (the user picked it manually or
+    // it was created earlier with a real filament_profile_id and usage
+    // history). Only stamp the NFC SKU into lot_number so the next sync
+    // recognises it and we don't replace the user's data.
+    if (linked) {
+      if (linked.lot_number !== sku) {
+        db.prepare('UPDATE spools SET lot_number = ? WHERE id = ?').run(sku, linked.id);
+      }
+      return;
+    }
 
-    // Try to find an existing non-archived spool with the same SKU that
-    // isn't currently attached anywhere else (or is already at this slot).
+    // No spool currently in this slot — try to find an existing non-archived
+    // spool with the same SKU that isn't attached anywhere.
     const candidate = db.prepare(`SELECT * FROM spools
-      WHERE lot_number = ? AND archived = 0
-        AND (printer_id IS NULL OR (printer_id = ? AND ams_tray = ?))
-      ORDER BY id DESC LIMIT 1`).get(sku, printerId, channel);
+      WHERE lot_number = ? AND archived = 0 AND printer_id IS NULL
+      ORDER BY id DESC LIMIT 1`).get(sku);
 
     if (candidate) {
-      // Detach whatever was on this slot first to avoid the unique-slot
-      // constraint, then attach the candidate.
-      if (linked && linked.id !== candidate.id) {
-        db.prepare('UPDATE spools SET printer_id = NULL, ams_unit = NULL, ams_tray = NULL WHERE id = ?').run(linked.id);
-      }
       db.prepare('UPDATE spools SET printer_id = ?, ams_unit = 0, ams_tray = ? WHERE id = ?')
         .run(printerId, channel, candidate.id);
       try { addSpoolEvent(candidate.id, 'linked', { source: 'nfc', channel, sku }, null); } catch { /* ignore */ }
       return;
     }
 
-    // Nothing to attach — auto-create a new spool from the NFC profile and
+    // Nothing matches — auto-create a new spool from the NFC profile and
     // link it. Resolve filament_profile_id from a vendor+material+color
     // match if possible; otherwise leave null and rely on inline metadata.
     const matName = nfc.type || 'PLA';
@@ -194,9 +196,6 @@ export function syncNfcSlot(printerId, channel, nfc) {
     } catch { /* missing tables are fine */ }
 
     const initial = nfc.weight ? Math.round(nfc.weight) : 1000;
-    if (linked) {
-      db.prepare('UPDATE spools SET printer_id = NULL, ams_unit = NULL, ams_tray = NULL WHERE id = ?').run(linked.id);
-    }
     const shortId = _generateShortId();
     const ins = db.prepare(`INSERT INTO spools
       (filament_profile_id, remaining_weight_g, used_weight_g, initial_weight_g,
