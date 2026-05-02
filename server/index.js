@@ -708,13 +708,22 @@ startFilamentDbScheduler();
 // background probe so the user sees a live "service detected" status
 // in the UI without paying for the probe on every request.
 try {
-  const { startBackgroundProbe, configure } = await import('./forge-slicer-client.js');
+  const { startBackgroundProbe, configure, onProbeChange } = await import('./forge-slicer-client.js');
   if (config?.forge_slicer) configure(config.forge_slicer);
   startBackgroundProbe();
   // Mirror the fork's profile catalog into our local slicer_profiles
   // table every 5 minutes so users see the same list in both UIs.
   const { startAutoSync } = await import('./forge-slicer-sync.js');
   startAutoSync();
+  // Fire user notifications on transitions so noticeable outages show
+  // up in Telegram/Discord/etc. rather than only in the header pill.
+  onProbeChange(({ ok, info, error, prevOk }) => {
+    if (prevOk && !ok) {
+      notifier.notify('forge_slicer_disconnected', { error: error || 'unknown' }).catch(() => {});
+    } else if (!prevOk && ok) {
+      notifier.notify('forge_slicer_reconnected', { version: info?.version || '?' }).catch(() => {});
+    }
+  });
 } catch { /* optional service — don't crash if module fails to load */ }
 
 // Spoolman health monitor — alerts via notifications when Spoolman goes offline/online

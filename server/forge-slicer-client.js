@@ -28,6 +28,25 @@ const PROBE_TIMEOUT_MS = 1500;
 let _config = { url: DEFAULT_URL, token: DEFAULT_TOKEN, enabled: true };
 let _lastProbe = { ok: false, info: null, at: 0, error: null };
 let _probeTimer = null;
+const _probeListeners = new Set();
+
+/**
+ * Register a callback fired on every probe completion. The callback
+ * receives ({ ok, info, error, prevOk }) so listeners can act on
+ * transitions (e.g. notify on disconnect/reconnect). Returns an
+ * unsubscribe function.
+ */
+export function onProbeChange(cb) {
+  if (typeof cb !== 'function') return () => {};
+  _probeListeners.add(cb);
+  return () => _probeListeners.delete(cb);
+}
+
+function _emitProbe(prevOk, next) {
+  for (const cb of _probeListeners) {
+    try { cb({ ...next, prevOk }); } catch (e) { log.warn(`probe listener threw: ${e.message}`); }
+  }
+}
 
 export function configure({ url, token, enabled } = {}) {
   if (typeof url === 'string' && url) _config.url = url;
@@ -112,12 +131,15 @@ export async function probe({ force = false } = {}) {
   if (!force && now - _lastProbe.at < PROBE_INTERVAL_MS && _lastProbe.at > 0) {
     return { ok: _lastProbe.ok, info: _lastProbe.info, error: _lastProbe.error };
   }
+  const prevOk = _lastProbe.ok;
   try {
     const info = await _request({ path: '/api/health', timeoutMs: PROBE_TIMEOUT_MS });
     _lastProbe = { ok: !!info.ok, info, at: now, error: null };
+    _emitProbe(prevOk, _lastProbe);
     return { ok: !!info.ok, info, error: null };
   } catch (e) {
     _lastProbe = { ok: false, info: null, at: now, error: e.message };
+    _emitProbe(prevOk, _lastProbe);
     return { ok: false, info: null, error: e.message };
   }
 }

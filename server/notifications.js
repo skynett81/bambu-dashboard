@@ -752,6 +752,18 @@ export class NotificationManager {
           message: `All items in queue "${data.queueName}" have been printed.`
         };
 
+      case 'forge_slicer_disconnected':
+        return {
+          title: 'Forge Slicer offline',
+          message: `The OrcaSlicer fork in service mode stopped responding — slicing now falls back to the CLI bridge or native engine.${data.error ? '\nError: ' + data.error : ''}`
+        };
+
+      case 'forge_slicer_reconnected':
+        return {
+          title: 'Forge Slicer back online',
+          message: `The OrcaSlicer fork is reachable again${data.version ? ' (v' + data.version + ')' : ''}. Slicing will resume through the service.`
+        };
+
       default:
         return { title: `3DPrintForge: ${eventType}`, message: JSON.stringify(data) };
     }

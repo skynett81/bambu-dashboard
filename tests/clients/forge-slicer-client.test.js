@@ -242,4 +242,19 @@ describe('forge-slicer-client', () => {
     assert.equal(p.error, 'disabled');
     configure({ enabled: true });  // restore
   });
+
+  it('onProbeChange() fires on every probe with prevOk and current state', async () => {
+    const { onProbeChange } = await import('../../server/forge-slicer-client.js');
+    const events = [];
+    const unsub = onProbeChange((e) => events.push({ ok: e.ok, prevOk: e.prevOk }));
+    await probe({ force: true });  // success
+    await probe({ force: true });  // success again — prevOk=true, ok=true
+    unsub();
+    await probe({ force: true });  // unsubscribed: must NOT add another event
+    assert.equal(events.length, 2, 'listener should fire exactly twice while subscribed');
+    assert.equal(events[0].ok, true);
+    // After two consecutive successful probes, the second sees prevOk=true
+    assert.equal(events[1].ok, true);
+    assert.equal(events[1].prevOk, true);
+  });
 });
