@@ -3665,5 +3665,33 @@
     "clear_all": "Tøm",
     "clear_all_tooltip": "Fjern alle varsler",
     "no_notifications": "Ingen varsler ennå"
+  },
+  "forge_slicer": {
+    "title": "Forge Slicer-tjeneste",
+    "subtitle": "Koble 3DPrintForge til din skynett81/OrcaSlicer-fork i tjenestemodus",
+    "unknown": "Ukjent",
+    "connected": "Tilkoblet",
+    "unreachable": "Ikke tilgjengelig",
+    "version": "Versjon",
+    "upstream": "Oppstrøms",
+    "config_dir": "Konfig-mappe",
+    "service_url": "Tjeneste-URL",
+    "token": "Token (valgfritt)",
+    "token_placeholder": "Bearer-token hvis ekstern",
+    "enabled": "Aktiver Forge Slicer",
+    "save": "Lagre",
+    "test_connection": "Test tilkobling",
+    "open_repo": "Åpne fork →",
+    "fallback_active": "Fallback i bruk",
+    "fallback_explainer": "Slicing går for øyeblikket gjennom CLI-broen eller den native motoren. Start fork-build med --rest-port 8765 for å aktivere denne tjenesten.",
+    "connected_toast": "Forge Slicer tilkoblet ✓",
+    "saved_unreachable": "Innstillinger lagret — tjenesten er fortsatt utilgjengelig",
+    "testing": "Tester tilkobling…",
+    "unreachable_toast": "Utilgjengelig: ",
+    "connected_short": "Forge Slicer",
+    "offline_short": "Forge Slicer (offline)",
+    "not_running": "Tjenesten kjører ikke — fallback i bruk",
+    "reconnected_toast": "🔧 Forge Slicer tilkoblet igjen",
+    "disconnected_toast": "🔧 Forge Slicer frakoblet — fallback i bruk"
   }
 }

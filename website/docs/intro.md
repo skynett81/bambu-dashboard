@@ -45,6 +45,10 @@ description: En kraftig, selvdriftet dashboard for alle dine 3D-printere
 - **Engelsk UI** — hele applikasjonen pa engelsk, dokumentasjon tilgjengelig pa norsk og engelsk
 - **Selvdriftet** — ingen sky-avhengighet, dine data pa din maskin
 
+### Nytt i v1.1.21
+
+- **Forge Slicer-integrasjon** — koble 3DPrintForge til [skynett81/OrcaSlicer](https://github.com/skynett81/OrcaSlicer) i tjenestemodus med live-progresjon over SSE, Slice & Send i ett klikk, profilkatalog-synkronisering hvert 5. minutt og statuspille i headeren. Se [Forge Slicer-oppsett](./forge-slicer-setup.md) og [REST-kontrakten](./FORGE_SLICER_API.md).
+
 ### Nytt i v1.1.20
 
 - **Egen sliser** — pure-JS slicing engine fra bunnen av (mesh→polygon→infill→G-code), kjører helt uten eksterne avhengigheter

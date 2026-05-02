@@ -1,0 +1,28 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --omit=optional --ignore-scripts
+      - name: Run tests
+        run: npm test
+      - name: Validate language files
+        run: |
+          node -e "JSON.parse(require('fs').readFileSync('public/lang/en.json', 'utf8')); console.log('en.json OK')"
+          node -e "JSON.parse(require('fs').readFileSync('public/lang/nb.json', 'utf8')); console.log('nb.json OK')"
+      - name: Validate Pterodactyl egg
+        run: node -e "JSON.parse(require('fs').readFileSync('egg-3dprintforge.json', 'utf8')); console.log('egg JSON OK')"
