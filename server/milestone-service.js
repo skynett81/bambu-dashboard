@@ -279,10 +279,13 @@ export function getMilestones(printerId) {
 }
 
 /**
- * Get milestone file path for serving
+ * Get milestone file path for serving.
+ * Path-traversal hardened: rejects any resolved path that escapes MILESTONE_DIR.
  */
 export function getMilestoneFile(printerId, filename) {
   const filepath = join(MILESTONE_DIR, printerId, filename);
+  const dirBoundary = MILESTONE_DIR.endsWith('/') ? MILESTONE_DIR : MILESTONE_DIR + '/';
+  if (!filepath.startsWith(dirBoundary)) return null;
   return existsSync(filepath) ? filepath : null;
 }
 
@@ -336,9 +339,12 @@ export function getArchivedMilestones(printHistoryId) {
 }
 
 /**
- * Get archived milestone file for serving
+ * Get archived milestone file for serving.
+ * Path-traversal hardened: rejects any resolved path that escapes MILESTONE_DIR.
  */
 export function getArchivedMilestoneFile(printHistoryId, filename) {
   const filepath = join(MILESTONE_DIR, 'archive', String(printHistoryId), filename);
+  const dirBoundary = MILESTONE_DIR.endsWith('/') ? MILESTONE_DIR : MILESTONE_DIR + '/';
+  if (!filepath.startsWith(dirBoundary)) return null;
   return existsSync(filepath) ? filepath : null;
 }

@@ -23,7 +23,7 @@
 
 import { spawn } from 'node:child_process';
 import { existsSync, readdirSync, statSync, readFileSync, mkdirSync, rmSync, mkdtempSync, writeFileSync, unlinkSync } from 'node:fs';
-import { join, basename } from 'node:path';
+import { join, basename, resolve as pathResolve } from 'node:path';
 import { homedir, tmpdir } from 'node:os';
 
 import { createLogger } from './logger.js';
@@ -186,14 +186,33 @@ export async function sliceModel(args) {
   mkdirSync(outDir, { recursive: true });
   writeFileSync(inputPath, args.modelBuffer);
 
+  // Validate that user-supplied profile paths stay inside the slicer's
+  // own profile directory — without this, a print-permission user could
+  // point the slicer at /etc/passwd or another sensitive file and have
+  // the slicer's logs echo back its contents.
+  const profileRoot = slicer.profileDir;
+  const _safeProfile = (p) => {
+    if (!p) return null;
+    const resolved = pathResolve(p);
+    const boundary = profileRoot.endsWith('/') ? profileRoot : profileRoot + '/';
+    if (!resolved.startsWith(boundary)) {
+      log.warn(`rejecting profile path outside profileDir: ${p}`);
+      return null;
+    }
+    return resolved;
+  };
+  const printerProf = _safeProfile(args.printerProfile);
+  const processProf = _safeProfile(args.processProfile);
+  const filamentProf = _safeProfile(args.filamentProfile);
+
   // Build CLI args. Most slicers take --slice 0 (all plates), then load
   // settings/filament/process JSONs via --load-settings.
   const settingsParts = [];
-  if (args.printerProfile) settingsParts.push(args.printerProfile);
-  if (args.processProfile) settingsParts.push(args.processProfile);
+  if (printerProf) settingsParts.push(printerProf);
+  if (processProf) settingsParts.push(processProf);
   const cliArgs = ['--slice', '0', '--outputdir', outDir];
   if (settingsParts.length) cliArgs.push('--load-settings', settingsParts.join(';'));
-  if (args.filamentProfile) cliArgs.push('--load-filaments', args.filamentProfile);
+  if (filamentProf) cliArgs.push('--load-filaments', filamentProf);
   cliArgs.push(inputPath);
 
   // Resolve actual command + args based on slicer kind.

@@ -3089,11 +3089,7 @@ export async function handleApiRequest(req, res) {
     // ---- Notifications ----
     if (method === 'GET' && path === '/api/notifications/config') {
       const nc = structuredClone(config.notifications || {});
-      // Mask sensitive fields
-      if (nc.channels?.telegram?.botToken) nc.channels.telegram.botToken = '***';
-      if (nc.channels?.email?.pass) nc.channels.email.pass = '***';
-      if (nc.channels?.ntfy?.token && nc.channels.ntfy.token) nc.channels.ntfy.token = '***';
-      if (nc.channels?.pushover?.apiToken) nc.channels.pushover.apiToken = '***';
+      _maskNotificationSecrets(nc);
       return sendJson(res, nc);
     }
 
@@ -3105,6 +3101,10 @@ export async function handleApiRequest(req, res) {
         if (body.channels?.email?.pass === '***') body.channels.email.pass = current.channels?.email?.pass || '';
         if (body.channels?.ntfy?.token === '***') body.channels.ntfy.token = current.channels?.ntfy?.token || '';
         if (body.channels?.pushover?.apiToken === '***') body.channels.pushover.apiToken = current.channels?.pushover?.apiToken || '';
+        if (body.channels?.discord?.webhookUrl === '***') body.channels.discord.webhookUrl = current.channels?.discord?.webhookUrl || '';
+        if (body.channels?.sms?.authToken === '***') body.channels.sms.authToken = current.channels?.sms?.authToken || '';
+        if (body.channels?.sms?.accountSid === '***') body.channels.sms.accountSid = current.channels?.sms?.accountSid || '';
+        if (body.channels?.webhook?.url === '***') body.channels.webhook.url = current.channels?.webhook?.url || '';
 
         saveConfig({ notifications: body });
         config.notifications = body;
@@ -4520,6 +4520,12 @@ export async function handleApiRequest(req, res) {
     if (method === 'GET' && path === '/api/spoolman/test') {
       const testUrl = url.searchParams.get('url') || config.spoolman?.url;
       if (!testUrl) return sendJson(res, { error: 'URL required' }, 400);
+      // SSRF guard: block link-local (cloud metadata at 169.254.169.254)
+      // and non-HTTP schemes. Self-hosted Spoolman commonly runs on
+      // localhost or RFC1918, so those are still allowed.
+      if (_isDangerousUrl(testUrl)) {
+        return sendJson(res, { error: 'URL scheme or target not allowed' }, 400);
+      }
       try {
         const resp = await fetch(`${testUrl}/api/v1/info`, { signal: AbortSignal.timeout(5000) });
         const data = await resp.json();
@@ -9563,7 +9569,12 @@ export async function handleApiRequest(req, res) {
         _meta: { type: '3dprintforge-settings', version: 1, exported_at: new Date().toISOString() },
         widget_layouts: getWidgetLayouts(),
         custom_fields: getCustomFieldDefs(null),
-        notification_config: (() => { try { return config.notifications || {}; } catch { return {}; } })(),
+        notification_config: (() => {
+          try {
+            const nc = structuredClone(config.notifications || {});
+            return _maskNotificationSecrets(nc);
+          } catch { return {}; }
+        })(),
         inventory_settings: getAllInventorySettings(),
       };
       res.writeHead(200, {
@@ -13820,6 +13831,42 @@ function _verifyTotp(secret, code, window = 1) {
     if (String(otp).padStart(6, '0') === String(code).padStart(6, '0')) return true;
   }
   return false;
+}
+
+// ---- Notification secret masking ----
+// Mutates the notifications config in place, replacing every credential
+// with '***'. Used by GET /api/notifications/config and the settings export.
+function _maskNotificationSecrets(nc) {
+  if (!nc?.channels) return nc;
+  const ch = nc.channels;
+  if (ch.telegram?.botToken) ch.telegram.botToken = '***';
+  if (ch.email?.pass) ch.email.pass = '***';
+  if (ch.ntfy?.token) ch.ntfy.token = '***';
+  if (ch.pushover?.apiToken) ch.pushover.apiToken = '***';
+  if (ch.discord?.webhookUrl) ch.discord.webhookUrl = '***';
+  if (ch.sms?.authToken) ch.sms.authToken = '***';
+  if (ch.sms?.accountSid) ch.sms.accountSid = '***';
+  if (ch.webhook?.url) ch.webhook.url = '***';
+  return nc;
+}
+
+// ---- SSRF Guard for trusted-LAN integrations ----
+// Less strict than _isPrivateUrl: still blocks link-local (cloud metadata
+// at 169.254.169.254) and non-HTTP schemes, but allows localhost and
+// RFC1918 since those are legitimate self-hosted setups (Spoolman,
+// Moonraker, etc. run there by default).
+function _isDangerousUrl(urlStr) {
+  try {
+    const u = new URL(urlStr);
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return true;
+    const h = u.hostname;
+    const p = h.split('.').map(Number);
+    if (p.length === 4 && p.every(n => !isNaN(n))) {
+      // 169.254.0.0/16 — link-local incl. AWS/GCP/Azure metadata service
+      if (p[0] === 169 && p[1] === 254) return true;
+    }
+    return false;
+  } catch { return true; }
 }
 
 // ---- SSRF Guard ----
