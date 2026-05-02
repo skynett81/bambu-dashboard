@@ -1106,6 +1106,18 @@
 
       let h = '<div style="display:flex;flex-direction:column;gap:14px">';
 
+      // Forge Slicer (top — runtime configurable, most actionable)
+      h += `<div data-fsl-container>
+        <div class="text-muted" style="padding:14px;font-size:0.85rem">Loading Forge Slicer settings…</div>
+      </div>`;
+      // Defer mount until after the panel HTML is in the DOM.
+      setTimeout(() => {
+        const c = document.querySelector('#system-sub-content [data-fsl-container]');
+        if (c && typeof window.renderForgeSlicerSettings === 'function') {
+          window.renderForgeSlicerSettings(c);
+        }
+      }, 0);
+
       // Printer Connections
       h += `<div class="settings-card">
         <div class="card-title" style="gap:8px">

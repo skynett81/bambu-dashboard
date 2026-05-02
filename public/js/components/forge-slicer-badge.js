@@ -14,6 +14,7 @@
   'use strict';
 
   let _timer = null;
+  let _wasOk = null;       // previous state — to detect transitions
 
   function _render(container, status) {
     const probe = status?.probe;
@@ -45,6 +46,22 @@
       if (!res.ok) return;
       const status = await res.json();
       _render(container, status);
+
+      // Health-state transition toasts. Only fire when the user
+      // explicitly enabled the integration — silent otherwise so
+      // non-fork users don't see noise.
+      const isOk = !!status?.probe?.ok;
+      const enabled = status?.config?.enabled !== false;
+      if (enabled && _wasOk !== null && _wasOk !== isOk) {
+        if (typeof showToast === 'function') {
+          if (isOk) {
+            showToast(t('forge_slicer.reconnected_toast', '🔧 Forge Slicer reconnected'), 'success', 3000);
+          } else {
+            showToast(t('forge_slicer.disconnected_toast', '🔧 Forge Slicer disconnected — fallback in use'), 'warning', 4000);
+          }
+        }
+      }
+      _wasOk = isOk;
     } catch { /* ignore — keep last state */ }
   }
 

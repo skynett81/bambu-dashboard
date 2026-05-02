@@ -312,6 +312,28 @@ export async function sliceStream({ modelBuffer, modelFilename = 'model.stl', pr
 }
 
 /**
+ * Cancel an in-progress slice job. Returns true if the cancel was
+ * accepted (typically when SSE is mid-flight).
+ */
+export async function cancelJob(jobId) {
+  try {
+    await _request({ path: `/api/jobs/${encodeURIComponent(jobId)}/cancel`, method: 'POST', timeoutMs: 5000 });
+    return true;
+  } catch (e) {
+    if (e.status === 404) return false;
+    throw e;
+  }
+}
+
+/**
+ * List currently queued/running slice jobs. Useful for a Slicer
+ * Studio queue view that shows what the fork is busy with.
+ */
+export async function listJobs() {
+  return _request({ path: '/api/jobs' });
+}
+
+/**
  * Get a PNG thumbnail for a model.
  */
 export async function preview({ modelBuffer, modelFilename = 'model.stl', width = 512, height = 512 }) {

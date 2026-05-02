@@ -7136,6 +7136,70 @@ export async function handleApiRequest(req, res) {
       }
     }
 
+    // POST /api/slicer/forge/jobs/:id/cancel — interrupt an in-flight slice
+    const forgeCancelMatch = path.match(/^\/api\/slicer\/forge\/jobs\/([^/]+)\/cancel$/);
+    if (forgeCancelMatch && method === 'POST') {
+      try {
+        const { cancelJob } = await import('./forge-slicer-client.js');
+        const ok = await cancelJob(forgeCancelMatch[1]);
+        return sendJson(res, { ok }, ok ? 200 : 404);
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+    }
+
+    if (method === 'GET' && path === '/api/slicer/forge/jobs') {
+      try {
+        const { listJobs } = await import('./forge-slicer-client.js');
+        return sendJson(res, await listJobs());
+      } catch (e) { return sendJson(res, { error: e.message }, 500); }
+    }
+
+    // POST /api/slicer/forge/slice-and-send — slice via the fork, then
+    // upload the produced gcode to a connected printer via the existing
+    // entry.client.uploadFile pipeline (Bambu FTPS / Moonraker /
+    // PrusaLink / OctoPrint). Pass print=1 to also start the print.
+    if (method === 'POST' && path === '/api/slicer/forge/slice-and-send') {
+      try {
+        const { probe, slice, fetchGcode } = await import('./forge-slicer-client.js');
+        const p = await probe();
+        if (!p.ok) return sendJson(res, { error: 'forge slicer not reachable', probe: p }, 503);
+        const targetPrinter = url.searchParams.get('target_printer');
+        if (!targetPrinter) return sendJson(res, { error: 'target_printer query param required' }, 400);
+        const entry = _printerManager?.printers?.get(targetPrinter);
+        if (!entry) return sendJson(res, { error: 'target printer not found' }, 404);
+        if (typeof entry.client?.uploadFile !== 'function') {
+          return sendJson(res, { error: `printer '${targetPrinter}' does not support file upload` }, 400);
+        }
+        const chunks = [];
+        for await (const chunk of req) chunks.push(chunk);
+        const buf = Buffer.concat(chunks);
+        const filIds = url.searchParams.get('filament_ids');
+        const sliceResult = await slice({
+          modelBuffer: buf,
+          modelFilename: req.headers['x-filename'] || 'model.stl',
+          printerId: url.searchParams.get('printer_id'),
+          filamentIds: filIds ? JSON.parse(filIds) : undefined,
+          processId: url.searchParams.get('process_id'),
+        });
+        const gcodeBuf = await fetchGcode(sliceResult.job_id);
+        const gcodeName = (req.headers['x-filename'] || 'model.stl').replace(/\.[^.]+$/, '') + '.gcode';
+        const startPrint = url.searchParams.get('print') === '1' && typeof entry.client.uploadAndPrint === 'function';
+        const upload = startPrint
+          ? await entry.client.uploadAndPrint(gcodeName, gcodeBuf)
+          : await entry.client.uploadFile(gcodeName, gcodeBuf);
+        return sendJson(res, {
+          ok: true,
+          slice: sliceResult,
+          gcodeFilename: gcodeName,
+          gcodeSize: gcodeBuf.length,
+          uploaded: true,
+          printing: startPrint,
+          upload,
+        });
+      } catch (e) {
+        return sendJson(res, { error: e.message, code: e.code || 'ERR_SLICE_FAILED' }, e.status || 500);
+      }
+    }
+
     // POST /api/slicer/forge/preview — multipart in, PNG out
     if (method === 'POST' && path === '/api/slicer/forge/preview') {
       try {
