@@ -4,6 +4,56 @@ All notable changes to 3DPrintForge.
 
 ---
 
+## v1.1.21 (in progress) — Forge Slicer fork integration
+
+Adds the 3DPrintForge half of an integration with the
+[skynett81/OrcaSlicer](https://github.com/skynett81/OrcaSlicer) fork.
+The fork hosts a small REST service (cpp-httplib) that 3DPrintForge
+talks to instead of spawning the slicer CLI per request. Profiles
+mirror automatically; slicing routes through the fork when available
+and falls back to the CLI bridge / native engine when not.
+
+- **API contract** (`website/docs/FORGE_SLICER_API.md`) — every
+  endpoint specified, 5-phase rollout, error codes, auth model
+- **Node REST client** (`server/forge-slicer-client.js`) — probe
+  with 60 s cache, profile listing, multipart slice, gcode download,
+  PNG preview, optional bearer token, env overrides
+- **Slicer resolver** (`server/slicer-resolver.js`) — single entry
+  point that picks the best backend in priority order (forge → bridge
+  → native). All slicer call sites get the same return shape regardless
+- **Profile sync** (`server/forge-slicer-sync.js`) — pulls the fork's
+  catalog into local `slicer_profiles` table every 5 min, archives
+  vanished entries, idempotent on (kind, name)
+- **9 REST endpoints** under `/api/slicer/forge/*`: status, configure,
+  profiles, slice, jobs/:id/gcode, preview, sync, sync/status
+- **Persistent settings** — configure endpoint writes to `config.json`
+  via `saveConfig` so URL/token/enabled survive restart
+- **UI status card** auto-mounted at the top of Slicer Studio
+  (`forge-slicer-settings.js`) with Save / Test connection / Open fork
+  buttons, version + upstream + config-dir display, fallback explainer
+- **Header badge** (`forge-slicer-badge.js`) — small status pill in the
+  global header so users see service state from any page
+- **Slicer Studio "Slice" button** prefers Forge when available,
+  shows "Sliced via Forge Slicer" in the success banner; falls back to
+  native if the service is down
+- **Mock server** (`tools/forge-slicer-mock.js`) — full Node
+  implementation of the contract for fork-side dev. Returns plausible
+  profiles + slice payloads so 3DPrintForge integration can be tested
+  end-to-end without waiting for a binary
+- **C++ reference impl**
+  (`website/docs/forge-slicer-cpp/rest_server.cpp`) — Phase-1 skeleton
+  using cpp-httplib + nlohmann/json. CMakeLists fragment + step-by-step
+  `main_integration.md` for wiring into the OrcaSlicer entry point
+- **Tests** — 25 new tests across `forge-slicer-client.test.js`,
+  `slicer-resolver.test.js`, `forge-slicer-sync.test.js` covering
+  probe + cache, profile listing, multipart slice, gcode download,
+  PNG preview, auth, disabled state, fallback chain, sync idempotency,
+  archived profile handling
+
+Service-worker cache bumped to v188.
+
+---
+
 ## v1.1.20 — Native Slicer, Scene Composer, AI Model Forge, Universal Vendor Coverage (2026-04-26)
 
 Largest release since v1.1.0. Adds **our own slicer** (both a desktop-

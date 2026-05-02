@@ -7036,6 +7036,78 @@ export async function handleApiRequest(req, res) {
       }
     }
 
+    // POST /api/slicer/forge/slice — frontend uploads a model, we forward
+    // it to the fork's /api/slice via the Node client and return the
+    // job metadata. Body is multipart/form-data with the model under
+    // 'model' and string fields printer_id / filament_ids / process_id.
+    if (method === 'POST' && path === '/api/slicer/forge/slice') {
+      try {
+        const { probe, slice } = await import('./forge-slicer-client.js');
+        const p = await probe();
+        if (!p.ok) return sendJson(res, { error: 'forge slicer not reachable', probe: p }, 503);
+        // Buffer the request body — these requests are typically <50 MB
+        // (a fat 3MF) and the fork accepts buffered uploads in Phase 1.
+        const chunks = [];
+        for await (const chunk of req) chunks.push(chunk);
+        const buf = Buffer.concat(chunks);
+        // Parse query/header for printer/filament/process selection.
+        // Accept both query params (easy from JS) and JSON body for
+        // flexibility — multipart parsing is left to the fork side.
+        const printerId = url.searchParams.get('printer_id') || req.headers['x-printer-id'];
+        const filamentIds = url.searchParams.get('filament_ids');
+        const processId = url.searchParams.get('process_id') || req.headers['x-process-id'];
+        const result = await slice({
+          modelBuffer: buf,
+          modelFilename: req.headers['x-filename'] || 'model.stl',
+          printerId,
+          filamentIds: filamentIds ? JSON.parse(filamentIds) : undefined,
+          processId,
+        });
+        return sendJson(res, result);
+      } catch (e) {
+        return sendJson(res, { error: e.message, code: e.code || 'ERR_SLICE_FAILED' }, e.status || 500);
+      }
+    }
+
+    // GET /api/slicer/forge/jobs/:id/gcode — proxy gcode download
+    const forgeGcodeMatch = path.match(/^\/api\/slicer\/forge\/jobs\/([^/]+)\/gcode$/);
+    if (forgeGcodeMatch && method === 'GET') {
+      try {
+        const { fetchGcode } = await import('./forge-slicer-client.js');
+        const buf = await fetchGcode(forgeGcodeMatch[1]);
+        res.writeHead(200, {
+          'Content-Type': 'application/octet-stream',
+          'Content-Disposition': `attachment; filename="${forgeGcodeMatch[1]}.gcode"`,
+        });
+        return res.end(buf);
+      } catch (e) {
+        return sendJson(res, { error: e.message }, 500);
+      }
+    }
+
+    // POST /api/slicer/forge/preview — multipart in, PNG out
+    if (method === 'POST' && path === '/api/slicer/forge/preview') {
+      try {
+        const { probe, preview } = await import('./forge-slicer-client.js');
+        const p = await probe();
+        if (!p.ok) return sendJson(res, { error: 'forge slicer not reachable' }, 503);
+        const chunks = [];
+        for await (const chunk of req) chunks.push(chunk);
+        const buf = Buffer.concat(chunks);
+        const w = parseInt(url.searchParams.get('width')) || 512;
+        const h = parseInt(url.searchParams.get('height')) || 512;
+        const png = await preview({
+          modelBuffer: buf,
+          modelFilename: req.headers['x-filename'] || 'model.stl',
+          width: w, height: h,
+        });
+        res.writeHead(200, { 'Content-Type': 'image/png' });
+        return res.end(png);
+      } catch (e) {
+        return sendJson(res, { error: e.message }, 500);
+      }
+    }
+
     // ──────────────────────────────────────────────────────────────────
     // SLICER BRIDGE — headless slicing via OrcaSlicer / BambuStudio / Snapmaker Orca
     // ──────────────────────────────────────────────────────────────────

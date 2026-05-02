@@ -420,24 +420,60 @@
     try {
       const buf = await _state.file.arrayBuffer();
       const start = Date.now();
-      const r = await fetch(`/api/slicer/native/slice?${params.toString()}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/octet-stream' },
-        body: buf,
-      });
-      if (!r.ok) {
-        const err = await r.json().catch(() => ({}));
-        progress.innerHTML = `<div style="color:#ef4444">Slice failed: ${_esc(err.error || r.statusText)}</div>`;
-        return;
+
+      // Prefer the Forge Slicer service when reachable. Falls through
+      // to the native engine when not — same UX, just a different
+      // backend. The status pill at the top of the panel shows which
+      // backend is currently active.
+      const forgeStatus = await fetch('/api/slicer/forge/status').then(r => r.json()).catch(() => null);
+      const useForge = !!forgeStatus?.probe?.ok;
+
+      let layers = 0, dur = 0, timeSec = 0, fil = 0, blob = null;
+
+      if (useForge) {
+        progress.innerHTML = '<div style="display:flex;align-items:center;gap:6px"><i class="bi bi-arrow-repeat" style="animation:spin 1s linear infinite"></i> Slicing via Forge Slicer…</div>';
+        const filIds = _state.selectedFilament ? JSON.stringify([String(_state.selectedFilament)]) : '';
+        const fr = await fetch(`/api/slicer/forge/slice?printer_id=${encodeURIComponent(_state.selectedPrinter || '')}${filIds ? '&filament_ids=' + encodeURIComponent(filIds) : ''}&process_id=${encodeURIComponent(_state.selectedProcess || '')}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'X-Filename': _state.fileName,
+          },
+          body: buf,
+        });
+        if (!fr.ok) {
+          const err = await fr.json().catch(() => ({}));
+          progress.innerHTML = `<div style="color:#ef4444">Forge slice failed: ${_esc(err.error || fr.statusText)}</div>`;
+          return;
+        }
+        const result = await fr.json();
+        timeSec = result.estimated_time_s || 0;
+        fil = (result.filament_used_g || []).reduce((a, b) => a + b, 0);
+        // Pull the gcode bytes through the proxy.
+        const gr = await fetch(`/api/slicer/forge/jobs/${encodeURIComponent(result.job_id)}/gcode`);
+        if (gr.ok) blob = await gr.blob();
+        dur = Date.now() - start;
+      } else {
+        const r = await fetch(`/api/slicer/native/slice?${params.toString()}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/octet-stream' },
+          body: buf,
+        });
+        if (!r.ok) {
+          const err = await r.json().catch(() => ({}));
+          progress.innerHTML = `<div style="color:#ef4444">Slice failed: ${_esc(err.error || r.statusText)}</div>`;
+          return;
+        }
+        layers = parseInt(r.headers.get('X-Layer-Count'), 10) || 0;
+        dur = parseInt(r.headers.get('X-Slice-Duration-Ms'), 10) || (Date.now() - start);
+        timeSec = parseInt(r.headers.get('X-Estimated-Time-Sec'), 10) || 0;
+        fil = parseFloat(r.headers.get('X-Filament-G')) || 0;
+        blob = await r.blob();
       }
-      const layers = parseInt(r.headers.get('X-Layer-Count'), 10) || 0;
-      const tris = parseInt(r.headers.get('X-Triangles'), 10) || 0;
-      const dur = parseInt(r.headers.get('X-Slice-Duration-Ms'), 10) || (Date.now() - start);
-      const timeSec = parseInt(r.headers.get('X-Estimated-Time-Sec'), 10) || 0;
-      const fil = parseFloat(r.headers.get('X-Filament-G')) || 0;
-      const blob = await r.blob();
+
       _state.lastSlice = { blob, filename: (_state.fileName.replace(/\.[^.]+$/, '') || 'model') + '.gcode', layers, dur, timeSec, fil };
-      progress.innerHTML = `<div style="color:#22c55e;font-weight:600">✓ Sliced in ${dur} ms</div>`;
+      const backendLabel = useForge ? 'Forge Slicer' : 'native engine';
+      progress.innerHTML = `<div style="color:#22c55e;font-weight:600">✓ Sliced via ${backendLabel} in ${dur} ms</div>`;
       _renderResult();
       document.getElementById('ss-send').disabled = false;
     } catch (e) {

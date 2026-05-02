@@ -1,4 +1,4 @@
-const CACHE_NAME = 'bambu-dash-v187';
+const CACHE_NAME = 'bambu-dash-v188';
 const PRECACHE = [
   '/',
   '/css/main.css',
