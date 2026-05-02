@@ -251,6 +251,7 @@
     "spools_unplaced": "Without location",
     "spools_in_stock": "Spools in stock",
     "_analytics_hint": "Translations for analytics panel are inlined with fallback strings inside the component to avoid bloating this file. Add overrides under analytics.* if needed.",
+    "_forge_slicer_hint": "Forge Slicer i18n keys live under forge_slicer.* — see public/js/components/forge-slicer-settings.js for the full list with English fallbacks.",
     "in_use": "in use",
     "unused": "Unused",
     "total_runway": "Total runway",

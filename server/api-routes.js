@@ -6993,9 +6993,35 @@ export async function handleApiRequest(req, res) {
       return readBody(req, res, async (body) => {
         const { configure, probe } = await import('./forge-slicer-client.js');
         configure({ url: body.url, token: body.token, enabled: body.enabled });
+        // Persist to config.json so the setting survives restart.
+        try {
+          const { saveConfig } = await import('./config.js');
+          saveConfig({
+            forge_slicer: {
+              url: body.url || 'http://127.0.0.1:8765',
+              token: body.token || '',
+              enabled: body.enabled !== false,
+            },
+          });
+        } catch (e) { /* config persistence is best-effort */ }
         const p = await probe({ force: true });
         sendJson(res, { ok: p.ok, probe: p });
       });
+    }
+
+    if (method === 'POST' && path === '/api/slicer/forge/sync') {
+      try {
+        const { syncOnce } = await import('./forge-slicer-sync.js');
+        const result = await syncOnce();
+        return sendJson(res, result, result.ok ? 200 : 503);
+      } catch (e) {
+        return sendJson(res, { error: e.message }, 500);
+      }
+    }
+
+    if (method === 'GET' && path === '/api/slicer/forge/sync/status') {
+      const { lastSync } = await import('./forge-slicer-sync.js');
+      return sendJson(res, lastSync());
     }
 
     if (method === 'GET' && path === '/api/slicer/forge/profiles') {

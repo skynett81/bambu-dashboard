@@ -711,6 +711,10 @@ try {
   const { startBackgroundProbe, configure } = await import('./forge-slicer-client.js');
   if (config?.forge_slicer) configure(config.forge_slicer);
   startBackgroundProbe();
+  // Mirror the fork's profile catalog into our local slicer_profiles
+  // table every 5 minutes so users see the same list in both UIs.
+  const { startAutoSync } = await import('./forge-slicer-sync.js');
+  startAutoSync();
 } catch { /* optional service — don't crash if module fails to load */ }
 
 // Spoolman health monitor — alerts via notifications when Spoolman goes offline/online
