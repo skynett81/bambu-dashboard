@@ -6980,6 +6980,37 @@ export async function handleApiRequest(req, res) {
     }
 
     // ──────────────────────────────────────────────────────────────────
+    // FORGE SLICER (skynett81/OrcaSlicer fork) — REST service mode
+    // ──────────────────────────────────────────────────────────────────
+
+    if (method === 'GET' && path === '/api/slicer/forge/status') {
+      const { probe, getConfig, lastProbe } = await import('./forge-slicer-client.js');
+      const fresh = await probe({ force: url.searchParams.get('force') === '1' });
+      return sendJson(res, { config: getConfig(), probe: fresh, last: lastProbe() });
+    }
+
+    if (method === 'POST' && path === '/api/slicer/forge/configure') {
+      return readBody(req, res, async (body) => {
+        const { configure, probe } = await import('./forge-slicer-client.js');
+        configure({ url: body.url, token: body.token, enabled: body.enabled });
+        const p = await probe({ force: true });
+        sendJson(res, { ok: p.ok, probe: p });
+      });
+    }
+
+    if (method === 'GET' && path === '/api/slicer/forge/profiles') {
+      try {
+        const { probe, listProfiles } = await import('./forge-slicer-client.js');
+        const p = await probe();
+        if (!p.ok) return sendJson(res, { error: 'forge slicer not reachable', probe: p }, 503);
+        const profiles = await listProfiles({ kind: url.searchParams.get('kind') || 'all' });
+        return sendJson(res, { profiles });
+      } catch (e) {
+        return sendJson(res, { error: e.message, code: e.code || 'ERR_INTERNAL' }, e.status || 500);
+      }
+    }
+
+    // ──────────────────────────────────────────────────────────────────
     // SLICER BRIDGE — headless slicing via OrcaSlicer / BambuStudio / Snapmaker Orca
     // ──────────────────────────────────────────────────────────────────
 

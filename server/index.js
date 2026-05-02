@@ -704,6 +704,15 @@ startBrandRefresh();
 const { startFilamentDbScheduler } = await import('./filament-db-refresh.js');
 startFilamentDbScheduler();
 
+// Forge slicer (skynett81/OrcaSlicer fork in service mode) — silent
+// background probe so the user sees a live "service detected" status
+// in the UI without paying for the probe on every request.
+try {
+  const { startBackgroundProbe, configure } = await import('./forge-slicer-client.js');
+  if (config?.forge_slicer) configure(config.forge_slicer);
+  startBackgroundProbe();
+} catch { /* optional service — don't crash if module fails to load */ }
+
 // Spoolman health monitor — alerts via notifications when Spoolman goes offline/online
 const { startSpoolmanHealthMonitor, setHub: setSpoolmanHub, setNotifier: setSpoolmanNotifier } = await import('./spoolman-health-monitor.js');
 setSpoolmanHub(hub);
