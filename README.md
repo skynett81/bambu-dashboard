@@ -19,6 +19,7 @@ Created by **SkyNett81** &bull; [AGPL-3.0 License](LICENSE)
 - **Filament Inventory** — favorites, color filters, bulk add, HueForge TD, CSV import, Spoolman sync
 - **Model Forge** — 51 parametric 3D generators across 8 categories: organization (Gridfinity, storage boxes, cable labels), mechanical (gears, pulleys, springs, hinges, snap-fits), printer (spool adapters, cable chains, first-layer tests, nozzle storage), home (hooks, clips, pots, organizers, wall plates, lidded boxes), tech (phone/headphone stands, VESA mounts, Raspberry Pi cases, battery holders), creative (voronoi, topographic maps, 3D QR, shapes, honeycomb, dice towers, miniature bases)
 - **Slicer Studio** — built-in pure-JS slicing engine + Slicer Bridge to OrcaSlicer/BambuStudio/Snapmaker Orca CLI, with profile system and Three.js viewport
+- **Forge Slicer integration** — first-class REST connection to the [skynett81/OrcaSlicer](https://github.com/skynett81/OrcaSlicer) fork running in service mode: live SSE progress, automatic profile sync, slice-and-send to printer in one click. See [docs/forge-slicer-setup.md](website/docs/forge-slicer-setup.md)
 - **Scene Composer** — 3D scene editor with BSP-tree CSG (boolean mesh operations)
 - **AI Model Forge** — text-to-3D generator with intent parser
 - **Mesh Repair Toolkit** — automatic repair of broken STL/3MF files

@@ -4,7 +4,7 @@ All notable changes to 3DPrintForge.
 
 ---
 
-## v1.1.21 (in progress) — Forge Slicer fork integration
+## v1.1.21 — Forge Slicer fork integration (2026-05-02)
 
 Adds the 3DPrintForge half of an integration with the
 [skynett81/OrcaSlicer](https://github.com/skynett81/OrcaSlicer) fork.
