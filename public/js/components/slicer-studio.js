@@ -46,6 +46,7 @@
     const body = document.getElementById('overlay-panel-body');
     if (!body) return;
     body.innerHTML = `
+      <div data-fsl-container style="margin-bottom:10px"></div>
       <div style="display:grid;grid-template-columns:280px 1fr 280px;gap:10px;min-height:560px">
         <!-- LEFT: profiles + settings -->
         <div class="card" style="overflow-y:auto;max-height:calc(100vh - 140px)">
@@ -132,6 +133,14 @@
 
     await _initViewport();
     await Promise.all([_loadProfiles(), _loadConnectedPrinters()]);
+
+    // Mount the Forge Slicer settings card at the top so users see the
+    // service status (connected / unreachable) every time they open
+    // Slicer Studio. Uses the new t(key, fallback) overload internally.
+    const fslContainer = body.querySelector('[data-fsl-container]');
+    if (fslContainer && typeof window.renderForgeSlicerSettings === 'function') {
+      window.renderForgeSlicerSettings(fslContainer);
+    }
   }
 
   // ── Profile loading ────────────────────────────────────────────
