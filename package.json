@@ -46,7 +46,7 @@
     "@jscad/stl-serializer": "^2.1.23",
     "@snapmaker/snapmaker-sacp-sdk": "^0.1.1",
     "admin-lte": "^4.0.0-rc7",
-    "basic-ftp": "^5.3.0",
+    "basic-ftp": "^5.3.1",
     "bootstrap": "^5.3.8",
     "mqtt": "^5.15.1",
     "qrcode": "^1.5.4",
@@ -54,7 +54,7 @@
     "ws": "^8.20.0"
   },
   "devDependencies": {
-    "electron": "^41.3.0",
+    "electron": "^41.5.0",
     "electron-builder": "^26.8.1",
     "electron-updater": "^6.8.3"
   },
