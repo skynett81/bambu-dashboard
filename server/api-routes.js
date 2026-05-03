@@ -524,11 +524,41 @@ export async function handleAuthApiRequest(req, res) {
       if (!checkLoginRate(clientIp)) {
         return sendJson(res, { error: 'Too many login attempts. Try again later.' }, 429);
       }
-      return readAuthBody((body) => {
-        const { password, username } = body;
+      return readAuthBody(async (body) => {
+        const { password, username, totp_code } = body;
         // Try DB-backed auth first (returns user object with role/permissions)
         const dbUser = validateCredentialsDB(username, password);
         if (dbUser) {
+          // If this user enabled TOTP, the password alone is insufficient.
+          // Require a 6-digit code from their authenticator (or a one-time
+          // backup code). Frontend should retry with totp_code in the body.
+          if (dbUser.totp_enabled === 1 && dbUser.totp_secret) {
+            if (!totp_code) {
+              return sendJson(res, { error: 'TOTP code required', totpRequired: true }, 401);
+            }
+            // Per-user rate limit on the verify step (5 / 15 min)
+            const rateKey = `${dbUser.id}:${clientIp}`;
+            if (!checkTotpRate(rateKey)) {
+              return sendJson(res, { error: 'Too many TOTP attempts. Try again later.' }, 429);
+            }
+            const code = String(totp_code).trim();
+            let valid = _verifyTotp(dbUser.totp_secret, code);
+            // Fall back to backup codes (single-use)
+            if (!valid && dbUser.totp_backup_codes) {
+              try {
+                const codes = JSON.parse(dbUser.totp_backup_codes);
+                const idx = codes.indexOf(code);
+                if (idx >= 0) {
+                  valid = true;
+                  codes.splice(idx, 1);
+                  updateUser(dbUser.id, { totp_backup_codes: JSON.stringify(codes) });
+                }
+              } catch { /* malformed backup codes — treat as invalid */ }
+            }
+            if (!valid) {
+              return sendJson(res, { error: 'Invalid TOTP code', totpRequired: true }, 401);
+            }
+          }
           const token = createSession(dbUser);
           const maxAge = (config.auth?.sessionDurationHours || 24) * 3600;
           res.writeHead(200, {

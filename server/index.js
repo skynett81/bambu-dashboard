@@ -486,8 +486,9 @@ function handleRequest(req, res) {
   if (pathname.startsWith('/docs') && existsSync(DOCS_BUILD)) {
     const relative = pathname.replace(/^\/docs\/?/, '') || '';
 
+    const _docsGuard = DOCS_BUILD.endsWith('/') ? DOCS_BUILD : DOCS_BUILD + '/';
     const _tryServe = (filePath) => {
-      if (!filePath.startsWith(DOCS_BUILD)) return false;
+      if (filePath !== DOCS_BUILD && !filePath.startsWith(_docsGuard)) return false;
       try {
         const stat = statSync(filePath, { throwIfNoEntry: false });
         // If it's a directory, try index.html inside
@@ -531,7 +532,10 @@ function handleRequest(req, res) {
 
   let filePath = join(PUBLIC_DIR, req.url === '/' ? 'index.html' : pathname);
 
-  if (!filePath.startsWith(PUBLIC_DIR)) {
+  // Trailing-separator boundary: prevents `/app/public-extra/secret`
+  // from passing `startsWith('/app/public')`.
+  const _publicGuard = PUBLIC_DIR.endsWith('/') ? PUBLIC_DIR : PUBLIC_DIR + '/';
+  if (filePath !== PUBLIC_DIR && !filePath.startsWith(_publicGuard)) {
     res.writeHead(403);
     res.end('Forbidden');
     return;

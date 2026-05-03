@@ -68,7 +68,15 @@ export function updateUser(id, u) {
   const db = getDb();
   const fields = [];
   const values = [];
-  for (const key of ['username', 'password_hash', 'role_id', 'display_name', 'last_login']) {
+  // Allowlist controls which columns may be updated. TOTP fields were
+  // missing previously, which silently dropped enrolment writes —
+  // /api/auth/totp/verify appeared to succeed but `totp_enabled` stayed 0,
+  // so MFA was effectively bypassed.
+  const ALLOWED = [
+    'username', 'password_hash', 'role_id', 'display_name', 'last_login',
+    'totp_secret', 'totp_enabled', 'totp_backup_codes',
+  ];
+  for (const key of ALLOWED) {
     if (u[key] !== undefined) { fields.push(`${key} = ?`); values.push(u[key]); }
   }
   if (fields.length === 0) return;

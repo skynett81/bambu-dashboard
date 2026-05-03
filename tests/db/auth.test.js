@@ -11,6 +11,7 @@ import {
   addUser,
   getUser,
   getUserByUsername,
+  updateUser,
   deleteUser,
   getApiKeys,
   addApiKey,
@@ -136,6 +137,25 @@ describe('Auth — roller, brukere og API-nøkler', () => {
       deleteUser(id);
       const user = getUser(id);
       assert.strictEqual(user, null, 'slettet bruker skal ikke finnes');
+    });
+
+    it('updateUser() persists totp_secret, totp_enabled, totp_backup_codes', () => {
+      // Regression: the field allowlist previously omitted TOTP columns,
+      // so /api/auth/totp/verify silently dropped enrolment writes and
+      // MFA could be bypassed despite appearing enabled. getUserByUsername
+      // is what the production login flow uses (SELECT u.*), so verify
+      // through that path.
+      addUser({ username: 'totp_user', password_hash: 'hash', role_id: null });
+      const created = getUserByUsername('totp_user');
+      updateUser(created.id, {
+        totp_secret: 'JBSWY3DPEHPK3PXP',
+        totp_enabled: 1,
+        totp_backup_codes: JSON.stringify(['code1', 'code2']),
+      });
+      const user = getUserByUsername('totp_user');
+      assert.strictEqual(user.totp_secret, 'JBSWY3DPEHPK3PXP', 'totp_secret skal lagres');
+      assert.strictEqual(user.totp_enabled, 1, 'totp_enabled skal lagres');
+      assert.match(user.totp_backup_codes, /code1/);
     });
   });
 

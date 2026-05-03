@@ -1,0 +1,6 @@
+Contact: mailto:skynett81@gmail.com
+Contact: https://github.com/skynett81/3dprintforge/security/advisories/new
+Expires: 2027-05-03T00:00:00Z
+Preferred-Languages: en, no
+Canonical: https://skynett81.github.io/3dprintforge/.well-known/security.txt
+Policy: https://github.com/skynett81/3dprintforge/blob/main/SECURITY.md
