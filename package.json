@@ -46,7 +46,7 @@
     "@jscad/stl-serializer": "^2.1.23",
     "@snapmaker/snapmaker-sacp-sdk": "^0.1.1",
     "admin-lte": "^4.0.0-rc7",
-    "basic-ftp": "^5.3.1",
+    "basic-ftp": "^6.0.1",
     "bootstrap": "^5.3.8",
     "mqtt": "^5.15.1",
     "qrcode": "^1.5.4",
