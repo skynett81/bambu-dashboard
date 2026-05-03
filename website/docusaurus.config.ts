@@ -43,6 +43,30 @@ const config: Config = {
     },
   },
 
+  plugins: [
+    [
+      '@docusaurus/plugin-client-redirects',
+      {
+        // The local dashboard serves docs under /docs/. The deployed
+        // site lives at /3dprintforge/<slug> (no /docs/ segment) because
+        // routeBasePath is '/'. People typing the local URL into the
+        // hosted site got a 404. This adds /docs/<slug> aliases that
+        // redirect to the canonical path on both locales.
+        createRedirects(existingPath: string): string[] | undefined {
+          // Only doc pages get the /docs/ alias — skip the home page
+          // and the blog (which is at /blog and /en/blog).
+          if (existingPath === '/' || existingPath === '/en' || existingPath === '/en/') return undefined;
+          if (existingPath.startsWith('/blog') || existingPath.startsWith('/en/blog')) return undefined;
+
+          if (existingPath.startsWith('/en/')) {
+            return [`/en/docs${existingPath.slice(3)}`];
+          }
+          return [`/docs${existingPath}`];
+        },
+      },
+    ],
+  ],
+
   presets: [
     [
       'classic',
