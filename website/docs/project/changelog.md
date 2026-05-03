@@ -4,9 +4,13 @@ All notable changes to 3DPrintForge.
 
 ---
 
-## v1.1.21 — Forge Slicer fork integration (2026-05-02)
+## v1.1.21 — Forge Slicer integration, filament overhaul, security hardening (2026-05-03)
 
-Adds the 3DPrintForge half of an integration with the
+Three concurrent tracks: a REST integration with our [skynett81/OrcaSlicer](https://github.com/skynett81/OrcaSlicer) fork, a top-to-bottom rewrite of the filament inventory experience (Storage tab, drag-and-drop, bulk-add), and a security audit that closed six CVE-class issues. Plus an i18n overhaul that fixed a broken-fallback pattern across 504 call sites, a tabbed Analytics dashboard, and 6 new database migrations.
+
+### Forge Slicer fork integration
+
+3DPrintForge half of an integration with the
 [skynett81/OrcaSlicer](https://github.com/skynett81/OrcaSlicer) fork.
 The fork hosts a small REST service (cpp-httplib) that 3DPrintForge
 talks to instead of spawning the slicer CLI per request. Profiles
@@ -17,53 +21,182 @@ and falls back to the CLI bridge / native engine when not.
   endpoint specified, 5-phase rollout, error codes, auth model
 - **Node REST client** (`server/forge-slicer-client.js`) — probe
   with 60 s cache, profile listing, multipart slice, gcode download,
-  PNG preview, optional bearer token, env overrides
+  PNG preview, optional bearer token, env overrides, SSE error event
+  handling, listener API for transition events
 - **Slicer resolver** (`server/slicer-resolver.js`) — single entry
   point that picks the best backend in priority order (forge → bridge
   → native). All slicer call sites get the same return shape regardless
 - **Profile sync** (`server/forge-slicer-sync.js`) — pulls the fork's
   catalog into local `slicer_profiles` table every 5 min, archives
   vanished entries, idempotent on (kind, name)
-- **9 REST endpoints** under `/api/slicer/forge/*`: status, configure,
-  profiles, slice, jobs/:id/gcode, preview, sync, sync/status
+- **12 REST endpoints** under `/api/slicer/forge/*`: status, configure,
+  profiles, slice, slice/stream (SSE), slice-and-send, jobs,
+  jobs/:id/gcode, jobs/:id/cancel, preview, sync, sync/status
 - **Persistent settings** — configure endpoint writes to `config.json`
-  via `saveConfig` so URL/token/enabled survive restart
-- **UI status card** auto-mounted at the top of Slicer Studio
-  (`forge-slicer-settings.js`) with Save / Test connection / Open fork
-  buttons, version + upstream + config-dir display, fallback explainer
+  via `saveConfig` so URL/token/enabled survive restart. Bearer token
+  is masked as `'***'` in `/api/slicer/forge/status` and the configure
+  endpoint detects the masked sentinel to preserve the existing token
+  on save
+- **UI status card** auto-mounted in Slicer Studio AND Settings →
+  System → Integrations (`forge-slicer-settings.js`) with Save / Test
+  connection / Open fork buttons, version + upstream + config-dir
+  display, fallback explainer. The settings dialog search index also
+  surfaces it for "forge", "orcaslicer", "fork", "rest", "slicer"
+  keywords
 - **Header badge** (`forge-slicer-badge.js`) — small status pill in the
-  global header so users see service state from any page
-- **Slicer Studio "Slice" button** prefers Forge when available,
-  shows "Sliced via Forge Slicer" in the success banner; falls back to
-  native if the service is down
+  global header with disconnect/reconnect transition toasts
+- **Slicer Studio "Slice" button** prefers Forge when available with
+  SSE live progress (stage + percent + per-layer counter), Cancel mid-
+  slice via AbortController, Slice & Send to printer in one click,
+  multi-extruder filament breakdown
+- **Notifications on outage** — `notifier.notify('forge_slicer_disconnected')`
+  / `'forge_slicer_reconnected'` fire on probe-state transitions so
+  outages reach Telegram / Discord / email / etc., not just the header
+  pill
+- **System Info exposure** — `/api/system/info` carries a `forge_slicer`
+  block with `enabled`, `ok`, `version`, `upstream`, `last_check`, and
+  `error`. Settings → System Info shows a corresponding row
 - **Mock server** (`tools/forge-slicer-mock.js`) — full Node
-  implementation of the contract for fork-side dev. Returns plausible
-  profiles + slice payloads so 3DPrintForge integration can be tested
-  end-to-end without waiting for a binary
+  implementation of the contract incl. SSE for fork-side dev. Returns
+  plausible profiles + slice payloads so 3DPrintForge integration can
+  be tested end-to-end without waiting for a binary
 - **C++ reference impl**
   (`website/docs/forge-slicer-cpp/rest_server.cpp`) — Phase-1 skeleton
   using cpp-httplib + nlohmann/json. CMakeLists fragment + step-by-step
   `main_integration.md` for wiring into the OrcaSlicer entry point
-- **Tests** — 28 new tests across `forge-slicer-client.test.js`,
-  `slicer-resolver.test.js`, `forge-slicer-sync.test.js`, and
-  `forge-slicer-routes.test.js` covering probe + cache, profile
+- **Tests** — 33 new tests across four files (`forge-slicer-client.test.js`,
+  `slicer-resolver.test.js`, `forge-slicer-sync.test.js`,
+  `forge-slicer-routes.test.js`) covering probe + cache, profile
   listing, multipart slice, gcode download, PNG preview, auth,
   disabled state, fallback chain, sync idempotency, archived profile
-  handling, and end-to-end HTTP route relay through an in-process
-  mock fork
+  handling, end-to-end HTTP route relay, SSE error events with code
+  preservation, truncated SSE streams, listener firing semantics,
+  and listPrinters()
 - **Pterodactyl egg** (`egg-3dprintforge.json`) — exposes
   `FORGE_SLICER_URL` and `FORGE_SLICER_TOKEN` so panel users can wire
   up the integration without editing config.json
+- **Docker compose** has commented `FORGE_SLICER_URL` and
+  `FORGE_SLICER_TOKEN` examples next to the existing BAMBU env vars
 - **Norwegian translations** — `forge_slicer.*` block added to
-  `public/lang/nb.json` (26 keys) so NB-locale users see translated
+  `public/lang/nb.json` (27 keys) so NB-locale users see translated
   status pills, settings card, and toasts
-- **Docs sidebar** — new "Forge Slicer" category in
-  `website/sidebars.ts` linking the setup guide and REST contract
-- **CI tests** — `.github/workflows/test.yml` runs `npm test` plus
-  JSON validation for language files and the Pterodactyl egg on
-  every push and pull request to main
+- **Docs** — setup guide, REST contract, sidebar entry, intro page
+  v1.1.21 section, architecture and API doc tables
 
-Service-worker cache bumped to v192.
+### SSE robustness
+
+Two silent-failure modes in the SSE parser were fixed after close
+reading of the contract:
+
+- `event: error` from the fork was previously ignored — promises hung
+  forever. Now rejects with the message and code preserved
+- Stream ending without `done` (fork crash, network drop) hung the
+  promise. Now rejects with "SSE stream ended without a done event"
+- Error payload shape was misaligned with the spec. Contract says
+  `{ message, code }`; client read `parsed.error`. Now reads `message`
+  with `error` as legacy fallback for older fork builds
+
+### Security hardening — six CVE-class fixes
+
+A focused security audit found six issues. All fixed in this release:
+
+- **CRITICAL — Path traversal** (CWE-22) in
+  `server/milestone-service.js`. `getMilestoneFile()` and
+  `getArchivedMilestoneFile()` joined user-controlled `printerId` /
+  `filename` onto `MILESTONE_DIR` with no boundary check. A view-
+  permission user could escape the directory via `..` segments to read
+  any file the server process can read. Both functions now reject any
+  resolved path that doesn't start with `MILESTONE_DIR/`. Regression
+  test: `tests/api/milestone-path-traversal.test.js` (5 tests)
+- **HIGH — Information disclosure** (CWE-200). `/api/settings/export`
+  returned `config.notifications` raw, leaking every configured
+  channel secret (Discord webhook URL, Twilio creds, SMS gateway,
+  webhook URL). New shared `_maskNotificationSecrets()` helper masks
+  all 8 sensitive fields before export, also called by GET
+  `/api/notifications/config` (which previously masked only 4 fields)
+- **HIGH — XSS** (CWE-79) in `printer-file-browser.js`. Printer-
+  supplied filenames were interpolated into inline `onclick=` and
+  `confirm()` strings. A malicious or compromised printer advertising
+  a quote-and-script payload would run JavaScript in the dashboard
+  user's browser. Switched to `data-pf-action` / `data-pf-name`
+  dataset attributes and a delegated click handler — filename is
+  passed as DOM data, never as JS source
+- **HIGH — SSRF** (CWE-918) in `/api/spoolman/test`. Endpoint fetched
+  an arbitrary user-supplied URL with no guard. A view-permission user
+  could probe cloud metadata at 169.254.169.254 for IAM credentials.
+  Added `_isDangerousUrl()` that blocks link-local + non-HTTP schemes;
+  RFC1918 and localhost are still allowed since self-hosted Spoolman
+  commonly runs there
+- **MEDIUM — Information disclosure** (CWE-22) in
+  `server/slicer-bridge.js`. User-supplied profile paths were passed
+  directly to the slicer CLI. A print-permission user could point the
+  slicer at `/etc/passwd` and have its logs echo the contents. Profile
+  paths are now resolved and rejected unless they stay inside the
+  slicer's `profileDir`
+- **MEDIUM — Information disclosure** in `/api/slicer/forge/status`.
+  The bearer token was returned in plain text; matches no other secret
+  in the project. Now masked to `'***'` plus a `token_set: bool` flag.
+  The configure endpoint detects the `'***'` sentinel from the UI and
+  preserves the existing token
+
+### Filament inventory overhaul
+
+Major UX rewrite of the filament panels:
+
+- **Top-level Storage tab** with locations + placement overview,
+  drag-and-drop discoverability hints, first-time empty state, stat
+  layout fix
+- **Drag spools to/from Active Filament slots** — all view modes now
+  draggable, not just grid + table. Clearer swap interaction when
+  dragging onto an occupied slot. File-drop overlay no longer hijacks
+  internal element drags
+- **Bulk-add multiple spools** properly with prominent quantity field;
+  "Add another" registers another reel of the same filament without
+  re-entering the metadata. Inline shortcut from Location dropdown
+  jumps to the Manage tab
+- **Spool detail view** shows storage method, last dried timestamp,
+  and tare weight
+- **Stats / Storage / Database** now show the full inventory, not just
+  used spools. Stats auto-refreshes on tab switch with material
+  reclassification. Usage Predictions surfaces both Total runway and
+  per-material runway
+- **Visual** — icons added to inventory tabs for faster scanning;
+  state-subscribe handlers wrapped in try/catch to surface real errors
+  instead of swallowing them
+
+### Analytics dashboard
+
+`public/js/components/analytics-panel.js` rewritten as a tabbed
+dashboard with auto-refresh and drill-downs (Overview, Statistics,
+Calendar, Filament, Cost, Waste, Comparison).
+
+### i18n cleanup — 504-site fix
+
+`window.t(key, varsOrFallback)` previously short-circuited on missing
+keys (the function returned the truthy key string, so
+`t('foo') || 'Default'` never used the fallback). 504 sites across
+28 files used that pattern and showed the raw key in production. The
+helper now accepts a string fallback as the second argument and all
+504 call sites have been migrated.
+
+### Database — six new migrations
+
+- **v136-138** — schema fixes for color hex storage (drops the
+  leading `#` so `'#' + color_hex` no longer double-prefixes), spool
+  override hex normalisation
+- **v139** — comprehensive eSUN filament catalogue
+- **v140** — ~80 missing profiles seeded across 10 vendors
+- **v141** — material classification normalisation: profiles like
+  "Rapid" or "PLA-Basic" rolled to base materials (PLA / PETG / ABS /
+  TPU) so Stats buckets correctly
+
+### Internal / developer experience
+
+- **CI tests** — `.github/workflows/test.yml` runs `npm test` plus
+  JSON validation for language files and the Pterodactyl egg on every
+  push and pull request to main
+- **Test count** — 762 tests pass (up from ~720 at v1.1.20)
+- **Service-worker cache** bumped to v196 across the release
 
 ---
 
