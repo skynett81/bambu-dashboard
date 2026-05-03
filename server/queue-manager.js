@@ -246,6 +246,25 @@ export class QueueManager {
   }
 
   async _dispatchItem(queue, item, printerId) {
+    // Reserve the printer SYNCHRONOUSLY before any await — otherwise the
+    // 10-second _checkDispatch interval can fire a second time while the
+    // bed-clear or filament check is still awaiting, see this printer as
+    // idle (because we haven't recorded it in _activeJobs yet), and call
+    // _dispatchItem again for the same item, causing a double print.
+    if (this._activeJobs.has(printerId)) return;
+    this._activeJobs.set(printerId, { queueId: queue.id, itemId: item.id, reserved: true });
+
+    try {
+      return await this._dispatchItemInner(queue, item, printerId);
+    } catch (e) {
+      // On any failure, release the reservation so the printer is
+      // available again on the next interval tick.
+      this._activeJobs.delete(printerId);
+      throw e;
+    }
+  }
+
+  async _dispatchItemInner(queue, item, printerId) {
     // Bed check before dispatch (if enabled)
     if (this._failureDetector && getInventorySetting('bed_check_enabled') === '1') {
       const printer = this._pm.printers.get(printerId);
@@ -256,6 +275,7 @@ export class QueueManager {
             addQueueLog(queue.id, item.id, printerId, 'bed_not_clear', `Confidence: ${Math.round((result.confidence || 0) * 100)}%`);
             this._broadcast('queue_update', { action: 'bed_not_clear', queueId: queue.id, printerId });
             log.info('Bed not clear for ' + printerId + ', skipping dispatch');
+            this._activeJobs.delete(printerId);  // release synchronous reservation
             return;
           }
         } catch (e) { log.warn('Bed check failed for ' + printerId + ': ' + e.message); }
@@ -288,6 +308,7 @@ export class QueueManager {
         addQueueLog(queue.id, item.id, printerId, 'filament_blocked', 'Dispatch blocked: insufficient filament');
         this._broadcast('queue_update', { action: 'filament_blocked', queueId: queue.id, itemId: item.id, printerId });
         log.info('Dispatch blocked for "' + item.filename + '" — insufficient filament');
+        this._activeJobs.delete(printerId);  // release synchronous reservation
         return;
       }
     }

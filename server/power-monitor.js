@@ -91,7 +91,10 @@ export function getLiveSession() {
     avgWatts: Math.round(avgWatts),
     peakWatts: Math.round(peakWatts),
     totalWh: Math.round(totalWh * 10) / 10,
-    totalKwh: Math.round(totalWh / 100) / 10,
+    // 1 kWh = 1000 Wh. The previous formula `Math.round(totalWh / 100) / 10`
+    // rounded at 100-Wh granularity before dividing by 10, so a 250 Wh
+    // print reported 0.3 kWh instead of 0.25 (off by 50 Wh / 20%).
+    totalKwh: Math.round(totalWh / 10) / 100,
     durationSec: Math.round(durationSec),
     readings: _totalReadings
   };

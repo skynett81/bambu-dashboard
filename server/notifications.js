@@ -365,8 +365,18 @@ export class NotificationManager {
 
   reloadConfig(newConfig) {
     this.config = newConfig;
-    if (this._digestTimer) clearInterval(this._digestTimer);
+    // All four timers must be cleared; previously only digest was. Each
+    // saveConfig call from the UI added another maintenance/drying/
+    // low-stock interval, so notifications fired Nx where N is the
+    // number of saves since boot.
+    if (this._digestTimer)      { clearInterval(this._digestTimer);      this._digestTimer = null; }
+    if (this._maintenanceTimer) { clearInterval(this._maintenanceTimer); this._maintenanceTimer = null; }
+    if (this._dryingTimer)      { clearInterval(this._dryingTimer);      this._dryingTimer = null; }
+    if (this._lowStockTimer)    { clearInterval(this._lowStockTimer);    this._lowStockTimer = null; }
     this._startDigestTimer();
+    this._startMaintenanceChecker();
+    this._startDryingChecker();
+    this._startLowStockChecker();
   }
 
   setPrinterListProvider(fn) {

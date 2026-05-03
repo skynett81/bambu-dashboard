@@ -13,7 +13,10 @@ export function getHistory(limit = 50, offset = 0, printerId = null, status = nu
   if (status) { conditions.push('status = ?'); params.push(status); }
   const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
   params.push(limit, offset);
-  return db.prepare(`SELECT * FROM print_history ${where} ORDER BY started_at DESC LIMIT ? OFFSET ?`).all(...params);
+  // id DESC tiebreaker — started_at is TEXT and not unique; without a
+  // stable secondary sort, batch imports or rapid prints can appear
+  // twice or be skipped between paginated pages.
+  return db.prepare(`SELECT * FROM print_history ${where} ORDER BY started_at DESC, id DESC LIMIT ? OFFSET ?`).all(...params);
 }
 
 export function getHistoryById(id) {
@@ -36,30 +39,41 @@ export function reviewPrint(id, review) {
   const wasteG = review.waste_g ?? null;
   const notes = review.notes ?? null;
 
-  db.prepare(`UPDATE print_history SET
-    review_status = ?,
-    review_waste_g = ?,
-    review_notes = ?,
-    reviewed_at = datetime('now')
-    WHERE id = ?`).run(status, wasteG, notes, id);
+  // Wrap the multi-step review in a transaction. Otherwise a crash
+  // between UPDATE review_status and INSERT INTO filament_waste leaves
+  // half-written state — waste recorded without the review status, or
+  // review marked approved without waste_g zeroed out.
+  db.exec('BEGIN');
+  try {
+    db.prepare(`UPDATE print_history SET
+      review_status = ?,
+      review_waste_g = ?,
+      review_notes = ?,
+      reviewed_at = datetime('now')
+      WHERE id = ?`).run(status, wasteG, notes, id);
 
-  // If rejected or partial, add waste to filament_waste table
-  if ((status === 'rejected' || status === 'partial') && (wasteG || existing.filament_used_g)) {
-    const actualWaste = wasteG ?? existing.filament_used_g ?? 0;
-    if (actualWaste > 0) {
-      db.prepare(`INSERT INTO filament_waste (printer_id, waste_g, reason, notes)
-        VALUES (?, ?, ?, ?)`).run(
-        existing.printer_id,
-        actualWaste,
-        status === 'rejected' ? 'rejected_print' : 'partial_waste',
-        `Print #${id}: ${existing.filename || 'unknown'} — ${notes || status}`
-      );
+    // If rejected or partial, add waste to filament_waste table
+    if ((status === 'rejected' || status === 'partial') && (wasteG || existing.filament_used_g)) {
+      const actualWaste = wasteG ?? existing.filament_used_g ?? 0;
+      if (actualWaste > 0) {
+        db.prepare(`INSERT INTO filament_waste (printer_id, waste_g, reason, notes)
+          VALUES (?, ?, ?, ?)`).run(
+          existing.printer_id,
+          actualWaste,
+          status === 'rejected' ? 'rejected_print' : 'partial_waste',
+          `Print #${id}: ${existing.filename || 'unknown'} — ${notes || status}`
+        );
+      }
     }
-  }
 
-  // If approved, update waste_g to 0 (no waste)
-  if (status === 'approved') {
-    db.prepare('UPDATE print_history SET waste_g = 0 WHERE id = ?').run(id);
+    // If approved, update waste_g to 0 (no waste)
+    if (status === 'approved') {
+      db.prepare('UPDATE print_history SET waste_g = 0 WHERE id = ?').run(id);
+    }
+    db.exec('COMMIT');
+  } catch (e) {
+    try { db.exec('ROLLBACK'); } catch { /* ignore */ }
+    throw e;
   }
 
   return db.prepare('SELECT * FROM print_history WHERE id = ?').get(id);
@@ -123,8 +137,11 @@ export function getStatistics(printerId = null, startDate = null, endDate = null
 
   const filamentByType = db.prepare(`SELECT filament_type as type, COALESCE(SUM(filament_used_g), 0) as grams, COUNT(*) as prints FROM print_history${where}${and}filament_type IS NOT NULL GROUP BY filament_type ORDER BY grams DESC`).all(...params);
 
-  // Weekly trends: respect date range if given, else last 56 days
-  const weekWhere = startDate ? where : (where ? where + ' AND' : ' WHERE') + " started_at >= datetime('now', '-56 days')";
+  // Weekly trends: respect date range if given, else last 56 days.
+  // Check both startDate AND endDate — passing only endDate previously
+  // fell through to the rolling 56-day window even though the caller had
+  // specified a range, producing internally inconsistent stats.
+  const weekWhere = (startDate || endDate) ? where : (where ? where + ' AND' : ' WHERE') + " started_at >= datetime('now', '-56 days')";
   const printsPerWeek = db.prepare(`
     SELECT strftime('%Y-W%W', started_at) as week,
            COUNT(*) as total,
@@ -154,7 +171,7 @@ export function getStatistics(printerId = null, startDate = null, endDate = null
   const topFiles = db.prepare(`SELECT filename, COUNT(*) as count, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM print_history${where}${and}filename IS NOT NULL GROUP BY filename ORDER BY count DESC LIMIT 5`).all(...params);
 
   // Monthly trends: respect date range if given, else last 180 days
-  const monthWhere = startDate ? where : (where ? where + ' AND' : ' WHERE') + " started_at >= datetime('now', '-180 days')";
+  const monthWhere = (startDate || endDate) ? where : (where ? where + ' AND' : ' WHERE') + " started_at >= datetime('now', '-180 days')";
   const monthlyTrends = db.prepare(`SELECT strftime('%Y-%m', started_at) as month, COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed, COALESCE(SUM(duration_seconds), 0) as total_seconds, COALESCE(SUM(filament_used_g), 0) as total_filament_g FROM print_history${monthWhere} GROUP BY month ORDER BY month`).all(...params);
 
   // Total layers

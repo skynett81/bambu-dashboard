@@ -28,14 +28,25 @@ export function createProfile({ kind, name, vendor, settings, is_default = 0 }) 
   if (!['printer', 'filament', 'process'].includes(kind)) throw new Error("kind must be printer/filament/process");
   if (!name) throw new Error('name required');
   const db = getDb();
-  // Only one default per kind — clear the previous default if user is setting one.
-  if (is_default) {
-    db.prepare('UPDATE slicer_profiles SET is_default = 0 WHERE kind = ?').run(kind);
+  // Wrap clear-defaults + insert in a transaction. Without it, an INSERT
+  // failure (e.g. UNIQUE name conflict) after the clear leaves zero
+  // defaults for that kind — getDefaultProfile() then returns undefined.
+  let newId;
+  db.exec('BEGIN');
+  try {
+    if (is_default) {
+      db.prepare('UPDATE slicer_profiles SET is_default = 0 WHERE kind = ?').run(kind);
+    }
+    const info = db.prepare(`INSERT INTO slicer_profiles
+      (kind, name, vendor, settings_json, is_default) VALUES (?, ?, ?, ?, ?)`
+    ).run(kind, name, vendor || null, JSON.stringify(settings || {}), is_default ? 1 : 0);
+    newId = info.lastInsertRowid;
+    db.exec('COMMIT');
+  } catch (e) {
+    try { db.exec('ROLLBACK'); } catch { /* ignore */ }
+    throw e;
   }
-  const info = db.prepare(`INSERT INTO slicer_profiles
-    (kind, name, vendor, settings_json, is_default) VALUES (?, ?, ?, ?, ?)`
-  ).run(kind, name, vendor || null, JSON.stringify(settings || {}), is_default ? 1 : 0);
-  return getProfile(info.lastInsertRowid);
+  return getProfile(newId);
 }
 
 export function updateProfile(id, { name, vendor, settings, is_default }) {
@@ -43,20 +54,30 @@ export function updateProfile(id, { name, vendor, settings, is_default }) {
   const existing = getProfile(id);
   if (!existing) return null;
 
-  if (is_default === 1) {
-    db.prepare('UPDATE slicer_profiles SET is_default = 0 WHERE kind = ? AND id != ?').run(existing.kind, id);
-  }
+  // Same atomicity concern as createProfile — clear + update is two
+  // statements and must be all-or-nothing.
+  db.exec('BEGIN');
+  try {
+    if (is_default === 1) {
+      db.prepare('UPDATE slicer_profiles SET is_default = 0 WHERE kind = ? AND id != ?').run(existing.kind, id);
+    }
 
-  const fields = [];
-  const args = [];
-  if (name !== undefined)        { fields.push('name = ?');          args.push(name); }
-  if (vendor !== undefined)      { fields.push('vendor = ?');        args.push(vendor); }
-  if (settings !== undefined)    { fields.push('settings_json = ?'); args.push(JSON.stringify(settings)); }
-  if (is_default !== undefined)  { fields.push('is_default = ?');    args.push(is_default ? 1 : 0); }
-  if (fields.length === 0) return existing;
-  fields.push("updated_at = datetime('now')");
-  args.push(id);
-  db.prepare(`UPDATE slicer_profiles SET ${fields.join(', ')} WHERE id = ?`).run(...args);
+    const fields = [];
+    const args = [];
+    if (name !== undefined)        { fields.push('name = ?');          args.push(name); }
+    if (vendor !== undefined)      { fields.push('vendor = ?');        args.push(vendor); }
+    if (settings !== undefined)    { fields.push('settings_json = ?'); args.push(JSON.stringify(settings)); }
+    if (is_default !== undefined)  { fields.push('is_default = ?');    args.push(is_default ? 1 : 0); }
+    if (fields.length > 0) {
+      fields.push("updated_at = datetime('now')");
+      args.push(id);
+      db.prepare(`UPDATE slicer_profiles SET ${fields.join(', ')} WHERE id = ?`).run(...args);
+    }
+    db.exec('COMMIT');
+  } catch (e) {
+    try { db.exec('ROLLBACK'); } catch { /* ignore */ }
+    throw e;
+  }
   return getProfile(id);
 }
 

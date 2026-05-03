@@ -228,10 +228,21 @@ export class FailureDetectionService {
         '-frames:v', '1', '-q:v', '2',
         outputPath
       ];
-      const proc = spawn('ffmpeg', args, { stdio: 'pipe', timeout: 15000 });
-      proc.on('close', code => code === 0 ? resolve() : reject(new Error(`FFmpeg exit ${code}`)));
-      proc.on('error', reject);
-      setTimeout(() => { try { proc.kill('SIGKILL'); } catch (e) { log.debug('Could not kill ffmpeg process: ' + e.message); } }, 15000);
+      // Either spawn timeout OR manual SIGKILL — not both. Together they
+      // double-fire on the close event and the second kill throws into a
+      // catch that swallowed the original error.
+      const proc = spawn('ffmpeg', args, { stdio: 'pipe' });
+      const killTimer = setTimeout(() => {
+        try { proc.kill('SIGKILL'); } catch (e) { log.debug('Could not kill ffmpeg process: ' + e.message); }
+      }, 15000);
+      proc.on('close', code => {
+        clearTimeout(killTimer);
+        code === 0 ? resolve() : reject(new Error(`FFmpeg exit ${code}`));
+      });
+      proc.on('error', err => {
+        clearTimeout(killTimer);
+        reject(err);
+      });
     });
   }
 

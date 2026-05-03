@@ -106,7 +106,20 @@ export async function refresh3DFP({ force = false } = {}) {
  * - Runs once 5 minutes after startup so the server boot isn't blocked.
  * - Re-runs every refreshDays (default 7) after that.
  */
+// Module-level handles so the scheduler can be stopped (e.g. by tests
+// or a hot-reload). Previously the setInterval handle was discarded,
+// leaking a timer per import.
+let _bootDelayTimer = null;
+let _refreshTimer = null;
+
+export function stopFilamentDbScheduler() {
+  if (_bootDelayTimer) { clearTimeout(_bootDelayTimer); _bootDelayTimer = null; }
+  if (_refreshTimer)   { clearInterval(_refreshTimer);  _refreshTimer = null; }
+}
+
 export function startFilamentDbScheduler(options = {}) {
+  // Stop any previously-started timers so re-entry doesn't accumulate.
+  stopFilamentDbScheduler();
   const refreshDays = options.refreshDays || DEFAULT_REFRESH_DAYS;
 
   const runOnce = async () => {
@@ -148,10 +161,10 @@ export function startFilamentDbScheduler(options = {}) {
   };
 
   // Initial run after startup delay
-  setTimeout(runOnce, 5 * 60_000);
+  _bootDelayTimer = setTimeout(runOnce, 5 * 60_000);
   // Periodic refresh every refreshDays
   const intervalMs = refreshDays * 86_400_000;
-  setInterval(runOnce, intervalMs);
+  _refreshTimer = setInterval(runOnce, intervalMs);
   log.info(`Filament-DB refresh scheduler started (every ${refreshDays} days)`);
 }
 

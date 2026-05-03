@@ -151,15 +151,26 @@ export function upsertUserQuota(userId, updates) {
 
 export function addUserTransaction(t) {
   const db = getDb();
-  const result = db.prepare('INSERT INTO user_transactions (user_id, type, amount, description, print_history_id) VALUES (?, ?, ?, ?, ?)').run(
-    t.user_id, t.type, t.amount, t.description || null, t.print_history_id || null);
-  // Update balance
-  if (t.type === 'credit') {
-    db.prepare('UPDATE user_quotas SET balance = balance + ? WHERE user_id = ?').run(Math.abs(t.amount), t.user_id);
-  } else if (t.type === 'debit') {
-    db.prepare('UPDATE user_quotas SET balance = balance - ? WHERE user_id = ?').run(Math.abs(t.amount), t.user_id);
+  // Wrap the ledger insert + balance update in a transaction so a crash
+  // mid-call can't leave a debit/credit recorded without the matching
+  // balance change (or vice versa).
+  db.exec('BEGIN');
+  let txId;
+  try {
+    const result = db.prepare('INSERT INTO user_transactions (user_id, type, amount, description, print_history_id) VALUES (?, ?, ?, ?, ?)').run(
+      t.user_id, t.type, t.amount, t.description || null, t.print_history_id || null);
+    txId = Number(result.lastInsertRowid);
+    if (t.type === 'credit') {
+      db.prepare('UPDATE user_quotas SET balance = balance + ? WHERE user_id = ?').run(Math.abs(t.amount), t.user_id);
+    } else if (t.type === 'debit') {
+      db.prepare('UPDATE user_quotas SET balance = balance - ? WHERE user_id = ?').run(Math.abs(t.amount), t.user_id);
+    }
+    db.exec('COMMIT');
+  } catch (e) {
+    try { db.exec('ROLLBACK'); } catch { /* ignore */ }
+    throw e;
   }
-  return Number(result.lastInsertRowid);
+  return txId;
 }
 
 export function getUserTransactions(userId, limit = 50) {
